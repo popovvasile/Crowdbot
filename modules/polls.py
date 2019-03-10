@@ -414,37 +414,38 @@ class PollBot(object):
     @run_async
     def handle_send_tags(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
-        if txt == "All users":
-            txt = "#user"
-        txt_split = txt.split(" ")
-        while "" in txt_split:
-            txt_split.remove("")
-        poll_name = user_data["poll_name_to_send"]
-        i = 0
         send_tags = []
-        for i in range(len(txt_split)):
-            if txt_split[i][0] == "#":
-                send_tags.append(txt_split[i].lower())
-                i += 1
+        poll_name = user_data["poll_name_to_send"]
+
+        if txt == "All users":
+            send_tags.append("#user")
+        else:
+            txt_split = txt.split(" ")
+            while "" in txt_split:
+                txt_split.remove("")
+            i = 0
+            for i in range(len(txt_split)):
+                if txt_split[i][0] == "#":
+                    send_tags.append(txt_split[i].lower())
+                    i += 1
         # if i == len(txt_split):
         approved = []
         rejected = []
         sent = []
-        print(send_tags)
 
         for tag_to_send in send_tags:
-            tags = chats_table.find({"tag": tag_to_send})
-            for tag in tags:
-                if tag['chat_id'] != chat_id:
-                    if not any(sent_d['id'] == tag['chat_id'] for sent_d in sent):
-                        sent.append(tag['chat_id'])
-                        approved.append(tag['name'])
+            chats = chats_table.find({"tag": tag_to_send})
+            for chat in chats:
+                if chat['chat_id'] != chat_id:
+                    if not any(sent_d['id'] == chat['chat_id'] for sent_d in sent):
+                        sent.append(chat['chat_id'])
+                        approved.append(chat['tag'])
 
                         poll = polls_table.find_one({'title': poll_name})
                         poll['options'] = ast.literal_eval(poll['options'])
                         poll['meta'] = ast.literal_eval(poll['meta'])
 
-                        bot.send_message(tag['chat_id'], self.assemble_message_text(poll),
+                        bot.send_message(chat['chat_id'], self.assemble_message_text(poll),
                                          reply_markup=self.assemble_inline_keyboard(poll, True),
                                          parse_mode='Markdown'
                                          )

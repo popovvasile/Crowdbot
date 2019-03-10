@@ -104,7 +104,6 @@ class UserAuthentication(object):
 
         text_to_return = ''
         for user in users:
-            print(user)
             text_to_return += 'Name: {}, email: {} \n'.format(user["full_name"], user['email'])
         bot.send_message(chat_id, "This is the full list on the users of this bot: \n" + text_to_return)
 

@@ -10,7 +10,7 @@ from telegram.error import Unauthorized, BadRequest, TimedOut, NetworkError, Cha
 from telegram.ext import CommandHandler, CallbackQueryHandler, ConversationHandler, \
     RegexHandler
 from telegram.ext.dispatcher import run_async
-from database import users_table, chatbots_table, custom_buttons_table
+from database import users_table, chatbots_table, custom_buttons_table, surveys_table, chats_table, tags_table
 from modules import ALL_MODULES
 from modules.add_menu_buttons import BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER
 from modules.old_scripts.answer_payment import EXECUTE_PAYMENT_HANDLER
@@ -299,8 +299,35 @@ class WelcomeBot(object):
                               "is_admin": False,
                               "tags": ["#all", "#user"]
                               })
+            chats_table.insert({'chat_id': chat_id,
+                                'name': update.message.from_user.full_name,
+                                'user_name': update.message.chat.full_name,
+                                "tag": "#all",
+                                "bot_id": bot.id,
+                                'user_id': update.message.from_user.id})
+            chats_table.insert({'chat_id': chat_id,
+                                'name': update.message.from_user.full_name,
+                                'user_name': update.message.chat.full_name,
+                                "tag": "#user",
+                                "bot_id": bot.id,
+                                'user_id': update.message.from_user.id})
             get_help(bot=bot, update=update)
-        return ConversationHandler.END
+            initial_survey = surveys_table.find_one({
+                "bot_id": bot.id,
+                "title": "initial"
+            })
+            if initial_survey:
+                bot.send_message(chat_id=chat_id,
+                                 text="Dear {}, before you start, please answer a some quick questions. "
+                                      "To start the survey, press the button START".format(
+                                     update.message.from_user.first_name),
+                                 reply_markup=InlineKeyboardMarkup(
+                                     [InlineKeyboardButton(text="START",
+                                                           callback_data="survey_{}".format(
+                                                               "initial"
+                                                           ))]
+                                 ))
+            return ConversationHandler.END
 
     @staticmethod
     def cancel(bot, update):

@@ -20,7 +20,7 @@ TYPING_TOPICS = 19
 DELETE_SURVEY = 23
 
 
-class SurveyHandler(object):
+class SurveyHandler(object):  # TODO remove the tags from here + add "ask if initial survey"
     @staticmethod
     def facts_to_str(user_data):
         facts = list()
@@ -34,20 +34,30 @@ class SurveyHandler(object):
     @run_async
     def start(bot, update, user_data):
         user_data["question_id"] = 0
-        update.message.reply_text("Please enter a title for your survey")
+        update.message.reply_text("Please enter a title for your survey."
+                                  "If you want this survey to be sent to your users at the beginning, "
+                                  "just press MAIN SURVEY",
+                                  reply_markup=ReplyKeyboardMarkup([["MAIN SURVEY"]],
+                                                                  one_time_keyboard=True))
 
         return CHOOSING_TITLE
 
     @run_async
     def handle_title(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
-        # if txt:
-        title = txt
-        user_data["title"] = title
-        bot.send_message(chat_id, "Please send me the tags of the users."
-                                  " Which groups of users should answer this survey")
+        if txt == "MAIN SURVEY":
+            user_data["title"] = "initial"
+        else:
+            title = txt
+            user_data["title"] = title
+            bot.send_message(chat_id, "Please send me the tags that you want to send to. "
+                                      "Try to send them in one message. For example:\n"
+                                      "#tag1 #tag2 #tag3 ... \n"
+                                      "If you want you want to send it to all users, click the button below",
+                             reply_markup=ReplyKeyboardMarkup([["All users"]], one_time_keyboard=True)
+                             )
 
-        return CHOOSING_QUESTIONS
+            return CHOOSING_QUESTIONS
 
     # surveys = [{"admin_id": "",
     #             "title": "",
@@ -62,15 +72,18 @@ class SurveyHandler(object):
         question = update.message.text
         if int(user_data["question_id"]) == 0:
             chat_id, txt = initiate_chat_id(update)
-            txt_split = txt.split(" ")
-            while "" in txt_split:
-                txt_split.remove("")
-            i = 0
             send_tags = []
-            for i in range(len(txt_split)):
-                if txt_split[i][0] == "#":
-                    send_tags.append(txt_split[i].lower())
-                    i += 1
+            if txt == "All users":
+                send_tags.append("#user")
+            else:
+                txt_split = txt.split(" ")
+                while "" in txt_split:
+                    txt_split.remove("")
+                i = 0
+                for i in range(len(txt_split)):
+                    if txt_split[i][0] == "#":
+                        send_tags.append(txt_split[i].lower())
+                        i += 1
             user_data["tags"] = send_tags
             if not send_tags:
                 bot.send_message(chat_id, "Looks like there are yet no users to send this poll to. "
@@ -115,24 +128,24 @@ class SurveyHandler(object):
         approved = []
         rejected = []
         sent = []
+
         for tag in send_tags:
-            tags = chats_table.find({"tag": tag})
-            for tag in tags:
-                if tag['chat_id'] != chat_id:
-                    if not any(sent_d['id'] == tag['chat_id'] for sent_d in sent):
-                        sent.append(tag['chat_id'])
-                        approved.append(tag['name'])
+            chats = chats_table.find({"tag": tag})
+            for chat in chats:
+                if chat['chat_id'] != chat_id:
+                    if not any(sent_d['id'] == chat['chat_id'] for sent_d in sent):
+                        sent.append(chat['chat_id'])
+                        approved.append(chat['tag'])
 
                         bot.send_message(text="Dear {}, a survey has been sent to you. Please press ".format(
-                            update.message.from_user.first_name
+                            chat['full_name']
                         ),
                             reply_markup=InlineKeyboardMarkup(
                                 [InlineKeyboardButton(text="START",
                                                       callback_data="survey_{}".format(
                                                           user_data["title"]
                                                       )
-                                                      )]
-                            ))
+                                                      )]))
                 else:
                     rejected.append(tag)
         if len(rejected) > 0:
@@ -234,7 +247,7 @@ class SurveyHandler(object):
                     sent.append(tag['chat_id'])
                     approved.append(tag['name'])
 
-                    bot.send_message(text="Dear {}, a survey has been sent to you. Please press ".format(
+                    bot.send_message(chat_id=tag['chat_id'], text="Dear {}, a survey has been sent to you. Please press the button START".format(
                         update.message.from_user.first_name),
                         reply_markup=InlineKeyboardMarkup(
                             [InlineKeyboardButton(text="START",
@@ -266,7 +279,7 @@ DELETE_SURVEYS_HANDLER = ConversationHandler(
 )
 
 # CHOOSING_TITLE, CHOOSING_TAGS, CHOOSING_QUESTIONS
-CREATE_SURVEY_HANDLER = ConversationHandler(  # TODO set an initial survey for the users. Ask a user to answer it by clicking "ANSWER"
+CREATE_SURVEY_HANDLER = ConversationHandler(
     entry_points=[CommandHandler('create_survey', SurveyHandler().start, pass_user_data=True)],
 
     states={

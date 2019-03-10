@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from telegram import LabeledPrice, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup
+from telegram import LabeledPrice, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import (MessageHandler, Filters, PreCheckoutQueryHandler, RegexHandler, CommandHandler,
                           ConversationHandler, run_async)
 import logging
@@ -17,27 +17,32 @@ logger = logging.getLogger(__name__)
 __mod_name__ = "Donations"
 
 __admin_help__ = """
+
  Click:
   - /donate - to make a donation for this organization
   - /configure_donation - to add an option that allows the users of this bot to donate for your organization 
+
 """
 
 __user_help__ = """
 
  Click:
   - /donate - to make a donation for this organization
+
 """
 
 __visitor_help__ = """
+
  Click:
   - /donate to make a donation for this organization
+
 """
 
 __admin_keyboard__ = [["/donate"], ["/configure_donation"]]
 __user_keyboard__ = [["/donate"]]
 __visitor_keyboard__ = [["/donate"]]
 
-DONATION_MESSAGE, EXECUTE_DONATION, HANDLE_PRECHECKOUT, HANDLE_SUCCES = range(4)
+EXECUTE_DONATION, HANDLE_PRECHECKOUT, HANDLE_SUCCES = range(3)
 
 
 class DonationBot(object):
@@ -57,19 +62,10 @@ class DonationBot(object):
             update.message.reply_text(text="To return to main menu, click 'Back' ",
                                       reply_markup=InlineKeyboardMarkup(  # TODO modify this shit
                                           [[InlineKeyboardButton(text="Back", callback_data="help_back")]]))
-            return DONATION_MESSAGE
+            return EXECUTE_DONATION
         else:
             update.message.reply_text("Sorry, no option for donation yet")
             return ConversationHandler.END
-
-    @run_async
-    def donation_message(self, bot, update, user_data):
-        chat_id, txt = initiate_chat_id(update)
-        user_data["amount"] = txt
-        update.message.reply_text("You can write a message about your donation, "
-                                  "tell why you want to donate or click NEXT STEP to skip",
-                                  reply_markup=ReplyKeyboardMarkup([["NEXT STEP"]], one_time_keyboard=True))
-        return EXECUTE_DONATION
 
     @run_async
     def execute_donation(self, bot, update, user_data):
@@ -79,21 +75,21 @@ class DonationBot(object):
                 return ConversationHandler.END
 
         chat_id, txt = initiate_chat_id(update)
-        user_data["donation_message"] = txt
         donation_request = chatbots_table.find_one({"bot_id": bot.id})["donation"]
+        # TODO make sure only one donation type ca be added to one bot
         title = donation_request['title']
         description = donation_request['description']
         payload = "Donation"
         provider_token = donation_request['payment_token']
         start_parameter = "test-payment"  # TODO change in production
         currency = donation_request['currency']
-        amount = int(user_data["amount"])
+        amount = int(txt)
         prices = [LabeledPrice(title, amount * 100)]
         bot.sendInvoice(chat_id, title, description, payload,
                         provider_token, start_parameter, currency, prices)
         update.message.reply_text(text="To return to main menu, click 'Back' ",
-                                  reply_markup=InlineKeyboardMarkup(
-                                      [[InlineKeyboardButton(text="Back", callback_data="help_back")]]))
+                                  reply_markup=InlineKeyboardMarkup(  # TODO modify this shit
+                                     [[InlineKeyboardButton(text="Back", callback_data="help_back")]]))
         user_data = donation_request
 
         return HANDLE_PRECHECKOUT
@@ -121,10 +117,10 @@ class DonationBot(object):
         # do something after successful receive of donation?
         user_data["status"] = "Paid"
         user_data['timestamp_paid'] = datetime.datetime.now()
-        donations_table.update_one({"bot_id": bot.id,
-                                    "title": user_data['title'],
-                                    "user_id": update.message.from_user.id},
-                                   user_data)
+        donation_request = donations_table.update_one({"bot_id": bot.id,
+                                                       "title": user_data['title'],
+                                                       "user_id": update.message.from_user.id},
+                                                      user_data)
         update.message.reply_text("Thank you for your donation!")
         return ConversationHandler.END
 

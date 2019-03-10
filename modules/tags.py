@@ -70,6 +70,7 @@ class TagBot(object):   # TODO allow users to send messages to the bots admins
                 if chat is None:
                     chats_table.insert({'chat_id': chat_id,
                                         'name': name,
+                                        'user_name': update.message.chat.full_name,
                                         "tag": tag,
                                         "bot_id": bot.id,
                                         'user_id': update.message.from_user.id})
