@@ -4,9 +4,7 @@ import datetime
 
 from telegram.ext import (CommandHandler, MessageHandler, Filters,
                           ConversationHandler, RegexHandler, run_async, CallbackQueryHandler)
-
 import logging
-
 from database import users_messages_to_admin_table
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -52,9 +50,7 @@ SEND_SCAM_REPORT_HANDLER = ConversationHandler(
         MESSAGE: [MessageHandler(Filters.all,
                                  SendScamReport().received_message,
                                  pass_user_data=True)],
-
     },
-
     fallbacks=[
                CommandHandler('cancel', SendScamReport().error, pass_user_data=True),
                MessageHandler(filters=Filters.command, callback=SendScamReport().error)]

@@ -10,22 +10,18 @@ from telegram.error import Unauthorized, BadRequest, TimedOut, NetworkError, Cha
 from telegram.ext import CommandHandler, CallbackQueryHandler, ConversationHandler, \
     RegexHandler
 from telegram.ext.dispatcher import run_async
-from database import users_table, chatbots_table, custom_buttons_table, surveys_table, chats_table, tags_table
+from database import users_table, chatbots_table, custom_buttons_table, surveys_table, chats_table
 from modules import ALL_MODULES
 from modules.add_menu_buttons import BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER
-from modules.old_scripts.answer_payment import EXECUTE_PAYMENT_HANDLER
 from modules.answer_surveys import ANSWER_SURVEY_HANDLER
-from modules.bot_info import BOT_INFO_HANDLER
 from modules.create_donation import CREATE_DONATION_HANDLER
-from modules.old_scripts.create_payment import CREATE_PAYMENT_HANDLER
 from modules.create_survey import DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_HANDLER, SEND_SURVEYS_HANDLER, \
     CREATE_SURVEY_HANDLER
 from modules.helper_funcs.auth import initiate_chat_id, if_admin
 from modules.helper_funcs.misc import paginate_modules
 from modules.pay_donation import DONATE_HANDLER
-from modules.payment_edit_delete_results import CHANGE_PAYMENT_TOKEN, EDIT_PAYMENT_HANDLER
 from modules.polls import POLL_HANDLER, SEND_POLLS_HANDLER, BUTTON_HANDLER, DELETE_POLLS_HANDLER, BOTS_POLLS_HANDLER
-from modules.tags import ADD_TAGS_HANDLER, RM_TAGS_HANDLER, TAGLIST_HANDLER, SEND_BY_HANSHTAG_HANDLER, \
+from modules.old_scripts.tags import ADD_TAGS_HANDLER, RM_TAGS_HANDLER, TAGLIST_HANDLER, SEND_BY_HANSHTAG_HANDLER, \
     MYTAGLIST_HANDLER, RM_CHAT_TAGS_HANDLER
 from modules.users import USER_AUTHENTICATION_HANDLER, USER_REMOVE_HANDLER, SHOW_USERS_HANDLER
 
@@ -172,7 +168,7 @@ def button_handler(bot: Bot, update: Update):
     try:
         button_info = custom_buttons_table.find_one(
             {"bot_id": bot.id, "button_lower": button_callback_data.replace("button_", "")}
-        )["button_lower"]
+        )["description"]
         buttons = list()
         buttons.append([InlineKeyboardButton(text="Back to main menu", callback_data="help_back")])
         query.message.reply_text(text=button_info,
@@ -214,6 +210,8 @@ def help_button(bot: Bot, update: Update):
                 query.message.reply_text(text="Here you can see the information about us",
                                          reply_markup=InlineKeyboardMarkup(
                                              buttons))
+                if if_admin(update, bot):
+                    query.message.reply_text(text="You can change the information about your chatbot by clicking /change_org_info")
             else:
                 if if_admin(update=update, bot=bot):
                     text = "{}:\n".format(HELPABLE[module].__mod_name__) \
@@ -244,7 +242,7 @@ def help_button(bot: Bot, update: Update):
         elif back_match:
             query.message.reply_text(text=HELP_STRINGS.format(bot.first_name),
                                      reply_markup=InlineKeyboardMarkup(paginate_modules(0, HELPABLE, "help", bot.id)))
-
+            return ConversationHandler.END
         # ensure no spinny white circle
         bot.answer_callback_query(query.id)
         query.message.delete()
@@ -367,10 +365,10 @@ def main(token):
     dispatcher.add_handler(BUTTON_ADD_HANDLER)
     dispatcher.add_handler(DELETE_BUTTON_HANDLER)
     # PAYMENTS
-    dispatcher.add_handler(CREATE_PAYMENT_HANDLER)
-    dispatcher.add_handler(EXECUTE_PAYMENT_HANDLER)
-    dispatcher.add_handler(CHANGE_PAYMENT_TOKEN)
-    dispatcher.add_handler(EDIT_PAYMENT_HANDLER)
+    # dispatcher.add_handler(CREATE_PAYMENT_HANDLER)
+    # dispatcher.add_handler(EXECUTE_PAYMENT_HANDLER)
+    # dispatcher.add_handler(CHANGE_PAYMENT_TOKEN)
+    # dispatcher.add_handler(EDIT_PAYMENT_HANDLER)
     # DONATIONS
     dispatcher.add_handler(CREATE_DONATION_HANDLER)
     dispatcher.add_handler(DONATE_HANDLER)
@@ -382,7 +380,7 @@ def main(token):
     dispatcher.add_handler(CREATE_SURVEY_HANDLER)
     dispatcher.add_handler(DELETE_SURVEYS_HANDLER)
     # BOT_IF
-    dispatcher.add_handler(BOT_INFO_HANDLER)
+    # dispatcher.add_handler(BOT_INFO_HANDLER)
     # TAGS
     dispatcher.add_handler(ADD_TAGS_HANDLER)
     dispatcher.add_handler(TAGLIST_HANDLER)

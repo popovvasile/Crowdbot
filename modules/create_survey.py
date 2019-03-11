@@ -13,14 +13,14 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-CHOOSING_TITLE, CHOOSING_TAGS, CHOOSING_QUESTIONS = range(3)
+CHOOSING_TITLE, CHOOSING_QUESTIONS = range(2)
 CHOOSING = 89
-TYPING_SEND_TITLE, TYPING_SEND_TAGS = range(2)
+TYPING_SEND_TITLE= range(2)
 TYPING_TOPICS = 19
 DELETE_SURVEY = 23
 
 
-class SurveyHandler(object):  # TODO remove the tags from here + add "ask if initial survey"
+class SurveyHandler(object):
     @staticmethod
     def facts_to_str(user_data):
         facts = list()
@@ -49,20 +49,25 @@ class SurveyHandler(object):  # TODO remove the tags from here + add "ask if ini
             user_data["title"] = "initial"
         else:
             title = txt
-            user_data["title"] = title
-            bot.send_message(chat_id, "Please send me the tags that you want to send to. "
-                                      "Try to send them in one message. For example:\n"
-                                      "#tag1 #tag2 #tag3 ... \n"
-                                      "If you want you want to send it to all users, click the button below",
-                             reply_markup=ReplyKeyboardMarkup([["All users"]], one_time_keyboard=True)
-                             )
+            survey = surveys_table.find_one({
+                "bot_id": bot.id,
+                "title": user_data["title"]
+            })
+            if not survey:
+                user_data["title"] = title
+                update.message.reply_text("Type your first question or click /cancel")
+                user_data["question_id"] = 1
+                return CHOOSING_QUESTIONS
 
-            return CHOOSING_QUESTIONS
+            else:
+                update.message.reply_text("You already have a survey with this title.\n"
+                                          "Please, type another title for your survey")
+                return CHOOSING_TITLE
+
 
     # surveys = [{"admin_id": "",
     #             "title": "",
     #             "bot_id": "",
-    #             "target_tags": ["#berlin", "#bucharest"],
     #             "questions": [{"question_id": "", "text": ""},
     #                           {"question_id": "", "text": ""}],
     #             "answers": [{"user_id": "", "question_id": "", "answer": ""}]},
@@ -70,45 +75,7 @@ class SurveyHandler(object):  # TODO remove the tags from here + add "ask if ini
     @run_async
     def receive_questions(self, bot, update, user_data):
         question = update.message.text
-        if int(user_data["question_id"]) == 0:
-            chat_id, txt = initiate_chat_id(update)
-            send_tags = []
-            if txt == "All users":
-                send_tags.append("#user")
-            else:
-                txt_split = txt.split(" ")
-                while "" in txt_split:
-                    txt_split.remove("")
-                i = 0
-                for i in range(len(txt_split)):
-                    if txt_split[i][0] == "#":
-                        send_tags.append(txt_split[i].lower())
-                        i += 1
-            user_data["tags"] = send_tags
-            if not send_tags:
-                bot.send_message(chat_id, "Looks like there are yet no users to send this poll to. "
-                                          "Ask them to add this tag to there chat")
-
-            survey = surveys_table.find_one({
-                "bot_id": bot.id,
-                "title": user_data["title"]
-            })
-
-            if not survey:
-                surveys_table.insert({
-                    "bot_id": bot.id,
-                    "title": user_data["title"],
-                    "questions": [],
-                    "answers": []
-                })
-
-                update.message.reply_text("Type your first question or click /cancel")
-                user_data["question_id"] = 1
-            else:
-                update.message.reply_text("You already have a survey with this title.\n"
-                                          "Please, type another title for your survey")
-
-        elif user_data["question_id"] > 0:
+        if user_data["question_id"] > 0:
             survey = surveys_table.find_one({
                 "bot_id": bot.id,
                 "title": user_data["title"]
@@ -120,38 +87,26 @@ class SurveyHandler(object):  # TODO remove the tags from here + add "ask if ini
             user_data["question_id"] = int(user_data["question_id"]) + 1
             update.message.reply_text("Please type your next question or write /done if you are finished")
 
-        return CHOOSING_QUESTIONS
+            return CHOOSING_QUESTIONS
 
     def done(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
-        send_tags = user_data['tags']
-        approved = []
-        rejected = []
         sent = []
+        chats = chats_table.find()
+        for chat in chats:
+            if chat['chat_id'] != chat_id:
+                if not any(sent_d['id'] == chat['chat_id'] for sent_d in sent):
+                    sent.append(chat['chat_id'])
 
-        for tag in send_tags:
-            chats = chats_table.find({"tag": tag})
-            for chat in chats:
-                if chat['chat_id'] != chat_id:
-                    if not any(sent_d['id'] == chat['chat_id'] for sent_d in sent):
-                        sent.append(chat['chat_id'])
-                        approved.append(chat['tag'])
-
-                        bot.send_message(text="Dear {}, a survey has been sent to you. Please press ".format(
-                            chat['full_name']
-                        ),
-                            reply_markup=InlineKeyboardMarkup(
-                                [InlineKeyboardButton(text="START",
-                                                      callback_data="survey_{}".format(
-                                                          user_data["title"]
-                                                      )
-                                                      )]))
-                else:
-                    rejected.append(tag)
-        if len(rejected) > 0:
-            bot.send_message(chat_id,
-                             "Failed to send messages to tags <i>" + ", ".join(rejected) + "</i>",
-                             parse_mode="HTML")
+                    bot.send_message(text="Dear {}, a survey has been sent to you. Please press ".format(
+                        chat['full_name']
+                    ),
+                        reply_markup=InlineKeyboardMarkup(
+                            [InlineKeyboardButton(text="START",
+                                                  callback_data="survey_{}".format(
+                                                      user_data["title"]
+                                                  )
+                                                  )]))
         survey = surveys_table.find_one({
             "bot_id": bot.id,
             "title": user_data["title"]
@@ -227,35 +182,29 @@ class SurveyHandler(object):  # TODO remove the tags from here + add "ask if ini
         update.message.reply_text(
             "Please choose the survey that you want to send",
             reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
-        return TYPING_SEND_TAGS
+        return TYPING_SEND_TITLE
 
     @run_async
-    def handle_send_tags(self, bot, update, user_data):
+    def handle_send_title(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
         user_data["title"] = txt
-        approved = []
         sent = []
-        tags = chats_table.find()
-        print(tags)
-        if tags.count() == 0:
-            bot.send_message(chat_id, "Looks like there are yet no users to send this poll to. "
-                                      "Ask them to add this tag to there chat. Command finished.")
-            return ConversationHandler.END
-        for tag in tags:
-            if tag['chat_id'] != chat_id:
-                if not any(sent_d['id'] == tag['chat_id'] for sent_d in sent):
-                    sent.append(tag['chat_id'])
-                    approved.append(tag['name'])
+        chats = chats_table.find()
+        for chat in chats:
+            if chat['chat_id'] != chat_id:
+                if not any(sent_d['id'] == chat['chat_id'] for sent_d in sent):
+                    sent.append(chat['chat_id'])
 
-                    bot.send_message(chat_id=tag['chat_id'], text="Dear {}, a survey has been sent to you. Please press the button START".format(
-                        update.message.from_user.first_name),
+                    bot.send_message(chat_id=chat['chat_id'], text="Dear {}, a survey has been sent to you. \n"
+                                                                   "Please press the button START".format(
+                        chat["full_name"]),
                         reply_markup=InlineKeyboardMarkup(
                             [InlineKeyboardButton(text="START",
                                                   callback_data="survey_{}".format(
                                                       user_data["title"]
                                                   ))]
                         ))
-
+        bot.send_message(chat_id=chat_id, text="Survey sent to all users!"),
         return ConversationHandler.END
 
     def cancel(self, bot, update):
@@ -278,7 +227,6 @@ DELETE_SURVEYS_HANDLER = ConversationHandler(
         MessageHandler(filters=Filters.command, callback=SurveyHandler().cancel)]
 )
 
-# CHOOSING_TITLE, CHOOSING_TAGS, CHOOSING_QUESTIONS
 CREATE_SURVEY_HANDLER = ConversationHandler(
     entry_points=[CommandHandler('create_survey', SurveyHandler().start, pass_user_data=True)],
 
@@ -303,10 +251,9 @@ SEND_SURVEYS_HANDLER = ConversationHandler(
 
                   ],
     states={
-        # TYPING_SEND_TITLE: [MessageHandler(Filters.text, SurveyHandler().handle_send_title, pass_user_data=True)],
-        TYPING_SEND_TAGS: [MessageHandler(Filters.text, SurveyHandler().handle_send_tags, pass_user_data=True),
-                           CommandHandler('cancel', SurveyHandler().cancel),
-                           ],
+        TYPING_SEND_TITLE: [MessageHandler(Filters.text, SurveyHandler().handle_send_title, pass_user_data=True),
+        CommandHandler('cancel', SurveyHandler().cancel)
+],
 
     },
     fallbacks=[

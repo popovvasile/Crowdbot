@@ -1,12 +1,9 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
 import datetime
-
+import logging
 from telegram.ext import (CommandHandler, MessageHandler, Filters,
                           ConversationHandler, RegexHandler, run_async, CallbackQueryHandler)
-
-import logging
-
 from database import users_messages_to_admin_table
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -16,7 +13,7 @@ logger = logging.getLogger(__name__)
 MESSAGE = 1
 
 
-class SendMessageToAdmin(object):
+class SendMessageToAdmin(object):  # TODO limit messages for ex. 4 times per day
     @run_async
     def start_answering(self, bot, update, user_data):
         bot.send_message(update.message.chat_id, "What do you want to tell us?")
@@ -72,7 +69,7 @@ SEND_MESSAGE_HANDLER = ConversationHandler(
 SEE_MESSAGES_HANDLER = CommandHandler("see_the_messages", SeeMessageToAdmin().see_messages)
 
 
-__mod_name__ = "Send message to the chatbot owner"
+__mod_name__ = "Send message to the admin"
 __user_help__ = """
 Send message to the chatbot owner
 

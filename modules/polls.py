@@ -142,7 +142,6 @@ class PollBot(object):
     def handle_done(self, bot, update, user_data):
         update.message.reply_text("Thank you! you can send this poll to other groups "
                                   "or chats by writing /send_poll \n"
-                                  "You can use the tag #all to send to every authorized user of this bot"
                                   )
         options = []
         for i, opt in enumerate(user_data['options']):
@@ -386,70 +385,27 @@ class PollBot(object):
 
         return TYPING_SEND_TITLE
 
+
     @run_async
     def handle_send_title(self, bot, update, user_data):
-        tags_names = []
-        for chat in chats_table.find({"bot_id": bot.id}):
-            if chat["tag"] in tags_names:
-                pass
-            else:
-                tags_names.append(chat["tag"])
-        response = "This is the list of tags assinged in your chatbot.\n To remove one of these tags, click /rmtag"
-        for tag in sorted(tags_names):
-            response = response + "\n<b>" + tag + "</b>"
-
         chat_id, txt = initiate_chat_id(update)
-        # if txt:
+        sent = []
         poll_name = txt
         user_data["poll_name_to_send"] = poll_name
-        bot.send_message(chat_id, "Please send me the tags that you want to send to. "
-                                  "Try to send them in one message. For example:\n"
-                                  "#tag1 #tag2 #tag3 ... \n"
-                                  "If you want you want to send it to all users, click the button below",
-                         reply_markup=ReplyKeyboardMarkup([["All users"]], one_time_keyboard=True)
-                         )
+        chats = chats_table.find_all()
+        for chat in chats:
+            if chat['chat_id'] != chat_id:
+                if not any(sent_d['id'] == chat['chat_id'] for sent_d in sent):
+                    sent.append(chat['chat_id'])
+                    poll = polls_table.find_one({'title': poll_name})
+                    poll['options'] = ast.literal_eval(poll['options'])
+                    poll['meta'] = ast.literal_eval(poll['meta'])
 
-        return TYPING_TAGS
-
-    @run_async
-    def handle_send_tags(self, bot, update, user_data):
-        chat_id, txt = initiate_chat_id(update)
-        send_tags = []
-        poll_name = user_data["poll_name_to_send"]
-
-        if txt == "All users":
-            send_tags.append("#user")
-        else:
-            txt_split = txt.split(" ")
-            while "" in txt_split:
-                txt_split.remove("")
-            i = 0
-            for i in range(len(txt_split)):
-                if txt_split[i][0] == "#":
-                    send_tags.append(txt_split[i].lower())
-                    i += 1
-        # if i == len(txt_split):
-        approved = []
-        rejected = []
-        sent = []
-
-        for tag_to_send in send_tags:
-            chats = chats_table.find({"tag": tag_to_send})
-            for chat in chats:
-                if chat['chat_id'] != chat_id:
-                    if not any(sent_d['id'] == chat['chat_id'] for sent_d in sent):
-                        sent.append(chat['chat_id'])
-                        approved.append(chat['tag'])
-
-                        poll = polls_table.find_one({'title': poll_name})
-                        poll['options'] = ast.literal_eval(poll['options'])
-                        poll['meta'] = ast.literal_eval(poll['meta'])
-
-                        bot.send_message(chat['chat_id'], self.assemble_message_text(poll),
-                                         reply_markup=self.assemble_inline_keyboard(poll, True),
-                                         parse_mode='Markdown'
-                                         )
-                        bot.send_message(chat_id, "Poll sent! ")
+                    bot.send_message(chat['chat_id'], self.assemble_message_text(poll),
+                                     reply_markup=self.assemble_inline_keyboard(poll, True),
+                                     parse_mode='Markdown'
+                                     )
+                    bot.send_message(chat_id, "Poll sent! ")
 
         if len(sent) == 0:
             bot.send_message(chat_id, "Looks like there are yet no users to send this poll to.")
@@ -530,7 +486,7 @@ Admin only:*
  - /create_poll - to create a new poll
  - /delete_poll
  - /bots_polls - to see all created polls created by you
- - /send_poll -  to send a poll to all users that added a specific hashtag/hashtags
+ - /send_poll -  to send a poll to all users 
  - /cancel -  to cancel the creation of the poll
 
 """
@@ -593,7 +549,7 @@ POLL_HANDLER = ConversationHandler(
 )
 BUTTON_HANDLER = CallbackQueryHandler(PollBot().button)
 
-NOT_ENGAGED_SEND, TYPING_SEND_TITLE, TYPING_TAGS = range(3)
+NOT_ENGAGED_SEND, TYPING_SEND_TITLE = range(2)
 
 SEND_POLLS_HANDLER = ConversationHandler(
     entry_points=[CommandHandler('send_poll', PollBot().handle_send_poll),
@@ -604,8 +560,7 @@ SEND_POLLS_HANDLER = ConversationHandler(
                            CommandHandler('cancel', PollBot().cancel), ],
         TYPING_SEND_TITLE: [MessageHandler(Filters.text, PollBot().handle_send_title, pass_user_data=True),
                             CommandHandler('cancel', PollBot().cancel), ],
-        TYPING_TAGS: [MessageHandler(Filters.text, PollBot().handle_send_tags, pass_user_data=True),
-                      CommandHandler('cancel', PollBot().cancel)],
+
 
     },
     fallbacks=[CommandHandler('cancel', PollBot().cancel, pass_user_data=True)]

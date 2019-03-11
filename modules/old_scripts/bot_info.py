@@ -26,10 +26,12 @@ markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
 __mod_name__ = "Info"
 
 __admin_help__ = """
- Information about us
+ Information about your chatbot.
+ 
+ To change it, click /change_org_info
 """
 
-# __admin_keyboard__ = [["/org_info"], ["/add_org_info"]]
+# __admin_keyboard__ = [["/change_org_info"]]
 
 # __user_help__ = """
 #     Click:
@@ -86,8 +88,8 @@ class BotInfo(object):
         user_data[category] = text
         del user_data['choice']
 
-        update.message.reply_text("Neat! Just so you know, this is what you already told me:"
-                                  "{}"
+        update.message.reply_text("Neat! Just so you know, this is what you already told me:\n"
+                                  "{}\n"
                                   "You can tell me more, or change your opinion on something.".format(
                                     BotInfo().facts_to_str(user_data)), reply_markup=markup)
 
@@ -105,7 +107,7 @@ class BotInfo(object):
         chatbot["chatbot_info"] = user_data
         chatbots_table.replace_one({"bot_id": bot.id}, chatbot)
         user_data.clear()
-        get_help(bot=bot, update=update)
+        # get_help(bot=bot, update=update)
 
         return ConversationHandler.END
 

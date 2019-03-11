@@ -139,6 +139,11 @@ DONATE_HANDLER = ConversationHandler(
                        DonationBot().start_donation,
                        pass_user_data=True)],
     states={
+        DONATION_MESSAGE: [MessageHandler(callback=DonationBot().donation_message,
+                                          filters=Filters.text,
+                                          pass_user_data=True),
+                           CommandHandler('cancel', DonationBot().cancel)
+                           ],
         EXECUTE_DONATION: [MessageHandler(callback=DonationBot().execute_donation,
                                           filters=Filters.text,
                                           pass_user_data=True),
