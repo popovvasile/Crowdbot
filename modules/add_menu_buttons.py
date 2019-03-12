@@ -28,9 +28,13 @@ __admin_help__ = """
 
 class AddCommands(object):
     def start(self, bot, update):
+        reply_keyboard = [['Rules', 'Contacts'],
+                          ['Useful links', 'Something else...'],
+                          ['Done']]
+        markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
         update.message.reply_text(
-            "Please type your new button, for example 'contacts' or 'new_address'. Please note that"
-            "you can't modify the buttons available by default ")
+            "Please type your new button, for example 'Contacts' or 'Rules'. Please note that"
+            "you can't modify the buttons available by default ", reply_keyboard=markup)
         return TYPING_BUTTON
 
     def button_handler(self, bot, update, user_data):

@@ -46,7 +46,9 @@ class SendMessageToAdmin(object):
 class SendMessageToUsers(object):
     @run_async
     def start_answering(self, bot, update):
-        bot.send_message(update.message.chat_id, "What do you want to tell your users?")
+        bot.send_message(update.message.chat_id, "What do you want to tell your users?\n"
+                                                 "We will forward your message to all your users."
+                                                 "p.s. You name will be displayed as well")
         return MESSAGE_TO_USERS
 
     @run_async
@@ -55,7 +57,7 @@ class SendMessageToUsers(object):
 
         chats = chats_table.find()
         for chat in chats:
-            bot.send_message(chat["chat_id"], txt)
+            bot.forward_message(chat_id=chat["chat_id"], from_chat_id=chat_id, message_id=update.message.id)
         bot.send_message(update.message.chat_id,
                          "Thank you! We've sent your message to your users!")
 
