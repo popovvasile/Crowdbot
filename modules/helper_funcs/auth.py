@@ -17,22 +17,22 @@ def initiate_chat_id(update):
 
 
 def if_admin(update, bot):
-    if update.message:
-        user_id = update.message.from_user.id
-    else:
-        user_id = update.callback_query.from_user.id
-    superuser = chatbots_table.find_one({"bot_id": bot.id})["superuser"]
-    if user_id == superuser:
-        return True
-    admin_chat = users_table.find_one({'user_id': user_id, "bot_id": bot.id})
-    if admin_chat is not None:
-        if admin_chat["registered"] and admin_chat["is_admin"]:
-            return True
-        else:
-            return False
-    else:
-        return False
-    # return True
+    # if update.message:
+    #     user_id = update.message.from_user.id
+    # else:
+    #     user_id = update.callback_query.from_user.id
+    # superuser = chatbots_table.find_one({"bot_id": bot.id})["superuser"]
+    # if user_id == superuser:
+    #     return True
+    # admin_chat = users_table.find_one({'user_id': user_id, "bot_id": bot.id})
+    # if admin_chat is not None:
+    #     if admin_chat["registered"] and admin_chat["is_admin"]:
+    #         return True
+    #     else:
+    #         return False
+    # else:
+    #     return False
+    return True
 
 
 def user_admin(func):
