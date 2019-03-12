@@ -56,15 +56,13 @@ def paginate_modules(page_n: int, module_dict: Dict, prefix, bot_id, chat=None) 
                for button in custom_buttons_table.find({"bot_id": bot_id})]
 
     if not chat:
-        modules = sorted(
-            [EqInlineKeyboardButton(x.__mod_name__,
+        modules = [EqInlineKeyboardButton(x.__mod_name__,
                                     callback_data="{}_module({})".format(prefix, x.__mod_name__.lower())) for x
-             in module_dict.values()] + buttons)
+             in module_dict.values()] + buttons
     else:
-        modules = sorted(
-            [EqInlineKeyboardButton(x.__mod_name__,
+        modules = [EqInlineKeyboardButton(x.__mod_name__,
                                     callback_data="{}_module({},{})".format(prefix, chat, x.__mod_name__.lower())) for x
-             in module_dict.values()])
+             in module_dict.values()]
 
     pairs = list(zip(modules[::2], modules[1::2]))
 

@@ -59,9 +59,9 @@ SEND_SCAM_REPORT_HANDLER = ConversationHandler(
 
 __mod_name__ = "Scam Report"
 
-__user_help__ = """
+__visitor_help__ = """
 Report a scam
 """
 
 
-__user_keyboard__ = [["/send_scam_report"]]
+__visitor_keyboard__ = [["/send_scam_report"]]

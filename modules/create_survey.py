@@ -1,13 +1,15 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
 from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import (CommandHandler, MessageHandler, Filters, ConversationHandler, run_async)
+from telegram.ext import (CommandHandler, MessageHandler, Filters, ConversationHandler, run_async, CallbackQueryHandler)
 import logging
 
 from database import surveys_table, users_table, profile_topics_table, chats_table
 from modules.helper_funcs.auth import initiate_chat_id, if_admin
 
 # Enable logging
+from modules.helper_funcs.main_runnner_helper import help_button
+
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
@@ -38,8 +40,12 @@ class SurveyHandler(object):
                                   "If you want this survey to be sent to your users at the beginning, "
                                   "just press MAIN SURVEY",
                                   reply_markup=ReplyKeyboardMarkup([["MAIN SURVEY"]],
-                                                                  one_time_keyboard=True))
-
+                                                                   one_time_keyboard=True))
+        # buttons = list()
+        # buttons.append([InlineKeyboardButton(text="Back", callback_data="help_back")])
+        # reply_markup = InlineKeyboardMarkup(
+        #     buttons)
+        # update.message.reply_text("If you want to quit this command, click 'Back' ", reply_markup=reply_markup)
         return CHOOSING_TITLE
 
     @run_async
@@ -49,6 +55,7 @@ class SurveyHandler(object):
             user_data["title"] = "initial"
         else:
             title = txt
+            user_data["title"] = title
             survey = surveys_table.find_one({
                 "bot_id": bot.id,
                 "title": user_data["title"]
@@ -243,8 +250,11 @@ CREATE_SURVEY_HANDLER = ConversationHandler(
     },
 
     fallbacks=[
+        CallbackQueryHandler(callback=help_button, pattern=r"help_back"),
         CommandHandler('done', SurveyHandler().done, pass_user_data=True),
-        MessageHandler(filters=Filters.command, callback=SurveyHandler().cancel)]
+        MessageHandler(filters=Filters.command, callback=SurveyHandler().cancel)
+
+        ]
 )
 SEND_SURVEYS_HANDLER = ConversationHandler(
     entry_points=[CommandHandler('send_survey', SurveyHandler().handle_send_survey),
@@ -258,7 +268,8 @@ SEND_SURVEYS_HANDLER = ConversationHandler(
     },
     fallbacks=[
         CommandHandler('done', SurveyHandler().done, pass_user_data=True),
-        MessageHandler(filters=Filters.command, callback=SurveyHandler().cancel)]
+        MessageHandler(filters=Filters.command, callback=SurveyHandler().cancel),
+        CallbackQueryHandler(callback=SurveyHandler().cancel, pattern=r"help_back")]
 )
 SHOW_SURVEYS_HANDLER = ConversationHandler(
     entry_points=[CommandHandler('survey_results', SurveyHandler().show_surveys)],
@@ -272,5 +283,6 @@ SHOW_SURVEYS_HANDLER = ConversationHandler(
 
     fallbacks=[
         CommandHandler('cancel', SurveyHandler().cancel),
-        MessageHandler(filters=Filters.command, callback=SurveyHandler().cancel)]
+        MessageHandler(filters=Filters.command, callback=SurveyHandler().cancel),
+        CallbackQueryHandler(callback=SurveyHandler().cancel, pattern=r"help_back")]
 )

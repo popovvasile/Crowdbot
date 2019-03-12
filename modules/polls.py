@@ -385,14 +385,13 @@ class PollBot(object):
 
         return TYPING_SEND_TITLE
 
-
     @run_async
     def handle_send_title(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
         sent = []
         poll_name = txt
         user_data["poll_name_to_send"] = poll_name
-        chats = chats_table.find_all()
+        chats = chats_table.find()
         for chat in chats:
             if chat['chat_id'] != chat_id:
                 if not any(sent_d['id'] == chat['chat_id'] for sent_d in sent):

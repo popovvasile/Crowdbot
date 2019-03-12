@@ -14,7 +14,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.INFO)
 
 logger = logging.getLogger(__name__)
-__mod_name__ = "Donations"
+__mod_name__ = "Donate"
 
 __admin_help__ = """
  Click:
@@ -22,11 +22,6 @@ __admin_help__ = """
   - /configure_donation - to add an option that allows the users of this bot to donate for your organization 
 """
 
-__user_help__ = """
-
- Click:
-  - /donate - to make a donation for this organization
-"""
 
 __visitor_help__ = """
  Click:
@@ -34,7 +29,6 @@ __visitor_help__ = """
 """
 
 __admin_keyboard__ = [["/donate"], ["/configure_donation"]]
-__user_keyboard__ = [["/donate"]]
 __visitor_keyboard__ = [["/donate"]]
 
 DONATION_MESSAGE, EXECUTE_DONATION, HANDLE_PRECHECKOUT, HANDLE_SUCCES = range(4)
