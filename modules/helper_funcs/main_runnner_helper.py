@@ -7,7 +7,7 @@ from telegram.ext import run_async, ConversationHandler
 
 from database import custom_buttons_table, chats_table, surveys_table, users_table
 from modules import ALL_MODULES
-from modules.helper_funcs.auth import if_admin, initiate_chat_id
+from modules.helper_funcs.auth import if_admin, initiate_chat_id, register_chat
 from modules.helper_funcs.misc import paginate_modules, LOGGER
 
 
@@ -204,6 +204,7 @@ def help_button(bot: Bot, update: Update):
 
 @run_async
 def get_help(bot: Bot, update: Update):
+    register_chat(bot, update)
     chat = update.effective_chat
 
     if if_admin(bot=bot, update=update):
@@ -218,54 +219,35 @@ class WelcomeBot(object):
 
         chat_id, txt = initiate_chat_id(update)
         user_id = update.message.from_user.id
-        if if_admin(update, bot):
-            get_help(bot=bot, update=update)
+        register_chat(bot, update)
+        users_table.save({'bot_id': bot.id,
+                          "chat_id": chat_id,
+                          "user_id": user_id,
+                          "username": update.message.from_user.username,
+                          "full_name": update.message.from_user.full_name,
+                          'registered': False,
+                          "pending": False,
+                          "is_admin": False,
+                          "tags": ["#all", "#user"]
+                          })
 
-            bot.send_message(chat_id, "As a first step, let's add some information about this chatbot.\n"
-                                      "To do this, click the command /bot_info".format(bot.name),
+        get_help(bot=bot, update=update)
+        initial_survey = surveys_table.find_one({
+            "bot_id": bot.id,
+            "title": "initial"
+        })
+        if initial_survey:
+            bot.send_message(chat_id=chat_id,
+                             text="Dear {}, before you start, please answer a some quick questions. "
+                                  "To start the survey, press the button START".format(
+                                 update.message.from_user.first_name),
                              reply_markup=InlineKeyboardMarkup(
-                                 inline_keyboard=[[InlineKeyboardButton(text="Back", callback_data="help_back")]])
-                             )
-        else:
-            users_table.save({'bot_id': bot.id,
-                              "chat_id": chat_id,
-                              "user_id": user_id,
-                              "username": update.message.from_user.username,
-                              "full_name": update.message.from_user.full_name,
-                              'registered': False,
-                              "pending": False,
-                              "is_admin": False,
-                              "tags": ["#all", "#user"]
-                              })
-            chats_table.insert({'chat_id': chat_id,
-                                'name': update.message.from_user.full_name,
-                                'user_name': update.message.chat.full_name,
-                                "tag": "#all",
-                                "bot_id": bot.id,
-                                'user_id': update.message.from_user.id})
-            chats_table.insert({'chat_id': chat_id,
-                                'name': update.message.from_user.full_name,
-                                'user_name': update.message.chat.full_name,
-                                "tag": "#user",
-                                "bot_id": bot.id,
-                                'user_id': update.message.from_user.id})
-            get_help(bot=bot, update=update)
-            initial_survey = surveys_table.find_one({
-                "bot_id": bot.id,
-                "title": "initial"
-            })
-            if initial_survey:
-                bot.send_message(chat_id=chat_id,
-                                 text="Dear {}, before you start, please answer a some quick questions. "
-                                      "To start the survey, press the button START".format(
-                                     update.message.from_user.first_name),
-                                 reply_markup=InlineKeyboardMarkup(
-                                     [InlineKeyboardButton(text="START",
-                                                           callback_data="survey_{}".format(
-                                                               "initial"
-                                                           ))]
-                                 ))
-            return ConversationHandler.END
+                                 [InlineKeyboardButton(text="START",
+                                                       callback_data="survey_{}".format(
+                                                           "initial"
+                                                       ))]
+                             ))
+        return ConversationHandler.END
 
     @staticmethod
     def cancel(bot, update):

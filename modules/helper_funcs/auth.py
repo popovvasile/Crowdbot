@@ -2,14 +2,25 @@ from typing import Optional
 from functools import wraps
 from telegram import User, Bot, Update
 
-from database import users_table, chatbots_table
+from database import users_table, chatbots_table, chats_table
+
+
+def register_chat(bot, update):
+    chat_id = update.effective_chat.id
+    chat_name = update.message.from_user.full_name
+    bot_id = bot.id
+    user_id = update.message.from_user.id
+    chats_table.update({"bot_id": bot.id, "chat_id": chat_id},
+                       {"bot_id": bot_id, "chat_id": chat_id,
+                        "name": chat_name, "user_id": user_id, "tag": "#all"},
+                       upsert=True)
 
 
 def initiate_chat_id(update):
     chat_id = update.effective_chat.id
 
     txt = ""
-    if update.message.text :
+    if update.message.text:
         txt = txt + update.message.text
     elif update.message.caption:
         txt = txt + update.message.caption
