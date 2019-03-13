@@ -13,7 +13,7 @@ class BasicPoll(BasePoll):
             votes = self.num_votes(poll, i)
             buttons.append([{
                 'text': "{}{}{}".format(option['text'],
-                                        " - " if votes > 0 else "",
+                                        " : " if votes > 0 else "",
                                         votes if votes > 0 else ""),
                 'callback_data': {'i': i},
             }])

@@ -10,7 +10,7 @@ from modules.create_survey import DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_HANDLER, 
     CREATE_SURVEY_HANDLER
 from modules.helper_funcs.main_runnner_helper import help_button, button_handler, get_help, WelcomeBot, error_callback
 from modules.pay_donation import DONATE_HANDLER
-from modules.polls import POLL_HANDLER, SEND_POLLS_HANDLER, BUTTON_HANDLER, DELETE_POLLS_HANDLER, BOTS_POLLS_HANDLER
+from modules.polls import POLL_HANDLER, SEND_POLLS_HANDLER, BUTTON_HANDLER, DELETE_POLLS_HANDLER
 from modules.send_message import SEND_MESSAGE_TO_ADMIN_HANDLER, SEND_MESSAGE_TO_USERS_HANDLER, SEE_MESSAGES_HANDLER
 
 logging.basicConfig(
@@ -46,7 +46,6 @@ def main(token):
     dispatcher.add_handler(SEND_POLLS_HANDLER)
     dispatcher.add_handler(BUTTON_HANDLER)
     dispatcher.add_handler(DELETE_POLLS_HANDLER)
-    dispatcher.add_handler(BOTS_POLLS_HANDLER)
 
     # ADD_BUTTONS
     dispatcher.add_handler(BUTTON_ADD_HANDLER)

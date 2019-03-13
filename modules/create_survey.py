@@ -4,7 +4,7 @@ from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMa
 from telegram.ext import (CommandHandler, MessageHandler, Filters, ConversationHandler, run_async, CallbackQueryHandler)
 import logging
 
-from database import surveys_table, users_table, profile_topics_table, chats_table
+from database import surveys_table, users_table, chats_table
 from modules.helper_funcs.auth import initiate_chat_id, if_admin
 
 # Enable logging
@@ -36,10 +36,9 @@ class SurveyHandler(object):
     @run_async
     def start(bot, update, user_data):
         user_data["question_id"] = 0
-        update.message.reply_text("Please enter a title for your survey."
-                                  "If you want this survey to be sent to your users at the beginning, "
-                                  "just press MAIN SURVEY",
-                                  reply_markup=ReplyKeyboardMarkup([["MAIN SURVEY"]],
+        update.message.reply_text("Please enter a title for your survey\n\n"
+                                  "If you want to quit the creation of a survey, click /cancel",
+                                  reply_markup=ReplyKeyboardMarkup([["/cancel"]],
                                                                    one_time_keyboard=True))
         # buttons = list()
         # buttons.append([InlineKeyboardButton(text="Back", callback_data="help_back")])
@@ -61,6 +60,10 @@ class SurveyHandler(object):
                 "title": user_data["title"]
             })
             if not survey:
+                surveys_table.insert({
+                    "bot_id": bot.id,
+                    "title": user_data["title"]
+                })
                 user_data["title"] = title
                 update.message.reply_text("Type your first question or click /cancel")
                 user_data["question_id"] = 1
@@ -70,7 +73,6 @@ class SurveyHandler(object):
                 update.message.reply_text("You already have a survey with this title.\n"
                                           "Please, type another title for your survey")
                 return CHOOSING_TITLE
-
 
     # surveys = [{"admin_id": "",
     #             "title": "",
@@ -99,7 +101,7 @@ class SurveyHandler(object):
     def done(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
         sent = []
-        chats = chats_table.find()
+        chats = chats_table.find({"bot_id": bot.id})
         for chat in chats:
             if chat['chat_id'] != chat_id:
                 if not any(sent_d['id'] == chat['chat_id'] for sent_d in sent):
@@ -196,7 +198,7 @@ class SurveyHandler(object):
         chat_id, txt = initiate_chat_id(update)
         user_data["title"] = txt
         sent = []
-        chats = chats_table.find()
+        chats = chats_table.find({"bot_id": bot.id})
         for chat in chats:
             if chat['chat_id'] != chat_id:
                 if not any(sent_d['id'] == chat['chat_id'] for sent_d in sent):

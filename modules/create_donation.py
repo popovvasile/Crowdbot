@@ -36,7 +36,7 @@ class CreateDonationHandler(object):
                                       "please click /change_donation_token")
             return TYPING_TITLE
         else:
-            update.message.reply_text("Please enter your donation provider token"
+            update.message.reply_text("Please enter your donation provider token\n"
                                       "In order to get it,"
                                       "please visit https://core.telegram.org/bots/donations#getting-a-token")
             return TYPING_TOKEN
@@ -44,8 +44,6 @@ class CreateDonationHandler(object):
     @run_async
     def handle_token(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
-        # chatbot = chatbots_table.find_one({"bot_id": bot.id})
-        # if not "payment_token" in chatbot:
         user_data['payment_token'] = txt
         update.message.reply_text("Please enter a title for your donation")
         return TYPING_TITLE

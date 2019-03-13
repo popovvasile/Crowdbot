@@ -57,6 +57,7 @@ logger = logging.getLogger(__name__)
 NOT_ENGAGED, TYPING_TITLE, TYPING_TYPE, TYPING_OPTION, TYPING_META = range(5)
 CHOOSE_TITLE, CHOOSE_OPTION = range(2)
 CHOOSE_TITLE_DELETE = 21
+CHOOSE_TITLE_RESULTS = 13
 AFFIRMATIONS = [
     "Cool",
     "Nice",
@@ -166,7 +167,7 @@ class PollBot(object):
             with open(filename, 'wb+') as csvfile1:
                 dbx = dropbox.Dropbox(DROPBOX_TOKEN)
                 dbx.files_upload(csvfile1.read(), "/" + filename)
-            poll['results_link'] = sharing.CreateSharedLinkArg(path=filename, short_url=True).short_url
+            # poll['results_link'] = sharing.CreateSharedLinkArg(path=filename, short_url=True).short_url
         table = polls_table
 
         table.insert(self.serialize(poll))
@@ -200,10 +201,6 @@ class PollBot(object):
 
     def assemble_inline_keyboard(self, poll, include_publish_button=False):
         inline_keyboard_items = self.get_inline_keyboard_items(poll)
-        # if include_publish_button:
-        #     publish_button = InlineKeyboardButton("Publish!",
-        #                                           switch_inline_query=poll['poll_id'])
-        #     inline_keyboard_items.append([publish_button])
 
         return InlineKeyboardMarkup(inline_keyboard_items)
 
@@ -249,6 +246,7 @@ class PollBot(object):
     # Inline query handler
     def inline_query(self, bot, update):
         query = update.inline_query.query
+
         result = list(polls_table.find(dict(poll_id=query, bot_id=bot.id)))
 
         if not result:
@@ -276,8 +274,9 @@ class PollBot(object):
 
     # Inline button press handler
     def button(self, bot, update):
+        chat_id = update.effective_chat.id
+
         query = update.callback_query
-        print(update.callback_query.data)
         data_dict = json.loads(update.callback_query.data)
 
         table = poll_instances_table
@@ -348,6 +347,15 @@ class PollBot(object):
             vote_instances[0].update(poll["votes"])
             poll["votes"] = vote_instances[0]
         poll["bot_id"] = bot.id
+        votes_list = []   # TODO find a way to solve this
+        for po in table.find({"bot_id": bot.id, "poll_id": poll["poll_id"]}):
+            if po["chat_id"] != chat_id:
+                votes_list.append(po["votes"])
+        votes_dict = {}
+        for d in votes_list:
+            votes_dict.update(ast.literal_eval(d))
+        if votes_dict:
+            poll["votes"] = votes_dict
         table.update({'poll_id': poll['poll_id'], "bot_id": bot.id},
                      self.serialize(poll),
                      upsert=True)
@@ -391,7 +399,7 @@ class PollBot(object):
         sent = []
         poll_name = txt
         user_data["poll_name_to_send"] = poll_name
-        chats = chats_table.find()
+        chats = chats_table.find({"bot_id": bot.id})
         for chat in chats:
             if chat['chat_id'] != chat_id:
                 if not any(sent_d['id'] == chat['chat_id'] for sent_d in sent):
@@ -404,59 +412,59 @@ class PollBot(object):
                                      reply_markup=self.assemble_inline_keyboard(poll, True),
                                      parse_mode='Markdown'
                                      )
-                    bot.send_message(chat_id, "Poll sent! ")
+        bot.send_message(chat_id, "Your poll was sent to all you users! ")
 
         if len(sent) == 0:
             bot.send_message(chat_id, "Looks like there are yet no users to send this poll to.")
 
         return NOT_ENGAGED
 
-    @run_async
-    def handle_bots_polls(self, bot, update):
-        chat_id, txt = initiate_chat_id(update)
-        polls_list_of_dicts = polls_table.find({"bot_id": bot.id})
-        command_list = [command['title'] for command in polls_list_of_dicts]
-        reply_keyboard = [command_list]
-        update.message.reply_text(
-            "Please choose the poll that you want to check",
-            reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
-        return CHOOSE_TITLE
-
-    @run_async
-    def handle_bots_polls_title(self, bot, update):
-        chat_id, txt = initiate_chat_id(update)
-        poll = polls_table.find_one(title=txt)
-
-        poll_title = poll['title']
-        poll_type = POLL_HANDLERS.get(poll['type']).name
-        if "description" in poll:
-            poll_description = poll['description']
-        else:
-            poll_description = POLL_HANDLERS.get(poll['type']).desc
-        poll_results_link = poll['results_link']
-        poll_id = poll['poll_id']
-        poll_instances = poll_instances_table.find({"poll_id": poll_id, "bot_id": bot.id})
-        txt_to_send = ""
-
-        for poll_instance in poll_instances:
-            votes = ast.literal_eval(poll_instance["votes"])
-            for vote in votes:
-                txt_to_send += str(votes[vote]["data"])
-        poll_results = txt_to_send
-
-        if poll is not None:
-            bot.send_message(chat_id,
-                             "Poll title:{} \nPoll_type:{} \nResults:{} \nDescription:{} \nLink to the results:{}".
-                             format(poll_title,
-                                    poll_type,
-                                    poll_results,
-                                    poll_description,
-                                    poll_results_link
-                                    ))
-
-        else:
-            bot.send_message(chat_id, "No poll with such title exists")
-        return ConversationHandler.END
+    # @run_async
+    # def handle_bots_polls(self, bot, update):
+    #     chat_id, txt = initiate_chat_id(update)
+    #     polls_list_of_dicts = polls_table.find({"bot_id": bot.id})
+    #     command_list = [command['title'] for command in polls_list_of_dicts]
+    #     reply_keyboard = [command_list]
+    #     update.message.reply_text(
+    #         "Please choose the poll that you want to check",
+    #         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+    #     return CHOOSE_TITLE_RESULTS
+    #
+    # @run_async
+    # def handle_bots_polls_title(self, bot, update):
+    #     print("TEST")
+    #     chat_id, txt = initiate_chat_id(update)
+    #     poll = polls_table.find_one({'title': txt})
+    #
+    #     poll_title = poll['title']
+    #     poll_type = POLL_HANDLERS.get(poll['type']).name
+    #     if "description" in poll:
+    #         poll_description = poll['description']
+    #     else:
+    #         poll_description = POLL_HANDLERS.get(poll['type']).desc
+    #     # poll_results_link = poll['results_link']
+    #     poll_id = poll['poll_id']
+    #     poll_instances = poll_instances_table.find({"poll_id": poll_id, "bot_id": bot.id})
+    #     txt_to_send = ""
+    #
+    #     for poll_instance in poll_instances:
+    #         votes = ast.literal_eval(poll_instance["votes"])
+    #         for vote in votes:
+    #             txt_to_send += str(votes[vote]["data"])
+    #     poll_results = txt_to_send
+    #
+    #     if poll is not None:
+    #         bot.send_message(chat_id,
+    #                          "Poll title:{} \nPoll_type:{} \nResults:{} \nDescription:{}".
+    #                          format(poll_title,
+    #                                 poll_type,
+    #                                 poll_results,
+    #                                 poll_description
+    #                                 ))
+    #
+    #     else:
+    #         bot.send_message(chat_id, "No poll with such title exists")
+    #     return ConversationHandler.END
 
     @run_async
     def handle_delete_poll(self, bot, update):
@@ -484,14 +492,12 @@ __admin_help__ = """
 Admin only:*
  - /create_poll - to create a new poll
  - /delete_poll
- - /bots_polls - to see all created polls created by you
  - /send_poll -  to send a poll to all users 
  - /cancel -  to cancel the creation of the poll
 
 """
 __admin_keyboard__ = [["/create_poll", "/delete_poll"],
-                      ["/bots_polls", "/send_poll"],
-                      ["/cancel"]]
+                      ["/send_poll"]]
 
 DELETE_POLLS_HANDLER = ConversationHandler(
     entry_points=[CommandHandler('delete_poll', PollBot().handle_delete_poll),
@@ -506,18 +512,18 @@ DELETE_POLLS_HANDLER = ConversationHandler(
     fallbacks=[CommandHandler('cancel', PollBot().cancel, pass_user_data=True)]
 )
 
-BOTS_POLLS_HANDLER = ConversationHandler(
-    entry_points=[CommandHandler('bots_polls', PollBot().handle_bots_polls),
-
-                  ],
-    states={
-
-        CHOOSE_TITLE: [MessageHandler(Filters.text, PollBot().handle_send_title, pass_user_data=True),
-                       CommandHandler('cancel', PollBot().cancel)],
-
-    },
-    fallbacks=[CommandHandler('cancel', PollBot().cancel, pass_user_data=True)]
-)
+# BOTS_POLLS_HANDLER = ConversationHandler(
+#     entry_points=[CommandHandler('bots_polls', PollBot().handle_bots_polls),
+#
+#                   ],
+#     states={
+#
+#         CHOOSE_TITLE_RESULTS: [MessageHandler(Filters.text, PollBot().handle_bots_polls_title),
+#                        CommandHandler('cancel', PollBot().cancel)],
+#
+#     },
+#     fallbacks=[CommandHandler('cancel', PollBot().cancel, pass_user_data=True)]
+# )
 POLL_HANDLER = ConversationHandler(
     entry_points=[CommandHandler('create_poll', PollBot().start),
                   ],

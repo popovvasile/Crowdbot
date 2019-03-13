@@ -55,7 +55,7 @@ class SendMessageToUsers(object):
     def received_message(self, bot, update):
         chat_id, txt = initiate_chat_id(update)
 
-        chats = chats_table.find()
+        chats = chats_table.find({"bot_id": bot.id})
         for chat in chats:
             bot.forward_message(chat_id=chat["chat_id"], from_chat_id=chat_id, message_id=update.message.id)
         bot.send_message(update.message.chat_id,
@@ -76,7 +76,6 @@ class SendMessageToUsers(object):
 class SeeMessageToAdmin(object):
     @run_async
     def see_messages(self, bot, update):
-        print("TEST")
         messages = users_messages_to_admin_table.find({"bot_id": bot.id})
         if messages:
             for message in messages:

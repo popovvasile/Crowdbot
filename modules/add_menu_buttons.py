@@ -15,8 +15,6 @@ TYPING_BUTTON, TYPING_DESCRIPTION, FINISH = range(3)
 TYPING_TO_DELETE_BUTTON = 1
 __mod_name__ = "Custom buttons"
 
-custom_buttons = [button for button in custom_buttons_table.find()]
-
 __admin_keyboard__ = [["/create_button"], ["/delete_button"]]
 
 __admin_help__ = """

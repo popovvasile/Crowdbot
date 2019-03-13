@@ -17,7 +17,7 @@ class MultipleOptionsHandler(BasicPoll):
             votes = self.num_votes_on_option(poll, opt['index'])
             buttons.append([{
                 'text': "{}{}{}".format(opt['text'],
-                                        " - " if votes > 0 else "",
+                                        " : " if votes > 0 else "",
                                         votes if votes > 0 else ""),
                 'callback_data': {'i': opt['index']}
             }])
@@ -54,7 +54,7 @@ class MultipleOptionsHandler(BasicPoll):
             opts = poll['options']
             vote_set = [opt['text'] for opt in opts if opt['index'] in vote]
             string = ",".join(vote_set) if vote_set else "nothing"
-            return "You voted for {}.".format(opt['text'])
+            return "You voted for {}.".format(opts['text'])
         return "Your vote was removed."
 
     def num_votes_on_option(self, poll, index):

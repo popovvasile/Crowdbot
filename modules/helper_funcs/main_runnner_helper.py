@@ -11,10 +11,6 @@ from modules.helper_funcs.auth import if_admin, initiate_chat_id, register_chat
 from modules.helper_funcs.misc import paginate_modules, LOGGER
 
 
-def test():
-    print("hi")
-
-
 PM_START_TEXT = """
 Hey there! My name is {}.
 I'm a modular group management bot with a few fun extras! Have a look at the following for an idea of some of \
@@ -118,7 +114,6 @@ def button_handler(bot: Bot, update: Update):
     query = update.callback_query
     button_callback_data = query.data
     bot.answer_callback_query(query.id)
-    print(button_callback_data)
     try:
         button_info = custom_buttons_table.find_one(
             {"bot_id": bot.id, "button_lower": button_callback_data.replace("button_", "")}

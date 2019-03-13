@@ -17,7 +17,7 @@ class OpenMultipleOptionsHandler(BasicPoll):
             votes = self.num_votes_on_option(poll, opt['index'])
             buttons.append([{
                 'text': "{}{}{}".format(opt['text'],
-                                        " - " if votes > 0 else "",
+                                        " : " if votes > 0 else "",
                                         votes if votes > 0 else ""),
                 'callback_data': {'i': opt['index']}
             }])

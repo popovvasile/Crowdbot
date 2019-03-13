@@ -20,7 +20,7 @@ class SetPollHandler(BasePoll):
             votes = self.num_votes_on_set(poll, index_set)
             buttons.append([{
                 'text': "{}{}{}".format(self.get_set_opt_text(title_set),
-                                        " - " if votes > 0 else "",
+                                        " : " if votes > 0 else "",
                                         votes if votes > 0 else ""),
                 'callback_data': {'i': index_set}
             }])

@@ -79,7 +79,6 @@ class AnswerSurveys(object):
                                   "title": survey["title"],
                                   "answer": answer})
         surveys_table.update({"title": survey["title"]}, survey)
-        print("TEST")
         if user_data["question_id"] > len(survey["questions"]) - 1:
             to_send_text = ""
             users_answers = []
