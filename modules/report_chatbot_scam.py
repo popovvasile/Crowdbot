@@ -2,10 +2,12 @@
 # # -*- coding: utf-8 -*-
 import datetime
 
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (CommandHandler, MessageHandler, Filters,
                           ConversationHandler, RegexHandler, run_async, CallbackQueryHandler)
 import logging
 from database import users_messages_to_admin_table
+from modules.helper_funcs.helper import get_help
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -15,6 +17,12 @@ MESSAGE = 1
 
 
 class SendScamReport(object):
+    def __init__(self):
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_report")])
+        self.reply_markup = InlineKeyboardMarkup(
+            buttons)
+
     @run_async
     def start_answering(self, bot, update, user_data):
         bot.send_message(update.message.chat_id, "Did you find out that this chatbot is a scam? \n"
@@ -42,6 +50,11 @@ class SendScamReport(object):
         logger.warning('Update "%s" caused error "%s"', update, error)
         return ConversationHandler.END
 
+    def cancel(self, bot, update):
+        get_help(bot, update)
+
+        return ConversationHandler.END
+
 
 SEND_SCAM_REPORT_HANDLER = ConversationHandler(
     entry_points=[CommandHandler("send_scam_report", SendScamReport().start_answering)],
@@ -51,7 +64,7 @@ SEND_SCAM_REPORT_HANDLER = ConversationHandler(
                                  SendScamReport().received_message,
                                  pass_user_data=True)],
     },
-    fallbacks=[
+    fallbacks=[CallbackQueryHandler(callback=SendScamReport().cancel, pattern=r"cancel_report"),
                CommandHandler('cancel', SendScamReport().error, pass_user_data=True),
                MessageHandler(filters=Filters.command, callback=SendScamReport().error)]
 )

@@ -7,9 +7,9 @@ from database import users_table, chatbots_table, chats_table
 
 def register_chat(bot, update):
     chat_id = update.effective_chat.id
-    chat_name = update.message.from_user.full_name
+    chat_name = update.effective_user.full_name
     bot_id = bot.id
-    user_id = update.message.from_user.id
+    user_id = update.effective_user.id
     chats_table.update({"bot_id": bot.id, "chat_id": chat_id},
                        {"bot_id": bot_id, "chat_id": chat_id,
                         "name": chat_name, "user_id": user_id, "tag": "#all"},

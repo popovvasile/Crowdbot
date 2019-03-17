@@ -1,5 +1,6 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (CommandHandler, MessageHandler, Filters,
                           ConversationHandler, RegexHandler, run_async, CallbackQueryHandler)
 
@@ -42,6 +43,11 @@ def facts_to_str(user_data):
 
 
 class AnswerSurveys(object):
+    def __init__(self):
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text="Cancel survey", callback_data="cancel_survey_answering")])
+        self.reply_markup = InlineKeyboardMarkup(
+            buttons)
 
     @run_async
     def start_answering(self, bot, update, user_data):  # TODO add the "skip" button
@@ -59,8 +65,8 @@ class AnswerSurveys(object):
         bot.send_message(update.message.chat_id,
                          "Please answer the following question.\n\n"
                          )
-        bot.send_message(update.message.chat_id, survey["questions"][int(user_data["question_id"])]["text"] +
-                         " \n\nIf you want to quit the survey, type /cancel")
+        bot.send_message(update.message.chat_id, survey["questions"][int(user_data["question_id"])]["text"],
+                         reply_markup=self.reply_markup)
 
         return ANSWERING
 
@@ -98,8 +104,8 @@ class AnswerSurveys(object):
         else:
 
             question = survey["questions"][int(user_data["question_id"])]["text"]
-            bot.send_message(update.message.chat_id, question +
-                             "\n\nIf you want to quit the survey, type /done")
+            bot.send_message(update.message.chat_id, question,
+                         reply_markup=self.reply_markup)
             user_data["last_question"] = question
 
             return ANSWERING
@@ -120,7 +126,7 @@ class AnswerSurveys(object):
 
 
 ANSWER_SURVEY_HANDLER = ConversationHandler(
-    entry_points=[CallbackQueryHandler(AnswerSurveys().start_answering, pattern=r"survey_")],
+    entry_points=[CallbackQueryHandler(AnswerSurveys().start_answering, pattern=r"survey_", pass_user_data=True)],
 
     states={
         ANSWERING: [MessageHandler(Filters.all,

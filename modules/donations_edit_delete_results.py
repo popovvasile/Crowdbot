@@ -2,8 +2,9 @@
 # # -*- coding: utf-8 -*-
 import uuid  # todo remake all functions to return END and user user_data[key] user_data[value]
 from dropbox.files import WriteMode
-from telegram import ReplyKeyboardMarkup
-from telegram.ext import (CommandHandler, MessageHandler, Filters, ConversationHandler, RegexHandler, run_async)
+from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import (CommandHandler, MessageHandler, Filters, ConversationHandler, RegexHandler, run_async,
+                          CallbackQueryHandler)
 import logging
 import datetime
 from database import donations_table, users_table, chats_table, chatbots_table, DROPBOX_TOKEN, donations_table
@@ -12,6 +13,8 @@ import csv
 import dropbox
 
 # Enable logging
+from modules.helper_funcs.helper import get_help
+
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
@@ -24,6 +27,12 @@ TYPING_TOKEN, TYPING_TOKEN_FINISH, EDIT_FINISH, DOUBLE_CHECK_DELETE, DELETE_FINI
 
 
 class EditPaymentHandler(object):
+    def __init__(self):
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_donation_edit")])
+        self.reply_markup = InlineKeyboardMarkup(
+            buttons)
+
     @staticmethod
     def facts_to_str(user_data):
         facts = list()
@@ -276,7 +285,7 @@ class EditPaymentHandler(object):
         logger.warning('Update "%s" caused error "%s"', update, error)
 
     def cancel(self, bot, update):
-        update.message.reply_text("Command is finished. Until next time!")
+        get_help(bot, update)
         return ConversationHandler.END
 
 
@@ -337,5 +346,6 @@ CREATE_PAYMENT_HANDLER = ConversationHandler(
     },
 
     fallbacks=[
+        CallbackQueryHandler(callback=EditPaymentHandler().cancel, pattern=r"cancel_donation_edit"),
         MessageHandler(filters=Filters.command, callback=EditPaymentHandler().cancel)]
 )

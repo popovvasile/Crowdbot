@@ -2,10 +2,13 @@
 # # -*- coding: utf-8 -*-
 import datetime
 import logging
+
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (CommandHandler, MessageHandler, Filters,
                           ConversationHandler, RegexHandler, run_async, CallbackQueryHandler)
 from database import users_messages_to_admin_table, chats_table
 from modules.helper_funcs.auth import initiate_chat_id
+from modules.helper_funcs.helper import get_help
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -16,9 +19,15 @@ MESSAGE_TO_USERS = 1
 
 
 class SendMessageToAdmin(object):
+    def __init__(self):
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_send_message")])
+        self.reply_markup = InlineKeyboardMarkup(
+            buttons)
+
     @run_async
     def start_answering(self, bot, update):
-        bot.send_message(update.message.chat_id, "What do you want to tell us?")
+        bot.send_message(update.message.chat_id, "What do you want to tell us?", reply_markup=self.reply_markup)
         return MESSAGE
 
     @run_async
@@ -42,13 +51,25 @@ class SendMessageToAdmin(object):
         logger.warning('Update "%s" caused error "%s"', update, error)
         return ConversationHandler.END
 
+    def cancel(self, bot, update):
+        get_help(bot, update)
+
+        return ConversationHandler.END
+
 
 class SendMessageToUsers(object):
+    def __init__(self):
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_send_message")])
+        self.reply_markup = InlineKeyboardMarkup(
+            buttons)
+
     @run_async
     def start_answering(self, bot, update):
         bot.send_message(update.message.chat_id, "What do you want to tell your users?\n"
                                                  "We will forward your message to all your users."
-                                                 "p.s. You name will be displayed as well")
+                                                 "p.s. You name will be displayed as well",
+                         reply_markup=self.reply_markup)
         return MESSAGE_TO_USERS
 
     @run_async
@@ -70,6 +91,11 @@ class SendMessageToUsers(object):
                          "Command canceled")
 
         logger.warning('Update "%s" caused error "%s"', update, error)
+        return ConversationHandler.END
+
+    def cancel(self, bot, update):
+        get_help(bot, update)
+
         return ConversationHandler.END
 
 
@@ -97,7 +123,7 @@ SEND_MESSAGE_TO_ADMIN_HANDLER = ConversationHandler(
 
     },
 
-    fallbacks=[
+    fallbacks=[CallbackQueryHandler(callback=SendMessageToUsers().cancel, pattern=r"cancel_send_message"),
                CommandHandler('cancel', SendMessageToAdmin().error),
                MessageHandler(filters=Filters.command, callback=SendMessageToAdmin().error)]
 )
@@ -107,11 +133,11 @@ SEND_MESSAGE_TO_USERS_HANDLER = ConversationHandler(
 
     states={
         MESSAGE_TO_USERS: [MessageHandler(Filters.all,
-                                 SendMessageToUsers().received_message)],
+                           SendMessageToUsers().received_message)],
 
     },
 
-    fallbacks=[
+    fallbacks=[CallbackQueryHandler(callback=SendMessageToUsers().cancel, pattern=r"cancel_send_message"),
                CommandHandler('cancel', SendMessageToUsers().error),
                MessageHandler(filters=Filters.command, callback=SendMessageToUsers().error)]
 )

@@ -8,7 +8,7 @@ from database import surveys_table, users_table, chats_table
 from modules.helper_funcs.auth import initiate_chat_id, if_admin
 
 # Enable logging
-from modules.helper_funcs.main_runnner_helper import help_button
+from modules.helper_funcs.helper import get_help
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -40,11 +40,11 @@ class SurveyHandler(object):
                                   "If you want to quit the creation of a survey, click /cancel",
                                   reply_markup=ReplyKeyboardMarkup([["/cancel"]],
                                                                    one_time_keyboard=True))
-        # buttons = list()
-        # buttons.append([InlineKeyboardButton(text="Back", callback_data="help_back")])
-        # reply_markup = InlineKeyboardMarkup(
-        #     buttons)
-        # update.message.reply_text("If you want to quit this command, click 'Back' ", reply_markup=reply_markup)
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_survey")])
+        reply_markup = InlineKeyboardMarkup(
+            buttons)
+        update.message.reply_text("If you want to quit, click 'Back' ", reply_markup=reply_markup)
         return CHOOSING_TITLE
 
     @run_async
@@ -62,16 +62,27 @@ class SurveyHandler(object):
             if not survey:
                 surveys_table.insert({
                     "bot_id": bot.id,
-                    "title": user_data["title"]
+                    "title": user_data["title"],
+                    "questions": []
                 })
                 user_data["title"] = title
-                update.message.reply_text("Type your first question or click /cancel")
+                update.message.reply_text("Type your first question")
+                buttons = list()
+                buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_survey")])
+                reply_markup = InlineKeyboardMarkup(
+                    buttons)
+                update.message.reply_text("If you want to quit this command, click 'Back' ", reply_markup=reply_markup)
                 user_data["question_id"] = 1
                 return CHOOSING_QUESTIONS
 
             else:
                 update.message.reply_text("You already have a survey with this title.\n"
                                           "Please, type another title for your survey")
+                buttons = list()
+                buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_survey")])
+                reply_markup = InlineKeyboardMarkup(
+                    buttons)
+                update.message.reply_text("If you want to qui, click 'Back' ", reply_markup=reply_markup)
                 return CHOOSING_TITLE
 
     # surveys = [{"admin_id": "",
@@ -95,7 +106,11 @@ class SurveyHandler(object):
             surveys_table.update({"title": survey["title"]}, survey)
             user_data["question_id"] = int(user_data["question_id"]) + 1
             update.message.reply_text("Please type your next question or write /done if you are finished")
-
+            buttons = list()
+            buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_survey")])
+            reply_markup = InlineKeyboardMarkup(
+                buttons)
+            update.message.reply_text("If you want to quit this command, click 'Back' ", reply_markup=reply_markup)
             return CHOOSING_QUESTIONS
 
     def done(self, bot, update, user_data):
@@ -144,6 +159,11 @@ class SurveyHandler(object):
         update.message.reply_text(
             "Please choose the survey that you want to see",
             reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_survey")])
+        reply_markup = InlineKeyboardMarkup(
+            buttons)
+        update.message.reply_text("If you want to quit this command, click 'Back' ", reply_markup=reply_markup)
         return CHOOSING
 
     @run_async
@@ -168,6 +188,11 @@ class SurveyHandler(object):
         update.message.reply_text(
             "Please choose the survey that you want to delete",
             reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_survey")])
+        reply_markup = InlineKeyboardMarkup(
+            buttons)
+        update.message.reply_text("If you want to quit this command, click 'Back' ", reply_markup=reply_markup)
         return DELETE_SURVEY
 
     @run_async
@@ -191,6 +216,11 @@ class SurveyHandler(object):
         update.message.reply_text(
             "Please choose the survey that you want to send",
             reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_survey")])
+        reply_markup = InlineKeyboardMarkup(
+            buttons)
+        update.message.reply_text("If you want to quit this command, click 'Back' ", reply_markup=reply_markup)
         return TYPING_SEND_TITLE
 
     @run_async
@@ -217,21 +247,24 @@ class SurveyHandler(object):
         return ConversationHandler.END
 
     def cancel(self, bot, update):
-        update.message.reply_text("Command is finished. Until next time!")
+        get_help(bot, update)
+
         return ConversationHandler.END
 
 
 DELETE_SURVEYS_HANDLER = ConversationHandler(
-    entry_points=[CommandHandler('delete_survey', SurveyHandler().delete_surveys, pass_user_data=True)],
+    entry_points=[CommandHandler('delete_survey', SurveyHandler().delete_surveys)],
 
     states={
-        CHOOSING: [MessageHandler(Filters.text,
+        DELETE_SURVEY: [MessageHandler(Filters.text,
                                   SurveyHandler().delete_surveys_finish),
                    CommandHandler('cancel', SurveyHandler().cancel),
                    ],
     },
 
     fallbacks=[
+        CallbackQueryHandler(callback=SurveyHandler().cancel, pattern=r"cancel_survey"),
+
         CommandHandler('done', SurveyHandler().done, pass_user_data=True),
         MessageHandler(filters=Filters.command, callback=SurveyHandler().cancel)]
 )
@@ -252,7 +285,8 @@ CREATE_SURVEY_HANDLER = ConversationHandler(
     },
 
     fallbacks=[
-        CallbackQueryHandler(callback=help_button, pattern=r"help_back"),
+        CallbackQueryHandler(callback=SurveyHandler().cancel, pattern=r"cancel_survey"),
+
         CommandHandler('done', SurveyHandler().done, pass_user_data=True),
         MessageHandler(filters=Filters.command, callback=SurveyHandler().cancel)
 
@@ -271,7 +305,7 @@ SEND_SURVEYS_HANDLER = ConversationHandler(
     fallbacks=[
         CommandHandler('done', SurveyHandler().done, pass_user_data=True),
         MessageHandler(filters=Filters.command, callback=SurveyHandler().cancel),
-        CallbackQueryHandler(callback=SurveyHandler().cancel, pattern=r"help_back")]
+    CallbackQueryHandler(callback=SurveyHandler().cancel, pattern=r"cancel_survey")]
 )
 SHOW_SURVEYS_HANDLER = ConversationHandler(
     entry_points=[CommandHandler('survey_results', SurveyHandler().show_surveys)],
@@ -286,5 +320,5 @@ SHOW_SURVEYS_HANDLER = ConversationHandler(
     fallbacks=[
         CommandHandler('cancel', SurveyHandler().cancel),
         MessageHandler(filters=Filters.command, callback=SurveyHandler().cancel),
-        CallbackQueryHandler(callback=SurveyHandler().cancel, pattern=r"help_back")]
+    CallbackQueryHandler(callback=SurveyHandler().cancel, pattern=r"cancel_survey")]
 )

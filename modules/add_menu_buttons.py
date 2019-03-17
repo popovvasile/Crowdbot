@@ -1,10 +1,11 @@
-from telegram import ReplyKeyboardMarkup
+from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (CommandHandler, MessageHandler, Filters,
-                          ConversationHandler)
+                          ConversationHandler, CallbackQueryHandler)
 import logging
 # Enable logging
 from database import custom_buttons_table
 from modules.helper_funcs.auth import initiate_chat_id
+from modules.helper_funcs.helper import get_help
 from modules.helper_funcs.restart_program import restart_program
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -25,6 +26,12 @@ __admin_help__ = """
 
 
 class AddCommands(object):
+    def __init__(self):
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_add_button")])
+        self.reply_markup = InlineKeyboardMarkup(
+            buttons)
+
     def start(self, bot, update):
         reply_keyboard = [['Rules', 'Contacts'],
                           ['Useful links', 'Something else...'],
@@ -33,12 +40,14 @@ class AddCommands(object):
         update.message.reply_text(
             "Please type your new button, for example 'Contacts' or 'Rules'. Please note that"
             "you can't modify the buttons available by default ", reply_keyboard=markup)
+        update.message.reply_text("To quit, click 'Back'", reply_markup=self.reply_markup)
         return TYPING_BUTTON
 
     def button_handler(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
         user_data['button'] = txt
-        update.message.reply_text('Excellent! Now, please send me the description of your new button')
+        update.message.reply_text('Excellent! Now, please send me the description of your new button',
+                                  reply_markup=self.reply_markup)
         return TYPING_DESCRIPTION
 
     def description_handler(self, bot, update, user_data):
@@ -52,14 +61,12 @@ class AddCommands(object):
                                    "bot_id": bot.id})
         update.message.reply_text(
             'Thank you! Now your button will be accessible by typing or clicking \n'
-            '{}:{}'.format(user_data["button"], txt))
+            '{}:{}'.format(user_data["button"], txt), reply_markup=self.reply_markup)
         restart_program()
         return ConversationHandler.END
 
     def cancel(self, bot, update):
-        user = update.message.from_user
-        logger.info("User %s canceled the conversation.", user.first_name)
-        update.message.reply_text('Bye! I hope we can talk again some day.')
+        get_help(bot, update)
 
         return ConversationHandler.END
 
@@ -78,6 +85,8 @@ class AddCommands(object):
         update.message.reply_text(
             "Please choose the button that button that you want to delete",
             reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+        update.message.reply_text("To quit, click 'Back'", reply_markup=self.reply_markup)
+
         return TYPING_TO_DELETE_BUTTON  # TODO make it with buttons
 
     def delete_button_finish(self, bot, update):
@@ -107,7 +116,8 @@ BUTTON_ADD_HANDLER = ConversationHandler(
                                             AddCommands().description_handler, pass_user_data=True)]
     },
 
-    fallbacks=[CommandHandler('cancel', AddCommands().cancel),
+    fallbacks=[CallbackQueryHandler(callback=AddCommands().cancel, pattern=r"cancel_add_button"),
+               CommandHandler('cancel', AddCommands().cancel),
                MessageHandler(filters=Filters.command, callback=AddCommands().cancel)]
 )
 DELETE_BUTTON_HANDLER = ConversationHandler(
@@ -118,6 +128,7 @@ DELETE_BUTTON_HANDLER = ConversationHandler(
                                                  AddCommands().delete_button_finish)],
     },
 
-    fallbacks=[CommandHandler('cancel', AddCommands().cancel),
+    fallbacks=[CallbackQueryHandler(callback=AddCommands().cancel, pattern=r"cancel_add_button"),
+               CommandHandler('cancel', AddCommands().cancel),
                MessageHandler(filters=Filters.command, callback=AddCommands().cancel)]
 )

@@ -3,12 +3,13 @@
 
 from telegram import LabeledPrice, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup
 from telegram.ext import (MessageHandler, Filters, PreCheckoutQueryHandler, RegexHandler, CommandHandler,
-                          ConversationHandler, run_async)
+                          ConversationHandler, run_async, CallbackQueryHandler)
 import logging
 import datetime
 # Enable logging
 from database import donations_table, chatbots_table
 from modules.helper_funcs.auth import initiate_chat_id
+from modules.helper_funcs.helper import get_help
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -22,7 +23,6 @@ __admin_help__ = """
   - /configure_donation - to add an option that allows the users of this bot to donate for your organization 
 """
 
-
 __visitor_help__ = """
  Click:
   - /donate to make a donation for this organization
@@ -35,6 +35,12 @@ DONATION_MESSAGE, EXECUTE_DONATION, HANDLE_PRECHECKOUT, HANDLE_SUCCES = range(4)
 
 
 class DonationBot(object):
+    def __init__(self):
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_donation_payment")])
+        self.reply_markup = InlineKeyboardMarkup(
+            buttons)
+
     def error(self, bot, update, error):
         """Log Errors caused by Updates."""
         logger.warning('Update "%s" caused error "%s"', update, error)
@@ -42,16 +48,18 @@ class DonationBot(object):
     @run_async
     def start_donation(self, bot, update, user_data):
         donation_request = chatbots_table.find_one({"bot_id": bot.id})
-        if "donation" in donation_request:
-            update.message.reply_text("Great! We very glad that you want to donate for our cause!")
-            update.message.reply_text("First, tell us how much do you want to donate. Enter a floating point number")
-            update.message.reply_text("Remember, we use {} as our primary currency".format(
-                donation_request["donation"]['currency'])
-            )
-            update.message.reply_text(text="To return to main menu, click 'Back' ",
-                                      reply_markup=InlineKeyboardMarkup(  # TODO modify this shit
-                                          [[InlineKeyboardButton(text="Back", callback_data="help_back")]]))
-            return DONATION_MESSAGE
+        if donation_request:
+            if "donation" in donation_request:
+                update.message.reply_text("Great! We very glad that you want to donate for our cause!")
+                update.message.reply_text(
+                    "First, tell us how much do you want to donate. Enter a floating point number")
+                update.message.reply_text("Remember, we use {} as our primary currency".format(
+                    donation_request["donation"]['currency'])
+                )
+                update.message.reply_text(text="To return to main menu, click 'Back' ",
+                                          reply_markup=InlineKeyboardMarkup(  # TODO modify this shit
+                                              [[InlineKeyboardButton(text="Back", callback_data="help_back")]]))
+                return DONATION_MESSAGE
         else:
             update.message.reply_text("Sorry, no option for donation yet")
             return ConversationHandler.END
@@ -93,19 +101,13 @@ class DonationBot(object):
         return HANDLE_PRECHECKOUT
 
     @run_async
-    # after (optional) shipping, it's the pre-checkout
     def precheckout_callback(self, bot, update, user_data):
         query = update.callback_query
         if query:
             if query.data == "help_back":
                 return ConversationHandler.END
         query = update.pre_checkout_query
-        # # check the payload, is this from your bot?
-        # if query.invoice_payload != 'Custom-Payload':
-        #     # answer False pre_checkout_query
-        #     bot.answer_pre_checkout_query(pre_checkout_query_id=query.id, ok=False,
-        #                                   error_message="Something went wrong...")
-        # else:
+
         bot.answer_pre_checkout_query(pre_checkout_query_id=query.id, ok=True)
         return HANDLE_SUCCES
 
@@ -123,7 +125,8 @@ class DonationBot(object):
         return ConversationHandler.END
 
     def cancel(self, bot, update):
-        update.message.reply_text("Command is finished. Until next time!")
+        get_help(bot, update)
+
         return ConversationHandler.END
 
 
@@ -154,7 +157,8 @@ DONATE_HANDLER = ConversationHandler(
                                        DonationBot().successful_payment_callback,
                                        pass_user_data=True), ]
     },
-    fallbacks=[MessageHandler(Filters.successful_payment,
+    fallbacks=[CallbackQueryHandler(callback=DonationBot().cancel, pattern=r"cancel_donation_payment"),
+               MessageHandler(Filters.successful_payment,
                               DonationBot().successful_payment_callback,
                               pass_user_data=True),
                MessageHandler(filters=Filters.command, callback=DonationBot().cancel)])

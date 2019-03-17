@@ -1,3 +1,4 @@
+
 import logging
 import telegram.ext as tg
 from telegram.ext import CommandHandler, CallbackQueryHandler,RegexHandler
@@ -8,11 +9,10 @@ from modules.answer_surveys import ANSWER_SURVEY_HANDLER
 from modules.create_donation import CREATE_DONATION_HANDLER
 from modules.create_survey import DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_HANDLER, SEND_SURVEYS_HANDLER, \
     CREATE_SURVEY_HANDLER
-from modules.helper_funcs.main_runnner_helper import help_button, button_handler, get_help, WelcomeBot, error_callback
+from modules.helper_funcs.main_runnner_helper import help_button, button_handler, get_help, WelcomeBot, error_callback, \
+    ADMIN_HELPABLE, VISITOR_HELPABLE
 from modules.pay_donation import DONATE_HANDLER
-from modules.polls import POLL_HANDLER, SEND_POLLS_HANDLER, BUTTON_HANDLER, DELETE_POLLS_HANDLER
 from modules.send_message import SEND_MESSAGE_TO_ADMIN_HANDLER, SEND_MESSAGE_TO_USERS_HANDLER, SEE_MESSAGES_HANDLER
-
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     level=logging.INFO)
@@ -42,10 +42,10 @@ def main(token):
     dispatcher.add_error_handler(error_callback)
 
     # POLLS
-    dispatcher.add_handler(POLL_HANDLER)
-    dispatcher.add_handler(SEND_POLLS_HANDLER)
-    dispatcher.add_handler(BUTTON_HANDLER)
-    dispatcher.add_handler(DELETE_POLLS_HANDLER)
+    # dispatcher.add_handler(POLL_HANDLER)
+    # dispatcher.add_handler(SEND_POLLS_HANDLER)
+    # dispatcher.add_handler(BUTTON_HANDLER)  # TODO fix this to use another callback
+    # dispatcher.add_handler(DELETE_POLLS_HANDLER)
 
     # ADD_BUTTONS
     dispatcher.add_handler(BUTTON_ADD_HANDLER)

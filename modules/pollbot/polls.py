@@ -19,14 +19,14 @@ from database import polls_table, poll_instances_table, DROPBOX_TOKEN
 from modules.create_survey import chats_table
 from modules.helper_funcs.auth import initiate_chat_id
 
-from .pollbot.basic_poll_handler import BasicPoll
-from .pollbot.tie_break_instant_runoff_poll_handler import TieBreakInstantRunoffPollHandler
-from .pollbot.stv_poll_handler import StvHandler
-from .pollbot.instant_runoff_poll_handler import InstantRunoffPollHandler
-from .pollbot.custom_description_poll_handler import CustomDescriptionHandler
-from .pollbot.custom_description_instant_runoff_poll_handler import CustomDescriptionInstantRunoffPollHandler
-from .pollbot.set_poll_handler import SetPollHandler
-from .pollbot.multiple_options_poll_handler import MultipleOptionsHandler
+from modules.pollbot.basic_poll_handler import BasicPoll
+from modules.pollbot.tie_break_instant_runoff_poll_handler import TieBreakInstantRunoffPollHandler
+from modules.pollbot.stv_poll_handler import StvHandler
+from modules.pollbot.instant_runoff_poll_handler import InstantRunoffPollHandler
+from modules.pollbot.custom_description_poll_handler import CustomDescriptionHandler
+from modules.pollbot.custom_description_instant_runoff_poll_handler import CustomDescriptionInstantRunoffPollHandler
+from modules.pollbot.set_poll_handler import SetPollHandler
+from modules.pollbot.multiple_options_poll_handler import MultipleOptionsHandler
 
 POLL_TYPE_BASIC, \
 POLL_TYPE_SET, \
