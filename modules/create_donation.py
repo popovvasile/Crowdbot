@@ -2,7 +2,8 @@
 # # -*- coding: utf-8 -*-
 import uuid
 from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import (CommandHandler, MessageHandler, Filters, ConversationHandler, run_async, CallbackQueryHandler)
+from telegram.ext import (CommandHandler, MessageHandler, Filters, ConversationHandler,
+                          run_async, CallbackQueryHandler)
 import logging
 import datetime
 from database import chats_table, chatbots_table
@@ -133,7 +134,7 @@ CREATE_DONATION_HANDLER = ConversationHandler(
                           CommandHandler('cancel', CreateDonationHandler().cancel)],
     },
 
-    fallbacks=[
+    fallbacks=[CallbackQueryHandler(callback=CreateDonationHandler().cancel, pattern=r"cancel_donation_create"),
         MessageHandler(filters=Filters.command, callback=CreateDonationHandler().cancel),
-        CallbackQueryHandler(callback=CreateDonationHandler().cancel, pattern=r"cancel_donation_create")]
+        ]
 )

@@ -36,15 +36,11 @@ class SurveyHandler(object):
     @run_async
     def start(bot, update, user_data):
         user_data["question_id"] = 0
-        update.message.reply_text("Please enter a title for your survey\n\n"
-                                  "If you want to quit the creation of a survey, click /cancel",
-                                  reply_markup=ReplyKeyboardMarkup([["/cancel"]],
-                                                                   one_time_keyboard=True))
         buttons = list()
-        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_survey")])
+        buttons.append([InlineKeyboardButton(text="Back to menu", callback_data="cancel_survey")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
-        update.message.reply_text("If you want to quit, click 'Back' ", reply_markup=reply_markup)
+        update.message.reply_text("Please enter a title for your survey", reply_markup=reply_markup)
         return CHOOSING_TITLE
 
     @run_async
@@ -68,7 +64,7 @@ class SurveyHandler(object):
                 user_data["title"] = title
                 update.message.reply_text("Type your first question")
                 buttons = list()
-                buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_survey")])
+                buttons.append([InlineKeyboardButton(text="Back to menu", callback_data="cancel_survey")])
                 reply_markup = InlineKeyboardMarkup(
                     buttons)
                 update.message.reply_text("If you want to quit this command, click 'Back' ", reply_markup=reply_markup)
@@ -76,13 +72,12 @@ class SurveyHandler(object):
                 return CHOOSING_QUESTIONS
 
             else:
-                update.message.reply_text("You already have a survey with this title.\n"
-                                          "Please, type another title for your survey")
                 buttons = list()
-                buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_survey")])
+                buttons.append([InlineKeyboardButton(text="Back to menu", callback_data="cancel_survey")])
                 reply_markup = InlineKeyboardMarkup(
                     buttons)
-                update.message.reply_text("If you want to qui, click 'Back' ", reply_markup=reply_markup)
+                update.message.reply_text("You already have a survey with this title.\n"
+                                          "Please, type another title for your survey", reply_markup=reply_markup)
                 return CHOOSING_TITLE
 
     # surveys = [{"admin_id": "",

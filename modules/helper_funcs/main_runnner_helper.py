@@ -181,6 +181,10 @@ def help_button(bot: Bot, update: Update):
             query.message.reply_text(text=HELP_STRINGS.format(bot.first_name),
                                      reply_markup=InlineKeyboardMarkup(paginate_modules(0, HELPABLE, "help", bot.id)))
             return ConversationHandler.END
+        else:
+            query.message.reply_text(text=HELP_STRINGS.format(bot.first_name),
+                                     reply_markup=InlineKeyboardMarkup(paginate_modules(0, HELPABLE, "help", bot.id)))
+            return ConversationHandler.END
         # ensure no spinny white circle
         bot.answer_callback_query(query.id)
         query.message.delete()

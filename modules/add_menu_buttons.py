@@ -59,10 +59,15 @@ class AddCommands(object):
                                    "admin_id": user_id,
                                    "chat_id": chat_id,
                                    "bot_id": bot.id})
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text="Back", callback_data="help_back")])
+        final_reply_markup = InlineKeyboardMarkup(
+            buttons)
         update.message.reply_text(
             'Thank you! Now your button will be accessible by typing or clicking \n'
-            '{}:{}'.format(user_data["button"], txt), reply_markup=self.reply_markup)
+            '{}:{}'.format(user_data["button"], txt), reply_markup=final_reply_markup)
         restart_program()
+
         return ConversationHandler.END
 
     def cancel(self, bot, update):
@@ -130,5 +135,6 @@ DELETE_BUTTON_HANDLER = ConversationHandler(
 
     fallbacks=[CallbackQueryHandler(callback=AddCommands().cancel, pattern=r"cancel_add_button"),
                CommandHandler('cancel', AddCommands().cancel),
-               MessageHandler(filters=Filters.command, callback=AddCommands().cancel)]
+               MessageHandler(filters=Filters.command, callback=AddCommands().cancel)
+               ]
 )

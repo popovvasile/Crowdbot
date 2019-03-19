@@ -17,12 +17,12 @@ the things I can help you with.
 
 ALL_MODULES = ['add_menu_buttons', 'answer_surveys', 'create_donation', 'create_survey',
                'donations_edit_delete_results', 'pay_donation', 'report_chatbot_scam', 'send_message']
-ADMIN_HELPABLE = {'add_menu_buttons': "",
-                  'answer_surveys': "",
-                  'pay_donation': "",
-                  'send_message': ""}
+ADMIN_HELPABLE = {'Custom buttons': "",
+                  'Donate': "",
+                  'Surveys': "",
+                  'Send a message': ""}
 
-VISITOR_HELPABLE = {'pay_donation', 'report_chatbot_scam', 'send_message'}
+VISITOR_HELPABLE = {'Donate':"",  "Scam Report":"", 'Send a message': ""}
 
 
 class EqInlineKeyboardButton(InlineKeyboardButton):
@@ -43,11 +43,11 @@ def paginate_modules(page_n: int, module_dict: Dict, prefix, bot_id, chat=None) 
 
     if not chat:
         modules = [
-            EqInlineKeyboardButton(x, callback_data="{}_module({})".format(prefix, x)) for x in module_dict
+            EqInlineKeyboardButton(x, callback_data="{}_module({})".format(prefix, x.lower())) for x in module_dict
         ] + buttons
     else:
         modules = [
-            EqInlineKeyboardButton(x, callback_data="{}_module({},{})".format(prefix, chat, x)) for x in module_dict
+            EqInlineKeyboardButton(x, callback_data="{}_module({},{})".format(prefix, chat, x.lower())) for x in module_dict
         ]
 
     pairs = list(zip(modules[::2], modules[1::2]))

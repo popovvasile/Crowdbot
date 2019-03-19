@@ -161,4 +161,7 @@ DONATE_HANDLER = ConversationHandler(
                MessageHandler(Filters.successful_payment,
                               DonationBot().successful_payment_callback,
                               pass_user_data=True),
-               MessageHandler(filters=Filters.command, callback=DonationBot().cancel)])
+
+               MessageHandler(filters=Filters.command, callback=DonationBot().cancel)
+
+               ])

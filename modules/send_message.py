@@ -78,9 +78,13 @@ class SendMessageToUsers(object):
 
         chats = chats_table.find({"bot_id": bot.id})
         for chat in chats:
-            bot.forward_message(chat_id=chat["chat_id"], from_chat_id=chat_id, message_id=update.message.id)
+            bot.forward_message(chat_id=chat["chat_id"], from_chat_id=chat_id, message_id=update.message.message_id)
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text="Back to menu", callback_data="help_back")])
+        final_reply_markup = InlineKeyboardMarkup(
+            buttons)
         bot.send_message(update.message.chat_id,
-                         "Thank you! We've sent your message to your users!")
+                         "Thank you! We've sent your message to your users!", reply_markup=final_reply_markup)
 
         return ConversationHandler.END
 
