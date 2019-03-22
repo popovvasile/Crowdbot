@@ -1,7 +1,8 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
 from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import (CommandHandler, MessageHandler, Filters, ConversationHandler, run_async, CallbackQueryHandler)
+from telegram.ext import (CommandHandler, MessageHandler, Filters, ConversationHandler,
+                          run_async, CallbackQueryHandler)
 import logging
 
 from database import surveys_table, users_table, chats_table
@@ -17,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 CHOOSING_TITLE, CHOOSING_QUESTIONS = range(2)
 CHOOSING = 89
-TYPING_SEND_TITLE= range(2)
+TYPING_SEND_TITLE = range(2)
 TYPING_TOPICS = 19
 DELETE_SURVEY = 23
 
@@ -232,12 +233,12 @@ class SurveyHandler(object):
                     bot.send_message(chat_id=chat['chat_id'], text="Dear {}, a survey has been sent to you. \n"
                                                                    "Please press the button START".format(
                         chat["full_name"]),
-                        reply_markup=InlineKeyboardMarkup(
-                            [InlineKeyboardButton(text="START",
-                                                  callback_data="survey_{}".format(
-                                                      user_data["title"]
-                                                  ))]
-                        ))
+                                     reply_markup=InlineKeyboardMarkup(
+                                         [InlineKeyboardButton(text="START",
+                                                               callback_data="survey_{}".format(
+                                                                   user_data["title"]
+                                                               ))]
+                                     ))
         bot.send_message(chat_id=chat_id, text="Survey sent to all users!"),
         return ConversationHandler.END
 
@@ -252,9 +253,9 @@ DELETE_SURVEYS_HANDLER = ConversationHandler(
 
     states={
         DELETE_SURVEY: [MessageHandler(Filters.text,
-                                  SurveyHandler().delete_surveys_finish),
-                   CommandHandler('cancel', SurveyHandler().cancel),
-                   ],
+                                       SurveyHandler().delete_surveys_finish),
+                        CommandHandler('cancel', SurveyHandler().cancel),
+                        ],
     },
 
     fallbacks=[
@@ -285,7 +286,7 @@ CREATE_SURVEY_HANDLER = ConversationHandler(
         CommandHandler('done', SurveyHandler().done, pass_user_data=True),
         MessageHandler(filters=Filters.command, callback=SurveyHandler().cancel)
 
-        ]
+    ]
 )
 SEND_SURVEYS_HANDLER = ConversationHandler(
     entry_points=[CommandHandler('send_survey', SurveyHandler().handle_send_survey),
@@ -293,14 +294,14 @@ SEND_SURVEYS_HANDLER = ConversationHandler(
                   ],
     states={
         TYPING_SEND_TITLE: [MessageHandler(Filters.text, SurveyHandler().handle_send_title, pass_user_data=True),
-        CommandHandler('cancel', SurveyHandler().cancel)
-],
+                            CommandHandler('cancel', SurveyHandler().cancel)
+                            ],
 
     },
     fallbacks=[
         CommandHandler('done', SurveyHandler().done, pass_user_data=True),
         MessageHandler(filters=Filters.command, callback=SurveyHandler().cancel),
-    CallbackQueryHandler(callback=SurveyHandler().cancel, pattern=r"cancel_survey")]
+        CallbackQueryHandler(callback=SurveyHandler().cancel, pattern=r"cancel_survey")]
 )
 SHOW_SURVEYS_HANDLER = ConversationHandler(
     entry_points=[CommandHandler('survey_results', SurveyHandler().show_surveys)],
@@ -315,5 +316,5 @@ SHOW_SURVEYS_HANDLER = ConversationHandler(
     fallbacks=[
         CommandHandler('cancel', SurveyHandler().cancel),
         MessageHandler(filters=Filters.command, callback=SurveyHandler().cancel),
-    CallbackQueryHandler(callback=SurveyHandler().cancel, pattern=r"cancel_survey")]
+        CallbackQueryHandler(callback=SurveyHandler().cancel, pattern=r"cancel_survey")]
 )
