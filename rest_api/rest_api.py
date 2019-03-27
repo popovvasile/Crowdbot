@@ -8,6 +8,7 @@ from pymongo import MongoClient
 client = MongoClient('localhost', 27017)
 db = client['chatbots']
 chatbots_table = db["chatbots"]
+users_table = db['users']
 
 
 class ThingsResource(object):
@@ -23,6 +24,7 @@ class ThingsResource(object):
             if chatbots_table.find_one({"token": doc["token"]}):
                 pass
             else:
+
                 doc["bot_id"] = chatbot.json()['result']['id']
                 db["chatbots"].save(doc)
                 superadmin = dict()
@@ -36,6 +38,7 @@ class ThingsResource(object):
                     admin["bot_id"] = doc["bot_id"]
                     admin["registered"] = False
                     admin["is_admin"] = True
+
                     db["users"].save(admin)
                 resp.status = falcon.HTTP_200
 
