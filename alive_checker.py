@@ -17,8 +17,8 @@ def multiple_bot_daemon():
 
     while True:
         for doc in db["chatbots"].find():  # run all tokens when the script is running
-            print(doc)
             if doc["token"] not in my_process.keys():
+                print(doc)
                 new_process = Process(target=main, args=(doc["token"],), name=doc["token"])
                 new_process.start()
                 my_process[doc["token"]] = new_process

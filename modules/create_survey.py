@@ -118,9 +118,8 @@ class SurveyHandler(object):
                 if not any(sent_d['id'] == chat['chat_id'] for sent_d in sent):
                     sent.append(chat['chat_id'])
 
-                    bot.send_message(text="Dear {}, a survey has been sent to you. Please press ".format(
-                        chat['full_name']
-                    ),
+                    bot.send_message(text="Dear user, a survey has been sent to you.\n"
+                                          "Please press START to answer to the questions",
                         reply_markup=InlineKeyboardMarkup(
                             [InlineKeyboardButton(text="START",
                                                   callback_data="survey_{}".format(
@@ -169,7 +168,7 @@ class SurveyHandler(object):
         txt_to_send = ""
         for answer in survey['answers']:
             txt_to_send += 'Users full name: {},\nQuestion: {}\nAnswer :{} \n\n'.format(
-                users_table.find_one({"user_id": answer['user_id']})["full_name"],
+                users_table.find_one({"user_id": answer['user_id']})["name"],
                 survey["questions"][answer["question_id"] - 1]['text'],
                 answer["answer"])
         update.message.reply_text("Here is your requested data : \n {}".format(txt_to_send))
@@ -229,10 +228,8 @@ class SurveyHandler(object):
             if chat['chat_id'] != chat_id:
                 if not any(sent_d['id'] == chat['chat_id'] for sent_d in sent):
                     sent.append(chat['chat_id'])
-
-                    bot.send_message(chat_id=chat['chat_id'], text="Dear {}, a survey has been sent to you. \n"
-                                                                   "Please press the button START".format(
-                        chat["full_name"]),
+                    bot.send_message(chat_id=chat['chat_id'], text="Dear user, a survey has been sent to you.\n"
+                                          "Please press START to answer to the questions",
                                      reply_markup=InlineKeyboardMarkup(
                                          [InlineKeyboardButton(text="START",
                                                                callback_data="survey_{}".format(

@@ -1,0 +1,11 @@
+
+2. Polls
+3. Delete donation
+4. Check if provider token is correct
+5. Donation: mention that a valute is not the only one, but for using another currency will be charged
+6. Users will choose the currency as weel, but will know that the preffered one is that set by admin
+10.think about pre-defined buttons with images/files/video/etc. and multiple texts (take from the data sent by BotFather)
+
+
+
+

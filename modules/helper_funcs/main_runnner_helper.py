@@ -5,26 +5,16 @@ from telegram import ParseMode, InlineKeyboardMarkup, Bot, Update, InlineKeyboar
 from telegram.error import Unauthorized, BadRequest, TimedOut, NetworkError, TelegramError, ChatMigrated
 from telegram.ext import run_async, ConversationHandler
 
-from database import custom_buttons_table, chats_table, surveys_table, users_table
+from database import custom_buttons_table, chats_table, surveys_table, users_table, chatbots_table
 from modules import ALL_MODULES
 from modules.helper_funcs.auth import if_admin, initiate_chat_id, register_chat
 from modules.helper_funcs.misc import paginate_modules, LOGGER
 
 
-PM_START_TEXT = """
-Hey there! My name is {}.
-I'm a modular group management bot with a few fun extras! Have a look at the following for an idea of some of \
-the things I can help you with.
 
-/help: to PM's you this message.
-"""
 
 HELP_STRINGS = """
-Hey there! My name is {}.
-I'm an organization management bot with a few fun extras! Have a look at the following for an idea of some of \
-the things I can help you with.
-
-/help: to PM's you this message.
+{}
 """
 
 IMPORTED = {}
@@ -147,6 +137,7 @@ def help_button(bot: Bot, update: Update):
     prev_match = re.match(r"help_prev\((.+?)\)", query.data)
     next_match = re.match(r"help_next\((.+?)\)", query.data)
     back_match = re.match(r"help_back", query.data)
+    chatbot = chatbots_table.find_one({"bot_id": bot.id})
     try:
         if mod_match:
             module = mod_match.group(1)
@@ -168,21 +159,21 @@ def help_button(bot: Bot, update: Update):
 
         elif prev_match:
             curr_page = int(prev_match.group(1))
-            query.message.reply_text(HELP_STRINGS.format(bot.first_name),
+            query.message.reply_text(HELP_STRINGS.format(chatbot['welcomeMessage']),
                                      reply_markup=InlineKeyboardMarkup(
                                          paginate_modules(curr_page - 1, HELPABLE, "help", bot.id)))
         elif next_match:
             next_page = int(next_match.group(1))
-            query.message.reply_text(HELP_STRINGS.format(bot.first_name),
+            query.message.reply_text(HELP_STRINGS.format(chatbot['welcomeMessage']),
                                      reply_markup=InlineKeyboardMarkup(
                                          paginate_modules(next_page + 1, HELPABLE, "help", bot.id)))
 
         elif back_match:
-            query.message.reply_text(text=HELP_STRINGS.format(bot.first_name),
+            query.message.reply_text(text=HELP_STRINGS.format(chatbot['welcomeMessage']),
                                      reply_markup=InlineKeyboardMarkup(paginate_modules(0, HELPABLE, "help", bot.id)))
             return ConversationHandler.END
         else:
-            query.message.reply_text(text=HELP_STRINGS.format(bot.first_name),
+            query.message.reply_text(text=HELP_STRINGS.format(chatbot['welcomeMessage']),
                                      reply_markup=InlineKeyboardMarkup(paginate_modules(0, HELPABLE, "help", bot.id)))
             return ConversationHandler.END
         # ensure no spinny white circle
@@ -203,13 +194,14 @@ def help_button(bot: Bot, update: Update):
 
 @run_async
 def get_help(bot: Bot, update: Update):
+    chatbot = chatbots_table.find_one({"bot_id": bot.id})
     register_chat(bot, update)
     chat = update.effective_chat
 
     if if_admin(bot=bot, update=update):
-        send_admin_help(bot, chat.id, HELP_STRINGS.format(bot.first_name))
+        send_admin_help(bot, chat.id, HELP_STRINGS.format(chatbot['welcomeMessage']))
     else:
-        send_visitor_help(bot, chat.id, HELP_STRINGS.format(bot.first_name))
+        send_visitor_help(bot, chat.id, HELP_STRINGS.format(chatbot['welcomeMessage']))
 
 
 class WelcomeBot(object):
