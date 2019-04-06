@@ -278,7 +278,7 @@ class PollBot(object):
 
         query = update.callback_query
         data_dict = json.loads(update.callback_query.data)
-
+        print(data_dict)
         table = poll_instances_table
         templates = polls_table
         result = {}

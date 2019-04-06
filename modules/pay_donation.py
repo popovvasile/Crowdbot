@@ -58,7 +58,7 @@ class DonationBot(object):
                 )
                 update.message.reply_text(text="To return to main menu, click 'Back' ",
                                           reply_markup=InlineKeyboardMarkup(  # TODO modify this shit
-                                              [[InlineKeyboardButton(text="Back", callback_data="help_back")]]))
+                                              [[InlineKeyboardButton(text="Back", callback_data="cancel_donation_payment")]]))
                 return DONATION_MESSAGE
         else:
             update.message.reply_text("Sorry, no option for donation yet")
@@ -95,7 +95,7 @@ class DonationBot(object):
                         provider_token, start_parameter, currency, prices)
         update.message.reply_text(text="To return to main menu, click 'Back' ",
                                   reply_markup=InlineKeyboardMarkup(
-                                      [[InlineKeyboardButton(text="Back", callback_data="help_back")]]))
+                                      [[InlineKeyboardButton(text="cancel_donation_payment", callback_data="help_back")]]))
         user_data = donation_request
 
         return HANDLE_PRECHECKOUT

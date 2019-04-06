@@ -80,7 +80,7 @@ class SendMessageToUsers(object):
         for chat in chats:
             bot.forward_message(chat_id=chat["chat_id"], from_chat_id=chat_id, message_id=update.message.message_id)
         buttons = list()
-        buttons.append([InlineKeyboardButton(text="Back to menu", callback_data="help_back")])
+        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_send_message")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.send_message(update.message.chat_id,

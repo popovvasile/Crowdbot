@@ -5,14 +5,10 @@ from typing import List, Dict
 from telegram import ParseMode, InlineKeyboardMarkup, Bot, Update, InlineKeyboardButton
 from telegram.ext import run_async
 
-from database import custom_buttons_table, chats_table
+from database import custom_buttons_table, chats_table, chatbots_table
 
 HELP_STRINGS = """
-Hey there! My name is {}.
-I'm an organization management bot with a few fun extras! Have a look at the following for an idea of some of \
-the things I can help you with.
-
-/help: to PM's you this message.
+{}
 """
 
 ALL_MODULES = ['add_menu_buttons', 'answer_surveys', 'create_donation', 'create_survey',
@@ -99,13 +95,14 @@ def register_chat(bot, update):
 
 @run_async
 def get_help(bot: Bot, update: Update):
+    chatbot = chatbots_table.find_one({"bot_id": bot.id})
     register_chat(bot, update)
     chat = update.effective_chat
 
     if if_admin(bot=bot, update=update):
-        send_admin_help(bot, chat.id, HELP_STRINGS.format(bot.first_name))
+        send_admin_help(bot, chat.id, HELP_STRINGS.format(chatbot['welcomeMessage']))
     else:
-        send_visitor_help(bot, chat.id, HELP_STRINGS.format(bot.first_name))
+        send_visitor_help(bot, chat.id, HELP_STRINGS.format(chatbot['welcomeMessage']))
 
 
 def send_admin_help(bot, chat_id, text, keyboard=None):

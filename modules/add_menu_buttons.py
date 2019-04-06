@@ -46,11 +46,11 @@ class AddCommands(object):
     def button_handler(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
         user_data['button'] = txt
-        update.message.reply_text('Excellent! Now, please send me the description of your new button',
+        update.message.reply_text('Excellent! Now, please send me a text or an image to display for your new button',
                                   reply_markup=self.reply_markup)
         return TYPING_DESCRIPTION
 
-    def description_handler(self, bot, update, user_data):
+    def description_handler(self, bot, update, user_data):  # TODO accept files
         user_id = update.message.from_user.id
         chat_id, txt = initiate_chat_id(update)
         custom_buttons_table.save({"button": user_data['button'],
@@ -60,7 +60,7 @@ class AddCommands(object):
                                    "chat_id": chat_id,
                                    "bot_id": bot.id})
         buttons = list()
-        buttons.append([InlineKeyboardButton(text="Back", callback_data="help_back")])
+        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_add_button")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         update.message.reply_text(

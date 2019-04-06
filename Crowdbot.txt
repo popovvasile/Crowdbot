@@ -1,11 +1,34 @@
-
-2. Polls
-3. Delete donation
+https://api.telegram.org/bot633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg/sendInvoice
 4. Check if provider token is correct
-5. Donation: mention that a valute is not the only one, but for using another currency will be charged
-6. Users will choose the currency as weel, but will know that the preffered one is that set by admin
 10.think about pre-defined buttons with images/files/video/etc. and multiple texts (take from the data sent by BotFather)
 
+Exclude animation and game
+
+audio get_file
+document get_file
+
+photo [list]  get_file
+
+sticker  get_file
+
+video  get_file
+
+voice  get_file
+
+video_note  get_file
 
 
 
+file_name
+
+    str – Optional. Original animation filename as defined by sender.
+
+mime_type
+
+    str – Optional. MIME type of the file as defined by sender.
+
+def photo(update, context):
+    user = update.message.from_user
+    photo_file = update.message.photo[-1].get_file()
+    photo_file.download('user_photo.jpg')
+logger.info("Photo of %s: %s", user.first_name, 'user_photo.jpg')

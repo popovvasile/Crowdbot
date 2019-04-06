@@ -65,7 +65,7 @@ class SurveyHandler(object):
                 user_data["title"] = title
                 update.message.reply_text("Type your first question")
                 buttons = list()
-                buttons.append([InlineKeyboardButton(text="Back to menu", callback_data="cancel_survey")])
+                buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_survey")])
                 reply_markup = InlineKeyboardMarkup(
                     buttons)
                 update.message.reply_text("If you want to quit this command, click 'Back' ", reply_markup=reply_markup)
@@ -74,7 +74,7 @@ class SurveyHandler(object):
 
             else:
                 buttons = list()
-                buttons.append([InlineKeyboardButton(text="Back to menu", callback_data="cancel_survey")])
+                buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_survey")])
                 reply_markup = InlineKeyboardMarkup(
                     buttons)
                 update.message.reply_text("You already have a survey with this title.\n"
@@ -296,9 +296,9 @@ SEND_SURVEYS_HANDLER = ConversationHandler(
 
     },
     fallbacks=[
+        CallbackQueryHandler(callback=SurveyHandler().cancel, pattern=r"cancel_survey"),
         CommandHandler('done', SurveyHandler().done, pass_user_data=True),
-        MessageHandler(filters=Filters.command, callback=SurveyHandler().cancel),
-        CallbackQueryHandler(callback=SurveyHandler().cancel, pattern=r"cancel_survey")]
+        MessageHandler(filters=Filters.command, callback=SurveyHandler().cancel)]
 )
 SHOW_SURVEYS_HANDLER = ConversationHandler(
     entry_points=[CommandHandler('survey_results', SurveyHandler().show_surveys)],
@@ -311,7 +311,8 @@ SHOW_SURVEYS_HANDLER = ConversationHandler(
     },
 
     fallbacks=[
+CallbackQueryHandler(callback=SurveyHandler().cancel, pattern=r"cancel_survey"),
         CommandHandler('cancel', SurveyHandler().cancel),
         MessageHandler(filters=Filters.command, callback=SurveyHandler().cancel),
-        CallbackQueryHandler(callback=SurveyHandler().cancel, pattern=r"cancel_survey")]
+        ]
 )

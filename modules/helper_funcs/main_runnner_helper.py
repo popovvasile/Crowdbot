@@ -107,7 +107,7 @@ def button_handler(bot: Bot, update: Update):
     try:
         button_info = custom_buttons_table.find_one(
             {"bot_id": bot.id, "button_lower": button_callback_data.replace("button_", "")}
-        )["description"]
+        )["description"]  # TODO add files and images
         buttons = list()
         buttons.append([InlineKeyboardButton(text="Back to main menu", callback_data="help_back")])
         query.message.reply_text(text=button_info,
