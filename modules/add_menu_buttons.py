@@ -85,14 +85,21 @@ class AddCommands(object):
         button_list_of_dicts = custom_buttons_table.find({
             "chat_id": chat_id,
             "bot_id": bot.id})
-        button_list = [button['button'] for button in button_list_of_dicts]
-        reply_keyboard = [button_list]
-        update.message.reply_text(
-            "Please choose the button that button that you want to delete",
-            reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
-        update.message.reply_text("To quit, click 'Back'", reply_markup=self.reply_markup)
+        if button_list_of_dicts:
+            button_list = [button['button'] for button in button_list_of_dicts]
+            reply_keyboard = [button_list]
+            update.message.reply_text(
+                "Please choose the button that button that you want to delete",
+                reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+            update.message.reply_text("To quit, click 'Back'", reply_markup=self.reply_markup)
 
-        return TYPING_TO_DELETE_BUTTON  # TODO make it with buttons
+            return TYPING_TO_DELETE_BUTTON  # TODO make it with buttons
+        else:
+            reply_keyboard = [["/create_button"]]
+            update.message.reply_text(
+                "You have no buttons created yet. Please create your first button by clicking /create_button command",
+                reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+            return ConversationHandler.END
 
     def delete_button_finish(self, bot, update):
         chat_id, txt = initiate_chat_id(update)
