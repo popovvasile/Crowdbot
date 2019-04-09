@@ -55,6 +55,13 @@ class SendScamReport(object):
 
         return ConversationHandler.END
 
+    def back(self, bot, update):
+        update.message.reply_text(
+            "Command is cancelled =("
+        )
+        get_help(bot, update)
+        return ConversationHandler.END
+
 
 SEND_SCAM_REPORT_HANDLER = ConversationHandler(
     entry_points=[CommandHandler("send_scam_report", SendScamReport().start_answering)],
@@ -64,8 +71,8 @@ SEND_SCAM_REPORT_HANDLER = ConversationHandler(
                                  SendScamReport().received_message,
                                  pass_user_data=True)],
     },
-    fallbacks=[CallbackQueryHandler(callback=SendScamReport().cancel, pattern=r"cancel_report"),
-               CommandHandler('cancel', SendScamReport().error, pass_user_data=True),
+    fallbacks=[CallbackQueryHandler(callback=SendScamReport().back, pattern=r"cancel_report"),
+               CommandHandler('cancel', SendScamReport().back, pass_user_data=True),
                MessageHandler(filters=Filters.command, callback=SendScamReport().error)]
 )
 

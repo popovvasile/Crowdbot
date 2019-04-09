@@ -4,3 +4,6 @@ dropbox==9.3.0
 pymongo==3.7.2
 
 python-telegram-bot==11.1.0
+
+
+https://python-telegram-bot.readthedocs.io/en/stable/telegram.message.html?highlight=reply_text#telegram.Message.reply_media_group  - send_media_group instead of bot.reply_media_group

@@ -244,6 +244,13 @@ class SurveyHandler(object):
 
         return ConversationHandler.END
 
+    def back(self, bot, update):
+        update.message.reply_text(
+            "Command is cancelled =("
+        )
+        get_help(bot, update)
+        return ConversationHandler.END
+
 
 DELETE_SURVEYS_HANDLER = ConversationHandler(
     entry_points=[CommandHandler('delete_survey', SurveyHandler().delete_surveys)],
@@ -256,10 +263,10 @@ DELETE_SURVEYS_HANDLER = ConversationHandler(
     },
 
     fallbacks=[
-        CallbackQueryHandler(callback=SurveyHandler().cancel, pattern=r"cancel_survey"),
+        CallbackQueryHandler(callback=SurveyHandler().back, pattern=r"cancel_survey"),
 
         CommandHandler('done', SurveyHandler().done, pass_user_data=True),
-        MessageHandler(filters=Filters.command, callback=SurveyHandler().cancel)]
+        MessageHandler(filters=Filters.command, callback=SurveyHandler().back)]
 )
 
 CREATE_SURVEY_HANDLER = ConversationHandler(
@@ -278,10 +285,10 @@ CREATE_SURVEY_HANDLER = ConversationHandler(
     },
 
     fallbacks=[
-        CallbackQueryHandler(callback=SurveyHandler().cancel, pattern=r"cancel_survey"),
+        CallbackQueryHandler(callback=SurveyHandler().back, pattern=r"cancel_survey"),
 
         CommandHandler('done', SurveyHandler().done, pass_user_data=True),
-        MessageHandler(filters=Filters.command, callback=SurveyHandler().cancel)
+        MessageHandler(filters=Filters.command, callback=SurveyHandler().back)
 
     ]
 )
@@ -296,6 +303,8 @@ SEND_SURVEYS_HANDLER = ConversationHandler(
 
     },
     fallbacks=[
+        CommandHandler('cancel', SurveyHandler().cancel),
+
         CallbackQueryHandler(callback=SurveyHandler().cancel, pattern=r"cancel_survey"),
         CommandHandler('done', SurveyHandler().done, pass_user_data=True),
         MessageHandler(filters=Filters.command, callback=SurveyHandler().cancel)]

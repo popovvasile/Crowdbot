@@ -4,7 +4,10 @@ from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMa
 from telegram.ext import (CommandHandler, MessageHandler, Filters, ConversationHandler, run_async,
                           CallbackQueryHandler)
 import logging
+import requests  # TODO
+import json
 
+from telegram import LabeledPrice
 # Enable logging
 from database import chatbots_table
 from modules.helper_funcs.auth import initiate_chat_id
@@ -18,6 +21,22 @@ logger = logging.getLogger(__name__)
 START, CHOOSING_ACTION, FINISH_ACTION, EDIT_PAYMENT, CHOOSING_EDIT_ACTION, \
 TYPING_TITLE, TYPING_DESCRIPTION, TYPING_CURRENCY, \
 TYPING_TOKEN, TYPING_TOKEN_FINISH, EDIT_FINISH, DOUBLE_CHECK_DELETE, DELETE_FINISH = range(13)
+
+
+def check_provider_token(provider_token, bot_id):
+    bot_token = chatbots_table.find_one({"bot_id": bot_id})["token"]
+    prices = [LabeledPrice("Test payment, Please ignore this message", 10000)]
+    data = requests.get("https://api.telegram.org/bot{}/sendInvoice".format(bot_token),
+
+                        params=dict(title="test",
+                                    description="test",
+                                    payload="test",
+                                    provider_token=provider_token,
+                                    currency="USD",
+                                    start_parameter="test",
+                                    prices=json.dumps([p.to_dict() for p in prices]),
+                                    chat_id=244356086))
+    return json.loads(data.content)["ok"]
 
 
 class EditPaymentHandler(object):
@@ -68,10 +87,12 @@ class EditPaymentHandler(object):
         user_data['edit_action'] = txt
         if txt == "Title":
             bot.send_message(chat_id,
-                             "Please write a new title for this donation")
+                             "Please write a new title for this donation", reply_markup=self.reply_markup)
             return TYPING_TITLE
         elif txt == "Description":
-            update.message.reply_text("Please write a short text for your donation- what your users have to pay for?")
+            update.message.reply_text(
+                "Please write a short text for your donation- what your users have to pay for?",
+                reply_markup=self.reply_markup)
             return TYPING_DESCRIPTION
         elif txt == "Currency":
             currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["CHF", "AUD", "RON", "PLN"]]
@@ -105,7 +126,7 @@ class EditPaymentHandler(object):
         chatbot = chatbots_table.find_one({"bot_id": bot.id})
         chatbot["donation"] = user_data
         chatbots_table.replace_one({"bot_id": bot.id}, chatbot)
-        update.message.reply_text("Your donation has been updated")
+        update.message.reply_text("Your donation has been updated", reply_markup=self.reply_markup)
 
         user_data.clear()
         return ConversationHandler.END
@@ -131,18 +152,26 @@ class EditPaymentHandler(object):
     def change_donation_token(self, bot, update):
 
         update.message.reply_text(
-            "Please enter your new donation provider token"
+            "Please enter your new donation provider token", reply_markup=self.reply_markup
         )
         return TYPING_TOKEN
 
     @run_async
     def change_donation_token_finish(self, bot, update):
+
         chat_id, txt = initiate_chat_id(update)
-        chatbot = chatbots_table.find_one({"bot_id": bot.id})
-        chatbots_table.update_one(chatbot, chatbot.update({"donation_token": txt}))
-        update.message.reply_text("Thank you! Your provider_token was changed successfully !")
-        # TODO check if token is valid
-        return ConversationHandler.END
+        if check_provider_token(provider_token=txt, bot_id=bot.id):
+            chatbot = chatbots_table.find_one({"bot_id": bot.id})
+            chatbots_table.update_one(chatbot, chatbot.update({"donation_token": txt}))
+            update.message.reply_text("Thank you! Your provider_token was changed successfully !",
+                                      reply_markup=self.reply_markup)
+            return ConversationHandler.END
+        else:
+            update.message.reply_text(
+                "Your provider token is wrong. Please check your provider token and send it again",
+                reply_markup=self.reply_markup)
+
+            return TYPING_TOKEN
 
     @staticmethod
     def error(bot, update, error):
@@ -150,6 +179,13 @@ class EditPaymentHandler(object):
         logger.warning('Update "%s" caused error "%s"', update, error)
 
     def cancel(self, bot, update):
+        get_help(bot, update)
+        return ConversationHandler.END
+
+    def back(self, bot, update):
+        update.message.reply_text(
+            "Command is cancelled =("
+        )
         get_help(bot, update)
         return ConversationHandler.END
 
@@ -183,10 +219,10 @@ EDIT_DONATION_HANDLER = ConversationHandler(
                                              EditPaymentHandler().handle_delete_double_check,
                                              pass_user_data=True),
                               CommandHandler('cancel', EditPaymentHandler().cancel)],
-
     },
 
     fallbacks=[
-        CallbackQueryHandler(callback=EditPaymentHandler().cancel, pattern=r"cancel_donation_edit"),
-        MessageHandler(filters=Filters.command, callback=EditPaymentHandler().cancel)]
+        CommandHandler('cancel', EditPaymentHandler().cancel),
+        CallbackQueryHandler(callback=EditPaymentHandler().back, pattern=r"cancel_donation_edit"),
+        MessageHandler(filters=Filters.command, callback=EditPaymentHandler().back)]
 )

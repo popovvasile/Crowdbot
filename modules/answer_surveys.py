@@ -3,6 +3,7 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (CommandHandler, MessageHandler, Filters,
                           ConversationHandler, RegexHandler, run_async, CallbackQueryHandler)
+from modules.helper_funcs.helper import get_help
 
 import logging
 
@@ -105,7 +106,7 @@ class AnswerSurveys(object):
 
             question = survey["questions"][int(user_data["question_id"])]["text"]
             bot.send_message(update.message.chat_id, question,
-                         reply_markup=self.reply_markup)
+                             reply_markup=self.reply_markup)
             user_data["last_question"] = question
 
             return ANSWERING
@@ -124,22 +125,28 @@ class AnswerSurveys(object):
         """Log Errors caused by Updates."""
         logger.warning('Update "%s" caused error "%s"', update, error)
 
+    def back(self, bot, update):
+        update.message.reply_text(
+            "Command is cancelled =("
+        )
+        get_help(bot, update)
+        return ConversationHandler.END
+
 
 ANSWER_SURVEY_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(AnswerSurveys().start_answering, pattern=r"survey_", pass_user_data=True)],
 
     states={
         ANSWERING: [MessageHandler(Filters.all,
-                                  AnswerSurveys().received_information,
-                                  pass_user_data=True)],
+                                   AnswerSurveys().received_information,
+                                   pass_user_data=True)],
 
     },
 
-    fallbacks=[CommandHandler('done', AnswerSurveys().done, pass_user_data=True),
-               CommandHandler('cancel', AnswerSurveys().done, pass_user_data=True),
-               MessageHandler(filters=Filters.command, callback=AnswerSurveys().done)]
+    fallbacks=[CommandHandler('done', AnswerSurveys().back),
+               CommandHandler('cancel', AnswerSurveys().back),
+               MessageHandler(filters=Filters.command, callback=AnswerSurveys().back)]
 )
-
 
 __mod_name__ = "Surveys"
 __admin_help__ = """
@@ -152,9 +159,6 @@ Admin only:
 
 """
 
-
 __admin_keyboard__ = [["/create_survey"],
                       ["/delete_survey", "/send_survey"],
                       ["/surveys_results"]]
-
-

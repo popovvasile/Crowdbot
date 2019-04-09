@@ -3,7 +3,7 @@
 import logging
 import telegram.ext as tg
 from telegram.ext import CommandHandler, CallbackQueryHandler,RegexHandler
-from admin_login import ADMIN_AUTHENTICATION_HANDLER
+from modules.helper_funcs.admin_login import ADMIN_AUTHENTICATION_HANDLER
 from modules.add_menu_buttons import BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER
 from modules.answer_surveys import ANSWER_SURVEY_HANDLER
 from modules.create_donation import CREATE_DONATION_HANDLER

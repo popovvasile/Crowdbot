@@ -1,11 +1,13 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
-import uuid
+import requests  # TODO
+import json
+
+from telegram import LabeledPrice
 from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (CommandHandler, MessageHandler, Filters, ConversationHandler,
                           run_async, CallbackQueryHandler)
 import logging
-import datetime
 from database import chats_table, chatbots_table
 from modules.helper_funcs.auth import initiate_chat_id
 
@@ -18,6 +20,22 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 TYPING_TOKEN, TYPING_TITLE, TYPING_DESCRIPTION, DONATION_FINISH = range(4)
+
+
+def check_provider_token(provider_token, bot_id):
+    bot_token = chatbots_table.find_one({"bot_id": bot_id})["token"]
+    prices = [LabeledPrice("Test payment, Please ignore this message", 10000)]
+    data = requests.get("https://api.telegram.org/bot{}/sendInvoice".format(bot_token),
+
+                        params=dict(title="test",
+                                    description="test",
+                                    payload="test",
+                                    provider_token=provider_token,
+                                    currency="USD",
+                                    start_parameter="test",
+                                    prices=json.dumps([p.to_dict() for p in prices]),
+                                    chat_id=244356086))
+    return json.loads(data.content)["ok"]
 
 
 class CreateDonationHandler(object):
@@ -42,14 +60,14 @@ class CreateDonationHandler(object):
         if "payment_token" in chatbot:
             update.message.reply_text("Please enter a title for your donation.\n"
                                       "If you want to change your donation provider token, "
-                                      "please click /change_donation_token")
+                                      "please click /edit_donation")
 
             update.message.reply_text("If you want to quit, click 'Back' ", reply_markup=self.reply_markup)
             return TYPING_TITLE
         else:
             update.message.reply_text("Please enter your donation provider token\n"
                                       "In order to get it,"
-                                      "please visit https://core.telegram.org/bots/donations#getting-a-token")
+                                      "please visit [Telegram's tutorial](https://core.telegram.org/bots/donations#getting-a-token)")
 
             update.message.reply_text("If you want to quit, click 'Back' ", reply_markup=self.reply_markup)
             return TYPING_TOKEN
@@ -57,11 +75,19 @@ class CreateDonationHandler(object):
     @run_async
     def handle_token(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
-        user_data['payment_token'] = txt
+        if check_provider_token(provider_token=txt, bot_id=bot.id):
 
-        update.message.reply_text("Please enter a title for your donation", reply_markup=self.reply_markup)
+            user_data['payment_token'] = txt
 
-        return TYPING_TITLE
+            update.message.reply_text("Please enter a title for your donation", reply_markup=self.reply_markup)
+
+            return TYPING_TITLE
+        else:
+            update.message.reply_text(
+                "Your provider token is wrong. Please check your provider token and send it again",
+                reply_markup=self.reply_markup)
+
+        return TYPING_TOKEN
 
     @run_async
     def handle_title(self, bot, update, user_data):
@@ -103,9 +129,14 @@ class CreateDonationHandler(object):
 
     def cancel(self, bot, update):
         get_help(bot, update)
-
         return ConversationHandler.END
 
+    def back(self, bot, update):
+        update.message.reply_text(
+            "Command is cancelled =("
+        )
+        get_help(bot, update)
+        return ConversationHandler.END
 
 # Add conversation handler with the states CHOOSING, TYPING_CHOICE and TYPING_REPLY'
 
@@ -134,7 +165,7 @@ CREATE_DONATION_HANDLER = ConversationHandler(
                           CommandHandler('cancel', CreateDonationHandler().cancel)],
     },
 
-    fallbacks=[CallbackQueryHandler(callback=CreateDonationHandler().cancel, pattern=r"cancel_donation_create"),
-        MessageHandler(filters=Filters.command, callback=CreateDonationHandler().cancel),
-        ]
+    fallbacks=[CallbackQueryHandler(callback=CreateDonationHandler().back, pattern=r"cancel_donation_create"),
+               MessageHandler(filters=Filters.command, callback=CreateDonationHandler().back),
+               ]
 )

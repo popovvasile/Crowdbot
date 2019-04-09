@@ -18,7 +18,7 @@ from telegram.inline.inputtextmessagecontent import InputTextMessageContent
 from database import polls_table, poll_instances_table, DROPBOX_TOKEN
 from modules.create_survey import chats_table
 from modules.helper_funcs.auth import initiate_chat_id
-
+from modules.helper_funcs.helper import get_help
 from modules.pollbot.basic_poll_handler import BasicPoll
 from modules.pollbot.tie_break_instant_runoff_poll_handler import TieBreakInstantRunoffPollHandler
 from modules.pollbot.stv_poll_handler import StvHandler
@@ -72,6 +72,11 @@ AFFIRMATIONS = [
 
 
 class PollBot(object):
+    def __init__(self):
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_poll")])
+        self.reply_markup = InlineKeyboardMarkup(
+            buttons)
 
     # Conversation handlers:
     @run_async
@@ -347,7 +352,7 @@ class PollBot(object):
             vote_instances[0].update(poll["votes"])
             poll["votes"] = vote_instances[0]
         poll["bot_id"] = bot.id
-        votes_list = []   # TODO find a way to solve this
+        votes_list = []  # TODO find a way to solve this
         for po in table.find({"bot_id": bot.id, "poll_id": poll["poll_id"]}):
             if po["chat_id"] != chat_id:
                 votes_list.append(po["votes"])
@@ -366,11 +371,17 @@ class PollBot(object):
                               **kwargs)
         return
 
-    @run_async
     def cancel(self, bot, update):
-        update.message.reply_text("Oh, too bad. Maybe next time!",
-                                  reply_markup=ReplyKeyboardRemove())
-        return NOT_ENGAGED
+        get_help(bot, update)
+
+        return ConversationHandler.END
+
+    def back(self, bot, update):
+        update.message.reply_text(
+            "Command is cancelled =("
+        )
+        get_help(bot, update)
+        return ConversationHandler.END
 
     # Error handler
     def error(self, bot, update, error):
@@ -550,7 +561,12 @@ POLL_HANDLER = ConversationHandler(
                         CommandHandler('cancel', PollBot().cancel),
                         ]
     },
-    fallbacks=[CommandHandler('done', PollBot().handle_done, pass_user_data=True)]
+    fallbacks=[
+        CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
+        CommandHandler('done', PollBot().handle_done, pass_user_data=True),
+        CommandHandler('cancel', PollBot().cancel),
+        MessageHandler(filters=Filters.command, callback=PollBot().back),
+    ]
 )
 BUTTON_HANDLER = CallbackQueryHandler(PollBot().button)
 
@@ -566,7 +582,11 @@ SEND_POLLS_HANDLER = ConversationHandler(
         TYPING_SEND_TITLE: [MessageHandler(Filters.text, PollBot().handle_send_title, pass_user_data=True),
                             CommandHandler('cancel', PollBot().cancel), ],
 
-
     },
-    fallbacks=[CommandHandler('cancel', PollBot().cancel, pass_user_data=True)]
+    fallbacks=[
+        CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
+        CommandHandler('cancel', PollBot().cancel),
+        MessageHandler(filters=Filters.command, callback=PollBot().back),
+
+    ]
 )

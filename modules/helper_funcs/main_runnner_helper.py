@@ -107,10 +107,31 @@ def button_handler(bot: Bot, update: Update):
     try:
         button_info = custom_buttons_table.find_one(
             {"bot_id": bot.id, "button_lower": button_callback_data.replace("button_", "")}
-        )["description"]  # TODO add files and images
+        )  # TODO add files and images
+
+        for descr in button_info["descriptions"]:
+            query.message.reply_text(text=descr)
+
+        for filename in button_info["audio_files"]:
+            with open(filename, 'rb') as file:
+                query.message.reply_audio(file)
+
+        for filename in button_info["video_files"]:
+            with open(filename, 'rb') as file:
+                query.message.reply_audio(file)
+
+        for filename in button_info["document_files"]:
+            with open(filename, 'rb') as file:
+                query.message.reply_audio(file)
+
+        for filename in button_info["photo_files"]:
+            with open(filename, 'rb') as file:
+                query.message.reply_audio(file)
+
         buttons = list()
-        buttons.append([InlineKeyboardButton(text="Back to main menu", callback_data="help_back")])
-        query.message.reply_text(text=button_info,
+        buttons.append([InlineKeyboardButton(text="Back", callback_data="help_back")])
+
+        query.message.reply_text(text="Back to main menu",
                                  reply_markup=InlineKeyboardMarkup(
                                      buttons))
     except BadRequest as excp:

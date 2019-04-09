@@ -21,6 +21,8 @@ __admin_help__ = """
  Click:
   - /donate - to make a donation for this organization
   - /configure_donation - to add an option that allows the users of this bot to donate for your organization 
+    - /edit_donation - to edit the current donation settings
+
 """
 
 __visitor_help__ = """
@@ -28,7 +30,7 @@ __visitor_help__ = """
   - /donate to make a donation for this organization
 """
 
-__admin_keyboard__ = [["/donate"], ["/configure_donation"]]
+__admin_keyboard__ = [["/donate"], ["/configure_donation"], ["/edit_donation"]]
 __visitor_keyboard__ = [["/donate"]]
 
 DONATION_MESSAGE, EXECUTE_DONATION, HANDLE_PRECHECKOUT, HANDLE_SUCCES = range(4)
@@ -129,6 +131,13 @@ class DonationBot(object):
 
         return ConversationHandler.END
 
+    def back(self, bot, update):
+        update.message.reply_text(
+            "Command is cancelled =("
+        )
+        get_help(bot, update)
+        return ConversationHandler.END
+
 
 DONATE_HANDLER = ConversationHandler(
     entry_points=[
@@ -157,11 +166,12 @@ DONATE_HANDLER = ConversationHandler(
                                        DonationBot().successful_payment_callback,
                                        pass_user_data=True), ]
     },
-    fallbacks=[CallbackQueryHandler(callback=DonationBot().cancel, pattern=r"cancel_donation_payment"),
+    fallbacks=[CallbackQueryHandler(callback=DonationBot().back, pattern=r"cancel_donation_payment"),
                MessageHandler(Filters.successful_payment,
                               DonationBot().successful_payment_callback,
                               pass_user_data=True),
 
-               MessageHandler(filters=Filters.command, callback=DonationBot().cancel)
+               MessageHandler(filters=Filters.command, callback=DonationBot().back),
 
+               CommandHandler('cancel', DonationBot().cancel)
                ])
