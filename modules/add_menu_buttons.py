@@ -48,7 +48,9 @@ class AddCommands(object):
         update.message.reply_text("To quit, click 'Back'", reply_markup=self.reply_markup)
         return TYPING_BUTTON
 
-    def button_handler(self, bot, update, user_data):  # TODO can't create two buttons with the same name
+    def button_handler(self, bot, update, user_data):
+        # TODO can't create two buttons with the same name
+        # TODO add back button in other models
         chat_id, txt = initiate_chat_id(update)
         user_data['button'] = txt
         update.message.reply_text('Excellent! Now, please send me a text, an image, a video'
