@@ -6,7 +6,7 @@ import csv
 import random
 import logging
 from uuid import uuid4
-from dropbox import dropbox, sharing
+# from dropbox import dropbox, sharing
 
 from telegram import InlineKeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import CommandHandler, ConversationHandler, MessageHandler, Filters, RegexHandler, \
@@ -164,14 +164,14 @@ class PollBot(object):
             'meta': user_data.get('meta'),
             'bot_id': bot.id
         }
-        filename = "{}{}.csv".format(poll['title'], random.random())
-        with open(filename, 'w+') as csvfile:
-            filewriter = csv.writer(csvfile, delimiter=',',
-                                    quotechar='|', quoting=csv.QUOTE_MINIMAL)
-            filewriter.writerow(['Option', 'Votes', 'Details'])
-            with open(filename, 'wb+') as csvfile1:
-                dbx = dropbox.Dropbox(DROPBOX_TOKEN)
-                dbx.files_upload(csvfile1.read(), "/" + filename)
+        # filename = "{}{}.csv".format(poll['title'], random.random())
+        # with open(filename, 'w+') as csvfile:
+        #     filewriter = csv.writer(csvfile, delimiter=',',
+        #                             quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        #     filewriter.writerow(['Option', 'Votes', 'Details'])
+        #     with open(filename, 'wb+') as csvfile1:
+        #         dbx = dropbox.Dropbox(DROPBOX_TOKEN)
+        #         dbx.files_upload(csvfile1.read(), "/" + filename)
             # poll['results_link'] = sharing.CreateSharedLinkArg(path=filename, short_url=True).short_url
         table = polls_table
 
@@ -283,7 +283,6 @@ class PollBot(object):
 
         query = update.callback_query
         data_dict = json.loads(update.callback_query.data)
-        print(data_dict)
         table = poll_instances_table
         templates = polls_table
         result = {}
@@ -372,14 +371,16 @@ class PollBot(object):
         return
 
     def cancel(self, bot, update):
+        update.message.reply_text(
+            "Command is cancelled =("
+        )
         get_help(bot, update)
 
         return ConversationHandler.END
 
     def back(self, bot, update):
-        update.message.reply_text(
-            "Command is cancelled =("
-        )
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
         get_help(bot, update)
         return ConversationHandler.END
 
@@ -568,7 +569,7 @@ POLL_HANDLER = ConversationHandler(
         MessageHandler(filters=Filters.command, callback=PollBot().back),
     ]
 )
-BUTTON_HANDLER = CallbackQueryHandler(PollBot().button)
+BUTTON_HANDLER = CallbackQueryHandler(PollBot().button, pattern='{"i":')
 
 NOT_ENGAGED_SEND, TYPING_SEND_TITLE = range(2)
 

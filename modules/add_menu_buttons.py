@@ -13,7 +13,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.INFO)
 
 logger = logging.getLogger(__name__)
-TYPING_BUTTON, TYPING_DESCRIPTION, FINISH = range(3)
+TYPING_BUTTON, TYPING_DESCRIPTION, DESCRIPTION_FINISH = range(3)
 TYPING_TO_DELETE_BUTTON = 1
 __mod_name__ = "Custom buttons"
 
@@ -23,7 +23,7 @@ __admin_help__ = """
  - /create_button - to create a custom button for your bot
  - /delete_button -  delete a button with a specific name\n
 
-"""  # TODO current_buttons and delete
+"""
 
 
 class AddCommands(object):
@@ -31,6 +31,10 @@ class AddCommands(object):
         buttons = list()
         buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_add_button")])
         self.reply_markup = InlineKeyboardMarkup(
+            buttons)
+        finish_buttons = list()
+        finish_buttons.append([InlineKeyboardButton(text="Back", callback_data="help_back")])
+        self.finish_reply_markup = InlineKeyboardMarkup(
             buttons)
 
     def start(self, bot, update):
@@ -44,7 +48,7 @@ class AddCommands(object):
         update.message.reply_text("To quit, click 'Back'", reply_markup=self.reply_markup)
         return TYPING_BUTTON
 
-    def button_handler(self, bot, update, user_data):
+    def button_handler(self, bot, update, user_data):  # TODO can't create two buttons with the same name
         chat_id, txt = initiate_chat_id(update)
         user_data['button'] = txt
         update.message.reply_text('Excellent! Now, please send me a text, an image, a video'
@@ -67,92 +71,126 @@ class AddCommands(object):
         if not os.path.exists(video_directory):
             os.makedirs(video_directory)
 
-        user_data["audio_files"] = []
-        user_data["video_files"] = []
-        user_data["document_files"] = []
-        user_data["photo_files"] = []
-        user_data["descriptions"] = []
         if update.message.text:
-            user_data["descriptions"].append(update.message.text)
+            if update.message.text == "DONE":
+                self.description_finish(bot, update, user_data)
+            elif "descriptions" not in user_data:
+                user_data["descriptions"] = [update.message.text]
+            elif user_data["descriptions"] is not None:
+                user_data["descriptions"].append(update.message.text)
+            else:
+                user_data["descriptions"] = list()
+
         if update.message.photo:
-            for index, pic in update.message.photo:
-                filename = 'photo_{}_button_{}_{}.jpg'.format(str(bot.id),
-                                                              str(user_data['button']),
-                                                              str(index))
-                photo_file = update.message.photo[index].get_file()
-                photo_file.download(filename=filename, path=photo_directory)
-                user_data["photo_files"] = user_data["photo_files"].append(photo_directory + "/" + filename)
+            filename = 'photo_{}_button_{}.jpg'.format(str(bot.id),
+                                                       str(user_data['button']))
+            photo_file = update.message.photo[-1].get_file(file_name=filename)
+            custom_path = photo_directory + "/" + filename
+            photo_file.download(custom_path=custom_path)
+            if "photo_files" not in user_data:
+                user_data["photo_files"] = [custom_path]
+            elif user_data["photo_files"] is not None:
+                user_data["photo_files"] = user_data["photo_files"].append(custom_path)
+            else:
+                user_data["photo_files"] = list()
 
         if update.message.audio:
             filename = 'audio_{}_button_{}.mp3'.format(str(bot.id),
                                                        str(user_data['button']))
-            audio_file = update.message.audio.get_file()
-            audio_file.download(filename, path=audio_directory)
-            user_data["audio_files"] = user_data["audio_files"].append(audio_directory + "/" + filename)
-
-        if update.message.document:
-            filename = 'document_{}_button_{}.pdf'.format(str(bot.id),
-                                                          str(user_data['button']))
-            document_file = update.message.document.get_file()
-            document_file.download(filename, path=document_directory)
-            user_data["document_files"] = user_data["document_files"]\
-                .append(document_directory + "/" + filename)
+            audio_file = update.message.audio.get_file(file_name=filename)
+            custom_path = audio_directory + "/" + filename
+            audio_file.download(custom_path=custom_path)
+            if "audio_files" not in user_data:
+                user_data["audio_files"] = [custom_path]
+            elif user_data["audio_files"] is not None:
+                user_data["audio_files"] = user_data["audio_files"].append(custom_path)
+            else:
+                user_data["audio_files"] = list()
 
         if update.message.voice:
             filename = 'voice_{}_button_{}.mp3'.format(str(bot.id),
                                                        str(user_data['button']))
-            voice_file = update.message.voice.get_file()
-            voice_file.download(filename, path=audio_directory)
-            user_data["audio_files"] = user_data["audio_files"]\
-                .append(audio_directory + "/" + filename)
+            voice_file = update.message.voice.get_file(file_name=filename)
+            custom_path = audio_directory + "/" + filename
+            voice_file.download(custom_path=custom_path)
+            if "audio_files" not in user_data:
+                user_data["audio_files"] = [custom_path]
+            elif user_data["audio_files"] is not None:
+                user_data["audio_files"] = user_data["audio_files"].append(custom_path)
+            else:
+                user_data["audio_files"] = list()
+
+        if update.message.document:
+            filename = 'document_{}_button_{}.pdf'.format(str(bot.id),
+                                                          str(user_data['button']))
+            document_file = update.message.document.get_file(file_name=filename)
+            custom_path = document_directory + "/" + filename
+            document_file.download(custom_path=custom_path)
+            if "document_files" not in user_data:
+                user_data["document_files"] = [custom_path]
+            elif user_data["document_files"] is not None:
+                user_data["document_files"] = user_data["document_files"].append(custom_path)
+            else:
+                user_data["document_files"] = list()
 
         if update.message.video:
             filename = 'video_{}_button_{}.mp4'.format(str(bot.id),
                                                        str(user_data['button']))
-            video_file = update.message.video.get_file()
-            video_file.download(filename, path=video_directory)
-            user_data["video_files"] = user_data["video_files"]\
-                .append(video_directory + "/" + filename)
+            video_file = update.message.video.get_file(file_name=filename)
+            custom_path = video_directory + "/" + filename
+
+            video_file.download(custom_path=custom_path)
+
+            if "video_files" not in user_data:
+                user_data["video_files"] = [custom_path]
+            elif user_data["video_files"] is not None:
+                user_data["video_files"] = user_data["video_files"] \
+                    .append(custom_path)
+            else:
+                user_data["video_files"] = list()
 
         if update.message.video_note:
             filename = 'video_note_{}_button_{}.mp4'.format(str(bot.id),
                                                             str(user_data['button']))
             video_note_file = update.message.audio.get_file()
-            video_note_file.download(filename, path=video_directory)
+            custom_path = video_directory + "/" + filename
+            video_note_file.download(filename, custom_path=custom_path)
 
-            user_data["video_files"] = user_data["video_files"]\
-                .append(video_directory + "/" + filename)
+            if "video_files" not in user_data:
+                user_data["video_files"] = [custom_path]
+            elif user_data["video_files"] is not None:
+                user_data["video_files"] = user_data["video_files"] \
+                    .append(custom_path)
+            else:
+                user_data["video_files"] = list()
+
         update.message.reply_text('Great! You can add one more file or text to display.\n'
-                                  'If you think that this is enough, click /done',
-                                  reply_markup=ReplyKeyboardMarkup([["/done"]]))
+                                  'If you think that this is enough, click DONE',
+                                  reply_markup=ReplyKeyboardMarkup([["DONE"]]))
         update.message.reply_text("Click Back to cancel", reply_markup=self.reply_markup)
         return TYPING_DESCRIPTION
 
     def description_finish(self, bot, update, user_data):
         user_id = update.message.from_user.id
-        chat_id, txt = initiate_chat_id(update)
-        custom_buttons_table.save({"button": user_data['button'],
-                                   "description": txt,
-                                   "button_lower": user_data['button'].replace(" ", "").lower(),
-                                   "admin_id": user_id,
-                                   "chat_id": chat_id,
-                                   "bot_id": bot.id,
-                                   })
+        user_data.update({"button": user_data['button'],
+                          "button_lower": user_data['button'].replace(" ", "").lower(),
+                          "admin_id": user_id,
+                          "bot_id": bot.id,
+                          })
+        custom_buttons_table.save(user_data)
 
         update.message.reply_text(
-            'Thank you! Now your button will be accessible by typing or clicking \n'
-            '{}:{}'.format(user_data["button"], txt), reply_markup=self.reply_markup)
-        restart_program()
+            'Thank you! Now your button will be accessible by typing or clicking the button \n'
+            '{} in menu'.format(user_data["button"]), reply_markup=self.finish_reply_markup)
+        restart_program(bot, update)
 
         return ConversationHandler.END
 
     def delete_button(self, bot, update):
-        chat_id, txt = initiate_chat_id(update)
-
         button_list_of_dicts = custom_buttons_table.find({
-            "chat_id": chat_id,
             "bot_id": bot.id})
-        if button_list_of_dicts:
+        print(button_list_of_dicts.count())
+        if button_list_of_dicts.count() != 0:
             button_list = [button['button'] for button in button_list_of_dicts]
             reply_keyboard = [button_list]
             update.message.reply_text(
@@ -160,7 +198,7 @@ class AddCommands(object):
                 reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
             update.message.reply_text("To quit, click 'Back'", reply_markup=self.reply_markup)
 
-            return TYPING_TO_DELETE_BUTTON  # TODO make it with buttons
+            return TYPING_TO_DELETE_BUTTON
         else:
             reply_keyboard = [["/create_button"]]
             update.message.reply_text(
@@ -174,18 +212,26 @@ class AddCommands(object):
         chat_id, txt = initiate_chat_id(update)
         custom_buttons_table.delete_one({
             "button": txt,
-            "chat_id": chat_id,
             "bot_id": bot.id
-        })
+        })  # TODO delete files as well
         update.message.reply_text(
-            'Thank you! We deleted the button {}'.format(txt))
-        restart_program()
+            'Thank you! We deleted the button {}'.format(txt), reply_markup=self.finish_reply_markup)
+        restart_program(bot, update)
+
         return ConversationHandler.END
 
     def back(self, bot, update):
+
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        get_help(bot, update)
+        return ConversationHandler.END
+
+    def cancel(self, bot, update):
         update.message.reply_text(
             "Command is cancelled =("
         )
+
         get_help(bot, update)
         return ConversationHandler.END
 
@@ -199,32 +245,41 @@ class AddCommands(object):
 
 # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
 BUTTON_ADD_HANDLER = ConversationHandler(
-    entry_points=[CommandHandler('create_button', AddCommands().start)],
+    entry_points=[CommandHandler('create_button', AddCommands().start),
+                  CallbackQueryHandler(callback=AddCommands().back, pattern=r"cancel_add_button")],
 
     states={
-        TYPING_BUTTON: [MessageHandler(Filters.text,
-                                       AddCommands().button_handler, pass_user_data=True)],
-        TYPING_DESCRIPTION: [MessageHandler(Filters.text,
-                                            AddCommands().description_handler, pass_user_data=True)],
+        TYPING_BUTTON: [
+            MessageHandler(Filters.text,
+                           AddCommands().button_handler, pass_user_data=True)],
+        TYPING_DESCRIPTION: [MessageHandler(Filters.all,
+                                            AddCommands().description_handler, pass_user_data=True),
+                             CallbackQueryHandler(callback=AddCommands().back, pattern=r"cancel_add_button")],
+        DESCRIPTION_FINISH: [MessageHandler(Filters.all,
+                                            AddCommands().description_finish, pass_user_data=True),
+                             CallbackQueryHandler(callback=AddCommands().back, pattern=r"cancel_add_button")],
 
     },
 
-    fallbacks=[CommandHandler("done", callback=AddCommands().description_finish, pass_user_data=True),
-               CallbackQueryHandler(callback=AddCommands().back, pattern=r"cancel_add_button"),
-               CommandHandler('cancel', AddCommands().back),
-               MessageHandler(filters=Filters.command, callback=AddCommands().back)
-               ]
+    fallbacks=[
+        CallbackQueryHandler(callback=AddCommands().back, pattern=r"cancel_add_button"),
+        CommandHandler("done", callback=AddCommands().description_finish, pass_user_data=True),
+        CommandHandler('cancel', AddCommands().cancel),
+        MessageHandler(filters=Filters.command, callback=AddCommands().cancel)
+    ]
 )
 DELETE_BUTTON_HANDLER = ConversationHandler(
-    entry_points=[CommandHandler("delete_button", AddCommands().delete_button)],
+    entry_points=[CommandHandler("delete_button", AddCommands().delete_button),
+                  CallbackQueryHandler(callback=AddCommands().back, pattern=r"cancel_add_button")],
 
     states={
         TYPING_TO_DELETE_BUTTON: [MessageHandler(Filters.text,
-                                                 AddCommands().delete_button_finish)],
+                                                 AddCommands().delete_button_finish),
+                                  CallbackQueryHandler(callback=AddCommands().back, pattern=r"cancel_add_button")],
     },
 
     fallbacks=[CallbackQueryHandler(callback=AddCommands().back, pattern=r"cancel_add_button"),
-               CommandHandler('cancel', AddCommands().back),
-               MessageHandler(filters=Filters.command, callback=AddCommands().back)
+               CommandHandler('cancel', AddCommands().cancel),
+               MessageHandler(filters=Filters.command, callback=AddCommands().cancel)
                ]
 )

@@ -17,4 +17,3 @@ orders_table = db["orders"]
 scam_reports_table = db["scam_reports"]
 users_messages_to_admin_table = db["users_messages_to_admin"]
 DROPBOX_TOKEN = "xPAGp5mkaqgAAAAAAAABwK7yiygvq9ITgQj7j4KlBU8SYQ3WEmHCQnUxCIZUD-mR"
-# TODO use subcollections for every chatbot

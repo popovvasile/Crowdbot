@@ -108,25 +108,25 @@ def button_handler(bot: Bot, update: Update):
         button_info = custom_buttons_table.find_one(
             {"bot_id": bot.id, "button_lower": button_callback_data.replace("button_", "")}
         )  # TODO add files and images
-
-        for descr in button_info["descriptions"]:
-            query.message.reply_text(text=descr)
-
-        for filename in button_info["audio_files"]:
-            with open(filename, 'rb') as file:
-                query.message.reply_audio(file)
-
-        for filename in button_info["video_files"]:
-            with open(filename, 'rb') as file:
-                query.message.reply_audio(file)
-
-        for filename in button_info["document_files"]:
-            with open(filename, 'rb') as file:
-                query.message.reply_audio(file)
-
-        for filename in button_info["photo_files"]:
-            with open(filename, 'rb') as file:
-                query.message.reply_audio(file)
+        if "descriptions" in button_info:
+            for descr in button_info["descriptions"]:  # TODO adjust for images and files
+                query.message.reply_text(text=descr)
+        if "audio_files" in button_info:
+            for filename in button_info["audio_files"]:
+                with open(filename, 'rb') as file:
+                    query.message.reply_audio(file)
+        if "video_files" in button_info:
+            for filename in button_info["video_files"]:
+                with open(filename, 'rb') as file:
+                    query.message.reply_video(file)
+        if "document_files" in button_info:
+            for filename in button_info["document_files"]:
+                with open(filename, 'rb') as file:
+                    query.message.reply_document(file)
+        if "photo_files" in button_info:
+            for filename in button_info["photo_files"]:
+                with open(filename, 'rb') as file:
+                    query.message.reply_photo(file)
 
         buttons = list()
         buttons.append([InlineKeyboardButton(text="Back", callback_data="help_back")])
@@ -174,7 +174,7 @@ def help_button(bot: Bot, update: Update):
             query.message.reply_text(text=text,
                                      reply_markup=InlineKeyboardMarkup(
                                          [[InlineKeyboardButton(text="Back", callback_data="help_back")]]))
-            bot.send_message(chat_id=chat_id, text="Choose a button",
+            bot.send_message(chat_id=chat_id, text="Commands",
                              reply_markup=ReplyKeyboardMarkup(commands_keyboard,
                                                               one_time_keyboard=True))
 
@@ -190,6 +190,8 @@ def help_button(bot: Bot, update: Update):
                                          paginate_modules(next_page + 1, HELPABLE, "help", bot.id)))
 
         elif back_match:
+            bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                               message_id=update.callback_query.message.message_id )
             query.message.reply_text(text=HELP_STRINGS.format(chatbot['welcomeMessage']),
                                      reply_markup=InlineKeyboardMarkup(paginate_modules(0, HELPABLE, "help", bot.id)))
             return ConversationHandler.END

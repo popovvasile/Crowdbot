@@ -34,9 +34,8 @@ class MultipleOptionsHandler(BasicPoll):
         old_vote = None
         if user in votes:
             old_vote = votes.pop(user)
-        if callback_data['i'] == 'C':
-            # remove vote
-            pass
+        if callback_data['i'] == 'C' or old_vote == [0]:  # TODO here is the problem
+            votes[user] = []
         elif old_vote is not None and callback_data['i'] in old_vote:
             old_vote.remove(callback_data['i'])
             if old_vote:
@@ -44,8 +43,8 @@ class MultipleOptionsHandler(BasicPoll):
         elif old_vote is not None:
             old_vote.append(callback_data['i'])
             votes[user] = old_vote
-        else:
-            votes[user] = [callback_data['i']]
+        # else:
+        #     votes[user] = [callback_data['i']]
 
     def get_confirmation_message(self, poll, user):
         votes = poll['votes']
@@ -54,7 +53,7 @@ class MultipleOptionsHandler(BasicPoll):
             opts = poll['options']
             vote_set = [opt['text'] for opt in opts if opt['index'] in vote]
             string = ",".join(vote_set) if vote_set else "nothing"
-            return "You voted for {}.".format(opts['text'])
+            return "You voted for {}.".format(string)
         return "Your vote was removed."
 
     def num_votes_on_option(self, poll, index):

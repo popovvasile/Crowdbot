@@ -125,10 +125,17 @@ class AnswerSurveys(object):
         """Log Errors caused by Updates."""
         logger.warning('Update "%s" caused error "%s"', update, error)
 
-    def back(self, bot, update):
+    def cancel(self, bot, update):
         update.message.reply_text(
             "Command is cancelled =("
         )
+        get_help(bot, update)
+        return ConversationHandler.END
+
+    def back(self, bot, update):
+
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
         get_help(bot, update)
         return ConversationHandler.END
 
@@ -144,7 +151,7 @@ ANSWER_SURVEY_HANDLER = ConversationHandler(
     },
 
     fallbacks=[CommandHandler('done', AnswerSurveys().back),
-               CommandHandler('cancel', AnswerSurveys().back),
+               CommandHandler('cancel', AnswerSurveys().cancel),
                MessageHandler(filters=Filters.command, callback=AnswerSurveys().back)]
 )
 

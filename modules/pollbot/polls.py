@@ -347,7 +347,7 @@ class PollBot(object):
             vote_instances[0].update(poll["votes"])
             poll["votes"] = vote_instances[0]
         poll["bot_id"] = bot.id
-        votes_list = []   # TODO find a way to solve this
+        votes_list = []
         for po in table.find({"bot_id": bot.id, "poll_id": poll["poll_id"]}):
             if po["chat_id"] != chat_id:
                 votes_list.append(po["votes"])
@@ -359,7 +359,6 @@ class PollBot(object):
         table.update({'poll_id': poll['poll_id'], "bot_id": bot.id},
                      self.serialize(poll),
                      upsert=True)
-        # TODO edit to actual result from db, the sum of votes
         bot.edit_message_text(text=self.assemble_message_text(poll),
                               parse_mode='Markdown',
                               reply_markup=self.assemble_inline_keyboard(poll),

@@ -39,8 +39,7 @@ class OpenMultipleOptionsHandler(BasicPoll):
         if user in votes:
             old_vote = votes.pop(user)
         if callback_data['i'] == 'C':
-            # remove vote
-            pass
+            votes[user] = []
         elif old_vote is not None and callback_data['i'] in old_vote['data']:
             old_vote['data'].remove(callback_data['i'])
             if old_vote['data']:

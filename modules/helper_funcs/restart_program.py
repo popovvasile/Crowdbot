@@ -1,8 +1,9 @@
 import os
 import sys
+from modules.helper_funcs.helper import get_help
 
 
-def restart_program():
+def restart_program(bot, update):
     # """Restarts the current program, with file objects and descriptors
     #    cleanup
     # """
@@ -13,6 +14,8 @@ def restart_program():
     #         os.close(handler.fd)
     # except Exception as e:
     #     logging.error(e)
+    get_help(bot, update)
 
     python = sys.executable
     os.execl(python, python, *sys.argv)
+

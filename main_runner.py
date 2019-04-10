@@ -4,7 +4,7 @@ import logging
 import telegram.ext as tg
 from telegram.ext import CommandHandler, CallbackQueryHandler,RegexHandler
 from modules.helper_funcs.admin_login import ADMIN_AUTHENTICATION_HANDLER
-from modules.add_menu_buttons import BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER
+from modules.add_menu_buttons import BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER, AddCommands
 from modules.answer_surveys import ANSWER_SURVEY_HANDLER
 from modules.create_donation import CREATE_DONATION_HANDLER
 from modules.create_survey import DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_HANDLER, SEND_SURVEYS_HANDLER, \
@@ -31,6 +31,7 @@ def main(token):
 
     custom_button_callback_handler = CallbackQueryHandler(button_handler, pattern=r"button_")
     help_callback_handler = CallbackQueryHandler(help_button, pattern=r"help_")
+
     dispatcher.add_handler(custom_button_callback_handler)
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(help_handler)
@@ -65,7 +66,7 @@ def main(token):
     # POLLS
     dispatcher.add_handler(POLL_HANDLER)
     dispatcher.add_handler(SEND_POLLS_HANDLER)
-    dispatcher.add_handler(BUTTON_HANDLER)  # TODO fix this to use another callback
+    dispatcher.add_handler(BUTTON_HANDLER)
     dispatcher.add_handler(DELETE_POLLS_HANDLER)
 
     LOGGER.info("Using long polling.")
@@ -74,5 +75,5 @@ def main(token):
     updater.idle()
 
 
-# if __name__ == '__main__':
-#     main("633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg")
+if __name__ == '__main__':
+    main("633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg")

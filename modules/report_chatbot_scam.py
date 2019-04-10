@@ -51,14 +51,16 @@ class SendScamReport(object):
         return ConversationHandler.END
 
     def cancel(self, bot, update):
+        update.message.reply_text(
+            "Command is cancelled =("
+        )
         get_help(bot, update)
 
         return ConversationHandler.END
 
     def back(self, bot, update):
-        update.message.reply_text(
-            "Command is cancelled =("
-        )
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
         get_help(bot, update)
         return ConversationHandler.END
 

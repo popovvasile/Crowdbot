@@ -31,8 +31,7 @@ class BasicPoll(BasePoll):
         if user in votes:
             old_vote = votes.pop(user)
         if old_vote is not None and str(old_vote) == str(callback_data['i']):
-            # remove old vote
-            pass
+            votes[user] = []
         else:
             votes[user] = callback_data['i']
 
