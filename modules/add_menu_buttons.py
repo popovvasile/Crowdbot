@@ -48,18 +48,25 @@ class AddCommands(object):
         return TYPING_BUTTON
 
     def button_handler(self, bot, update, user_data):
-        # TODO can't create two buttons with the same name
-        # TODO add back button in other models
         # TODO commands /command must be inline buttons, not one-time keyboard
         # TODO delete files as well
-        # TODO test everything from scratch
         # TODO create a chatbot specially for OG
         chat_id, txt = initiate_chat_id(update)
-        user_data['button'] = txt
-        update.message.reply_text('Excellent! Now, please send me a text, an image, a video'
-                                  ' or a document to display for your new button',
-                                  reply_markup=self.reply_markup)
-        return TYPING_DESCRIPTION
+        button_list_of_dicts = custom_buttons_table.find({
+            "bot_id": bot.id,
+            "button": txt})
+        if button_list_of_dicts.count() == 0:
+
+            user_data['button'] = txt
+            update.message.reply_text('Excellent! Now, please send me a text, an image, a video'
+                                      ' or a document to display for your new button',
+                                      reply_markup=self.reply_markup)
+            return TYPING_DESCRIPTION
+        else:
+            update.message.reply_text('You already have a button with the same name. Please choose another name',
+                                      reply_markup=self.reply_markup)
+
+            return TYPING_BUTTON
 
     def description_handler(self, bot, update, user_data):
         photo_directory = "dynamic_files/{bot_id}/photo".format(bot_id=bot.id)
@@ -194,7 +201,6 @@ class AddCommands(object):
     def delete_button(self, bot, update):
         button_list_of_dicts = custom_buttons_table.find({
             "bot_id": bot.id})
-        print(button_list_of_dicts.count())
         if button_list_of_dicts.count() != 0:
             button_list = [button['button'] for button in button_list_of_dicts]
             reply_keyboard = [button_list]
