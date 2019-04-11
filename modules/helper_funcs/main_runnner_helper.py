@@ -159,6 +159,13 @@ def help_button(bot: Bot, update: Update):
     next_match = re.match(r"help_next\((.+?)\)", query.data)
     back_match = re.match(r"help_back", query.data)
     chatbot = chatbots_table.find_one({"bot_id": bot.id})
+    if chatbot:
+        if 'welcomeMessage' in chatbot:
+            welcome_message = chatbot['welcomeMessage']
+        else:
+            welcome_message = "Hello"
+    else:
+        welcome_message = "Hello"
     try:
         if mod_match:
             module = mod_match.group(1)
@@ -180,23 +187,23 @@ def help_button(bot: Bot, update: Update):
 
         elif prev_match:
             curr_page = int(prev_match.group(1))
-            query.message.reply_text(HELP_STRINGS.format(chatbot['welcomeMessage']),
+            query.message.reply_text(HELP_STRINGS.format(welcome_message),
                                      reply_markup=InlineKeyboardMarkup(
                                          paginate_modules(curr_page - 1, HELPABLE, "help", bot.id)))
         elif next_match:
             next_page = int(next_match.group(1))
-            query.message.reply_text(HELP_STRINGS.format(chatbot['welcomeMessage']),
+            query.message.reply_text(HELP_STRINGS.format(welcome_message),
                                      reply_markup=InlineKeyboardMarkup(
                                          paginate_modules(next_page + 1, HELPABLE, "help", bot.id)))
 
         elif back_match:
             bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                message_id=update.callback_query.message.message_id )
-            query.message.reply_text(text=HELP_STRINGS.format(chatbot['welcomeMessage']),
+            query.message.reply_text(text=HELP_STRINGS.format(welcome_message),
                                      reply_markup=InlineKeyboardMarkup(paginate_modules(0, HELPABLE, "help", bot.id)))
             return ConversationHandler.END
         else:
-            query.message.reply_text(text=HELP_STRINGS.format(chatbot['welcomeMessage']),
+            query.message.reply_text(text=HELP_STRINGS.format(welcome_message),
                                      reply_markup=InlineKeyboardMarkup(paginate_modules(0, HELPABLE, "help", bot.id)))
             return ConversationHandler.END
         # ensure no spinny white circle
