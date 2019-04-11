@@ -60,7 +60,8 @@ class DonationBot(object):
                 )
                 update.message.reply_text(text="To return to main menu, click 'Back' ",
                                           reply_markup=InlineKeyboardMarkup(  # TODO modify this shit
-                                              [[InlineKeyboardButton(text="Back", callback_data="cancel_donation_payment")]]))
+                                              [[InlineKeyboardButton(text="Back",
+                                                                     callback_data="cancel_donation_payment")]]))
                 return DONATION_MESSAGE
         else:
             update.message.reply_text("Sorry, no option for donation yet")
@@ -97,7 +98,8 @@ class DonationBot(object):
                         provider_token, start_parameter, currency, prices)
         update.message.reply_text(text="To return to main menu, click 'Back' ",
                                   reply_markup=InlineKeyboardMarkup(
-                                      [[InlineKeyboardButton(text="cancel_donation_payment", callback_data="help_back")]]))
+                                      [[InlineKeyboardButton(text="cancel_donation_payment",
+                                                             callback_data="help_back")]]))
         user_data = donation_request
 
         return HANDLE_PRECHECKOUT
@@ -151,15 +153,18 @@ DONATE_HANDLER = ConversationHandler(
         DONATION_MESSAGE: [MessageHandler(callback=DonationBot().donation_message,
                                           filters=Filters.text,
                                           pass_user_data=True),
+                           CallbackQueryHandler(callback=DonationBot().back, pattern=r"cancel_donation_payment"),
                            CommandHandler('cancel', DonationBot().cancel)
                            ],
         EXECUTE_DONATION: [MessageHandler(callback=DonationBot().execute_donation,
                                           filters=Filters.text,
                                           pass_user_data=True),
+                           CallbackQueryHandler(callback=DonationBot().back, pattern=r"cancel_donation_payment"),
                            CommandHandler('cancel', DonationBot().cancel)
                            ],
         HANDLE_PRECHECKOUT: [PreCheckoutQueryHandler(DonationBot().precheckout_callback,
                                                      pass_user_data=True),
+                             CallbackQueryHandler(callback=DonationBot().back, pattern=r"cancel_donation_payment"),
                              CommandHandler('cancel', DonationBot().cancel),
                              MessageHandler(Filters.successful_payment,
                                             DonationBot().successful_payment_callback,
@@ -167,7 +172,8 @@ DONATE_HANDLER = ConversationHandler(
                              ],
         HANDLE_SUCCES: [MessageHandler(Filters.successful_payment,
                                        DonationBot().successful_payment_callback,
-                                       pass_user_data=True), ]
+                                       pass_user_data=True),
+                        CallbackQueryHandler(callback=DonationBot().back, pattern=r"cancel_donation_payment")]
     },
     fallbacks=[CallbackQueryHandler(callback=DonationBot().back, pattern=r"cancel_donation_payment"),
                MessageHandler(Filters.successful_payment,

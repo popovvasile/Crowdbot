@@ -306,7 +306,7 @@ SEND_SURVEYS_HANDLER = ConversationHandler(
     },
     fallbacks=[
         CommandHandler('cancel', SurveyHandler().cancel),
-        CallbackQueryHandler(callback=SurveyHandler().cancel, pattern=r"cancel_survey"),
+        CallbackQueryHandler(callback=SurveyHandler().back, pattern=r"cancel_survey"),
         CommandHandler('done', SurveyHandler().done, pass_user_data=True),
         MessageHandler(filters=Filters.command, callback=SurveyHandler().cancel)]
 )
@@ -321,7 +321,7 @@ SHOW_SURVEYS_HANDLER = ConversationHandler(
     },
 
     fallbacks=[
-        CallbackQueryHandler(callback=SurveyHandler().cancel, pattern=r"cancel_survey"),
+        CallbackQueryHandler(callback=SurveyHandler().back, pattern=r"cancel_survey"),
         CommandHandler('cancel', SurveyHandler().cancel),
         MessageHandler(filters=Filters.command, callback=SurveyHandler().cancel),
         ]

@@ -172,7 +172,7 @@ class PollBot(object):
         #     with open(filename, 'wb+') as csvfile1:
         #         dbx = dropbox.Dropbox(DROPBOX_TOKEN)
         #         dbx.files_upload(csvfile1.read(), "/" + filename)
-            # poll['results_link'] = sharing.CreateSharedLinkArg(path=filename, short_url=True).short_url
+        # poll['results_link'] = sharing.CreateSharedLinkArg(path=filename, short_url=True).short_url
         table = polls_table
 
         table.insert(self.serialize(poll))
@@ -544,21 +544,25 @@ POLL_HANDLER = ConversationHandler(
         TYPING_TITLE: [MessageHandler(Filters.text,
                                       PollBot().handle_title,
                                       pass_user_data=True),
+                       CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
                        CommandHandler('cancel', PollBot().cancel),
                        ],
         TYPING_TYPE: [RegexHandler(PollBot().assemble_type_regex(),
                                    PollBot().handle_type,
                                    pass_user_data=True),
+                      CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
                       CommandHandler('cancel', PollBot().cancel),
                       ],
         TYPING_META: [MessageHandler(Filters.text,
                                      PollBot().handle_meta,
                                      pass_user_data=True),
+                      CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
                       CommandHandler('cancel', PollBot().cancel),
                       ],
         TYPING_OPTION: [MessageHandler(Filters.text,
                                        PollBot().handle_option,
                                        pass_user_data=True),
+                        CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
                         CommandHandler('cancel', PollBot().cancel),
                         ]
     },
@@ -575,12 +579,14 @@ NOT_ENGAGED_SEND, TYPING_SEND_TITLE = range(2)
 
 SEND_POLLS_HANDLER = ConversationHandler(
     entry_points=[CommandHandler('send_poll', PollBot().handle_send_poll),
-
+                  CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll")
                   ],
     states={
         NOT_ENGAGED_SEND: [CommandHandler('send_poll', PollBot().handle_send_poll),
+                           CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
                            CommandHandler('cancel', PollBot().cancel), ],
         TYPING_SEND_TITLE: [MessageHandler(Filters.text, PollBot().handle_send_title, pass_user_data=True),
+                            CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
                             CommandHandler('cancel', PollBot().cancel), ],
 
     },

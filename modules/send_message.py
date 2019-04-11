@@ -51,9 +51,18 @@ class SendMessageToAdmin(object):
         logger.warning('Update "%s" caused error "%s"', update, error)
         return ConversationHandler.END
 
-    def cancel(self, bot, update):
+    def back(self, bot, update):
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
         get_help(bot, update)
+        return ConversationHandler.END
 
+    def cancel(self, bot, update):
+        update.message.reply_text(
+            "Command is cancelled =("
+        )
+
+        get_help(bot, update)
         return ConversationHandler.END
 
 
@@ -99,9 +108,18 @@ class SendMessageToUsers(object):
         logger.warning('Update "%s" caused error "%s"', update, error)
         return ConversationHandler.END
 
-    def cancel(self, bot, update):
+    def back(self, bot, update):
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
         get_help(bot, update)
+        return ConversationHandler.END
 
+    def cancel(self, bot, update):
+        update.message.reply_text(
+            "Command is cancelled =("
+        )
+
+        get_help(bot, update)
         return ConversationHandler.END
 
 
@@ -121,29 +139,31 @@ class SeeMessageToAdmin(object):
 
 
 SEND_MESSAGE_TO_ADMIN_HANDLER = ConversationHandler(
-    entry_points=[CommandHandler("Send_message", SendMessageToAdmin().send_message)],
+    entry_points=[CommandHandler("Send_message", SendMessageToAdmin().send_message),
+                  CallbackQueryHandler(callback=SendMessageToUsers().back, pattern=r"cancel_send_message")],
 
     states={
-        MESSAGE: [MessageHandler(Filters.all,
-                                 SendMessageToAdmin().received_message)],
+        MESSAGE: [MessageHandler(Filters.all, SendMessageToAdmin().received_message),
+                  CallbackQueryHandler(callback=SendMessageToUsers().back, pattern=r"cancel_send_message")],
 
     },
 
-    fallbacks=[CallbackQueryHandler(callback=SendMessageToUsers().cancel, pattern=r"cancel_send_message"),
+    fallbacks=[CallbackQueryHandler(callback=SendMessageToUsers().back, pattern=r"cancel_send_message"),
                CommandHandler('cancel', SendMessageToAdmin().error),
                MessageHandler(filters=Filters.command, callback=SendMessageToAdmin().error)]
 )
 
 SEND_MESSAGE_TO_USERS_HANDLER = ConversationHandler(
-    entry_points=[CommandHandler("Send_message_to_users", SendMessageToUsers().send_message)],
+    entry_points=[CommandHandler("Send_message_to_users", SendMessageToUsers().send_message),
+                  CallbackQueryHandler(callback=SendMessageToUsers().back, pattern=r"cancel_send_message")],
 
     states={
-        MESSAGE_TO_USERS: [MessageHandler(Filters.all,
-                           SendMessageToUsers().received_message)],
+        MESSAGE_TO_USERS: [MessageHandler(Filters.all, SendMessageToUsers().received_message),
+                           CallbackQueryHandler(callback=SendMessageToUsers().back, pattern=r"cancel_send_message")],
 
     },
 
-    fallbacks=[CallbackQueryHandler(callback=SendMessageToUsers().cancel, pattern=r"cancel_send_message"),
+    fallbacks=[CallbackQueryHandler(callback=SendMessageToUsers().back, pattern=r"cancel_send_message"),
                CommandHandler('cancel', SendMessageToUsers().error),
                MessageHandler(filters=Filters.command, callback=SendMessageToUsers().error)]
 )
