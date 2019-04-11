@@ -221,10 +221,14 @@ def get_help(bot: Bot, update: Update):
     register_chat(bot, update)
     chat = update.effective_chat
 
-    if if_admin(bot=bot, update=update):
-        send_admin_help(bot, chat.id, HELP_STRINGS.format(chatbot['welcomeMessage']))
+    if 'welcomeMessage' in chatbot:
+        welcome_message = chatbot['welcomeMessage']
     else:
-        send_visitor_help(bot, chat.id, HELP_STRINGS.format(chatbot['welcomeMessage']))
+        welcome_message = "Hello"
+    if if_admin(bot=bot, update=update):
+        send_admin_help(bot, chat.id, HELP_STRINGS.format(welcome_message))
+    else:
+        send_visitor_help(bot, chat.id, HELP_STRINGS.format(welcome_message))
 
 
 class WelcomeBot(object):
