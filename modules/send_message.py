@@ -26,7 +26,7 @@ class SendMessageToAdmin(object):
             buttons)
 
     @run_async
-    def start_answering(self, bot, update):
+    def send_message(self, bot, update):
         bot.send_message(update.message.chat_id, "What do you want to tell us?", reply_markup=self.reply_markup)
         return MESSAGE
 
@@ -65,7 +65,7 @@ class SendMessageToUsers(object):
             buttons)
 
     @run_async
-    def start_answering(self, bot, update):
+    def send_message(self, bot, update):
         bot.send_message(update.message.chat_id, "What do you want to tell your users?\n"
                                                  "We will forward your message to all your users."
                                                  "p.s. You name will be displayed as well",
@@ -78,7 +78,9 @@ class SendMessageToUsers(object):
 
         chats = chats_table.find({"bot_id": bot.id})
         for chat in chats:
-            bot.forward_message(chat_id=chat["chat_id"], from_chat_id=chat_id, message_id=update.message.message_id)
+            bot.forward_message(chat_id=chat["chat_id"],  # TODO make it anonymous
+                                from_chat_id=chat_id,
+                                message_id=update.message.message_id)
         buttons = list()
         buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_send_message")])
         final_reply_markup = InlineKeyboardMarkup(
@@ -119,7 +121,7 @@ class SeeMessageToAdmin(object):
 
 
 SEND_MESSAGE_TO_ADMIN_HANDLER = ConversationHandler(
-    entry_points=[CommandHandler("Send_message", SendMessageToAdmin().start_answering)],
+    entry_points=[CommandHandler("Send_message", SendMessageToAdmin().send_message)],
 
     states={
         MESSAGE: [MessageHandler(Filters.all,
@@ -133,7 +135,7 @@ SEND_MESSAGE_TO_ADMIN_HANDLER = ConversationHandler(
 )
 
 SEND_MESSAGE_TO_USERS_HANDLER = ConversationHandler(
-    entry_points=[CommandHandler("Send_message_to_users", SendMessageToUsers().start_answering)],
+    entry_points=[CommandHandler("Send_message_to_users", SendMessageToUsers().send_message)],
 
     states={
         MESSAGE_TO_USERS: [MessageHandler(Filters.all,

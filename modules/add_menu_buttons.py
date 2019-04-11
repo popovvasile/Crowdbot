@@ -38,9 +38,8 @@ class AddCommands(object):
             buttons)
 
     def start(self, bot, update):
-        reply_keyboard = [['Rules', 'Contacts'],
-                          ['Useful links', 'Something else...'],
-                          ['Done']]
+        reply_keyboard = [['About', 'Contacts'],
+                          ['Rules', 'Useful links']]
         markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
         update.message.reply_text(
             "Please type your new button, for example 'Contacts' or 'Rules'. Please note that"
@@ -51,6 +50,10 @@ class AddCommands(object):
     def button_handler(self, bot, update, user_data):
         # TODO can't create two buttons with the same name
         # TODO add back button in other models
+        # TODO commands /command must be inline buttons, not one-time keyboard
+        # TODO delete files as well
+        # TODO test everything from scratch
+        # TODO create a chatbot specially for OG
         chat_id, txt = initiate_chat_id(update)
         user_data['button'] = txt
         update.message.reply_text('Excellent! Now, please send me a text, an image, a video'
@@ -215,7 +218,7 @@ class AddCommands(object):
         custom_buttons_table.delete_one({
             "button": txt,
             "bot_id": bot.id
-        })  # TODO delete files as well
+        })
         update.message.reply_text(
             'Thank you! We deleted the button {}'.format(txt), reply_markup=self.finish_reply_markup)
         restart_program(bot, update)
