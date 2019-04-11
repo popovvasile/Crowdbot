@@ -99,8 +99,11 @@ def get_help(bot: Bot, update: Update):
     chatbot = chatbots_table.find_one({"bot_id": bot.id})
     register_chat(bot, update)
     chat = update.effective_chat
-    if 'welcomeMessage' in chatbot:
-        welcome_message = chatbot['welcomeMessage']
+    if chatbot:
+        if 'welcomeMessage' in chatbot:
+            welcome_message = chatbot['welcomeMessage']
+        else:
+            welcome_message = "Hello"
     else:
         welcome_message = "Hello"
     if if_admin(bot=bot, update=update):
