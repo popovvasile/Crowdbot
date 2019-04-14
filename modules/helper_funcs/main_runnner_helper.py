@@ -10,9 +10,6 @@ from modules import ALL_MODULES
 from modules.helper_funcs.auth import if_admin, initiate_chat_id, register_chat
 from modules.helper_funcs.misc import paginate_modules, LOGGER
 
-
-
-
 HELP_STRINGS = """
 {}
 """
@@ -103,37 +100,38 @@ def error_callback(bot, update, error):
 def button_handler(bot: Bot, update: Update):
     query = update.callback_query
     button_callback_data = query.data
-    bot.answer_callback_query(query.id)
+    buttons = [[InlineKeyboardButton(text="Back", callback_data="help_back")]]
+    bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                       message_id=update.callback_query.message.message_id)
     try:
         button_info = custom_buttons_table.find_one(
             {"bot_id": bot.id, "button_lower": button_callback_data.replace("button_", "")}
         )  # TODO add files and images
         if "descriptions" in button_info:
             for descr in button_info["descriptions"]:  # TODO adjust for images and files
-                query.message.reply_text(text=descr)
+                query.message.reply_text(text=descr, reply_markup=InlineKeyboardMarkup(
+                                     buttons))
         if "audio_files" in button_info:
             for filename in button_info["audio_files"]:
                 with open(filename, 'rb') as file:
-                    query.message.reply_audio(file)
+                    query.message.reply_audio(file, reply_markup=InlineKeyboardMarkup(
+                                     buttons))
         if "video_files" in button_info:
             for filename in button_info["video_files"]:
                 with open(filename, 'rb') as file:
-                    query.message.reply_video(file)
+                    query.message.reply_video(file, reply_markup=InlineKeyboardMarkup(
+                                     buttons))
         if "document_files" in button_info:
             for filename in button_info["document_files"]:
                 with open(filename, 'rb') as file:
-                    query.message.reply_document(file)
+                    query.message.reply_document(file, reply_markup=InlineKeyboardMarkup(
+                                     buttons))
         if "photo_files" in button_info:
             for filename in button_info["photo_files"]:
                 with open(filename, 'rb') as file:
-                    query.message.reply_photo(file)
-
-        buttons = list()
-        buttons.append([InlineKeyboardButton(text="Back", callback_data="help_back")])
-
-        query.message.reply_text(text="Back to main menu",
-                                 reply_markup=InlineKeyboardMarkup(
+                    query.message.reply_photo(file, reply_markup=InlineKeyboardMarkup(
                                      buttons))
+
     except BadRequest as excp:
         if excp.message == "Message is not modified":
             pass
@@ -180,10 +178,11 @@ def help_button(bot: Bot, update: Update):
                 commands_keyboard = HELPABLE[module].__visitor_keyboard__
             query.message.reply_text(text=text,
                                      reply_markup=InlineKeyboardMarkup(
-                                         [[InlineKeyboardButton(text="Back", callback_data="help_back")]]))
-            bot.send_message(chat_id=chat_id, text="Commands",
-                             reply_markup=ReplyKeyboardMarkup(commands_keyboard,
-                                                              one_time_keyboard=True))
+                                         [commands_keyboard, [
+                                             InlineKeyboardButton(text="Back", callback_data="help_back")]]))
+            # bot.send_message(chat_id=chat_id, text="Menu",
+            #                  reply_markup=ReplyKeyboardMarkup(commands_keyboard,
+            #                                                   one_time_keyboard=True))
 
         elif prev_match:
             curr_page = int(prev_match.group(1))
@@ -198,7 +197,7 @@ def help_button(bot: Bot, update: Update):
 
         elif back_match:
             bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                               message_id=update.callback_query.message.message_id )
+                               message_id=update.callback_query.message.message_id)
             query.message.reply_text(text=HELP_STRINGS.format(welcome_message),
                                      reply_markup=InlineKeyboardMarkup(paginate_modules(0, HELPABLE, "help", bot.id)))
             return ConversationHandler.END
@@ -243,7 +242,6 @@ def get_help(bot: Bot, update: Update):
 class WelcomeBot(object):
     @staticmethod
     def start(bot, update):
-
         chat_id, txt = initiate_chat_id(update)
         user_id = update.message.from_user.id
         register_chat(bot, update)

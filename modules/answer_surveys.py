@@ -169,3 +169,8 @@ Admin only:
 __admin_keyboard__ = [["/create_survey"],
                       ["/delete_survey", "/send_survey"],
                       ["/surveys_results"]]
+
+__admin_keyboard__ = [InlineKeyboardButton(text="Create", callback_data="create_button"),
+                      InlineKeyboardButton(text="Delete", callback_data="delete_button")]
+CallbackQueryHandler(callback=AddCommands().start,
+                                       pattern=r"create_button"),

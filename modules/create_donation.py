@@ -128,6 +128,7 @@ class CreateDonationHandler(object):
         logger.warning('Update "%s" caused error "%s"', update, error)
 
     def cancel(self, bot, update):
+
         update.message.reply_text(
             "Command is cancelled =("
         )

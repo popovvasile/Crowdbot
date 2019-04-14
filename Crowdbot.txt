@@ -1,5 +1,5 @@
 ГЛАВНЫЙ ЭКРАН, КОТОРЫЙ ВИДЯТ ЛЮДИ В БРАУЗЕРЕ
-Monetize your audience and find out what they is interested in. Create your bot in 5 minutes with no programming skills required. NO ABO FEES!
+
 
 
 """
@@ -90,3 +90,15 @@ Admin only:*
  "{}! Now, send another answer option or type /done to publish."
  "{}, that's it! Next, please send the first answer option."
  'Hi! Please send the title of a new poll. (/cancel to exit)'
+
+
+
+ Текст не беру в расчёт
+
+
+
+ДОНАТЫ
+    1. Они не работают
+
+УЖЕ ЛУЧШЕ! МОЛОДЕЦ!
+
