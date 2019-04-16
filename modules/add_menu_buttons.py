@@ -224,13 +224,10 @@ class AddCommands(object):
 
             return TYPING_TO_DELETE_BUTTON
         else:
-            reply_keyboard = [["/create_button"]]
             bot.send_message(update.callback_query.message.chat.id,
                              "You have no buttons created yet. Create your first button by clicking "
-                             "/create_button command",
-                             reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
-            bot.send_message(update.callback_query.message.chat.id,
-                             "Click Back  for menu", reply_markup=self.reply_markup)
+                             "'Create'")
+            get_help(bot, update)
 
             return ConversationHandler.END
 
