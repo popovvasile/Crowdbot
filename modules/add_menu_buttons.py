@@ -1,6 +1,6 @@
 import os
 
-from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import (CommandHandler, MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler, RegexHandler)
 import logging
@@ -38,8 +38,9 @@ class AddCommands(object):
     def start(self, bot, update):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        reply_keyboard = [['About', 'Contacts'],
-                          ['Rules', 'Useful links']]
+
+        reply_keyboard = [['About', 'My projects'],
+                          ['Contacts', 'Useful links']]
         markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
         bot.send_message(update.callback_query.message.chat.id,
                          "Type a name for new button or choose one of the examples below. "
@@ -53,6 +54,7 @@ class AddCommands(object):
         # TODO commands /command must be inline buttons, not one-time keyboard
         # TODO delete files as well
         # TODO create a chatbot specially for OG
+        # TODO change bot description
         chat_id, txt = initiate_chat_id(update)
         button_list_of_dicts = custom_buttons_table.find({
             "bot_id": bot.id,
@@ -60,12 +62,13 @@ class AddCommands(object):
         if button_list_of_dicts.count() == 0:
 
             user_data['button'] = txt
-            update.message.reply_text('Excellent! Now, please send me a text, an image, a video'
+            update.message.reply_text("Great!", reply_markup=ReplyKeyboardRemove())
+            update.message.reply_text('Now, send a text, an image, a video'
                                       'a document or a music file to display for your new button',
                                       reply_markup=self.reply_markup)
             return TYPING_DESCRIPTION
         else:
-            update.message.reply_text('You already have a button with the same name. Please choose another name',
+            update.message.reply_text('You already have a button with the same name. Choose another name',
                                       reply_markup=self.reply_markup)
 
             return TYPING_BUTTON
@@ -201,7 +204,7 @@ class AddCommands(object):
         custom_buttons_table.save(user_data)
 
         bot.send_message(update.callback_query.message.chat.id,
-                         'Thank you! Now your button will be accessible by typing or clicking the button \n'
+                         'Thank you! The button will be accessible by clicking \n'
                          '{} in menu'.format(user_data["button"]))
         get_help(bot, update)
         return ConversationHandler.END
@@ -214,7 +217,7 @@ class AddCommands(object):
             reply_keyboard = [button_list]
             bot.send_message(update.callback_query.message.chat.id,
 
-                             "Please choose the button that button that you want to delete",
+                             "Choose the button that button that you want to delete",
                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
             bot.send_message(update.callback_query.message.chat.id,
                              "To quit, click 'Back'", reply_markup=self.reply_markup)
@@ -223,7 +226,7 @@ class AddCommands(object):
         else:
             reply_keyboard = [["/create_button"]]
             bot.send_message(update.callback_query.message.chat.id,
-                             "You have no buttons created yet. Please create your first button by clicking "
+                             "You have no buttons created yet. Create your first button by clicking "
                              "/create_button command",
                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
             bot.send_message(update.callback_query.message.chat.id,

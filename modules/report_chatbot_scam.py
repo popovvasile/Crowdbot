@@ -25,8 +25,11 @@ class SendScamReport(object):
 
     @run_async
     def start_answering(self, bot, update, user_data):
-        bot.send_message(update.message.chat_id, "Did you find out that this chatbot is a scam? \n"
-                                                 "Please describe us the details and we will try to solve this issue")
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        bot.send_message(update.callback_query.message.chat.id,
+                         "Did you find out that this chatbot is a scam? \n"
+                          "Please describe us the details and we, the Crowdbot team, will try to solve this issue")
         return MESSAGE
 
     @run_async
@@ -66,7 +69,7 @@ class SendScamReport(object):
 
 
 SEND_SCAM_REPORT_HANDLER = ConversationHandler(
-    entry_points=[CommandHandler("send_scam_report", SendScamReport().start_answering)],
+    entry_points=[CallbackQueryHandler(pattern="send_scam_report", callback=SendScamReport().start_answering)],
 
     states={
         MESSAGE: [MessageHandler(Filters.all,
@@ -82,8 +85,8 @@ SEND_SCAM_REPORT_HANDLER = ConversationHandler(
 __mod_name__ = "Scam Report"
 
 __visitor_help__ = """
-Report a scam
+Report a scam chatbot
 """
 
 
-__visitor_keyboard__ = [["/send_scam_report"]]
+__visitor_keyboard__ = [InlineKeyboardButton(text="Report", callback_data="send_scam_report")]

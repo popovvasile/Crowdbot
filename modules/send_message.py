@@ -27,7 +27,10 @@ class SendMessageToAdmin(object):
 
     @run_async
     def send_message(self, bot, update):
-        bot.send_message(update.message.chat_id, "What do you want to tell us?", reply_markup=self.reply_markup)
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        bot.send_message(update.callback_query.message.chat.id,
+                         "What do you want to tell us?", reply_markup=self.reply_markup)
         return MESSAGE
 
     @run_async
@@ -75,9 +78,12 @@ class SendMessageToUsers(object):
 
     @run_async
     def send_message(self, bot, update):
-        bot.send_message(update.message.chat_id, "What do you want to tell your users?\n"
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        bot.send_message(update.callback_query.message.chat.id,
+                         "What do you want to tell your users?\n"
                                                  "We will forward your message to all your users."
-                                                 "p.s. You name will be displayed as well",
+                                                 "p.s. Your name will be displayed as well",
                          reply_markup=self.reply_markup)
         return MESSAGE_TO_USERS
 
@@ -126,20 +132,24 @@ class SendMessageToUsers(object):
 class SeeMessageToAdmin(object):
     @run_async
     def see_messages(self, bot, update):
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
         messages = users_messages_to_admin_table.find({"bot_id": bot.id})
         if messages:
             for message in messages:
                 if message["timestamp"] + datetime.timedelta(days=14) > datetime.datetime.now():
-                    bot.send_message(update.message.chat_id, "User's fullname:{}, \n"
+                    bot.send_message(update.callback_query.message.chat.id,
+                                     "User's fullname:{}, \n"
                                                              "Message:{}".format(message["full_name"],
                                                                                  message["message"]))
 
         else:
-            bot.send_message(update.message.chat_id, "You have no incoming messages yet")
+            bot.send_message(update.callback_query.message.chat.id,
+                             "You have no incoming messages yet")
 
 
 SEND_MESSAGE_TO_ADMIN_HANDLER = ConversationHandler(
-    entry_points=[CommandHandler("Send_message", SendMessageToAdmin().send_message),
+    entry_points=[CallbackQueryHandler(pattern="Send_message", callback=SendMessageToAdmin().send_message),
                   CallbackQueryHandler(callback=SendMessageToUsers().back, pattern=r"cancel_send_message")],
 
     states={
@@ -154,7 +164,7 @@ SEND_MESSAGE_TO_ADMIN_HANDLER = ConversationHandler(
 )
 
 SEND_MESSAGE_TO_USERS_HANDLER = ConversationHandler(
-    entry_points=[CommandHandler("Send_message_to_users", SendMessageToUsers().send_message),
+    entry_points=[CallbackQueryHandler(pattern="send_message_to_users", callback=SendMessageToUsers().send_message),
                   CallbackQueryHandler(callback=SendMessageToUsers().back, pattern=r"cancel_send_message")],
 
     states={
@@ -168,7 +178,7 @@ SEND_MESSAGE_TO_USERS_HANDLER = ConversationHandler(
                MessageHandler(filters=Filters.command, callback=SendMessageToUsers().error)]
 )
 
-SEE_MESSAGES_HANDLER = CommandHandler("See_Inbox_Messages", SeeMessageToAdmin().see_messages)
+SEE_MESSAGES_HANDLER = CallbackQueryHandler(pattern="inbox_message", callback=SeeMessageToAdmin().see_messages)
 
 
 __mod_name__ = "Send a message"
@@ -178,7 +188,7 @@ Here you can send a message to the chatbot owner
 """
 
 
-__visitor_keyboard__ = [["/Send_message"]]
+__visitor_keyboard__ = [InlineKeyboardButton(text="Send message", callback_data="send_message_to_admin")]
 
 
 __admin_help__ = """
@@ -186,4 +196,7 @@ Messages sent by the users to you
 """
 
 
-__admin_keyboard__ = [["/See_Inbox_Messages", "/Send_message_to_users"]]
+__admin_keyboard__ = [
+    InlineKeyboardButton(text="Send message", callback_data="send_message_to_users"),
+    InlineKeyboardButton(text="Inbox messages", callback_data="inbox_message"),
+]

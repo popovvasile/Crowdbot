@@ -1,6 +1,6 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
-from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import (CommandHandler, MessageHandler, Filters, ConversationHandler, run_async,
                           CallbackQueryHandler)
 import logging
@@ -58,9 +58,11 @@ class EditPaymentHandler(object):
     def start_donation(self, bot, update, user_data):
 
         reply_keyboard = [["Delete this donation"], ["Edit"]]
-        update.message.reply_text(
-            "What do you want to do with this donation?",
-            reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+        # bot.delete_message(chat_id=update.callback_query.message.chat_id,
+        #                    message_id=update.callback_query.message.message_id)
+        bot.send_message(update.callback_query.message.chat.id,
+                         "What do you want to do with this donation?",
+                         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
 
         return FINISH_ACTION
 
@@ -68,61 +70,55 @@ class EditPaymentHandler(object):
         chat_id, txt = initiate_chat_id(update)
         if txt == "Delete this donation":
             user_data['action'] = txt
-            return DOUBLE_CHECK_DELETE
-        elif txt == "Edit":
-            user_data['action'] = txt
-            return EDIT_PAYMENT
+            reply_keyboard = [["Yes, I am sure"], ["No, let's get back"]]
+            update.message.reply_text(
+                "Are you sure that you want to delete this donation?",
+                reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+            return DELETE_FINISH
 
-    @run_async
-    def handle_edit_action(self, bot, update, user_data):
-        keyboard_markup = [["Title", "Description"],
-                           ["Currency"]]
-        chat_id, txt = initiate_chat_id(update)
-        bot.send_message(chat_id, "Please choose what exactly do you want to edit",
-                         reply_markup=ReplyKeyboardMarkup(keyboard_markup))
-        return CHOOSING_EDIT_ACTION
+        elif txt == "Edit":
+            keyboard_markup = [["Title", "Description"],
+                               ["Currency"]]
+            chat_id, txt = initiate_chat_id(update)
+            bot.send_message(chat_id, "Please choose what exactly do you want to edit",
+                             reply_markup=ReplyKeyboardMarkup(keyboard_markup))
+            return CHOOSING_EDIT_ACTION
 
     def handle_edit_action_finish(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
         user_data['edit_action'] = txt
         if txt == "Title":
+            bot.send_message(chat_id, "Great!", reply_markup=ReplyKeyboardRemove())
             bot.send_message(chat_id,
-                             "Please write a new title for this donation", reply_markup=self.reply_markup)
-            return TYPING_TITLE
+                             "Now, write a new title for this donation", reply_markup=self.reply_markup)
         elif txt == "Description":
+            bot.send_message(chat_id, "Great!", reply_markup=ReplyKeyboardRemove())
+
             update.message.reply_text(
-                "Please write a short text for your donation- what your users have to pay for?",
+                "Now, write a short text for your donation- what your users have to pay for?",
                 reply_markup=self.reply_markup)
-            return TYPING_DESCRIPTION
         elif txt == "Currency":
+            bot.send_message(chat_id, "Great!", reply_markup=ReplyKeyboardRemove())
+
             currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["CHF", "AUD", "RON", "PLN"]]
-            update.message.reply_text("Please choose the currency of your donation",
+            update.message.reply_text("Now, choose the currency of your donation",
                                       reply_markup=ReplyKeyboardMarkup(currency_keyboard, one_time_keyboard=True))
-            return TYPING_CURRENCY
-
-    @run_async
-    def handle_currency(self, bot, update, user_data):
-        chat_id, txt = initiate_chat_id(update)
-        currency = txt
-        user_data["currency"] = currency
-
+        user_data["action"] = txt
         return EDIT_FINISH
 
-    @run_async
-    def handle_title(self, bot, update, user_data):
-        chat_id, txt = initiate_chat_id(update)
-        user_data['title'] = txt
-        return EDIT_FINISH
-
-    @run_async
-    def handle_description(self, bot, update, user_data):
-        chat_id, txt = initiate_chat_id(update)
-        user_data["description"] = txt
-
-        return EDIT_FINISH
 
     @run_async
     def handle_edit_finish(self, bot, update, user_data):  # TODO double check
+        chat_id, txt = initiate_chat_id(update)
+        if user_data["action"] == "Title":
+            user_data['title'] = txt
+
+        if user_data["action"] == "Description":
+            user_data["description"] = txt
+
+        if user_data["action"] == "Currency":
+            user_data["currency"] = txt
+        user_data.pop(user_data)
         chatbot = chatbots_table.find_one({"bot_id": bot.id})
         chatbot["donation"] = user_data
         chatbots_table.replace_one({"bot_id": bot.id}, chatbot)
@@ -132,21 +128,26 @@ class EditPaymentHandler(object):
         return ConversationHandler.END
 
     @run_async
-    def handle_delete_double_check(self, bot, update, user_data):
-        reply_keyboard = [["Yes, I am sure"], ["No, let's get back"]]
-        update.message.reply_text(
-            "Are you sure that you want to delete this donation?",
-            reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
-        return DELETE_FINISH
-
-    @run_async
     def handle_finish_delete(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
         if txt == "Yes, I am sure":
             user_data['action'] = "delete"
+            update.message.reply_text("Your donation has been deleted")
+            get_help(bot, update)
             return ConversationHandler.END
         elif txt == "No, let's get back":
-            return CHOOSING_ACTION
+            chat_id, txt = initiate_chat_id(update)
+            if txt == "Delete this donation":
+                user_data['action'] = txt
+                reply_keyboard = [["Yes, I am sure"], ["No, let's get back"]]
+                update.message.reply_text(
+                    "Are you sure that you want to delete this donation?",
+                    reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+                return DELETE_FINISH
+
+            elif txt == "Edit":
+                user_data['action'] = txt
+                return EDIT_PAYMENT
 
     @run_async
     def change_donation_token(self, bot, update):
@@ -161,8 +162,10 @@ class EditPaymentHandler(object):
 
         chat_id, txt = initiate_chat_id(update)
         if check_provider_token(provider_token=txt, bot_id=bot.id):
-            chatbot = chatbots_table.find_one({"bot_id": bot.id})
-            chatbots_table.update_one(chatbot, chatbot.update({"donation_token": txt}))
+            chatbot = chatbots_table.find_one({"bot_id": bot.id}) or {}
+
+            chatbot["donation"]["payment_token"] = txt
+            chatbots_table.update_one({"bot_id": bot.id}, {'$set': chatbot}, upsert=True)
             update.message.reply_text("Thank you! Your provider_token was changed successfully !",
                                       reply_markup=self.reply_markup)
             return ConversationHandler.END
@@ -193,9 +196,23 @@ class EditPaymentHandler(object):
 
 
 EDIT_DONATION_HANDLER = ConversationHandler(
-    entry_points=[CommandHandler('edit_donation', EditPaymentHandler().start_donation, pass_user_data=True)],
+    entry_points=[
+        CallbackQueryHandler(callback=EditPaymentHandler().start_donation,
+                                       pass_user_data=True,
+                                       pattern=r'configure_donation')
+    ],
 
     states={
+        FINISH_ACTION: [MessageHandler(Filters.text,
+                                       EditPaymentHandler().handle_action_finish,
+                                       pass_user_data=True),
+                       CommandHandler('cancel', EditPaymentHandler().cancel)],
+        CHOOSING_EDIT_ACTION: [MessageHandler(Filters.text,
+                                       EditPaymentHandler().handle_edit_action_finish,
+                                       pass_user_data=True),
+                       CommandHandler('cancel', EditPaymentHandler().cancel)],
+
+
         TYPING_TOKEN: [MessageHandler(Filters.text,
                                       EditPaymentHandler().change_donation_token,
                                       pass_user_data=True),
@@ -216,11 +233,11 @@ EDIT_DONATION_HANDLER = ConversationHandler(
                                          EditPaymentHandler().handle_currency,
                                          pass_user_data=True),
                           CommandHandler('cancel', EditPaymentHandler().cancel)],
+        DELETE_FINISH: [MessageHandler(Filters.text,
+                                         EditPaymentHandler().handle_finish_delete,
+                                         pass_user_data=True),
+                          CommandHandler('cancel', EditPaymentHandler().cancel)],
 
-        DOUBLE_CHECK_DELETE: [MessageHandler(Filters.text,
-                                             EditPaymentHandler().handle_delete_double_check,
-                                             pass_user_data=True),
-                              CommandHandler('cancel', EditPaymentHandler().cancel)],
     },
 
     fallbacks=[

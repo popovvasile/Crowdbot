@@ -73,26 +73,31 @@ AFFIRMATIONS = [
 
 class PollBot(object):
     def __init__(self):
-        buttons = list()
-        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_poll")])
+        buttons = [[InlineKeyboardButton(text="Back", callback_data="cancel_poll")]]
         self.reply_markup = InlineKeyboardMarkup(
             buttons)
+        done_buttons = [[InlineKeyboardButton(text="Done", callback_data="done_poll")]]
+        self.done_markup = InlineKeyboardMarkup(
+            done_buttons)
 
     # Conversation handlers:
     @run_async
     def start(self, bot, update):
         """Send a message when the command /start is issued."""
-        update.message.reply_text('Hi! Please send me the title of your poll. (/cancel to exit)')
-
+        bot.send_message(update.callback_query.message.chat.id,
+                         'Hi! Please send me the title of your new poll', reply_markup=self.reply_markup)
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
         return TYPING_TITLE
 
     @run_async
     def handle_title(self, bot, update, user_data):
         text = update.message.text
         user_data['title'] = text
-        update.message.reply_text("{}! What kind of poll is it going to be? (/cancel to shut me up)"
+        update.message.reply_text("{}! What kind of poll is it going to be?"
                                   .format(self.get_affirmation()),
                                   reply_markup=self.assemble_reply_keyboard())
+
 
         return TYPING_TYPE
 
@@ -105,12 +110,12 @@ class PollBot(object):
         user_data['meta'] = dict()
 
         if POLL_HANDLERS[polltype].requires_extra_config(user_data['meta']):
-            update.message.reply_text(POLL_HANDLERS[polltype].ask_for_extra_config(user_data.get('meta')))
+            update.message.reply_text(POLL_HANDLERS[polltype].ask_for_extra_config(user_data.get('meta')), reply_markup=self.reply_markup)
             return TYPING_META
         else:
-            update.message.reply_text("{}. Now, send me the first answer option. (or /cancel)".format(
+            update.message.reply_text("{}! Now, send me the first answer option".format(
                 self.get_affirmation()
-            ))
+            ), reply_markup=self.reply_markup)
             return TYPING_OPTION
 
     @run_async
@@ -120,11 +125,12 @@ class PollBot(object):
         POLL_HANDLERS[polltype].register_extra_config(text, user_data.get('meta'))
 
         if POLL_HANDLERS[polltype].requires_extra_config(user_data.get('meta')):
-            update.message.reply_text(POLL_HANDLERS[polltype].ask_for_extra_config(user_data.get('meta')))
+            update.message.reply_text(POLL_HANDLERS[polltype].ask_for_extra_config(user_data.get('meta')),
+                                      replu_markup=self.reply_markup)
             return TYPING_META
         else:
             update.message.reply_text("{}, that's it! Next, please send me the first answer option."
-                                      .format(self.get_affirmation()))
+                                      .format(self.get_affirmation()), replu_markup=self.reply_markup)
             return TYPING_OPTION
 
     def handle_option(self, bot, update, user_data):
@@ -134,20 +140,23 @@ class PollBot(object):
 
         if len(user_data['options']) >= handler.max_options:
             return self.handle_done(bot, update, user_data)
-
-        update.message.reply_text("{}! Now, send me another answer option or type /done to publish."
-                                  .format(self.get_affirmation()),
-                                  reply_markup=ReplyKeyboardRemove())
+        update.message.reply_text("{}!".format(self.get_affirmation()), reply_markup=ReplyKeyboardRemove())
+        update.message.reply_text("Now, send me another answer option or click DONE to publish.",
+                                  reply_markup=self.done_markup)
 
         if len(user_data['options']) >= handler.max_options - 1:
-            update.message.reply_text("Uh oh, you're running out of options. You can only have one more option.")
+            update.message.reply_text("Uh oh, you're running out of options. You can only have one more option.",
+                                      replu_markup=self.reply_markup)
 
         return TYPING_OPTION
 
     @run_async
     def handle_done(self, bot, update, user_data):
-        update.message.reply_text("Thank you! you can send this poll to other groups "
-                                  "or chats by writing /send_poll \n"
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        bot.send_message(update.callback_query.message.chat.id,
+                         "Thank you! you can send this poll to other groups "
+                         "or chats by writing /send_poll \n"
                                   )
         options = []
         for i, opt in enumerate(user_data['options']):
@@ -177,14 +186,16 @@ class PollBot(object):
 
         table.insert(self.serialize(poll))
 
-        update.message.reply_text(self.assemble_message_text(poll),
+        bot.send_message(update.callback_query.message.chat.id,
+                         self.assemble_message_text(poll),
                                   reply_markup=self.assemble_inline_keyboard(poll, True),
                                   parse_mode='Markdown'
                                   )
 
         user_data.clear()
+        get_help(bot, update)
 
-        return NOT_ENGAGED
+        return ConversationHandler.END
 
     def get_affirmation(self):
         return random.choice(AFFIRMATIONS)
@@ -351,7 +362,7 @@ class PollBot(object):
             vote_instances[0].update(poll["votes"])
             poll["votes"] = vote_instances[0]
         poll["bot_id"] = bot.id
-        votes_list = []  # TODO find a way to solve this
+        votes_list = []
         for po in table.find({"bot_id": bot.id, "poll_id": poll["poll_id"]}):
             if po["chat_id"] != chat_id:
                 votes_list.append(po["votes"])
@@ -363,12 +374,11 @@ class PollBot(object):
         table.update({'poll_id': poll['poll_id'], "bot_id": bot.id},
                      self.serialize(poll),
                      upsert=True)
-        # TODO edit to actual result from db, the sum of votes
         bot.edit_message_text(text=self.assemble_message_text(poll),
                               parse_mode='Markdown',
                               reply_markup=self.assemble_inline_keyboard(poll),
                               **kwargs)
-        return
+        return ConversationHandler.END
 
     def cancel(self, bot, update):
         update.message.reply_text(
@@ -392,17 +402,18 @@ class PollBot(object):
 
     @run_async
     def handle_send_poll(self, bot, update):
-        chat_id, txt = initiate_chat_id(update)
-        bot.send_message(chat_id, "This is the list of the current polls. "
-                                  "Choose the pool that you want to send or click /cancel")
+
+        bot.send_message(update.callback_query.message.chat.id,
+                         "This is the list of the current polls. ", reply_keyboard=self.reply_markup)
 
         polls_list_of_dicts = polls_table.find({"bot_id": bot.id})
         command_list = [command['title'] for command in polls_list_of_dicts]
         reply_keyboard = [command_list]
-        update.message.reply_text(
-            "Please choose the poll that you want to send",
-            reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
-
+        bot.send_message(update.callback_query.message.chat.id,
+                         "Choose the poll that you want to send",
+                         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
         return TYPING_SEND_TITLE
 
     @run_async
@@ -428,8 +439,9 @@ class PollBot(object):
 
         if len(sent) == 0:
             bot.send_message(chat_id, "Looks like there are yet no users to send this poll to.")
+        get_help(bot, update)
 
-        return NOT_ENGAGED
+        return ConversationHandler.END
 
     # @run_async
     # def handle_bots_polls(self, bot, update):
@@ -480,12 +492,15 @@ class PollBot(object):
 
     @run_async
     def handle_delete_poll(self, bot, update):
+        # TODO delete not just the instance in the databse, but the messages themselves as well
         polls_list_of_dicts = polls_table.find({"bot_id": bot.id})
         command_list = [command['title'] for command in polls_list_of_dicts]
         reply_keyboard = [command_list]
-        update.message.reply_text(
-            "Please choose the poll that you want to check",
-            reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+        bot.send_message(update.callback_query.message.chat.id,
+                         "Please choose the poll that you want to delete",
+                         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
         return CHOOSE_TITLE_DELETE
 
     @run_async
@@ -495,33 +510,35 @@ class PollBot(object):
         poll_instances_table.delete_one({"bot_id": bot.id, "title": txt})
         update.message.reply_text(
             "Poll with title {} has been deleted".format(txt))
-
+        get_help(bot, update)
+        return ConversationHandler.END
 
 __mod_name__ = "Polls"
 
 __admin_help__ = """
-
-Admin only:*
- - /create_poll - to create a new poll
- - /delete_poll
- - /send_poll -  to send a poll to all users 
- - /cancel -  to cancel the creation of the poll
+Here you can:
+ - Create a new poll
+ - Delete_poll
+ - Send a poll to all users 
 
 """
-__admin_keyboard__ = [["/create_poll", "/delete_poll"],
-                      ["/send_poll"]]
 
+__admin_keyboard__ = [
+    InlineKeyboardButton(text="Create", callback_data="create_poll"),
+    InlineKeyboardButton(text="Delete", callback_data="delete_poll"),
+    InlineKeyboardButton(text="Send", callback_data="send_poll"),
+]
 DELETE_POLLS_HANDLER = ConversationHandler(
-    entry_points=[CommandHandler('delete_poll', PollBot().handle_delete_poll),
-
+    entry_points=[CallbackQueryHandler(callback=PollBot().handle_delete_poll,
+                                       pattern=r"delete_poll")
                   ],
     states={
 
-        CHOOSE_TITLE_DELETE: [MessageHandler(Filters.text, PollBot().handle_delete_poll_finish, pass_user_data=True),
+        CHOOSE_TITLE_DELETE: [MessageHandler(Filters.text, PollBot().handle_delete_poll_finish),
                               CommandHandler('cancel', PollBot().cancel)],
 
     },
-    fallbacks=[CommandHandler('cancel', PollBot().cancel, pass_user_data=True)]
+    fallbacks=[CallbackQueryHandler(callback=PollBot().cancel, pattern=r"cancel_poll")]
 )
 
 # BOTS_POLLS_HANDLER = ConversationHandler(
@@ -537,7 +554,8 @@ DELETE_POLLS_HANDLER = ConversationHandler(
 #     fallbacks=[CommandHandler('cancel', PollBot().cancel, pass_user_data=True)]
 # )
 POLL_HANDLER = ConversationHandler(
-    entry_points=[CommandHandler('create_poll', PollBot().start),
+    entry_points=[CallbackQueryHandler(callback=PollBot().start,
+                                       pattern=r"create_poll"),
                   ],
     states={
         NOT_ENGAGED: [CommandHandler('poll', PollBot().start)],
@@ -568,7 +586,7 @@ POLL_HANDLER = ConversationHandler(
     },
     fallbacks=[
         CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
-        CommandHandler('done', PollBot().handle_done, pass_user_data=True),
+        CallbackQueryHandler(callback=PollBot().handle_done, pattern=r"done_poll", pass_user_data=True),
         CommandHandler('cancel', PollBot().cancel),
         MessageHandler(filters=Filters.command, callback=PollBot().back),
     ]
@@ -578,7 +596,8 @@ BUTTON_HANDLER = CallbackQueryHandler(PollBot().button, pattern='{"i":')
 NOT_ENGAGED_SEND, TYPING_SEND_TITLE = range(2)
 
 SEND_POLLS_HANDLER = ConversationHandler(
-    entry_points=[CommandHandler('send_poll', PollBot().handle_send_poll),
+    entry_points=[CallbackQueryHandler(callback=PollBot().handle_send_poll,
+                                       pattern=r"send_poll"),
                   CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll")
                   ],
     states={

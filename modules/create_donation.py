@@ -57,19 +57,23 @@ class CreateDonationHandler(object):
     @run_async
     def start_create_donation(self, bot, update, user_data):
         chatbot = chatbots_table.find_one({"bot_id": bot.id}) or {}
-        if "payment_token" in chatbot:
-            update.message.reply_text("Please enter a title for your donation.\n"
-                                      "If you want to change your donation provider token, "
-                                      "please click /edit_donation")
-
-            update.message.reply_text("If you want to quit, click 'Back' ", reply_markup=self.reply_markup)
-            return TYPING_TITLE
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        if "donation" in chatbot:
+            if "payment_token" in chatbot["donation"]:
+                bot.send_message(update.callback_query.message.chat.id,
+                                 "Please enter a title for your donation", reply_markup=self.reply_markup)
+                return TYPING_TITLE
+            else:
+                bot.send_message(update.callback_query.message.chat.id,
+                                 "Please enter your donation provider token\n"
+                                          "In order to get it, "
+                                          "please visit the [Telegram's tutorial](https://core.telegram.org/bots/donations#getting-a-token)", parse_mode= 'Markdown', reply_markup=self.reply_markup)
         else:
-            update.message.reply_text("Please enter your donation provider token\n"
-                                      "In order to get it,"
-                                      "please visit [Telegram's tutorial](https://core.telegram.org/bots/donations#getting-a-token)")
-
-            update.message.reply_text("If you want to quit, click 'Back' ", reply_markup=self.reply_markup)
+            bot.send_message(update.callback_query.message.chat.id,
+                             "Please enter your donation provider token\n"
+                                      "In order to get it, "
+                                      "please visit the [Telegram's tutorial](https://core.telegram.org/bots/donations#getting-a-token)", parse_mode= 'Markdown', reply_markup=self.reply_markup)
             return TYPING_TOKEN
 
     @run_async
@@ -79,7 +83,7 @@ class CreateDonationHandler(object):
 
             user_data['payment_token'] = txt
 
-            update.message.reply_text("Please enter a title for your donation", reply_markup=self.reply_markup)
+            update.message.reply_text("Enter a title for your donation", reply_markup=self.reply_markup)
 
             return TYPING_TITLE
         else:
@@ -94,7 +98,7 @@ class CreateDonationHandler(object):
         chat_id, txt = initiate_chat_id(update)
         user_data['title'] = txt
 
-        update.message.reply_text("Please write a short text for your donation- what your users have to pay for?",
+        update.message.reply_text("Write a short text for your donation- what your users have to pay for?",
                                   reply_markup=self.reply_markup)
 
         return TYPING_DESCRIPTION
@@ -104,7 +108,7 @@ class CreateDonationHandler(object):
         chat_id, txt = initiate_chat_id(update)
         user_data["description"] = txt
         currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["CHF", "AUD", "RON", "PLN"]]
-        update.message.reply_text("Please choose the currency of your payment",
+        update.message.reply_text("Now, Choose the currency of your payment",
                                   reply_markup=ReplyKeyboardMarkup(currency_keyboard, one_time_keyboard=True))
 
         return DONATION_FINISH
@@ -114,12 +118,14 @@ class CreateDonationHandler(object):
         chat_id, txt = initiate_chat_id(update)
         currency = txt
         user_data["currency"] = currency
-        bot.send_message(chat_id, "Your donation has been created!")
+        bot.send_message(chat_id, "Your donation has been created!", reply_markup=self.reply_markup)
         chatbot = chatbots_table.find_one({"bot_id": bot.id}) or {}
         chatbot["donation"] = user_data
-        chatbot["payment_token"] = user_data['payment_token']
+        if 'payment_token' in user_data:
+            chatbot["donation"]["payment_token"] = user_data['payment_token']
         chatbots_table.update_one({"bot_id": bot.id}, {'$set': chatbot}, upsert=True)
         user_data.clear()
+        get_help(bot, update)
         return ConversationHandler.END
 
     @staticmethod
@@ -146,8 +152,10 @@ class CreateDonationHandler(object):
 
 
 CREATE_DONATION_HANDLER = ConversationHandler(
-    entry_points=[CommandHandler('configure_donation', CreateDonationHandler().start_create_donation,
-                                 pass_user_data=True)],
+    entry_points=[CallbackQueryHandler(callback=CreateDonationHandler().start_create_donation,
+                                       pass_user_data=True,
+                                       pattern=r'allow_donation'),
+                  ],
     # TYPING_TOKEN, TYPING_TITLE,  TYPING_DESCRIPTION, TYPING_AMOUNT, TYPING_CURRENCY,\
     # TYPING_TAGS, TYPING_TAGS_FINISH, TYPING_TYPE, TYPING_DEADLINE, TYPING_REPEAT
     states={

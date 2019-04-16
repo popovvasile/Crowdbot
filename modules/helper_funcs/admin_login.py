@@ -17,7 +17,7 @@ class AdminAuthentication(object):
         used_email = txt
         user = users_table.find_one({'bot_id': bot.id, "email": used_email})
         if user:
-            bot.send_message(chat_id, "Please enter your password or click /cancel")
+            bot.send_message(chat_id, "Enter your password or click /cancel")
             user_data["email"] = used_email
             return TYPING_PASS
         else:

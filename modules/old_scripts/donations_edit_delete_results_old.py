@@ -79,7 +79,7 @@ class EditPaymentHandler(object):
                            ["Price", "Currency", "Tags"],
                            ["Type of donation", "Repeat frequency"]]
         chat_id, txt = initiate_chat_id(update)
-        bot.send_message(chat_id, "Please choose what exactly do you want to edit",
+        bot.send_message(chat_id, "Choose what exactly do you want to edit",
                          reply_markup=ReplyKeyboardMarkup(keyboard_markup))
         return CHOOSING_EDIT_ACTION
 
@@ -88,21 +88,21 @@ class EditPaymentHandler(object):
         user_data['edit_action'] = txt
         # if txt == "Deadline":
         #     bot.send_message(chat_id,
-        #                      "Please enter a deadline for this donation, in the following format: dd.mm.yyyy")
+        #                      "Enter a deadline for this donation, in the following format: dd.mm.yyyy")
         #     return TYPING_DEADLINE
         if txt == "Title":
             bot.send_message(chat_id,
                              "Please write a new title for this donation")
             return TYPING_TITLE
         elif txt == "Description":
-            update.message.reply_text("Please write a short text for your donation- what your users have to pay for?")
+            update.message.reply_text("Write a short text for your donation- what your users have to pay for?")
             return TYPING_DESCRIPTION
         elif txt == "Price":
-            update.message.reply_text("Please enter a floating number in following format: 10.50")
+            update.message.reply_text("Enter a floating number in following format: 10.50")
             return TYPING_AMOUNT
         elif txt == "Currency":
             currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["CHF", "AUD", "RON", "PLN"]]
-            update.message.reply_text("Please choose the currency of your donation",
+            update.message.reply_text("Choose the currency of your donation",
                                       reply_markup=ReplyKeyboardMarkup(currency_keyboard, one_time_keyboard=True))
             return TYPING_CURRENCY
         elif txt == "Tags":
@@ -113,7 +113,7 @@ class EditPaymentHandler(object):
                 else:
                     tags_names.append(chat["tag"])
             tags_names = [["Ready"] + list(set(tags_names))]
-            bot.send_message(chat_id, "Please send me the tags of the users that have to pay this donation. \n"
+            bot.send_message(chat_id, "Send me the tags of the users that have to pay this donation. \n"
                                       "Click on one of the tags or click Ready to proceed to the next step",
                              reply_markup=ReplyKeyboardMarkup(tags_names))
             user_data['tags'] = []
@@ -122,7 +122,7 @@ class EditPaymentHandler(object):
         elif txt == "Type of donation":
             reply_keyboard = [["Crowdfunding"], ["Fee"]]
             bot.send_message(chat_id,
-                             "Please choose the type of your donation request: is it a donation,"
+                             "Choose the type of your donation request: is it a donation,"
                              "a membership fee or a crowdfunding campaign?",
                              reply_markup=ReplyKeyboardMarkup(reply_keyboard))
             return TYPING_TYPE

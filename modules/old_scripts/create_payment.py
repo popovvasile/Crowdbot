@@ -50,14 +50,14 @@ class CreatePaymentHandler(object):
         chatbot = chatbots_table.find_one({"bot_id": bot.id})
         if not "payment_token" in chatbot:
             user_data['payment_token'] = txt
-        update.message.reply_text("Please enter a title for your payment")
+        update.message.reply_text("Enter a title for your payment")
         return TYPING_TITLE
 
     @run_async
     def handle_title(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
         user_data['title'] = txt
-        update.message.reply_text("Please write a short text for your payment- what your users have to pay for?")
+        update.message.reply_text("Write a short text for your payment- what your users have to pay for?")
         return TYPING_DESCRIPTION
 
     @run_async
@@ -71,7 +71,7 @@ class CreatePaymentHandler(object):
             else:
                 tags_names.append(chat["tag"])
         tags_names = [["Ready"] + list(set(tags_names))]
-        bot.send_message(chat_id, "Please type a floating point amount for your payment. Like this: 10.50"
+        bot.send_message(chat_id, "Type a floating point amount for your payment. Like this: 10.50"
                          ,
                          reply_markup=ReplyKeyboardMarkup(tags_names))
         user_data['tags'] = []
@@ -88,7 +88,7 @@ class CreatePaymentHandler(object):
             return TYPING_AMOUNT
         user_data["amount"] = amount
         currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["CHF", "AUD", "RON", "PLN"]]
-        update.message.reply_text("Please choose the currency of your payment",
+        update.message.reply_text("Now, choose the currency of your payment",
                                   reply_markup=ReplyKeyboardMarkup(currency_keyboard, one_time_keyboard=True))
         return TYPING_CURRENCY
 
@@ -104,7 +104,7 @@ class CreatePaymentHandler(object):
             else:
                 tags_names.append(chat["tag"])
         tags_names = [["Ready"] + list(set(tags_names))]
-        bot.send_message(chat_id, "Please send me the tags of the users that have to pay this payment. \n"
+        bot.send_message(chat_id, "Send me the tags of the users that have to pay this payment. \n"
                                   "Click on one of the tags or click Ready to proceed to the next step",
                          reply_markup=ReplyKeyboardMarkup(tags_names))
         user_data['tags'] = []

@@ -257,21 +257,21 @@ class WelcomeBot(object):
                           })
 
         get_help(bot=bot, update=update)
-        initial_survey = surveys_table.find_one({
-            "bot_id": bot.id,
-            "title": "initial"
-        })
-        if initial_survey:
-            bot.send_message(chat_id=chat_id,
-                             text="Dear {}, before you start, please answer a some quick questions. "
-                                  "To start the survey, press the button START".format(
-                                 update.message.from_user.first_name),
-                             reply_markup=InlineKeyboardMarkup(
-                                 [InlineKeyboardButton(text="START",
-                                                       callback_data="survey_{}".format(
-                                                           "initial"
-                                                       ))]
-                             ))
+        # initial_survey = surveys_table.find_one({
+        #     "bot_id": bot.id,
+        #     "title": "initial"
+        # })
+        # if initial_survey:
+        #     bot.send_message(chat_id=chat_id,
+        #                      text="Dear {}, before you start, please answer a some quick questions. "
+        #                           "To start the survey, press the button START".format(
+        #                          update.message.from_user.first_name),
+        #                      reply_markup=InlineKeyboardMarkup(
+        #                          [InlineKeyboardButton(text="START",
+        #                                                callback_data="survey_{}".format(
+        #                                                    "initial"
+        #                                                ))]
+        #                      ))
         return ConversationHandler.END
 
     @staticmethod

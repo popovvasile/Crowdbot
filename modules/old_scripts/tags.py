@@ -91,7 +91,7 @@ class TagBot(object):   # TODO allow users to send messages to the bots admins
         if "#user" in tags_list:
             tags_list.remove("#user")
         reply_keyboard = [tags_list]
-        bot.send_message(chat_id, "Please choose the tag that you want to delete from your chat."
+        bot.send_message(chat_id, "Choose the tag that you want to delete from your chat."
                                   "To cancel this command click /cancel",
                          reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
         return CHOOSING_TAGS

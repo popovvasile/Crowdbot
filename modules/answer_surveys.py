@@ -45,14 +45,12 @@ def facts_to_str(user_data):
 
 class AnswerSurveys(object):
     def __init__(self):
-        buttons = list()
-        buttons.append([InlineKeyboardButton(text="Cancel survey", callback_data="cancel_survey_answering")])
+        buttons = [[InlineKeyboardButton(text="Cancel survey", callback_data="cancel_survey_answering")]]
         self.reply_markup = InlineKeyboardMarkup(
             buttons)
 
     @run_async
     def start_answering(self, bot, update, user_data):  # TODO add the "skip" button
-        chat_id, txt = initiate_chat_id(update)
         user_data['title'] = update.callback_query.data.replace("survey_", "")
         user_data["question_id"] = 0
         survey = surveys_table.find_one({
@@ -157,20 +155,17 @@ ANSWER_SURVEY_HANDLER = ConversationHandler(
 
 __mod_name__ = "Surveys"
 __admin_help__ = """
- - /cancel - cancel a survey
-Admin only:
- - /create_survey - to create a survey 
- - /delete_survey - to delete a survey 
- - /send_survey  - to send to the users a notification about a survey via tags
- - /survey_results - the results of a survey
+ Here you can:
+ -  Create a survey and ask your users any questions \n
+ -  Delete a survey\n
+ -  Send an invitation to answer to your survey\n
+ -  Check the results of the survey
 
 """
 
-__admin_keyboard__ = [["/create_survey"],
-                      ["/delete_survey", "/send_survey"],
-                      ["/surveys_results"]]
-
-__admin_keyboard__ = [InlineKeyboardButton(text="Create", callback_data="create_button"),
-                      InlineKeyboardButton(text="Delete", callback_data="delete_button")]
-CallbackQueryHandler(callback=AddCommands().start,
-                                       pattern=r"create_button"),
+__admin_keyboard__ = [
+    InlineKeyboardButton(text="Create", callback_data="create_survey"),
+     InlineKeyboardButton(text="Delete", callback_data="delete_survey"),
+    InlineKeyboardButton(text="Send", callback_data="send_survey"),
+     InlineKeyboardButton(text="Resutls", callback_data="surveys_results")
+]

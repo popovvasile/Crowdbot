@@ -14,7 +14,7 @@ db = client['chatbots']
 
 def multiple_bot_daemon():
     my_process = {}
-
+    print(db["chatbots"].find().count())
     while True:
         for doc in db["chatbots"].find():  # run all tokens when the script is running
             if doc["token"] not in my_process.keys():
@@ -23,12 +23,14 @@ def multiple_bot_daemon():
                 new_process.start()
                 my_process[doc["token"]] = new_process
                 # print(my_process)
-                # print(doc["token"])
+                print(doc["token"])
 
         for key, process in my_process.items():
             if not process.is_alive():
                 doc = dict()
                 doc["token"] = key
+                print(doc)
+
                 new_process = Process(target=main, args=(doc,), name=doc["token"])
                 new_process.start()
                 my_process[doc["token"]] = new_process

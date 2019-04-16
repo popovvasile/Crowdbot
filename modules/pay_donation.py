@@ -15,23 +15,26 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.INFO)
 
 logger = logging.getLogger(__name__)
-__mod_name__ = "Donate"
+__mod_name__ = "Donation"
 
 __admin_help__ = """
  Click:
-  - /donate - to make a donation for this organization
-  - /configure_donation - to add an option that allows the users of this bot to donate for your organization 
-    - /edit_donation - to edit the current donation settings
+  - Donate - to make a donation for this organization
+  - Allow donations - to allow the users of this bot to donate for your organization 
+  - Configure - to edit the current donation settings
 
 """
 
 __visitor_help__ = """
  Click:
-  - /donate to make a donation for this organization
+  - Donate to make a donation for this organization
 """
 
-__admin_keyboard__ = [["/donate"], ["/configure_donation"], ["/edit_donation"]]
-__visitor_keyboard__ = [["/donate"]]
+__admin_keyboard__ = [InlineKeyboardButton(text="Donate", callback_data="donate"),
+                      InlineKeyboardButton(text="Allow donations", callback_data="allow_donation"),
+                      InlineKeyboardButton(text="Configure", callback_data="configure_donation")]
+__visitor_keyboard__ = [InlineKeyboardButton(text="Donate", callback_data="donate")]
+
 
 DONATION_MESSAGE, EXECUTE_DONATION, HANDLE_PRECHECKOUT, HANDLE_SUCCES = range(4)
 
@@ -50,21 +53,32 @@ class DonationBot(object):
     @run_async
     def start_donation(self, bot, update, user_data):
         donation_request = chatbots_table.find_one({"bot_id": bot.id})
+
         if donation_request:
+
             if "donation" in donation_request:
-                update.message.reply_text("Great! We very glad that you want to donate for our cause!")
-                update.message.reply_text(
-                    "First, tell us how much do you want to donate. Enter a floating point number")
-                update.message.reply_text("Remember, we use {} as our primary currency".format(
+                bot.send_message(update.callback_query.message.chat.id,
+                                 "Great! We very glad that you want to donate for our cause!")
+                bot.send_message(update.callback_query.message.chat.id,
+                                 "First, tell us how much do you want to donate. Enter a floating point number")
+                bot.send_message(update.callback_query.message.chat.id,
+                                 "Remember, we use {} as our primary currency".format(
                     donation_request["donation"]['currency'])
                 )
-                update.message.reply_text(text="To return to main menu, click 'Back' ",
+                bot.send_message(update.callback_query.message.chat.id,
+                                 text="To return to main menu, click 'Back' ",
                                           reply_markup=InlineKeyboardMarkup(  # TODO modify this shit
                                               [[InlineKeyboardButton(text="Back",
                                                                      callback_data="cancel_donation_payment")]]))
                 return DONATION_MESSAGE
+            else:
+                bot.send_message(update.callback_query.message.chat.id,
+                                 "Sorry, no option for donation yet")
+                return ConversationHandler.END
+
         else:
-            update.message.reply_text("Sorry, no option for donation yet")
+            bot.send_message(update.callback_query.message.chat.id,
+                             "Sorry, no option for donation yet")
             return ConversationHandler.END
 
     @run_async
@@ -72,8 +86,8 @@ class DonationBot(object):
         chat_id, txt = initiate_chat_id(update)
         user_data["amount"] = txt
         update.message.reply_text("You can write a message about your donation, "
-                                  "tell why you want to donate or click NEXT STEP to skip",
-                                  reply_markup=ReplyKeyboardMarkup([["NEXT STEP"]], one_time_keyboard=True))
+                                  "tell why you want to donate or click SKIP",
+                                  reply_markup=ReplyKeyboardMarkup([["SKIP"]], one_time_keyboard=True))
         return EXECUTE_DONATION
 
     @run_async
@@ -98,7 +112,7 @@ class DonationBot(object):
                         provider_token, start_parameter, currency, prices)
         update.message.reply_text(text="To return to main menu, click 'Back' ",
                                   reply_markup=InlineKeyboardMarkup(
-                                      [[InlineKeyboardButton(text="cancel_donation_payment",
+                                      [[InlineKeyboardButton(text="Back",
                                                              callback_data="help_back")]]))
         user_data = donation_request
 
@@ -146,9 +160,10 @@ class DonationBot(object):
 
 DONATE_HANDLER = ConversationHandler(
     entry_points=[
-        CommandHandler('donate',
-                       DonationBot().start_donation,
-                       pass_user_data=True)],
+        CallbackQueryHandler(callback=DonationBot().start_donation,
+                             pass_user_data=True,
+                             pattern=r'donate'),
+    ],
     states={
         DONATION_MESSAGE: [MessageHandler(callback=DonationBot().donation_message,
                                           filters=Filters.text,
