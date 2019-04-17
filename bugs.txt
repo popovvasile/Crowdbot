@@ -1,5 +1,15 @@
-todo 1)fix and test buttons with files
-    2)change the text
 
+    10. Команда Delete наебнулась совсем. Не реагирует. Остальное пока что работает. #TODO delete the instaces in chats as well
 
+Survay
+    12. Бот упал. Не реагировал. Через /cancel получилось реанимировать.
+    13. Create survey ввёл название, два вопроса по очереди, жму Done - Второй вопрос прыгнул под Done, жму ещё раз Done- первый вопрос пргнул под Done. Done исчез, клавиши back нету-команда тупиковая и с багами
+    14. Если жать на Send и Result, то бот перестаёт реагировать  # TODO Results works strange
 
+# TODO a lot of polls work strange
+#restore users (with acceptance), tags, payments, user_profile
+
+# TODO make message anonymous
+
+# TODO create a ProtestBot as an example
+TODO learn how to use  ForceReply https://python-telegram-bot.readthedocs.io/en/stable/telegram.forcereply.html

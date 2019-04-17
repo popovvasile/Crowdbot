@@ -56,17 +56,31 @@ class EditPaymentHandler(object):
 
     @run_async
     def start_donation(self, bot, update, user_data):
+        chatbot = chatbots_table.find_one({"bot_id": bot.id})
 
-        reply_keyboard = [["Delete this donation"], ["Edit"]]
-        # bot.delete_message(chat_id=update.callback_query.message.chat_id,
-        #                    message_id=update.callback_query.message.message_id)
-        bot.send_message(update.callback_query.message.chat.id,
-                         "What do you want to do with this donation?",
-                         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+        if chatbot.count() != 0:
+            reply_keyboard = [["Delete this donation"], ["Edit"]]
+            bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                               message_id=update.callback_query.message.message_id)
+            bot.send_message(update.callback_query.message.chat.id,
+                             "What do you want to do with this donation?",
+                             reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
 
-        return FINISH_ACTION
+            return FINISH_ACTION
+        else:
+            bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                               message_id=update.callback_query.message.message_id)
+            admin_keyboard = [InlineKeyboardButton(text="Allow donations", callback_data="allow_donation"),
+                              InlineKeyboardButton(text="Back", callback_data="help_back")]
+            bot.send_message(update.callback_query.message.chat.id,
+                             """You have no donations set so far. \n
+                              Press "Allow donations" to configure your first donation option
+                               or click "Back" for main menu""",
+                             reply_markup=InlineKeyboardMarkup(admin_keyboard))
+            return ConversationHandler.END
 
     def handle_action_finish(self, bot, update, user_data):  # TODO add if leifs for every action
+
         chat_id, txt = initiate_chat_id(update)
         if txt == "Delete this donation":
             user_data['action'] = txt

@@ -109,28 +109,23 @@ def button_handler(bot: Bot, update: Update):
         )  # TODO add files and images
         if "descriptions" in button_info:
             for descr in button_info["descriptions"]:  # TODO adjust for images and files
-                query.message.reply_text(text=descr, reply_markup=InlineKeyboardMarkup(
-                                     buttons))
+                query.message.reply_text(text=descr)
         if "audio_files" in button_info:
             for filename in button_info["audio_files"]:
                 with open(filename, 'rb') as file:
-                    query.message.reply_audio(file, reply_markup=InlineKeyboardMarkup(
-                                     buttons))
+                    query.message.reply_audio(file)
         if "video_files" in button_info:
             for filename in button_info["video_files"]:
                 with open(filename, 'rb') as file:
-                    query.message.reply_video(file, reply_markup=InlineKeyboardMarkup(
-                                     buttons))
+                    query.message.reply_video(file)
         if "document_files" in button_info:
             for filename in button_info["document_files"]:
                 with open(filename, 'rb') as file:
-                    query.message.reply_document(file, reply_markup=InlineKeyboardMarkup(
-                                     buttons))
+                    query.message.reply_document(file)
         if "photo_files" in button_info:
             for filename in button_info["photo_files"]:
                 with open(filename, 'rb') as file:
-                    query.message.reply_photo(file, reply_markup=InlineKeyboardMarkup(
-                                     buttons))
+                    query.message.reply_photo(file)
 
     except BadRequest as excp:
         if excp.message == "Message is not modified":
@@ -141,6 +136,9 @@ def button_handler(bot: Bot, update: Update):
             pass
         else:
             LOGGER.exception("Exception in help buttons. %s", str(query.data))
+    bot.send_message(chat_id=update.callback_query.message.chat_id,
+                     text="Back to menu", reply_markup=InlineKeyboardMarkup(
+                                     buttons))
 
 
 @run_async

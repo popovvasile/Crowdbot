@@ -23,7 +23,8 @@ TYPING_TOKEN, TYPING_TITLE, TYPING_DESCRIPTION, DONATION_FINISH = range(4)
 
 
 def check_provider_token(provider_token, bot_id):
-    bot_token = chatbots_table.find_one({"bot_id": bot_id})["token"]
+    # bot_token = chatbots_table.find_one({"bot_id": bot_id})["token"]
+    bot_token = "633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg"
     prices = [LabeledPrice("Test payment, Please ignore this message", 10000)]
     data = requests.get("https://api.telegram.org/bot{}/sendInvoice".format(bot_token),
 
@@ -68,12 +69,12 @@ class CreateDonationHandler(object):
                 bot.send_message(update.callback_query.message.chat.id,
                                  "Please enter your donation provider token\n"
                                           "In order to get it, "
-                                          "please visit the [Telegram's tutorial](https://core.telegram.org/bots/donations#getting-a-token)", parse_mode= 'Markdown', reply_markup=self.reply_markup)
+                                          "please visit the [Telegram's tutorial](https://core.telegram.org/bots/payments#getting-a-token)", parse_mode= 'Markdown', reply_markup=self.reply_markup)
         else:
             bot.send_message(update.callback_query.message.chat.id,
                              "Please enter your donation provider token\n"
                                       "In order to get it, "
-                                      "please visit the [Telegram's tutorial](https://core.telegram.org/bots/donations#getting-a-token)", parse_mode= 'Markdown', reply_markup=self.reply_markup)
+                                      "please visit the [Telegram's tutorial](https://core.telegram.org/bots/payments#getting-a-token)", parse_mode= 'Markdown', reply_markup=self.reply_markup)
             return TYPING_TOKEN
 
     @run_async

@@ -51,8 +51,6 @@ class AddCommands(object):
         return TYPING_BUTTON
 
     def button_handler(self, bot, update, user_data):
-        # TODO commands /command must be inline buttons, not one-time keyboard
-        # TODO delete files as well
         # TODO create a chatbot specially for OG
         # TODO change bot description
         chat_id, txt = initiate_chat_id(update)
@@ -101,11 +99,10 @@ class AddCommands(object):
                 user_data["descriptions"] = list()
 
         if update.message.photo:
-
+            photo_file = update.message.photo[-1].get_file
             filename = 'photo_{}_button_{}_{}.jpg'.format(str(bot.id),
                                                           str(user_data['button']),
-                                                          update.message.photo[-1].file_id)
-            photo_file = update.message.photo[-1].get_file(file_name=filename)
+                                                          photo_file.file_id)
             custom_path = photo_directory + "/" + filename
             photo_file.download(custom_path=custom_path)
             if "photo_files" not in user_data:
@@ -116,9 +113,11 @@ class AddCommands(object):
                 user_data["photo_files"] = list()
 
         if update.message.audio:
-            filename = 'audio_{}_button_{}.mp3'.format(str(bot.id),
-                                                       str(user_data['button']))
-            audio_file = update.message.audio.get_file(file_name=filename)
+
+            audio_file = update.message.audio.get_file()
+            filename = 'audio_{}_button_{}_{}.mp3'.format(str(bot.id),
+                                                          str(user_data['button']),
+                                                          audio_file.title)
             custom_path = audio_directory + "/" + filename
             audio_file.download(custom_path=custom_path)
             if "audio_files" not in user_data:
@@ -129,9 +128,11 @@ class AddCommands(object):
                 user_data["audio_files"] = list()
 
         if update.message.voice:
-            filename = 'voice_{}_button_{}.mp3'.format(str(bot.id),
-                                                       str(user_data['button']))
-            voice_file = update.message.voice.get_file(file_name=filename)
+
+            voice_file = update.message.voice.get_file()
+            filename = 'voice_{}_{}_button_{}.mp3'.format(voice_file.file_id,
+                                                          str(bot.id),
+                                                          str(user_data['button']))
             custom_path = audio_directory + "/" + filename
             voice_file.download(custom_path=custom_path)
             if "audio_files" not in user_data:
@@ -142,9 +143,11 @@ class AddCommands(object):
                 user_data["audio_files"] = list()
 
         if update.message.document:
-            filename = 'document_{}_button_{}.pdf'.format(str(bot.id),
-                                                          str(user_data['button']))
-            document_file = update.message.document.get_file(file_name=filename)
+
+            document_file = update.message.document.get_file()
+            filename = '{}_document_{}_button_{}.pdf'.format(document_file.title,
+                                                             str(bot.id),
+                                                             str(user_data['button']))
             custom_path = document_directory + "/" + filename
             document_file.download(custom_path=custom_path)
             if "document_files" not in user_data:
@@ -155,9 +158,10 @@ class AddCommands(object):
                 user_data["document_files"] = list()
 
         if update.message.video:
-            filename = 'video_{}_button_{}.mp4'.format(str(bot.id),
-                                                       str(user_data['button']))
-            video_file = update.message.video.get_file(file_name=filename)
+
+            video_file = update.message.video.get_file()
+            filename = 'video_{}_{}_button_{}.mp4'.format(video_file.title, str(bot.id),
+                                                          str(user_data['button']))
             custom_path = video_directory + "/" + filename
 
             video_file.download(custom_path=custom_path)
@@ -170,9 +174,10 @@ class AddCommands(object):
                 user_data["video_files"] = list()
 
         if update.message.video_note:
-            filename = 'video_note_{}_button_{}.mp4'.format(str(bot.id),
-                                                            str(user_data['button']))
             video_note_file = update.message.audio.get_file()
+            filename = 'video_note_{}_{}_button_{}.mp4'.format(video_note_file.file_id,
+                                                               str(bot.id),
+                                                               str(user_data['button']))
             custom_path = video_directory + "/" + filename
             video_note_file.download(filename, custom_path=custom_path)
 
@@ -225,8 +230,7 @@ class AddCommands(object):
             return TYPING_TO_DELETE_BUTTON
         else:
             bot.send_message(update.callback_query.message.chat.id,
-                             "You have no buttons created yet. Create your first button by clicking "
-                             "'Create'")
+                             """You have no buttons created yet. Create your first button by clicking "Create" """)
             get_help(bot, update)
 
             return ConversationHandler.END

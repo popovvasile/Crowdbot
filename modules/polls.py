@@ -435,10 +435,12 @@ class PollBot(object):
                                      reply_markup=self.assemble_inline_keyboard(poll, True),
                                      parse_mode='Markdown'
                                      )
-        bot.send_message(chat_id, "Your poll was sent to all you users! ")
+
+        bot.send_message(chat_id, "Your poll was sent to all you users! ", reply_markup=ReplyKeyboardRemove())
 
         if len(sent) == 0:
-            bot.send_message(chat_id, "Looks like there are yet no users to send this poll to.")
+            bot.send_message(chat_id, "Looks like there are yet no users to send this poll to. "
+                                      "No polls sent :( ", reply_markup=ReplyKeyboardRemove())
         get_help(bot, update)
 
         return ConversationHandler.END
@@ -494,24 +496,40 @@ class PollBot(object):
     def handle_delete_poll(self, bot, update):
         # TODO delete not just the instance in the databse, but the messages themselves as well
         polls_list_of_dicts = polls_table.find({"bot_id": bot.id})
-        command_list = [command['title'] for command in polls_list_of_dicts]
-        reply_keyboard = [command_list]
-        bot.send_message(update.callback_query.message.chat.id,
-                         "Please choose the poll that you want to delete",
-                         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
-        bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
-        return CHOOSE_TITLE_DELETE
+        if polls_list_of_dicts.count() !=0:
+            command_list = [command['title'] for command in polls_list_of_dicts]
+            reply_keyboard = [command_list]
+            bot.send_message(update.callback_query.message.chat.id,
+                             "Please choose the poll that you want to delete",
+                             reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+            bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                               message_id=update.callback_query.message.message_id)
+            bot.send_message(update.callback_query.message.chat.id,
+                             "Click 'Back' to cancel", reply_keyboard=self.reply_markup)
+            return CHOOSE_TITLE_DELETE
+        else:
+            bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                               message_id=update.callback_query.message.message_id)
+            admin_keyboard = [InlineKeyboardButton(text="Create", callback_data="create_poll"),
+                              InlineKeyboardButton(text="Back", callback_data="help_back")]
+            bot.send_message(update.callback_query.message.chat.id,
+                             """You have no polls created yet. \n"""
+                             """Click "Create" to configure your first poll or "Back" for main menu""",
+                             reply_markup=InlineKeyboardMarkup([admin_keyboard]))
+            return ConversationHandler.END
 
     @run_async
     def handle_delete_poll_finish(self, bot, update):
         chat_id, txt = initiate_chat_id(update)
         polls_table.delete_one({"bot_id": bot.id, "title": txt})
         poll_instances_table.delete_one({"bot_id": bot.id, "title": txt})
+        update.message.reply_text("Ok!", reply_markup=ReplyKeyboardRemove())
+
         update.message.reply_text(
             "Poll with title {} has been deleted".format(txt))
         get_help(bot, update)
         return ConversationHandler.END
+
 
 __mod_name__ = "Polls"
 

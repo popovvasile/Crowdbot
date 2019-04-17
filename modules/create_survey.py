@@ -1,6 +1,6 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
-from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import (CommandHandler, MessageHandler, Filters, ConversationHandler,
                           run_async, CallbackQueryHandler)
 import logging
@@ -45,8 +45,6 @@ class SurveyHandler(object):
     def start(self, bot, update, user_data):
 
         user_data["question_id"] = 0
-        buttons = list()
-
         bot.send_message(update.callback_query.message.chat.id,
                          "Enter a title for your survey", reply_markup=self.reply_markup)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -149,21 +147,34 @@ class SurveyHandler(object):
 
     @run_async
     def show_surveys(self, bot, update):
-        bot.send_message(update.callback_query.message.chat.id,
-                         "This is the list of your current surveys:")
-        command_list = [survey['title'] for survey in surveys_table.find({"bot_id": bot.id})]
-        reply_keyboard = [command_list]
-        bot.send_message(update.callback_query.message.chat.id,
-                         "Choose the survey that you want to see",
-                         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
-        buttons = list()
-        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_survey")])
-        reply_markup = InlineKeyboardMarkup(
-            buttons)
-        bot.send_message(update.callback_query.message.chat.id,
-                         "If you want to quit this command, click 'Back' ", reply_markup=reply_markup)
+        survey_list = surveys_table.find({"bot_id": bot.id})
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
+        if survey_list.count() != 0:
+
+            bot.send_message(update.callback_query.message.chat.id,
+                             "This is the list of your current surveys:")
+            command_list = [survey['title'] for survey in survey_list]
+            reply_keyboard = [command_list]
+            bot.send_message(update.callback_query.message.chat.id,
+                             "Choose the survey that you want to see",
+                             reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+            buttons = list()
+            buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_survey")])
+            reply_markup = InlineKeyboardMarkup(
+                buttons)
+            bot.send_message(update.callback_query.message.chat.id,
+                             "If you want to quit this command, click 'Back' ", reply_markup=reply_markup)
+
+        else:
+
+            admin_keyboard = [InlineKeyboardButton(text="Create", callback_data="create_survey"),
+                              InlineKeyboardButton(text="Back", callback_data="help_back")]
+            bot.send_message(update.callback_query.message.chat.id,
+                             """You have no surveys created yet. \n"""
+                             """Click "Create" to configure your first survey or "Back" for main menu""",
+                             reply_markup=InlineKeyboardMarkup([admin_keyboard]))
+            return ConversationHandler.END
         return CHOOSING
 
     @run_async
@@ -176,31 +187,45 @@ class SurveyHandler(object):
                 users_table.find_one({"user_id": answer['user_id']})["name"],
                 survey["questions"][answer["question_id"] - 1]['text'],
                 answer["answer"])
-        update.message.reply_text("Here is your requested data : \n {}".format(txt_to_send))
+        update.message.reply_text("Here is your requested data : \n {}".format(txt_to_send),
+                                  reply_markup=ReplyKeyboardRemove())
         get_help(bot, update)
 
         return ConversationHandler.END
 
     @run_async
     def delete_surveys(self, bot, update):
-        bot.send_message(update.callback_query.message.chat.id,
-                         "This is the list of your current surveys:", reply_markup=self.reply_markup)
-        command_list = [survey['title'] for survey in surveys_table.find({"bot_id": bot.id})]
-        reply_keyboard = [command_list]
-        bot.send_message(update.callback_query.message.chat.id,
-            "Choose the survey that you want to delete",
-            reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+        surveys = surveys_table.find({"bot_id": bot.id})
+        if surveys.count() != 0:
+            bot.send_message(update.callback_query.message.chat.id,
+                             "This is the list of your current surveys:", reply_markup=self.reply_markup)
+            command_list = [survey['title'] for survey in surveys_table.find({"bot_id": bot.id})]
+            reply_keyboard = [command_list]
+            bot.send_message(update.callback_query.message.chat.id,
+                "Choose the survey that you want to delete",
+                reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
 
-        bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+            bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                               message_id=update.callback_query.message.message_id)
 
-        return DELETE_SURVEY
+            return DELETE_SURVEY
+        else:
+            bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                               message_id=update.callback_query.message.message_id)
+            admin_keyboard = [InlineKeyboardButton(text="Create", callback_data="create_survey"),
+                              InlineKeyboardButton(text="Back", callback_data="help_back")]
+            bot.send_message(update.callback_query.message.chat.id,
+                             """You have no surveys created yet. \n"""
+                             """Click "Create" to configure your first survey or "Back" for main menu""",
+                             reply_markup=InlineKeyboardMarkup([admin_keyboard]))
+            return ConversationHandler.END
 
     @run_async
     def delete_surveys_finish(self, bot, update):
         chat_id, txt = initiate_chat_id(update)
         surveys_table.delete_one({"bot_id": bot.id, 'title': txt})
-        update.message.reply_text("The survey with the title '{}' has been deleted".format(txt))
+        update.message.reply_text("The survey with the title '{}' has been deleted".format(txt),
+                                  reply_markup=ReplyKeyboardRemove())
         get_help(bot, update)
 
         return ConversationHandler.END
@@ -212,16 +237,27 @@ class SurveyHandler(object):
 
     @run_async
     def handle_send_survey(self, bot, update):
-        bot.send_message(update.callback_query.message.chat.id,
-                         "This is the list of your current surveys:", reply_markup=self.reply_markup)
-        command_list = [survey['title'] for survey in surveys_table.find({"bot_id": bot.id})]
-        reply_keyboard = [command_list]
-        bot.send_message(update.callback_query.message.chat.id,
-                         "Choose the survey that you want to send",
-                         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+        surveys_list = surveys_table.find({"bot_id": bot.id})
+        if surveys_list.count() !=0:
+            bot.send_message(update.callback_query.message.chat.id,
+                             "This is the list of your current surveys:", reply_markup=self.reply_markup)
+            command_list = [survey['title'] for survey in surveys_table.find({"bot_id": bot.id})]
+            reply_keyboard = [command_list]
+            bot.send_message(update.callback_query.message.chat.id,
+                             "Choose the survey that you want to send",
+                             reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
 
-        bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+            bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                               message_id=update.callback_query.message.message_id)
+        else:
+            bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                               message_id=update.callback_query.message.message_id)
+            admin_keyboard = [InlineKeyboardButton(text="Create", callback_data="create_survey"),
+                              InlineKeyboardButton(text="Back", callback_data="help_back")]
+            bot.send_message(update.callback_query.message.chat.id,
+                             """You have no surveys created yet. \n"""
+                             """Click "Create" to configure your first survey or "Back" for main menu""",
+                             reply_markup=InlineKeyboardMarkup([admin_keyboard]))
         return TYPING_SEND_TITLE
 
     @run_async
@@ -242,7 +278,7 @@ class SurveyHandler(object):
                                                                    user_data["title"]
                                                                ))]
                                      ))
-        bot.send_message(chat_id=chat_id, text="Survey sent to all users!"),
+        bot.send_message(chat_id=chat_id, text="Survey sent to all users!", reply_markup=ReplyKeyboardRemove()),
         get_help(bot, update)
         return ConversationHandler.END
 
@@ -321,7 +357,7 @@ SEND_SURVEYS_HANDLER = ConversationHandler(
 
 SHOW_SURVEYS_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=SurveyHandler().show_surveys,
-                                       pattern=r"survey_results"),
+                                       pattern=r"surveys_results"),
                   ],
 
     states={

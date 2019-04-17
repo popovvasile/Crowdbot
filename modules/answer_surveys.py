@@ -167,5 +167,5 @@ __admin_keyboard__ = [
     InlineKeyboardButton(text="Create", callback_data="create_survey"),
      InlineKeyboardButton(text="Delete", callback_data="delete_survey"),
     InlineKeyboardButton(text="Send", callback_data="send_survey"),
-     InlineKeyboardButton(text="Resutls", callback_data="surveys_results")
+     InlineKeyboardButton(text="Results", callback_data="surveys_results")
 ]

@@ -7,7 +7,7 @@ modules/__pycache__/
 modules/__pycache__/*
 *.py[cod]
 *$py.class
-
+dynamic_files/
 # C extensions
 *.so
 # Distribution / packaging
