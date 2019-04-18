@@ -43,8 +43,11 @@ class ThingsResource(object):
                 resp.status = falcon.HTTP_200
 
     def on_delete(self, req, resp):
+        doc = {}
+        if req.content_length:
+            doc = falcon.json.load(req.stream)
         """Handles POST requests"""
-        chatbot_id = requests.get(url="https://api.telegram.org/bot{}/getMe".format(req.data["token"])
+        chatbot_id = requests.get(url="https://api.telegram.org/bot{}/getMe".format(doc["token"])
                                   ).json()["results"]["id"]
         db["users"].delete_all({"bot_id": chatbot_id})
         db["chatbots"].delete_all({"bot_id": chatbot_id})
