@@ -1,10 +1,7 @@
 
-    10. Команда Delete наебнулась совсем. Не реагирует. Остальное пока что работает. #TODO delete the instaces in chats as well
-
-Survay
-    12. Бот упал. Не реагировал. Через /cancel получилось реанимировать.
-    13. Create survey ввёл название, два вопроса по очереди, жму Done - Второй вопрос прыгнул под Done, жму ещё раз Done- первый вопрос пргнул под Done. Done исчез, клавиши back нету-команда тупиковая и с багами
-    14. Если жать на Send и Result, то бот перестаёт реагировать  # TODO Results works strange
+    #TODO delete the instaces in chats as well
+# TODO delete ALL previous messages everywhere
+# TODO Results works strange
 
 # TODO a lot of polls work strange
 #restore users (with acceptance), tags, payments, user_profile
@@ -13,3 +10,14 @@ Survay
 
 # TODO create a ProtestBot as an example
 TODO learn how to use  ForceReply https://python-telegram-bot.readthedocs.io/en/stable/telegram.forcereply.html
+
+Кнопки:
+
+
+Polls
+    1. Можешь придумать адекватные названия для опросов?))) гуглить надо чтоб понять о чём это вообще)
+    2. Выбрал «инстант ран офф пол виз кастом дескрипшн». Проголосовал, а clear my votes не работает, голоса остаются по крайней мере на экране-это запутывает.
+Servey
+    1. Если я хочу отправить полз, а юзеров у меня нет,то приходит сообщений: «у вас нет юзеров, некому отправлять, сори». В Сёрвай он всё таки кому-то что-то отправляет, странно.
+    2. Резалт ведёт в тупик. Бот начал тупить. Реанимировал через /help. Знаешь что ,может это команду прописать в меню? Типо, если бот тупит то нажмите /help, а? ну и желательно сделать так чтоб он не тупил.
+Первый раз затестил бот до конца))

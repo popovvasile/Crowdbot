@@ -68,13 +68,18 @@ class CreateDonationHandler(object):
             else:
                 bot.send_message(update.callback_query.message.chat.id,
                                  "Please enter your donation provider token\n"
-                                          "In order to get it, "
-                                          "please visit the [Telegram's tutorial](https://core.telegram.org/bots/payments#getting-a-token)", parse_mode= 'Markdown', reply_markup=self.reply_markup)
+"""
+Use the /mybots command in the chat with @BotFather and choose your chatbot. Go to Bot Settings > Payments. Choose a provider, and you will be redirected to the relevant bot. Enter the required details so that the payments provider is connected successfully, go back to the chat with Botfather. The message will now show available providers. Each will have a name, a token, and the date the provider was connected. You will use the token when working with the Bot API.
+
+[Telegram's tutorial](https://core.telegram.org/bots/payments#getting-a-token)""",
+                                 parse_mode='Markdown', reply_markup=self.reply_markup)
         else:
             bot.send_message(update.callback_query.message.chat.id,
                              "Please enter your donation provider token\n"
-                                      "In order to get it, "
-                                      "please visit the [Telegram's tutorial](https://core.telegram.org/bots/payments#getting-a-token)", parse_mode= 'Markdown', reply_markup=self.reply_markup)
+"""
+Use the /mybots command in the chat with @BotFather and choose your chatbot. Go to Bot Settings > Payments. Choose a provider, and you will be redirected to the relevant bot. Enter the required details so that the payments provider is connected successfully, go back to the chat with Botfather. The message will now show available providers. Each will have a name, a token, and the date the provider was connected. You will use the token when working with the Bot API. 
+
+[Telegram's tutorial](https://core.telegram.org/bots/payments#getting-a-token)""", parse_mode='Markdown', reply_markup=self.reply_markup)
             return TYPING_TOKEN
 
     @run_async

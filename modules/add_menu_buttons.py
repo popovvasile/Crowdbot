@@ -15,7 +15,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 TYPING_BUTTON, TYPING_DESCRIPTION, DESCRIPTION_FINISH = range(3)
-TYPING_TO_DELETE_BUTTON = 1
+TYPING_TO_DELETE_BUTTON = 17
 __mod_name__ = "Custom buttons"
 
 # __admin_keyboard__ = [["/create_button"], ["/delete_button"]]
@@ -31,8 +31,11 @@ Here you can:\n
 
 class AddCommands(object):
     def __init__(self):
-        finish_buttons = [[InlineKeyboardButton(text="Back", callback_data="cancel_add_button")]]
+        reply_buttons = [[InlineKeyboardButton(text="Back", callback_data="cancel_add_button")]]
         self.reply_markup = InlineKeyboardMarkup(
+            reply_buttons)
+        finish_buttons = [[InlineKeyboardButton(text="Back", callback_data="cancel_delete_button")]]
+        self.finish_markup = InlineKeyboardMarkup(
             finish_buttons)
 
     def start(self, bot, update):
@@ -61,7 +64,7 @@ class AddCommands(object):
 
             user_data['button'] = txt
             update.message.reply_text("Great!", reply_markup=ReplyKeyboardRemove())
-            update.message.reply_text('Now, send a text, an image, a video'
+            update.message.reply_text('Now, send a text, an image, a video, '
                                       'a document or a music file to display for your new button',
                                       reply_markup=self.reply_markup)
             return TYPING_DESCRIPTION
@@ -99,7 +102,7 @@ class AddCommands(object):
                 user_data["descriptions"] = list()
 
         if update.message.photo:
-            photo_file = update.message.photo[-1].get_file
+            photo_file = update.message.photo[-1].get_file()
             filename = 'photo_{}_button_{}_{}.jpg'.format(str(bot.id),
                                                           str(user_data['button']),
                                                           photo_file.file_id)
@@ -117,7 +120,7 @@ class AddCommands(object):
             audio_file = update.message.audio.get_file()
             filename = 'audio_{}_button_{}_{}.mp3'.format(str(bot.id),
                                                           str(user_data['button']),
-                                                          audio_file.title)
+                                                          audio_file.file_id)
             custom_path = audio_directory + "/" + filename
             audio_file.download(custom_path=custom_path)
             if "audio_files" not in user_data:
@@ -145,9 +148,9 @@ class AddCommands(object):
         if update.message.document:
 
             document_file = update.message.document.get_file()
-            filename = '{}_document_{}_button_{}.pdf'.format(document_file.title,
-                                                             str(bot.id),
-                                                             str(user_data['button']))
+            filename = 'document_{}_button_{}_{}'.format(str(bot.id),
+                                                         str(user_data['button']),
+                                                         update.message.document.file_name)
             custom_path = document_directory + "/" + filename
             document_file.download(custom_path=custom_path)
             if "document_files" not in user_data:
@@ -160,7 +163,7 @@ class AddCommands(object):
         if update.message.video:
 
             video_file = update.message.video.get_file()
-            filename = 'video_{}_{}_button_{}.mp4'.format(video_file.title, str(bot.id),
+            filename = 'video_{}_{}_button_{}.mp4'.format(video_file.file_id, str(bot.id),
                                                           str(user_data['button']))
             custom_path = video_directory + "/" + filename
 
@@ -215,6 +218,8 @@ class AddCommands(object):
         return ConversationHandler.END
 
     def delete_button(self, bot, update):
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
         button_list_of_dicts = custom_buttons_table.find({
             "bot_id": bot.id})
         if button_list_of_dicts.count() != 0:
@@ -222,10 +227,10 @@ class AddCommands(object):
             reply_keyboard = [button_list]
             bot.send_message(update.callback_query.message.chat.id,
 
-                             "Choose the button that button that you want to delete",
+                             "Choose the button that button that you want to delete",  # TODO remove this message later
                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
             bot.send_message(update.callback_query.message.chat.id,
-                             "To quit, click 'Back'", reply_markup=self.reply_markup)
+                             "To quit, click 'Back'", reply_markup=self.finish_markup)
 
             return TYPING_TO_DELETE_BUTTON
         else:
@@ -237,17 +242,34 @@ class AddCommands(object):
 
     def delete_button_finish(self, bot, update):
         chat_id, txt = initiate_chat_id(update)
+        to_delete_button = custom_buttons_table.find_one({
+            "button": txt,
+            "bot_id": bot.id
+        })
+        if "photo_files" in to_delete_button:
+            for file in to_delete_button["photo_files"]:
+                os.remove(file)
+        if "document_files" in to_delete_button:
+            for file in to_delete_button["document_files"]:
+                os.remove(file)
+        if "audio_files" in to_delete_button:
+            for file in to_delete_button["audio_files"]:
+                os.remove(file)
+        if "video_files" in to_delete_button:
+            for file in to_delete_button["video_files"]:
+                os.remove(file)
         custom_buttons_table.delete_one({
             "button": txt,
             "bot_id": bot.id
         })
         update.message.reply_text(
-            'Thank you! We deleted the button {}'.format(txt))
+            'Thank you! We deleted the button {}'.format(txt), reply_markup=ReplyKeyboardRemove())
         get_help(bot, update)
         return ConversationHandler.END
 
     def back(self, bot, update, user_data):
         user_data.clear()
+
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         get_help(bot, update)
@@ -256,9 +278,9 @@ class AddCommands(object):
     def cancel(self, bot, update):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        update.message.reply_text(
-            "Command is cancelled =("
-        )
+        bot.send_message(update.callback_query.message.chat.id,
+                         "Command is cancelled", reply_markup=ReplyKeyboardRemove()
+                         )
 
         get_help(bot, update)
         return ConversationHandler.END
@@ -305,18 +327,16 @@ BUTTON_ADD_HANDLER = ConversationHandler(
 DELETE_BUTTON_HANDLER = ConversationHandler(
     entry_points=[
         CallbackQueryHandler(callback=AddCommands().delete_button,
-                             pattern=r"delete_button"),
-        CallbackQueryHandler(callback=AddCommands().back, pattern=r"cancel_add_button")],
+                             pattern=r"delete_button")
+    ],
 
     states={
         TYPING_TO_DELETE_BUTTON: [MessageHandler(Filters.text,
-                                                 AddCommands().delete_button_finish),
-                                  CallbackQueryHandler(callback=AddCommands().back,
-                                                       pattern=r"cancel_add_button", pass_user_data=True)],
+                                                 AddCommands().delete_button_finish)],
     },
 
-    fallbacks=[CallbackQueryHandler(callback=AddCommands().back,
-                                    pattern=r"cancel_add_button", pass_user_data=True),
+    fallbacks=[CallbackQueryHandler(callback=AddCommands().cancel,
+                                    pattern=r"cancel_delete_button"),
                CommandHandler('cancel', AddCommands().cancel),
                MessageHandler(filters=Filters.command, callback=AddCommands().cancel)
                ]
