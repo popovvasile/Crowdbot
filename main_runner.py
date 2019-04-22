@@ -77,10 +77,16 @@ def main(token):
     dispatcher.add_handler(DELETE_POLLS_HANDLER)
 
     LOGGER.info("Using long polling.")
-    updater.start_polling(timeout=15, read_latency=4)
+    updater.start_webhook(listen='0.0.0.0',
+                          port=8443,
+                          url_path=token,
+                          key='private.key',
+                          cert='cert.pem',
+                          webhook_url='https://142.93.109.14:8443/' + token)
+    # updater.start_polling(timeout=15, read_latency=4)
+    #
+    # updater.idle()
 
-    updater.idle()
 
-
-# if __name__ == '__main__':
-#     main("633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg")
+if __name__ == '__main__':
+    main("633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg")

@@ -52,33 +52,31 @@ class DonationBot(object):
 
     @run_async
     def start_donation(self, bot, update, user_data):
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                   message_id=update.callback_query.message.message_id,)
         donation_request = chatbots_table.find_one({"bot_id": bot.id})
-
-        if donation_request:
-
-            if "donation" in donation_request:
-                bot.send_message(update.callback_query.message.chat.id,
-                                 "Great! We very glad that you want to donate for our cause!")
-                bot.send_message(update.callback_query.message.chat.id,
-                                 "First, tell us how much do you want to donate. Enter a floating point number")
-                bot.send_message(update.callback_query.message.chat.id,
-                                 "Remember, we use {} as our primary currency".format(
-                    donation_request["donation"]['currency'])
-                )
-                bot.send_message(update.callback_query.message.chat.id,
-                                 text="To return to main menu, click 'Back' ",
-                                          reply_markup=InlineKeyboardMarkup(  # TODO modify this shit
-                                              [[InlineKeyboardButton(text="Back",
-                                                                     callback_data="cancel_donation_payment")]]))
-                return DONATION_MESSAGE
-            else:
-                bot.send_message(update.callback_query.message.chat.id,
-                                 "Sorry, no option for donation yet")
-                return ConversationHandler.END
+        if donation_request.get("donation") != {}:
+            bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                               message_id=update.callback_query.message.message_id)
+            bot.send_message(update.callback_query.message.chat.id,
+                             "Great! We very glad that you want to donate for our cause!")
+            bot.send_message(update.callback_query.message.chat.id,
+                             "First, tell us how much do you want to donate. Enter a floating point number")
+            bot.send_message(update.callback_query.message.chat.id,
+                             "Remember, we use {} as our primary currency".format(
+                donation_request["donation"]['currency'])
+            )
+            bot.send_message(update.callback_query.message.chat.id,
+                             text="To return to main menu, click 'Back' ",
+                                      reply_markup=InlineKeyboardMarkup(  # TODO modify this shit
+                                          [[InlineKeyboardButton(text="Back",
+                                                                 callback_data="cancel_donation_payment")]]))
+            return DONATION_MESSAGE
 
         else:
             bot.send_message(update.callback_query.message.chat.id,
                              "Sorry, no option for donation yet")
+            get_help(bot, update)
             return ConversationHandler.END
 
     @run_async
@@ -140,6 +138,7 @@ class DonationBot(object):
                                     "user_id": update.message.from_user.id},
                                    user_data)
         update.message.reply_text("Thank you for your donation!")
+        user_data.clear()
         return ConversationHandler.END
 
     def cancel(self, bot, update):

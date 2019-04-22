@@ -138,7 +138,7 @@ class TieBreakInstantRunoffPollHandler(BasePoll):
             old_vote = votes[user]
 
         if callback_data['i'] == 'C':
-            old_vote = {}
+            old_vote = None
         elif callback_data['i'] in old_vote:
             old_vote.remove(callback_data['i'])
         else:
@@ -149,6 +149,7 @@ class TieBreakInstantRunoffPollHandler(BasePoll):
                 votes.pop(user)
         else:
             votes[user] = old_vote
+        print(votes)
 
     def get_confirmation_message(self, poll, user):
         votes = poll['votes']
@@ -165,3 +166,22 @@ class TieBreakInstantRunoffPollHandler(BasePoll):
             if opt['index'] == index:
                 return opt['text']
         return "Invalid option"
+
+
+
+
+     #     # vote_instances.append(instance["votes"])
+        # if old_instances.count() > 0:
+        #     # TODO this makes no sense at all - we should have the possibility to add together the results from different instances
+        #     for instance in old_instances:
+        #         poll["votes"].update(instance["votes"])
+        #
+        #     old_instances = table.find({"poll_id": poll["poll_id"], "bot_id": bot.id})
+        #     vote_instances = []
+        #
+        #     # vote_instances.append(instance["votes"])
+        #     if old_instances.count() > 0:
+        #         # TODO this makes no sense at all - we should have the possibility to add together the results from different instances
+        #         for instance in old_instances:
+        #             poll["votes"].update(instance["votes"])
+        #

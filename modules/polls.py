@@ -69,6 +69,11 @@ AFFIRMATIONS = [
     "Wonderful",
     "Splendid",
 ]
+__admin_keyboard__ = [
+    InlineKeyboardButton(text="Create", callback_data="create_poll"),
+    InlineKeyboardButton(text="Delete", callback_data="delete_poll"),
+    InlineKeyboardButton(text="Send", callback_data="send_poll"),
+]
 
 
 class PollBot(object):
@@ -79,7 +84,10 @@ class PollBot(object):
         done_buttons = [[InlineKeyboardButton(text="Done", callback_data="done_poll")]]
         self.done_markup = InlineKeyboardMarkup(
             done_buttons)
-
+        send_buttons = [[InlineKeyboardButton(text="Menu", callback_data="cancel_poll"),
+                         InlineKeyboardButton(text="Send", callback_data="send_poll")]]
+        self.send_markup = InlineKeyboardMarkup(
+            send_buttons)
     # Conversation handlers:
     @run_async
     def start(self, bot, update):
@@ -97,7 +105,6 @@ class PollBot(object):
         update.message.reply_text("{}! What kind of poll is it going to be?"
                                   .format(self.get_affirmation()),
                                   reply_markup=self.assemble_reply_keyboard())
-
 
         return TYPING_TYPE
 
@@ -154,10 +161,7 @@ class PollBot(object):
     def handle_done(self, bot, update, user_data):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        bot.send_message(update.callback_query.message.chat.id,
-                         "Thank you! you can send this poll to other groups "
-                         "or chats by writing /send_poll \n"
-                                  )
+
         options = []
         for i, opt in enumerate(user_data['options']):
             options.append({
@@ -193,8 +197,11 @@ class PollBot(object):
                                   )
 
         user_data.clear()
-        get_help(bot, update)
-
+        bot.send_message(update.callback_query.message.chat.id,
+                         "Thank you! you can send this poll to your users "
+                         "by clicking 'Send' \n",
+                         reply_markup=self.send_markup
+                                  )
         return ConversationHandler.END
 
     def get_affirmation(self):
@@ -348,19 +355,23 @@ class PollBot(object):
         name = str(query.from_user.first_name)
         handler = POLL_HANDLERS[poll['type']]
         handler.handle_vote(poll['votes'], uid_str, name, data_dict)
-
         query.answer(handler.get_confirmation_message(poll, uid_str))
         if "_id" in poll:
             poll.pop('_id')
-
+        table.update({'poll_id': poll['poll_id'], "bot_id": bot.id},
+                     self.serialize(poll),
+                     upsert=True)
         old_instances = table.find({"poll_id": poll["poll_id"], "bot_id": bot.id})
         vote_instances = []
         for instance in old_instances:
             vote_instances.append(instance["votes"])
-        if len(vote_instances) > 0:
+            print(instance["votes"])
+
+        if len(vote_instances) > 0:  # TODO this makes no sense at all- we should have the posibility to add toghether the results of different instaces of the polls
             vote_instances[0] = ast.literal_eval(vote_instances[0])
             vote_instances[0].update(poll["votes"])
             poll["votes"] = vote_instances[0]
+
         poll["bot_id"] = bot.id
         votes_list = []
         for po in table.find({"bot_id": bot.id, "poll_id": poll["poll_id"]}):
@@ -371,9 +382,7 @@ class PollBot(object):
             votes_dict.update(ast.literal_eval(d))
         if votes_dict:
             poll["votes"] = votes_dict
-        table.update({'poll_id': poll['poll_id'], "bot_id": bot.id},
-                     self.serialize(poll),
-                     upsert=True)
+
         bot.edit_message_text(text=self.assemble_message_text(poll),
                               parse_mode='Markdown',
                               reply_markup=self.assemble_inline_keyboard(poll),
@@ -435,12 +444,12 @@ class PollBot(object):
                                      reply_markup=self.assemble_inline_keyboard(poll, True),
                                      parse_mode='Markdown'
                                      )
-
-        bot.send_message(chat_id, "Your poll was sent to all you users! ", reply_markup=ReplyKeyboardRemove())
-
         if len(sent) == 0:
             bot.send_message(chat_id, "Looks like there are yet no users to send this poll to. "
                                       "No polls sent :( ", reply_markup=ReplyKeyboardRemove())
+        else:
+            bot.send_message(chat_id, "Your poll was sent to all you users! ", reply_markup=ReplyKeyboardRemove())
+
         get_help(bot, update)
 
         return ConversationHandler.END
@@ -541,11 +550,7 @@ Here you can:
 
 """
 
-__admin_keyboard__ = [
-    InlineKeyboardButton(text="Create", callback_data="create_poll"),
-    InlineKeyboardButton(text="Delete", callback_data="delete_poll"),
-    InlineKeyboardButton(text="Send", callback_data="send_poll"),
-]
+
 DELETE_POLLS_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=PollBot().handle_delete_poll,
                                        pattern=r"delete_poll")

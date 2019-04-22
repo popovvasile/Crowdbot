@@ -214,6 +214,7 @@ class AddCommands(object):
         bot.send_message(update.callback_query.message.chat.id,
                          'Thank you! The button will be accessible by clicking \n'
                          '{} in menu'.format(user_data["button"]))
+        user_data.clear()
         get_help(bot, update)
         return ConversationHandler.END
 

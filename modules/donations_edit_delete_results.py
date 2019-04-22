@@ -56,20 +56,18 @@ class EditPaymentHandler(object):
 
     @run_async
     def start_donation(self, bot, update, user_data):
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                   message_id=update.callback_query.message.message_id,)
         chatbot = chatbots_table.find_one({"bot_id": bot.id})
-
-        if chatbot.count() != 0:
+        if chatbot.get("donation") != {}:
             reply_keyboard = [["Delete this donation"], ["Edit"]]
-            bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                               message_id=update.callback_query.message.message_id)
+
             bot.send_message(update.callback_query.message.chat.id,
                              "What do you want to do with this donation?",
                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
 
             return FINISH_ACTION
         else:
-            bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                               message_id=update.callback_query.message.message_id)
             admin_keyboard = [InlineKeyboardButton(text="Allow donations", callback_data="allow_donation"),
                               InlineKeyboardButton(text="Back", callback_data="help_back")]
             bot.send_message(update.callback_query.message.chat.id,
@@ -77,12 +75,15 @@ class EditPaymentHandler(object):
                               Press "Allow donations" to configure your first donation option
                                or click "Back" for main menu""",
                              reply_markup=InlineKeyboardMarkup(admin_keyboard))
+            user_data.clear()
+
             return ConversationHandler.END
 
     def handle_action_finish(self, bot, update, user_data):  # TODO add if leifs for every action
 
         chat_id, txt = initiate_chat_id(update)
         if txt == "Delete this donation":
+
             user_data['action'] = txt
             reply_keyboard = [["Yes, I am sure"], ["No, let's get back"]]
             update.message.reply_text(
@@ -120,7 +121,6 @@ class EditPaymentHandler(object):
         user_data["action"] = txt
         return EDIT_FINISH
 
-
     @run_async
     def handle_edit_finish(self, bot, update, user_data):  # TODO double check
         chat_id, txt = initiate_chat_id(update)
@@ -145,8 +145,12 @@ class EditPaymentHandler(object):
     def handle_finish_delete(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
         if txt == "Yes, I am sure":
-            user_data['action'] = "delete"
+            chatbot = chatbots_table.find_one({"bot_id": bot.id})
+            chatbot["donation"] = {}
+            chatbots_table.replace_one({"bot_id": bot.id}, chatbot)
             update.message.reply_text("Your donation has been deleted")
+            user_data.clear()
+
             get_help(bot, update)
             return ConversationHandler.END
         elif txt == "No, let's get back":
@@ -165,7 +169,6 @@ class EditPaymentHandler(object):
 
     @run_async
     def change_donation_token(self, bot, update):
-
         update.message.reply_text(
             "Please enter your new donation provider token", reply_markup=self.reply_markup
         )
@@ -182,6 +185,7 @@ class EditPaymentHandler(object):
             chatbots_table.update_one({"bot_id": bot.id}, {'$set': chatbot}, upsert=True)
             update.message.reply_text("Thank you! Your provider_token was changed successfully !",
                                       reply_markup=self.reply_markup)
+            get_help(bot, update)
             return ConversationHandler.END
         else:
             update.message.reply_text(

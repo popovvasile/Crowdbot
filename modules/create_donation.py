@@ -73,6 +73,7 @@ Use the /mybots command in the chat with @BotFather and choose your chatbot. Go 
 
 [Telegram's tutorial](https://core.telegram.org/bots/payments#getting-a-token)""",
                                  parse_mode='Markdown', reply_markup=self.reply_markup)
+                return TYPING_TOKEN
         else:
             bot.send_message(update.callback_query.message.chat.id,
                              "Please enter your donation provider token\n"
