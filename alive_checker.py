@@ -12,7 +12,7 @@ client = MongoClient('localhost', 27017)
 db = client['chatbots']
 
 
-def multiple_bot_daemon():
+def multiple_bot_daemon():  # TODO adjust to the new botFather and webhook
     my_process = {}
     print(db["chatbots"].find().count())
     while True:

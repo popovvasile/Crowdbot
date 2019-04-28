@@ -12,6 +12,10 @@ users_table = db['users']
 
 
 class ThingsResource(object):
+    # {'admins': [{'email': 'popov@gmail.com', 'password': '4PIl4FUDCzn'}], 'requireNext': None, 'welcomeForm': [],
+    #  'finished': True, 'buttons': [], '_id': '5cc25547a9a63e710b0c456a', 'superuser': 244356086,
+    #  'token': '633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg', 'name': 'Crowdbot', 'welcomeMessage': 'he'}
+
     def on_post(self, req, resp):
         """Handles POST requests"""
         doc = {}
@@ -43,29 +47,51 @@ class ThingsResource(object):
                 resp.status = falcon.HTTP_200
 
     def on_delete(self, req, resp):
-        doc = {}
-        if req.content_length:
-            doc = falcon.json.load(req.stream)
-        """Handles POST requests"""
+        # doc = {}
+        # if req.content_length:
+        #
+        doc = req.params
+        """Handles DELETE requests"""
         chatbot_id = requests.get(url="https://api.telegram.org/bot{}/getMe".format(doc["token"])
-                                  ).json()["results"]["id"]
-        db["users"].delete_all({"bot_id": chatbot_id})
-        db["chatbots"].delete_all({"bot_id": chatbot_id})
-        db['donations_table'].delete_all({"bot_id": chatbot_id})
-        db['setpoll_instances'].delete_all({"bot_id": chatbot_id})
-        db['setpolls'].delete_all({"bot_id": chatbot_id})
-        db['tags'].delete_all({"bot_id": chatbot_id})
-        db["surveys"].delete_all({"bot_id": chatbot_id})
-        db["custom_commands"].delete_all({"bot_id": chatbot_id})
-        db['payments_requests_table'].delete_all({"bot_id": chatbot_id})
-        db['payments_table'].delete_all({"bot_id": chatbot_id})
-        db["chats"].delete_all({"bot_id": chatbot_id})
+                                  ).json()
+        print(chatbot_id)
+        chatbot_id = chatbot_id["result"]["id"]
+        db["users"].delete_many({"bot_id": chatbot_id})
+        db["chatbots"].delete_many({"bot_id": chatbot_id})
+        db['donations_table'].delete_many({"bot_id": chatbot_id})
+        db['setpoll_instances'].delete_many({"bot_id": chatbot_id})
+        db['setpolls'].delete_many({"bot_id": chatbot_id})
+        db['tags'].delete_many({"bot_id": chatbot_id})
+        db["surveys"].delete_many({"bot_id": chatbot_id})
+        db["custom_commands"].delete_many({"bot_id": chatbot_id})
+        db['payments_requests_table'].delete_many({"bot_id": chatbot_id})
+        db['payments_table'].delete_many({"bot_id": chatbot_id})
+        db["chats"].delete_many({"bot_id": chatbot_id})
+        resp.status = falcon.HTTP_200
+
+
+class AdminResource(object):
+
+    def on_delete(self, req, resp):
+        # doc = {}
+        # if req.content_length:
+        #
+        doc = req.params  #  {token: bot.token, email: chat.changeRequest.payload}
+        print(req.params)
+        """Handles DELETE requests"""
+        chatbot = requests.get(url="https://api.telegram.org/bot{}/getMe".format(doc["token"])
+                                  ).json()
+        print(chatbot)
+        chatbot_id = chatbot["result"]["id"]
+        db["users"].delete_many({"bot_id": chatbot_id, "email": doc["email"]})
         resp.status = falcon.HTTP_200
 
 
 app = falcon.API()
 things = ThingsResource()
+admins = AdminResource()
 app.add_route('/chatbot', things)
+app.add_route('/chatbot/admin', admins)
 
 
 if __name__ == '__main__':
