@@ -5,7 +5,7 @@ from typing import List, Dict
 from telegram import ParseMode, InlineKeyboardMarkup, Bot, Update, InlineKeyboardButton
 from telegram.ext import run_async
 
-from database import custom_buttons_table, chats_table, chatbots_table
+from database import custom_buttons_table, chats_table, chatbots_table, users_table
 
 HELP_STRINGS = """
 {}
@@ -65,22 +65,21 @@ def paginate_modules(page_n: int, module_dict: Dict, prefix, bot_id, chat=None) 
 
 
 def if_admin(update, bot):
-    # if update.message:
-    #     user_id = update.message.from_user.id
-    # else:
-    #     user_id = update.callback_query.from_user.id
-    # superuser = chatbots_table.find_one({"bot_id": bot.id})["superuser"]
-    # if user_id == superuser:
-    #     return True
-    # admin_chat = users_table.find_one({'user_id': user_id, "bot_id": bot.id})
-    # if admin_chat is not None:
-    #     if admin_chat["registered"] and admin_chat["is_admin"]:
-    #         return True
-    #     else:
-    #         return False
-    # else:
-    #     return False
-    return True
+    if update.message:
+        user_id = update.message.from_user.id
+    else:
+        user_id = update.callback_query.from_user.id
+    superuser = chatbots_table.find_one({"bot_id": bot.id})["superuser"]
+    if user_id == superuser:
+        return True
+    admin_chat = users_table.find_one({'user_id': user_id, "bot_id": bot.id})
+    if admin_chat is not None:
+        if admin_chat["registered"] and admin_chat["is_admin"]:
+            return True
+        else:
+            return False
+    else:
+        return False
 
 
 def register_chat(bot, update):
