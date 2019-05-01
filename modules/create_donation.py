@@ -60,8 +60,8 @@ class CreateDonationHandler(object):
         chatbot = chatbots_table.find_one({"bot_id": bot.id}) or {}
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        if "donation" in chatbot:
-            if "payment_token" in chatbot["donation"]:
+        if "donate" in chatbot:
+            if "payment_token" in chatbot["donate"]:
                 bot.send_message(update.callback_query.message.chat.id,
                                  "Please enter a title for your donation", reply_markup=self.reply_markup)
                 return TYPING_TITLE
@@ -90,7 +90,7 @@ Use the /mybots command in the chat with @BotFather and choose your chatbot. Go 
 
             user_data['payment_token'] = txt
 
-            update.message.reply_text("Enter a title for your donation", reply_markup=self.reply_markup)
+            update.message.reply_text("Enter a title for your crowdfunding", reply_markup=self.reply_markup)
 
             return TYPING_TITLE
         else:
@@ -105,7 +105,7 @@ Use the /mybots command in the chat with @BotFather and choose your chatbot. Go 
         chat_id, txt = initiate_chat_id(update)
         user_data['title'] = txt
 
-        update.message.reply_text("Write a short text for your donation- what your users have to pay for?",
+        update.message.reply_text("Write a short text for your crowdfunding- what your users are donating for?",
                                   reply_markup=self.reply_markup)
 
         return TYPING_DESCRIPTION
@@ -125,11 +125,11 @@ Use the /mybots command in the chat with @BotFather and choose your chatbot. Go 
         chat_id, txt = initiate_chat_id(update)
         currency = txt
         user_data["currency"] = currency
-        bot.send_message(chat_id, "Your donation has been created!", reply_markup=self.reply_markup)
+        bot.send_message(chat_id, "Your donation option has been created!", reply_markup=self.reply_markup)
         chatbot = chatbots_table.find_one({"bot_id": bot.id}) or {}
-        chatbot["donation"] = user_data
+        chatbot["donate"] = user_data
         if 'payment_token' in user_data:
-            chatbot["donation"]["payment_token"] = user_data['payment_token']
+            chatbot["donate"]["payment_token"] = user_data['payment_token']
         chatbots_table.update_one({"bot_id": bot.id}, {'$set': chatbot}, upsert=True)
         user_data.clear()
         get_help(bot, update)

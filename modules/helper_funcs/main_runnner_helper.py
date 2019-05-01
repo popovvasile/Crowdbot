@@ -167,9 +167,12 @@ def help_button(bot: Bot, update: Update):
     try:
         if mod_match:
             module = mod_match.group(1)
-            if module == "donation":
-                HELPABLE[module].__visitor_help__ = chatbots_table.find_one(
-                    {"bot_id": bot.id})["donation"]["description"]
+            if module == "donate":
+                chatbot_info = chatbots_table.find_one(
+                    {"bot_id": bot.id})
+                if "donate" in chatbot_info:
+                    if "description" in chatbot_info["donate"]:
+                        HELPABLE[module].__visitor_help__ = chatbot_info["donate"]["description"]
             if if_admin(update=update, bot=bot):
                 text = HELPABLE[module].__admin_help__
                 commands_keyboard = HELPABLE[module].__admin_keyboard__

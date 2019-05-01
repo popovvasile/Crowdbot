@@ -46,7 +46,7 @@ class EditPaymentHandler(object):
         command_list = [donation['title'] for donation in donations_table.find({"bot_id": bot.id})]
         reply_keyboard = [list(set(command_list))]
         update.message.reply_text(
-            "Please choose one of your donation requests",
+            "Please choose your action",
             reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
         return CHOOSING_ACTION
 

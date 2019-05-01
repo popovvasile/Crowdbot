@@ -14,12 +14,12 @@ HELP_STRINGS = """
 ALL_MODULES = ['add_menu_buttons', 'answer_surveys', 'create_donation', 'create_survey',
                'donations_edit_delete_results', 'pay_donation', 'report_chatbot_scam', 'send_message', "polls"]
 ADMIN_HELPABLE = {'Custom buttons': "",
-                  'Donation': "",
+                  'Donate': "",
                   'Surveys': "",
                   'Send a message': "",
                   "Polls": ""}
 
-VISITOR_HELPABLE = {'Donation': "",  "Scam Report":"", 'Send a message': ""}
+VISITOR_HELPABLE = {'Donate': "",  "Scam Report":"", 'Send a message': ""}
 
 
 class EqInlineKeyboardButton(InlineKeyboardButton):

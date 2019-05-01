@@ -52,25 +52,24 @@ class DonationBot(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id,)
         donation_request = chatbots_table.find_one({"bot_id": bot.id})
-        if donation_request.get("donation") != {}:
+        if donation_request.get("donate") is not None and donation_request.get("donate") != {}:
             bot.send_message(update.callback_query.message.chat.id,
-                             donation_request["donation"]["description"])
+                             donation_request["donate"]["description"])
             bot.send_message(update.callback_query.message.chat.id,
                              "First, tell us how much do you want to donate. Enter a floating point number")
             bot.send_message(update.callback_query.message.chat.id,
                              "Remember, we use {} as our primary currency".format(
-                donation_request["donation"]['currency'])
-            )
+                                 donation_request["donate"]['currency']))
             bot.send_message(update.callback_query.message.chat.id,
                              text="To return to main menu, click 'Back' ",
-                                      reply_markup=InlineKeyboardMarkup(  # TODO modify this shit
+                             reply_markup=InlineKeyboardMarkup(  # TODO modify this shit
                                           [[InlineKeyboardButton(text="Back",
                                                                  callback_data="cancel_donation_payment")]]))
             return DONATION_MESSAGE
 
         else:
             bot.send_message(update.callback_query.message.chat.id,
-                             "Sorry, no option for donation yet")
+                             "Sorry,you can't donate on this chatbot yet")
             get_help(bot, update)
             return ConversationHandler.END
 
@@ -78,7 +77,7 @@ class DonationBot(object):
     def donation_message(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
         user_data["amount"] = txt
-        update.message.reply_text("You can write a message about your donation, "
+        update.message.reply_text("You can write a message about your crowdfunding campaign, "
                                   "tell why you want to donate or click SKIP",
                                   reply_markup=ReplyKeyboardMarkup([["SKIP"]], one_time_keyboard=True))
         return EXECUTE_DONATION
@@ -92,7 +91,7 @@ class DonationBot(object):
 
         chat_id, txt = initiate_chat_id(update)
         user_data["donation_message"] = txt
-        donation_request = chatbots_table.find_one({"bot_id": bot.id})["donation"]
+        donation_request = chatbots_table.find_one({"bot_id": bot.id})["donate"]
         title = donation_request['title']
         description = donation_request['description']
         payload = "Donation"

@@ -137,7 +137,7 @@ class EditPaymentHandler(object):
         if user_data["action"] == "Currency":
             user_data["currency"] = txt
         chatbot = chatbots_table.find_one({"bot_id": bot.id})
-        chatbot["donation"].update(user_data)
+        chatbot["donate"].update(user_data)
         chatbots_table.replace_one({"bot_id": bot.id}, chatbot)
         update.message.reply_text("Your donation has been updated", reply_markup=self.finish_markup)
 
@@ -149,7 +149,7 @@ class EditPaymentHandler(object):
         chat_id, txt = initiate_chat_id(update)
         if txt == "Yes, I am sure":
             chatbot = chatbots_table.find_one({"bot_id": bot.id})
-            chatbot["donation"] = {}
+            chatbot["donate"] = {}
             chatbots_table.replace_one({"bot_id": bot.id}, chatbot)
             update.message.reply_text("Your donation has been deleted")
             user_data.clear()
@@ -184,7 +184,7 @@ class EditPaymentHandler(object):
         if check_provider_token(provider_token=txt, bot_id=bot.id):
             chatbot = chatbots_table.find_one({"bot_id": bot.id}) or {}
 
-            chatbot["donation"]["payment_token"] = txt
+            chatbot["donate"]["payment_token"] = txt
             chatbots_table.update_one({"bot_id": bot.id}, {'$set': chatbot}, upsert=True)
             update.message.reply_text("Thank you! Your provider_token was changed successfully !",
                                       reply_markup=self.reply_markup)
