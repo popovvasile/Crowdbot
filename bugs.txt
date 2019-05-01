@@ -1,18 +1,24 @@
 
-    #TODO delete the instaces in chats as well
+#TODO delete the instaces in chats as well
 # TODO delete ALL previous messages everywhere
 # TODO Results works strange
 
 # TODO a lot of polls work strange
 #restore users (with acceptance), tags, payments, user_profile
-
 # TODO make message anonymous
 
-# TODO create a ProtestBot as an example
 TODO learn how to use  ForceReply https://python-telegram-bot.readthedocs.io/en/stable/telegram.forcereply.html
 
 
-Полз:
-    1. Можешь придумать адекватные названия для опросов?))) гуглить надо чтоб понять о чём это вообще)
-    2. Выбрал «инстант ран офф пол виз кастом дескрипшн». Проголосовал, а clear my votes не работает, голоса остаются по крайней мере на экране-это запутывает. Подтверждение, что голоса удалены-приходит, но на экране голоса отображаются.
 
+
+TODOS
+
+1. User mode
+3. Fix bugs
+5. Polls results
+7. Send message anonymous
+8. Delete admins
+
+6. Buttons in buttons
+8. Delete ALL previous messages, keep the chat clean
