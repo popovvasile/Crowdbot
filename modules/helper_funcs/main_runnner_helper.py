@@ -140,6 +140,8 @@ def button_handler(bot: Bot, update: Update):
                      text="Back to menu", reply_markup=InlineKeyboardMarkup(
                                      buttons))
 
+# chatbots_table.find_one({"bot_id": bot.id})["donation"]["description"]
+
 
 @run_async
 def help_button(bot: Bot, update: Update):
@@ -165,14 +167,14 @@ def help_button(bot: Bot, update: Update):
     try:
         if mod_match:
             module = mod_match.group(1)
-
+            if module == "donation":
+                HELPABLE[module].__visitor_help__ = chatbots_table.find_one(
+                    {"bot_id": bot.id})["donation"]["description"]
             if if_admin(update=update, bot=bot):
-                text = "{}:\n".format(HELPABLE[module].__mod_name__) \
-                       + HELPABLE[module].__admin_help__
+                text = HELPABLE[module].__admin_help__
                 commands_keyboard = HELPABLE[module].__admin_keyboard__
             else:
-                text = "{}:\n".format(HELPABLE[module].__mod_name__) \
-                       + HELPABLE[module].__visitor_help__
+                text = HELPABLE[module].__visitor_help__
                 commands_keyboard = HELPABLE[module].__visitor_keyboard__
             query.message.reply_text(text=text,
                                      reply_markup=InlineKeyboardMarkup(

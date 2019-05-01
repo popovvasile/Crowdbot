@@ -6,7 +6,7 @@ class InstantRunoffPollHandler(BasePoll):
     def __init__(self):
         super(InstantRunoffPollHandler, self).__init__()
 
-        self.name = "Instant runoff poll"
+        self.name = "Order of preference poll"
         self.desc = "Lets you define an order of preference and picks the option which is preferred by most."
 
     def options(self, poll):

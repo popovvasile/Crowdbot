@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import ast
 import json
-import csv
+# import csv
 import random
 import logging
 from uuid import uuid4
@@ -15,36 +15,27 @@ from telegram.inline.inlinekeyboardmarkup import InlineKeyboardMarkup
 from telegram.inline.inlinequeryresultarticle import InlineQueryResultArticle
 from telegram.inline.inputtextmessagecontent import InputTextMessageContent
 
-from database import polls_table, poll_instances_table, DROPBOX_TOKEN
+from database import polls_table, poll_instances_table
 from modules.create_survey import chats_table
 from modules.helper_funcs.auth import initiate_chat_id
 from modules.helper_funcs.helper import get_help
 from modules.pollbot.basic_poll_handler import BasicPoll
-from modules.pollbot.tie_break_instant_runoff_poll_handler import TieBreakInstantRunoffPollHandler
-from modules.pollbot.stv_poll_handler import StvHandler
 from modules.pollbot.instant_runoff_poll_handler import InstantRunoffPollHandler
 from modules.pollbot.custom_description_poll_handler import CustomDescriptionHandler
-from modules.pollbot.custom_description_instant_runoff_poll_handler import CustomDescriptionInstantRunoffPollHandler
-from modules.pollbot.set_poll_handler import SetPollHandler
 from modules.pollbot.multiple_options_poll_handler import MultipleOptionsHandler
+from modules.pollbot.custom_description_instant_runoff_poll_handler import CustomDescriptionInstantRunoffPollHandler
 
 POLL_TYPE_BASIC, \
-POLL_TYPE_SET, \
 POLL_TYPE_INSTANT_RUNOFF, \
-POLL_TYPE_INSTANT_RUNOFF_TIE_BREAK, \
 POLL_TYPE_CUSTOM_DESCRIPTION, \
-POLL_TYPE_STV, \
 POLL_TYPE_INSTANT_RUNOFF_CUSTOM_DESCRIPTION, \
-POLL_TYPE_MULTIPLE_OPTIONS = range(8)
+POLL_TYPE_MULTIPLE_OPTIONS = range(5)
 
 POLL_HANDLERS = {
     POLL_TYPE_BASIC: BasicPoll(),
-    POLL_TYPE_SET: SetPollHandler(),
     POLL_TYPE_INSTANT_RUNOFF: InstantRunoffPollHandler(),
-    POLL_TYPE_INSTANT_RUNOFF_TIE_BREAK: TieBreakInstantRunoffPollHandler(),
-    POLL_TYPE_CUSTOM_DESCRIPTION: CustomDescriptionHandler(),
-    POLL_TYPE_STV: StvHandler(),
     POLL_TYPE_INSTANT_RUNOFF_CUSTOM_DESCRIPTION: CustomDescriptionInstantRunoffPollHandler(),
+    POLL_TYPE_CUSTOM_DESCRIPTION: CustomDescriptionHandler(),
     POLL_TYPE_MULTIPLE_OPTIONS: MultipleOptionsHandler(),
 }
 
@@ -89,6 +80,7 @@ class PollBot(object):
         self.send_markup = InlineKeyboardMarkup(
             send_buttons)
     # Conversation handlers:
+
     @run_async
     def start(self, bot, update):
         """Send a message when the command /start is issued."""

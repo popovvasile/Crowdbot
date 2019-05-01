@@ -15,7 +15,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.INFO)
 
 logger = logging.getLogger(__name__)
-__mod_name__ = "Donation"
+__mod_name__ = "Donate"
 
 __admin_help__ = """
  Click:
@@ -25,15 +25,12 @@ __admin_help__ = """
 
 """
 
-__visitor_help__ = """
- Click:
-  - Donate to make a donation for this organization
-"""
+__visitor_help__ = "Donate"
 
 __admin_keyboard__ = [InlineKeyboardButton(text="Donate", callback_data="donate"),
                       InlineKeyboardButton(text="Allow donations", callback_data="allow_donation"),
                       InlineKeyboardButton(text="Configure", callback_data="configure_donation")]
-__visitor_keyboard__ = [InlineKeyboardButton(text="Donate", callback_data="donate")]
+__visitor_keyboard__ = [InlineKeyboardButton(text="Donate!", callback_data="donate")]
 
 
 DONATION_MESSAGE, EXECUTE_DONATION, HANDLE_PRECHECKOUT, HANDLE_SUCCES = range(4)
@@ -53,13 +50,11 @@ class DonationBot(object):
     @run_async
     def start_donation(self, bot, update, user_data):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                   message_id=update.callback_query.message.message_id,)
+                           message_id=update.callback_query.message.message_id,)
         donation_request = chatbots_table.find_one({"bot_id": bot.id})
         if donation_request.get("donation") != {}:
-            bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                               message_id=update.callback_query.message.message_id)
             bot.send_message(update.callback_query.message.chat.id,
-                             "Great! We very glad that you want to donate for our cause!")
+                             donation_request["donation"]["description"])
             bot.send_message(update.callback_query.message.chat.id,
                              "First, tell us how much do you want to donate. Enter a floating point number")
             bot.send_message(update.callback_query.message.chat.id,

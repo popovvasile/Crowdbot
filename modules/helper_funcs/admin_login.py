@@ -5,6 +5,7 @@ from telegram.ext.dispatcher import run_async
 
 from database import users_table
 from modules.helper_funcs.auth import initiate_chat_id
+from modules.helper_funcs.main_runnner_helper import get_help
 
 TYPING_PASS = 1
 
@@ -52,6 +53,8 @@ class AdminAuthentication(object):
                                          "superuser": superuser,
                                          "tags": ["#all", "#user", "#admin"]
                                          })
+                get_help(bot, update)
+
             else:
                 bot.send_message(chat_id, update.message.chat.first_name + ", you have been registered " +
                                  "as an authorized user of this bot.")
@@ -66,6 +69,7 @@ class AdminAuthentication(object):
                                          "superuser": superuser,
                                          "tags": ["#all", "#user"]
                                          })
+                get_help(bot, update)
             return ConversationHandler.END
         elif used_password is None:
             bot.send_message(chat_id, "No password provided. Please send a  valid password or click /cancel")

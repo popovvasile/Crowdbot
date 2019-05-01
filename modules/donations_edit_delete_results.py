@@ -45,6 +45,10 @@ class EditPaymentHandler(object):
         buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_donation_edit")])
         self.reply_markup = InlineKeyboardMarkup(
             buttons)
+        finish_buttons = list()
+        finish_buttons.append([InlineKeyboardButton(text="Back", callback_data="help_back")])
+        self.finish_markup = InlineKeyboardMarkup(
+            finish_buttons)
 
     @staticmethod
     def facts_to_str(user_data):
@@ -57,7 +61,7 @@ class EditPaymentHandler(object):
     @run_async
     def start_donation(self, bot, update, user_data):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                   message_id=update.callback_query.message.message_id,)
+                           message_id=update.callback_query.message.message_id,)
         chatbot = chatbots_table.find_one({"bot_id": bot.id})
         if chatbot.get("donation") != {}:
             reply_keyboard = [["Delete this donation"], ["Edit"]]
@@ -132,11 +136,10 @@ class EditPaymentHandler(object):
 
         if user_data["action"] == "Currency":
             user_data["currency"] = txt
-        user_data.pop(user_data)
         chatbot = chatbots_table.find_one({"bot_id": bot.id})
-        chatbot["donation"] = user_data
+        chatbot["donation"].update(user_data)
         chatbots_table.replace_one({"bot_id": bot.id}, chatbot)
-        update.message.reply_text("Your donation has been updated", reply_markup=self.reply_markup)
+        update.message.reply_text("Your donation has been updated", reply_markup=self.finish_markup)
 
         user_data.clear()
         return ConversationHandler.END
@@ -243,6 +246,10 @@ EDIT_DONATION_HANDLER = ConversationHandler(
                                          EditPaymentHandler().handle_finish_delete,
                                          pass_user_data=True),
                           CommandHandler('cancel', EditPaymentHandler().cancel)],
+        EDIT_FINISH:[MessageHandler(Filters.text,
+                                             EditPaymentHandler().handle_edit_finish,
+                                             pass_user_data=True),
+                              CommandHandler('cancel', EditPaymentHandler().cancel)],
 
     },
 

@@ -4,7 +4,7 @@ from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMa
 from telegram.ext import (CommandHandler, MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler, RegexHandler)
 import logging
-from database import custom_buttons_table
+from database import custom_buttons_table, chatbots_table
 from modules.helper_funcs.auth import initiate_chat_id
 from modules.helper_funcs.helper import get_help
 
@@ -42,8 +42,7 @@ class AddCommands(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
 
-        reply_keyboard = [['About', 'My projects'],
-                          ['Contacts', 'Useful links']]
+        reply_keyboard = [chatbots_table.find_one({"bot_id": bot.id})["buttons"]]
         markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
         bot.send_message(update.callback_query.message.chat.id,
                          "Type a name for new button or choose one of the examples below. "
@@ -270,7 +269,9 @@ class AddCommands(object):
 
     def back(self, bot, update, user_data):
         user_data.clear()
-
+        bot.send_message(update.callback_query.message.chat.id,
+                         ".", reply_markup=ReplyKeyboardRemove()
+                         )
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         get_help(bot, update)
