@@ -19,7 +19,7 @@ ADMIN_HELPABLE = {'Custom buttons': "",
                   'Send a message': "",
                   "Polls": ""}
 
-VISITOR_HELPABLE = {'Donate': "",  "Scam Report":"", 'Send a message': ""}
+VISITOR_HELPABLE = {'Donate': "",  'Send a message': ""}
 
 
 class EqInlineKeyboardButton(InlineKeyboardButton):

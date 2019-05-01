@@ -37,12 +37,13 @@ class SendMessageToAdmin(object):
     def received_message(self, bot, update):
         bot.send_message(update.message.chat_id,
                          "Thank you! Your message has been sent to the chatbot owner!")
-        users_messages_to_admin_table.insert({"user_full_name": update.message.full_name,
+        users_messages_to_admin_table.insert({"user_full_name": update.message.from_user.full_name,
                                               "chat_id": update.message.chat_id,
-                                              "user_id": update.message.user_id,
+                                              "user_id": update.message.from_user.id,
                                               "message": update.message.text,
                                               "timestamp": datetime.datetime.now(),
                                               "bot_id": bot.id})
+        get_help(bot, update)
         return ConversationHandler.END
 
     @run_async
@@ -139,17 +140,18 @@ class SeeMessageToAdmin(object):
             for message in messages:
                 if message["timestamp"] + datetime.timedelta(days=14) > datetime.datetime.now():
                     bot.send_message(update.callback_query.message.chat.id,
-                                     "User's fullname:{}, \n"
-                                                             "Message:{}".format(message["full_name"],
-                                                                                 message["message"]))
+                                     "User's name: {}, \n\n"
+                                      "Message: {}".format(message["user_full_name"],
+                                      message["message"]))
 
         else:
             bot.send_message(update.callback_query.message.chat.id,
                              "You have no incoming messages yet")
+        get_help(update=update, bot=bot)
 
 
 SEND_MESSAGE_TO_ADMIN_HANDLER = ConversationHandler(
-    entry_points=[CallbackQueryHandler(pattern="Send_message", callback=SendMessageToAdmin().send_message),
+    entry_points=[CallbackQueryHandler(pattern="send_message_to_admin", callback=SendMessageToAdmin().send_message),
                   CallbackQueryHandler(callback=SendMessageToUsers().back, pattern=r"cancel_send_message")],
 
     states={

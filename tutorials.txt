@@ -1,4 +1,4 @@
-Go to @botfather and create /newbot and copy the forty five-digit token. Tell the token nobody(Надо?). Go to the new bot and press “Start”. Then go back to @Crowdfatherbot and command /newbot.
+
 
 
 Hallo, I’m Crowdbot and ready to use.

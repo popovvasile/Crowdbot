@@ -138,7 +138,8 @@ def button_handler(bot: Bot, update: Update):
             LOGGER.exception("Exception in help buttons. %s", str(query.data))
     bot.send_message(chat_id=update.callback_query.message.chat_id,
                      text="Back to menu", reply_markup=InlineKeyboardMarkup(
-                                     buttons))
+            buttons))
+
 
 # chatbots_table.find_one({"bot_id": bot.id})["donation"]["description"]
 
@@ -258,7 +259,11 @@ class WelcomeBot(object):
                           "is_admin": False,
                           "tags": ["#all", "#user"]
                           })
-
+        if if_admin(update=update, bot=bot):
+            bot.send_message(chat_id,
+                             "Hallo, I’{} {} and ready to use. \n"
+                             "To add new content for your audience, press the 'Custom buttons'.\n"
+                             "To ask audience use Polls or survey.".format(bot.first_name, bot.last_name))
         get_help(bot=bot, update=update)
         # initial_survey = surveys_table.find_one({
         #     "bot_id": bot.id,
