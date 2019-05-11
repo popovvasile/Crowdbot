@@ -270,7 +270,7 @@ class AddCommands(object):
     def back(self, bot, update, user_data):
         user_data.clear()
         bot.send_message(update.callback_query.message.chat.id,
-                         ".", reply_markup=ReplyKeyboardRemove()
+                         "Button creation was stopped", reply_markup=ReplyKeyboardRemove()
                          )
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)

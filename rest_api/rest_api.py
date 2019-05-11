@@ -47,10 +47,10 @@ class ThingsResource(object):
                 resp.status = falcon.HTTP_200
 
     def on_delete(self, req, resp):
-        # doc = {}
-        # if req.content_length:
-        #
-        doc = req.params
+        doc = {}
+        if req.content_length:
+            doc = falcon.json.load(req.stream)
+        print(doc)
         """Handles DELETE requests"""
         chatbot_id = requests.get(url="https://api.telegram.org/bot{}/getMe".format(doc["token"])
                                   ).json()

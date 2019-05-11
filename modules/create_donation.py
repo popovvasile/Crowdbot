@@ -90,7 +90,7 @@ Use the /mybots command in the chat with @BotFather and choose your chatbot. Go 
 
             user_data['payment_token'] = txt
 
-            update.message.reply_text("Enter a title for your crowdfunding", reply_markup=self.reply_markup)
+            update.message.reply_text("Enter a title for your donation", reply_markup=self.reply_markup)
 
             return TYPING_TITLE
         else:
@@ -105,7 +105,7 @@ Use the /mybots command in the chat with @BotFather and choose your chatbot. Go 
         chat_id, txt = initiate_chat_id(update)
         user_data['title'] = txt
 
-        update.message.reply_text("Write a short text for your crowdfunding- what your users are donating for?",
+        update.message.reply_text("Write a short text for your donation campaign- what your users are donating for?",
                                   reply_markup=self.reply_markup)
 
         return TYPING_DESCRIPTION

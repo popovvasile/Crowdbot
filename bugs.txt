@@ -4,21 +4,24 @@
 # TODO Results works strange
 
 # TODO a lot of polls work strange
-#restore users (with acceptance), tags, payments, user_profile
 # TODO make message anonymous
+# TODO send messages only to admins (option)
+Кнопки
+    2. Знаешь что было бы круто. Кнопка «Manage button», где можно изменить контент или название
+    3. Buttons in buttons
 
+Месседж
+    2. Inbox Message странно себя ведёт. Дрыгается и выдаёт меню. Если сообщений нет, то так и надо написать
+
+Survey
+    2.Есть идея. Можно ли в сёрвай и полз добавить картинки или другой контент?
+
+Donation
+    1. Sorry,you can't donate on this chatbot yet. Лучше объяснить, что в боте не подключены донаты. Создайте донат.как-то так
+    4. Когда edit donation, то хорошо было бы в подменю иметь кнопку бэк, вдруг ты передумаешь что-то менять, а вернутся никак.
+    5. Когда что-то в донате, то приходит акцепт процедуры и кнопка «бэк». Вместо Бэк нужно сразу главное меню
+    6. Удалил донат, нажал на кнопку DONATE, и бот затупил.
 TODO learn how to use  ForceReply https://python-telegram-bot.readthedocs.io/en/stable/telegram.forcereply.html
 
 
-
-
-TODOS
-
-1. User mode
-3. Fix bugs
-5. Polls results
-7. Send message anonymous
-8. Delete admins
-
-6. Buttons in buttons
-8. Delete ALL previous messages, keep the chat clean
+TODO for Occupy: add an universal pass + all old polls including doodle + tags-

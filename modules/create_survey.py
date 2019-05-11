@@ -249,13 +249,13 @@ class SurveyHandler(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         surveys_list = surveys_table.find({"bot_id": bot.id})
-        if surveys_list.count() !=0:
+        if surveys_list.count() != 0:
             bot.send_message(update.callback_query.message.chat.id,
                              "This is the list of your current surveys:", reply_markup=self.reply_markup)
             command_list = [survey['title'] for survey in surveys_table.find({"bot_id": bot.id})]
             reply_keyboard = [command_list]
             bot.send_message(update.callback_query.message.chat.id,
-                             "Choose the survey that you want to send",
+                             "Choose the survey that you want to send to your users",
                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
             return TYPING_SEND_TITLE
         else:
@@ -272,6 +272,8 @@ class SurveyHandler(object):
     def handle_send_title(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
         user_data["title"] = txt
+        survey = surveys_table.find_one({"bot_id": bot.id, 'title': txt})
+
         sent = []
         chats = chats_table.find({"bot_id": bot.id})
         for chat in chats:
@@ -289,7 +291,7 @@ class SurveyHandler(object):
 
         if len(sent) == 0:
             bot.send_message(chat_id, "Looks like there are yet no users to send this survey to. "
-                                      "No polls sent :( ", reply_markup=ReplyKeyboardRemove())
+                                      "No surveys sent :( ", reply_markup=ReplyKeyboardRemove())
         else:
             bot.send_message(chat_id=chat_id, text="Survey sent to all users!", reply_markup=ReplyKeyboardRemove())
         get_help(bot, update)

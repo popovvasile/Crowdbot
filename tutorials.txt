@@ -1,11 +1,4 @@
 
-
-
-Hallo, I’m Crowdbot and ready to use.
-To add new content for your audience create /new button.
-To ask audience use Polls or survey.
-
-
 Donate
 Go to @botfather and enter /mybots. Choose your bot and press “Payments”. Choose a provider. We advise to use „Stripe“ because of low Acquiring for European card. Follow instructions of @botfather and the chosen provider then you will get a token-access, that you should copy.
 Go back to your bot and create /newdonate. Paste your token, choose the currency, and minimal donation.
