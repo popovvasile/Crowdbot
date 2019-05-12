@@ -47,14 +47,15 @@ class ThingsResource(object):
                 resp.status = falcon.HTTP_200
 
     def on_delete(self, req, resp):
-        doc = {}
-        if req.content_length:
-            doc = falcon.json.load(req.stream)
-        print(doc)
+        print(req.params)
+        # {'admins[]': ['{"email":"po@gmail.co"', '"password":"NThLDLf1Xqz"}'], 'finished': 'true',
+        #  'buttons[]': ['Discography', 'Concerts', 'Battles', 'New Projects', 'Live photos'],
+        #  '_id': '"5cd835f0522bc511ad555ffe"', 'superuser': '244356086',
+        #  'token': '633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg', 'name': 'Crowdbot', 'welcomeMessage': 'hi'}
+
         """Handles DELETE requests"""
-        chatbot_id = requests.get(url="https://api.telegram.org/bot{}/getMe".format(doc["token"])
+        chatbot_id = requests.get(url="https://api.telegram.org/bot{}/getMe".format(req.params["token"])
                                   ).json()
-        print(chatbot_id)
         chatbot_id = chatbot_id["result"]["id"]
         db["users"].delete_many({"bot_id": chatbot_id})
         db["chatbots"].delete_many({"bot_id": chatbot_id})
