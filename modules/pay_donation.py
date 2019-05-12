@@ -8,7 +8,7 @@ import logging
 import datetime
 # Enable logging
 from database import donations_table, chatbots_table
-from modules.helper_funcs.auth import initiate_chat_id
+from modules.helper_funcs.auth import initiate_chat_id, if_admin
 from modules.helper_funcs.helper import get_help
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -70,6 +70,10 @@ class DonationBot(object):
         else:
             bot.send_message(update.callback_query.message.chat.id,
                              "Sorry,you can't donate on this chatbot yet")
+            if if_admin(update, bot):
+                bot.send_message(update.callback_query.message.chat.id,
+                                 "Please visit 'Donations' ==> 'Allow donations' and "
+                                 "follow the instructions to enable this option.")
             get_help(bot, update)
             return ConversationHandler.END
 

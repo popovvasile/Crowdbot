@@ -1,27 +1,14 @@
 
-#TODO delete the instaces in chats as well
-# TODO delete ALL previous messages everywhere
+# TODO delete the instances in chats as well (polls)
+# TODO delete ALL previous messages everywhere (store ALL sent messages id's)
 # TODO Results works strange
-
-# TODO a lot of polls work strange
 # TODO make message anonymous
 # TODO send messages only to admins (option)
-Кнопки
-    2. Знаешь что было бы круто. Кнопка «Manage button», где можно изменить контент или название
-    3. Buttons in buttons
+# TODO Edit button
+# TODO buttons in buttons
+# TODO pics and other content for surveys and polls
+# TODO test BotFather and rest_api again (admin delete and add, etc.)
 
-Месседж
-    2. Inbox Message странно себя ведёт. Дрыгается и выдаёт меню. Если сообщений нет, то так и надо написать
 
-Survey
-    2.Есть идея. Можно ли в сёрвай и полз добавить картинки или другой контент?
-
-Donation
-    1. Sorry,you can't donate on this chatbot yet. Лучше объяснить, что в боте не подключены донаты. Создайте донат.как-то так
-    4. Когда edit donation, то хорошо было бы в подменю иметь кнопку бэк, вдруг ты передумаешь что-то менять, а вернутся никак.
-    5. Когда что-то в донате, то приходит акцепт процедуры и кнопка «бэк». Вместо Бэк нужно сразу главное меню
-    6. Удалил донат, нажал на кнопку DONATE, и бот затупил.
 TODO learn how to use  ForceReply https://python-telegram-bot.readthedocs.io/en/stable/telegram.forcereply.html
-
-
 TODO for Occupy: add an universal pass + all old polls including doodle + tags-

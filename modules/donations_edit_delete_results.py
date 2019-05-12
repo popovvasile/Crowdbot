@@ -46,7 +46,7 @@ class EditPaymentHandler(object):
         self.reply_markup = InlineKeyboardMarkup(
             buttons)
         finish_buttons = list()
-        finish_buttons.append([InlineKeyboardButton(text="Back", callback_data="help_back")])
+        finish_buttons.append([InlineKeyboardButton(text="Menu", callback_data="help_back")])
         self.finish_markup = InlineKeyboardMarkup(
             finish_buttons)
 
@@ -67,7 +67,7 @@ class EditPaymentHandler(object):
             reply_keyboard = [["Delete this donation"], ["Edit"]]
 
             bot.send_message(update.callback_query.message.chat.id,
-                             "What do you want to do with this donation?",
+                             "What do you want to do with this donation? (click /cancel to return)",
                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
 
             return FINISH_ACTION
@@ -80,7 +80,6 @@ class EditPaymentHandler(object):
                                or click "Back" for main menu""",
                              reply_markup=InlineKeyboardMarkup(admin_keyboard))
             user_data.clear()
-
             return ConversationHandler.END
 
     def handle_action_finish(self, bot, update, user_data):  # TODO add if leifs for every action
@@ -91,7 +90,7 @@ class EditPaymentHandler(object):
             user_data['action'] = txt
             reply_keyboard = [["Yes, I am sure"], ["No, let's get back"]]
             update.message.reply_text(
-                "Are you sure that you want to delete this donation?",
+                "Are you sure that you want to delete this donation? ",
                 reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
             return DELETE_FINISH
 
@@ -99,7 +98,7 @@ class EditPaymentHandler(object):
             keyboard_markup = [["Title", "Description"],
                                ["Currency"]]
             chat_id, txt = initiate_chat_id(update)
-            bot.send_message(chat_id, "Please choose what exactly do you want to edit",
+            bot.send_message(chat_id, "Please choose what exactly do you want to edit (or click /cancel)",
                              reply_markup=ReplyKeyboardMarkup(keyboard_markup))
             return CHOOSING_EDIT_ACTION
 
@@ -109,18 +108,18 @@ class EditPaymentHandler(object):
         if txt == "Title":
             bot.send_message(chat_id, "Great!", reply_markup=ReplyKeyboardRemove())
             bot.send_message(chat_id,
-                             "Now, write a new title for this donation", reply_markup=self.reply_markup)
+                             "Now, write a new title for this donation (or click /cancel)", reply_markup=self.reply_markup)
         elif txt == "Description":
             bot.send_message(chat_id, "Great!", reply_markup=ReplyKeyboardRemove())
 
             update.message.reply_text(
-                "Now, write a short text for your donation- what your users have to pay for?",
+                "Now, write a short text for your donation- what your users have to pay for? (or click /cancel)",
                 reply_markup=self.reply_markup)
         elif txt == "Currency":
             bot.send_message(chat_id, "Great!", reply_markup=ReplyKeyboardRemove())
 
             currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["CHF", "AUD", "RON", "PLN"]]
-            update.message.reply_text("Now, choose the currency of your donation",
+            update.message.reply_text("Now, choose the currency of your donation (or click /cancel)",
                                       reply_markup=ReplyKeyboardMarkup(currency_keyboard, one_time_keyboard=True))
         user_data["action"] = txt
         return EDIT_FINISH

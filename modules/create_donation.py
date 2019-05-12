@@ -125,7 +125,7 @@ Use the /mybots command in the chat with @BotFather and choose your chatbot. Go 
         chat_id, txt = initiate_chat_id(update)
         currency = txt
         user_data["currency"] = currency
-        bot.send_message(chat_id, "Your donation option has been created!", reply_markup=self.reply_markup)
+        bot.send_message(chat_id, "Your donation option has been created!")
         chatbot = chatbots_table.find_one({"bot_id": bot.id}) or {}
         chatbot["donate"] = user_data
         if 'payment_token' in user_data:

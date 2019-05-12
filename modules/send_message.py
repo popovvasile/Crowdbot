@@ -136,7 +136,8 @@ class SeeMessageToAdmin(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         messages = users_messages_to_admin_table.find({"bot_id": bot.id})
-        if messages:
+
+        if messages.count() !=0:
             for message in messages:
                 if message["timestamp"] + datetime.timedelta(days=14) > datetime.datetime.now():
                     bot.send_message(update.callback_query.message.chat.id,
@@ -147,6 +148,7 @@ class SeeMessageToAdmin(object):
         else:
             bot.send_message(update.callback_query.message.chat.id,
                              "You have no incoming messages yet")
+
         get_help(update=update, bot=bot)
 
 
