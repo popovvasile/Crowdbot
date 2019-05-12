@@ -1,14 +1,15 @@
 
-# TODO delete the instances in chats as well (polls)
+Bugs:
 # TODO delete ALL previous messages everywhere (store ALL sent messages id's)
 # TODO Results works strange
-# TODO make message anonymous
-# TODO send messages only to admins (option)
+# TODO make a loop for multiple messages at once
+# TODO test BotFather and rest_api again (admin delete and add, etc.)
+# TODO for Occupy: add an universal pass + all old polls + tags
+
+New features:
 # TODO Edit button
 # TODO buttons in buttons
 # TODO pics and other content for surveys and polls
-# TODO test BotFather and rest_api again (admin delete and add, etc.)
 
 
 TODO learn how to use  ForceReply https://python-telegram-bot.readthedocs.io/en/stable/telegram.forcereply.html
-TODO for Occupy: add an universal pass + all old polls including doodle + tags-

@@ -495,9 +495,9 @@ class PollBot(object):
 
     @run_async
     def handle_delete_poll(self, bot, update):
-        # TODO delete not just the instance in the databse, but the messages themselves as well
         polls_list_of_dicts = polls_table.find({"bot_id": bot.id})
-        if polls_list_of_dicts.count() !=0:
+        if polls_list_of_dicts.count() != 0:
+
             command_list = [command['title'] for command in polls_list_of_dicts]
             reply_keyboard = [command_list]
             bot.send_message(update.callback_query.message.chat.id,
@@ -522,12 +522,19 @@ class PollBot(object):
     @run_async
     def handle_delete_poll_finish(self, bot, update):
         chat_id, txt = initiate_chat_id(update)
+        poll_to_delete_instances = poll_instances_table.find_many({"bot_id": bot.id, "title": txt})
+
+        for poll_instance in poll_to_delete_instances:
+            bot.delete_message(chat_id=chat_id,
+                               message_id=poll_instance["message_id"])
+
         polls_table.delete_one({"bot_id": bot.id, "title": txt})
-        poll_instances_table.delete_one({"bot_id": bot.id, "title": txt})
+        poll_instances_table.delete_many({"bot_id": bot.id, "title": txt})
+
         update.message.reply_text("Ok!", reply_markup=ReplyKeyboardRemove())
 
         update.message.reply_text(
-            "Poll with title {} has been deleted".format(txt))
+            "Poll with title {} has been deleted from all chats.".format(txt))
         get_help(bot, update)
         return ConversationHandler.END
 
