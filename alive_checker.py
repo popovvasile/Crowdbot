@@ -16,8 +16,9 @@ def multiple_bot_daemon():  # TODO adjust to the new botFather and webhook
     my_process = {}
     print(db["chatbots"].find().count())
     while True:
+        print(my_process)
         for doc in db["chatbots"].find():  # run all tokens when the script is running
-            if doc["token"] not in my_process.keys():
+            if doc["token"] not in list(my_process):
                 print(doc)
                 new_process = Process(target=main, args=(doc["token"],), name=doc["token"])
                 new_process.start()
@@ -35,6 +36,12 @@ def multiple_bot_daemon():  # TODO adjust to the new botFather and webhook
                 new_process.start()
                 my_process[doc["token"]] = new_process
                 # print "restarted process " + doc["token"]
+        for process_key in list(my_process):  # run all tokens when the script is running
+            list_of_tokens = [d['token'] for d in db["chatbots"].find() if 'token' in d]
+            if process_key not in list_of_tokens:
+                my_process[process_key].terminate()
+                my_process.pop(process_key, None)
+                print(process_key)
         time.sleep(2)
 
 
