@@ -1,15 +1,63 @@
 
 Bugs:
-# TODO delete ALL previous messages everywhere (store ALL sent messages id's)
-# TODO Results works strange
+# TODO make surveys easier (just send the question. User answers or skips)
+# TODO make donations easier
+# TODO logging everywhere
+# TODO delete ALL previous messages everywhere (store ALL sent messages id's) -  the buttons
+# TODO Results in polls works strange
 # TODO make a loop for multiple messages at once
 # TODO test BotFather and rest_api again (admin delete and add, etc.)
-# TODO for Occupy: add an universal pass + all old polls + tags
+# TODO make polls easier. Adjust priority polls results
+# TODO English everywhere
+# TODO it is not clear the payment token thing
 
 New features:
 # TODO Edit button
 # TODO buttons in buttons
 # TODO pics and other content for surveys and polls
+# TODO results for surveys, polls and donations
+# TODO payment balance in the bot (Kirill BotFather)
+# TODO multiple languages
+# TODO hidden content and e-shop
+# TODO multiple languages
+# TODO for Occupy: add users + all old polls + tags + payments for members
 
 
 TODO learn how to use  ForceReply https://python-telegram-bot.readthedocs.io/en/stable/telegram.forcereply.html
+
+
+
+Кирилл
+    1. Мы договаривались, что имеил суперюзера остаётся у нас. Сейчас его можно снести.
+Проблема с Делит бот не исчезла
+Вася
+	Кнопки
+    1. Знаешь что было бы круто. Кнопка «Manage button», где можно изменить контент или название
+    2. Две картинки и док с картинкой загружаются через раз(пробуй их загружать не только друг с другом, но и с видео и с текстом и с аудио).  Тут загрузил Две картинки, аудио, видео, нажал DONE. Button creation was stopped было записано в контент, картинки не вышли,хз. BACK не показывается, даже если жать на эту кнопку.
+
+СМОТРИ На след страницу
+    3. Вот опять. Смотри картинка+док
+
+    4. Теперь док+док+текст. Вылез только док+текст,нет кнопки BACK. Кароч чекай, и там опять видно какой-то тонкий баг, если Отмена создания кнопки вплелась в кнопку.
+
+Polls
+    1. Оставь три типа основных опросов и норм. Чем отличается бэйсик пол от кастом дескрипшона?
+    2. Нельзя делит Полз. Бот тупит.
+    3. Мультиплай опшн полз. Если голосовать, бот пишет, что мой голос удалён.
+
+СЁервай
+Зашёл со второгоаккаунта как юзер и бот начал адски тупить.
+Сёрвай не создаётся, бэк не выскакивает, ничё не отправляется, кнопка бэе тупит.
+После любой команды приходит сообщение «Button creation was stoped“
+
+Донаты 284685063:TEST:OWRiZGIxYWFhYzk4
+
+
+    1. Это просто перебор) сам всё видишь. Думаю туда сёрвай вплелись
+
+    2.
+    3. Ну и донаты и сам бот отрубились. Всё
+
+    4. От юзера вообще нельзя задонатить, после донейта и Skip всё просто заканчивается.
+
+    5. В Юзер вью если жать на кнопку, то за ней зачем-то следует кнопка с таким же названием, инфа дублируется. Например Donate=>Donate!
