@@ -1,4 +1,4 @@
-from .basic_poll_handler import BasicPoll
+from modules.old_scripts.basic_poll_handler import BasicPoll
 
 
 class MultipleOptionsHandler(BasicPoll):
@@ -31,6 +31,8 @@ class MultipleOptionsHandler(BasicPoll):
         return message
 
     def handle_vote(self, votes, user, name, callback_data):
+        # print(callback_data)
+        votes[user] = []
         old_vote = None
         if user in votes:
             old_vote = votes.pop(user)

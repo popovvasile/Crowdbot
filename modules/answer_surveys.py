@@ -58,13 +58,14 @@ class AnswerSurveys(object):
             "title": user_data["title"]
         })
         for answer in survey["answers"]:
-            if answer.get('user_id', "") == update.message.from_user.id:
+            if answer.get('user_id', "") == update.callback_query.message.from_user.id:
                 survey["answers"] = []
                 surveys_table.update({"title": survey["title"]}, survey)
-        bot.send_message(update.message.chat_id,
+        bot.send_message(update.callback_query.message.chat_id,
                          "Please answer the following question.\n\n"
                          )
-        bot.send_message(update.message.chat_id, survey["questions"][int(user_data["question_id"])]["text"],
+        bot.send_message(update.callback_query.message.chat_id,
+                         survey["questions"][int(user_data["question_id"])]["text"],
                          reply_markup=self.reply_markup)
 
         return ANSWERING
@@ -94,7 +95,8 @@ class AnswerSurveys(object):
                     to_send_text += "Question:{}, Answer: {} \n".format(question,
                                                                         answer['answer'])
 
-            bot.send_message(update.message.chat_id, "Thank you for your responses!\n" + to_send_text + "\n" +
+            bot.send_message(update.message.chat_id,
+                             "Thank you for your responses!\n" + to_send_text + "\n" +
                              "Until next time!")
             del user_data
             del answer
@@ -114,8 +116,8 @@ class AnswerSurveys(object):
         update.message.reply_text("Thank you for your responses!"
                                   "{}"
                                   "Until next time!".format(facts_to_str(user_data)))
-
         user_data.clear()
+        get_help(bot, update)
         return ConversationHandler.END
 
     @run_async
@@ -145,12 +147,13 @@ ANSWER_SURVEY_HANDLER = ConversationHandler(
         ANSWERING: [MessageHandler(Filters.all,
                                    AnswerSurveys().received_information,
                                    pass_user_data=True)],
-
     },
 
-    fallbacks=[CommandHandler('done', AnswerSurveys().back),
-               CommandHandler('cancel', AnswerSurveys().cancel),
-               MessageHandler(filters=Filters.command, callback=AnswerSurveys().back)]
+    fallbacks=[
+        CallbackQueryHandler(AnswerSurveys().back, pattern=r"cancel_survey_answering"),
+        CommandHandler('done', AnswerSurveys().back),
+        CommandHandler('cancel', AnswerSurveys().cancel),
+        MessageHandler(filters=Filters.command, callback=AnswerSurveys().back)]
 )
 
 __mod_name__ = "Surveys"
@@ -165,7 +168,7 @@ __admin_help__ = """
 
 __admin_keyboard__ = [
     InlineKeyboardButton(text="Create", callback_data="create_survey"),
-     InlineKeyboardButton(text="Delete", callback_data="delete_survey"),
+    InlineKeyboardButton(text="Delete", callback_data="delete_survey"),
     InlineKeyboardButton(text="Send", callback_data="send_survey"),
-     InlineKeyboardButton(text="Results", callback_data="surveys_results")
+    InlineKeyboardButton(text="Results", callback_data="surveys_results")
 ]

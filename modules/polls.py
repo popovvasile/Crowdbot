@@ -19,21 +19,15 @@ from database import polls_table, poll_instances_table
 from modules.create_survey import chats_table
 from modules.helper_funcs.auth import initiate_chat_id
 from modules.helper_funcs.helper import get_help
-from modules.pollbot.basic_poll_handler import BasicPoll
-from modules.pollbot.instant_runoff_poll_handler import InstantRunoffPollHandler
 from modules.pollbot.custom_description_poll_handler import CustomDescriptionHandler
 from modules.pollbot.multiple_options_poll_handler import MultipleOptionsHandler
 from modules.pollbot.custom_description_instant_runoff_poll_handler import CustomDescriptionInstantRunoffPollHandler
 
-POLL_TYPE_BASIC, \
-POLL_TYPE_INSTANT_RUNOFF, \
 POLL_TYPE_CUSTOM_DESCRIPTION, \
 POLL_TYPE_INSTANT_RUNOFF_CUSTOM_DESCRIPTION, \
-POLL_TYPE_MULTIPLE_OPTIONS = range(5)
+POLL_TYPE_MULTIPLE_OPTIONS = range(3)
 
 POLL_HANDLERS = {
-    POLL_TYPE_BASIC: BasicPoll(),
-    POLL_TYPE_INSTANT_RUNOFF: InstantRunoffPollHandler(),
     POLL_TYPE_INSTANT_RUNOFF_CUSTOM_DESCRIPTION: CustomDescriptionInstantRunoffPollHandler(),
     POLL_TYPE_CUSTOM_DESCRIPTION: CustomDescriptionHandler(),
     POLL_TYPE_MULTIPLE_OPTIONS: MultipleOptionsHandler(),
@@ -358,6 +352,7 @@ class PollBot(object):
         for instance in old_instances:
             vote_instances.append(instance["votes"])
             print(instance["votes"])
+            print(instance)
 
         if len(vote_instances) > 0:  # TODO this makes no sense at all- we should have the posibility to add toghether the results of different instaces of the polls
             vote_instances[0] = ast.literal_eval(vote_instances[0])
@@ -522,7 +517,7 @@ class PollBot(object):
     @run_async
     def handle_delete_poll_finish(self, bot, update):
         chat_id, txt = initiate_chat_id(update)
-        poll_to_delete_instances = poll_instances_table.find_many({"bot_id": bot.id, "title": txt})
+        poll_to_delete_instances = poll_instances_table.find({"bot_id": bot.id, "title": txt})
 
         for poll_instance in poll_to_delete_instances:
             bot.delete_message(chat_id=chat_id,

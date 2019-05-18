@@ -33,7 +33,7 @@ __admin_keyboard__ = [InlineKeyboardButton(text="Donate", callback_data="donate"
 __visitor_keyboard__ = [InlineKeyboardButton(text="Donate!", callback_data="donate")]
 
 
-DONATION_MESSAGE, EXECUTE_DONATION, HANDLE_PRECHECKOUT, HANDLE_SUCCES = range(4)
+EXECUTE_DONATION, HANDLE_PRECHECKOUT, HANDLE_SUCCES = range(3)
 
 
 class DonationBot(object):
@@ -65,7 +65,7 @@ class DonationBot(object):
                              reply_markup=InlineKeyboardMarkup(  # TODO modify this shit
                                           [[InlineKeyboardButton(text="Back",
                                                                  callback_data="cancel_donation_payment")]]))
-            return DONATION_MESSAGE
+            return EXECUTE_DONATION
 
         else:
             bot.send_message(update.callback_query.message.chat.id,
@@ -77,14 +77,14 @@ class DonationBot(object):
             get_help(bot, update)
             return ConversationHandler.END
 
-    @run_async
-    def donation_message(self, bot, update, user_data):
-        chat_id, txt = initiate_chat_id(update)
-        user_data["amount"] = txt
-        update.message.reply_text("You can write a message about your crowdfunding campaign, "
-                                  "tell why you want to donate or click SKIP",
-                                  reply_markup=ReplyKeyboardMarkup([["SKIP"]], one_time_keyboard=True))
-        return EXECUTE_DONATION
+    # @run_async
+    # def donation_message(self, bot, update, user_data):
+    #     chat_id, txt = initiate_chat_id(update)
+    #     user_data["amount"] = txt
+    #     update.message.reply_text("You can write a message about your crowdfunding campaign, "
+    #                               "tell why you want to donate or click SKIP",
+    #                               reply_markup=ReplyKeyboardMarkup([["SKIP"]], one_time_keyboard=True))
+    #     return EXECUTE_DONATION
 
     @run_async
     def execute_donation(self, bot, update, user_data):
@@ -94,7 +94,7 @@ class DonationBot(object):
                 return ConversationHandler.END
 
         chat_id, txt = initiate_chat_id(update)
-        user_data["donation_message"] = txt
+        user_data["amount"] = txt
         donation_request = chatbots_table.find_one({"bot_id": bot.id})["donate"]
         title = donation_request['title']
         description = donation_request['description']
@@ -162,12 +162,12 @@ DONATE_HANDLER = ConversationHandler(
                              pattern=r'donate'),
     ],
     states={
-        DONATION_MESSAGE: [MessageHandler(callback=DonationBot().donation_message,
-                                          filters=Filters.text,
-                                          pass_user_data=True),
-                           CallbackQueryHandler(callback=DonationBot().back, pattern=r"cancel_donation_payment"),
-                           CommandHandler('cancel', DonationBot().cancel)
-                           ],
+        # DONATION_MESSAGE: [MessageHandler(callback=DonationBot().donation_message,
+        #                                   filters=Filters.text,
+        #                                   pass_user_data=True),
+        #                    CallbackQueryHandler(callback=DonationBot().back, pattern=r"cancel_donation_payment"),
+        #                    CommandHandler('cancel', DonationBot().cancel)
+        #                    ],
         EXECUTE_DONATION: [MessageHandler(callback=DonationBot().execute_donation,
                                           filters=Filters.text,
                                           pass_user_data=True),

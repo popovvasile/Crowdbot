@@ -1,11 +1,11 @@
-from .basic_poll_handler import BasicPoll
+from modules.old_scripts.basic_poll_handler import BasicPoll
 
 
 class CustomDescriptionHandler(BasicPoll):
     def __init__(self):
         super(CustomDescriptionHandler, self).__init__()
         self.name = "Basic poll with custom description"
-        self.desc = "Like basic poll, but lets you add a custom text to the poll message."
+        self.desc = "You can add a custom text to the poll message."
 
     def evaluation(self, poll):
         message = poll['meta']['text']

@@ -1,4 +1,5 @@
 import os
+import uuid
 
 from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import (CommandHandler, MessageHandler, Filters,
@@ -102,9 +103,9 @@ class AddCommands(object):
 
         if update.message.photo:
             photo_file = update.message.photo[-1].get_file()
-            filename = 'photo_{}_button_{}_{}.jpg'.format(str(bot.id),
+            filename = 'photo_{}_button_{}_{}_{}.jpg'.format(str(bot.id),
                                                           str(user_data['button']),
-                                                          photo_file.file_id)
+                                                          photo_file.file_id, uuid.uuid4())
             custom_path = photo_directory + "/" + filename
             photo_file.download(custom_path=custom_path)
             if "photo_files" not in user_data:
@@ -117,9 +118,10 @@ class AddCommands(object):
         if update.message.audio:
 
             audio_file = update.message.audio.get_file()
-            filename = 'audio_{}_button_{}_{}.mp3'.format(str(bot.id),
+            filename = 'audio_{}_button_{}_{}_{}.mp3'.format(str(bot.id),
                                                           str(user_data['button']),
-                                                          audio_file.file_id)
+                                                          audio_file.file_id,
+                                                             uuid.uuid4())
             custom_path = audio_directory + "/" + filename
             audio_file.download(custom_path=custom_path)
             if "audio_files" not in user_data:
@@ -132,9 +134,10 @@ class AddCommands(object):
         if update.message.voice:
 
             voice_file = update.message.voice.get_file()
-            filename = 'voice_{}_{}_button_{}.mp3'.format(voice_file.file_id,
+            filename = 'voice_{}_{}_button_{}_{}.mp3'.format(voice_file.file_id,
                                                           str(bot.id),
-                                                          str(user_data['button']))
+                                                          str(user_data['button']),
+                                                             uuid.uuid4())
             custom_path = audio_directory + "/" + filename
             voice_file.download(custom_path=custom_path)
             if "audio_files" not in user_data:
@@ -147,9 +150,11 @@ class AddCommands(object):
         if update.message.document:
 
             document_file = update.message.document.get_file()
-            filename = 'document_{}_button_{}_{}'.format(str(bot.id),
+            filename = 'document_{}_button_{}_{}_{}'.format(str(bot.id),
                                                          str(user_data['button']),
-                                                         update.message.document.file_name)
+                                                         uuid.uuid4(),
+                                                         update.message.document.file_name
+                                                         )
             custom_path = document_directory + "/" + filename
             document_file.download(custom_path=custom_path)
             if "document_files" not in user_data:
@@ -162,8 +167,8 @@ class AddCommands(object):
         if update.message.video:
 
             video_file = update.message.video.get_file()
-            filename = 'video_{}_{}_button_{}.mp4'.format(video_file.file_id, str(bot.id),
-                                                          str(user_data['button']))
+            filename = 'video_{}_{}_button_{}_{}.mp4'.format(video_file.file_id, str(bot.id),
+                                                          str(user_data['button']),uuid.uuid4())
             custom_path = video_directory + "/" + filename
 
             video_file.download(custom_path=custom_path)
@@ -177,9 +182,10 @@ class AddCommands(object):
 
         if update.message.video_note:
             video_note_file = update.message.audio.get_file()
-            filename = 'video_note_{}_{}_button_{}.mp4'.format(video_note_file.file_id,
+            filename = 'video_note_{}_{}_button_{}_{}.mp4'.format(video_note_file.file_id,
                                                                str(bot.id),
-                                                               str(user_data['button']))
+                                                               str(user_data['button']),
+                                                                  uuid.uuid4())
             custom_path = video_directory + "/" + filename
             video_note_file.download(filename, custom_path=custom_path)
 

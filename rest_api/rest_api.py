@@ -47,7 +47,6 @@ class ThingsResource(object):
                 resp.status = falcon.HTTP_200
 
     def on_delete(self, req, resp):
-        print(req.params)
         # {'admins[]': ['{"email":"po@gmail.co"', '"password":"NThLDLf1Xqz"}'], 'finished': 'true',
         #  'buttons[]': ['Discography', 'Concerts', 'Battles', 'New Projects', 'Live photos'],
         #  '_id': '"5cd835f0522bc511ad555ffe"', 'superuser': '244356086',
@@ -78,11 +77,9 @@ class AdminResource(object):
         # if req.content_length:
         #
         doc = req.params  #  {token: bot.token, email: chat.changeRequest.payload}
-        print(req.params)
         """Handles DELETE requests"""
         chatbot = requests.get(url="https://api.telegram.org/bot{}/getMe".format(doc["token"])
                                   ).json()
-        print(chatbot)
         chatbot_id = chatbot["result"]["id"]
         db["users"].delete_many({"bot_id": chatbot_id, "email": doc["email"]})
         resp.status = falcon.HTTP_200

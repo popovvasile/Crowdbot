@@ -131,11 +131,12 @@ class SurveyHandler(object):
         for question in survey["questions"]:
             questions += str(question['question_id'] + 1) + ") " + question['text'] + "\n"
         user_data["questions"] = survey["questions"]
+        user_data["answers"] = []
         texr_to_send = "\nQuestions: \n{}".format(questions)
         bot.send_message(update.callback_query.message.chat.id,
-            "Created a survey with title: {}\n"
-                                  "{}"
-                                  "\nUntil next time!".format(survey['title'], texr_to_send))
+                         "Created a survey with title: {}\n"
+                         "{}"
+                         "\nUntil next time!".format(survey['title'], texr_to_send))
         surveys_table.update_one({
             "bot_id": bot.id,
             "title": user_data["title"]
@@ -190,7 +191,7 @@ class SurveyHandler(object):
             update.message.reply_text("Here is your requested data : \n {}".format(txt_to_send),
                                       reply_markup=ReplyKeyboardRemove())
             admin_keyboard = [
-                              InlineKeyboardButton(text="Back", callback_data="help_back")]
+                InlineKeyboardButton(text="Back", callback_data="help_back")]
             update.message.reply_text("Back to main menu",
                                       reply_markup=InlineKeyboardMarkup([admin_keyboard]))
         else:
@@ -211,8 +212,8 @@ class SurveyHandler(object):
             command_list = [survey['title'] for survey in surveys_table.find({"bot_id": bot.id})]
             reply_keyboard = [command_list]
             bot.send_message(update.callback_query.message.chat.id,
-                "Choose the survey that you want to delete",
-                reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+                             "Choose the survey that you want to delete",
+                             reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
 
             bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                message_id=update.callback_query.message.message_id)
@@ -277,17 +278,17 @@ class SurveyHandler(object):
         sent = []
         chats = chats_table.find({"bot_id": bot.id})
         for chat in chats:
-            if chat['chat_id'] != chat_id:
-                if not any(sent_d['id'] == chat['chat_id'] for sent_d in sent):
-                    sent.append(chat['chat_id'])
-                    bot.send_message(chat_id=chat['chat_id'], text="Dear user, a survey has been sent to you.\n"
-                                                                   "Please press START to answer to the questions",
-                                     reply_markup=InlineKeyboardMarkup(
-                                         [InlineKeyboardButton(text="START",
-                                                               callback_data="survey_{}".format(
-                                                                   user_data["title"]
-                                                               ))]
-                                     ))
+            # if chat['chat_id'] != chat_id:
+            if not any(sent_d['id'] == chat['chat_id'] for sent_d in sent):
+                sent.append(chat['chat_id'])
+                bot.send_message(chat_id=chat['chat_id'], text="Dear user, a survey has been sent to you.\n"
+                                                               "Please press START to answer to the questions",
+                                 reply_markup=InlineKeyboardMarkup(
+                                     [[InlineKeyboardButton(text="START",
+                                                            callback_data="survey_{}".format(
+                                                                str(txt)
+                                                            ))]]
+                                 ))
 
         if len(sent) == 0:
             bot.send_message(chat_id, "Looks like there are yet no users to send this survey to. "

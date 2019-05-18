@@ -1,4 +1,4 @@
-from .base_poll_handler import BasePoll
+from modules.pollbot.base_poll_handler import BasePoll
 
 
 class BasicPoll(BasePoll):
