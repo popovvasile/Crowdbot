@@ -1,5 +1,6 @@
 
 Bugs:
+# TODO user mode
 # TODO make surveys easier (just send the question. User answers or skips)
 # TODO make donations easier
 # TODO logging everywhere

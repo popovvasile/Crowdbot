@@ -68,8 +68,11 @@ class CreateDonationHandler(object):
             else:
                 bot.send_message(update.callback_query.message.chat.id,
                                  "Please enter your donation provider token\n"
-"""
-Use the /mybots command in the chat with @BotFather and choose your chatbot. Go to Bot Settings > Payments. Choose a provider, and you will be redirected to the relevant bot. Enter the required details so that the payments provider is connected successfully, go back to the chat with Botfather. The message will now show available providers. Each will have a name, a token, and the date the provider was connected. You will use the token when working with the Bot API.
+                                 """
+"1st Step: Go to @botfather and enter /mybots. Choose your bot and press “Payments”. Choose a provider. \n" +
+        "We advise to use „Stripe“ because of low Acquiring comisson for European card. \n" +
+        "2nd Step: Authorize yourself in the chatbot of the chosen provider. Just follow instructions then you will get a token-access, that you should copy.\n" +
+        "3nd Step :Go back to your bot and create /newdonate. Paste your token, choose the currency, and minimal donation. \n" +
 
 [Telegram's tutorial](https://core.telegram.org/bots/payments#getting-a-token)""",
                                  parse_mode='Markdown', reply_markup=self.reply_markup)
@@ -77,10 +80,15 @@ Use the /mybots command in the chat with @BotFather and choose your chatbot. Go 
         else:
             bot.send_message(update.callback_query.message.chat.id,
                              "Please enter your donation provider token\n"
-"""
-Use the /mybots command in the chat with @BotFather and choose your chatbot. Go to Bot Settings > Payments. Choose a provider, and you will be redirected to the relevant bot. Enter the required details so that the payments provider is connected successfully, go back to the chat with Botfather. The message will now show available providers. Each will have a name, a token, and the date the provider was connected. You will use the token when working with the Bot API. 
-
-[Telegram's tutorial](https://core.telegram.org/bots/payments#getting-a-token)""", parse_mode='Markdown', reply_markup=self.reply_markup)
+                             "1st Step: Go to @botfather and enter /mybots. Choose your bot and press “Payments”. Choose a provider. \n" +
+                             "We advise to use „Stripe“ because of low Acquiring comisson for European card. \n" +
+                             "2nd Step: Authorize yourself in the chatbot of the chosen provider. Just follow instructions then you will get a token-access, that you should copy.\n" +
+                             "3nd Step :Go back to your bot and create /newdonate. Paste your token, choose the currency, and minimal donation. \n"
+                             """
+ +
+       
+[Telegram's tutorial](https://core.telegram.org/bots/payments#getting-a-token)""", parse_mode='Markdown',
+                             reply_markup=self.reply_markup)
             return TYPING_TOKEN
 
     @run_async
@@ -125,7 +133,7 @@ Use the /mybots command in the chat with @BotFather and choose your chatbot. Go 
         chat_id, txt = initiate_chat_id(update)
         currency = txt
         user_data["currency"] = currency
-        bot.send_message(chat_id, "Your donation option has been created!")
+        bot.send_message(chat_id, "Congratulation! You can get payments from your audience. Do not forget to remind them of this.")
         chatbot = chatbots_table.find_one({"bot_id": bot.id}) or {}
         chatbot["donate"] = user_data
         if 'payment_token' in user_data:
@@ -151,9 +159,10 @@ Use the /mybots command in the chat with @BotFather and choose your chatbot. Go 
     def back(self, bot, update):
 
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                   message_id=update.callback_query.message.message_id,)
+                           message_id=update.callback_query.message.message_id, )
         get_help(bot, update)
         return ConversationHandler.END
+
 
 # Add conversation handler with the states CHOOSING, TYPING_CHOICE and TYPING_REPLY'
 
