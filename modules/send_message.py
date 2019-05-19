@@ -145,13 +145,17 @@ class SendMessageToUsers(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         buttons = list()
-        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_send_message")])
+        buttons.append([InlineKeyboardButton(text="Back", callback_data="help_back")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.send_message(update.callback_query.message.chat_id,
                          "Thank you! We've sent your message to your users!",
                          reply_markup=final_reply_markup)
-
+        chats = chats_table.find({"bot_id": bot.id})
+        for chat in chats:
+            bot.send_message(chat["chat_id"],
+                             "Click here for menu",
+                             reply_markup=final_reply_markup)
         return ConversationHandler.END
 
     @run_async

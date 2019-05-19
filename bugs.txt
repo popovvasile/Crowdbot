@@ -1,12 +1,13 @@
 
 Bugs:
-# TODO send donation request message
+# TODO test BotFather and rest_api again (admin delete and add, etc.)
+# TODO English everywhere
+
 # TODO make donations easier
 # TODO logging everywhere
 # TODO delete ALL previous messages everywhere (store ALL sent messages id's) -  the buttons
 # TODO Results in polls works strange
-# TODO test BotFather and rest_api again (admin delete and add, etc.)
-# TODO English everywhere
+
 
 New features:
 # TODO buttons in buttons
