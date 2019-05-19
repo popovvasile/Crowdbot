@@ -6,7 +6,7 @@ class CustomDescriptionInstantRunoffPollHandler(InstantRunoffPollHandler, Custom
     def __init__(self):
         super(CustomDescriptionInstantRunoffPollHandler, self).__init__()
         self.name = "Order of preference poll with custom description"
-        self.desc = "Order of preference poll, but with a custom description"
+        self.desc = "Order of preference poll with a custom description"
 
     def evaluation(self, poll):
         votes = poll.get('votes', {})

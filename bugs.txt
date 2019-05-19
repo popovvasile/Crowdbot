@@ -1,20 +1,16 @@
 
 Bugs:
-# TODO user mode
-# TODO make surveys easier (just send the question. User answers or skips)
+# TODO send donation request message
 # TODO make donations easier
 # TODO logging everywhere
 # TODO delete ALL previous messages everywhere (store ALL sent messages id's) -  the buttons
 # TODO Results in polls works strange
-# TODO make a loop for multiple messages at once
 # TODO test BotFather and rest_api again (admin delete and add, etc.)
-# TODO make polls easier. Adjust priority polls results
 # TODO English everywhere
-# TODO it is not clear the payment token thing
 
 New features:
-# TODO Edit button
 # TODO buttons in buttons
+# TODO emojiii
 # TODO pics and other content for surveys and polls
 # TODO results for surveys, polls and donations
 # TODO payment balance in the bot (Kirill BotFather)
@@ -22,6 +18,7 @@ New features:
 # TODO hidden content and e-shop
 # TODO multiple languages
 # TODO for Occupy: add users + all old polls + tags + payments for members
+# TODO bot statistics
 
 
 TODO learn how to use  ForceReply https://python-telegram-bot.readthedocs.io/en/stable/telegram.forcereply.html

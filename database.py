@@ -16,4 +16,5 @@ products_table = db["products"]
 orders_table = db["orders"]
 scam_reports_table = db["scam_reports"]
 users_messages_to_admin_table = db["users_messages_to_admin"]
+user_mode_table = db["user_mode"]
 DROPBOX_TOKEN = "xPAGp5mkaqgAAAAAAAABwK7yiygvq9ITgQj7j4KlBU8SYQ3WEmHCQnUxCIZUD-mR"

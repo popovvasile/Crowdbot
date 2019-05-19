@@ -21,12 +21,14 @@ __mod_name__ = "Custom buttons"
 
 # __admin_keyboard__ = [["/create_button"], ["/delete_button"]]
 __admin_keyboard__ = [InlineKeyboardButton(text="Create", callback_data="create_button"),
-                      InlineKeyboardButton(text="Delete", callback_data="delete_button")]
+                      InlineKeyboardButton(text="Delete", callback_data="delete_button"),
+                      InlineKeyboardButton(text="Edit", callback_data="edit_button")]
 
 __admin_help__ = """
 Here you can:\n
 - Create a custom button for your bot that will display images, files, voice, music or text.\n
 - Delete an old button
+- Edit the content of the button
 """
 
 
@@ -304,9 +306,7 @@ class AddCommands(object):
 # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
 BUTTON_ADD_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=AddCommands().start,
-                                       pattern=r"create_button"),
-                  CallbackQueryHandler(callback=AddCommands().back,
-                                       pattern=r"cancel_add_button", pass_user_data=True)],
+                                       pattern=r"create_button")],
 
     states={
         TYPING_BUTTON: [

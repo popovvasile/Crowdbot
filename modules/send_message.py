@@ -83,8 +83,8 @@ class SendMessageToUsers(object):
                            message_id=update.callback_query.message.message_id)
         bot.send_message(update.callback_query.message.chat.id,
                          "What do you want to tell your users?\n"
-                                                 "We will forward your message to all your users."
-                                                 "p.s. Your name will be displayed as well",
+                         "We will forward your message to all your users."
+                         "p.s. Your name will be displayed as well",
                          reply_markup=self.reply_markup)
         return MESSAGE_TO_USERS
 
@@ -132,12 +132,25 @@ class SendMessageToUsers(object):
                 video_note_file = update.message.audio.get_file().file_id
                 bot.send_video_note(chat["chat_id"], video_note_file)
 
+        final_reply_markup = InlineKeyboardMarkup(
+            [[InlineKeyboardButton(text="Done", callback_data="send_message_finish")]]
+        )
+        bot.send_message(update.message.chat_id,
+                         "Great! Send me a new message or click 'Done'",
+                         reply_markup=final_reply_markup)
+
+        return MESSAGE_TO_USERS
+
+    def send_message_finish(self, bot, update):
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
         buttons = list()
         buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_send_message")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
-        bot.send_message(update.message.chat_id,
-                         "Thank you! We've sent your message to your users!", reply_markup=final_reply_markup)
+        bot.send_message(update.callback_query.message.chat_id,
+                         "Thank you! We've sent your message to your users!",
+                         reply_markup=final_reply_markup)
 
         return ConversationHandler.END
 
@@ -172,13 +185,13 @@ class SeeMessageToAdmin(object):
                            message_id=update.callback_query.message.message_id)
         messages = users_messages_to_admin_table.find({"bot_id": bot.id})
 
-        if messages.count() !=0:
+        if messages.count() != 0:
             for message in messages:
                 if message["timestamp"] + datetime.timedelta(days=14) > datetime.datetime.now():
                     bot.send_message(update.callback_query.message.chat.id,
                                      "User's name: {}, \n\n"
-                                      "Message: {}".format(message["user_full_name"],
-                                      message["message"]))
+                                     "Message: {}".format(message["user_full_name"],
+                                                          message["message"]))
 
         else:
             bot.send_message(update.callback_query.message.chat.id,
@@ -187,42 +200,48 @@ class SeeMessageToAdmin(object):
         get_help(update=update, bot=bot)
 
 
-def send_message(bot, update):
-    pass
-
-
 SEND_MESSAGE_TO_ADMIN_HANDLER = ConversationHandler(
-    entry_points=[CallbackQueryHandler(pattern="send_message_to_admin", callback=SendMessageToAdmin().send_message),
-                  CallbackQueryHandler(callback=SendMessageToUsers().back, pattern=r"cancel_send_message")],
+    entry_points=[CallbackQueryHandler(pattern="send_message_to_admin",
+                                       callback=SendMessageToAdmin().send_message),
+                  CallbackQueryHandler(callback=SendMessageToUsers().back,
+                                       pattern=r"cancel_send_message")],
 
     states={
         MESSAGE: [MessageHandler(Filters.all, SendMessageToAdmin().received_message),
-                  CallbackQueryHandler(callback=SendMessageToUsers().back, pattern=r"cancel_send_message")],
+                  CallbackQueryHandler(callback=SendMessageToUsers().back,
+                                       pattern=r"cancel_send_message")],
 
     },
 
-    fallbacks=[CallbackQueryHandler(callback=SendMessageToUsers().back, pattern=r"cancel_send_message"),
+    fallbacks=[
+               CallbackQueryHandler(callback=SendMessageToUsers().back,
+                                    pattern=r"cancel_send_message"),
                CommandHandler('cancel', SendMessageToAdmin().error),
                MessageHandler(filters=Filters.command, callback=SendMessageToAdmin().error)]
 )
 
 SEND_MESSAGE_TO_USERS_HANDLER = ConversationHandler(
-    entry_points=[CallbackQueryHandler(pattern="send_message_to_users", callback=SendMessageToUsers().send_message),
-                  CallbackQueryHandler(callback=SendMessageToUsers().back, pattern=r"cancel_send_message")],
+    entry_points=[CallbackQueryHandler(pattern="send_message_to_users",
+                                       callback=SendMessageToUsers().send_message),
+                  CallbackQueryHandler(callback=SendMessageToUsers().back,
+                                       pattern=r"cancel_send_message")],
 
     states={
         MESSAGE_TO_USERS: [MessageHandler(Filters.all, SendMessageToUsers().received_message),
-                           CallbackQueryHandler(callback=SendMessageToUsers().back, pattern=r"cancel_send_message")],
+                           CallbackQueryHandler(callback=SendMessageToUsers().back,
+                                                pattern=r"cancel_send_message")],
 
     },
 
-    fallbacks=[CallbackQueryHandler(callback=SendMessageToUsers().back, pattern=r"cancel_send_message"),
+    fallbacks=[CallbackQueryHandler(callback=SendMessageToUsers().send_message_finish,
+                                    pattern=r"send_message_finish"),
+               CallbackQueryHandler(callback=SendMessageToUsers().back,
+                                    pattern=r"cancel_send_message"),
                CommandHandler('cancel', SendMessageToUsers().error),
                MessageHandler(filters=Filters.command, callback=SendMessageToUsers().error)]
 )
 
 SEE_MESSAGES_HANDLER = CallbackQueryHandler(pattern="inbox_message", callback=SeeMessageToAdmin().see_messages)
-
 
 __mod_name__ = "Send a message"
 __visitor_help__ = """
@@ -230,14 +249,11 @@ Here you can send a message to the chatbot owner
 
 """
 
-
 __visitor_keyboard__ = [InlineKeyboardButton(text="Send message", callback_data="send_message_to_admin")]
-
 
 __admin_help__ = """
 Messages sent by the users to you
 """
-
 
 __admin_keyboard__ = [
     InlineKeyboardButton(text="Send message", callback_data="send_message_to_users"),

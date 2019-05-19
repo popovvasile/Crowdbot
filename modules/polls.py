@@ -351,10 +351,8 @@ class PollBot(object):
         vote_instances = []
         for instance in old_instances:
             vote_instances.append(instance["votes"])
-            print(instance["votes"])
-            print(instance)
 
-        if len(vote_instances) > 0:  # TODO this makes no sense at all- we should have the posibility to add toghether the results of different instaces of the polls
+        if len(vote_instances) > 0:
             vote_instances[0] = ast.literal_eval(vote_instances[0])
             vote_instances[0].update(poll["votes"])
             poll["votes"] = vote_instances[0]
@@ -369,7 +367,7 @@ class PollBot(object):
             votes_dict.update(ast.literal_eval(d))
         if votes_dict:
             poll["votes"] = votes_dict
-
+        print(poll)
         bot.edit_message_text(text=self.assemble_message_text(poll),
                               parse_mode='Markdown',
                               reply_markup=self.assemble_inline_keyboard(poll),

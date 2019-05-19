@@ -5,21 +5,25 @@ from typing import List, Dict
 from telegram import ParseMode, InlineKeyboardMarkup, Bot, Update, InlineKeyboardButton
 from telegram.ext import run_async
 
-from database import custom_buttons_table, chats_table, chatbots_table, users_table
+from database import custom_buttons_table, chats_table, chatbots_table, users_table, user_mode_table
 
 HELP_STRINGS = """
 {}
 """
 
 ALL_MODULES = ['add_menu_buttons', 'answer_surveys', 'create_donation', 'create_survey',
-               'donations_edit_delete_results', 'pay_donation', 'report_chatbot_scam', 'send_message', "polls"]
+               'donations_edit_delete_results', 'pay_donation',
+               'report_chatbot_scam', 'send_message', "polls", "user_mode"]
 ADMIN_HELPABLE = {'Custom buttons': "",
                   'Donate': "",
                   'Surveys': "",
                   'Send a message': "",
-                  "Polls": ""}
-
-VISITOR_HELPABLE = {'Donate': "",  'Send a message': ""}
+                  "Polls": "",
+                  "User view": ""}
+ADMIN_USER_MODE = {'Donate': "",
+                   'Send a message': "",
+                   "User view": ""}
+VISITOR_HELPABLE = {'Donate': "", 'Send a message': ""}
 
 
 class EqInlineKeyboardButton(InlineKeyboardButton):
@@ -44,7 +48,8 @@ def paginate_modules(page_n: int, module_dict: Dict, prefix, bot_id, chat=None) 
         ]) + buttons
     else:
         modules = sorted([
-            EqInlineKeyboardButton(x, callback_data="{}_module({},{})".format(prefix, chat, x.lower())) for x in module_dict
+            EqInlineKeyboardButton(x, callback_data="{}_module({},{})".format(prefix, chat, x.lower())) for x in
+            module_dict
         ])
 
     pairs = list(zip(modules[::2], modules[1::2]))
@@ -98,6 +103,8 @@ def get_help(bot: Bot, update: Update):
     chatbot = chatbots_table.find_one({"bot_id": bot.id})
     register_chat(bot, update)
     chat = update.effective_chat
+    current_user_mode = user_mode_table.find_one({"bot_id": bot.id,
+                                                  "user_id": update.effective_user.id})
     if chatbot:
         if 'welcomeMessage' in chatbot:
             welcome_message = chatbot['welcomeMessage']
@@ -106,9 +113,21 @@ def get_help(bot: Bot, update: Update):
     else:
         welcome_message = "Hello"
     if if_admin(bot=bot, update=update):
-        send_admin_help(bot, chat.id, HELP_STRINGS.format(welcome_message))
+        if current_user_mode.get("user_mode") is True:
+            send_admin_user_mode(bot, chat.id, HELP_STRINGS.format(welcome_message))
+        else:
+            send_admin_help(bot, chat.id, HELP_STRINGS.format(welcome_message))
     else:
         send_visitor_help(bot, chat.id, HELP_STRINGS.format(welcome_message))
+
+
+def send_admin_user_mode(bot, chat_id, text, keyboard=None):
+    if not keyboard:
+        keyboard = InlineKeyboardMarkup(paginate_modules(0, ADMIN_USER_MODE, "help", bot.id))
+    bot.send_message(chat_id=chat_id,
+                     text=text,
+                     parse_mode=ParseMode.MARKDOWN,
+                     reply_markup=keyboard)
 
 
 def send_admin_help(bot, chat_id, text, keyboard=None):
