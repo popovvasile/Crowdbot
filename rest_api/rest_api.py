@@ -21,7 +21,6 @@ class ThingsResource(object):
         doc = {}
         if req.content_length:
             doc = falcon.json.load(req.stream)
-        print(doc)
         token = doc["token"]
         chatbot = requests.get(url="https://api.telegram.org/bot{}/getMe".format(token))
         if chatbot.ok:
@@ -71,12 +70,13 @@ class ThingsResource(object):
 
 
 class AdminResource(object):
-
     def on_delete(self, req, resp):
         # doc = {}
         # if req.content_length:
         #
         doc = req.params  #  {token: bot.token, email: chat.changeRequest.payload}
+        print(req.params)
+        print(req.stream)
         """Handles DELETE requests"""
         chatbot = requests.get(url="https://api.telegram.org/bot{}/getMe".format(doc["token"])
                                   ).json()

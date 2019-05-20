@@ -250,7 +250,6 @@ SEE_MESSAGES_HANDLER = CallbackQueryHandler(pattern="inbox_message", callback=Se
 __mod_name__ = "Send a message"
 __visitor_help__ = """
 Here you can send a message to the chatbot owner
-
 """
 
 __visitor_keyboard__ = [InlineKeyboardButton(text="Send message", callback_data="send_message_to_admin")]
