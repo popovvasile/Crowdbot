@@ -17,31 +17,33 @@ class ThingsResource(object):
     #  'token': '633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg', 'name': 'Crowdbot', 'welcomeMessage': 'he'}
 
     def on_post(self, req, resp):
+
         """Handles POST requests"""
         doc = {}
         if req.content_length:
             doc = falcon.json.load(req.stream)
         token = doc["token"]
         chatbot = requests.get(url="https://api.telegram.org/bot{}/getMe".format(token))
+        doc["bot_id"] = chatbot.json()['result']['id']
+        db["chatbots"].save(doc)
+
         if chatbot.ok:
-            if chatbots_table.find_one({"token": doc["token"]}):
-                pass
-            else:
-
-                doc["bot_id"] = chatbot.json()['result']['id']
-                db["chatbots"].save(doc)
-                superadmin = dict()
-                superadmin["bot_id"] = doc["bot_id"]
-                superadmin["registered"] = False
-                superadmin["is_admin"] = True
-                superadmin["is_superuser"] = True
-                superadmin["user_id"] = doc["superuser"]
-                db["users"].save(superadmin)
-                for admin in doc["admins"]:  # TODO check for the fullname and for email
-                    admin["bot_id"] = doc["bot_id"]
-                    admin["registered"] = False
-                    admin["is_admin"] = True
-
+            superadmin = dict()
+            superadmin["bot_id"] = doc["bot_id"]
+            superadmin["registered"] = False
+            superadmin["is_admin"] = True
+            superadmin["is_superuser"] = True
+            superadmin["user_id"] = doc["superuser"]
+            doc["admins"].append(superadmin)
+            for admin in doc["admins"]:  # TODO check for the fullname and for email
+                admin["bot_id"] = doc["bot_id"]
+                admin["registered"] = False
+                admin["is_admin"] = True
+                if "user_id" in admin:
+                    db["users"].update({"user_id": admin["user_id"]}, admin, upsert=True)
+                elif "email" in admin:
+                    db["users"].update({"email": admin["email"]}, admin, upsert=True)
+                else:
                     db["users"].save(admin)
                 resp.status = falcon.HTTP_200
 
