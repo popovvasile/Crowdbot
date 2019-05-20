@@ -113,9 +113,16 @@ def get_help(bot: Bot, update: Update):
     else:
         welcome_message = "Hello"
     if if_admin(bot=bot, update=update):
-        if current_user_mode.get("user_mode") is True:
-            send_admin_user_mode(bot, chat.id, HELP_STRINGS.format(welcome_message))
-        else:
+        try:
+            if current_user_mode.get("user_mode") is True:
+                send_admin_user_mode(bot, chat.id, HELP_STRINGS.format(welcome_message))
+            else:
+                send_admin_help(bot, chat.id, HELP_STRINGS.format(welcome_message))
+        except AttributeError:
+
+            user_mode_table.insert({"bot_id": bot.id,
+                                    "user_id": update.effective_user.id,
+                                    "user_mode": False})
             send_admin_help(bot, chat.id, HELP_STRINGS.format(welcome_message))
     else:
         send_visitor_help(bot, chat.id, HELP_STRINGS.format(welcome_message))
