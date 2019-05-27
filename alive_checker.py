@@ -9,10 +9,10 @@ from main_runner import main
 # from tg_bot.__main__ import main
 # from testi import main
 client = MongoClient('localhost', 27017)
-db = client['chatbots']
+db = client['chatbots']  # TODO make two different clients or not
 
 
-def multiple_bot_daemon():  # TODO adjust to the new botFather and webhook
+def multiple_bot_daemon():  # TODO adjust to webhook
     my_process = {}
     print(db["chatbots"].find().count())
     while True:

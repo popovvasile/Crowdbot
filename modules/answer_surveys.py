@@ -118,6 +118,8 @@ class AnswerSurveys(object):
                                   "Until next time!".format(facts_to_str(user_data)))
         user_data.clear()
         get_help(bot, update)
+        logger.info("User {} on bot {}:{} answered to survey:{}".format(
+            update.effective_user.first_name, bot.first_name, bot.id, user_data["title"]))
         return ConversationHandler.END
 
     @run_async

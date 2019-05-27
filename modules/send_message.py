@@ -83,54 +83,53 @@ class SendMessageToUsers(object):
                            message_id=update.callback_query.message.message_id)
         bot.send_message(update.callback_query.message.chat.id,
                          "What do you want to tell your users?\n"
-                         "We will forward your message to all your users."
-                         "p.s. Your name will be displayed as well",
+                         "We will forward your message to all your users.",
                          reply_markup=self.reply_markup)
         return MESSAGE_TO_USERS
 
     @run_async
     def received_message(self, bot, update):
-        chat_id, txt = initiate_chat_id(update)
         chats = chats_table.find({"bot_id": bot.id})
         for chat in chats:
-            if update.message.text:
-                bot.send_message(chat["chat_id"], update.message.text)
+            if chat["chat_id"] != update.message.chat_id:
+                if update.message.text:
+                    bot.send_message(chat["chat_id"], update.message.text)
 
-            elif update.message.photo:
-                photo_file = update.message.photo[0].get_file().file_id
-                bot.send_photo(chat_id=chat["chat_id"], photo=photo_file)
+                elif update.message.photo:
+                    photo_file = update.message.photo[0].get_file().file_id
+                    bot.send_photo(chat_id=chat["chat_id"], photo=photo_file)
 
-            elif update.message.audio:
-                audio_file = update.message.audio.get_file().file_id
-                bot.send_audio(chat["chat_id"], audio_file)
+                elif update.message.audio:
+                    audio_file = update.message.audio.get_file().file_id
+                    bot.send_audio(chat["chat_id"], audio_file)
 
-            elif update.message.voice:
-                voice_file = update.message.voice.get_file().file_id
-                bot.send_voice(chat["chat_id"], voice_file)
+                elif update.message.voice:
+                    voice_file = update.message.voice.get_file().file_id
+                    bot.send_voice(chat["chat_id"], voice_file)
 
-            elif update.message.document:
-                document_file = update.message.document.get_file().file_id
-                bot.send_document(chat["chat_id"], document_file)
+                elif update.message.document:
+                    document_file = update.message.document.get_file().file_id
+                    bot.send_document(chat["chat_id"], document_file)
 
-            elif update.message.sticker:
-                sticker_file = update.message.sticker.get_file().file_id
-                bot.send_sticker(chat["chat_id"], sticker_file)
+                elif update.message.sticker:
+                    sticker_file = update.message.sticker.get_file().file_id
+                    bot.send_sticker(chat["chat_id"], sticker_file)
 
-            elif update.message.game:
-                sticker_file = update.message.game.get_file().file_id
-                bot.send_game(chat["chat_id"], sticker_file)
+                elif update.message.game:
+                    sticker_file = update.message.game.get_file().file_id
+                    bot.send_game(chat["chat_id"], sticker_file)
 
-            elif update.message.animation:
-                animation_file = update.message.animation.get_file().file_id
-                bot.send_animation(chat["chat_id"], animation_file)
+                elif update.message.animation:
+                    animation_file = update.message.animation.get_file().file_id
+                    bot.send_animation(chat["chat_id"], animation_file)
 
-            elif update.message.video:
-                video_file = update.message.video.get_file().file_id
-                bot.send_video(chat["chat_id"], video_file)
+                elif update.message.video:
+                    video_file = update.message.video.get_file().file_id
+                    bot.send_video(chat["chat_id"], video_file)
 
-            elif update.message.video_note:
-                video_note_file = update.message.audio.get_file().file_id
-                bot.send_video_note(chat["chat_id"], video_note_file)
+                elif update.message.video_note:
+                    video_note_file = update.message.audio.get_file().file_id
+                    bot.send_video_note(chat["chat_id"], video_note_file)
 
         final_reply_markup = InlineKeyboardMarkup(
             [[InlineKeyboardButton(text="Done", callback_data="send_message_finish")]]
@@ -153,9 +152,12 @@ class SendMessageToUsers(object):
                          reply_markup=final_reply_markup)
         chats = chats_table.find({"bot_id": bot.id})
         for chat in chats:
-            bot.send_message(chat["chat_id"],
-                             "Click here for menu",
-                             reply_markup=final_reply_markup)
+            if chat["chat_id"] != update.callback_query.message.chat_id:
+                bot.send_message(chat["chat_id"],
+                                 "Click here for menu",
+                                 reply_markup=final_reply_markup)
+        logger.info("Admin {} on bot {}:{} sent a message to the users".format(
+            update.effective_user.first_name, bot.first_name, bot.id))
         return ConversationHandler.END
 
     @run_async

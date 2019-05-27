@@ -11,21 +11,27 @@ chatbots_table = db["chatbots"]
 users_table = db['users']
 
 
-class ThingsResource(object):
+class ChatbotResource(object):  # TODO adjust to the new config
     # {'admins': [{'email': 'popov@gmail.com', 'password': '4PIl4FUDCzn'}], 'requireNext': None, 'welcomeForm': [],
     #  'finished': True, 'buttons': [], '_id': '5cc25547a9a63e710b0c456a', 'superuser': 244356086,
     #  'token': '633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg', 'name': 'Crowdbot', 'welcomeMessage': 'he'}
-
+    # language: [Russian, English], crowdbot_token: token, shop_token: token
     def on_post(self, req, resp):
 
         """Handles POST requests"""
         doc = {}
         if req.content_length:
             doc = falcon.json.load(req.stream)
-        token = doc["token"]
+        # Crowdbot token
+        token = doc["crowdbot_token"]
         chatbot = requests.get(url="https://api.telegram.org/bot{}/getMe".format(token))
         doc["bot_id"] = chatbot.json()['result']['id']
-        db["chatbots"].save(doc)
+        db["crowdbot_chatbots"].save(doc)
+        # Shop token
+        shop_token = doc["shop_token"]
+        shop_chatbot = requests.get(url="https://api.telegram.org/bot{}/getMe".format(shop_token))
+        doc["bot_id"] = shop_chatbot.json()['result']['id']
+        db["shop_chatbots"].save(doc)
 
         if chatbot.ok:
             superadmin = dict()
@@ -47,7 +53,7 @@ class ThingsResource(object):
                     db["users"].save(admin)
                 resp.status = falcon.HTTP_200
 
-    def on_delete(self, req, resp):
+    def on_delete(self, req, resp):  # TODO make the difference between shop bot and crowdbot
         # {'admins[]': ['{"email":"po@gmail.co"', '"password":"NThLDLf1Xqz"}'], 'finished': 'true',
         #  'buttons[]': ['Discography', 'Concerts', 'Battles', 'New Projects', 'Live photos'],
         #  '_id': '"5cd835f0522bc511ad555ffe"', 'superuser': '244356086',
@@ -72,13 +78,19 @@ class ThingsResource(object):
 
 
 class AdminResource(object):
-    def on_delete(self, req, resp):
-        # doc = {}
-        # if req.content_length:
-        #
+    def on_post(self, req, resp):
         doc = req.params  #  {token: bot.token, email: chat.changeRequest.payload}
         print(req.params)
         print(req.stream)
+        """Handles DELETE requests"""
+        chatbot = requests.get(url="https://api.telegram.org/bot{}/getMe".format(doc["token"])
+                                  ).json()
+        chatbot_id = chatbot["result"]["id"]
+        db["users"].insert_one({"bot_id": chatbot_id, "email": doc["email"], "password": doc["password"]})
+        resp.status = falcon.HTTP_200
+
+    def on_delete(self, req, resp):
+        doc = req.params  #  {token: bot.token, email: chat.changeRequest.payload}
         """Handles DELETE requests"""
         chatbot = requests.get(url="https://api.telegram.org/bot{}/getMe".format(doc["token"])
                                   ).json()
@@ -88,7 +100,7 @@ class AdminResource(object):
 
 
 app = falcon.API()
-things = ThingsResource()
+things = ChatbotResource()
 admins = AdminResource()
 app.add_route('/chatbot', things)
 app.add_route('/chatbot/admin', admins)

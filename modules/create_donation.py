@@ -133,14 +133,19 @@ class CreateDonationHandler(object):
         chat_id, txt = initiate_chat_id(update)
         currency = txt
         user_data["currency"] = currency
-        bot.send_message(chat_id, "Congratulation! You can get payments from your audience. Do not forget to remind them of this.")
+        bot.send_message(chat_id,
+                         "Congratulation! You can get payments from your audience.\n"
+                         "Do not forget to remind them of this.")  # TODO add button send donation request and back
         chatbot = chatbots_table.find_one({"bot_id": bot.id}) or {}
         chatbot["donate"] = user_data
         if 'payment_token' in user_data:
             chatbot["donate"]["payment_token"] = user_data['payment_token']
         chatbots_table.update_one({"bot_id": bot.id}, {'$set': chatbot}, upsert=True)
         user_data.clear()
-        get_help(bot, update)
+
+        logger.info("Admin {} on bot {}:{} added a donation config:{}".format(
+            update.effective_user.first_name, bot.first_name, bot.id, user_data["title"]))
+
         return ConversationHandler.END
 
     @staticmethod

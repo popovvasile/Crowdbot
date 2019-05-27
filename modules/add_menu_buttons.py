@@ -17,17 +17,18 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 TYPING_BUTTON, TYPING_DESCRIPTION, DESCRIPTION_FINISH = range(3)
 TYPING_TO_DELETE_BUTTON = 17
-__mod_name__ = "Custom buttons"
+__mod_name__ = "Edit menu"
 
 # __admin_keyboard__ = [["/create_button"], ["/delete_button"]]
 __admin_keyboard__ = [InlineKeyboardButton(text="Create", callback_data="create_button"),
                       InlineKeyboardButton(text="Delete", callback_data="delete_button"),
-                      InlineKeyboardButton(text="Edit", callback_data="edit_button")]
+                      InlineKeyboardButton(text="Edit a button", callback_data="edit_button"),
+                      InlineKeyboardButton(text="Edit menu text", callback_data="edit_menu_text")]
 
 __admin_help__ = """
 Here you can:\n
 - Create a custom button for your bot that will display images, files, voice, music or text.\n
-- Delete an old button
+- Delete an old button\n
 - Edit the content of the button
 """
 
@@ -57,7 +58,7 @@ class AddCommands(object):
 
     def button_handler(self, bot, update, user_data):
         # TODO create a chatbot specially for OG
-        # TODO change bot description
+
         chat_id, txt = initiate_chat_id(update)
         button_list_of_dicts = custom_buttons_table.find({
             "bot_id": bot.id,
@@ -77,10 +78,10 @@ class AddCommands(object):
             return TYPING_BUTTON
 
     def description_handler(self, bot, update, user_data):
-        photo_directory = "dynamic_files/{bot_id}/photo".format(bot_id=bot.id)
-        audio_directory = "dynamic_files/{bot_id}/audio".format(bot_id=bot.id)
-        document_directory = "dynamic_files/{bot_id}/document".format(bot_id=bot.id)
-        video_directory = "dynamic_files/{bot_id}/video".format(bot_id=bot.id)
+        photo_directory = "files/{bot_id}/photo".format(bot_id=bot.id)
+        audio_directory = "files/{bot_id}/audio".format(bot_id=bot.id)
+        document_directory = "files/{bot_id}/document".format(bot_id=bot.id)
+        video_directory = "files/{bot_id}/video".format(bot_id=bot.id)
 
         if not os.path.exists(photo_directory):
             os.makedirs(photo_directory)
@@ -105,96 +106,80 @@ class AddCommands(object):
 
         if update.message.photo:
             photo_file = update.message.photo[-1].get_file()
-            filename = 'photo_{}_button_{}_{}_{}.jpg'.format(str(bot.id),
-                                                          str(user_data['button']),
-                                                          photo_file.file_id, uuid.uuid4())
+            filename = 'photo_{}.jpg'.format(str(uuid.uuid4())[:7])
             custom_path = photo_directory + "/" + filename
             photo_file.download(custom_path=custom_path)
             if "photo_files" not in user_data:
-                user_data["photo_files"] = [custom_path]
+                user_data["photo_files"] = [filename]
             elif user_data["photo_files"] is not None:
-                user_data["photo_files"] = user_data["photo_files"] + [custom_path]
+                user_data["photo_files"] = user_data["photo_files"] + [filename]
             else:
                 user_data["photo_files"] = list()
 
         if update.message.audio:
 
             audio_file = update.message.audio.get_file()
-            filename = 'audio_{}_button_{}_{}_{}.mp3'.format(str(bot.id),
-                                                          str(user_data['button']),
-                                                          audio_file.file_id,
-                                                             uuid.uuid4())
+            filename = 'audio_{}.mp3'.format(str(uuid.uuid4())[:7])
             custom_path = audio_directory + "/" + filename
             audio_file.download(custom_path=custom_path)
             if "audio_files" not in user_data:
-                user_data["audio_files"] = [custom_path]
+                user_data["audio_files"] = [filename]
             elif user_data["audio_files"] is not None:
-                user_data["audio_files"] = user_data["audio_files"] + [custom_path]
+                user_data["audio_files"] = user_data["audio_files"] + [filename]
             else:
                 user_data["audio_files"] = list()
 
         if update.message.voice:
 
             voice_file = update.message.voice.get_file()
-            filename = 'voice_{}_{}_button_{}_{}.mp3'.format(voice_file.file_id,
-                                                          str(bot.id),
-                                                          str(user_data['button']),
-                                                             uuid.uuid4())
+            filename = 'voice_{}.mp3'.format(str(uuid.uuid4())[:7])
             custom_path = audio_directory + "/" + filename
             voice_file.download(custom_path=custom_path)
             if "audio_files" not in user_data:
-                user_data["audio_files"] = [custom_path]
+                user_data["audio_files"] = [filename]
             elif user_data["audio_files"] is not None:
-                user_data["audio_files"] = user_data["audio_files"] + [custom_path]
+                user_data["audio_files"] = user_data["audio_files"] + [filename]
             else:
                 user_data["audio_files"] = list()
 
         if update.message.document:
 
             document_file = update.message.document.get_file()
-            filename = 'document_{}_button_{}_{}_{}'.format(str(bot.id),
-                                                         str(user_data['button']),
-                                                         uuid.uuid4(),
-                                                         update.message.document.file_name
-                                                         )
+            filename = 'document_{}_{}'.format(str(uuid.uuid4())[:5], update.message.document.file_name[-5:])
             custom_path = document_directory + "/" + filename
             document_file.download(custom_path=custom_path)
             if "document_files" not in user_data:
-                user_data["document_files"] = [custom_path]
+                user_data["document_files"] = [filename]
             elif user_data["document_files"] is not None:
-                user_data["document_files"] = user_data["document_files"] + [custom_path]
+                user_data["document_files"] = user_data["document_files"] + [filename]
             else:
                 user_data["document_files"] = list()
 
         if update.message.video:
 
             video_file = update.message.video.get_file()
-            filename = 'video_{}_{}_button_{}_{}.mp4'.format(video_file.file_id, str(bot.id),
-                                                          str(user_data['button']),uuid.uuid4())
+            filename = 'video_{}.mp4'.format(str(uuid.uuid4())[:7])
             custom_path = video_directory + "/" + filename
 
             video_file.download(custom_path=custom_path)
 
             if "video_files" not in user_data:
-                user_data["video_files"] = [custom_path]
+                user_data["video_files"] = [filename]
             elif user_data["video_files"] is not None:
-                user_data["video_files"] = user_data["video_files"] + [custom_path]
+                user_data["video_files"] = user_data["video_files"] + [filename]
             else:
                 user_data["video_files"] = list()
 
         if update.message.video_note:
             video_note_file = update.message.audio.get_file()
-            filename = 'video_note_{}_{}_button_{}_{}.mp4'.format(video_note_file.file_id,
-                                                               str(bot.id),
-                                                               str(user_data['button']),
-                                                                  uuid.uuid4())
+            filename = 'video_note_{}.mp4'.format(str(uuid.uuid4())[:7])
             custom_path = video_directory + "/" + filename
             video_note_file.download(filename, custom_path=custom_path)
 
             if "video_files" not in user_data:
-                user_data["video_files"] = [custom_path]
+                user_data["video_files"] = [filename]
             elif user_data["video_files"] is not None:
-                user_data["video_files"] = user_data["video_files"] + [custom_path]
+                user_data["video_files"] = user_data["video_files"] + [filename]
             else:
                 user_data["video_files"] = list()
         done_buttons = [[InlineKeyboardButton(text="DONE", callback_data="DONE")]]
@@ -223,6 +208,8 @@ class AddCommands(object):
                          '{} in menu'.format(user_data["button"]))
         user_data.clear()
         get_help(bot, update)
+        logger.info("Admin {} on bot {}:{} added a new button:{}".format(
+            update.effective_user.first_name, bot.first_name, bot.id, user_data["button"]))
         return ConversationHandler.END
 
     def delete_button(self, bot, update):
@@ -249,6 +236,10 @@ class AddCommands(object):
             return ConversationHandler.END
 
     def delete_button_finish(self, bot, update):
+        photo_directory = "files/{bot_id}/photo".format(bot_id=bot.id)
+        audio_directory = "files/{bot_id}/audio".format(bot_id=bot.id)
+        document_directory = "files/{bot_id}/document".format(bot_id=bot.id)
+        video_directory = "files/{bot_id}/video".format(bot_id=bot.id)
         chat_id, txt = initiate_chat_id(update)
         to_delete_button = custom_buttons_table.find_one({
             "button": txt,
@@ -256,16 +247,16 @@ class AddCommands(object):
         })
         if "photo_files" in to_delete_button:
             for file in to_delete_button["photo_files"]:
-                os.remove(file)
+                os.remove(photo_directory + "/" + file)
         if "document_files" in to_delete_button:
             for file in to_delete_button["document_files"]:
-                os.remove(file)
+                os.remove(document_directory + "/" + file)
         if "audio_files" in to_delete_button:
             for file in to_delete_button["audio_files"]:
-                os.remove(file)
+                os.remove(audio_directory + "/" + file)
         if "video_files" in to_delete_button:
             for file in to_delete_button["video_files"]:
-                os.remove(file)
+                os.remove(video_directory + "/" + file)
         custom_buttons_table.delete_one({
             "button": txt,
             "bot_id": bot.id
@@ -273,6 +264,8 @@ class AddCommands(object):
         update.message.reply_text(
             'Thank you! We deleted the button {}'.format(txt), reply_markup=ReplyKeyboardRemove())
         get_help(bot, update)
+        logger.info("Admin {} on bot {}:{} deleted the button:{}".format(
+            update.effective_user.first_name, bot.first_name, bot.id, txt))
         return ConversationHandler.END
 
     def back(self, bot, update, user_data):

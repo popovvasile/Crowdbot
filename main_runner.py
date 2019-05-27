@@ -12,8 +12,9 @@ from modules.create_survey import DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_HANDLER, 
 from modules.donations_edit_delete_results import EDIT_DONATION_HANDLER
 from modules.helper_funcs.main_runnner_helper import help_button, button_handler, get_help, WelcomeBot, error_callback
 from modules.manage_button import BUTTON_EDIT_HANDLER, BUTTON_EDIT_FINISH_HANDLER
-from modules.pay_donation import DONATE_HANDLER, DonationBot
+from modules.pay_donation import DONATE_HANDLER, DonationBot, HANDLE_SUCCES, HANDLE_PRECHECKOUT
 from modules.polls import POLL_HANDLER, SEND_POLLS_HANDLER, BUTTON_HANDLER, DELETE_POLLS_HANDLER
+from modules.send_donation_request import SEND_DONATION_TO_USERS_HANDLER
 from modules.send_message import SEND_MESSAGE_TO_ADMIN_HANDLER, SEND_MESSAGE_TO_USERS_HANDLER, SEE_MESSAGES_HANDLER, \
     SendMessageToUsers
 from modules.user_mode import USER_MODE_OFF, USER_MODE_ON
@@ -64,7 +65,10 @@ def main(token):
     # DONATIONS
     dispatcher.add_handler(CREATE_DONATION_HANDLER)
     dispatcher.add_handler(DONATE_HANDLER)
+    dispatcher.add_handler(HANDLE_SUCCES)
+    dispatcher.add_handler(HANDLE_PRECHECKOUT)
     dispatcher.add_handler(EDIT_DONATION_HANDLER)
+    dispatcher.add_handler(SEND_DONATION_TO_USERS_HANDLER)
     # MESSAGES
     dispatcher.add_handler(SEND_MESSAGE_TO_ADMIN_HANDLER)
     dispatcher.add_handler(SEND_MESSAGE_TO_USERS_HANDLER)

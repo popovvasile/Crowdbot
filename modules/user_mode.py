@@ -21,14 +21,13 @@ __admin_help__ = """
 """
 
 
-__admin_keyboard__ = [InlineKeyboardButton(text="ON", callback_data="turn_user_mode_on"),
-                      InlineKeyboardButton(text="OFF", callback_data="turn_user_mode_off")]
+__admin_keyboard__ = [InlineKeyboardButton(text="USER MODE", callback_data="turn_user_mode_on")]
 
 
 class UserMode(object):
     def __init__(self):
         buttons = list()
-        buttons.append([InlineKeyboardButton(text="MENU", callback_data="cancel_send_message")])
+        buttons.append([InlineKeyboardButton(text="MENU", callback_data="help_back")])
         self.reply_markup = InlineKeyboardMarkup(
             buttons)
 
@@ -52,7 +51,8 @@ class UserMode(object):
                          "Great! Now you can return to the main menu and"
                          " you'll see it as non-admin users do (except the 'User view button'.",
                          reply_markup=self.reply_markup)
-
+        logger.info("USER MODE ON for user {} on bot {}:{}".format(
+            update.effective_user.first_name, bot.first_name, bot.id))
         return ConversationHandler.END
 
     @run_async
@@ -74,7 +74,8 @@ class UserMode(object):
         bot.send_message(update.callback_query.message.chat.id,
                          "User view is turned off! Now you can use the main menu as admin",
                          reply_markup=self.reply_markup)
-
+        logger.info("USER MODE OFF for user {} on bot {}:{}".format(
+            update.effective_user.first_name, bot.first_name, bot.id))
         return ConversationHandler.END
 
 

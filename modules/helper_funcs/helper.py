@@ -14,7 +14,7 @@ HELP_STRINGS = """
 ALL_MODULES = ['add_menu_buttons', 'answer_surveys', 'create_donation', 'create_survey',
                'donations_edit_delete_results', 'pay_donation',
                'report_chatbot_scam', 'send_message', "polls", "user_mode"]
-ADMIN_HELPABLE = {'Custom buttons': "",
+ADMIN_HELPABLE = {"Edit menu": "",
                   'Donate': "",
                   'Surveys': "",
                   'Send a message': "",
@@ -113,13 +113,12 @@ def get_help(bot: Bot, update: Update):
     else:
         welcome_message = "Hello"
     if if_admin(bot=bot, update=update):
-        try:
+        if "user_mode" in current_user_mode:
             if current_user_mode.get("user_mode") is True:
                 send_admin_user_mode(bot, chat.id, HELP_STRINGS.format(welcome_message))
             else:
                 send_admin_help(bot, chat.id, HELP_STRINGS.format(welcome_message))
-        except AttributeError:
-
+        else:
             user_mode_table.insert({"bot_id": bot.id,
                                     "user_id": update.effective_user.id,
                                     "user_mode": False})

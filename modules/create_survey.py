@@ -143,7 +143,8 @@ class SurveyHandler(object):
         }, {'$set': user_data}, upsert=True)
         user_data.clear()
         get_help(bot, update)
-
+        logger.info("Admin {} on bot {}:{} added a new survey:{}".format(
+            update.effective_user.first_name, bot.first_name, bot.id, user_data["title"]))
         return ConversationHandler.END
 
     @run_async
@@ -237,7 +238,8 @@ class SurveyHandler(object):
         update.message.reply_text("The survey with the title '{}' has been deleted".format(txt),
                                   reply_markup=ReplyKeyboardRemove())
         get_help(bot, update)
-
+        logger.info("Admin {} on bot {}:{} deleted a survey:{}".format(
+            update.effective_user.first_name, bot.first_name, bot.id, txt))
         return ConversationHandler.END
 
     @staticmethod
@@ -296,6 +298,8 @@ class SurveyHandler(object):
         else:
             bot.send_message(chat_id=chat_id, text="Survey sent to all users!", reply_markup=ReplyKeyboardRemove())
         get_help(bot, update)
+        logger.info("Admin {} on bot {}:{} sent a survey to the users:{}".format(
+            update.effective_user.first_name, bot.first_name, bot.id, txt))
         return ConversationHandler.END
 
     def cancel(self, bot, update):

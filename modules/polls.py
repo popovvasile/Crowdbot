@@ -430,7 +430,7 @@ class PollBot(object):
                                      parse_mode='Markdown'
                                      )
         if len(sent) == 0:
-            bot.send_message(chat_id, "Looks like there are yet no users to send this poll to. "
+            bot.send_message(chat_id, "Looks like there are yet no users to send this poll to. \n"
                                       "No polls sent :( ", reply_markup=ReplyKeyboardRemove())
         else:
             bot.send_message(chat_id, "Your poll was sent to all you users! ", reply_markup=ReplyKeyboardRemove())
@@ -529,6 +529,8 @@ class PollBot(object):
         update.message.reply_text(
             "Poll with title {} has been deleted from all chats.".format(txt))
         get_help(bot, update)
+        logger.info("Admin {} on bot {}:{} created a new poll: {}".format(
+            update.effective_user.first_name, bot.first_name, bot.id, txt))
         return ConversationHandler.END
 
 

@@ -61,7 +61,7 @@ class EditPaymentHandler(object):
     @run_async
     def start_donation(self, bot, update, user_data):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id,)
+                           message_id=update.callback_query.message.message_id, )
         chatbot = chatbots_table.find_one({"bot_id": bot.id})
         if chatbot.get("donate") != {}:
             reply_keyboard = [["Delete this donation"], ["Edit"]]
@@ -75,10 +75,10 @@ class EditPaymentHandler(object):
             admin_keyboard = [InlineKeyboardButton(text="Allow donations", callback_data="allow_donation"),
                               InlineKeyboardButton(text="Back", callback_data="help_back")]
             bot.send_message(update.callback_query.message.chat.id,
-                             """You have no donations set so far. \n
-                              Press "Allow donations" to configure your first donation option
-                               or click "Back" for main menu""",
-                             reply_markup=InlineKeyboardMarkup(admin_keyboard))
+                             "You have no donations set so far. \n"
+                             'Press "Allow donations" to configure your first donation option\n'
+                             'or click "Back" for main menu',
+                             reply_markup=InlineKeyboardMarkup([admin_keyboard]))
             user_data.clear()
             return ConversationHandler.END
 
@@ -108,7 +108,8 @@ class EditPaymentHandler(object):
         if txt == "Title":
             bot.send_message(chat_id, "Great!", reply_markup=ReplyKeyboardRemove())
             bot.send_message(chat_id,
-                             "Now, write a new title for this donation (or click /cancel)", reply_markup=self.reply_markup)
+                             "Now, write a new title for this donation (or click /cancel)",
+                             reply_markup=self.reply_markup)
         elif txt == "Description":
             bot.send_message(chat_id, "Great!", reply_markup=ReplyKeyboardRemove())
 
@@ -141,6 +142,8 @@ class EditPaymentHandler(object):
         update.message.reply_text("Your donation has been updated", reply_markup=self.finish_markup)
 
         user_data.clear()
+        logger.info("Admin {} on bot {}:{} did  the following edit on donation: {}".format(
+            update.effective_user.first_name, bot.first_name, bot.id, user_data["action"]))
         return ConversationHandler.END
 
     @run_async
@@ -152,7 +155,8 @@ class EditPaymentHandler(object):
             chatbots_table.replace_one({"bot_id": bot.id}, chatbot)
             update.message.reply_text("Your donation has been deleted")
             user_data.clear()
-
+            logger.info("Admin {} on bot {}:{} did  the following edit on donation: {}".format(
+                update.effective_user.first_name, bot.first_name, bot.id, user_data["action"]))
             get_help(bot, update)
             return ConversationHandler.END
         elif txt == "No, let's get back":
@@ -170,14 +174,14 @@ class EditPaymentHandler(object):
                 return EDIT_PAYMENT
 
     @run_async
-    def change_donation_token(self, bot, update):
+    def change_donation_token(self, bot, update, user_data):
         update.message.reply_text(
             "Please enter your new donation provider token", reply_markup=self.reply_markup
         )
         return TYPING_TOKEN
 
     @run_async
-    def change_donation_token_finish(self, bot, update):
+    def change_donation_token_finish(self, bot, update, user_data):
 
         chat_id, txt = initiate_chat_id(update)
         if check_provider_token(provider_token=txt, bot_id=bot.id):
@@ -188,6 +192,8 @@ class EditPaymentHandler(object):
             update.message.reply_text("Thank you! Your provider_token was changed successfully !",
                                       reply_markup=self.reply_markup)
             get_help(bot, update)
+            logger.info("Admin {} on bot {}:{} did  the following edit on donation: {}".format(
+                update.effective_user.first_name, bot.first_name, bot.id, user_data["action"]))
             return ConversationHandler.END
         else:
             update.message.reply_text(
@@ -218,20 +224,19 @@ class EditPaymentHandler(object):
 EDIT_DONATION_HANDLER = ConversationHandler(
     entry_points=[
         CallbackQueryHandler(callback=EditPaymentHandler().start_donation,
-                                       pass_user_data=True,
-                                       pattern=r'configure_donation')
+                             pass_user_data=True,
+                             pattern=r'configure_donation')
     ],
 
     states={
         FINISH_ACTION: [MessageHandler(Filters.text,
                                        EditPaymentHandler().handle_action_finish,
                                        pass_user_data=True),
-                       CommandHandler('cancel', EditPaymentHandler().cancel)],
+                        CommandHandler('cancel', EditPaymentHandler().cancel)],
         CHOOSING_EDIT_ACTION: [MessageHandler(Filters.text,
-                                       EditPaymentHandler().handle_edit_action_finish,
-                                       pass_user_data=True),
-                       CommandHandler('cancel', EditPaymentHandler().cancel)],
-
+                                              EditPaymentHandler().handle_edit_action_finish,
+                                              pass_user_data=True),
+                               CommandHandler('cancel', EditPaymentHandler().cancel)],
 
         TYPING_TOKEN: [MessageHandler(Filters.text,
                                       EditPaymentHandler().change_donation_token,
@@ -242,13 +247,13 @@ EDIT_DONATION_HANDLER = ConversationHandler(
                                              pass_user_data=True),
                               CommandHandler('cancel', EditPaymentHandler().cancel)],
         DELETE_FINISH: [MessageHandler(Filters.text,
-                                         EditPaymentHandler().handle_finish_delete,
-                                         pass_user_data=True),
-                          CommandHandler('cancel', EditPaymentHandler().cancel)],
-        EDIT_FINISH:[MessageHandler(Filters.text,
-                                             EditPaymentHandler().handle_edit_finish,
-                                             pass_user_data=True),
-                              CommandHandler('cancel', EditPaymentHandler().cancel)],
+                                       EditPaymentHandler().handle_finish_delete,
+                                       pass_user_data=True),
+                        CommandHandler('cancel', EditPaymentHandler().cancel)],
+        EDIT_FINISH: [MessageHandler(Filters.text,
+                                     EditPaymentHandler().handle_edit_finish,
+                                     pass_user_data=True),
+                      CommandHandler('cancel', EditPaymentHandler().cancel)],
 
     },
 
