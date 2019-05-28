@@ -7,7 +7,7 @@ import utils
 import threading
 
 
-def main(token):
+def shop_main(token):
     """The core code of the program. Should be run only in the main process!"""
 
     # Rename the main thread for presentation purposes

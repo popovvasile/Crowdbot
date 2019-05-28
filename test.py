@@ -15,7 +15,8 @@ requests.post('127.0.0.1:8000/chatbot',
                     "crowdbot_token": '633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg',
                     "shop_token": "token",
                     "credit_card_token": "token",
-                    "currency": "EUR"
+                    "currency": "EUR",
+                    "active": True
                     })
 requests.delete('127.0.0.1:8000/chatbot',
                 data={'token': '633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg'})

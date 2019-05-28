@@ -8,11 +8,12 @@ Bugs:
 # TODO results for surveys, polls, users and donations - send csv as file
 # TODO for Occupy: add users + all old polls + tags + payments for members
 
-# TODO addjust REST api + two languages
+# TODO change the admin authentication in the bot
+# TODO adjust REST api + two languages
 # TODO make buying easier in the shop - don't enforce funds
 # TODO return the amount of money received by both bots
 # TODO hidden content
-
+# TODO in the botfather- add the option "pause the bot"
 # TODO support bot
 
 

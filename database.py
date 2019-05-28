@@ -1,7 +1,7 @@
 from pymongo import MongoClient
 
 client = MongoClient('localhost', 27017)
-db = client['chatbots']
+db = client['crowdbot_chatbots']
 donations_table = db['donations_table']
 poll_instances_table = db['setpoll_instances']
 polls_table = db['setpolls']

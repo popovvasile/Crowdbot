@@ -8,21 +8,18 @@ import os
 import sys
 import strings
 
-if config["Error Reporting"]["sentry_token"] != \
-        "https://00000000000000000000000000000000:00000000000000000000000000000000@sentry.io/0000000":
-    import raven
+import raven
 
-    sentry_client = raven.Client(config["Error Reporting"]["sentry_token"],
-                                 release=raven.fetch_git_sha(os.path.dirname(__file__)),
-                                 environment="Dev" if __debug__ else "Prod")
-else:
-    sentry_client = None
+sentry_client = raven.Client(config["Error Reporting"]["sentry_token"],
+                             release=raven.fetch_git_sha(os.path.dirname(__file__)),
+                             environment="Dev" if __debug__ else "Prod")
 
 
 class Price:
     """The base class for the prices in greed.
     Its int value is in minimum units, while its float and str values are in decimal format.int("""
-    def __init__(self, value: typing.Union[int, float, str, "Price"]=0):
+
+    def __init__(self, value: typing.Union[int, float, str, "Price"] = 0):
         if isinstance(value, int):
             # Keep the value as it is
             self.value = int(value)
@@ -106,14 +103,15 @@ class Price:
 
 
 def telegram_html_escape(string: str):
-    return string.replace("<", "&lt;")\
-                 .replace(">", "&gt;")\
-                 .replace("&", "&amp;")\
-                 .replace('"', "&quot;")
+    return string.replace("<", "&lt;") \
+        .replace(">", "&gt;") \
+        .replace("&", "&amp;") \
+        .replace('"', "&quot;")
 
 
 def catch_telegram_errors(func):
     """Decorator, can be applied to any function to retry in case of Telegram errors."""
+
     def result_func(*args, **kwargs):
         while True:
             try:
@@ -155,6 +153,7 @@ def catch_telegram_errors(func):
                     elif sentry_client is not None:
                         sentry_client.captureException(exc_info=sys.exc_info())
                     time.sleep(int(config["Telegram"]["error_pause"]))
+
     return result_func
 
 

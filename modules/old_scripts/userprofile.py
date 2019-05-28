@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 CHOOSING, TYPING_REPLY, TYPING_CHOICE = range(3)
 
 client = MongoClient('localhost', 27017)
-db = client['chatbots']
+db = client['crowdbot_chatbots']
 profile_topics_table = db["profile_topics"]
 users_table = db['users']
 

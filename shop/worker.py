@@ -17,8 +17,8 @@ import raven
 from pymongo import MongoClient
 
 client = MongoClient('localhost', 27017)
-mongo_db = client['chatbots']
-chatbots_table = mongo_db["shop_chatbots"]
+mongo_db = client['shop_chatbots']
+chatbots_table = mongo_db["chatbots"]
 
 
 class StopSignal:
