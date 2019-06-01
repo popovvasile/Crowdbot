@@ -99,6 +99,6 @@ def main(token):
 
     updater.idle()
 
-
-if __name__ == '__main__':
-    main("633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg")
+#
+# if __name__ == '__main__':
+#     main("633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg")
