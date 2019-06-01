@@ -7,13 +7,12 @@ import requests
 from wsgiref import simple_server
 from pymongo import MongoClient
 
-from database import donations_table
 
 client = MongoClient('localhost', 27017)
 # TODO for the russian version, change the name of the database with sufix rus_
 crowdbot_db = client['crowdbot_chatbots']
 crowdbot_bots_table = crowdbot_db["crowdbot_chatbots"]
-
+donations_table = crowdbot_db['donations_table']
 users_table = crowdbot_db['users']
 
 

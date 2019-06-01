@@ -27,7 +27,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 def main(token):
-    updater = tg.Updater(token, workers=8)
+    updater = tg.Updater(token)
     dispatcher = updater.dispatcher
     start_handler = CommandHandler("start", WelcomeBot().start)
     help_handler = CommandHandler("help", get_help)
@@ -37,10 +37,10 @@ def main(token):
     custom_button_callback_handler = CallbackQueryHandler(button_handler, pattern=r"button_")
     help_callback_handler = CallbackQueryHandler(help_button, pattern=r"help_")
 
-    # dispatcher.add_handler(CallbackQueryHandler(callback=SendMessageToUsers().back, pattern=r"cancel_"))
-    # dispatcher.add_handler(CallbackQueryHandler(callback=AddCommands().back, pattern=r"cancel_add_button"))
-    # dispatcher.add_handler(CallbackQueryHandler(callback=SurveyHandler().back, pattern=r"cancel_survey"))
-    # dispatcher.add_handler(CallbackQueryHandler(callback=DonationBot().back, pattern=r"cancel_donation_payment"))
+    dispatcher.add_handler(CallbackQueryHandler(callback=SendMessageToUsers().back, pattern=r"cancel_"))
+    dispatcher.add_handler(CallbackQueryHandler(callback=AddCommands().back, pattern=r"cancel_add_button"))
+    dispatcher.add_handler(CallbackQueryHandler(callback=SurveyHandler().back, pattern=r"cancel_survey"))
+    dispatcher.add_handler(CallbackQueryHandler(callback=DonationBot().back, pattern=r"cancel_donation_payment"))
 
     dispatcher.add_handler(custom_button_callback_handler)
     dispatcher.add_handler(start_handler)
@@ -94,9 +94,9 @@ def main(token):
     #                       key='private.key',
     #                       cert='cert.pem',
     #                       webhook_url='https://142.93.109.14:8443/' + token)
-
+    print(token)
     updater.idle()
 
 
-# if __name__ == '__main__':
-#     main("633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg")
+if __name__ == '__main__':
+    main("633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg")
