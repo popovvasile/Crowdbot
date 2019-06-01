@@ -98,6 +98,7 @@ class AnswerSurveys(object):
             bot.send_message(update.message.chat_id,
                              "Thank you for your responses!\n" + to_send_text + "\n" +
                              "Until next time!")
+            get_help(bot, update)
             del user_data
             del answer
             return ConversationHandler.END
@@ -116,10 +117,10 @@ class AnswerSurveys(object):
         update.message.reply_text("Thank you for your responses!"
                                   "{}"
                                   "Until next time!".format(facts_to_str(user_data)))
-        user_data.clear()
         get_help(bot, update)
         logger.info("User {} on bot {}:{} answered to survey:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, user_data["title"]))
+        user_data.clear()
         return ConversationHandler.END
 
     @run_async

@@ -31,7 +31,7 @@ __admin_keyboard__ = [InlineKeyboardButton(text="Donate", callback_data="pay_don
                       InlineKeyboardButton(text="Allow donations", callback_data="allow_donation"),
                       InlineKeyboardButton(text="Configure", callback_data="configure_donation"),
                       InlineKeyboardButton(text="Ask users for donation", callback_data="send_donation_to_users")]
-__visitor_keyboard__ = [InlineKeyboardButton(text="Donate!", callback_data="donate")]
+__visitor_keyboard__ = [InlineKeyboardButton(text="Donate!", callback_data="pay_donation")]
 
 
 EXECUTE_DONATION = 1
@@ -100,7 +100,15 @@ class DonationBot(object):
                 return ConversationHandler.END
 
         chat_id, txt = initiate_chat_id(update)
-        user_data["amount"] = txt
+        # user_data["amount"] = txt
+        try:
+            amount = int(float(txt)*100)  # TODO add an exception if not int
+        except ValueError:
+            update.message.reply_text(text="You entered a wrong number. Please enter a valid amount of money ",
+                                      reply_markup=InlineKeyboardMarkup(
+                                          [[InlineKeyboardButton(text="MENU",
+                                                                 callback_data="cancel_donation_payment")]]))
+            return EXECUTE_DONATION
         donation_request = chatbots_table.find_one({"bot_id": bot.id})["donate"]
         title = donation_request['title']
         description = donation_request['description']
@@ -108,8 +116,8 @@ class DonationBot(object):
         provider_token = donation_request['payment_token']
         start_parameter = "test-payment"  # TODO change in production
         currency = donation_request['currency']
-        amount = int(user_data["amount"])
-        prices = [LabeledPrice(title, amount * 100)]
+        print(amount)
+        prices = [LabeledPrice(title, amount)]
         bot.sendInvoice(chat_id, title, description, payload,
                         provider_token, start_parameter, currency, prices)
         update.message.reply_text(text="To return to main menu, click 'Back' ",
@@ -155,7 +163,7 @@ class DonationBot(object):
         return ConversationHandler.END
 
     def back(self, bot, update, user_data):
-
+        print("TEST")
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         get_help(bot, update)

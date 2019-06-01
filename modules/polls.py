@@ -63,6 +63,10 @@ __admin_keyboard__ = [
 
 class PollBot(object):
     def __init__(self):
+        create_buttons = [[InlineKeyboardButton(text="Create", callback_data="create_poll"),
+                           InlineKeyboardButton(text="Back", callback_data="help_back")]]
+        self.create_markup = InlineKeyboardMarkup(
+            create_buttons)
         buttons = [[InlineKeyboardButton(text="Back", callback_data="cancel_poll")]]
         self.reply_markup = InlineKeyboardMarkup(
             buttons)
@@ -181,13 +185,12 @@ class PollBot(object):
                                   reply_markup=self.assemble_inline_keyboard(poll, True),
                                   parse_mode='Markdown'
                                   )
-
-        user_data.clear()
         bot.send_message(update.callback_query.message.chat.id,
                          "Thank you! you can send this poll to your users "
                          "by clicking 'Send' \n",
                          reply_markup=self.send_markup
                                   )
+        user_data.clear()
         return ConversationHandler.END
 
     def get_affirmation(self):
@@ -396,19 +399,26 @@ class PollBot(object):
 
     @run_async
     def handle_send_poll(self, bot, update):
-
-        bot.send_message(update.callback_query.message.chat.id,
-                         "This is the list of the current polls. ", reply_keyboard=self.reply_markup)
-
         polls_list_of_dicts = polls_table.find({"bot_id": bot.id})
         command_list = [command['title'] for command in polls_list_of_dicts]
-        reply_keyboard = [command_list]
-        bot.send_message(update.callback_query.message.chat.id,
-                         "Choose the poll that you want to send",
-                         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
-        bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
-        return TYPING_SEND_TITLE
+        if len(command_list) == 0:
+            bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                               message_id=update.callback_query.message.message_id)
+            bot.send_message(update.callback_query.message.chat.id,
+                             "You didn't create any polls yet. Please create your first poll",
+                             reply_markup=self.create_markup)
+            return ConversationHandler.END
+        else:
+            bot.send_message(update.callback_query.message.chat.id,
+                             "This is the list of the current polls. ", reply_markup=self.reply_markup)
+
+            reply_keyboard = [command_list]
+            bot.send_message(update.callback_query.message.chat.id,
+                             "Choose the poll that you want to send",
+                             reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+            bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                               message_id=update.callback_query.message.message_id)
+            return TYPING_SEND_TITLE
 
     @run_async
     def handle_send_title(self, bot, update, user_data):

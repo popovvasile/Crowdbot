@@ -206,10 +206,11 @@ class AddCommands(object):
         bot.send_message(update.callback_query.message.chat.id,
                          'Thank you! The button will be accessible by clicking \n'
                          '{} in menu'.format(user_data["button"]))
-        user_data.clear()
         get_help(bot, update)
         logger.info("Admin {} on bot {}:{} added a new button:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, user_data["button"]))
+        user_data.clear()
+
         return ConversationHandler.END
 
     def delete_button(self, bot, update):
@@ -269,13 +270,13 @@ class AddCommands(object):
         return ConversationHandler.END
 
     def back(self, bot, update, user_data):
-        user_data.clear()
         bot.send_message(update.callback_query.message.chat.id,
                          "Button creation was stopped", reply_markup=ReplyKeyboardRemove()
                          )
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         get_help(bot, update)
+        user_data.clear()
         return ConversationHandler.END
 
     def cancel(self, bot, update):

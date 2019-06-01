@@ -141,10 +141,10 @@ class CreateDonationHandler(object):
         if 'payment_token' in user_data:
             chatbot["donate"]["payment_token"] = user_data['payment_token']
         chatbots_table.update_one({"bot_id": bot.id}, {'$set': chatbot}, upsert=True)
-        user_data.clear()
 
         logger.info("Admin {} on bot {}:{} added a donation config:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, user_data["title"]))
+        user_data.clear()
 
         return ConversationHandler.END
 

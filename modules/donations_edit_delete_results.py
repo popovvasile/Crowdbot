@@ -141,9 +141,10 @@ class EditPaymentHandler(object):
         chatbots_table.replace_one({"bot_id": bot.id}, chatbot)
         update.message.reply_text("Your donation has been updated", reply_markup=self.finish_markup)
 
-        user_data.clear()
         logger.info("Admin {} on bot {}:{} did  the following edit on donation: {}".format(
             update.effective_user.first_name, bot.first_name, bot.id, user_data["action"]))
+        user_data.clear()
+
         return ConversationHandler.END
 
     @run_async
@@ -154,10 +155,10 @@ class EditPaymentHandler(object):
             chatbot["donate"] = {}
             chatbots_table.replace_one({"bot_id": bot.id}, chatbot)
             update.message.reply_text("Your donation has been deleted")
-            user_data.clear()
             logger.info("Admin {} on bot {}:{} did  the following edit on donation: {}".format(
                 update.effective_user.first_name, bot.first_name, bot.id, user_data["action"]))
             get_help(bot, update)
+            user_data.clear()
             return ConversationHandler.END
         elif txt == "No, let's get back":
             chat_id, txt = initiate_chat_id(update)

@@ -141,10 +141,10 @@ class SurveyHandler(object):
             "bot_id": bot.id,
             "title": user_data["title"]
         }, {'$set': user_data}, upsert=True)
-        user_data.clear()
         get_help(bot, update)
         logger.info("Admin {} on bot {}:{} added a new survey:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, user_data["title"]))
+        user_data.clear()
         return ConversationHandler.END
 
     @run_async
