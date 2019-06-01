@@ -1,15 +1,16 @@
 # #!/usr/bin/env python3
 # -*- coding: utf-8 -*
+import json
+
 import falcon
 import requests
 from wsgiref import simple_server
 from pymongo import MongoClient
 
+from database import donations_table
+
 client = MongoClient('localhost', 27017)
 # TODO for the russian version, change the name of the database with sufix rus_
-shop_db = client['shop_chatbots']
-shop_bots_table = shop_db["shop_chatbots"]
-
 crowdbot_db = client['crowdbot_chatbots']
 crowdbot_bots_table = crowdbot_db["crowdbot_chatbots"]
 
@@ -22,22 +23,16 @@ class CrowdbotResource(object):
     #  'token': '633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg', 'name': 'Crowdbot', 'welcomeMessage': 'he'}
     # language: [Russian, English], crowdbot_token: token, shop_token: token
     def on_get(self, req, resp):  # TODO
-        crowdbot_doc = {}
-        if req.content_length:
-            crowdbot_doc = falcon.json.load(req.stream)
+        crowdbot_doc = json.loads(req.stream.read().decode('utf-8'))["params"]
         chatbot = requests.get(url="https://api.telegram.org/bot{}/getMe".format(crowdbot_doc["token"]))
         crowdbot_doc["bot_id"] = chatbot.json()['result']['id']
-        chatbot = shop_bots_table.find_one({"bot_id": crowdbot_doc["bot_id"]})
-        resp.body = {"active": chatbot["active"],
-                     "total_amount": chatbot["total_amount"],
-                     "last_update": chatbot["last_update"]
-                     }
+        chatbot = crowdbot_bots_table.find_one({"bot_id": crowdbot_doc["bot_id"]})
+        resp.body = donations_table.find_many({"bot_id": crowdbot_doc["bot_id"]})
         resp.status = falcon.HTTP_200
 
     def on_put(self, req, resp):  # TODO
-        crowdbot_doc = {}
-        if req.content_length:
-            crowdbot_doc = falcon.json.load(req.stream)
+        crowdbot_doc = json.loads(req.stream.read().decode('utf-8'))["params"]
+
         chatbot = requests.get(url="https://api.telegram.org/bot{}/getMe".format(crowdbot_doc["token"]))
         crowdbot_doc["bot_id"] = chatbot.json()['result']['id']
 
@@ -45,12 +40,8 @@ class CrowdbotResource(object):
         resp.status = falcon.HTTP_200
 
     def on_post(self, req, resp):
-        doc = {}
-        if req.content_length:
-            doc = falcon.json.load(req.stream)
+        doc = json.loads(req.stream.read().decode('utf-8'))["params"]
         # Crowdbot token
-        print(doc)
-        doc.pop("token", None)
         crowdbot_token = doc["token"]
         chatbot = requests.get(url="https://api.telegram.org/bot{}/getMe".format(crowdbot_token))
         doc["bot_id"] = chatbot.json()['result']['id']
@@ -65,6 +56,8 @@ class CrowdbotResource(object):
             superadmin["user_id"] = doc["superuser"]
             doc["admins"].append(superadmin)
             for admin in doc["admins"]:
+                print(admin)
+                print(doc["admins"])
                 admin["bot_id"] = doc["bot_id"]
                 admin["registered"] = False
                 admin["is_admin"] = True
@@ -74,57 +67,24 @@ class CrowdbotResource(object):
                     users_table.update({"email": admin["email"]}, admin, upsert=True)
                 else:
                     users_table.save(admin)
-                resp.status = falcon.HTTP_200
+        resp.status = falcon.HTTP_200
 
     def on_delete(self, req, resp):
         chatbot_id = requests.get(url="https://api.telegram.org/bot{}/getMe".format(req.params["token"])
                                   ).json()
+
         chatbot_id = chatbot_id["result"]["id"]
-        crowdbot_bots_table["users"].delete_many({"bot_id": chatbot_id})
-        crowdbot_bots_table["chatbots"].delete_many({"bot_id": chatbot_id})
-        crowdbot_bots_table['donations_table'].delete_many({"bot_id": chatbot_id})
-        crowdbot_bots_table['setpoll_instances'].delete_many({"bot_id": chatbot_id})
-        crowdbot_bots_table['setpolls'].delete_many({"bot_id": chatbot_id})
-        crowdbot_bots_table['tags'].delete_many({"bot_id": chatbot_id})
-        crowdbot_bots_table["surveys"].delete_many({"bot_id": chatbot_id})
-        crowdbot_bots_table["custom_commands"].delete_many({"bot_id": chatbot_id})
-        crowdbot_bots_table['payments_requests_table'].delete_many({"bot_id": chatbot_id})
-        crowdbot_bots_table['payments_table'].delete_many({"bot_id": chatbot_id})
-        crowdbot_bots_table["chats"].delete_many({"bot_id": chatbot_id})
-        resp.status = falcon.HTTP_200
-
-
-class ShopResource(object):
-    def on_get(self, req, resp):  # TODO
-        shop_doc = {}
-        if req.content_length:
-            shop_doc = falcon.json.load(req.stream)
-        chatbot = shop_bots_table.find({"bot_id": shop_doc["bot_id"]})
-        resp.body = {"active": chatbot["active"],
-                     "total_amount": chatbot["total_amount"],
-                     "last_update": chatbot["last_update"]
-                     }
-        resp.status = falcon.HTTP_200
-
-    def on_post(self, req, resp):
-        # Shop token
-        shop_doc = {}
-        if req.content_length:
-            shop_doc = falcon.json.load(req.stream)
-        print(shop_doc)
-        shop_doc.pop("token", None)
-        shop_token = shop_doc["token"]
-        shop_chatbot = requests.get(url="https://api.telegram.org/bot{}/getMe".format(shop_token))
-        shop_doc["bot_id"] = shop_chatbot.json()['result']['id']
-        shop_bots_table.save(shop_doc)
-        resp.status = falcon.HTTP_200
-
-    def on_delete(self, req, resp):
-        print(req.params)
-        chatbot_id = requests.get(url="https://api.telegram.org/bot{}/getMe".format(req.params["token"])
-                                  ).json()
-        chatbot_id = chatbot_id["result"]["id"]
-        shop_bots_table.delete_many({"bot_id": chatbot_id})
+        crowdbot_db["users"].delete_many({"bot_id": chatbot_id})
+        crowdbot_db["crowdbot_chatbots"].delete_many({"bot_id": chatbot_id})
+        crowdbot_db['donations_table'].delete_many({"bot_id": chatbot_id})
+        crowdbot_db['setpoll_instances'].delete_many({"bot_id": chatbot_id})
+        crowdbot_db['setpolls'].delete_many({"bot_id": chatbot_id})
+        crowdbot_db['tags'].delete_many({"bot_id": chatbot_id})
+        crowdbot_db["surveys"].delete_many({"bot_id": chatbot_id})
+        crowdbot_db["custom_commands"].delete_many({"bot_id": chatbot_id})
+        crowdbot_db['payments_requests_table'].delete_many({"bot_id": chatbot_id})
+        crowdbot_db['payments_table'].delete_many({"bot_id": chatbot_id})
+        crowdbot_db["chats"].delete_many({"bot_id": chatbot_id})
         resp.status = falcon.HTTP_200
 
 
@@ -154,12 +114,9 @@ class AdminResource(object):
 
 app = falcon.API()
 crowdbot_things = CrowdbotResource()
-shop_things = ShopResource()
 admins = AdminResource()
 app.add_route('/crowdbot', crowdbot_things)
-
 app.add_route('/crowdbot/admin', admins)
-app.add_route('/shopbot', shop_things)
 
 if __name__ == '__main__':
     httpd = simple_server.make_server('127.0.0.1', 8000, app)   # todo two different ports for two languages

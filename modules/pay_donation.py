@@ -140,6 +140,7 @@ class DonationBot(object):
         user_data = dict()
         user_data["status"] = "Paid"
         user_data['timestamp_paid'] = datetime.datetime.now()
+        user_data["amount"] = update.message.successful_payment.total_amount
         donations_table.insert_one(user_data)
         update.message.reply_text("Thank you for your donation!")
         user_data.clear()
@@ -197,4 +198,4 @@ DONATE_HANDLER = ConversationHandler(
 HANDLE_PRECHECKOUT = PreCheckoutQueryHandler(DonationBot().precheckout_callback)
 
 HANDLE_SUCCES = MessageHandler(Filters.successful_payment,
-                                       DonationBot().successful_payment_callback)
+                               DonationBot().successful_payment_callback)

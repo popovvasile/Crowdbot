@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 MESSAGE = 1
 
 
-class SendScamReport(object):
+class SendScamReport(object):  # TODO
     def __init__(self):
         buttons = list()
         buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_report")])
@@ -28,7 +28,7 @@ class SendScamReport(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         bot.send_message(update.callback_query.message.chat.id,
-                        "Please describe your problem and we will try to solve this issue")
+                         "Please describe your problem and we will try to solve this issue")
         return MESSAGE
 
     @run_async

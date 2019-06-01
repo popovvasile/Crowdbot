@@ -15,7 +15,7 @@ Bugs:
 # TODO make buying easier in the shop - don't enforce funds
 # TODO return the amount of money received by both bots
 # TODO in the botfather- add the option "pause the bot"
-# TODO support bot
+# TODO finish the support bot with sending the messages to our email + create our new email
 
 # TODO hidden content
 # TODO allow the crowdbot to post on channels
@@ -25,5 +25,5 @@ Bugs:
     # TODO make different enpoints for shop and crowdbot
     # TODO credit card token for shop
 
-TODO learn how to use  ForceReply https://python-telegram-bot.readthedocs.io/en/stable/telegram.forcereply.html
+TODO learn how to use  ForceReply https://python-tel:egram-bot.readthedocs.io/en/stable/telegram.forcereply.html
 
