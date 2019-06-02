@@ -67,15 +67,6 @@ class EditBotDescription(object):
         return ConversationHandler.END
 
 
-__mod_name__ = "Edit menu text"
-
-__admin_help__ = """
-Messages sent by the users to you
-"""
-
-__admin_keyboard__ = [
-    InlineKeyboardButton(text="Edit bot description", callback_data="edit_bot_description")
-]
 EDIT_BOT_DESCRIPTION_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(pattern="edit_bot_description",
                                        callback=EditBotDescription().send_message),
