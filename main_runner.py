@@ -37,10 +37,12 @@ def main(token):
     custom_button_callback_handler = CallbackQueryHandler(button_handler, pattern=r"button_")
     help_callback_handler = CallbackQueryHandler(help_button, pattern=r"help_")
 
-    dispatcher.add_handler(CallbackQueryHandler(callback=SendMessageToUsers().back, pattern=r"cancel_"))
-    dispatcher.add_handler(CallbackQueryHandler(callback=AddCommands().back, pattern=r"cancel_add_button"))
-    dispatcher.add_handler(CallbackQueryHandler(callback=SurveyHandler().back, pattern=r"cancel_survey"))
-    dispatcher.add_handler(CallbackQueryHandler(callback=DonationBot().back, pattern=r"cancel_donation_payment"))
+    # dispatcher.add_handler(CallbackQueryHandler(callback=SendMessageToUsers().back, pattern=r"cancel_send_message"))
+    # dispatcher.add_handler(CallbackQueryHandler(callback=AddCommands().back,
+    #                                             pattern=r"cancel_add_button",
+    #                                             pass_user_data=True))
+    # dispatcher.add_handler(CallbackQueryHandler(callback=SurveyHandler().back, pattern=r"cancel_survey"))
+    # dispatcher.add_handler(CallbackQueryHandler(callback=DonationBot().back, pattern=r"cancel_donation_payment"))
 
     dispatcher.add_handler(custom_button_callback_handler)
     dispatcher.add_handler(start_handler)
