@@ -13,14 +13,13 @@ HELP_STRINGS = """
 
 ALL_MODULES = ['add_menu_buttons', 'answer_surveys', 'create_donation', 'create_survey',
                'donations_edit_delete_results', 'pay_donation',
-               'report_chatbot_scam', 'send_message', "polls", "user_mode", "edit_bot_description"]
+               'report_chatbot_scam', 'send_message', "polls", "user_mode"]
 ADMIN_HELPABLE = {"Edit menu": "",
                   'Donate': "",
                   'Surveys': "",
                   'Send a message': "",
                   "Polls": "",
-                  "User view": "",
-                  "Edit menu text": ""}
+                  "User view": ""}
 ADMIN_USER_MODE = {'Donate': "",
                    'Send a message': "",
                    "User view": ""}

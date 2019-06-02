@@ -22,7 +22,8 @@ __mod_name__ = "Edit menu"
 # __admin_keyboard__ = [["/create_button"], ["/delete_button"]]
 __admin_keyboard__ = [InlineKeyboardButton(text="Create", callback_data="create_button"),
                       InlineKeyboardButton(text="Delete", callback_data="delete_button"),
-                      InlineKeyboardButton(text="Edit a button", callback_data="edit_button")]
+                      InlineKeyboardButton(text="Edit a button", callback_data="edit_button"),
+                      InlineKeyboardButton(text="Edit menu text", callback_data="edit_bot_description")]
 
 __admin_help__ = """
 Here you can:\n
