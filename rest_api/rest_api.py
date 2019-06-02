@@ -76,7 +76,8 @@ def crowdbot_on_post():
 
 @app.route('/crowdbot', methods=['DELETE'])
 def on_delete():
-    doc = request.get_json()["params"]
+    doc = request.args
+    print(doc)
     chatbot_id = requests.get(url="https://api.telegram.org/bot{}/getMe".format(doc["token"])
                               ).json()
 
