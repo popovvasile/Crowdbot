@@ -131,7 +131,7 @@ class DonationBot(object):
 
     @run_async
     def precheckout_callback(self, bot, update):
-        query = update.callback_query
+        # query = update.callback_query
         # if query:
         #     if query.data == "help_back":
         #         return ConversationHandler.END
