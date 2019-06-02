@@ -3,6 +3,8 @@
 import logging
 import telegram.ext as tg
 from telegram.ext import CommandHandler, CallbackQueryHandler,RegexHandler
+
+from modules.edit_bot_description import EDIT_BOT_DESCRIPTION_HANDLER
 from modules.helper_funcs.admin_login import ADMIN_AUTHENTICATION_HANDLER
 from modules.add_menu_buttons import BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER, AddCommands
 from modules.answer_surveys import ANSWER_SURVEY_HANDLER
@@ -54,7 +56,7 @@ def main(token):
 
     dispatcher.add_handler(help_callback_handler)
     dispatcher.add_error_handler(error_callback)
-
+    dispatcher.add_handler(EDIT_BOT_DESCRIPTION_HANDLER)
     # ADD_BUTTONS
     dispatcher.add_handler(BUTTON_ADD_HANDLER)
     dispatcher.add_handler(DELETE_BUTTON_HANDLER)
