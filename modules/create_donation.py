@@ -23,8 +23,7 @@ TYPING_TOKEN, TYPING_TITLE, TYPING_DESCRIPTION, DONATION_FINISH = range(4)
 
 
 def check_provider_token(provider_token, bot_id):
-    # bot_token = chatbots_table.find_one({"bot_id": bot_id})["token"]
-    bot_token = "633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg"
+    bot_token = chatbots_table.find_one({"bot_id": bot_id})["token"]
     prices = [LabeledPrice("Test payment, Please ignore this message", 10000)]
     data = requests.get("https://api.telegram.org/bot{}/sendInvoice".format(bot_token),
 
@@ -137,15 +136,18 @@ class CreateDonationHandler(object):
                          "Congratulation! You can get payments from your audience.\n"
                          "Do not forget to remind them of this.")  # TODO add button send donation request and back
         chatbot = chatbots_table.find_one({"bot_id": bot.id}) or {}
+
+        print(user_data)
+        if 'payment_token' not in user_data:
+            # chatbot["donate"]["payment_token"] = user_data['payment_token']
+            user_data["payment_token"] = chatbot["donate"]["payment_token"]
         chatbot["donate"] = user_data
-        if 'payment_token' in user_data:
-            chatbot["donate"]["payment_token"] = user_data['payment_token']
         chatbots_table.update_one({"bot_id": bot.id}, {'$set': chatbot}, upsert=True)
 
         logger.info("Admin {} on bot {}:{} added a donation config:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, user_data["title"]))
         user_data.clear()
-
+        get_help(bot, update)
         return ConversationHandler.END
 
     @staticmethod

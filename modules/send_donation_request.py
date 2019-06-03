@@ -96,7 +96,7 @@ class SendDonationToUsers(object):
         bot.send_message(update.callback_query.message.chat_id,
                          "Thank you! We've sent your message to your users!",
                          reply_markup=final_reply_markup)
-        chats = chats_table.find({"bot_id": bot.id})
+        chats = chats_table.find({"bot_id": bot.id})  # TODO it sends to everybody =/
         for chat in chats:
             if chat["chat_id"] != update.callback_query.message.chat_id:
                 bot.send_message(chat["chat_id"],

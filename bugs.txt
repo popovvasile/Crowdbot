@@ -1,29 +1,30 @@
 
 Bugs:
+# TODO test buttons once again
 # TODO make content to return in the same order as was sent !
-# TODO edit menu description !
 # TODO edit button for long texts - fix !
-# TODO make surveys easier for users
 # TODO results for surveys, polls, users and donations - send csv as file !
-# TODO for Occupy: add users + all old polls + tags
-
-# TODO pics and other content for surveys and polls
-
-
-# TODO change the admin authentication in the bot
 # TODO adjust REST api + two languages
-# TODO make buying easier in the shop - don't enforce funds
+# TODO pics and other content for surveys and polls
 # TODO return the amount of money received by both bots
-# TODO in the botfather- add the option "pause the bot"
-# TODO finish the support bot with sending the messages to our email + create our new email
+# TODO add the option "pause the bot"
+# TODO create a POST endpoint to pause the chatbot if not paid "active"
+# TODO credit card token for shop
+# TODO make buying easier in the shop - don't enforce funds
 
+
+# TODO for Occupy: add users + all old polls + tags
 # TODO hidden content
-# TODO allow the crowdbot to post on channels
 
-    # TODO create a POST endpoint to pause the chatbot if not paid "active" +
-    #  in the botfather- add the option "pause the bot"
-    # TODO make different enpoints for shop and crowdbot
-    # TODO credit card token for shop
 
 TODO learn how to use  ForceReply https://python-tel:egram-bot.readthedocs.io/en/stable/telegram.forcereply.html
 
+
+Polls:
+    try from the user
+Survey:
+    try from the user
+Menu:
+    add "Connect e-shop" button
+Shopbot:
+    connect to rest api and alive_checker

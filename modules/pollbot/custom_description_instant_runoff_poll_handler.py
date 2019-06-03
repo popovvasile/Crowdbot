@@ -1,3 +1,5 @@
+import ast
+
 from .instant_runoff_poll_handler import InstantRunoffPollHandler
 from .custom_description_poll_handler import CustomDescriptionHandler
 
@@ -10,6 +12,12 @@ class CustomDescriptionInstantRunoffPollHandler(InstantRunoffPollHandler, Custom
 
     def evaluation(self, poll):
         votes = poll.get('votes', {})
+        if type(poll["options"]) is str:
+            poll["options"] = ast.literal_eval(poll["options"])
+        if type(poll["meta"]) is str:
+            poll["meta"] = ast.literal_eval(poll["meta"])
+        if type(votes) is str:
+            votes = ast.literal_eval(votes)
         candidates = [opt['index'] for opt in poll['options']]
 
         explanation = "Click on only those options that work for you, in the order of your preference."

@@ -58,6 +58,8 @@ __admin_keyboard__ = [
     InlineKeyboardButton(text="Create", callback_data="create_poll"),
     InlineKeyboardButton(text="Delete", callback_data="delete_poll"),
     InlineKeyboardButton(text="Send", callback_data="send_poll"),
+    InlineKeyboardButton(text="Results", callback_data="poll_results"),
+
 ]
 
 
@@ -77,6 +79,7 @@ class PollBot(object):
                          InlineKeyboardButton(text="Send", callback_data="send_poll")]]
         self.send_markup = InlineKeyboardMarkup(
             send_buttons)
+
     # Conversation handlers:
 
     @run_async
@@ -107,7 +110,8 @@ class PollBot(object):
         user_data['meta'] = dict()
 
         if POLL_HANDLERS[polltype].requires_extra_config(user_data['meta']):
-            update.message.reply_text(POLL_HANDLERS[polltype].ask_for_extra_config(user_data.get('meta')), reply_markup=self.reply_markup)
+            update.message.reply_text(POLL_HANDLERS[polltype].ask_for_extra_config(user_data.get('meta')),
+                                      reply_markup=self.reply_markup)
             return TYPING_META
         else:
             update.message.reply_text("{}! Now, send me the first answer option".format(
@@ -123,11 +127,11 @@ class PollBot(object):
 
         if POLL_HANDLERS[polltype].requires_extra_config(user_data.get('meta')):
             update.message.reply_text(POLL_HANDLERS[polltype].ask_for_extra_config(user_data.get('meta')),
-                                      replu_markup=self.reply_markup)
+                                      reply_markup=self.reply_markup)
             return TYPING_META
         else:
             update.message.reply_text("{}, that's it! Next, please send me the first answer option."
-                                      .format(self.get_affirmation()), replu_markup=self.reply_markup)
+                                      .format(self.get_affirmation()), reply_markup=self.reply_markup)
             return TYPING_OPTION
 
     def handle_option(self, bot, update, user_data):
@@ -182,14 +186,14 @@ class PollBot(object):
 
         bot.send_message(update.callback_query.message.chat.id,
                          self.assemble_message_text(poll),
-                                  reply_markup=self.assemble_inline_keyboard(poll, True),
-                                  parse_mode='Markdown'
-                                  )
+                         reply_markup=self.assemble_inline_keyboard(poll, True),
+                         parse_mode='Markdown'
+                         )
         bot.send_message(update.callback_query.message.chat.id,
                          "Thank you! you can send this poll to your users "
                          "by clicking 'Send' \n",
                          reply_markup=self.send_markup
-                                  )
+                         )
         user_data.clear()
         return ConversationHandler.END
 
@@ -315,9 +319,6 @@ class PollBot(object):
 
         elif query.message:
             if query.message:
-                if query.message.from_user.bot == bot:
-                    include_publish_button = True
-
                 kwargs['message_id'] = query.message.message_id
                 kwargs['chat_id'] = query.message.chat.id
                 try:
@@ -421,7 +422,7 @@ class PollBot(object):
             return TYPING_SEND_TITLE
 
     @run_async
-    def handle_send_title(self, bot, update, user_data):
+    def handle_send_title(self, bot, update, user_data):  # TODO save more poll instances
         chat_id, txt = initiate_chat_id(update)
         sent = []
         poll_name = txt
@@ -443,58 +444,68 @@ class PollBot(object):
             bot.send_message(chat_id, "Looks like there are yet no users to send this poll to. \n"
                                       "No polls sent :( ", reply_markup=ReplyKeyboardRemove())
         else:
-            bot.send_message(chat_id, "Your poll was sent to all you users! ", reply_markup=ReplyKeyboardRemove())
+            bot.send_message(chat_id, "Your poll was sent to all you users! ",
+                             reply_markup=ReplyKeyboardRemove())
 
         get_help(bot, update)
 
         return ConversationHandler.END
 
-    # @run_async
-    # def handle_bots_polls(self, bot, update):
-    #     chat_id, txt = initiate_chat_id(update)
-    #     polls_list_of_dicts = polls_table.find({"bot_id": bot.id})
-    #     command_list = [command['title'] for command in polls_list_of_dicts]
-    #     reply_keyboard = [command_list]
-    #     update.message.reply_text(
-    #         "Please choose the poll that you want to check",
-    #         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
-    #     return CHOOSE_TITLE_RESULTS
-    #
-    # @run_async
-    # def handle_bots_polls_title(self, bot, update):
-    #     print("TEST")
-    #     chat_id, txt = initiate_chat_id(update)
-    #     poll = polls_table.find_one({'title': txt})
-    #
-    #     poll_title = poll['title']
-    #     poll_type = POLL_HANDLERS.get(poll['type']).name
-    #     if "description" in poll:
-    #         poll_description = poll['description']
-    #     else:
-    #         poll_description = POLL_HANDLERS.get(poll['type']).desc
-    #     # poll_results_link = poll['results_link']
-    #     poll_id = poll['poll_id']
-    #     poll_instances = poll_instances_table.find({"poll_id": poll_id, "bot_id": bot.id})
-    #     txt_to_send = ""
-    #
-    #     for poll_instance in poll_instances:
-    #         votes = ast.literal_eval(poll_instance["votes"])
-    #         for vote in votes:
-    #             txt_to_send += str(votes[vote]["data"])
-    #     poll_results = txt_to_send
-    #
-    #     if poll is not None:
-    #         bot.send_message(chat_id,
-    #                          "Poll title:{} \nPoll_type:{} \nResults:{} \nDescription:{}".
-    #                          format(poll_title,
-    #                                 poll_type,
-    #                                 poll_results,
-    #                                 poll_description
-    #                                 ))
-    #
-    #     else:
-    #         bot.send_message(chat_id, "No poll with such title exists")
-    #     return ConversationHandler.END
+    @run_async
+    def handle_bots_polls(self, bot, update):
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        polls_list_of_dicts = polls_table.find({"bot_id": bot.id})
+        command_list = [command['title'] for command in polls_list_of_dicts]
+        reply_keyboard = [command_list]
+        bot.send_message(update.callback_query.message.chat.id,
+                         "Please choose the poll that you want to check",
+                         reply_markup=ReplyKeyboardMarkup(reply_keyboard,
+                                                          one_time_keyboard=True))
+        return CHOOSE_TITLE_RESULTS
+
+    @run_async
+    def handle_bots_polls_title(self, bot, update):
+        print("TEST")
+        chat_id, txt = initiate_chat_id(update)
+        poll = polls_table.find_one({'title': txt})
+
+        poll_title = poll['title']
+        poll_type = POLL_HANDLERS.get(poll['type']).name
+        if "description" in poll:
+            poll_description = poll['description']
+        else:
+            poll_description = POLL_HANDLERS.get(poll['type']).desc
+        # poll_results_link = poll['results_link']
+        poll_id = poll['poll_id']
+        poll_instances = poll_instances_table.find({"poll_id": poll_id, "bot_id": bot.id})
+        # txt_to_send = ""
+        #
+        # for poll_instance in poll_instances:
+        #     votes = ast.literal_eval(poll_instance["votes"])
+        #     for vote in votes:
+        #         txt_to_send += str(votes[vote]["data"])
+        # poll_results = txt_to_send
+        print(poll)
+        bot.send_message(update.message.chat.id,
+                         self.assemble_message_text(poll),
+                         reply_markup=self.assemble_inline_keyboard(poll, True),
+                         parse_mode='Markdown'
+                         )
+        get_help(bot, update)
+        # if poll is not None:
+        #     bot.send_message(chat_id,  # TODO send an instance of poll instead of results
+        #                      "Poll title:{} \nPoll_type:{} \nResults:{} \nDescription:{}".
+        #                      format(poll_title,
+        #                             poll_type,
+        #                             poll_results,
+        #                             poll_description
+        #                             ))
+        #
+        # else:
+        #     bot.send_message(chat_id, "No poll with such title exists")
+
+        return ConversationHandler.END
 
     @run_async
     def handle_delete_poll(self, bot, update):
@@ -528,7 +539,7 @@ class PollBot(object):
         poll_to_delete_instances = poll_instances_table.find({"bot_id": bot.id, "title": txt})
 
         for poll_instance in poll_to_delete_instances:
-            bot.delete_message(chat_id=chat_id,
+            bot.delete_message(chat_id=poll_instance["chat_id"],
                                message_id=poll_instance["message_id"])
 
         polls_table.delete_one({"bot_id": bot.id, "title": txt})
@@ -554,7 +565,6 @@ Here you can:
 
 """
 
-
 DELETE_POLLS_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=PollBot().handle_delete_poll,
                                        pattern=r"delete_poll")
@@ -562,24 +572,28 @@ DELETE_POLLS_HANDLER = ConversationHandler(
     states={
 
         CHOOSE_TITLE_DELETE: [MessageHandler(Filters.text, PollBot().handle_delete_poll_finish),
+                              CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
                               CommandHandler('cancel', PollBot().cancel)],
 
     },
     fallbacks=[CallbackQueryHandler(callback=PollBot().cancel, pattern=r"cancel_poll")]
 )
 
-# BOTS_POLLS_HANDLER = ConversationHandler(
-#     entry_points=[CommandHandler('bots_polls', PollBot().handle_bots_polls),
-#
-#                   ],
-#     states={
-#
-#         CHOOSE_TITLE_RESULTS: [MessageHandler(Filters.text, PollBot().handle_bots_polls_title),
-#                        CommandHandler('cancel', PollBot().cancel)],
-#
-#     },
-#     fallbacks=[CommandHandler('cancel', PollBot().cancel, pass_user_data=True)]
-# )
+POLLS_RESULTS_HANDLER = ConversationHandler(
+    entry_points=[CallbackQueryHandler(pattern="poll_results", callback=PollBot().handle_bots_polls),
+
+                  ],
+    states={
+
+        CHOOSE_TITLE_RESULTS: [MessageHandler(Filters.text, PollBot().handle_bots_polls_title),
+                               CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
+                               CommandHandler('cancel', PollBot().cancel)],
+
+    },
+    fallbacks=[CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
+               CommandHandler('cancel', PollBot().cancel, pass_user_data=True)]
+)
+
 POLL_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=PollBot().start,
                                        pattern=r"create_poll"),

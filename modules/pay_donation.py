@@ -186,7 +186,9 @@ DONATE_HANDLER = ConversationHandler(
         EXECUTE_DONATION: [MessageHandler(callback=DonationBot().execute_donation,
                                           filters=Filters.text,
                                           pass_user_data=True),
-                           CallbackQueryHandler(callback=DonationBot().back, pattern=r"cancel_donation_payment"),
+                           CallbackQueryHandler(callback=DonationBot().back,
+                                                pattern=r"cancel_donation_payment",
+                                                pass_user_data=True),
                            CommandHandler('cancel', DonationBot().cancel)
                            ],
 

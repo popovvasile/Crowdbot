@@ -128,12 +128,16 @@ def get_help(bot: Bot, update: Update):
 
 
 def send_admin_user_mode(bot, chat_id, text, keyboard=None):
+
     if not keyboard:
-        keyboard = InlineKeyboardMarkup(paginate_modules(0, ADMIN_USER_MODE, "help", bot.id))
+        keyboard = paginate_modules(0, VISITOR_HELPABLE, "help", bot.id)
+    keyboard = keyboard+[[EqInlineKeyboardButton(text="ADMIN MODE", callback_data="turn_user_mode_off")]]
     bot.send_message(chat_id=chat_id,
                      text=text,
                      parse_mode=ParseMode.MARKDOWN,
-                     reply_markup=keyboard)
+                     reply_markup=InlineKeyboardMarkup(
+                         keyboard
+                     ))
 
 
 def send_admin_help(bot, chat_id, text, keyboard=None):

@@ -15,7 +15,7 @@ from modules.donations_edit_delete_results import EDIT_DONATION_HANDLER
 from modules.helper_funcs.main_runnner_helper import help_button, button_handler, get_help, WelcomeBot, error_callback
 from modules.manage_button import BUTTON_EDIT_HANDLER, BUTTON_EDIT_FINISH_HANDLER
 from modules.pay_donation import DONATE_HANDLER, DonationBot, HANDLE_SUCCES, HANDLE_PRECHECKOUT
-from modules.polls import POLL_HANDLER, SEND_POLLS_HANDLER, BUTTON_HANDLER, DELETE_POLLS_HANDLER
+from modules.polls import POLL_HANDLER, SEND_POLLS_HANDLER, BUTTON_HANDLER, DELETE_POLLS_HANDLER, POLLS_RESULTS_HANDLER
 from modules.send_donation_request import SEND_DONATION_TO_USERS_HANDLER
 from modules.send_message import SEND_MESSAGE_TO_ADMIN_HANDLER, SEND_MESSAGE_TO_USERS_HANDLER, SEE_MESSAGES_HANDLER, \
     SendMessageToUsers
@@ -90,7 +90,7 @@ def main(token):
     dispatcher.add_handler(SEND_POLLS_HANDLER)
     dispatcher.add_handler(BUTTON_HANDLER)
     dispatcher.add_handler(DELETE_POLLS_HANDLER)
-
+    dispatcher.add_handler(POLLS_RESULTS_HANDLER)
     LOGGER.info("Using long polling.")
     # updater.start_webhook(listen='0.0.0.0',
     #                       port=8443,

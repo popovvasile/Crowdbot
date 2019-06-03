@@ -35,7 +35,7 @@ def multiple_bot_daemon():
             if process_key not in list_of_tokens:
                 my_process[process_key].terminate()
                 my_process.pop(process_key, None)
-
+        print(my_process)
         time.sleep(2)
 
 
