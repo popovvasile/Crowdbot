@@ -15,7 +15,7 @@ from modules.helper_funcs.auth import initiate_chat_id
 from modules.helper_funcs.helper import get_help
 from modules.helper_funcs.strings import create_donation_str_1, back_button, create_donation_str_2, \
     create_donation_str_3, create_donation_str_4, create_donation_str_5, create_donation_str_6, create_donation_str_7, \
-    create_donation_str_8
+    create_donation_str_8, send_donation_request
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -47,7 +47,10 @@ class CreateDonationHandler(object):
         buttons.append([InlineKeyboardButton(text=back_button, callback_data="cancel_donation_create")])
         self.reply_markup = InlineKeyboardMarkup(
             buttons)
-
+        create_buttons = [[InlineKeyboardButton(text="", callback_data=send_donation_request),
+                           InlineKeyboardButton(text=back_button, callback_data="help_back")]]
+        self.create_markup = InlineKeyboardMarkup(
+            create_buttons)
     @staticmethod
     def facts_to_str(user_data):
         facts = list()
@@ -120,8 +123,10 @@ class CreateDonationHandler(object):
         chat_id, txt = initiate_chat_id(update)
         currency = txt
         user_data["currency"] = currency
+
         bot.send_message(chat_id,
-                         create_donation_str_8)  # TODO add button send donation request and back
+                         create_donation_str_8,
+                         reply_markup=self.create_markup)  # TODO add button send donation request and back
         chatbot = chatbots_table.find_one({"bot_id": bot.id}) or {}
 
         print(user_data)

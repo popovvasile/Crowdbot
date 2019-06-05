@@ -456,28 +456,24 @@ class PollBot(object):
         return CHOOSE_TITLE_RESULTS
 
     @run_async
-    def handle_bots_polls_title(self, bot, update):
+    def handle_bots_polls_title(self, bot, update):  # TODO make miserably, need to refactor
         print("TEST")
         chat_id, txt = initiate_chat_id(update)
-        poll = polls_table.find_one({'title': txt})
+        poll_instances = poll_instances_table.find({"title": txt, "bot_id": bot.id})
+        new_poll_instances = []
+        for poll_instance in poll_instances:
+            if "options" in poll_instance:
+                poll_instance["options"] = ast.literal_eval(poll_instance["options"])
+            if "meta" in poll_instance:
+                poll_instance["meta"] = ast.literal_eval(poll_instance["meta"])
+            if "votes" in poll_instance:
+                poll_instance["votes"] = ast.literal_eval(poll_instance["votes"])
 
-        poll_title = poll['title']
-        poll_type = POLL_HANDLERS.get(poll['type']).name
-        if "description" in poll:
-            poll_description = poll['description']
-        else:
-            poll_description = POLL_HANDLERS.get(poll['type']).desc
-        # poll_results_link = poll['results_link']
-        poll_id = poll['poll_id']
-        poll_instances = poll_instances_table.find({"poll_id": poll_id, "bot_id": bot.id})
-        # txt_to_send = ""
-        #
-        # for poll_instance in poll_instances:
-        #     votes = ast.literal_eval(poll_instance["votes"])
-        #     for vote in votes:
-        #         txt_to_send += str(votes[vote]["data"])
-        # poll_results = txt_to_send
-        print(poll)
+            new_poll_instances.append(poll_instance)
+        print(new_poll_instances)
+        poll = new_poll_instances[0]
+        for other_poll in poll_instances:
+            poll.update(other_poll)
         bot.send_message(update.message.chat.id,
                          self.assemble_message_text(poll),
                          reply_markup=self.assemble_inline_keyboard(poll, True),

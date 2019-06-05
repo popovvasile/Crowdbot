@@ -1,15 +1,17 @@
 
 Bugs:
-# TODO make content to return in the same order as was sent !
-# TODO edit button for long texts - fix !
-# TODO results for surveys, polls, users and donations - send csv as file !
+
 # TODO adjust REST api + two languages
-# TODO pics and other content for surveys and polls
 # TODO return the amount of money received by both bots
 # TODO add the option "pause the bot"
 # TODO create a POST endpoint to pause the chatbot if not paid "active"
 # TODO credit card token for shop
 # TODO make buying easier in the shop - don't enforce funds
+
+
+# TODO make content to return in the same order as was sent !
+# TODO results for users and donations - send csv as file !
+# TODO pics and other content for surveys and polls
 
 
 # TODO for Occupy: add users + all old polls + tags

@@ -62,7 +62,7 @@ class ButtonEdit(object):
                         text=descr,
                         reply_markup=InlineKeyboardMarkup([[
                             InlineKeyboardButton(text=edit_button,
-                                                 callback_data="btn_edit_{}___{}".format(descr,
+                                                 callback_data="btn_edit_{}___{}".format(descr[10],
                                                                                        update.message.text))]])
                     )
             if "audio_files" in button_info:
@@ -162,7 +162,7 @@ class ButtonEdit(object):
             os.remove(photo_directory + "/" + user_data["content_id"])
 
         else:
-            button_info["descriptions"].remove(user_data["content_id"])
+            button_info["descriptions"] = [x for x in button_info["descriptions"] if user_data["content_id"] not in x]
 
         if update.message.text:
             if "descriptions" not in button_info:

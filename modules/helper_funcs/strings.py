@@ -31,7 +31,7 @@ send_donation_request_1 = "What do you want to tell your users?\n"\
                            "together with a 'Donate' button"
 send_donation_request_2 = "Great! Send me a new message or click 'Done'"
 send_donation_request_3 = "Thank you! We've sent your message to your users!"
-
+send_donation_request = "Send donation request"
 cancel_button_survey = "Cancel survey"
 donate_button = "Donate"
 back_button = "Back"
