@@ -10,6 +10,10 @@ from modules.helper_funcs.auth import initiate_chat_id
 from modules.helper_funcs.helper import get_help
 
 # from modules.helper_funcs.restart_program import restart_program
+from modules.helper_funcs.strings import create_button, delete_button, edit_button_button, edit_menu_text, \
+    add_menu_buttons_help, back_button, add_menu_buttons_str_1, back_text, great_text, add_menu_buttons_str_2, \
+    add_menu_buttons_str_3, done_button, add_menu_buttons_str_4, add_menu_buttons_str_5, add_menu_buttons_str_6, \
+    add_menu_buttons_str_7, add_menu_buttons_str_8, add_menu_buttons_str_9
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -20,25 +24,20 @@ TYPING_TO_DELETE_BUTTON = 17
 __mod_name__ = "Edit menu"
 
 # __admin_keyboard__ = [["/create_button"], ["/delete_button"]]
-__admin_keyboard__ = [InlineKeyboardButton(text="Create", callback_data="create_button"),
-                      InlineKeyboardButton(text="Delete", callback_data="delete_button"),
-                      InlineKeyboardButton(text="Edit a button", callback_data="edit_button"),
-                      InlineKeyboardButton(text="Edit menu text", callback_data="edit_bot_description")]
+__admin_keyboard__ = [InlineKeyboardButton(text=create_button, callback_data="create_button"),
+                      InlineKeyboardButton(text=delete_button, callback_data="delete_button"),
+                      InlineKeyboardButton(text=edit_button_button, callback_data="edit_button"),
+                      InlineKeyboardButton(text=edit_menu_text, callback_data="edit_bot_description")]
 
-__admin_help__ = """
-Here you can:\n
-- Create a custom button for your bot that will display images, files, voice, music or text.\n
-- Delete an old button\n
-- Edit the content of the button
-"""
+__admin_help__ = add_menu_buttons_help
 
 
 class AddCommands(object):
     def __init__(self):
-        reply_buttons = [[InlineKeyboardButton(text="Back", callback_data="cancel_add_button")]]
+        reply_buttons = [[InlineKeyboardButton(text=back_button, callback_data="cancel_add_button")]]
         self.reply_markup = InlineKeyboardMarkup(
             reply_buttons)
-        finish_buttons = [[InlineKeyboardButton(text="Back", callback_data="cancel_delete_button")]]
+        finish_buttons = [[InlineKeyboardButton(text=back_button, callback_data="cancel_delete_button")]]
         self.finish_markup = InlineKeyboardMarkup(
             finish_buttons)
 
@@ -49,11 +48,10 @@ class AddCommands(object):
         reply_keyboard = [chatbots_table.find_one({"bot_id": bot.id})["buttons"]]
         markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
         bot.send_message(update.callback_query.message.chat.id,
-                         "Type a name for new button or choose one of the examples below. "
-                         "Please note that you can't modify the buttons available by default ",
+                         add_menu_buttons_str_1,
                          reply_markup=markup)
         bot.send_message(update.callback_query.message.chat.id,
-                         "To quit, click 'Back'", reply_markup=self.reply_markup)
+                         back_text, reply_markup=self.reply_markup)
         return TYPING_BUTTON
 
     def button_handler(self, bot, update, user_data):
@@ -66,13 +64,12 @@ class AddCommands(object):
         if button_list_of_dicts.count() == 0:
 
             user_data['button'] = txt
-            update.message.reply_text("Great!", reply_markup=ReplyKeyboardRemove())
-            update.message.reply_text('Now, send a text, an image, a video, '
-                                      'a document or a music file to display for your new button',
+            update.message.reply_text(great_text, reply_markup=ReplyKeyboardRemove())
+            update.message.reply_text(add_menu_buttons_str_2,
                                       reply_markup=self.reply_markup)
             return TYPING_DESCRIPTION
         else:
-            update.message.reply_text('You already have a button with the same name. Choose another name',
+            update.message.reply_text(add_menu_buttons_str_3,
                                       reply_markup=self.reply_markup)
 
             return TYPING_BUTTON
@@ -93,7 +90,7 @@ class AddCommands(object):
             os.makedirs(video_directory)
 
         if update.callback_query:
-            if update.message.callback_query.data == "DONE":
+            if update.message.callback_query.data == done_button:
                 self.description_finish(bot, update, user_data)
                 return ConversationHandler.END
         if update.message.text:
@@ -182,13 +179,12 @@ class AddCommands(object):
                 user_data["video_files"] = user_data["video_files"] + [filename]
             else:
                 user_data["video_files"] = list()
-        done_buttons = [[InlineKeyboardButton(text="DONE", callback_data="DONE")]]
+        done_buttons = [[InlineKeyboardButton(text=done_button, callback_data="DONE")]]
         done_reply_markup = InlineKeyboardMarkup(
             done_buttons)
-        update.message.reply_text('Great! You can add one more file or text to display.\n'
-                                  'If you think that this is enough, click DONE',
+        update.message.reply_text(add_menu_buttons_str_4,
                                   reply_markup=done_reply_markup)
-        update.message.reply_text("Click Back to cancel", reply_markup=self.reply_markup)
+        update.message.reply_text(back_text, reply_markup=self.reply_markup)
         return TYPING_DESCRIPTION
 
     def description_finish(self, bot, update, user_data):
@@ -204,8 +200,7 @@ class AddCommands(object):
         custom_buttons_table.save(user_data)
 
         bot.send_message(update.callback_query.message.chat.id,
-                         'Thank you! The button will be accessible by clicking \n'
-                         '{} in menu'.format(user_data["button"]))
+                         add_menu_buttons_str_5.format(user_data["button"]))
         get_help(bot, update)
         logger.info("Admin {} on bot {}:{} added a new button:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, user_data["button"]))
@@ -222,16 +217,15 @@ class AddCommands(object):
             button_list = [button['button'] for button in button_list_of_dicts]
             reply_keyboard = [button_list]
             bot.send_message(update.callback_query.message.chat.id,
-
-                             "Choose the button that button that you want to delete",  # TODO remove this message later
+                             add_menu_buttons_str_6,  # TODO remove this message later
                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
             bot.send_message(update.callback_query.message.chat.id,
-                             "To quit, click 'Back'", reply_markup=self.finish_markup)
+                             back_text, reply_markup=self.finish_markup)
 
             return TYPING_TO_DELETE_BUTTON
         else:
             bot.send_message(update.callback_query.message.chat.id,
-                             """You have no buttons created yet. Create your first button by clicking "Create" """)
+                            add_menu_buttons_str_7)
             get_help(bot, update)
 
             return ConversationHandler.END
@@ -263,7 +257,7 @@ class AddCommands(object):
             "bot_id": bot.id
         })
         update.message.reply_text(
-            'Thank you! We deleted the button {}'.format(txt), reply_markup=ReplyKeyboardRemove())
+            add_menu_buttons_str_8.format(txt), reply_markup=ReplyKeyboardRemove())
         get_help(bot, update)
         logger.info("Admin {} on bot {}:{} deleted the button:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, txt))
@@ -271,7 +265,7 @@ class AddCommands(object):
 
     def back(self, bot, update, user_data):
         bot.send_message(update.callback_query.message.chat.id,
-                         "Button creation was stopped", reply_markup=ReplyKeyboardRemove()
+                         add_menu_buttons_str_9, reply_markup=ReplyKeyboardRemove()
                          )
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)

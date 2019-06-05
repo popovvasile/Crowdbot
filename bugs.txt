@@ -1,6 +1,5 @@
 
 Bugs:
-# TODO test buttons once again
 # TODO make content to return in the same order as was sent !
 # TODO edit button for long texts - fix !
 # TODO results for surveys, polls, users and donations - send csv as file !

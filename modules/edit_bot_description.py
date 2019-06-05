@@ -1,13 +1,13 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
-import datetime
 import logging
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (CommandHandler, MessageHandler, Filters,
-                          ConversationHandler, RegexHandler, run_async, CallbackQueryHandler)
-from database import users_messages_to_admin_table, chatbots_table
+                          ConversationHandler, run_async, CallbackQueryHandler)
+from database import chatbots_table
 from modules.helper_funcs.helper import get_help
+from modules.helper_funcs.strings import back_button, edit_button_str_1, edit_button_str_2
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -20,7 +20,7 @@ MESSAGE_TO_USERS = 1
 class EditBotDescription(object):
     def __init__(self):
         buttons = list()
-        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_edit_description")])
+        buttons.append([InlineKeyboardButton(text=back_button, callback_data="cancel_edit_description")])
         self.reply_markup = InlineKeyboardMarkup(
             buttons)
 
@@ -29,13 +29,13 @@ class EditBotDescription(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         bot.send_message(update.callback_query.message.chat.id,
-                         "Please tell me a new text to be displayed above the menu keyboard", reply_markup=self.reply_markup)
+                         edit_button_str_1, reply_markup=self.reply_markup)
         return MESSAGE
 
     @run_async
     def received_message(self, bot, update):
         bot.send_message(update.message.chat_id,
-                         "Thank you! Your has been updated!")
+                         edit_button_str_2)
 
         old_bot = chatbots_table.find_one({"bot_id": bot.id})
         old_bot['welcomeMessage'] = update.message.text

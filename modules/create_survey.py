@@ -6,10 +6,15 @@ from telegram.ext import (CommandHandler, MessageHandler, Filters, ConversationH
 import logging
 
 from database import surveys_table, users_table, chats_table
-from modules.helper_funcs.auth import initiate_chat_id, if_admin
+from modules.helper_funcs.auth import initiate_chat_id
 
 # Enable logging
 from modules.helper_funcs.helper import get_help
+from modules.helper_funcs.strings import back_button, done_button, survey_str_1, main_survey_button, survey_str_2, \
+    survey_str_3, survey_str_4, survey_str_5, start_button, survey_str_6, survey_str_7, survey_str_8, back_text, \
+    create_button, survey_str_9, survey_str_10, survey_str_12, send_button, survey_str_13, survey_str_14, survey_str_15, \
+    survey_str_16, survey_str_17, survey_str_18, survey_str_19, survey_str_20, survey_str_21, survey_str_22, \
+    survey_str_23
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -25,10 +30,10 @@ DELETE_SURVEY = 23
 
 class SurveyHandler(object):
     def __init__(self):
-        buttons = [[InlineKeyboardButton(text="Back", callback_data="cancel_survey")]]
+        buttons = [[InlineKeyboardButton(text=back_button, callback_data="cancel_survey")]]
         self.reply_markup = InlineKeyboardMarkup(
             buttons)
-        done_buttons = [[InlineKeyboardButton(text="DONE", callback_data="done_survey")]]
+        done_buttons = [[InlineKeyboardButton(text=done_button, callback_data="done_survey")]]
         self.done_markup = InlineKeyboardMarkup(
             done_buttons)
 
@@ -46,7 +51,7 @@ class SurveyHandler(object):
 
         user_data["question_id"] = 0
         bot.send_message(update.callback_query.message.chat.id,
-                         "Enter a title for your survey", reply_markup=self.reply_markup)
+                         survey_str_1, reply_markup=self.reply_markup)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         return CHOOSING_TITLE
@@ -54,7 +59,7 @@ class SurveyHandler(object):
     @run_async
     def handle_title(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
-        if txt == "MAIN SURVEY":
+        if txt == main_survey_button:
             user_data["title"] = "initial"
         else:
             title = txt
@@ -70,14 +75,13 @@ class SurveyHandler(object):
                     "questions": []
                 })
                 user_data["title"] = title
-                update.message.reply_text("Type your first question", reply_markup=self.reply_markup)
+                update.message.reply_text(survey_str_2, reply_markup=self.reply_markup)
                 user_data["question_id"] = 1
                 return CHOOSING_QUESTIONS
 
             else:
 
-                update.message.reply_text("You already have a survey with this title.\n"
-                                          "Please type another title for your survey", reply_markup=self.reply_markup)
+                update.message.reply_text(survey_str_3, reply_markup=self.reply_markup)
                 return CHOOSING_TITLE
 
     # surveys = [{"admin_id": "",
@@ -100,7 +104,7 @@ class SurveyHandler(object):
 
             surveys_table.update({"title": survey["title"]}, survey)
             user_data["question_id"] = int(user_data["question_id"]) + 1
-            update.message.reply_text("Type your next question or click DONE if you are finished",
+            update.message.reply_text(survey_str_4,
                                       reply_markup=self.done_markup)
 
             return CHOOSING_QUESTIONS
@@ -115,10 +119,9 @@ class SurveyHandler(object):
                 if not any(sent_d['id'] == chat['chat_id'] for sent_d in sent):
                     sent.append(chat['chat_id'])
 
-                    bot.send_message(text="Dear user, a survey has been sent to you.\n"
-                                          "Please press START to answer to the questions",
+                    bot.send_message(text=survey_str_5,
                                      reply_markup=InlineKeyboardMarkup(
-                                         [InlineKeyboardButton(text="START",
+                                         [InlineKeyboardButton(text=start_button,
                                                                callback_data="survey_{}".format(
                                                                    user_data["title"]
                                                                )
@@ -134,9 +137,7 @@ class SurveyHandler(object):
         user_data["answers"] = []
         texr_to_send = "\nQuestions: \n{}".format(questions)
         bot.send_message(update.callback_query.message.chat.id,
-                         "Created a survey with title: {}\n"
-                         "{}"
-                         "\nUntil next time!".format(survey['title'], texr_to_send))
+                         survey_str_6.format(survey['title'], texr_to_send))
         surveys_table.update_one({
             "bot_id": bot.id,
             "title": user_data["title"]
@@ -155,26 +156,25 @@ class SurveyHandler(object):
         if survey_list.count() != 0:
 
             bot.send_message(update.callback_query.message.chat.id,
-                             "This is the list of your current surveys:")
+                             survey_str_7)
             command_list = [survey['title'] for survey in survey_list]
             reply_keyboard = [command_list]
             bot.send_message(update.callback_query.message.chat.id,
-                             "Choose the survey that you want to see",
+                             survey_str_8,
                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
             buttons = list()
-            buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_survey")])
+            buttons.append([InlineKeyboardButton(text=back_button, callback_data="cancel_survey")])
             reply_markup = InlineKeyboardMarkup(
                 buttons)
             bot.send_message(update.callback_query.message.chat.id,
-                             "If you want to quit this command, click 'Back' ", reply_markup=reply_markup)
+                             back_text, reply_markup=reply_markup)
             return CHOOSING
         else:
 
-            admin_keyboard = [InlineKeyboardButton(text="Create", callback_data="create_survey"),
-                              InlineKeyboardButton(text="Back", callback_data="help_back")]
+            admin_keyboard = [InlineKeyboardButton(text=create_button, callback_data="create_survey"),
+                              InlineKeyboardButton(text=back_button, callback_data="help_back")]
             bot.send_message(update.callback_query.message.chat.id,
-                             """You have no surveys created yet. \n"""
-                             """Click "Create" to configure your first survey or "Back" for main menu""",
+                             survey_str_9,
                              reply_markup=InlineKeyboardMarkup([admin_keyboard]))
             return ConversationHandler.END
 
@@ -185,22 +185,22 @@ class SurveyHandler(object):
         txt_to_send = ""
         if survey.get("answers") is not None:
             for answer in survey['answers']:
-                txt_to_send += 'Users full name: {},\nQuestion: {}\nAnswer :{} \n\n'.format(
+                txt_to_send += survey_str_10.format(
                     users_table.find_one({"user_id": answer['user_id']})["name"],
                     survey["questions"][answer["question_id"] - 1]['text'],
                     answer["answer"])
-            update.message.reply_text("Here is your requested data : \n {}".format(txt_to_send),
+            update.message.reply_text(survey_str_11.format(txt_to_send),
                                       reply_markup=ReplyKeyboardRemove())
             admin_keyboard = [
-                InlineKeyboardButton(text="Back", callback_data="help_back")]
-            update.message.reply_text("Back to main menu",
+                InlineKeyboardButton(text=back_button, callback_data="help_back")]
+            update.message.reply_text(back_text,
                                       reply_markup=InlineKeyboardMarkup([admin_keyboard]))
         else:
-            update.message.reply_text("Your survey doesn't have any answers yet =/",
+            update.message.reply_text(survey_str_12,
                                       reply_markup=ReplyKeyboardRemove())
-            admin_keyboard = [InlineKeyboardButton(text="Send", callback_data="send_survey"),
-                              InlineKeyboardButton(text="Back", callback_data="help_back")]
-            update.message.reply_text("Send your users a reminder to answer to your questions using the button 'Send'",
+            admin_keyboard = [InlineKeyboardButton(text=send_button, callback_data="send_survey"),
+                              InlineKeyboardButton(text=back_button, callback_data="help_back")]
+            update.message.reply_text(survey_str_13,
                                       reply_markup=InlineKeyboardMarkup([admin_keyboard]))
         return ConversationHandler.END
 
@@ -209,11 +209,11 @@ class SurveyHandler(object):
         surveys = surveys_table.find({"bot_id": bot.id})
         if surveys.count() != 0:
             bot.send_message(update.callback_query.message.chat.id,
-                             "This is the list of your current surveys:", reply_markup=self.reply_markup)
+                             survey_str_14, reply_markup=self.reply_markup)
             command_list = [survey['title'] for survey in surveys_table.find({"bot_id": bot.id})]
             reply_keyboard = [command_list]
             bot.send_message(update.callback_query.message.chat.id,
-                             "Choose the survey that you want to delete",
+                             survey_str_15,
                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
 
             bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -223,11 +223,10 @@ class SurveyHandler(object):
         else:
             bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                message_id=update.callback_query.message.message_id)
-            admin_keyboard = [InlineKeyboardButton(text="Create", callback_data="create_survey"),
-                              InlineKeyboardButton(text="Back", callback_data="help_back")]
+            admin_keyboard = [InlineKeyboardButton(text=create_button, callback_data="create_survey"),
+                              InlineKeyboardButton(text=back_button, callback_data="help_back")]
             bot.send_message(update.callback_query.message.chat.id,
-                             """You have no surveys created yet. \n"""
-                             """Click "Create" to configure your first survey or "Back" for main menu""",
+                             survey_str_16,
                              reply_markup=InlineKeyboardMarkup([admin_keyboard]))
             return ConversationHandler.END
 
@@ -235,7 +234,7 @@ class SurveyHandler(object):
     def delete_surveys_finish(self, bot, update):
         chat_id, txt = initiate_chat_id(update)
         surveys_table.delete_one({"bot_id": bot.id, 'title': txt})
-        update.message.reply_text("The survey with the title '{}' has been deleted".format(txt),
+        update.message.reply_text(survey_str_17.format(txt),
                                   reply_markup=ReplyKeyboardRemove())
         get_help(bot, update)
         logger.info("Admin {} on bot {}:{} deleted a survey:{}".format(
@@ -254,20 +253,19 @@ class SurveyHandler(object):
         surveys_list = surveys_table.find({"bot_id": bot.id})
         if surveys_list.count() != 0:
             bot.send_message(update.callback_query.message.chat.id,
-                             "This is the list of your current surveys:", reply_markup=self.reply_markup)
+                             survey_str_18, reply_markup=self.reply_markup)
             command_list = [survey['title'] for survey in surveys_table.find({"bot_id": bot.id})]
             reply_keyboard = [command_list]
             bot.send_message(update.callback_query.message.chat.id,
-                             "Choose the survey that you want to send to your users",
+                             survey_str_19,
                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
             return TYPING_SEND_TITLE
         else:
 
-            admin_keyboard = [InlineKeyboardButton(text="Create", callback_data="create_survey"),
-                              InlineKeyboardButton(text="Back", callback_data="help_back")]
+            admin_keyboard = [InlineKeyboardButton(text=create_button, callback_data="create_survey"),
+                              InlineKeyboardButton(text=back_button, callback_data="help_back")]
             bot.send_message(update.callback_query.message.chat.id,
-                             """You have no surveys created yet. \n"""
-                             """Click "Create" to configure your first survey or "Back" for main menu""",
+                             survey_str_23,
                              reply_markup=InlineKeyboardMarkup([admin_keyboard]))
             return ConversationHandler.END
 
@@ -283,20 +281,18 @@ class SurveyHandler(object):
             # if chat['chat_id'] != chat_id:
             if not any(sent_d['id'] == chat['chat_id'] for sent_d in sent):
                 sent.append(chat['chat_id'])
-                bot.send_message(chat_id=chat['chat_id'], text="Dear user, a survey has been sent to you.\n"
-                                                               "Please press START to answer to the questions",
+                bot.send_message(chat_id=chat['chat_id'], text=survey_str_20,
                                  reply_markup=InlineKeyboardMarkup(
-                                     [[InlineKeyboardButton(text="START",
+                                     [[InlineKeyboardButton(text=start_button,
                                                             callback_data="survey_{}".format(
                                                                 str(txt)
                                                             ))]]
                                  ))
 
         if len(sent) == 0:
-            bot.send_message(chat_id, "Looks like there are yet no users to send this survey to. "
-                                      "No surveys sent :( ", reply_markup=ReplyKeyboardRemove())
+            bot.send_message(chat_id, survey_str_21, reply_markup=ReplyKeyboardRemove())
         else:
-            bot.send_message(chat_id=chat_id, text="Survey sent to all users!", reply_markup=ReplyKeyboardRemove())
+            bot.send_message(chat_id=chat_id, text=survey_str_22, reply_markup=ReplyKeyboardRemove())
         get_help(bot, update)
         logger.info("Admin {} on bot {}:{} sent a survey to the users:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, txt))

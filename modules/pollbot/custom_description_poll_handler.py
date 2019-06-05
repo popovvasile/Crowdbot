@@ -1,3 +1,5 @@
+import ast
+
 from modules.old_scripts.basic_poll_handler import BasicPoll
 
 
@@ -8,6 +10,10 @@ class CustomDescriptionHandler(BasicPoll):
         self.desc = "You can add a custom text to the poll message."
 
     def evaluation(self, poll):
+        if type(poll['meta']) is str:
+            poll['meta'] = ast.literal_eval(poll['meta'])
+        if type(poll['options']) is str:
+            poll['options'] = ast.literal_eval(poll['options'])
         message = poll['meta']['text']
         message += "\n"
         for i, option in enumerate(poll['options']):

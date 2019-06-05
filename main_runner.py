@@ -29,7 +29,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 def main(token):
-    updater = tg.Updater(token, workers=8)  # TODO check the docs
+    updater = tg.Updater(token, workers=15)  # TODO check the docs
     dispatcher = updater.dispatcher
     start_handler = CommandHandler("start", WelcomeBot().start)
     help_handler = CommandHandler("help", get_help)

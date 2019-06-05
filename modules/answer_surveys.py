@@ -2,14 +2,16 @@
 # # -*- coding: utf-8 -*-
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (CommandHandler, MessageHandler, Filters,
-                          ConversationHandler, RegexHandler, run_async, CallbackQueryHandler)
+                          ConversationHandler, run_async, CallbackQueryHandler)
 from modules.helper_funcs.helper import get_help
 
 import logging
 
 # Enable logging
 from database import surveys_table
-from modules.helper_funcs.auth import initiate_chat_id
+from modules.helper_funcs.strings import cancel_button_survey, answer_survey_str_1, answer_survey_str_2, \
+    answer_survey_str_3, answer_survey_str_4, survey_help_admin, survey_mode_str, create_button, delete_button, \
+    send_button, results_button
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -45,7 +47,7 @@ def facts_to_str(user_data):
 
 class AnswerSurveys(object):
     def __init__(self):
-        buttons = [[InlineKeyboardButton(text="Cancel survey", callback_data="cancel_survey_answering")]]
+        buttons = [[InlineKeyboardButton(text=cancel_button_survey, callback_data="cancel_survey_answering")]]
         self.reply_markup = InlineKeyboardMarkup(
             buttons)
 
@@ -62,7 +64,7 @@ class AnswerSurveys(object):
                 survey["answers"] = []
                 surveys_table.update({"title": survey["title"]}, survey)
         bot.send_message(update.callback_query.message.chat_id,
-                         "Please answer the following question.\n\n"
+                         answer_survey_str_1
                          )
         bot.send_message(update.callback_query.message.chat_id,
                          survey["questions"][int(user_data["question_id"])]["text"],
@@ -92,12 +94,11 @@ class AnswerSurveys(object):
                 if answer["user_id"] == user_id and answer["title"] == user_data["title"]:
                     users_answers.append(answer)
                     question = survey["questions"][int(answer["question_id"]) - 1]["text"]
-                    to_send_text += "Question:{}, Answer: {} \n".format(question,
-                                                                        answer['answer'])
+                    to_send_text += answer_survey_str_2.format(question, answer['answer'])
 
             bot.send_message(update.message.chat_id,
-                             "Thank you for your responses!\n" + to_send_text + "\n" +
-                             "Until next time!")
+                             answer_survey_str_3 + to_send_text + "\n" +
+                             answer_survey_str_4)
             get_help(bot, update)
             del user_data
             del answer
@@ -114,9 +115,8 @@ class AnswerSurveys(object):
 
     @run_async
     def done(self, bot, update, user_data):
-        update.message.reply_text("Thank you for your responses!"
-                                  "{}"
-                                  "Until next time!".format(facts_to_str(user_data)))
+        update.message.reply_text(answer_survey_str_3 + "{}" +
+                                  answer_survey_str_4.format(facts_to_str(user_data)))
         get_help(bot, update)
         logger.info("User {} on bot {}:{} answered to survey:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, user_data["title"]))
@@ -159,19 +159,12 @@ ANSWER_SURVEY_HANDLER = ConversationHandler(
         MessageHandler(filters=Filters.command, callback=AnswerSurveys().back)]
 )
 
-__mod_name__ = "Surveys"
-__admin_help__ = """
- Here you can:
- -  Create a survey and ask your users any questions \n
- -  Delete a survey\n
- -  Send an invitation to answer to your survey\n
- -  Check the results of the survey
-
-"""
+__mod_name__ = survey_mode_str
+__admin_help__ = survey_help_admin
 
 __admin_keyboard__ = [
-    InlineKeyboardButton(text="Create", callback_data="create_survey"),
-    InlineKeyboardButton(text="Delete", callback_data="delete_survey"),
-    InlineKeyboardButton(text="Send", callback_data="send_survey"),
-    InlineKeyboardButton(text="Results", callback_data="surveys_results")
+    InlineKeyboardButton(text=create_button, callback_data="create_survey"),
+    InlineKeyboardButton(text=delete_button, callback_data="delete_survey"),
+    InlineKeyboardButton(text=send_button, callback_data="send_survey"),
+    InlineKeyboardButton(text=results_button, callback_data="surveys_results")
 ]

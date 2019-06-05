@@ -7,6 +7,8 @@ from telegram.ext import (CommandHandler, MessageHandler, Filters,
                           ConversationHandler, run_async, CallbackQueryHandler)
 from database import chats_table
 from modules.helper_funcs.helper import get_help
+from modules.helper_funcs.strings import send_donation_request_1, send_donation_request_2, send_donation_request_3, \
+    donate_button, back_button, done_button
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -18,7 +20,7 @@ DONATION_TO_USERS, DONATION_TO_USERS_FINISH = range(2)
 class SendDonationToUsers(object):
     def __init__(self):
         buttons = list()
-        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_send_donation")])
+        buttons.append([InlineKeyboardButton(text=back_button, callback_data="cancel_send_donation")])
         self.reply_markup = InlineKeyboardMarkup(
             buttons)
 
@@ -27,8 +29,7 @@ class SendDonationToUsers(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         bot.send_message(update.callback_query.message.chat.id,
-                         "What do you want to tell your users?\n"
-                         "We will forward your message to all your users,\ntogether with a 'Donate' button",
+                         send_donation_request_1,
                          reply_markup=self.reply_markup)
         return DONATION_TO_USERS
 
@@ -77,10 +78,10 @@ class SendDonationToUsers(object):
                     bot.send_video_note(chat["chat_id"], video_note_file)
 
         final_reply_markup = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(text="Done", callback_data="send_donation_finish")]]
+            [[InlineKeyboardButton(text=done_button, callback_data="send_donation_finish")]]
         )
         bot.send_message(update.message.chat_id,
-                         "Great! Send me a new message or click 'Done'",
+                         send_donation_request_2,
                          reply_markup=final_reply_markup)
 
         return DONATION_TO_USERS
@@ -89,18 +90,18 @@ class SendDonationToUsers(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         buttons = list()
-        buttons.append([InlineKeyboardButton(text="Donate", callback_data="pay_donation"),
-                        InlineKeyboardButton(text="Back", callback_data="help_back")])
+        buttons.append([InlineKeyboardButton(text=donate_button, callback_data="pay_donation"),
+                        InlineKeyboardButton(text=back_button, callback_data="help_back")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.send_message(update.callback_query.message.chat_id,
-                         "Thank you! We've sent your message to your users!",
+                         send_donation_request_3,
                          reply_markup=final_reply_markup)
         chats = chats_table.find({"bot_id": bot.id})  # TODO it sends to everybody =/
         for chat in chats:
             if chat["chat_id"] != update.callback_query.message.chat_id:
                 bot.send_message(chat["chat_id"],
-                                 "Donate!",
+                                 donate_button,
                                  reply_markup=final_reply_markup)
         return ConversationHandler.END
 

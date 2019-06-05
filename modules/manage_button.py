@@ -10,6 +10,8 @@ from database import custom_buttons_table, chatbots_table
 from modules.helper_funcs.helper import get_help
 
 # from modules.helper_funcs.restart_program import restart_program
+from modules.helper_funcs.strings import back_button, manage_button_str_1, manage_button_str_2, create_button_button, \
+    edit_button, back_text, manage_button_str_3, manage_button_str_4, manage_button_str_5, manage_button_str_6
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -21,7 +23,7 @@ EDIT_FINISH = 1
 
 class ButtonEdit(object):
     def __init__(self):
-        reply_buttons = [[InlineKeyboardButton(text="Back", callback_data="cancel_edit_button")]]
+        reply_buttons = [[InlineKeyboardButton(text=back_button, callback_data="cancel_edit_button")]]
         self.reply_markup = InlineKeyboardMarkup(
             reply_buttons)
 
@@ -31,17 +33,17 @@ class ButtonEdit(object):
         all_buttons = custom_buttons_table.find({"bot_id": bot.id})
         if all_buttons:
             bot.send_message(chat_id=update.callback_query.message.chat_id,
-                             text="Please choose the button that you want to edit (or click /cancel)",
+                             text=manage_button_str_1,
                              reply_markup=ReplyKeyboardMarkup(
                                  [[button_name["button"]] for button_name in all_buttons])
                              )
             return CHOOSE_BUTTON
         else:
             bot.send_message(chat_id=update.callback_query.message.chat_id,  # TODO send as in polls
-                             text="You have no custom buttons to edit. Please create a button first",
+                             text=manage_button_str_2,
                              reply_markup=InlineKeyboardMarkup(
-                                 [[InlineKeyboardButton("Create button", callback_data="create_button"),
-                                   InlineKeyboardButton("Back", callback_data="help_back")]]
+                                 [[InlineKeyboardButton(create_button_button, callback_data="create_button"),
+                                   InlineKeyboardButton(back_button, callback_data="help_back")]]
                              ))
             return ConversationHandler.END
 
@@ -59,7 +61,7 @@ class ButtonEdit(object):
                     update.message.reply_text(
                         text=descr,
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text="EDIT",
+                            InlineKeyboardButton(text=edit_button,
                                                  callback_data="btn_edit_{}___{}".format(descr,
                                                                                        update.message.text))]])
                     )
@@ -69,7 +71,7 @@ class ButtonEdit(object):
                         update.message.reply_audio(
                             file,
                             reply_markup=InlineKeyboardMarkup([[
-                                InlineKeyboardButton(text="EDIT",
+                                InlineKeyboardButton(text=edit_button,
                                                      callback_data="btn_edit_{}___{}".format(
                                                          filename, update.message.text))]])
                         )
@@ -79,7 +81,7 @@ class ButtonEdit(object):
                         update.message.reply_video(
                             file,
                             reply_markup=InlineKeyboardMarkup([[
-                                InlineKeyboardButton(text="EDIT",
+                                InlineKeyboardButton(text=edit_button,
                                                      callback_data="btn_edit_{}___{}".format(
                                                          filename, update.message.text))]])
                         )
@@ -89,7 +91,7 @@ class ButtonEdit(object):
                         update.message.reply_document(
                             file,
                             reply_markup=InlineKeyboardMarkup([[
-                                InlineKeyboardButton(text="EDIT",
+                                InlineKeyboardButton(text=edit_button,
                                                      callback_data="btn_edit_{}___{}".format(
                                                          filename, update.message.text))]])
                         )
@@ -99,7 +101,7 @@ class ButtonEdit(object):
                         update.message.reply_photo(
                             file,
                             reply_markup=InlineKeyboardMarkup([[
-                                InlineKeyboardButton(text="EDIT",
+                                InlineKeyboardButton(text=edit_button,
                                                      callback_data="btn_edit_{}___{}".format(
                                                          filename, update.message.text))]])
                         )
@@ -113,12 +115,12 @@ class ButtonEdit(object):
             else:
                 LOGGER.exception("Exception in edit buttons")
         bot.send_message(chat_id=update.message.chat_id,
-                         text="Please choose the part that you want to replace",
+                         text=manage_button_str_3,
                          reply_markup=ReplyKeyboardRemove())
         bot.send_message(chat_id=update.message.chat_id,
-                         text="Or click Back to cancel",
+                         text=back_text,
                          reply_markup=InlineKeyboardMarkup(
-                             [[InlineKeyboardButton(text="Back", callback_data="help_back")]])
+                             [[InlineKeyboardButton(text=back_button, callback_data="help_back")]])
                          )
         return ConversationHandler.END
 
@@ -129,7 +131,7 @@ class ButtonEdit(object):
         user_data["content_id"] = content_data[0]
         user_data["button"] = content_data[1]
         bot.send_message(chat_id=update.callback_query.message.chat_id,
-                         text="Send me the new content to update the old one",
+                         text=manage_button_str_4,
                          reply_markup=self.reply_markup)
         return EDIT_FINISH
 
@@ -225,9 +227,9 @@ class ButtonEdit(object):
             {"bot_id": bot.id, "button": user_data["button"]},
             button_info
         )
-        buttons = [[InlineKeyboardButton(text="Back", callback_data="help_back")]]
+        buttons = [[InlineKeyboardButton(text=back_button, callback_data="help_back")]]
         bot.send_message(chat_id=update.message.chat_id,
-                         text="Great! Your content has been changed!",
+                         text=manage_button_str_5,
                          reply_markup=InlineKeyboardMarkup(buttons))
         logger.info("Admin {} on bot {}:{} did  the following edit button: {}".format(
             update.effective_user.first_name, bot.first_name, bot.id, user_data["button"]))
@@ -236,7 +238,7 @@ class ButtonEdit(object):
 
     def back(self, bot, update, user_data):
         bot.send_message(update.callback_query.message.chat.id,
-                         "Button creation was stopped", reply_markup=ReplyKeyboardRemove()
+                         manage_button_str_6, reply_markup=ReplyKeyboardRemove()
                          )
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)

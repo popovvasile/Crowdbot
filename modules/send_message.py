@@ -8,6 +8,9 @@ from telegram.ext import (CommandHandler, MessageHandler, Filters,
                           ConversationHandler, RegexHandler, run_async, CallbackQueryHandler)
 from database import users_messages_to_admin_table, chats_table
 from modules.helper_funcs.helper import get_help
+from modules.helper_funcs.strings import send_message_1, send_message_2, send_message_3, send_message_4, send_message_5, \
+    send_message_6, send_message_button_1, send_message_button_2, send_message_admin, send_message_user, \
+    send_message_module_str
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -29,13 +32,13 @@ class SendMessageToAdmin(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         bot.send_message(update.callback_query.message.chat.id,
-                         "What do you want to tell us?", reply_markup=self.reply_markup)
+                         send_message_1, reply_markup=self.reply_markup)
         return MESSAGE
 
     @run_async
     def received_message(self, bot, update):
         bot.send_message(update.message.chat_id,
-                         "Thank you! Your message has been sent to the chatbot owner!")
+                         send_message_2)
         users_messages_to_admin_table.insert({"user_full_name": update.message.from_user.full_name,
                                               "chat_id": update.message.chat_id,
                                               "user_id": update.message.from_user.id,
@@ -81,8 +84,7 @@ class SendMessageToUsers(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         bot.send_message(update.callback_query.message.chat.id,
-                         "What do you want to tell your users?\n"
-                         "We will forward your message to all your users.",
+                         send_message_3,
                          reply_markup=self.reply_markup)
         return MESSAGE_TO_USERS
 
@@ -134,7 +136,7 @@ class SendMessageToUsers(object):
             [[InlineKeyboardButton(text="Done", callback_data="send_message_finish")]]
         )
         bot.send_message(update.message.chat_id,
-                         "Great! Send me a new message or click 'Done'",
+                         send_message_4,
                          reply_markup=final_reply_markup)
 
         return MESSAGE_TO_USERS
@@ -147,7 +149,7 @@ class SendMessageToUsers(object):
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.send_message(update.callback_query.message.chat_id,
-                         "Thank you! We've sent your message to your users!",
+                         send_message_5,
                          reply_markup=final_reply_markup)
         chats = chats_table.find({"bot_id": bot.id})
         for chat in chats:
@@ -200,7 +202,7 @@ class SeeMessageToAdmin(object):
 
         else:
             bot.send_message(update.callback_query.message.chat.id,
-                             "You have no incoming messages yet")
+                             send_message_6)
 
         get_help(update=update, bot=bot)
 
@@ -248,18 +250,15 @@ SEND_MESSAGE_TO_USERS_HANDLER = ConversationHandler(
 
 SEE_MESSAGES_HANDLER = CallbackQueryHandler(pattern="inbox_message", callback=SeeMessageToAdmin().see_messages)
 
-__mod_name__ = "Send a message"
-__visitor_help__ = """
-Here you can send a message to the chatbot owner
-"""
+__mod_name__ = send_message_module_str
+__visitor_help__ = send_message_user
 
-__visitor_keyboard__ = [InlineKeyboardButton(text="Send message", callback_data="send_message_to_admin")]
+__visitor_keyboard__ = [InlineKeyboardButton(text=send_message_button_1,
+                                             callback_data="send_message_to_admin")]
 
-__admin_help__ = """
-Messages sent by the users to you
-"""
+__admin_help__ = send_message_admin
 
 __admin_keyboard__ = [
-    InlineKeyboardButton(text="Send message", callback_data="send_message_to_users"),
-    InlineKeyboardButton(text="Inbox messages", callback_data="inbox_message"),
+    InlineKeyboardButton(text=send_message_button_1, callback_data="send_message_to_users"),
+    InlineKeyboardButton(text=send_message_button_2, callback_data="inbox_message"),
 ]

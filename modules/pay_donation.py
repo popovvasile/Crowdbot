@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from telegram import LabeledPrice, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup
-from telegram.ext import (MessageHandler, Filters, PreCheckoutQueryHandler, RegexHandler, CommandHandler,
+from telegram import LabeledPrice, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram.ext import (MessageHandler, Filters, PreCheckoutQueryHandler, CommandHandler,
                           ConversationHandler, run_async, CallbackQueryHandler)
 import logging
 import datetime
@@ -10,28 +10,28 @@ import datetime
 from database import donations_table, chatbots_table
 from modules.helper_funcs.auth import initiate_chat_id, if_admin
 from modules.helper_funcs.helper import get_help
+from modules.helper_funcs.strings import pay_donation_str_admin, pay_donation_mode_str,\
+    donate_button, allow_donations_button, configure_button,\
+    ask_donation_button, back_button, pay_donation_str_1, pay_donation_str_2,\
+    back_text, allow_donation_text, pay_donation_str_4, pay_donation_str_5, menu_button
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
 logger = logging.getLogger(__name__)
-__mod_name__ = "Donate"
+__mod_name__ = pay_donation_mode_str
 
-__admin_help__ = """
- Click:
-  - Donate - to make a donation for this organization
-  - Allow donations - to allow the users of this bot to donate for your organization 
-  - Configure - to edit the current donation settings
+__admin_help__ = pay_donation_str_admin
 
-"""
+__visitor_help__ = pay_donation_mode_str
 
-__visitor_help__ = "Donate"
-
-__admin_keyboard__ = [InlineKeyboardButton(text="Donate", callback_data="pay_donation"),
-                      InlineKeyboardButton(text="Allow donations", callback_data="allow_donation"),
-                      InlineKeyboardButton(text="Configure", callback_data="configure_donation"),
-                      InlineKeyboardButton(text="Ask users for donation", callback_data="send_donation_to_users")]
-__visitor_keyboard__ = [InlineKeyboardButton(text="Donate!", callback_data="pay_donation")]
+__admin_keyboard__ = [InlineKeyboardButton(text=donate_button, callback_data="pay_donation"),
+                      InlineKeyboardButton(text=allow_donations_button,
+                                           callback_data="allow_donation"),
+                      InlineKeyboardButton(text=configure_button, callback_data="configure_donation"),
+                      InlineKeyboardButton(text=ask_donation_button,
+                                           callback_data="send_donation_to_users")]
+__visitor_keyboard__ = [InlineKeyboardButton(text=donate_button, callback_data="pay_donation")]
 
 
 EXECUTE_DONATION = 1
@@ -40,7 +40,8 @@ EXECUTE_DONATION = 1
 class DonationBot(object):
     def __init__(self):
         buttons = list()
-        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_donation_payment")])
+        buttons.append([InlineKeyboardButton(text=back_button,
+                                             callback_data="cancel_donation_payment")])
         self.reply_markup = InlineKeyboardMarkup(
             buttons)
 
@@ -57,30 +58,29 @@ class DonationBot(object):
             bot.send_message(update.callback_query.message.chat.id,
                              donation_request["donate"]["description"])
             bot.send_message(update.callback_query.message.chat.id,
-                             "First, tell us how much do you want to donate. Enter a floating point number")
+                             pay_donation_str_1)
             bot.send_message(update.callback_query.message.chat.id,
-                             "Remember, we use {} as our primary currency".format(
+                             pay_donation_str_2.format(
                                  donation_request["donate"]['currency']))
             bot.send_message(update.callback_query.message.chat.id,
-                             text="To return to main menu, click 'Back' ",
+                             text=back_text,
                              reply_markup=InlineKeyboardMarkup(
-                                          [[InlineKeyboardButton(text="Back",
-                                                                 callback_data="cancel_donation_payment")]]))
+                                          [[InlineKeyboardButton(text=back_button,
+                                            callback_data="cancel_donation_payment")]]))
             return EXECUTE_DONATION
 
         else:
 
             if if_admin(update, bot):
-                admin_keyboard = [InlineKeyboardButton(text="Allow donations", callback_data="allow_donation"),
-                                  InlineKeyboardButton(text="Back", callback_data="help_back")]
+                admin_keyboard = [InlineKeyboardButton(text=allow_donations_button,
+                                                       callback_data="allow_donation"),
+                                  InlineKeyboardButton(text=back_button, callback_data="help_back")]
                 bot.send_message(update.callback_query.message.chat.id,
-                                 "You didn't set up configurations so far. \n"
-                                 'Press "Allow donations" to configure your first donation option\n'
-                                 'or click "Back" for main menu',
+                                 allow_donation_text,
                                  reply_markup=InlineKeyboardMarkup([admin_keyboard]))
             else:
                 bot.send_message(update.callback_query.message.chat.id,
-                                 "Sorry,you can't donate on this chatbot yet")
+                                 pay_donation_str_4)
             return ConversationHandler.END
 
     # @run_async
@@ -104,10 +104,10 @@ class DonationBot(object):
         try:
             amount = int(float(txt)*100)  # TODO add an exception if not int
         except ValueError:
-            update.message.reply_text(text="You entered a wrong number. Please enter a valid amount of money ",
+            update.message.reply_text(text=pay_donation_str_5,
                                       reply_markup=InlineKeyboardMarkup(
-                                          [[InlineKeyboardButton(text="MENU",
-                                                                 callback_data="cancel_donation_payment")]]))
+                                          [[InlineKeyboardButton(text=menu_button,
+                                            callback_data="cancel_donation_payment")]]))
             return EXECUTE_DONATION
         donation_request = chatbots_table.find_one({"bot_id": bot.id})["donate"]
         title = donation_request['title']
@@ -120,9 +120,9 @@ class DonationBot(object):
         prices = [LabeledPrice(title, amount)]
         bot.sendInvoice(chat_id, title, description, payload,
                         provider_token, start_parameter, currency, prices)
-        update.message.reply_text(text="To return to main menu, click 'Back' ",
+        update.message.reply_text(text=back_text,
                                   reply_markup=InlineKeyboardMarkup(
-                                      [[InlineKeyboardButton(text="Back",
+                                      [[InlineKeyboardButton(text=back_button,
                                                              callback_data="help_back")]]))
         logger.info("User {} on bot {} requested a donation".format(
             update.effective_user.first_name, bot.first_name))
