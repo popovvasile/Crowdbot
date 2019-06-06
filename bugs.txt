@@ -10,15 +10,15 @@ Shopbot:
     connect to rest api and alive_checker
 
 
-# TODO try surveys results
-# TODO credit card token for shop
-# TODO for Occupy: add users + all old polls + tags
-
-
-
+# TODO credit card token for shop  410694247:TEST:c374c3a5-04b2-4f5d-a923-062cd4adc358
 # TODO create a POST endpoint to pause the chatbot if not paid "active"
 # TODO adjust REST api + two languages
 # TODO connect e-shop
+# TODO how to solve the survey results without /start
+
+
+
+# TODO for Occupy: add users + all old polls + tags
 # TODO add content
 # TODO return the amount of money received by both bots
 # TODO add the option "pause the bot"

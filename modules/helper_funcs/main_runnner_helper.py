@@ -164,6 +164,17 @@ def button_handler(bot: Bot, update: Update):
 #                    "User view": ""}
 @run_async
 def help_button(bot: Bot, update: Update):
+    # users_table.update({"user_id": update.message.from_user.id},
+    #                    {'bot_id': bot.id,
+    #                     "chat_id": update.message.chat.id,
+    #                     "user_id": update.message.from_user.id,
+    #                     "username": update.message.from_user.username,
+    #                     "full_name": update.message.from_user.full_name,
+    #                     'registered': False,
+    #                     "pending": False,
+    #                     "is_admin": False,
+    #                     "tags": ["#all", "#user"]
+    #                     }, upsert=True)
     if if_admin(update=update, bot=bot):
         HELPABLE = ADMIN_HELPABLE
     else:

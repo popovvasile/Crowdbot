@@ -183,25 +183,30 @@ class SurveyHandler(object):
         chat_id, txt = initiate_chat_id(update)
         survey = surveys_table.find_one({"bot_id": bot.id, 'title': txt})
         txt_to_send = ""
-        if survey.get("answers") is not None:
-            for answer in survey['answers']:
-                txt_to_send += survey_str_10.format(
-                    users_table.find_one({"user_id": answer['user_id']})["full_name"],
-                    survey["questions"][answer["question_id"] - 1]['text'],
-                    answer["answer"])
-            update.message.reply_text(survey_str_11.format(txt_to_send),
+        try:
+            if survey.get("answers") is not None:
+                for answer in survey['answers']:
+                    txt_to_send += survey_str_10.format(
+                        users_table.find_one({"user_id": answer['user_id']})["full_name"],
+                        survey["questions"][answer["question_id"] - 1]['text'],
+                        answer["answer"])
+                update.message.reply_text(survey_str_11.format(txt_to_send),
+                                          reply_markup=ReplyKeyboardRemove())
+                admin_keyboard = [
+                    InlineKeyboardButton(text=back_button, callback_data="help_back")]
+                update.message.reply_text(back_text,
+                                          reply_markup=InlineKeyboardMarkup([admin_keyboard]))
+            else:
+                update.message.reply_text(survey_str_12,
+                                          reply_markup=ReplyKeyboardRemove())
+                admin_keyboard = [InlineKeyboardButton(text=send_button, callback_data="send_survey"),
+                                  InlineKeyboardButton(text=back_button, callback_data="help_back")]
+                update.message.reply_text(survey_str_13,
+                                          reply_markup=InlineKeyboardMarkup([admin_keyboard]))
+        except KeyError:
+            update.message.reply_text("Please click /start to register yourself as a user",
                                       reply_markup=ReplyKeyboardRemove())
-            admin_keyboard = [
-                InlineKeyboardButton(text=back_button, callback_data="help_back")]
-            update.message.reply_text(back_text,
-                                      reply_markup=InlineKeyboardMarkup([admin_keyboard]))
-        else:
-            update.message.reply_text(survey_str_12,
-                                      reply_markup=ReplyKeyboardRemove())
-            admin_keyboard = [InlineKeyboardButton(text=send_button, callback_data="send_survey"),
-                              InlineKeyboardButton(text=back_button, callback_data="help_back")]
-            update.message.reply_text(survey_str_13,
-                                      reply_markup=InlineKeyboardMarkup([admin_keyboard]))
+            get_help(bot, update)
         return ConversationHandler.END
 
     @run_async
