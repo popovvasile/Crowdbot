@@ -69,10 +69,9 @@ def send_visitor_help(bot, chat_id, text, keyboard=None):
 
 
 def send_admin_user_mode(bot, chat_id, text, keyboard=None):
-
     if not keyboard:
         keyboard = paginate_modules(0, VISITOR_HELPABLE, "help", bot.id)
-    keyboard = keyboard+[[EqInlineKeyboardButton(text="ADMIN MODE", callback_data="turn_user_mode_off")]]
+    keyboard = keyboard + [[EqInlineKeyboardButton(text="ADMIN MODE", callback_data="turn_user_mode_off")]]
     bot.send_message(chat_id=chat_id,
                      text=text,
                      parse_mode=ParseMode.MARKDOWN,
@@ -291,16 +290,17 @@ class WelcomeBot(object):
         chat_id, txt = initiate_chat_id(update)
         user_id = update.message.from_user.id
         register_chat(bot, update)
-        users_table.save({'bot_id': bot.id,
-                          "chat_id": chat_id,
-                          "user_id": user_id,
-                          "username": update.message.from_user.username,
-                          "full_name": update.message.from_user.full_name,
-                          'registered': False,
-                          "pending": False,
-                          "is_admin": False,
-                          "tags": ["#all", "#user"]
-                          })
+        users_table.update({"user_id": user_id},
+                           {'bot_id': bot.id,
+                            "chat_id": chat_id,
+                            "user_id": user_id,
+                            "username": update.message.from_user.username,
+                            "full_name": update.message.from_user.full_name,
+                            'registered': False,
+                            "pending": False,
+                            "is_admin": False,
+                            "tags": ["#all", "#user"]
+                            }, upsert=True)
         if if_admin(update=update, bot=bot):
             bot.send_message(chat_id,
                              "Hello, I’m {} and ready to use. \n"

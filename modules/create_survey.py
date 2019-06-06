@@ -14,7 +14,7 @@ from modules.helper_funcs.strings import back_button, done_button, survey_str_1,
     survey_str_3, survey_str_4, survey_str_5, start_button, survey_str_6, survey_str_7, survey_str_8, back_text, \
     create_button, survey_str_9, survey_str_10, survey_str_12, send_button, survey_str_13, survey_str_14, survey_str_15, \
     survey_str_16, survey_str_17, survey_str_18, survey_str_19, survey_str_20, survey_str_21, survey_str_22, \
-    survey_str_23
+    survey_str_23, survey_str_11
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -186,7 +186,7 @@ class SurveyHandler(object):
         if survey.get("answers") is not None:
             for answer in survey['answers']:
                 txt_to_send += survey_str_10.format(
-                    users_table.find_one({"user_id": answer['user_id']})["name"],
+                    users_table.find_one({"user_id": answer['user_id']})["full_name"],
                     survey["questions"][answer["question_id"] - 1]['text'],
                     answer["answer"])
             update.message.reply_text(survey_str_11.format(txt_to_send),

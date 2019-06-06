@@ -1,6 +1,6 @@
 # TODO crowdbot production
 @CrowdRobot  CrowdBot                        892372248:AAEM32Ye0ye4rTkyTuk5Z4minhsNKVhSQ-w
-@CrowdFunBot CrowdShopTest                   835405066:AAGqH6XRek3BGED6lh_ha3BVp8_oAle5rZ0
+@ChatNetworkBot CrowdBotTest                 514295854:AAGD2iqpBMm8g7cn3zp9DYuMs2F_JNdo3NQ
 
 # TODO teambot production
 @CrowdTeamBot  CrowdTeamBot                  744779225:AAE8CSxUSNzJxa3o6nLSr91PeZwCw7gkink
@@ -8,7 +8,7 @@
 
 # TODO shop production
 @CrowdShopBot   CrowdShop                    873905267:AAGisFQ5Us7nv9cCHZfv8AIJIfTF-Ohpmfw
-@ChatNetworkBot CrowdBotTest                 514295854:AAGD2iqpBMm8g7cn3zp9DYuMs2F_JNdo3NQ
+@CrowdFunBot CrowdShopTest                   835405066:AAGqH6XRek3BGED6lh_ha3BVp8_oAle5rZ0
 
 
 
@@ -25,7 +25,7 @@
 @SuperMarioRunBot  TeamCrowdFatherTest       502301506:AAGIuV3XCZuOrIhiCPhRdWXNK5ehWMueizI
 @BrainAgeBot  TeamCrowdTest                  477358694:AAF4_pWPq07yFKExf4RTSe80KAK9rP-N7aI
 
-
+occupyguguta@gmail.com
 
 # TODO Guguta
 @GugutaBot        OccupyGuguţă               806812696:AAEH_QbgIvn2h5_LEdB4v2c5cPi8zwcY5E8

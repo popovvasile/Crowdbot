@@ -124,7 +124,8 @@ class EditPaymentHandler(object):
 
             currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["CHF", "AUD", "RON", "PLN"]]
             update.message.reply_text(donations_edit_str_9,
-                                      reply_markup=ReplyKeyboardMarkup(currency_keyboard, one_time_keyboard=True))
+                                      reply_markup=ReplyKeyboardMarkup(currency_keyboard,
+                                                                       one_time_keyboard=True))
         user_data["action"] = txt
         return EDIT_FINISH
 

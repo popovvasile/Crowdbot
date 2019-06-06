@@ -51,6 +51,7 @@ class CreateDonationHandler(object):
                            InlineKeyboardButton(text=back_button, callback_data="help_back")]]
         self.create_markup = InlineKeyboardMarkup(
             create_buttons)
+
     @staticmethod
     def facts_to_str(user_data):
         facts = list()

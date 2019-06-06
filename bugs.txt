@@ -1,26 +1,5 @@
 
 Bugs:
-
-# TODO adjust REST api + two languages
-# TODO return the amount of money received by both bots
-# TODO add the option "pause the bot"
-# TODO create a POST endpoint to pause the chatbot if not paid "active"
-# TODO credit card token for shop
-# TODO make buying easier in the shop - don't enforce funds
-
-
-# TODO make content to return in the same order as was sent !
-# TODO results for users and donations - send csv as file !
-# TODO pics and other content for surveys and polls
-
-
-# TODO for Occupy: add users + all old polls + tags
-# TODO hidden content
-
-
-TODO learn how to use  ForceReply https://python-tel:egram-bot.readthedocs.io/en/stable/telegram.forcereply.html
-
-
 Polls:
     try from the user
 Survey:
@@ -29,3 +8,27 @@ Menu:
     add "Connect e-shop" button
 Shopbot:
     connect to rest api and alive_checker
+
+
+# TODO try surveys results
+# TODO credit card token for shop
+# TODO for Occupy: add users + all old polls + tags
+
+
+
+# TODO create a POST endpoint to pause the chatbot if not paid "active"
+# TODO adjust REST api + two languages
+# TODO connect e-shop
+# TODO add content
+# TODO return the amount of money received by both bots
+# TODO add the option "pause the bot"
+# TODO make buying easier in the shop - don't enforce funds
+# TODO make content to return in the same order as was sent !
+# TODO results for users and donations - send csv as file !
+# TODO pics and other content for surveys and polls
+# TODO hidden content
+
+
+TODO learn how to use  ForceReply https://python-tel:egram-bot.readthedocs.io/en/stable/telegram.forcereply.html
+
+
