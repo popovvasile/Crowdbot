@@ -7,7 +7,7 @@ from telegram.ext import (MessageHandler, Filters, PreCheckoutQueryHandler, Comm
 import logging
 import datetime
 # Enable logging
-from database import donations_table, chatbots_table
+from database import donations_table, chatbots_table, user_mode_table
 from modules.helper_funcs.auth import initiate_chat_id, if_admin
 from modules.helper_funcs.helper import get_help
 from modules.helper_funcs.strings import pay_donation_str_admin, pay_donation_mode_str,\
@@ -54,6 +54,8 @@ class DonationBot(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id,)
         donation_request = chatbots_table.find_one({"bot_id": bot.id})
+        current_user_mode = user_mode_table.find_one({"bot_id": bot.id,
+                                                      "user_id": update.effective_user.id}) or {"user_mode": False}
         if donation_request.get("donate") is not None and donation_request.get("donate") != {}:
             bot.send_message(update.callback_query.message.chat.id,
                              donation_request["donate"]["description"])
@@ -70,17 +72,29 @@ class DonationBot(object):
             return EXECUTE_DONATION
 
         else:
-
-            if if_admin(update, bot):
-                admin_keyboard = [InlineKeyboardButton(text=allow_donations_button,
-                                                       callback_data="allow_donation"),
+            try:
+                if current_user_mode["user_mode"] is True:
+                    admin_keyboard = [InlineKeyboardButton(text=back_button, callback_data="help_back")]
+                    bot.send_message(update.callback_query.message.chat.id,
+                                     pay_donation_str_4,
+                                     reply_markup=InlineKeyboardMarkup([admin_keyboard]))
+                elif if_admin(update, bot):
+                    admin_keyboard = [InlineKeyboardButton(text=allow_donations_button, callback_data="allow_donation"),
+                                      InlineKeyboardButton(text=back_button, callback_data="help_back")]
+                    bot.send_message(update.callback_query.message.chat.id,
+                                     allow_donation_text,
+                                     reply_markup=InlineKeyboardMarkup([admin_keyboard]))
+                else:
+                    admin_keyboard = [InlineKeyboardButton(text=back_button, callback_data="help_back")]
+                    bot.send_message(update.callback_query.message.chat.id,
+                                     pay_donation_str_4,
+                                     reply_markup=InlineKeyboardMarkup([admin_keyboard]))
+            except KeyError:
+                admin_keyboard = [InlineKeyboardButton(text=allow_donations_button, callback_data="allow_donation"),
                                   InlineKeyboardButton(text=back_button, callback_data="help_back")]
                 bot.send_message(update.callback_query.message.chat.id,
                                  allow_donation_text,
                                  reply_markup=InlineKeyboardMarkup([admin_keyboard]))
-            else:
-                bot.send_message(update.callback_query.message.chat.id,
-                                 pay_donation_str_4)
             return ConversationHandler.END
 
     # @run_async
