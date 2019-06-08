@@ -125,7 +125,7 @@ class SurveyHandler(object):
                                                                callback_data="survey_{}".format(
                                                                    user_data["title"]
                                                                )
-                                                               )]))
+                                                               )]), chat_id=chat['chat_id'])
         survey = surveys_table.find_one({
             "bot_id": bot.id,
             "title": user_data["title"]
