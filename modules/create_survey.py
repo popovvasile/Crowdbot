@@ -284,7 +284,7 @@ class SurveyHandler(object):
         chats = chats_table.find({"bot_id": bot.id})
         for chat in chats:
             # if chat['chat_id'] != chat_id:
-            if not any(sent_d['id'] == chat['chat_id'] for sent_d in sent):
+            if not any(sent_d == chat['chat_id'] for sent_d in sent):
                 sent.append(chat['chat_id'])
                 bot.send_message(chat_id=chat['chat_id'], text=survey_str_20,
                                  reply_markup=InlineKeyboardMarkup(
