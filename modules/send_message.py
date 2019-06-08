@@ -10,7 +10,7 @@ from database import users_messages_to_admin_table, chats_table
 from modules.helper_funcs.helper import get_help
 from modules.helper_funcs.strings import send_message_1, send_message_2, send_message_3, send_message_4, send_message_5, \
     send_message_6, send_message_button_1, send_message_button_2, send_message_admin, send_message_user, \
-    send_message_module_str
+    send_message_module_str, back_text
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -186,6 +186,12 @@ class SendMessageToUsers(object):
 
 
 class SeeMessageToAdmin(object):
+    def __init__(self):
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text="Back", callback_data="help_back")])
+        self.reply_markup = InlineKeyboardMarkup(
+            buttons)
+
     @run_async
     def see_messages(self, bot, update):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -203,8 +209,8 @@ class SeeMessageToAdmin(object):
         else:
             bot.send_message(update.callback_query.message.chat.id,
                              send_message_6)
-
-        get_help(update=update, bot=bot)
+        bot.send_message(update.callback_query.message.chat.id,
+                         back_text, reply_markup=self.reply_markup)
 
 
 SEND_MESSAGE_TO_ADMIN_HANDLER = ConversationHandler(

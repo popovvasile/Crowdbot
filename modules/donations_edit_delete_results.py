@@ -68,7 +68,7 @@ class EditPaymentHandler(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id, )
         chatbot = chatbots_table.find_one({"bot_id": bot.id})
-        if chatbot.get("donate") != {}:
+        if chatbot.get("donate") != {} and "donate" in chatbot:
             reply_keyboard = [[delete_donation_button], [edit_button]]
 
             bot.send_message(update.callback_query.message.chat.id,

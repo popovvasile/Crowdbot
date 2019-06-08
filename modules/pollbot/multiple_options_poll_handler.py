@@ -51,8 +51,8 @@ class MultipleOptionsHandler(BasicPoll):
         elif old_vote is not None:
             old_vote.append(callback_data['i'])
             votes[user] = old_vote
-        # else:
-        #     votes[user] = [callback_data['i']]
+        else:
+            votes[user] = [callback_data['i']]
 
     def get_confirmation_message(self, poll, user):
         votes = poll['votes']

@@ -79,10 +79,11 @@ polls_str_11 = "Looks like there are yet no users to send this poll to. \n No po
 polls_str_12 = "Your poll was sent to all you users! "
 polls_str_13 = "Please choose the poll that you want to check"
 polls_str_14 = "Please choose the poll that you want to delete"
-polls_str_15 = "Click 'Back' to cancel"
+polls_str_15 = "Click 'Back' if you want to cancel"
 polls_str_16 = """You have no polls created yet. \n
 Click "Create" to configure your first poll or "Back" for main menu"""
 polls_str_17 = "Poll with title {} has been deleted from all chats."
+polls_str_18 = """Click "Create" to configure a new poll or "Back" for main menu"""
 polls_help_admin = """
 Here you can:
  - Create a new poll
@@ -215,3 +216,4 @@ add_menu_buttons_str_6 ="Choose the button that button that you want to delete"
 add_menu_buttons_str_7 =  """You have no buttons created yet. Create your first button by clicking "Create" """
 add_menu_buttons_str_8 = 'Thank you! We deleted the button {}'
 add_menu_buttons_str_9 = "Button creation was stopped"
+add_menu_buttons_str_10 = "You can create a new button or return to menu"

@@ -31,4 +31,9 @@ Shopbot:
 
 TODO learn how to use  ForceReply https://python-tel:egram-bot.readthedocs.io/en/stable/telegram.forcereply.html
 
+Кнопки
+    2. Добавил 03.06-09.06.docx, но в кнопке он называется document_27798_.docx
+    3. Текст вне правильной последовательности. Он всегда добавляется сверху.
+Message:
+    2. Юзер: Чтобы задонатить надо два раза жать на Donate. Чтобы отправить сообщение надо тоже два раза жать
 

@@ -22,7 +22,7 @@ from modules.helper_funcs.helper import get_help
 from modules.helper_funcs.strings import polls_affirmations, results_button, send_button, delete_button, create_button, \
     back_button, done_button, menu_button, polls_str_1, polls_str_2, polls_str_3, polls_str_4, polls_str_5, polls_str_6, \
     polls_str_7, polls_str_9, polls_str_8, polls_str_10, polls_str_11, polls_str_12, polls_str_13, polls_str_14, \
-    polls_str_15, polls_str_16, polls_str_17, polls_help_admin, polls_module_str
+    polls_str_15, polls_str_16, polls_str_17, polls_help_admin, polls_module_str, polls_str_18
 from modules.pollbot.custom_description_poll_handler import CustomDescriptionHandler
 from modules.pollbot.multiple_options_poll_handler import MultipleOptionsHandler
 from modules.pollbot.custom_description_instant_runoff_poll_handler import CustomDescriptionInstantRunoffPollHandler
@@ -105,7 +105,7 @@ class PollBot(object):
         if POLL_HANDLERS[polltype].requires_extra_config(user_data['meta']):
             update.message.reply_text(POLL_HANDLERS[polltype].ask_for_extra_config(
                 user_data.get('meta')),
-                                      reply_markup=self.reply_markup)
+                reply_markup=self.reply_markup)
             return TYPING_META
         else:
             update.message.reply_text(polls_str_3, reply_markup=self.reply_markup)
@@ -340,9 +340,11 @@ class PollBot(object):
         query.answer(handler.get_confirmation_message(poll, uid_str))
         if "_id" in poll:
             poll.pop('_id')
-        table.update({'poll_id': poll['poll_id'], "bot_id": bot.id},
-                     self.serialize(poll),
-                     upsert=True)
+        table.update_one({'poll_id': poll['poll_id'],
+                          "bot_id": bot.id,
+                          "chat_id": update.callback_query.message.chat_id},
+                         self.serialize(poll),
+                         upsert=True)
         old_instances = table.find({"poll_id": poll["poll_id"], "bot_id": bot.id})
         vote_instances = []
         for instance in old_instances:
@@ -363,7 +365,6 @@ class PollBot(object):
             votes_dict.update(ast.literal_eval(d))
         if votes_dict:
             poll["votes"] = votes_dict
-        print(poll)
         bot.edit_message_text(text=self.assemble_message_text(poll),
                               parse_mode='Markdown',
                               reply_markup=self.assemble_inline_keyboard(poll),
@@ -449,15 +450,17 @@ class PollBot(object):
         polls_list_of_dicts = polls_table.find({"bot_id": bot.id})
         command_list = [command['title'] for command in polls_list_of_dicts]
         reply_keyboard = [command_list]
+
         bot.send_message(update.callback_query.message.chat.id,
                          polls_str_13,
                          reply_markup=ReplyKeyboardMarkup(reply_keyboard,
                                                           one_time_keyboard=True))
+        bot.send_message(update.callback_query.message.chat.id,
+                         polls_str_15, reply_keyboard=self.reply_markup)
         return CHOOSE_TITLE_RESULTS
 
     @run_async
-    def handle_bots_polls_title(self, bot, update):  # TODO make miserably, need to refactor
-        print("TEST")
+    def handle_bots_polls_title(self, bot, update):  # TODO made miserably, need to refactor
         chat_id, txt = initiate_chat_id(update)
         poll_instances = poll_instances_table.find({"title": txt, "bot_id": bot.id})
         new_poll_instances = []
@@ -470,7 +473,6 @@ class PollBot(object):
                 poll_instance["votes"] = ast.literal_eval(poll_instance["votes"])
 
             new_poll_instances.append(poll_instance)
-        print(new_poll_instances)
         poll = new_poll_instances[0]
         for other_poll in poll_instances:
             poll.update(other_poll)
@@ -479,19 +481,7 @@ class PollBot(object):
                          reply_markup=self.assemble_inline_keyboard(poll, True),
                          parse_mode='Markdown'
                          )
-        get_help(bot, update)
-        # if poll is not None:
-        #     bot.send_message(chat_id,  # TODO send an instance of poll instead of results
-        #                      "Poll title:{} \nPoll_type:{} \nResults:{} \nDescription:{}".
-        #                      format(poll_title,
-        #                             poll_type,
-        #                             poll_results,
-        #                             poll_description
-        #                             ))
-        #
-        # else:
-        #     bot.send_message(chat_id, "No poll with such title exists")
-
+        bot.send_message(update.message.chat.id, polls_str_18, reply_markup=self.create_markup)
         return ConversationHandler.END
 
     @run_async

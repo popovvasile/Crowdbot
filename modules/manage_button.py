@@ -62,7 +62,7 @@ class ButtonEdit(object):
                         text=descr,
                         reply_markup=InlineKeyboardMarkup([[
                             InlineKeyboardButton(text=edit_button,
-                                                 callback_data="btn_edit_{}___{}".format(descr[10],
+                                                 callback_data="btn_edit_{}___{}".format(descr[:10],
                                                                                        update.message.text))]])
                     )
             if "audio_files" in button_info:

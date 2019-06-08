@@ -13,7 +13,8 @@ from modules.helper_funcs.helper import get_help
 from modules.helper_funcs.strings import create_button, delete_button, edit_button_button, edit_menu_text, \
     add_menu_buttons_help, back_button, add_menu_buttons_str_1, back_text, great_text, add_menu_buttons_str_2, \
     add_menu_buttons_str_3, done_button, add_menu_buttons_str_4, add_menu_buttons_str_5, add_menu_buttons_str_6, \
-    add_menu_buttons_str_7, add_menu_buttons_str_8, add_menu_buttons_str_9
+    add_menu_buttons_str_7, add_menu_buttons_str_8, add_menu_buttons_str_9, create_button_button, manage_button_str_2, \
+    add_menu_buttons_str_10, menu_button
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -258,7 +259,12 @@ class AddCommands(object):
         })
         update.message.reply_text(
             add_menu_buttons_str_8.format(txt), reply_markup=ReplyKeyboardRemove())
-        get_help(bot, update)
+        bot.send_message(chat_id=update.callback_query.message.chat_id,  # TODO send as in polls
+                         text=add_menu_buttons_str_10,
+                         reply_markup=InlineKeyboardMarkup(
+                             [[InlineKeyboardButton(create_button_button, callback_data="create_button"),
+                               InlineKeyboardButton(menu_button, callback_data="help_back")]]
+                         ))
         logger.info("Admin {} on bot {}:{} deleted the button:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, txt))
         return ConversationHandler.END

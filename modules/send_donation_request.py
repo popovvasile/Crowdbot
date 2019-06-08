@@ -5,10 +5,10 @@ import logging
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (CommandHandler, MessageHandler, Filters,
                           ConversationHandler, run_async, CallbackQueryHandler)
-from database import chats_table
+from database import chats_table, chatbots_table
 from modules.helper_funcs.helper import get_help
 from modules.helper_funcs.strings import send_donation_request_1, send_donation_request_2, send_donation_request_3, \
-    donate_button, back_button, done_button
+    donate_button, back_button, done_button, allow_donations_button, allow_donation_text
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -28,10 +28,19 @@ class SendDonationToUsers(object):
     def send_donation(self, bot, update):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        bot.send_message(update.callback_query.message.chat.id,
-                         send_donation_request_1,
-                         reply_markup=self.reply_markup)
-        return DONATION_TO_USERS
+        chatbot = chatbots_table.find_one({"bot_id": bot.id})
+        if chatbot.get("donate") != {} and "donate" in chatbot:
+            bot.send_message(update.callback_query.message.chat.id,
+                             send_donation_request_1,
+                             reply_markup=self.reply_markup)
+            return DONATION_TO_USERS
+        else:
+            admin_keyboard = [InlineKeyboardButton(text=allow_donations_button, callback_data="allow_donation"),
+                              InlineKeyboardButton(text=back_button, callback_data="help_back")]
+            bot.send_message(update.callback_query.message.chat.id,
+                             allow_donation_text,
+                             reply_markup=InlineKeyboardMarkup([admin_keyboard]))
+            return ConversationHandler.END
 
     @run_async
     def received_donation(self, bot, update):

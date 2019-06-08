@@ -47,7 +47,7 @@ class CreateDonationHandler(object):
         buttons.append([InlineKeyboardButton(text=back_button, callback_data="cancel_donation_create")])
         self.reply_markup = InlineKeyboardMarkup(
             buttons)
-        create_buttons = [[InlineKeyboardButton(text="", callback_data=send_donation_request),
+        create_buttons = [[InlineKeyboardButton(text=send_donation_request, callback_data="send_donation_to_users"),
                            InlineKeyboardButton(text=back_button, callback_data="help_back")]]
         self.create_markup = InlineKeyboardMarkup(
             create_buttons)
@@ -127,7 +127,7 @@ class CreateDonationHandler(object):
 
         bot.send_message(chat_id,
                          create_donation_str_8,
-                         reply_markup=self.create_markup)  # TODO add button send donation request and back
+                         reply_markup=self.create_markup)
         chatbot = chatbots_table.find_one({"bot_id": bot.id}) or {}
 
         print(user_data)
@@ -140,7 +140,6 @@ class CreateDonationHandler(object):
         logger.info("Admin {} on bot {}:{} added a donation config:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, user_data["title"]))
         user_data.clear()
-        get_help(bot, update)
         return ConversationHandler.END
 
     @staticmethod
