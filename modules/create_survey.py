@@ -14,7 +14,7 @@ from modules.helper_funcs.strings import back_button, done_button, survey_str_1,
     survey_str_3, survey_str_4, survey_str_5, start_button, survey_str_6, survey_str_7, survey_str_8, back_text, \
     create_button, survey_str_9, survey_str_10, survey_str_12, send_button, survey_str_13, survey_str_14, survey_str_15, \
     survey_str_16, survey_str_17, survey_str_18, survey_str_19, survey_str_20, survey_str_21, survey_str_22, \
-    survey_str_23, survey_str_11
+    survey_str_23, survey_str_11, menu_button, survey_str_24
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -241,9 +241,13 @@ class SurveyHandler(object):
         surveys_table.delete_one({"bot_id": bot.id, 'title': txt})
         update.message.reply_text(survey_str_17.format(txt),
                                   reply_markup=ReplyKeyboardRemove())
-        get_help(bot, update)
         logger.info("Admin {} on bot {}:{} deleted a survey:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, txt))
+        admin_keyboard = [InlineKeyboardButton(text=create_button, callback_data="create_survey"),
+                          InlineKeyboardButton(text=menu_button, callback_data="help_back")]
+        bot.send_message(update.callback_query.message.chat.id,
+                         survey_str_24,
+                         reply_markup=InlineKeyboardMarkup([admin_keyboard]))
         return ConversationHandler.END
 
     @staticmethod

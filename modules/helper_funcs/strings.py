@@ -166,7 +166,7 @@ survey_str_21 = "Looks like there are yet no users to send this survey to. "\
 survey_str_22 = "Survey sent to all users!"
 survey_str_23 = """You have no surveys created yet. \n
 Click "Create" to configure your first survey or "Back" for main menu"""
-
+survey_str_24 = "You can create a new survey or get back to the menu"
 create_donation_str_1 = "Test payment, Please ignore this message"
 create_donation_str_2 = "Please enter a title for your donation"
 create_donation_str_3 = """Please enter your donation provider token\n 1st Step: Go to @botfather and enter /mybots. 
