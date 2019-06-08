@@ -31,7 +31,6 @@ class MultipleOptionsHandler(BasicPoll):
             poll['options'] = ast.literal_eval(poll['options'])
 
         for option in poll['options']:
-            print(type(poll['options']))
             message += "\n"
             message += "{}: {}".format(option['text'], self.num_votes_on_option(poll, option['index']))
         return message

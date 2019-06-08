@@ -444,7 +444,7 @@ class PollBot(object):
         return ConversationHandler.END
 
     @run_async
-    def handle_bots_polls(self, bot, update):
+    def handle_polls_results(self, bot, update):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         polls_list_of_dicts = polls_table.find({"bot_id": bot.id})
@@ -460,7 +460,7 @@ class PollBot(object):
         return CHOOSE_TITLE_RESULTS
 
     @run_async
-    def handle_bots_polls_title(self, bot, update):  # TODO made miserably, need to refactor
+    def handle_polls_results_title(self, bot, update):  # TODO made miserably, need to refactor
         chat_id, txt = initiate_chat_id(update)
         poll_instances = poll_instances_table.find({"title": txt, "bot_id": bot.id})
         new_poll_instances = []
@@ -522,11 +522,11 @@ class PollBot(object):
         poll_instances_table.delete_many({"bot_id": bot.id, "title": txt})
 
         update.message.reply_text("Ok!", reply_markup=ReplyKeyboardRemove())
-
+        admin_keyboard = [InlineKeyboardButton(text=create_button, callback_data="create_poll"),
+                          InlineKeyboardButton(text=back_button, callback_data="help_back")]
         update.message.reply_text(
-            polls_str_17.format(txt))
-        get_help(bot, update)
-        logger.info("Admin {} on bot {}:{} created a new poll: {}".format(
+            polls_str_17.format(txt), reply_markup=InlineKeyboardMarkup([admin_keyboard]))
+        logger.info("Admin {} on bot {}:{} deleted the poll: {}".format(
             update.effective_user.first_name, bot.first_name, bot.id, txt))
         return ConversationHandler.END
 
@@ -550,12 +550,12 @@ DELETE_POLLS_HANDLER = ConversationHandler(
 )
 
 POLLS_RESULTS_HANDLER = ConversationHandler(
-    entry_points=[CallbackQueryHandler(pattern="poll_results", callback=PollBot().handle_bots_polls),
+    entry_points=[CallbackQueryHandler(pattern="poll_results", callback=PollBot().handle_polls_results),
 
                   ],
     states={
 
-        CHOOSE_TITLE_RESULTS: [MessageHandler(Filters.text, PollBot().handle_bots_polls_title),
+        CHOOSE_TITLE_RESULTS: [MessageHandler(Filters.text, PollBot().handle_polls_results_title),
                                CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
                                CommandHandler('cancel', PollBot().cancel)],
 
