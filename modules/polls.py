@@ -343,7 +343,7 @@ class PollBot(object):
         table.update_one({'poll_id': poll['poll_id'],
                           "bot_id": bot.id,
                           "chat_id": update.callback_query.message.chat_id},
-                         self.serialize(poll),
+                         {"$set": self.serialize(poll)},
                          upsert=True)
         old_instances = table.find({"poll_id": poll["poll_id"], "bot_id": bot.id})
         vote_instances = []
