@@ -16,7 +16,7 @@ Shopbot:
 
 
 Вася
-3)Answer to the specific message from the user and delete old answer. Give the possibility to answer to the admin as well
+# TODO fix polls
 4)Create custom "send message" button, like "order promotion"
 # TODO results for users and donations - send csv as file !
 # TODO two clicks on donate and send message from user side
@@ -28,7 +28,7 @@ Shopbot:
 
 
 
-
+# TODO fix multiple options and order of preference polls
 # TODO credit card token for shop  410694247:TEST:c374c3a5-04b2-4f5d-a923-062cd4adc358
 # TODO connect e-shop button
 # TODO for Occupy: add users + all old polls + tags

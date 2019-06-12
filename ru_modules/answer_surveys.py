@@ -53,6 +53,8 @@ class AnswerSurveys(object):
 
     @run_async
     def start_answering(self, bot, update, user_data):  # TODO add the "skip" button
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
         user_data['title'] = update.callback_query.data.replace("survey_", "")
         user_data["question_id"] = 0
         survey = surveys_table.find_one({

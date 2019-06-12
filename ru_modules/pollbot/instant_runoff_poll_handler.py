@@ -68,8 +68,8 @@ class InstantRunoffPollHandler(BasePoll):
         return body
 
     def run_election(self, candidates, votes, skip_index=0):
-
-        if not any([v[skip_index:] for v in votes]):
+        print(votes)
+        if not any([v for v in votes]):
             # No votes left - it's a tie.
             return candidates
 
@@ -102,10 +102,10 @@ class InstantRunoffPollHandler(BasePoll):
         counts = [0] * len(candidates)
         for vote in votes:
             vote_counted = False
-            for preference in vote:
-                if preference in candidates and not vote_counted:
-                    counts[candidates.index(preference)] += 1
-                    vote_counted = True
+            # for preference in vote:
+            if vote in candidates and not vote_counted:
+                counts[candidates.index(vote)] += 1
+                vote_counted = True
         return counts
 
     def handle_vote(self, votes, user, name, callback_data):

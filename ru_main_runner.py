@@ -18,7 +18,7 @@ from ru_modules.pay_donation import DONATE_HANDLER, DonationBot, HANDLE_SUCCES, 
 from ru_modules.polls import POLL_HANDLER, SEND_POLLS_HANDLER, BUTTON_HANDLER, DELETE_POLLS_HANDLER, POLLS_RESULTS_HANDLER
 from ru_modules.send_donation_request import SEND_DONATION_TO_USERS_HANDLER
 from ru_modules.send_message import SEND_MESSAGE_TO_ADMIN_HANDLER, SEND_MESSAGE_TO_USERS_HANDLER, SEE_MESSAGES_HANDLER, \
-    SendMessageToUsers
+    SendMessageToUsers, ANSWER_TO_MESSAGE_HANDLER
 from ru_modules.user_mode import USER_MODE_OFF, USER_MODE_ON
 
 logging.basicConfig(
@@ -77,6 +77,7 @@ def ru_main(token):
     dispatcher.add_handler(SEND_MESSAGE_TO_ADMIN_HANDLER)
     dispatcher.add_handler(SEND_MESSAGE_TO_USERS_HANDLER)
     dispatcher.add_handler(SEE_MESSAGES_HANDLER)
+    dispatcher.add_handler(ANSWER_TO_MESSAGE_HANDLER)
 
     # SURVEYS
     dispatcher.add_handler(ANSWER_SURVEY_HANDLER)
@@ -99,7 +100,7 @@ def ru_main(token):
     #                       cert='cert.pem',
     #                       webhook_url='https://142.93.109.14:8443/' + token)
     print(token)
-    updater.start_polling(timeout=15, read_latency=4)
+    updater.start_polling(timeout=20, read_latency=4)
 
     updater.idle()
 

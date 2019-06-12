@@ -4,13 +4,14 @@ from .instant_runoff_poll_handler import InstantRunoffPollHandler
 from .custom_description_poll_handler import CustomDescriptionHandler
 
 
-class CustomDescriptionInstantRunoffPollHandler(InstantRunoffPollHandler, CustomDescriptionHandler):
+class CustomDescriptionInstantRunoffPollHandler(CustomDescriptionHandler, InstantRunoffPollHandler):
     def __init__(self):
         super(CustomDescriptionInstantRunoffPollHandler, self).__init__()
-        self.name = "Order of preference poll with custom description"
-        self.desc = "Order of preference poll with a custom description"
+        self.name = "Order of preference with custom description"
+        self.desc = "Order of preference with custom description"
 
     def evaluation(self, poll):
+        print(poll)
         votes = poll.get('votes', {})
         if type(poll["options"]) is str:
             poll["options"] = ast.literal_eval(poll["options"])

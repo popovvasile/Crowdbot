@@ -8,9 +8,10 @@ from telegram.ext import (CommandHandler, MessageHandler, Filters,
                           ConversationHandler, RegexHandler, run_async, CallbackQueryHandler)
 from database import users_messages_to_admin_table, chats_table
 from ru_modules.helper_funcs.helper import get_help
-from ru_modules.helper_funcs.strings import send_message_1, send_message_2, send_message_3, send_message_4, send_message_5, \
+from ru_modules.helper_funcs.strings import send_message_1, send_message_2, send_message_3, send_message_4, \
+    send_message_5, \
     send_message_6, send_message_button_1, send_message_button_2, send_message_admin, send_message_user, \
-    send_message_module_str, back_text
+    send_message_module_str, back_text, answer_button_str
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -194,7 +195,7 @@ class AnswerToMessage(object):
 
     @run_async
     def send_message(self, bot, update, user_data):
-        user_data["chat_id"] = update.callback_query.data  # chat_id
+        user_data["chat_id"] = update.callback_query.data.replace("answer_to_message_", "")  # chat_id
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         bot.send_message(update.callback_query.message.chat.id,
@@ -244,7 +245,7 @@ class AnswerToMessage(object):
             bot.send_video_note(user_data["chat_id"], video_note_file)
 
         final_reply_markup = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(text="Done", callback_data="send_message_finish")]]
+            [[InlineKeyboardButton(text="Done", callback_data="answer_to_message_finish")]]
         )
         bot.send_message(update.message.chat_id,
                          send_message_4,
@@ -263,9 +264,6 @@ class AnswerToMessage(object):
                          send_message_5,
                          reply_markup=final_reply_markup)
 
-        bot.send_message(user_data["chat_id"],
-                         "Click here for menu",
-                         reply_markup=final_reply_markup)
         logger.info("Admin {} on bot {}:{} sent a message to the users".format(
             update.effective_user.first_name, bot.first_name, bot.id))
         return ConversationHandler.END
@@ -315,7 +313,9 @@ class SeeMessageToAdmin(object):
                                      "Message: {}".format(message["user_full_name"],
                                                           message["message"]),
                                      reply_markup=InlineKeyboardMarkup(
-                                         [[InlineKeyboardButton(text="Ответить", callback_data=message["chat_id"])]]
+                                         [[InlineKeyboardButton(text=answer_button_str,
+                                                                callback_data="answer_to_message_" +
+                                                                              str(message["chat_id"]))]]
                                      ))  # TODO recheck
 
         else:
@@ -369,7 +369,7 @@ SEND_MESSAGE_TO_USERS_HANDLER = ConversationHandler(
 SEE_MESSAGES_HANDLER = CallbackQueryHandler(pattern="inbox_message", callback=SeeMessageToAdmin().see_messages)
 
 ANSWER_TO_MESSAGE_HANDLER = ConversationHandler(
-    entry_points=[CallbackQueryHandler(pattern="answer_to_message",
+    entry_points=[CallbackQueryHandler(pattern=r"answer_to_message",
                                        callback=AnswerToMessage().send_message, pass_user_data=True),
                   CallbackQueryHandler(callback=AnswerToMessage().back,
                                        pattern=r"cancel_send_message", pass_user_data=True)],

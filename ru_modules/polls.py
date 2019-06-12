@@ -27,8 +27,8 @@ from ru_modules.pollbot.custom_description_poll_handler import CustomDescription
 from ru_modules.pollbot.multiple_options_poll_handler import MultipleOptionsHandler
 from ru_modules.pollbot.custom_description_instant_runoff_poll_handler import CustomDescriptionInstantRunoffPollHandler
 
-POLL_TYPE_CUSTOM_DESCRIPTION, \
 POLL_TYPE_INSTANT_RUNOFF_CUSTOM_DESCRIPTION, \
+POLL_TYPE_CUSTOM_DESCRIPTION, \
 POLL_TYPE_MULTIPLE_OPTIONS = range(3)
 
 POLL_HANDLERS = {
@@ -101,7 +101,6 @@ class PollBot(object):
         user_data['type'] = polltype
         user_data['options'] = []
         user_data['meta'] = dict()
-
         if POLL_HANDLERS[polltype].requires_extra_config(user_data['meta']):
             update.message.reply_text(POLL_HANDLERS[polltype].ask_for_extra_config(
                 user_data.get('meta')),
@@ -450,13 +449,13 @@ class PollBot(object):
         polls_list_of_dicts = polls_table.find({"bot_id": bot.id})
         command_list = [command['title'] for command in polls_list_of_dicts]
         reply_keyboard = [command_list]
-
+        print(reply_keyboard)
         bot.send_message(update.callback_query.message.chat.id,
                          polls_str_13,
                          reply_markup=ReplyKeyboardMarkup(reply_keyboard,
                                                           one_time_keyboard=True))
         bot.send_message(update.callback_query.message.chat.id,
-                         polls_str_15, reply_keyboard=self.reply_markup)
+                         polls_str_15, reply_markup=self.reply_markup)
         return CHOOSE_TITLE_RESULTS
 
     @run_async
@@ -473,15 +472,19 @@ class PollBot(object):
                 poll_instance["votes"] = ast.literal_eval(poll_instance["votes"])
 
             new_poll_instances.append(poll_instance)
-        poll = new_poll_instances[0]
-        for other_poll in poll_instances:
-            poll.update(other_poll)
-        bot.send_message(update.message.chat.id,
-                         self.assemble_message_text(poll),
-                         reply_markup=self.assemble_inline_keyboard(poll, True),
-                         parse_mode='Markdown'
-                         )
-        bot.send_message(update.message.chat.id, polls_str_18, reply_markup=self.create_markup)
+        if len(new_poll_instances) > 0:
+            poll = new_poll_instances[0]
+            for other_poll in poll_instances:
+                poll.update(other_poll)
+            bot.send_message(update.message.chat.id,
+                             self.assemble_message_text(poll),
+                             reply_markup=self.assemble_inline_keyboard(poll, True),
+                             parse_mode='Markdown'
+                             )
+            bot.send_message(update.message.chat.id, polls_str_18, reply_markup=self.create_markup)
+        else:
+            bot.send_message(update.message.chat.id, polls_str_18, reply_markup=self.send_markup)
+
         return ConversationHandler.END
 
     @run_async

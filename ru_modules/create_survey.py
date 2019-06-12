@@ -136,13 +136,16 @@ class SurveyHandler(object):
         user_data["questions"] = survey["questions"]
         user_data["answers"] = []
         texr_to_send = "\nQuestions: \n{}".format(questions)
+        admin_keyboard = [InlineKeyboardButton(text=send_button, callback_data="send_survey"),
+                          InlineKeyboardButton(text=menu_button, callback_data="help_back")]
         bot.send_message(update.callback_query.message.chat.id,
-                         survey_str_6.format(survey['title'], texr_to_send))
+                         survey_str_6.format(survey['title'], texr_to_send),
+                         reply_markup=InlineKeyboardMarkup([admin_keyboard]))
+
         surveys_table.update_one({
             "bot_id": bot.id,
             "title": user_data["title"]
         }, {'$set': user_data}, upsert=True)
-        get_help(bot, update)
         logger.info("Admin {} on bot {}:{} added a new survey:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, user_data["title"]))
         user_data.clear()
@@ -245,7 +248,7 @@ class SurveyHandler(object):
             update.effective_user.first_name, bot.first_name, bot.id, txt))
         admin_keyboard = [InlineKeyboardButton(text=create_button, callback_data="create_survey"),
                           InlineKeyboardButton(text=menu_button, callback_data="help_back")]
-        bot.send_message(update.callback_query.message.chat.id,
+        bot.send_message(update.message.chat.id,
                          survey_str_24,
                          reply_markup=InlineKeyboardMarkup([admin_keyboard]))
         return ConversationHandler.END

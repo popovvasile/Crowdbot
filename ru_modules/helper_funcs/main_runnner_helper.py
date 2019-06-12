@@ -110,10 +110,6 @@ def error_callback(bot, update, error):
 
 @run_async
 def button_handler(bot: Bot, update: Update):
-    photo_directory = "files/{bot_id}/photo".format(bot_id=bot.id)
-    audio_directory = "files/{bot_id}/audio".format(bot_id=bot.id)
-    document_directory = "files/{bot_id}/document".format(bot_id=bot.id)
-    video_directory = "files/{bot_id}/video".format(bot_id=bot.id)
     query = update.callback_query
     button_callback_data = query.data
     buttons = [[InlineKeyboardButton(text="🔙 Назад", callback_data="help_back")]]
@@ -128,20 +124,22 @@ def button_handler(bot: Bot, update: Update):
                 query.message.reply_text(text=descr)
         if "audio_files" in button_info:
             for filename in button_info["audio_files"]:
-                with open(audio_directory + "/" + filename, 'rb') as file:
-                    query.message.reply_audio(file)
+                query.message.reply_audio(filename)
         if "video_files" in button_info:
             for filename in button_info["video_files"]:
-                with open(video_directory + "/" + filename, 'rb') as file:
-                    query.message.reply_video(file)
+                query.message.reply_video(filename)
         if "document_files" in button_info:
             for filename in button_info["document_files"]:
-                with open(document_directory + "/" + filename, 'rb') as file:
-                    query.message.reply_document(file)
+                if ".png" in filename or ".jpg" in filename:
+                    bot.send_photo(chat_id=query.message.chat.id,
+                                   photo=filename)
+                else:
+                    bot.send_document(chat_id=query.message.chat.id,
+                                      document=filename)
         if "photo_files" in button_info:
             for filename in button_info["photo_files"]:
-                with open(photo_directory + "/" + filename, 'rb') as file:
-                    query.message.reply_photo(file)
+                bot.send_photo(chat_id=query.message.chat.id,
+                               photo=filename)
 
     except BadRequest as excp:
         if excp.message == "Message is not modified":
