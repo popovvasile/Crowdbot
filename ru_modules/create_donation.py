@@ -9,11 +9,11 @@ from telegram.ext import (CommandHandler, MessageHandler, Filters, ConversationH
                           run_async, CallbackQueryHandler)
 import logging
 from database import chatbots_table
-from modules.helper_funcs.auth import initiate_chat_id
+from ru_modules.helper_funcs.auth import initiate_chat_id
 
 # Enable logging
-from modules.helper_funcs.helper import get_help
-from modules.helper_funcs.strings import create_donation_str_1, back_button, create_donation_str_2, \
+from ru_modules.helper_funcs.helper import get_help
+from ru_modules.helper_funcs.strings import create_donation_str_1, back_button, create_donation_str_2, \
     create_donation_str_3, create_donation_str_4, create_donation_str_5, create_donation_str_6, create_donation_str_7, \
     create_donation_str_8, send_donation_request_button
 

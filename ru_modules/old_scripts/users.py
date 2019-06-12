@@ -1,30 +1,37 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, Filters, RegexHandler
+from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, Filters
 from telegram.ext.dispatcher import run_async
 
 from database import users_table
-from ru_modules.helper_funcs.auth import initiate_chat_id
-from ru_modules.helper_funcs.main_runnner_helper import get_help
+from modules.helper_funcs.auth import initiate_chat_id
 
-TYPING_PASS = 1
+TYPING_EMAIL, TYPING_PASS = range(2)
 
 
-class AdminAuthentication(object):
+class UserAuthentication(object):
+    @run_async
+    def handle_addme_user(self, bot, update):
+        print("Message: " + str(update.message))
+        chat_id, txt = initiate_chat_id(update)
+        bot.send_message(chat_id, update.message.chat.first_name + " please enter your email")
+        return TYPING_EMAIL
+
     @run_async
     def handle_email(self, bot, update, user_data):
         print("Message: " + str(update.message))
         chat_id, txt = initiate_chat_id(update)
         used_email = txt
         user = users_table.find_one({'bot_id': bot.id, "email": used_email})
-        if user:
-            bot.send_message(chat_id, "Enter your password or click /cancel")
+        if user:  # TODO double check
+            bot.send_message(chat_id, "Please enter your password")
             user_data["email"] = used_email
             return TYPING_PASS
         else:
             bot.send_message(chat_id,
-                             "This email is not listed in the list of users.")
-            return ConversationHandler.END
+                             "This email is not listed in the list of users."
+                             " Please enter a valid email or click /cancel")
+            return TYPING_EMAIL
 
     @run_async
     def handle_password(self, bot, update, user_data):
@@ -53,8 +60,6 @@ class AdminAuthentication(object):
                                          "superuser": superuser,
                                          "tags": ["#all", "#user", "#admin"]
                                          })
-                get_help(bot, update)
-
             else:
                 bot.send_message(chat_id, update.message.chat.first_name + ", you have been registered " +
                                  "as an authorized user of this bot.")
@@ -69,7 +74,6 @@ class AdminAuthentication(object):
                                          "superuser": superuser,
                                          "tags": ["#all", "#user"]
                                          })
-                get_help(bot, update)
             return ConversationHandler.END
         elif used_password is None:
             bot.send_message(chat_id, "No password provided. Please send a  valid password or click /cancel")
@@ -80,22 +84,68 @@ class AdminAuthentication(object):
             return TYPING_PASS
 
     @run_async
+    def handle_rmme(self, bot, update):
+        user_id = update.message.from_user.id
+        chat_id = update.message.chat_id
+        user = users_table.find_one({'bot_id': bot.id, "chat_id": chat_id})
+
+        if user:
+            users_table.delete_one(
+                {"bot_id": bot.id, "user_id": user_id}
+            )
+            bot.send_message(chat_id, "Your permission for using the bot was removed successfully.")
+        else:
+            bot.send_message(chat_id, "You didn't have the permission to use this bot")
+
+    @run_async
+    def show_users(self, bot, update):  # TODO why no full_name is save?
+        chat_id = update.message.chat_id
+        users = users_table.find({'bot_id': bot.id})
+
+        text_to_return = ''
+        for user in users:
+            text_to_return += 'Name: {}, email: {} \n'.format(user["full_name"], user['email'])
+        bot.send_message(chat_id, "This is the full list on the users of this bot: \n" + text_to_return)
+
+    @run_async
     def cancel(self, bot, update):
-        get_help(bot, update)
         update.message.reply_text("Until next time!")
         return ConversationHandler.END
 
 
-ADMIN_AUTHENTICATION_HANDLER = ConversationHandler(
-    entry_points=[RegexHandler(r"^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$",
-                               AdminAuthentication().handle_email, pass_user_data=True)],
+USER_AUTHENTICATION_HANDLER = ConversationHandler(
+    entry_points=[CommandHandler('addme', UserAuthentication().handle_addme_user)],
 
     states={
+        TYPING_EMAIL: [MessageHandler(Filters.text,
+                                      UserAuthentication().handle_email,
+                                      pass_user_data=True)],
         TYPING_PASS: [MessageHandler(Filters.text,
-                                     AdminAuthentication().handle_password,
+                                     UserAuthentication().handle_password,
                                      pass_user_data=True)],
     },
 
-    fallbacks=[CommandHandler('cancel', AdminAuthentication().cancel),
-               MessageHandler(filters=Filters.command, callback=AdminAuthentication().cancel)]
+    fallbacks=[CommandHandler('cancel', UserAuthentication().cancel),
+               MessageHandler(filters=Filters.command, callback=UserAuthentication().cancel)]
 )
+USER_REMOVE_HANDLER = CommandHandler("rmme", UserAuthentication().handle_rmme)
+SHOW_USERS_HANDLER = CommandHandler("show_users", UserAuthentication().show_users)
+
+__mod_name__ = "Login"
+
+__admin_help__ = """
+  -  /addme - get the user permissions
+  -  /rmme - removes the user permissions 
+  -  /show_users - shows all the users of the chatbot
+"""
+
+__user_help__ = """
+  -  /rmme - removes your user permissions 
+"""
+
+__visitor_help__ = """
+  -  /addme - get your user permissions
+"""
+__admin_keyboard__ = [["/addme", "/rmme", "/show_users"]]
+__user_keyboard__ = [["/addme"]]
+__visitor_keyboard__ = [["/addme"]]

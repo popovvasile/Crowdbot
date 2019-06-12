@@ -9,22 +9,33 @@ Menu:
 Shopbot:
     connect to rest api and alive_checker
 
+Юра
+1)add and Posting to the channels
+2)Redirecting on surveys, donations and subscriptions from channel to chatbot
+
+
+
+Вася
+3)Answer to the specific message from the user and delete old answer. Give the possibility to answer to the admin as well
+4)Create custom "send message" button, like "order promotion"
+# TODO results for users and donations - send csv as file !
+# TODO two clicks on donate and send message from user side
+
+
+
+
+# TODO Kirill add the option "pause the bot"
+
+
+
 
 # TODO credit card token for shop  410694247:TEST:c374c3a5-04b2-4f5d-a923-062cd4adc358
-# TODO create a POST endpoint to pause the chatbot if not paid "active"
-# TODO adjust REST api + two languages
-# TODO connect e-shop
-# TODO how to solve the survey results without /start
-
-
-
+# TODO connect e-shop button
 # TODO for Occupy: add users + all old polls + tags
 # TODO add content
 # TODO return the amount of money received by both bots
-# TODO add the option "pause the bot"
 # TODO make buying easier in the shop - don't enforce funds
 # TODO make content to return in the same order as was sent !
-# TODO results for users and donations - send csv as file !
 # TODO pics and other content for surveys and polls
 # TODO hidden content
 

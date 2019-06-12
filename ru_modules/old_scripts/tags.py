@@ -3,7 +3,7 @@
 from telegram import ReplyKeyboardMarkup
 from telegram.ext import RegexHandler, CommandHandler, run_async, ConversationHandler, MessageHandler, Filters
 from database import chats_table, tags_table
-from ru_modules.helper_funcs.auth import if_admin
+from modules.helper_funcs.auth import if_admin
 
 CHOOSING_TAGS = 1
 

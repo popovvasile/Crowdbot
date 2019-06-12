@@ -1,219 +1,231 @@
-user_mode_help_admin = """
- Click "ON" to turn on the user view and interact with the chatbot as an non-admin user.
-  
- Click "OFF" to return to the normal mode
-"""
-user_mode_on_finish = "Great! Now you can return to the main menu and"\
-                      " you'll see it as non-admin users do (except the 'User view button'."
-user_mode_off_finish = "User view is turned off! Now you can use the main menu as admin"
-user_mode_str = "User view"
 
-send_message_module_str = "Send a message"
-send_message_button_1 = "Send message"
-send_message_button_2 = "Inbox messages"
-send_message_1 = "What do you want to tell us?"
-send_message_2 = "Thank you! Your message has been sent to the chatbot owner!"
-send_message_3 = "What do you want to tell your users?\n"\
-                         "We will forward your message to all your users."
-send_message_4 = "Great! Send me a new message or click 'Done'"
-send_message_5 = "Thank you! We've sent your message to your users!"
-send_message_6 = "You have no incoming messages yet"
+user_mode_help_admin = """
+Press “On" to turn on the bot in the user mode. 
+Press “Off" to return to the normal mode 
+"""
+user_mode_on_finish = "✅ Ready, now look at the bot in user mode"
+user_mode_off_finish = "🔚 User mode is off"
+
+user_mode_str = "User mode"
+
+
+send_message_module_str = "✉️ Messages"
+send_message_button_1 = "📤 Send message"
+send_message_button_2 = "📥 Mailbox"
+send_message_1 = "Write a message"
+send_message_2 = "Thanks, the homing pigeon's on its way. 🕊!"
+send_message_3 = "Write a message to users\n"\
+"Thanks, the homing pigeon's on its way. 🕊!"
+send_message_4 = "Write a new message and press '✅ Done"
+send_message_5 = "✅The message is sent"
+send_message_6 = "Forever alone 😉 "
 send_message_admin = """
-Send a message to your users or check the messages sent by the users to you
+Here you can:
+📤 Send message to users
+📥 Check email
+🦖 Meet the dinosaur
+
+
+Send a message to users and get feedback
 """
 send_message_user = """
-Here you can send a message to the chatbot owner
+Say Hello to the admin!
 """
+send_donation_request_1 = "Tell everyone about the fundraising and how you will utilize the money\n"\
+"The 'Support project' button will be attached to the message'"
+send_donation_request_2 = "Write a new message and press '✅ Done"
+send_donation_request_3 = "💸 The message is sent!"
 
-
-send_donation_request_1 = "What do you want to tell your users?\n"\
-                           "We will forward your message to all your users,\n" \
-                           "together with a 'Donate' button"
-send_donation_request_2 = "Great! Send me a new message or click 'Done'"
-send_donation_request_3 = "Thank you! We've sent your message to your users!"
-send_donation_request = "Send donation request"
-cancel_button_survey = "Cancel survey"
-donate_button = "Donate"
-back_button = "Back"
-done_button = "Done"
+send_donation_request_button = "Send donation requst"
+cancel_button_survey = "🔚 Cancel survey"
+donate_button = "💰 Manage payments"
+back_button = "🔙 Back"
+done_button = "✅ Done"
 create_button = "Create"
-delete_button = "Delete"
-send_button = "Send"
-results_button = "Results"
-menu_button = "Menu"
-allow_donations_button = "Allow donations"
-configure_button = "Configure"
-ask_donation_button = "Ask users for donation"
-title_button = "Title"
+delete_button = "🗑 Delete"
+send_button = "📤 Send"
+results_button = "📊 Results"
+menu_button = "ℹ️ Menu"
+allow_donations_button = " 💰 Create a payment"
+configure_button = "🛠 Settings"
+ask_donation_button = "Ask for money"
+title_button = "Name"
 description_button = "Description"
 currency_button = "Currency"
-delete_donation_button = "Delete this donation"
-great_text = "Great!"
-create_button_button = "Create button"
-edit_button = "EDIT"
-start_button = "START"
-main_survey_button = "MAIN SURVEY"
-back_text = "To return to main menu, click 'Back' "
+delete_donation_button = "🗑 Delete the payment"
+great_text = "Well done!"
+create_button_button ="📌 Create a button "
+edit_button = "✏️ Edit"
+start_button = "🏁 Start"
+main_survey_button = "The main survey"
+back_text = "Press '🔙 Back ' to return to the menu "
 polls_affirmations = [
-    "Cool",
-    "Nice",
-    "Doing great",
-    "Awesome",
-    "Okey dokey",
-    "Neat",
-    "Whoo",
-    "Wonderful",
-    "Splendid",
+"OK",
+"Cool",
+"Great",
+"Perfectly",
+"Okeydokey",
+"Easy-peasy",
+"Yuhu",
+"Yo",
+"Good",
 ]
-polls_str_1 = 'Hi! Please send me the title of your new poll'
-polls_str_2 = "What kind of poll is it going to be?"
-polls_str_3 = "Now, send me the first answer option"
-polls_str_4 = "Next, please send me the first answer option."
-polls_str_5 = "Now, send me another answer option or click DONE to publish."
-polls_str_6 = "Uh oh, you're running out of options. You can only have one more option."
-polls_str_7 = "Thank you! you can send this poll to your users by clicking 'Send' \n"
-polls_str_8 = "You didn't create any polls yet. Please create your first poll"
-polls_str_9 = "This is the list of the current polls. "
-polls_str_10 = "Choose the poll that you want to send"
-polls_str_11 = "Looks like there are yet no users to send this poll to. \n No polls sent :( "
-polls_str_12 = "Your poll was sent to all you users! "
-polls_str_13 = "Please choose the poll that you want to check"
-polls_str_14 = "Please choose the poll that you want to delete"
-polls_str_15 = "Click 'Back' if you want to cancel"
-polls_str_16 = """You have no polls created yet. \n
-Click "Create" to configure your first poll or "Back" for main menu"""
-polls_str_17 = "Poll with title {} has been deleted from all chats."
-polls_str_18 = """Click "Create" to configure a new poll or "Back" for main menu"""
+polls_str_1 = 'Enter the name of the poll'
+polls_str_2 = "Choose your poll type?"
+polls_str_3 = "Enter the first answer"
+polls_str_4 = "Send the next answer"
+polls_str_5 = "Enter the next answer and press'✅ Done'"
+polls_str_6 = "Oops, too many answers. There is one more option"
+polls_str_7 = "Thank you! Press '📤 Send' to allow users to take the poll.\n"
+polls_str_8 = "You haven't done the poll yet. Click 'Create'"
+polls_str_9 = "List of active polls"
+polls_str_10 = "Choose a poll to send to users"
+polls_str_11 = "Damn it, the poll is not sent 🤨 \n you have no users. Share the link of your bot in the social networks and  online resource or invite your friends. Somebody will come along soon 🐣"
+polls_str_12 = "✅ The poll is sent"
+polls_str_13 = "Choose a poll to view 📊 theresults"
+polls_str_14 = "🗑 Choose a poll to delete"
+polls_str_15 = "Press '🔙 Back' to cancel"
+polls_str_16 = """ You haven't created a survey yet. \n
+Click 'Create' or '🔙 Back'"""
+polls_str_17 = "🗑 Poll with name {} removed from all chats."
+polls_str_18 = "These are the results. You can create a new poll or return to menu"
 polls_help_admin = """
 Here you can:
- - Create a new poll
- - Delete_poll
- - Send a poll to all users 
+🙌🏻 Create a poll
+📊 Get the results
+🗑 Delete the poll
+📤 Send a poll to users
+🚭 Smoking is prohibited
+
 
 """
-polls_module_str = "Polls"
+polls_module_str = "Poll"
+
 
 pay_donation_str_admin = """
- Click:
-  - Donate - to make a donation for this organization
-  - Allow donations - to allow the users of this bot to donate for your organization 
-  - Configure - to edit the current donation settings
+Here you can:
+💸 Send payment
+💰 Create a payment for yourself and notify the users of the bot
+🛠 Set up payment
+
 
 """
-pay_donation_mode_str = "Donate"
-pay_donation_str_1 = "First, tell us how much do you want to donate. Enter a floating point number"
-pay_donation_str_2 = "Remember, we use {} as our primary currency"
-allow_donation_text = "You didn't set up configurations so far. \n"\
-                                 'Press "Allow donations" to configure your first donation option\n'\
-                                 'or click "Back" for main menu'
-pay_donation_str_4 = "Sorry,you can't donate on this chatbot yet"
-pay_donation_str_5 = "You entered a wrong number. Please enter a valid amount of money "
+pay_donation_mode_str = "Make a payment"
+pay_donation_str_1 = "How much do you want to pay? Enter the amount. ❗️ Cents and pennies separated by commas."
+pay_donation_str_2 = "The main currency of the administrator ❗️ {}"
+allow_donation_text = "Press '💰 Create a payment'\n'\
+'or press '🔙 Back'"
+pay_donation_str_4 = "Admin has not yet set up payments 🤷‍ "
+pay_donation_str_5 = "Oops, you entered the wrong number. Try again."
 
-manage_button_str_1 = "Please choose the button that you want to edit (or click /cancel)"
-manage_button_str_2 = "You have no custom buttons to edit. Please create a button first"
-manage_button_str_3 = "Please choose the part that you want to replace"
-manage_button_str_4 = "Send me the new content to update the old one"
-manage_button_str_5 = "Great! Your content has been changed!"
-manage_button_str_6 = "Button creation was stopped"
 
-edit_button_str_1 = "Please tell me a new text to be displayed above the menu keyboard"
-edit_button_str_2 = "Thank you! Your description has been updated!"
+manage_button_str_1 = "✏️Choose the button you want to edit or press '🔙 Back'"
+manage_button_str_2 = "Hopla, you haven't made the button yet. Press'📌 Create a button'"
+manage_button_str_3 = "✏️ Choose the content you want to replace"
+manage_button_str_4 = "Send a new content"
+manage_button_str_5 = "✅ Super! Content is updated"
+manage_button_str_6 = "🛑 You canceled the creation of a button."
 
-donations_edit_str_1 = "Test payment, Please ignore this message"
-donations_edit_str_2 = "What do you want to do with this donation? (click /cancel to return)"
-donations_edit_str_3 = "Yes, I am sure"
-donations_edit_str_4 = "No, let's get back"
-donations_edit_str_5 = "Are you sure that you want to delete this donation? "
-donations_edit_str_6 = "Please choose what exactly do you want to edit (or click /cancel)"
-donations_edit_str_7 = "Now, write a new title for this donation (or click /cancel)"
-donations_edit_str_8 = "Now, write a short text for your donation- what your users have to pay for? (or click /cancel)"
-donations_edit_str_9 = "Now, choose the currency of your donation (or click /cancel)"
-donations_edit_str_10 = "Your donation has been updated"
-donations_edit_str_11 = "Your donation has been deleted"
-donations_edit_str_12 = "Please enter your new donation provider token"
-donations_edit_str_13 = "Thank you! Your provider_token was changed successfully !"
-donations_edit_str_14 = "Your provider token is wrong. Please check your provider token and send it again"
 
-survey_str_1 = "Enter a title for your survey"
-survey_str_2 = "Type your first question"
-survey_str_3 = "You already have a survey with this title.\n"\
-                                          "Please type another title for your survey"
-survey_str_4 = "Type your next question or click DONE if you are finished"
-survey_str_5 = "Dear user, a survey has been sent to you.\n"\
-                                          "Please press START to answer to the questions"
-survey_str_6 = "Created a survey with title: {}\n"\
-                         "{}"\
-                         "\nUntil next time!"
-survey_str_7 = "This is the list of your current surveys:"
-survey_str_8 = "Choose the survey that you want to see"
-survey_str_9 = """You have no surveys created yet. \n
-Click "Create" to configure your first survey or "Back" for main menu"""
-survey_str_10 = 'Users full name: {},\nQuestion: {}\nAnswer :{} \n\n'
-survey_str_11 = "Here is your requested data : \n {}"
-survey_str_12 = "Your survey doesn't have any answers yet =/"
-survey_str_13 = "Send your users a reminder to answer to your questions using the button 'Send'"
-survey_str_14 = "This is the list of your current surveys:"
-survey_str_15 = "Choose the survey that you want to delete"
-survey_str_16 = """You have no surveys created yet. \n
-Click "Create" to configure your first survey or "Back" for main menu"""
-survey_str_17 = "The survey with the title '{}' has been deleted"
-survey_str_18 = "This is the list of your current surveys:"
-survey_str_19 = "Choose the survey that you want to send to your users"
-survey_str_20 = "Dear user, a survey has been sent to you.\n" \
-                "Please press START to answer to the questions"
-survey_str_21 = "Looks like there are yet no users to send this survey to. "\
-                                      "No surveys sent :( "
-survey_str_22 = "Survey sent to all users!"
-survey_str_23 = """You have no surveys created yet. \n
-Click "Create" to configure your first survey or "Back" for main menu"""
-survey_str_24 = "You can create a new survey or get back to the menu"
-create_donation_str_1 = "Test payment, Please ignore this message"
-create_donation_str_2 = "Please enter a title for your donation"
-create_donation_str_3 = """Please enter your donation provider token\n 1st Step: Go to @botfather and enter /mybots. 
-Choose your bot and press “Payments”. Choose a provider. \nWe advise to use „Stripe“ because of low Acquiring 
-comisson for European card. \n2nd Step: Authorize yourself in the chatbot of the chosen provider. Just follow 
-instructions then you will get a token-access, that you should copy.\n3nd Step :Go back to your bot and create 
-/newdonate. Paste your token, choose the currency, and minimal donation. \n
-[Telegram's tutorial](https://core.telegram.org/bots/payments#getting-a-token)"""
-create_donation_str_4 = "Enter a title for your donation"
-create_donation_str_5 = "Your provider token is wrong. Please check your provider token and send it again"
-create_donation_str_6 = "Write a short text for your donation campaign- what your users are donating for?"
-create_donation_str_7 = "Now, Choose the currency of your payment"
-create_donation_str_8 = "Congratulation! You can get payments from your audience.\n"\
-                         "Do not forget to remind them of this."
+edit_button_str_1 = "Enter a new 🤝 greeting for users"
+edit_button_str_2 = "✅ It's done.!"
 
-answer_survey_str_1 = "Please answer the following question.\n\n"
+
+donations_edit_str_1 = "Test payment. Ignore it"
+donations_edit_str_2 = "What to do with the payment? Or press '🔙 Back"
+donations_edit_str_3 = "Yes, I'm sure."
+donations_edit_str_4 = "No, cancel"
+donations_edit_str_5 = "🗑 Are you sure you want to delete this payment?"
+donations_edit_str_6 = "What exactly do you want to change? Or press '🔙 Back'"
+donations_edit_str_7 = "Write a new name for the payment. Or press '🔙 Back'"
+donations_edit_str_8 = "Do description of payment for users or write how you will utilize the money? Or press '🔙 Back'"
+donations_edit_str_9 = " Choose the main currency. Or press '🔙 Back'"
+donations_edit_str_10 = "✅ It’s in the bag!"
+donations_edit_str_11 = "🗑 The payment is deleted"
+donations_edit_str_12 = "Enter a new token of your payment system"
+donations_edit_str_13 = "✅ New token updated!"
+donations_edit_str_14 = "Wrong token. Check it and send it again."
+
+
+survey_str_1 = "Enter a name for the survey"
+survey_str_2 = "Write the first question"
+survey_str_3 = "The question with this name is already.\n"\
+"Think of another name"
+survey_str_4 = "Write the next question or  press '✅ Done'"
+survey_str_5 = "Hi, please take the survey. It won't be long.\n"\
+"Press '🏁 Start' to begin"
+survey_str_6 = "Created a survey called: {}\n"\
+"{}"\
+"\n Thanks, come again!"
+survey_str_7 = "This is a list of active surveys:"
+survey_str_8 = "Choose a survey to check 📊 results"
+survey_str_9 = """ You haven't created a survey yet. \n
+Press "Create" or '🔙 Back'"""
+survey_str_10 = 'The name of the user: {},\nQuestion: {}\nAnswer :{} \n\n'
+survey_str_11 = "The data you requested: \n {}"
+survey_str_12 = "Wait until someone answers. =/"
+survey_str_13 = "Click '📤 Send' to remind users of the survey"
+survey_str_14 = "List of surveys:"
+survey_str_15 = "🗑 Choose a survey to delete "
+survey_str_16 = """You haven't created a survey yet. \n
+Press "Create" or '🔙 Back'"""
+survey_str_17 = "🗑 Survey called '{}' removed"
+survey_str_18 = "List of active surveys:"
+survey_str_19 = "Choose the survey you want to send to users"
+survey_str_20 = "Hi, please take the survey..\n" \
+"Press '🏁 Start' to begin "
+survey_str_21 = "Damn it, the survey is not sent 🤨 \n you have no users. Share the link of your bot in the social networks and  online resource or invite your friends. Somebody will come along soon 🐣"
+survey_str_22 = "✅ The survey is sent."
+survey_str_23 = """You haven't done the survey yet.\n
+Press "Create" or '🔙 Back'"""
+survey_str_24 = "Survey has been deleted. You can create a new one or return to menu"
+
+create_donation_str_1 = "Test payment. Ignore it"
+create_donation_str_2 = "✏️ Write the name of the payment"
+create_donation_str_3 = """How to get a token payment system:\n 1st Step: Go to @botfather and enter /mybots.
+Choose your bot and press “Payments". Choose a provider. \nWe advise to use „Stripe“ because of low Acquiring
+comisson for European card. \n2nd Step: Authorize yourself in the chatbot of the chosen provider. Just follow
+instructions then you will get a token-access, that you should copy.\n3nd Step :Go back to your bot and create /newdonate.
+Вставь токен: \n"""
+create_donation_str_4 = "✏️ Write the name of the payment"
+create_donation_str_5 = "Wrong token. Check it and send it again."
+create_donation_str_6 = "Tell everyone about the fundraising and how you will utilize the money"
+create_donation_str_7 = "Choose the main currency"
+create_donation_str_8 = "✅Great! Now you can accept payments from bot users. ❗ ️Users only need a Bank card.\n"\
+"Don't forget to tell about it."
+
+
+answer_survey_str_1 = "Please answer the question.\n\n"
 answer_survey_str_2 = "Question:{}, Answer: {} \n"
-answer_survey_str_3 = "Thank you for your responses!\n"
-answer_survey_str_4 = "Until next time!"
+answer_survey_str_3 = "☺️ Thank you for answering my questions!\n"
+answer_survey_str_4 = "See you later!"
 survey_help_admin = """
- Here you can:
- -  Create a survey and ask your users any questions \n
- -  Delete a survey\n
- -  Send an invitation to answer to your survey\n
- -  Check the results of the survey
-
+Here you can:
+❓ Create a survey\n
+🗑 Delete a survey\n
+📤 Send a survey to users\n
+📊 The results of the survey.
 """
-survey_mode_str = "Surveys"
+survey_mode_str = "Survey"
 
-edit_button_button = "Edit a button"
-edit_menu_text = "Edit menu text"
+
+edit_button_button = "✏️ Edit"
+edit_menu_text = "🤝 Change the greeting"
 add_menu_buttons_help = """
 Here you can:\n
-- Create a custom button for your bot that will display images, files, voice, music or text.\n
-- Delete an old button\n
-- Edit the content of the button
+🙌🏻 Create a button to download any content. Show the users what you do.\n
+🗑 Delete the button\n
+✏️ Edit the button
 """
-add_menu_buttons_str_1 = "Type a name for new button or choose one of the examples below. "\
-                         "Please note that you can't modify the buttons available by default "
-add_menu_buttons_str_2 = 'Now, send a text, an image, a video, '\
-                                      'a document or a music file to display for your new button'
-add_menu_buttons_str_3 = 'You already have a button with the same name. Choose another name'
-add_menu_buttons_str_4 = 'Great! You can add one more file or text to display.\n'\
-                                  'If you think that this is enough, click DONE'
-add_menu_buttons_str_5 = 'Thank you! The button will be accessible by clicking \n {} in menu'
-add_menu_buttons_str_6 ="Choose the button that button that you want to delete"
-add_menu_buttons_str_7 =  """You have no buttons created yet. Create your first button by clicking "Create" """
-add_menu_buttons_str_8 = 'Thank you! We deleted the button {}'
-add_menu_buttons_str_9 = "Button creation was stopped"
-add_menu_buttons_str_10 = "You can create a new button or return to menu"
+add_menu_buttons_str_1 = "Write the name of the button or choose from the template."
+add_menu_buttons_str_2 = 'Send text, picture, document, video or music. '\
+'❗️ The text added to the description is not displayed in the button.'
+add_menu_buttons_str_3 = 'A button with this name already exists. Think of another name.'
+add_menu_buttons_str_4 = "Great! Add something else.\n'\
+'or press '✅ Done'"
+add_menu_buttons_str_5 = '✅Done! The button will be available in the title menu \n {}'
+add_menu_buttons_str_6 ="🗑 Choose the button you want to delete "
+add_menu_buttons_str_7 = """Oops. You don't have buttons yet. Click "Create"""
+add_menu_buttons_str_8 = '🗑 Button {} removed'
+add_menu_buttons_str_9 = "🛑 You canceled the creation of a button."
+add_menu_buttons_str_10 = "You can crete a new button or return to menu"
