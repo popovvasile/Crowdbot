@@ -9,7 +9,7 @@ import logging
 
 # Enable logging
 from database import surveys_table
-from modules.helper_funcs.strings import cancel_button_survey, answer_survey_str_1, answer_survey_str_2, \
+from modules.helper_funcs.en_strings import cancel_button_survey, answer_survey_str_1, answer_survey_str_2, \
     answer_survey_str_3, answer_survey_str_4, survey_help_admin, survey_mode_str, create_button, delete_button, \
     send_button, results_button
 
@@ -53,6 +53,8 @@ class AnswerSurveys(object):
 
     @run_async
     def start_answering(self, bot, update, user_data):  # TODO add the "skip" button
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
         user_data['title'] = update.callback_query.data.replace("survey_", "")
         user_data["question_id"] = 0
         survey = surveys_table.find_one({

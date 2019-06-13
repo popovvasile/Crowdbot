@@ -8,9 +8,10 @@ from telegram.ext import (CommandHandler, MessageHandler, Filters,
                           ConversationHandler, RegexHandler, run_async, CallbackQueryHandler)
 from database import users_messages_to_admin_table, chats_table
 from modules.helper_funcs.helper import get_help
-from modules.helper_funcs.strings import send_message_1, send_message_2, send_message_3, send_message_4, send_message_5, \
+from modules.helper_funcs.en_strings import send_message_1, send_message_2, send_message_3, send_message_4, \
+    send_message_5, \
     send_message_6, send_message_button_1, send_message_button_2, send_message_admin, send_message_user, \
-    send_message_module_str, back_text
+    send_message_module_str, back_text, answer_button_str
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -185,6 +186,112 @@ class SendMessageToUsers(object):
         return ConversationHandler.END
 
 
+class AnswerToMessage(object):
+    def __init__(self):
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_send_message")])
+        self.reply_markup = InlineKeyboardMarkup(
+            buttons)
+
+    @run_async
+    def send_message(self, bot, update, user_data):
+        user_data["chat_id"] = update.callback_query.data.replace("answer_to_message_", "")  # chat_id
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        bot.send_message(update.callback_query.message.chat.id,
+                         send_message_3,
+                         reply_markup=self.reply_markup)
+        return MESSAGE_TO_USERS
+
+    @run_async
+    def received_message(self, bot, update, user_data):
+        if update.message.text:
+            bot.send_message(user_data["chat_id"], update.message.text)
+
+        elif update.message.photo:
+            photo_file = update.message.photo[0].get_file().file_id
+            bot.send_photo(chat_id=user_data["chat_id"], photo=photo_file)
+
+        elif update.message.audio:
+            audio_file = update.message.audio.get_file().file_id
+            bot.send_audio(user_data["chat_id"], audio_file)
+
+        elif update.message.voice:
+            voice_file = update.message.voice.get_file().file_id
+            bot.send_voice(user_data["chat_id"], voice_file)
+
+        elif update.message.document:
+            document_file = update.message.document.get_file().file_id
+            bot.send_document(user_data["chat_id"], document_file)
+
+        elif update.message.sticker:
+            sticker_file = update.message.sticker.get_file().file_id
+            bot.send_sticker(user_data["chat_id"], sticker_file)
+
+        elif update.message.game:
+            sticker_file = update.message.game.get_file().file_id
+            bot.send_game(user_data["chat_id"], sticker_file)
+
+        elif update.message.animation:
+            animation_file = update.message.animation.get_file().file_id
+            bot.send_animation(user_data["chat_id"], animation_file)
+
+        elif update.message.video:
+            video_file = update.message.video.get_file().file_id
+            bot.send_video(user_data["chat_id"], video_file)
+
+        elif update.message.video_note:
+            video_note_file = update.message.audio.get_file().file_id
+            bot.send_video_note(user_data["chat_id"], video_note_file)
+
+        final_reply_markup = InlineKeyboardMarkup(
+            [[InlineKeyboardButton(text="Done", callback_data="answer_to_message_finish")]]
+        )
+        bot.send_message(update.message.chat_id,
+                         send_message_4,
+                         reply_markup=final_reply_markup)
+
+        return MESSAGE_TO_USERS
+
+    def send_message_finish(self, bot, update, user_data):
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text="Back", callback_data="help_back")])
+        final_reply_markup = InlineKeyboardMarkup(
+            buttons)
+        bot.send_message(update.callback_query.message.chat_id,
+                         send_message_5,
+                         reply_markup=final_reply_markup)
+
+        logger.info("Admin {} on bot {}:{} sent a message to the users".format(
+            update.effective_user.first_name, bot.first_name, bot.id))
+        return ConversationHandler.END
+
+    @run_async
+    def error(self, bot, update, error, user_data):
+        """Log Errors caused by Updates."""
+        bot.send_message(update.message.chat_id,
+                         "Command canceled")
+
+        logger.warning('Update "%s" caused error "%s"', update, error)
+        return ConversationHandler.END
+
+    def back(self, bot, update, user_data):
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        get_help(bot, update)
+        return ConversationHandler.END
+
+    def cancel(self, bot, update, user_data):
+        update.message.reply_text(
+            "Command is cancelled =("
+        )
+
+        get_help(bot, update)
+        return ConversationHandler.END
+
+
 class SeeMessageToAdmin(object):
     def __init__(self):
         buttons = list()
@@ -204,7 +311,12 @@ class SeeMessageToAdmin(object):
                     bot.send_message(update.callback_query.message.chat.id,
                                      "User's name: {}, \n\n"
                                      "Message: {}".format(message["user_full_name"],
-                                                          message["message"]))
+                                                          message["message"]),
+                                     reply_markup=InlineKeyboardMarkup(
+                                         [[InlineKeyboardButton(text=answer_button_str,
+                                                                callback_data="answer_to_message_" +
+                                                                              str(message["chat_id"]))]]
+                                     ))  # TODO recheck
 
         else:
             bot.send_message(update.callback_query.message.chat.id,
@@ -229,8 +341,8 @@ SEND_MESSAGE_TO_ADMIN_HANDLER = ConversationHandler(
     fallbacks=[
                CallbackQueryHandler(callback=SendMessageToUsers().back,
                                     pattern=r"cancel_send_message"),
-               CommandHandler('cancel', SendMessageToAdmin().error),
-               MessageHandler(filters=Filters.command, callback=SendMessageToAdmin().error)]
+               CommandHandler('cancel', SendMessageToUsers().back),
+               MessageHandler(filters=Filters.command, callback=SendMessageToUsers().back)]
 )
 
 SEND_MESSAGE_TO_USERS_HANDLER = ConversationHandler(
@@ -250,11 +362,37 @@ SEND_MESSAGE_TO_USERS_HANDLER = ConversationHandler(
                                     pattern=r"send_message_finish"),
                CallbackQueryHandler(callback=SendMessageToUsers().back,
                                     pattern=r"cancel_send_message"),
-               CommandHandler('cancel', SendMessageToUsers().error),
-               MessageHandler(filters=Filters.command, callback=SendMessageToUsers().error)]
+               CommandHandler('cancel', SendMessageToUsers().back),
+               MessageHandler(filters=Filters.command, callback=SendMessageToUsers().back)]
 )
 
 SEE_MESSAGES_HANDLER = CallbackQueryHandler(pattern="inbox_message", callback=SeeMessageToAdmin().see_messages)
+
+ANSWER_TO_MESSAGE_HANDLER = ConversationHandler(
+    entry_points=[CallbackQueryHandler(pattern=r"answer_to_message",
+                                       callback=AnswerToMessage().send_message, pass_user_data=True),
+                  CallbackQueryHandler(callback=AnswerToMessage().back,
+                                       pattern=r"cancel_send_message", pass_user_data=True)],
+
+    states={
+        MESSAGE_TO_USERS: [MessageHandler(Filters.all, AnswerToMessage().received_message, pass_user_data=True),
+                           CallbackQueryHandler(callback=AnswerToMessage().back,
+                                                pattern=r"cancel_send_message", pass_user_data=True)],
+
+    },
+
+    fallbacks=[CallbackQueryHandler(callback=AnswerToMessage().send_message_finish,
+                                    pattern=r"answer_to_message_finish",
+                                    pass_user_data=True),
+               CallbackQueryHandler(callback=AnswerToMessage().back,
+                                    pattern=r"cancel_send_message",
+                                    pass_user_data=True),
+               CommandHandler('cancel', AnswerToMessage().back,
+                              pass_user_data=True),
+               MessageHandler(filters=Filters.command,
+                              callback=AnswerToMessage().back,
+                              pass_user_data=True)]
+)
 
 __mod_name__ = send_message_module_str
 __visitor_help__ = send_message_user

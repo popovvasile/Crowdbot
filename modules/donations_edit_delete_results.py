@@ -12,7 +12,7 @@ from telegram import LabeledPrice
 from database import chatbots_table
 from modules.helper_funcs.auth import initiate_chat_id
 from modules.helper_funcs.helper import get_help
-from modules.helper_funcs.strings import donations_edit_str_1, back_button, menu_button, donations_edit_str_2, \
+from modules.helper_funcs.en_strings import donations_edit_str_1, back_button, menu_button, donations_edit_str_2, \
     allow_donations_button, allow_donation_text, delete_donation_button, edit_button, donations_edit_str_4, \
     donations_edit_str_3, donations_edit_str_5, title_button, description_button, currency_button, donations_edit_str_6, \
     great_text, donations_edit_str_7, donations_edit_str_8, donations_edit_str_9, donations_edit_str_10, \

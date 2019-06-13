@@ -7,7 +7,7 @@ from telegram.ext import (CommandHandler, MessageHandler, Filters,
                           ConversationHandler, run_async, CallbackQueryHandler)
 from database import chatbots_table
 from modules.helper_funcs.helper import get_help
-from modules.helper_funcs.strings import back_button, edit_button_str_1, edit_button_str_2
+from modules.helper_funcs.en_strings import back_button, edit_button_str_1, edit_button_str_2
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)

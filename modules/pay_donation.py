@@ -10,7 +10,7 @@ import datetime
 from database import donations_table, chatbots_table, user_mode_table
 from modules.helper_funcs.auth import initiate_chat_id, if_admin
 from modules.helper_funcs.helper import get_help
-from modules.helper_funcs.strings import pay_donation_str_admin, pay_donation_mode_str,\
+from modules.helper_funcs.en_strings import pay_donation_str_admin, pay_donation_mode_str,\
     donate_button, allow_donations_button, configure_button,\
     ask_donation_button, back_button, pay_donation_str_1, pay_donation_str_2,\
     back_text, allow_donation_text, pay_donation_str_4, pay_donation_str_5, menu_button

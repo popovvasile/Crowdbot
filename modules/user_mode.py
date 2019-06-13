@@ -6,7 +6,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ConversationHandler, run_async, CallbackQueryHandler
 
 from database import user_mode_table
-from modules.helper_funcs.strings import user_mode_on_finish, user_mode_off_finish, user_mode_help_admin, menu_button, \
+from modules.helper_funcs.en_strings import user_mode_on_finish, user_mode_off_finish, user_mode_help_admin, menu_button, \
     user_mode_str
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',

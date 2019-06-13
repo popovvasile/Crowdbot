@@ -10,11 +10,11 @@ from modules.helper_funcs.auth import initiate_chat_id
 from modules.helper_funcs.helper import get_help
 
 # from modules.helper_funcs.restart_program import restart_program
-from modules.helper_funcs.strings import create_button, delete_button, edit_button_button, edit_menu_text, \
+from modules.helper_funcs.en_strings import create_button, delete_button, edit_button_button, edit_menu_text, \
     add_menu_buttons_help, back_button, add_menu_buttons_str_1, back_text, great_text, add_menu_buttons_str_2, \
     add_menu_buttons_str_3, done_button, add_menu_buttons_str_4, add_menu_buttons_str_5, add_menu_buttons_str_6, \
     add_menu_buttons_str_7, add_menu_buttons_str_8, add_menu_buttons_str_9, create_button_button, manage_button_str_2, \
-    add_menu_buttons_str_10, menu_button
+    add_menu_buttons_str_10, menu_button, add_menu_module_button
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -22,7 +22,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 TYPING_BUTTON, TYPING_DESCRIPTION, DESCRIPTION_FINISH = range(3)
 TYPING_TO_DELETE_BUTTON = 17
-__mod_name__ = "Edit menu"
+__mod_name__ = add_menu_module_button
 
 # __admin_keyboard__ = [["/create_button"], ["/delete_button"]]
 __admin_keyboard__ = [InlineKeyboardButton(text=create_button, callback_data="create_button"),
@@ -103,81 +103,57 @@ class AddCommands(object):
                 user_data["descriptions"] = list()
 
         if update.message.photo:
-            photo_file = update.message.photo[-1].get_file()
-            filename = 'photo_{}.jpg'.format(str(uuid.uuid4())[:7])
-            custom_path = photo_directory + "/" + filename
-            photo_file.download(custom_path=custom_path)
+            photo_file = update.message.photo[-1].get_file().file_id
             if "photo_files" not in user_data:
-                user_data["photo_files"] = [filename]
+                user_data["photo_files"] = [photo_file]
             elif user_data["photo_files"] is not None:
-                user_data["photo_files"] = user_data["photo_files"] + [filename]
+                user_data["photo_files"] = user_data["photo_files"] + [photo_file]
             else:
                 user_data["photo_files"] = list()
 
         if update.message.audio:
 
-            audio_file = update.message.audio.get_file()
-            filename = 'audio_{}.mp3'.format(str(uuid.uuid4())[:7])
-            custom_path = audio_directory + "/" + filename
-            audio_file.download(custom_path=custom_path)
+            audio_file = update.message.audio.get_file().file_id
             if "audio_files" not in user_data:
-                user_data["audio_files"] = [filename]
+                user_data["audio_files"] = [audio_file]
             elif user_data["audio_files"] is not None:
-                user_data["audio_files"] = user_data["audio_files"] + [filename]
+                user_data["audio_files"] = user_data["audio_files"] + [audio_file]
             else:
                 user_data["audio_files"] = list()
 
         if update.message.voice:
-
-            voice_file = update.message.voice.get_file()
-            filename = 'voice_{}.mp3'.format(str(uuid.uuid4())[:7])
-            custom_path = audio_directory + "/" + filename
-            voice_file.download(custom_path=custom_path)
+            voice_file = update.message.voice.get_file().file_id
             if "audio_files" not in user_data:
-                user_data["audio_files"] = [filename]
+                user_data["audio_files"] = [voice_file]
             elif user_data["audio_files"] is not None:
-                user_data["audio_files"] = user_data["audio_files"] + [filename]
+                user_data["audio_files"] = user_data["audio_files"] + [voice_file]
             else:
                 user_data["audio_files"] = list()
 
         if update.message.document:
-
-            document_file = update.message.document.get_file()
-            filename = 'document_{}_{}'.format(str(uuid.uuid4())[:5], update.message.document.file_name[-5:])
-            custom_path = document_directory + "/" + filename
-            document_file.download(custom_path=custom_path)
+            document_file = update.message.document.get_file().file_id
             if "document_files" not in user_data:
-                user_data["document_files"] = [filename]
+                user_data["document_files"] = [document_file]
             elif user_data["document_files"] is not None:
-                user_data["document_files"] = user_data["document_files"] + [filename]
+                user_data["document_files"] = user_data["document_files"] + [document_file]
             else:
                 user_data["document_files"] = list()
 
         if update.message.video:
-
-            video_file = update.message.video.get_file()
-            filename = 'video_{}.mp4'.format(str(uuid.uuid4())[:7])
-            custom_path = video_directory + "/" + filename
-
-            video_file.download(custom_path=custom_path)
-
+            video_file = update.message.video.get_file().file_id
             if "video_files" not in user_data:
-                user_data["video_files"] = [filename]
+                user_data["video_files"] = [video_file]
             elif user_data["video_files"] is not None:
-                user_data["video_files"] = user_data["video_files"] + [filename]
+                user_data["video_files"] = user_data["video_files"] + [video_file]
             else:
                 user_data["video_files"] = list()
 
         if update.message.video_note:
-            video_note_file = update.message.audio.get_file()
-            filename = 'video_note_{}.mp4'.format(str(uuid.uuid4())[:7])
-            custom_path = video_directory + "/" + filename
-            video_note_file.download(filename, custom_path=custom_path)
-
+            video_note_file = update.message.audio.get_file().file_id
             if "video_files" not in user_data:
-                user_data["video_files"] = [filename]
+                user_data["video_files"] = [video_note_file]
             elif user_data["video_files"] is not None:
-                user_data["video_files"] = user_data["video_files"] + [filename]
+                user_data["video_files"] = user_data["video_files"] + [video_note_file]
             else:
                 user_data["video_files"] = list()
         done_buttons = [[InlineKeyboardButton(text=done_button, callback_data="DONE")]]
@@ -226,40 +202,20 @@ class AddCommands(object):
             return TYPING_TO_DELETE_BUTTON
         else:
             bot.send_message(update.callback_query.message.chat.id,
-                            add_menu_buttons_str_7)
+                             add_menu_buttons_str_7)
             get_help(bot, update)
 
             return ConversationHandler.END
 
     def delete_button_finish(self, bot, update):
-        photo_directory = "files/{bot_id}/photo".format(bot_id=bot.id)
-        audio_directory = "files/{bot_id}/audio".format(bot_id=bot.id)
-        document_directory = "files/{bot_id}/document".format(bot_id=bot.id)
-        video_directory = "files/{bot_id}/video".format(bot_id=bot.id)
         chat_id, txt = initiate_chat_id(update)
-        to_delete_button = custom_buttons_table.find_one({
-            "button": txt,
-            "bot_id": bot.id
-        })
-        if "photo_files" in to_delete_button:
-            for file in to_delete_button["photo_files"]:
-                os.remove(photo_directory + "/" + file)
-        if "document_files" in to_delete_button:
-            for file in to_delete_button["document_files"]:
-                os.remove(document_directory + "/" + file)
-        if "audio_files" in to_delete_button:
-            for file in to_delete_button["audio_files"]:
-                os.remove(audio_directory + "/" + file)
-        if "video_files" in to_delete_button:
-            for file in to_delete_button["video_files"]:
-                os.remove(video_directory + "/" + file)
         custom_buttons_table.delete_one({
             "button": txt,
             "bot_id": bot.id
         })
         update.message.reply_text(
             add_menu_buttons_str_8.format(txt), reply_markup=ReplyKeyboardRemove())
-        bot.send_message(chat_id=update.callback_query.message.chat_id,  # TODO send as in polls
+        bot.send_message(chat_id=update.message.chat_id,  # TODO send as in polls
                          text=add_menu_buttons_str_10,
                          reply_markup=InlineKeyboardMarkup(
                              [[InlineKeyboardButton(create_button_button, callback_data="create_button"),
@@ -343,3 +299,4 @@ DELETE_BUTTON_HANDLER = ConversationHandler(
                MessageHandler(filters=Filters.command, callback=AddCommands().cancel)
                ]
 )
+

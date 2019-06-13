@@ -36,6 +36,7 @@ send_donation_request_1 = "Tell everyone about the fundraising and how you will 
 send_donation_request_2 = "Write a new message and press '✅ Done"
 send_donation_request_3 = "💸 The message is sent!"
 
+answer_button_str = "Answer"
 send_donation_request_button = "Send donation requst"
 cancel_button_survey = "🔚 Cancel survey"
 donate_button = "💰 Manage payments"
@@ -118,7 +119,7 @@ allow_donation_text = "Press '💰 Create a payment'\n'\
 pay_donation_str_4 = "Admin has not yet set up payments 🤷‍ "
 pay_donation_str_5 = "Oops, you entered the wrong number. Try again."
 
-
+add_menu_module_button = "Edit menu"
 manage_button_str_1 = "✏️Choose the button you want to edit or press '🔙 Back'"
 manage_button_str_2 = "Hopla, you haven't made the button yet. Press'📌 Create a button'"
 manage_button_str_3 = "✏️ Choose the content you want to replace"

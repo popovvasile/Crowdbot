@@ -1,6 +1,6 @@
 import ast
 
-from modules.old_scripts.basic_poll_handler import BasicPoll
+from ru_modules.old_scripts.basic_poll_handler import BasicPoll
 
 
 class CustomDescriptionHandler(BasicPoll):

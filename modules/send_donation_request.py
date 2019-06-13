@@ -7,7 +7,7 @@ from telegram.ext import (CommandHandler, MessageHandler, Filters,
                           ConversationHandler, run_async, CallbackQueryHandler)
 from database import chats_table, chatbots_table
 from modules.helper_funcs.helper import get_help
-from modules.helper_funcs.strings import send_donation_request_1, send_donation_request_2, send_donation_request_3, \
+from modules.helper_funcs.en_strings import send_donation_request_1, send_donation_request_2, send_donation_request_3, \
     donate_button, back_button, done_button, allow_donations_button, allow_donation_text
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',

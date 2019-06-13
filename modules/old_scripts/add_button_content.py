@@ -9,7 +9,7 @@ from database import custom_buttons_table, chatbots_table
 from modules.helper_funcs.helper import get_help
 
 # from modules.helper_funcs.restart_program import restart_program
-from modules.helper_funcs.strings import create_button, delete_button, edit_button_button, edit_menu_text,\
+from modules.helper_funcs.en_strings import create_button, delete_button, edit_button_button, edit_menu_text,\
     back_button, done_button, back_text
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',

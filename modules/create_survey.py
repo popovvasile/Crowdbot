@@ -10,7 +10,7 @@ from modules.helper_funcs.auth import initiate_chat_id
 
 # Enable logging
 from modules.helper_funcs.helper import get_help
-from modules.helper_funcs.strings import back_button, done_button, survey_str_1, main_survey_button, survey_str_2, \
+from modules.helper_funcs.en_strings import back_button, done_button, survey_str_1, main_survey_button, survey_str_2, \
     survey_str_3, survey_str_4, survey_str_5, start_button, survey_str_6, survey_str_7, survey_str_8, back_text, \
     create_button, survey_str_9, survey_str_10, survey_str_12, send_button, survey_str_13, survey_str_14, survey_str_15, \
     survey_str_16, survey_str_17, survey_str_18, survey_str_19, survey_str_20, survey_str_21, survey_str_22, \
@@ -136,13 +136,16 @@ class SurveyHandler(object):
         user_data["questions"] = survey["questions"]
         user_data["answers"] = []
         texr_to_send = "\nQuestions: \n{}".format(questions)
+        admin_keyboard = [InlineKeyboardButton(text=send_button, callback_data="send_survey"),
+                          InlineKeyboardButton(text=menu_button, callback_data="help_back")]
         bot.send_message(update.callback_query.message.chat.id,
-                         survey_str_6.format(survey['title'], texr_to_send))
+                         survey_str_6.format(survey['title'], texr_to_send),
+                         reply_markup=InlineKeyboardMarkup([admin_keyboard]))
+
         surveys_table.update_one({
             "bot_id": bot.id,
             "title": user_data["title"]
         }, {'$set': user_data}, upsert=True)
-        get_help(bot, update)
         logger.info("Admin {} on bot {}:{} added a new survey:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, user_data["title"]))
         user_data.clear()
@@ -245,7 +248,7 @@ class SurveyHandler(object):
             update.effective_user.first_name, bot.first_name, bot.id, txt))
         admin_keyboard = [InlineKeyboardButton(text=create_button, callback_data="create_survey"),
                           InlineKeyboardButton(text=menu_button, callback_data="help_back")]
-        bot.send_message(update.callback_query.message.chat.id,
+        bot.send_message(update.message.chat.id,
                          survey_str_24,
                          reply_markup=InlineKeyboardMarkup([admin_keyboard]))
         return ConversationHandler.END
