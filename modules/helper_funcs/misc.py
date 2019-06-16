@@ -1,7 +1,7 @@
 from math import ceil
 from typing import List, Dict
 
-from telegram import MAX_MESSAGE_LENGTH, InlineKeyboardButton, Bot, ParseMode
+from telegram import InlineKeyboardButton, Bot, ParseMode
 from telegram.error import TelegramError
 import logging
 
@@ -28,41 +28,20 @@ class EqInlineKeyboardButton(InlineKeyboardButton):
         return self.text > other.text
 
 
-def split_message(msg: str) -> List[str]:
-    if len(msg) < MAX_MESSAGE_LENGTH:
-        return [msg]
-
-    else:
-        lines = msg.splitlines(True)
-        small_msg = ""
-        result = []
-        for line in lines:
-            if len(small_msg) + len(line) < MAX_MESSAGE_LENGTH:
-                small_msg += line
-            else:
-                result.append(small_msg)
-                small_msg = line
-        else:
-            # Else statement at the end of the for loop, so append the leftover string.
-            result.append(small_msg)
-
-        return result
-
-
 def paginate_modules(page_n: int, module_dict: Dict, prefix, bot_id, chat=None) -> List:
-
     buttons = [EqInlineKeyboardButton(button["button"],
                                       callback_data="button_{}".format(button["button"].replace(" ", "").lower()))
                for button in custom_buttons_table.find({"bot_id": bot_id})]
 
     if not chat:
-        modules = sorted([EqInlineKeyboardButton(x.__mod_name__,
-                                    callback_data="{}_module({})".format(prefix, x.__mod_name__.lower())) for x
-             in module_dict.values()]) + buttons
+        modules = sorted([
+            EqInlineKeyboardButton(x, callback_data="{}_module({})".format(prefix, x.lower())) for x in module_dict
+        ]) + buttons
     else:
-        modules = sorted([EqInlineKeyboardButton(x.__mod_name__,
-                                    callback_data="{}_module({},{})".format(prefix, chat, x.__mod_name__.lower())) for x
-             in module_dict.values()])
+        modules = sorted([
+            EqInlineKeyboardButton(x, callback_data="{}_module({},{})".format(prefix, chat, x.lower())) for x in
+            module_dict
+        ])
 
     pairs = list(zip(modules[::2], modules[1::2]))
 

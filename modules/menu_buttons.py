@@ -1,20 +1,16 @@
 import os
-import uuid
 
 from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import (CommandHandler, MessageHandler, Filters,
-                          ConversationHandler, CallbackQueryHandler, RegexHandler)
+                          ConversationHandler, CallbackQueryHandler)
 import logging
 from database import custom_buttons_table, chatbots_table
 from modules.helper_funcs.auth import initiate_chat_id
 from modules.helper_funcs.helper import get_help
 
-# from modules.helper_funcs.restart_program import restart_program
-from modules.helper_funcs.en_strings import create_button, delete_button, edit_button_button, edit_menu_text, \
-    add_menu_buttons_help, back_button, add_menu_buttons_str_1, back_text, great_text, add_menu_buttons_str_2, \
-    add_menu_buttons_str_3, done_button, add_menu_buttons_str_4, add_menu_buttons_str_5, add_menu_buttons_str_6, \
-    add_menu_buttons_str_7, add_menu_buttons_str_8, add_menu_buttons_str_9, create_button_button, manage_button_str_2, \
-    add_menu_buttons_str_10, menu_button, add_menu_module_button
+
+from modules.helper_funcs.lang_strings.strings import string_dict
+
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -22,37 +18,26 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 TYPING_BUTTON, TYPING_DESCRIPTION, DESCRIPTION_FINISH = range(3)
 TYPING_TO_DELETE_BUTTON = 17
-__mod_name__ = add_menu_module_button
-
-# __admin_keyboard__ = [["/create_button"], ["/delete_button"]]
-__admin_keyboard__ = [InlineKeyboardButton(text=create_button, callback_data="create_button"),
-                      InlineKeyboardButton(text=delete_button, callback_data="delete_button"),
-                      InlineKeyboardButton(text=edit_button_button, callback_data="edit_button"),
-                      InlineKeyboardButton(text=edit_menu_text, callback_data="edit_bot_description")]
-
-__admin_help__ = add_menu_buttons_help
 
 
 class AddCommands(object):
-    def __init__(self):
-        reply_buttons = [[InlineKeyboardButton(text=back_button, callback_data="cancel_add_button")]]
-        self.reply_markup = InlineKeyboardMarkup(
-            reply_buttons)
-        finish_buttons = [[InlineKeyboardButton(text=back_button, callback_data="cancel_delete_button")]]
-        self.finish_markup = InlineKeyboardMarkup(
-            finish_buttons)
 
     def start(self, bot, update):
+        reply_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                               callback_data="cancel_add_button")]]
+        self.reply_markup = InlineKeyboardMarkup(
+            reply_buttons)
+
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
 
         reply_keyboard = [chatbots_table.find_one({"bot_id": bot.id})["buttons"]]
         markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
         bot.send_message(update.callback_query.message.chat.id,
-                         add_menu_buttons_str_1,
+                         string_dict(bot)["add_menu_buttons_str_1"],
                          reply_markup=markup)
         bot.send_message(update.callback_query.message.chat.id,
-                         back_text, reply_markup=self.reply_markup)
+                         string_dict(bot)["back_text"], reply_markup=self.reply_markup)
         return TYPING_BUTTON
 
     def button_handler(self, bot, update, user_data):
@@ -65,12 +50,12 @@ class AddCommands(object):
         if button_list_of_dicts.count() == 0:
 
             user_data['button'] = txt
-            update.message.reply_text(great_text, reply_markup=ReplyKeyboardRemove())
-            update.message.reply_text(add_menu_buttons_str_2,
+            update.message.reply_text(string_dict(bot)["great_text"], reply_markup=ReplyKeyboardRemove())
+            update.message.reply_text(string_dict(bot)["add_menu_buttons_str_2"],
                                       reply_markup=self.reply_markup)
             return TYPING_DESCRIPTION
         else:
-            update.message.reply_text(add_menu_buttons_str_3,
+            update.message.reply_text(string_dict(bot)["add_menu_buttons_str_3"],
                                       reply_markup=self.reply_markup)
 
             return TYPING_BUTTON
@@ -91,7 +76,7 @@ class AddCommands(object):
             os.makedirs(video_directory)
 
         if update.callback_query:
-            if update.message.callback_query.data == done_button:
+            if update.message.callback_query.data == string_dict(bot)["done_button"]:
                 self.description_finish(bot, update, user_data)
                 return ConversationHandler.END
         if update.message.text:
@@ -156,12 +141,12 @@ class AddCommands(object):
                 user_data["video_files"] = user_data["video_files"] + [video_note_file]
             else:
                 user_data["video_files"] = list()
-        done_buttons = [[InlineKeyboardButton(text=done_button, callback_data="DONE")]]
+        done_buttons = [[InlineKeyboardButton(text=string_dict(bot)["done_button"], callback_data="DONE")]]
         done_reply_markup = InlineKeyboardMarkup(
             done_buttons)
-        update.message.reply_text(add_menu_buttons_str_4,
+        update.message.reply_text(string_dict(bot)["add_menu_buttons_str_4"],
                                   reply_markup=done_reply_markup)
-        update.message.reply_text(back_text, reply_markup=self.reply_markup)
+        update.message.reply_text(string_dict(bot)["back_text"], reply_markup=self.reply_markup)
         return TYPING_DESCRIPTION
 
     def description_finish(self, bot, update, user_data):
@@ -177,7 +162,7 @@ class AddCommands(object):
         custom_buttons_table.save(user_data)
 
         bot.send_message(update.callback_query.message.chat.id,
-                         add_menu_buttons_str_5.format(user_data["button"]))
+                         string_dict(bot)["add_menu_buttons_str_5"].format(user_data["button"]))
         get_help(bot, update)
         logger.info("Admin {} on bot {}:{} added a new button:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, user_data["button"]))
@@ -186,6 +171,10 @@ class AddCommands(object):
         return ConversationHandler.END
 
     def delete_button(self, bot, update):
+        finish_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                callback_data="cancel_delete_button")]]
+        self.finish_markup = InlineKeyboardMarkup(
+            finish_buttons)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         button_list_of_dicts = custom_buttons_table.find({
@@ -194,15 +183,15 @@ class AddCommands(object):
             button_list = [button['button'] for button in button_list_of_dicts]
             reply_keyboard = [button_list]
             bot.send_message(update.callback_query.message.chat.id,
-                             add_menu_buttons_str_6,  # TODO remove this message later
+                             string_dict(bot)["add_menu_buttons_str_6"],  # TODO remove this message later
                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
             bot.send_message(update.callback_query.message.chat.id,
-                             back_text, reply_markup=self.finish_markup)
+                             string_dict(bot)["back_text"], reply_markup=self.finish_markup)
 
             return TYPING_TO_DELETE_BUTTON
         else:
             bot.send_message(update.callback_query.message.chat.id,
-                             add_menu_buttons_str_7)
+                             string_dict(bot)["add_menu_buttons_str_7"])
             get_help(bot, update)
 
             return ConversationHandler.END
@@ -214,12 +203,13 @@ class AddCommands(object):
             "bot_id": bot.id
         })
         update.message.reply_text(
-            add_menu_buttons_str_8.format(txt), reply_markup=ReplyKeyboardRemove())
+            string_dict(bot)["add_menu_buttons_str_8"].format(txt), reply_markup=ReplyKeyboardRemove())
         bot.send_message(chat_id=update.message.chat_id,  # TODO send as in polls
-                         text=add_menu_buttons_str_10,
+                         text=string_dict(bot)["add_menu_buttons_str_10"],
                          reply_markup=InlineKeyboardMarkup(
-                             [[InlineKeyboardButton(create_button_button, callback_data="create_button"),
-                               InlineKeyboardButton(menu_button, callback_data="help_back")]]
+                             [[InlineKeyboardButton(string_dict(bot)["create_button_button"],
+                                                    callback_data="create_button"),
+                               InlineKeyboardButton(string_dict(bot)["menu_button"], callback_data="help_back")]]
                          ))
         logger.info("Admin {} on bot {}:{} deleted the button:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, txt))
@@ -227,7 +217,7 @@ class AddCommands(object):
 
     def back(self, bot, update, user_data):
         bot.send_message(update.callback_query.message.chat.id,
-                         add_menu_buttons_str_9, reply_markup=ReplyKeyboardRemove()
+                         string_dict(bot)["add_menu_buttons_str_9"], reply_markup=ReplyKeyboardRemove()
                          )
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)

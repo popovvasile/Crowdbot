@@ -1,6 +1,6 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
-import requests  # TODO
+import requests  
 import json
 
 from telegram import LabeledPrice
@@ -9,14 +9,11 @@ from telegram.ext import (CommandHandler, MessageHandler, Filters, ConversationH
                           run_async, CallbackQueryHandler)
 import logging
 from database import chatbots_table
-from ru_modules.helper_funcs.auth import initiate_chat_id
+from modules.helper_funcs.auth import initiate_chat_id
 
 # Enable logging
-from ru_modules.helper_funcs.helper import get_help
-from ru_modules.helper_funcs.strings import create_donation_str_1, back_button, create_donation_str_2, \
-    create_donation_str_3, create_donation_str_4, create_donation_str_5, create_donation_str_6, create_donation_str_7, \
-    create_donation_str_8, send_donation_request_button
-
+from modules.helper_funcs.helper import get_help
+from modules.helper_funcs.lang_strings.strings import string_dict
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
@@ -25,9 +22,9 @@ logger = logging.getLogger(__name__)
 TYPING_TOKEN, TYPING_TITLE, TYPING_DESCRIPTION, DONATION_FINISH = range(4)
 
 
-def check_provider_token(provider_token, bot_id):
-    bot_token = chatbots_table.find_one({"bot_id": bot_id})["token"]
-    prices = [LabeledPrice(create_donation_str_1, 10000)]
+def check_provider_token(provider_token, bot):
+    bot_token = chatbots_table.find_one({"bot_id": bot.id})["token"]
+    prices = [LabeledPrice(string_dict(bot)["create_donation_str_1"], 10000)]
     data = requests.get("https://api.telegram.org/bot{}/sendInvoice".format(bot_token),
 
                         params=dict(title="test",
@@ -42,16 +39,6 @@ def check_provider_token(provider_token, bot_id):
 
 
 class CreateDonationHandler(object):
-    def __init__(self):
-        buttons = list()
-        buttons.append([InlineKeyboardButton(text=back_button, callback_data="cancel_donation_create")])
-        self.reply_markup = InlineKeyboardMarkup(
-            buttons)
-        create_buttons = [[InlineKeyboardButton(text=send_donation_request_button, callback_data="send_donation_to_users"),
-                           InlineKeyboardButton(text=back_button, callback_data="help_back")]]
-        self.create_markup = InlineKeyboardMarkup(
-            create_buttons)
-
     @staticmethod
     def facts_to_str(user_data):
         facts = list()
@@ -63,38 +50,45 @@ class CreateDonationHandler(object):
 
     @run_async
     def start_create_donation(self, bot, update, user_data):
+        buttons = list()
+        buttons.append(
+            [InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                  callback_data="cancel_donation_create")])
+        self.reply_markup = InlineKeyboardMarkup(
+            buttons)
+
         chatbot = chatbots_table.find_one({"bot_id": bot.id}) or {}
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         if "donate" in chatbot:
             if "payment_token" in chatbot["donate"]:
                 bot.send_message(update.callback_query.message.chat.id,
-                                 create_donation_str_2, reply_markup=self.reply_markup)
+                                 string_dict(bot)["create_donation_str_2"], reply_markup=self.reply_markup)
                 return TYPING_TITLE
             else:
                 bot.send_message(update.callback_query.message.chat.id,
-                                 create_donation_str_3,
+                                 string_dict(bot)["create_donation_str_3"],
                                  parse_mode='Markdown', reply_markup=self.reply_markup)
                 return TYPING_TOKEN
         else:
             bot.send_message(update.callback_query.message.chat.id,
-                             create_donation_str_3, parse_mode='Markdown',
+                             string_dict(bot)["create_donation_str_3"], parse_mode='Markdown',
                              reply_markup=self.reply_markup)
             return TYPING_TOKEN
 
     @run_async
     def handle_token(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
-        if check_provider_token(provider_token=txt, bot_id=bot.id):
+        if check_provider_token(provider_token=txt, bot=bot):
 
             user_data['payment_token'] = txt
 
-            update.message.reply_text(create_donation_str_4, reply_markup=self.reply_markup)
+            update.message.reply_text(string_dict(bot)["create_donation_str_4"], reply_markup=self.reply_markup)
 
             return TYPING_TITLE
         else:
             update.message.reply_text(
-                create_donation_str_5,
+                string_dict(bot)["create_donation_str_5"],
                 reply_markup=self.reply_markup)
 
         return TYPING_TOKEN
@@ -104,7 +98,7 @@ class CreateDonationHandler(object):
         chat_id, txt = initiate_chat_id(update)
         user_data['title'] = txt
 
-        update.message.reply_text(create_donation_str_6,
+        update.message.reply_text(string_dict(bot)["create_donation_str_6"],
                                   reply_markup=self.reply_markup)
 
         return TYPING_DESCRIPTION
@@ -114,19 +108,27 @@ class CreateDonationHandler(object):
         chat_id, txt = initiate_chat_id(update)
         user_data["description"] = txt
         currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["CHF", "AUD", "RON", "PLN"]]
-        update.message.reply_text(create_donation_str_7,
+        update.message.reply_text(string_dict(bot)["create_donation_str_7"],
                                   reply_markup=ReplyKeyboardMarkup(currency_keyboard, one_time_keyboard=True))
 
         return DONATION_FINISH
 
     @run_async
     def handle_donation_finish(self, bot, update, user_data):
+
+        create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["send_donation_request_button"],
+                                                callback_data="send_donation_to_users"),
+                           InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                callback_data="help_back")]]
+        self.create_markup = InlineKeyboardMarkup(
+            create_buttons)
+
         chat_id, txt = initiate_chat_id(update)
         currency = txt
         user_data["currency"] = currency
 
         bot.send_message(chat_id,
-                         create_donation_str_8,
+                         string_dict(bot)["create_donation_str_8"],
                          reply_markup=self.create_markup)
         chatbot = chatbots_table.find_one({"bot_id": bot.id}) or {}
 

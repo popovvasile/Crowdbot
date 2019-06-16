@@ -2,16 +2,12 @@
 # # -*- coding: utf-8 -*-
 import datetime
 import logging
-
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (CommandHandler, MessageHandler, Filters,
-                          ConversationHandler, RegexHandler, run_async, CallbackQueryHandler)
+                          ConversationHandler, run_async, CallbackQueryHandler)
 from database import users_messages_to_admin_table, chats_table
-from ru_modules.helper_funcs.helper import get_help
-from ru_modules.helper_funcs.strings import send_message_1, send_message_2, send_message_3, send_message_4, \
-    send_message_5, \
-    send_message_6, send_message_button_1, send_message_button_2, send_message_admin, send_message_user, \
-    send_message_module_str, back_text, answer_button_str
+from modules.helper_funcs.helper import get_help
+from modules.helper_funcs.lang_strings.strings import string_dict
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -21,28 +17,27 @@ MESSAGE = 1
 MESSAGE_TO_USERS = 1
 
 
-class SendMessageToAdmin(object):
-    def __init__(self):
-        buttons = list()
-        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_send_message")])
-        self.reply_markup = InlineKeyboardMarkup(
-            buttons)
-
+class SendMessageToAdmin(object):  # TODO save messages that contain files
     @run_async
     def send_message(self, bot, update):
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_send_message")])
+        reply_markup = InlineKeyboardMarkup(
+            buttons)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         bot.send_message(update.callback_query.message.chat.id,
-                         send_message_1, reply_markup=self.reply_markup)
+                         string_dict(bot)["send_message_1"], reply_markup=reply_markup)
         return MESSAGE
 
     @run_async
     def received_message(self, bot, update):
         bot.send_message(update.message.chat_id,
-                         send_message_2)
+                         string_dict(bot)["send_message_2"])
         users_messages_to_admin_table.insert({"user_full_name": update.message.from_user.full_name,
                                               "chat_id": update.message.chat_id,
                                               "user_id": update.message.from_user.id,
+                                              "message_id": update.message.message_id,
                                               "message": update.message.text,
                                               "timestamp": datetime.datetime.now(),
                                               "bot_id": bot.id})
@@ -74,19 +69,16 @@ class SendMessageToAdmin(object):
 
 
 class SendMessageToUsers(object):
-    def __init__(self):
-        buttons = list()
-        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_send_message")])
-        self.reply_markup = InlineKeyboardMarkup(
-            buttons)
-
     @run_async
     def send_message(self, bot, update):
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_send_message")])
+        reply_markup = InlineKeyboardMarkup(buttons)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         bot.send_message(update.callback_query.message.chat.id,
-                         send_message_3,
-                         reply_markup=self.reply_markup)
+                         string_dict(bot)["send_message_3"],
+                         reply_markup=reply_markup)
         return MESSAGE_TO_USERS
 
     @run_async
@@ -137,7 +129,7 @@ class SendMessageToUsers(object):
             [[InlineKeyboardButton(text="Done", callback_data="send_message_finish")]]
         )
         bot.send_message(update.message.chat_id,
-                         send_message_4,
+                         string_dict(bot)["send_message_4"],
                          reply_markup=final_reply_markup)
 
         return MESSAGE_TO_USERS
@@ -150,7 +142,7 @@ class SendMessageToUsers(object):
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.send_message(update.callback_query.message.chat_id,
-                         send_message_5,
+                         string_dict(bot)["send_message_5"],
                          reply_markup=final_reply_markup)
         chats = chats_table.find({"bot_id": bot.id})
         for chat in chats:
@@ -187,20 +179,18 @@ class SendMessageToUsers(object):
 
 
 class AnswerToMessage(object):
-    def __init__(self):
-        buttons = list()
-        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_send_message")])
-        self.reply_markup = InlineKeyboardMarkup(
-            buttons)
-
     @run_async
     def send_message(self, bot, update, user_data):
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_send_message")])
+        reply_markup = InlineKeyboardMarkup(
+            buttons)
         user_data["chat_id"] = update.callback_query.data.replace("answer_to_message_", "")  # chat_id
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         bot.send_message(update.callback_query.message.chat.id,
-                         send_message_3,
-                         reply_markup=self.reply_markup)
+                         string_dict(bot)["send_message_3"],
+                         reply_markup=reply_markup)
         return MESSAGE_TO_USERS
 
     @run_async
@@ -248,7 +238,7 @@ class AnswerToMessage(object):
             [[InlineKeyboardButton(text="Done", callback_data="answer_to_message_finish")]]
         )
         bot.send_message(update.message.chat_id,
-                         send_message_4,
+                         string_dict(bot)["send_message_4"],
                          reply_markup=final_reply_markup)
 
         return MESSAGE_TO_USERS
@@ -261,7 +251,7 @@ class AnswerToMessage(object):
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.send_message(update.callback_query.message.chat_id,
-                         send_message_5,
+                         string_dict(bot)["send_message_5"],
                          reply_markup=final_reply_markup)
 
         logger.info("Admin {} on bot {}:{} sent a message to the users".format(
@@ -292,15 +282,56 @@ class AnswerToMessage(object):
         return ConversationHandler.END
 
 
-class SeeMessageToAdmin(object):
-    def __init__(self):
+class DeleteMessage(object):
+    @run_async
+    def delete_message(self, bot, update):
         buttons = list()
         buttons.append([InlineKeyboardButton(text="Back", callback_data="help_back")])
-        self.reply_markup = InlineKeyboardMarkup(
+        reply_markup = InlineKeyboardMarkup(
             buttons)
 
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        message_id = update.callback_query.data.replace("delete_message_", "")  # message_id
+        if message_id == "all":
+            users_messages_to_admin_table.delete_many({"bot_id": bot.id})  # delete all messages from the users
+        elif message_id == "week":
+            time_past = datetime.datetime.now() - datetime.timedelta(days=7)
+            users_messages_to_admin_table.delete_many({"bot_id": bot,
+                                                       "timestamp": {'$gt': time_past}})
+            # delete all messages from the users
+        elif message_id == "month":
+            time_past = datetime.datetime.now() - datetime.timedelta(days=30)
+
+            users_messages_to_admin_table.delete_many({"bot_id": bot.id,
+                                                       "timestamp": {'$gt': time_past}})
+            # delete all messages from the users
+        else:
+            print(bot.id)
+            print(message_id)
+            users_messages_to_admin_table.delete_one({"bot_id": bot.id, "message_id": int(message_id)})
+        bot.send_message(update.callback_query.message.chat.id,
+                         string_dict(bot)["delete_message_str_1"],
+                         reply_markup=reply_markup)
+        return ConversationHandler.END
+
+
+class SeeMessageToAdmin(object):
     @run_async
     def see_messages(self, bot, update):
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")])
+        delete_buttons = buttons
+        delete_buttons.append([InlineKeyboardButton(text=string_dict(bot)["delete_button_str_all"],
+                                                    callback_data="delete_message_all")
+                               ])
+        delete_buttons.append([InlineKeyboardButton(text=string_dict(bot)["delete_button_str_last_week"],
+                                                    callback_data="delete_message_week"),
+                               InlineKeyboardButton(text=string_dict(bot)["delete_button_str_last_month"],
+                                                    callback_data="delete_message_month")
+                               ])
+        delete_markup = InlineKeyboardMarkup(
+            delete_buttons)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         messages = users_messages_to_admin_table.find({"bot_id": bot.id})
@@ -313,17 +344,24 @@ class SeeMessageToAdmin(object):
                                      "Message: {}".format(message["user_full_name"],
                                                           message["message"]),
                                      reply_markup=InlineKeyboardMarkup(
-                                         [[InlineKeyboardButton(text=answer_button_str,
+                                         [[InlineKeyboardButton(text=string_dict(bot)["answer_button_str"],
                                                                 callback_data="answer_to_message_" +
-                                                                              str(message["chat_id"]))]]
+                                                                              str(message["chat_id"]))],
+                                          [InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
+                                                                callback_data="delete_message_" +
+                                                                              str(message["message_id"]))]
+                                          ]
                                      ))  # TODO recheck
 
         else:
             bot.send_message(update.callback_query.message.chat.id,
-                             send_message_6)
+                             string_dict(bot)["send_message_6"])
         bot.send_message(update.callback_query.message.chat.id,
-                         back_text, reply_markup=self.reply_markup)
+                         string_dict(bot)["back_text"], reply_markup=delete_markup)
 
+
+DELETE_MESSAGES_HANDLER = CallbackQueryHandler(pattern="delete_message",
+                                               callback=DeleteMessage().delete_message)
 
 SEND_MESSAGE_TO_ADMIN_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(pattern="send_message_to_admin",
@@ -339,10 +377,10 @@ SEND_MESSAGE_TO_ADMIN_HANDLER = ConversationHandler(
     },
 
     fallbacks=[
-               CallbackQueryHandler(callback=SendMessageToUsers().back,
-                                    pattern=r"cancel_send_message"),
-               CommandHandler('cancel', SendMessageToUsers().back),
-               MessageHandler(filters=Filters.command, callback=SendMessageToUsers().back)]
+        CallbackQueryHandler(callback=SendMessageToUsers().back,
+                             pattern=r"cancel_send_message"),
+        CommandHandler('cancel', SendMessageToUsers().back),
+        MessageHandler(filters=Filters.command, callback=SendMessageToUsers().back)]
 )
 
 SEND_MESSAGE_TO_USERS_HANDLER = ConversationHandler(
@@ -394,15 +432,4 @@ ANSWER_TO_MESSAGE_HANDLER = ConversationHandler(
                               pass_user_data=True)]
 )
 
-__mod_name__ = send_message_module_str
-__visitor_help__ = send_message_user
 
-__visitor_keyboard__ = [InlineKeyboardButton(text=send_message_button_1,
-                                             callback_data="send_message_to_admin")]
-
-__admin_help__ = send_message_admin
-
-__admin_keyboard__ = [
-    InlineKeyboardButton(text=send_message_button_1, callback_data="send_message_to_users"),
-    InlineKeyboardButton(text=send_message_button_2, callback_data="inbox_message"),
-]

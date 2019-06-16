@@ -4,8 +4,8 @@ from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, Fi
 from telegram.ext.dispatcher import run_async
 
 from database import users_table
-from ru_modules.helper_funcs.auth import initiate_chat_id
-from ru_modules.helper_funcs.main_runnner_helper import get_help
+from modules.helper_funcs.auth import initiate_chat_id
+from modules.helper_funcs.main_runnner_helper import get_help
 
 TYPING_PASS = 1
 

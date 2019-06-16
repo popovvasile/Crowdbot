@@ -1,25 +1,27 @@
-# #!/usr/bin/env python
-# # -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import logging
 import telegram.ext as tg
 from telegram.ext import CommandHandler, CallbackQueryHandler,RegexHandler
 
-from modules.edit_bot_description import EDIT_BOT_DESCRIPTION_HANDLER
+from modules.menu_description import EDIT_BOT_DESCRIPTION_HANDLER
 from modules.helper_funcs.admin_login import ADMIN_AUTHENTICATION_HANDLER
-from modules.add_menu_buttons import BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER, AddCommands
-from modules.answer_surveys import ANSWER_SURVEY_HANDLER
-from modules.create_donation import CREATE_DONATION_HANDLER
-from modules.create_survey import DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_HANDLER, SEND_SURVEYS_HANDLER, \
+from modules.menu_buttons import BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER, AddCommands
+from modules.surveys_answer import ANSWER_SURVEY_HANDLER
+from modules.donation_enable import CREATE_DONATION_HANDLER
+from modules.surveys_create import DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_HANDLER, SEND_SURVEYS_HANDLER, \
     CREATE_SURVEY_HANDLER, SurveyHandler
 from modules.donations_edit_delete_results import EDIT_DONATION_HANDLER
 from modules.helper_funcs.main_runnner_helper import help_button, button_handler, get_help, WelcomeBot, error_callback
 from modules.manage_button import BUTTON_EDIT_HANDLER, BUTTON_EDIT_FINISH_HANDLER
-from modules.pay_donation import DONATE_HANDLER, DonationBot, HANDLE_SUCCES, HANDLE_PRECHECKOUT
+from modules.donation_payment import DONATE_HANDLER, DonationBot, HANDLE_SUCCES, HANDLE_PRECHECKOUT
 from modules.polls import POLL_HANDLER, SEND_POLLS_HANDLER, BUTTON_HANDLER, DELETE_POLLS_HANDLER, POLLS_RESULTS_HANDLER
-from modules.send_donation_request import SEND_DONATION_TO_USERS_HANDLER
-from modules.send_message import SEND_MESSAGE_TO_ADMIN_HANDLER, SEND_MESSAGE_TO_USERS_HANDLER, SEE_MESSAGES_HANDLER, \
-    SendMessageToUsers
+from modules.donation_send_promotion import SEND_DONATION_TO_USERS_HANDLER
+from modules.messages import SEND_MESSAGE_TO_ADMIN_HANDLER, SEND_MESSAGE_TO_USERS_HANDLER, SEE_MESSAGES_HANDLER, \
+    SendMessageToUsers, ANSWER_TO_MESSAGE_HANDLER, DELETE_MESSAGES_HANDLER
 from modules.user_mode import USER_MODE_OFF, USER_MODE_ON
+from modules.channels import MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER, REMOVE_CHANNEL_HANDLER, \
+    POST_ON_CHANNEL_HANDLER, SEND_POST_HANDLER
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -74,6 +76,8 @@ def main(token):
     dispatcher.add_handler(EDIT_DONATION_HANDLER)
     dispatcher.add_handler(SEND_DONATION_TO_USERS_HANDLER)
     # MESSAGES
+    dispatcher.add_handler(ANSWER_TO_MESSAGE_HANDLER)
+    dispatcher.add_handler(DELETE_MESSAGES_HANDLER)
     dispatcher.add_handler(SEND_MESSAGE_TO_ADMIN_HANDLER)
     dispatcher.add_handler(SEND_MESSAGE_TO_USERS_HANDLER)
     dispatcher.add_handler(SEE_MESSAGES_HANDLER)
@@ -91,6 +95,14 @@ def main(token):
     dispatcher.add_handler(BUTTON_HANDLER)
     dispatcher.add_handler(DELETE_POLLS_HANDLER)
     dispatcher.add_handler(POLLS_RESULTS_HANDLER)
+
+    # CHANNELS
+    dispatcher.add_handler(MY_CHANNELS_HANDLER)
+    dispatcher.add_handler(ADD_CHANNEL_HANDLER)
+    dispatcher.add_handler(REMOVE_CHANNEL_HANDLER)
+    dispatcher.add_handler(POST_ON_CHANNEL_HANDLER)
+    dispatcher.add_handler(SEND_POST_HANDLER)
+
     LOGGER.info("Using long polling.")
     # updater.start_webhook(listen='0.0.0.0',
     #                       port=8443,

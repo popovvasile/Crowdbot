@@ -1,52 +1,31 @@
-import importlib
 import re
-
-from telegram import ParseMode, InlineKeyboardMarkup, Bot, Update, InlineKeyboardButton, ReplyKeyboardMarkup
+from telegram import ParseMode, InlineKeyboardMarkup, Bot, Update, InlineKeyboardButton
 from telegram.error import Unauthorized, BadRequest, TimedOut, NetworkError, TelegramError, ChatMigrated
 from telegram.ext import run_async, ConversationHandler
 
-from database import custom_buttons_table, chats_table, surveys_table, users_table, chatbots_table, user_mode_table
-from modules import ALL_MODULES
+from database import custom_buttons_table, users_table, chatbots_table, user_mode_table
 from modules.helper_funcs.auth import if_admin, initiate_chat_id, register_chat
+from modules.helper_funcs.lang_strings.help_strings import help_strings
 from modules.helper_funcs.misc import paginate_modules, LOGGER, EqInlineKeyboardButton
 
 HELP_STRINGS = """
 {}
 """
 
-IMPORTED = {}
-MIGRATEABLE = []
-ADMIN_HELPABLE = {}
-USER_HELPABLE = {}
-VISITOR_HELPABLE = {}
-
-STATS = []
-USER_INFO = []
-DATA_IMPORT = []
-DATA_EXPORT = []
-
-CHAT_SETTINGS = {}
-USER_SETTINGS = {}
-
-GDPR = []
-
-for module_name in ALL_MODULES:
-    imported_module = importlib.import_module("modules." + module_name)
-    if not hasattr(imported_module, "__mod_name__"):
-        imported_module.__mod_name__ = imported_module.__name__
-    if not imported_module.__mod_name__.lower() in IMPORTED:
-        IMPORTED[imported_module.__mod_name__.lower()] = imported_module
-    else:
-        raise Exception("Can't have two modules with the same name! Please change one")
-
-    if hasattr(imported_module, "__admin_help__") and imported_module.__admin_help__:
-        ADMIN_HELPABLE[imported_module.__mod_name__.lower()] = imported_module
-
-    if hasattr(imported_module, "__user_help__") and imported_module.__user_help__:
-        USER_HELPABLE[imported_module.__mod_name__.lower()] = imported_module
-
-    if hasattr(imported_module, "__visitor_help__") and imported_module.__visitor_help__:
-        VISITOR_HELPABLE[imported_module.__mod_name__.lower()] = imported_module
+ALL_MODULES = ['add_menu_buttons', 'answer_surveys', 'create_donation', 'create_survey',
+               'donations_edit_delete_results', 'pay_donation',
+               'report_chatbot_scam', 'send_message', "polls", "user_mode"]
+ADMIN_HELPABLE = {"Edit menu": "",
+                  "💰 Manage payments": "",
+                  'Surveys': "",
+                  "✉️ Messages": "",
+                  "Polls": "",
+                  "User view": "",
+                  "Promotion":""}
+ADMIN_USER_MODE = {"💰 Manage payments": "",
+                   "✉️ Messages": "",
+                   "User view": ""}
+VISITOR_HELPABLE = {"💰 Manage payments": "", "✉️ Messages": "", "Promotion":""}
 
 
 # do not async
@@ -110,10 +89,6 @@ def error_callback(bot, update, error):
 
 @run_async
 def button_handler(bot: Bot, update: Update):
-    photo_directory = "files/{bot_id}/photo".format(bot_id=bot.id)
-    audio_directory = "files/{bot_id}/audio".format(bot_id=bot.id)
-    document_directory = "files/{bot_id}/document".format(bot_id=bot.id)
-    video_directory = "files/{bot_id}/video".format(bot_id=bot.id)
     query = update.callback_query
     button_callback_data = query.data
     buttons = [[InlineKeyboardButton(text="Back", callback_data="help_back")]]
@@ -128,20 +103,22 @@ def button_handler(bot: Bot, update: Update):
                 query.message.reply_text(text=descr)
         if "audio_files" in button_info:
             for filename in button_info["audio_files"]:
-                with open(audio_directory + "/" + filename, 'rb') as file:
-                    query.message.reply_audio(file)
+                query.message.reply_audio(filename)
         if "video_files" in button_info:
             for filename in button_info["video_files"]:
-                with open(video_directory + "/" + filename, 'rb') as file:
-                    query.message.reply_video(file)
+                query.message.reply_video(filename)
         if "document_files" in button_info:
             for filename in button_info["document_files"]:
-                with open(document_directory + "/" + filename, 'rb') as file:
-                    query.message.reply_document(file)
+                if ".png" in filename or ".jpg" in filename:
+                    bot.send_photo(chat_id=query.message.chat.id,
+                                   photo=filename)
+                else:
+                    bot.send_document(chat_id=query.message.chat.id,
+                                      document=filename)
         if "photo_files" in button_info:
             for filename in button_info["photo_files"]:
-                with open(photo_directory + "/" + filename, 'rb') as file:
-                    query.message.reply_photo(file)
+                bot.send_photo(chat_id=query.message.chat.id,
+                               photo=filename)
 
     except BadRequest as excp:
         if excp.message == "Message is not modified":
@@ -200,23 +177,23 @@ def help_button(bot: Bot, update: Update):
                     {"bot_id": bot.id})
                 if "donate" in chatbot_info:
                     if "description" in chatbot_info["donate"]:
-                        HELPABLE[module].__visitor_help__ = chatbot_info["donate"]["description"]
+                        text = chatbot_info["donate"]["description"]
             current_user_mode = user_mode_table.find_one({"bot_id": bot.id,
                                                           "user_id": update.effective_user.id})
             if if_admin(update=update, bot=bot):
                 if current_user_mode:
                     if current_user_mode.get("user_mode") is True:
-                        text = HELPABLE[module].__visitor_help__
-                        commands_keyboard = HELPABLE[module].__visitor_keyboard__
+                        text = help_strings(bot)[module]["visitor_help"]  # TODO modify for languages
+                        commands_keyboard = help_strings(bot)[module]["visitor_keyboard"]
                     else:
-                        text = HELPABLE[module].__admin_help__
-                        commands_keyboard = HELPABLE[module].__admin_keyboard__
+                        text = help_strings(bot)[module]["admin_help"]
+                        commands_keyboard = help_strings(bot)[module]["admin_keyboard"]
                 else:
-                    text = HELPABLE[module].__admin_help__
-                    commands_keyboard = HELPABLE[module].__admin_keyboard__
+                    text = help_strings(bot)[module]["admin_help"]
+                    commands_keyboard = help_strings(bot)[module]["admin_keyboard"]
             else:
-                text = HELPABLE[module].__visitor_help__
-                commands_keyboard = HELPABLE[module].__visitor_keyboard__
+                text = help_strings(bot)[module]["visitor_help"]
+                commands_keyboard = help_strings(bot)[module]["visitor_keyboard"]
 
             pairs = list(zip(commands_keyboard[::2], commands_keyboard[1::2]))
 

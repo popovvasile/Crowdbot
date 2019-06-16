@@ -1,17 +1,12 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
+import logging
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (CommandHandler, MessageHandler, Filters,
                           ConversationHandler, run_async, CallbackQueryHandler)
 from modules.helper_funcs.helper import get_help
-
-import logging
-
-# Enable logging
 from database import surveys_table
-from modules.helper_funcs.en_strings import cancel_button_survey, answer_survey_str_1, answer_survey_str_2, \
-    answer_survey_str_3, answer_survey_str_4, survey_help_admin, survey_mode_str, create_button, delete_button, \
-    send_button, results_button
+from modules.helper_funcs.lang_strings.strings import string_dict
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -46,13 +41,12 @@ def facts_to_str(user_data):
 
 
 class AnswerSurveys(object):
-    def __init__(self):
-        buttons = [[InlineKeyboardButton(text=cancel_button_survey, callback_data="cancel_survey_answering")]]
-        self.reply_markup = InlineKeyboardMarkup(
-            buttons)
-
     @run_async
     def start_answering(self, bot, update, user_data):  # TODO add the "skip" button
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["cancel_button_survey"],
+                                         callback_data="cancel_survey_answering")]]
+        self.reply_markup = InlineKeyboardMarkup(
+            buttons)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         user_data['title'] = update.callback_query.data.replace("survey_", "")
@@ -66,7 +60,7 @@ class AnswerSurveys(object):
                 survey["answers"] = []
                 surveys_table.update({"title": survey["title"]}, survey)
         bot.send_message(update.callback_query.message.chat_id,
-                         answer_survey_str_1
+                         string_dict(bot)["answer_survey_str_1"]
                          )
         bot.send_message(update.callback_query.message.chat_id,
                          survey["questions"][int(user_data["question_id"])]["text"],
@@ -76,6 +70,10 @@ class AnswerSurveys(object):
 
     @run_async
     def received_information(self, bot, update, user_data):
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["cancel_button_survey"],
+                                         callback_data="cancel_survey_answering")]]
+        self.reply_markup = InlineKeyboardMarkup(
+            buttons)
         user_data["question_id"] += 1
         survey = surveys_table.find_one({
             "bot_id": bot.id,
@@ -96,11 +94,11 @@ class AnswerSurveys(object):
                 if answer["user_id"] == user_id and answer["title"] == user_data["title"]:
                     users_answers.append(answer)
                     question = survey["questions"][int(answer["question_id"]) - 1]["text"]
-                    to_send_text += answer_survey_str_2.format(question, answer['answer'])
+                    to_send_text += string_dict(bot)["answer_survey_str_2"].format(question, answer['answer'])
 
             bot.send_message(update.message.chat_id,
-                             answer_survey_str_3 + to_send_text + "\n" +
-                             answer_survey_str_4)
+                             string_dict(bot)["answer_survey_str_3 + to_send_text"] + "\n" +
+                             string_dict(bot)["answer_survey_str_4"])
             get_help(bot, update)
             del user_data
             del answer
@@ -117,8 +115,8 @@ class AnswerSurveys(object):
 
     @run_async
     def done(self, bot, update, user_data):
-        update.message.reply_text(answer_survey_str_3 + "{}" +
-                                  answer_survey_str_4.format(facts_to_str(user_data)))
+        update.message.reply_text(string_dict(bot)["answer_survey_str_3"] + "{}" +
+                                  string_dict(bot)["answer_survey_str_4"].format(facts_to_str(user_data)))
         get_help(bot, update)
         logger.info("User {} on bot {}:{} answered to survey:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, user_data["title"]))
@@ -161,12 +159,3 @@ ANSWER_SURVEY_HANDLER = ConversationHandler(
         MessageHandler(filters=Filters.command, callback=AnswerSurveys().back)]
 )
 
-__mod_name__ = survey_mode_str
-__admin_help__ = survey_help_admin
-
-__admin_keyboard__ = [
-    InlineKeyboardButton(text=create_button, callback_data="create_survey"),
-    InlineKeyboardButton(text=delete_button, callback_data="delete_survey"),
-    InlineKeyboardButton(text=send_button, callback_data="send_survey"),
-    InlineKeyboardButton(text=results_button, callback_data="surveys_results")
-]

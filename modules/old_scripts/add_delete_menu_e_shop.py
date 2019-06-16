@@ -3,14 +3,14 @@ import uuid
 
 from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import (CommandHandler, MessageHandler, Filters,
-                          ConversationHandler, CallbackQueryHandler, RegexHandler)
+                          ConversationHandler, CallbackQueryHandler)
 import logging
 from database import custom_buttons_table, chatbots_table
 from modules.helper_funcs.auth import initiate_chat_id
 from modules.helper_funcs.helper import get_help
 
 # from modules.helper_funcs.restart_program import restart_program
-from modules.helper_funcs.en_strings import create_button, delete_button, edit_button_button, edit_menu_text, \
+from modules.helper_funcs.lang_strings.strings import create_button, delete_button, edit_button_button, \
     add_menu_buttons_help, back_button, add_menu_buttons_str_1, back_text, great_text, add_menu_buttons_str_2, \
     add_menu_buttons_str_3, done_button, add_menu_buttons_str_4, add_menu_buttons_str_5, add_menu_buttons_str_6, \
     add_menu_buttons_str_7, add_menu_buttons_str_8, add_menu_buttons_str_9

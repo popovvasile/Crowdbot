@@ -1,5 +1,3 @@
-import importlib
-import re
 from math import ceil
 from typing import List, Dict
 from telegram import ParseMode, InlineKeyboardMarkup, Bot, Update, InlineKeyboardButton
@@ -15,15 +13,16 @@ ALL_MODULES = ['add_menu_buttons', 'answer_surveys', 'create_donation', 'create_
                'donations_edit_delete_results', 'pay_donation',
                'report_chatbot_scam', 'send_message', "polls", "user_mode"]
 ADMIN_HELPABLE = {"Edit menu": "",
-                  'Donate': "",
+                  "💰 Manage payments": "",
                   'Surveys': "",
-                  'Send a message': "",
+                  "✉️ Messages": "",
                   "Polls": "",
-                  "User view": ""}
-ADMIN_USER_MODE = {'Donate': "",
-                   'Send a message': "",
+                  "User view": "",
+                  "Promotion":""}
+ADMIN_USER_MODE = {"💰 Manage payments": "",
+                   "✉️ Messages": "",
                    "User view": ""}
-VISITOR_HELPABLE = {'Donate': "", 'Send a message': ""}
+VISITOR_HELPABLE = {"💰 Manage payments": "", "✉️ Messages": "", "Promotion":""}
 
 
 class EqInlineKeyboardButton(InlineKeyboardButton):

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 from telegram import LabeledPrice, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import (MessageHandler, Filters, PreCheckoutQueryHandler, CommandHandler,
                           ConversationHandler, run_async, CallbackQueryHandler)
@@ -8,43 +7,21 @@ import logging
 import datetime
 # Enable logging
 from database import donations_table, chatbots_table, user_mode_table
-from ru_modules.helper_funcs.auth import initiate_chat_id, if_admin
-from ru_modules.helper_funcs.helper import get_help
-from ru_modules.helper_funcs.strings import pay_donation_str_admin, pay_donation_mode_str,\
-    donate_button, allow_donations_button, configure_button,\
-    ask_donation_button, back_button, pay_donation_str_1, pay_donation_str_2,\
-    back_text, allow_donation_text, pay_donation_str_4, pay_donation_str_5, menu_button
+from modules.helper_funcs.auth import initiate_chat_id, if_admin
+from modules.helper_funcs.helper import get_help
+from modules.helper_funcs.lang_strings.strings import string_dict
+
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
 logger = logging.getLogger(__name__)
-__mod_name__ = pay_donation_mode_str
-
-__admin_help__ = pay_donation_str_admin
-
-__visitor_help__ = pay_donation_mode_str
-
-__admin_keyboard__ = [InlineKeyboardButton(text=donate_button, callback_data="pay_donation"),
-                      InlineKeyboardButton(text=allow_donations_button,
-                                           callback_data="allow_donation"),
-                      InlineKeyboardButton(text=configure_button, callback_data="configure_donation"),
-                      InlineKeyboardButton(text=ask_donation_button,
-                                           callback_data="send_donation_to_users")]
-__visitor_keyboard__ = [InlineKeyboardButton(text=donate_button, callback_data="pay_donation")]
 
 
 EXECUTE_DONATION = 1
 
 
 class DonationBot(object):
-    def __init__(self):
-        buttons = list()
-        buttons.append([InlineKeyboardButton(text=back_button,
-                                             callback_data="cancel_donation_payment")])
-        self.reply_markup = InlineKeyboardMarkup(
-            buttons)
-
     def error(self, bot, update, error):
         """Log Errors caused by Updates."""
         logger.warning('Update "%s" caused error "%s"', update, error)
@@ -60,40 +37,46 @@ class DonationBot(object):
             bot.send_message(update.callback_query.message.chat.id,
                              donation_request["donate"]["description"])
             bot.send_message(update.callback_query.message.chat.id,
-                             pay_donation_str_1)
+                             string_dict(bot)["pay_donation_str_1"])
             bot.send_message(update.callback_query.message.chat.id,
-                             pay_donation_str_2.format(
+                             string_dict(bot)["pay_donation_str_2"].format(
                                  donation_request["donate"]['currency']))
             bot.send_message(update.callback_query.message.chat.id,
-                             text=back_text,
+                             text=string_dict(bot)["back_text"],
                              reply_markup=InlineKeyboardMarkup(
-                                          [[InlineKeyboardButton(text=back_button,
+                                          [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                             callback_data="cancel_donation_payment")]]))
             return EXECUTE_DONATION
 
         else:
             try:
                 if current_user_mode["user_mode"] is True:
-                    admin_keyboard = [InlineKeyboardButton(text=back_button, callback_data="help_back")]
+                    admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                           callback_data="help_back")]
                     bot.send_message(update.callback_query.message.chat.id,
-                                     pay_donation_str_4,
+                                     string_dict(bot)["pay_donation_str_4"],
                                      reply_markup=InlineKeyboardMarkup([admin_keyboard]))
                 elif if_admin(update, bot):
-                    admin_keyboard = [InlineKeyboardButton(text=allow_donations_button, callback_data="allow_donation"),
-                                      InlineKeyboardButton(text=back_button, callback_data="help_back")]
+                    admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["allow_donations_button"],
+                                                           callback_data="allow_donation"),
+                                      InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                           callback_data="help_back")]
                     bot.send_message(update.callback_query.message.chat.id,
-                                     allow_donation_text,
+                                     string_dict(bot)["allow_donation_text"],
                                      reply_markup=InlineKeyboardMarkup([admin_keyboard]))
                 else:
-                    admin_keyboard = [InlineKeyboardButton(text=back_button, callback_data="help_back")]
+                    admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                           callback_data="help_back")]
                     bot.send_message(update.callback_query.message.chat.id,
-                                     pay_donation_str_4,
+                                     string_dict(bot)["pay_donation_str_4"],
                                      reply_markup=InlineKeyboardMarkup([admin_keyboard]))
             except KeyError:
-                admin_keyboard = [InlineKeyboardButton(text=allow_donations_button, callback_data="allow_donation"),
-                                  InlineKeyboardButton(text=back_button, callback_data="help_back")]
+                admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["allow_donations_button"],
+                                                       callback_data="allow_donation"),
+                                  InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                       callback_data="help_back")]
                 bot.send_message(update.callback_query.message.chat.id,
-                                 allow_donation_text,
+                                 string_dict(bot)["allow_donation_text"],
                                  reply_markup=InlineKeyboardMarkup([admin_keyboard]))
             return ConversationHandler.END
 
@@ -118,9 +101,9 @@ class DonationBot(object):
         try:
             amount = int(float(txt)*100)  # TODO add an exception if not int
         except ValueError:
-            update.message.reply_text(text=pay_donation_str_5,
+            update.message.reply_text(text=string_dict(bot)["pay_donation_str_5"],
                                       reply_markup=InlineKeyboardMarkup(
-                                          [[InlineKeyboardButton(text=menu_button,
+                                          [[InlineKeyboardButton(text=string_dict(bot)["menu_button"],
                                             callback_data="cancel_donation_payment")]]))
             return EXECUTE_DONATION
         donation_request = chatbots_table.find_one({"bot_id": bot.id})["donate"]
@@ -134,9 +117,9 @@ class DonationBot(object):
         prices = [LabeledPrice(title, amount)]
         bot.sendInvoice(chat_id, title, description, payload,
                         provider_token, start_parameter, currency, prices)
-        update.message.reply_text(text=back_text,
+        update.message.reply_text(text=string_dict(bot)["back_text"],
                                   reply_markup=InlineKeyboardMarkup(
-                                      [[InlineKeyboardButton(text=back_button,
+                                      [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                              callback_data="help_back")]]))
         logger.info("User {} on bot {} requested a donation".format(
             update.effective_user.first_name, bot.first_name))

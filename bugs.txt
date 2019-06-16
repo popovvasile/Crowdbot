@@ -1,25 +1,23 @@
 
-Bugs:
-Polls:
-    try from the user
-Survey:
-    try from the user
-Menu:
-    add "Connect e-shop" button
-Shopbot:
-    connect to rest api and alive_checker
-
-Юра
-1)add and Posting to the channels
-2)Redirecting on surveys, donations and subscriptions from channel to chatbot
-
-
 
 Вася
-# TODO fix polls
-4)Create custom "send message" button, like "order promotion"
+# TODO fix the language thing. Create a function that will return the string
+# TODO categories for messages. Ask what this message is about
+# TODO delete and answer buttons to look better. Delete old messages using user_data
+# TODO add button "answer" for users + make it clear that is from admin
+# TODO save messages from users that contain files + make it continues
+# TODO on error, return to menu
+
 # TODO results for users and donations - send csv as file !
-# TODO two clicks on donate and send message from user side
+# TODO two clicks on donate and send message from user side - fix
+# TODO fix polls
+# TODO payment token fix
+# TODO think about an example chatbot (TV8)
+# TODO add content to button
+# TODO implement https://github.com/CubexX/confstat-bot  with channels
+# TODO send a message to all who donated
+
+
 
 
 
@@ -28,17 +26,16 @@ Shopbot:
 
 
 
-# TODO fix multiple options and order of preference polls
-# TODO credit card token for shop  410694247:TEST:c374c3a5-04b2-4f5d-a923-062cd4adc358
-# TODO connect e-shop button
-# TODO for Occupy: add users + all old polls + tags
-# TODO add content
-# TODO return the amount of money received by both bots
-# TODO make buying easier in the shop - don't enforce funds
+
 # TODO make content to return in the same order as was sent !
 # TODO pics and other content for surveys and polls
 # TODO hidden content
 
+
+# TODO credit card token for shop  410694247:TEST:c374c3a5-04b2-4f5d-a923-062cd4adc358
+# TODO connect e-shop button
+# TODO return the amount of money received by both bots
+# TODO make buying easier in the shop - don't enforce funds
 
 TODO learn how to use  ForceReply https://python-tel:egram-bot.readthedocs.io/en/stable/telegram.forcereply.html
 
