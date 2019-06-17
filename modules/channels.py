@@ -11,10 +11,10 @@ from modules.helper_funcs.lang_strings.strings import string_dict
 # from modules.polls import PollBot
 
 import logging
+
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
-
 
 # TODO: When we need to use @run_async decorator?
 #       before every send check that bot admin and can send message
@@ -33,10 +33,10 @@ channel_table_scheme = {
     'chat_id': int
 }
 
-
 MY_CHANNELS, MANAGE_CHANNEL, ADD_CHANNEL, \
-    CHOOSE_TO_REMOVE, REMOVE_CHANNEL, \
-    CHOOSE_TO_SEND_POST, POST_TO_CHANNEL, MESSAGE_TO_USERS = range(8)
+CHOOSE_TO_REMOVE, REMOVE_CHANNEL, \
+CHOOSE_TO_SEND_POST, POST_TO_CHANNEL, MESSAGE_TO_USERS = range(8)
+
 
 #     CHOOSE_TO_SEND_POLL, CHOOSE_POLL_TO_SEND,\
 #     CHOOSE_CHANNEL_TO_SEND_SURVEY, CHOOSE_SURVEY_TO_SEND = range(12)
@@ -89,22 +89,6 @@ def check_channel(bot, channel_username):
 
 # DELETING USING USER_DATA
 class Channels(object):
-    def __init__(self):
-        self.post_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton('Write a post', callback_data='write_post')],
-                                                   [InlineKeyboardButton("Send a poll",
-                                                                         callback_data='post_poll_to_channel')],
-                                                   [InlineKeyboardButton("Send a survey", callback_data='post_survey')],
-                                                   [InlineKeyboardButton('Back', callback_data='help_back')]])
-        self.no_channel_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("Add", callback_data='add_channel')],
-                                                         [InlineKeyboardButton('Back', callback_data='help_back')]])
-        self.cancel_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton('Cancel', callback_data='cancel_add')]])
-        self.one_channel_keyboard = \
-            InlineKeyboardMarkup([[InlineKeyboardButton('Remove', callback_data='channel_remove')],
-                                  [InlineKeyboardButton('Send a poll', callback_data='PASS'),
-                                   InlineKeyboardButton('Send a survey', callback_data='PASS')],
-                                  [InlineKeyboardButton('Write a post', callback_data='channel_write_post')],
-                                  [InlineKeyboardButton('Back', callback_data='back')]])
-
     # ################################## HELP METHODS ###########################################################
     # update channels usernames if channel username has benn changed.
     # call this only when at least one channel exists in db
@@ -127,15 +111,18 @@ class Channels(object):
                                           {'$set': {'channel_username': '@{}'.format(current_username)}})
         return channels_table.find({'bot_id': bot.id})
 
-
     # to make keyboard with channels
     def make_channels_layout(self, bot, update, state, text: str, user_data):
+        no_channel_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(string_dict(bot)["add_button"], callback_data='add_channel')],
+                                                    [InlineKeyboardButton(string_dict(bot)["back_button"],
+                                                                          callback_data='help_back')]])
+
         # bot.delete_message(update.effective_chat.id, update.effective_message.message_id)
         delete_messages(bot, user_data, update)
         if channels_table.find({'bot_id': bot.id}).count() == 0:
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id, string_dict(bot)["no_channels"],
-                                 reply_markup=self.no_channel_keyboard))
+                                 reply_markup=no_channel_keyboard))
             return ConversationHandler.END
         else:
             channels = self.update_channels_usernames(bot, user_data, update.effective_chat.id)
@@ -147,15 +134,16 @@ class Channels(object):
             return state
 
     def send_wrong_format_message(self, bot, update, user_data, text: str = None):
+        cancel_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(string_dict(bot)["cancel_button"], callback_data='cancel_add')]])
         delete_messages(bot, user_data, update)
         user_data['to_delete'].append(
             bot.send_message(update.message.chat_id, string_dict(bot)["wrong_channel_link_format"]
             if text is None else text,
-                             reply_markup=self.cancel_keyboard))
+                             reply_markup=cancel_keyboard))
         return ADD_CHANNEL
 
     # check that channel username is correct
-    def register_channel(self, bot,  update, user_data):
+    def register_channel(self, bot, update, user_data):
         link = update.message.text
         # VALIDATE USER MESSAGE
         if len(link.split(" ")) != 1 or len(link) > 45:
@@ -187,7 +175,8 @@ class Channels(object):
                                                       string_dict(bot)["try_to_add_already_exist_channel"])
         else:
             return self.send_wrong_format_message(bot, update, user_data, check)
-################################################################
+
+    ################################################################
 
     # 'My Channels' button
     def my_channels(self, bot, update, user_data):
@@ -195,14 +184,24 @@ class Channels(object):
                                          user_data)
 
     # when user click on channel name in 'My channels' menu
-    def channel(self, bot, update, user_data):
+    def channel(self, bot, update, user_data): # string_dict(bot)["back_button"] todo
+        one_channel_keyboard = \
+            InlineKeyboardMarkup([[InlineKeyboardButton(string_dict(bot)["remove_button"],
+                                                        callback_data='channel_remove')],
+                                  [InlineKeyboardButton(string_dict(bot)["send_survey_to_channel"],
+                                                        callback_data='PASS'),
+                                   InlineKeyboardButton(string_dict(bot)["send_poll_to_channel"],
+                                                        callback_data='PASS')],
+                                  [InlineKeyboardButton(string_dict(bot)["send_a_post_to_channel"],
+                                                        callback_data='channel_write_post')],
+                                  [InlineKeyboardButton(string_dict(bot)["back_button"], callback_data='back')]])
         delete_messages(bot, user_data, update)
         channel = channels_table.find_one({'bot_id': bot.id, 'channel_username': update.message.text})
         if channel:
             user_data['channel'] = channel['channel_username']
             user_data['to_delete'].append(
                 bot.send_message(update.message.chat_id, channel['channel_username'],
-                                 reply_markup=self.one_channel_keyboard))
+                                 reply_markup=one_channel_keyboard))
             return MANAGE_CHANNEL
         else:
             return self.make_channels_layout(bot, update, MY_CHANNELS, string_dict(bot)["channels_str_2"], user_data)
@@ -222,8 +221,9 @@ class Channels(object):
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id, string_dict(bot)["channel_has_been_removed"]
                                  .format(channel_username),
-                                 reply_markup=InlineKeyboardMarkup([InlineKeyboardButton(text="Back",
-                                                                                         callback_data="help_back")])
+                                 reply_markup=InlineKeyboardMarkup([InlineKeyboardButton(
+                                     text=string_dict(bot)["back_button"],
+                                     callback_data="help_back")])
                                  ))
             return ConversationHandler.END
         else:
@@ -233,36 +233,59 @@ class Channels(object):
 
     # 'Add Channels' button
     def add_channel(self, bot, update, user_data):
+        cancel_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(string_dict(bot)["cancel_button"],
+                                                                      callback_data='cancel_add')]])
         delete_messages(bot, user_data, update)
         user_data['to_delete'].append(
             bot.send_message(update.callback_query.message.chat_id, string_dict(bot)["channels_str_4"],
-                             reply_markup=self.cancel_keyboard))
+                             reply_markup=cancel_keyboard))
         return ADD_CHANNEL
 
     # call this when message with channel link arrive
     def confirm_add(self, bot, update, user_data):
+        post_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(string_dict(bot)["send_post_to_channel"],
+                                                                    callback_data='write_post')],
+                                              [InlineKeyboardButton(string_dict(bot)["send_poll_to_channel"],
+                                                                    callback_data='post_poll_to_channel')],
+                                              [InlineKeyboardButton(string_dict(bot)["send_survey_to_channel"],
+                                                                    callback_data='post_survey')],
+                                              [InlineKeyboardButton(string_dict(bot)["back_button"],
+                                                                    callback_data='help_back')]])
         have_added = self.register_channel(bot, update, user_data)
         if have_added is True:
             delete_messages(bot, user_data, update)
             user_data['to_delete'].append(
                 bot.send_message(update.message.chat_id, string_dict(bot)["channel_added_success"]
                                  .format(update.message.text),
-                                 reply_markup=self.post_keyboard))
+                                 reply_markup=post_keyboard))
             return ConversationHandler.END
 
     # 'Post on channel' button
     def post_on_channel(self, bot, update, user_data):
+        post_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(string_dict(bot)["send_post_to_channel"],
+                                                                    callback_data='write_post')],
+                                              [InlineKeyboardButton(string_dict(bot)["send_poll_to_channel"],
+                                                                    callback_data='post_poll_to_channel')],
+                                              [InlineKeyboardButton(string_dict(bot)["send_survey_to_channel"],
+                                                                    callback_data='post_survey')],
+                                              [InlineKeyboardButton(string_dict(bot)["back_button"],
+                                                                    callback_data='help_back')]])
+        no_channel_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(string_dict(bot)["add_button"],
+                                                                          callback_data='add_channel')],
+                                                    [InlineKeyboardButton(string_dict(bot)["back_button"],
+                                                                          callback_data='help_back')]])
+
         delete_messages(bot, user_data, update)
 
         if channels_table.find({'bot_id': bot.id}).count() == 0:
             user_data['to_delete'].append(
                 bot.send_message(update.callback_query.message.chat.id, string_dict(bot)["no_channels"],
-                                 reply_markup=self.no_channel_keyboard))
+                                 reply_markup=no_channel_keyboard))
             return ConversationHandler.END
         else:
             user_data['to_delete'].append(
                 bot.send_message(update.callback_query.message.chat_id, string_dict(bot)["post_message"],
-                                 reply_markup=self.post_keyboard))
+                                 reply_markup=post_keyboard))
             return ConversationHandler.END
 
     @staticmethod
@@ -280,27 +303,26 @@ class Channels(object):
     #     bot.delete_message(update.message.chat_id, update.message.message_id)
     #     bot.delete_message(update.message.chat_id, update.message.message_id-1)
 
-        # update.message.reply_text(
-        #     "Command is cancelled =("
-        # )
+    # update.message.reply_text(
+    #     "Command is cancelled =("
+    # )
     #     get_help(bot, update)
     #     return ConversationHandler.END
 
 
 # TODO: ask user if he/she sure to send posts to the channel
 class SendPost(object):
-    def __init__(self):
-        buttons = list()
-        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_send_post")])
-        self.reply_markup = InlineKeyboardMarkup(
-            buttons)
-
     def choose_channel(self, bot, update, user_data):
         return Channels().make_channels_layout(bot, update, CHOOSE_TO_SEND_POST,
                                                string_dict(bot)["choose_channel_to_post"], user_data)
 
     @run_async
     def send_message(self, bot, update, user_data):
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_send_post")])
+        reply_markup = InlineKeyboardMarkup(
+            buttons)
+
         # TODO: use of 'update.effective_chat.id' to get id of chat
         channel = channels_table.find_one({'bot_id': bot.id, 'channel_username': update.message.text})
         if channel:
@@ -308,7 +330,7 @@ class SendPost(object):
             user_data['channel'] = update.message.text
             user_data['to_delete'].append(
                 bot.send_message(update.message.chat.id, string_dict(bot)["send_post"].format(update.message.text),
-                                 reply_markup=self.reply_markup))
+                                 reply_markup=reply_markup))
             return MESSAGE_TO_USERS
         else:
             return Channels().make_channels_layout(bot, update, CHOOSE_TO_SEND_POST,
@@ -357,7 +379,7 @@ class SendPost(object):
             bot.send_video_note(user_data['channel'], video_note_file)
 
         final_reply_markup = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(text="Done", callback_data="send_post_finish")]]
+            [[InlineKeyboardButton(text=string_dict(bot)["done_button"], callback_data="send_post_finish")]]
         )
         user_data['to_delete'].append(
             bot.send_message(update.message.chat_id,
@@ -368,7 +390,7 @@ class SendPost(object):
     def send_post_finish(self, bot, update, user_data):
         delete_messages(bot, user_data, update)
         buttons = list()
-        buttons.append([InlineKeyboardButton(text="Back", callback_data="help_back")])
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         user_data['to_delete'].append(
@@ -449,7 +471,6 @@ SEND_POST_HANDLER = ConversationHandler(
     fallbacks=[CallbackQueryHandler(callback=SendPost().send_post_finish,
                                     pattern=r"send_post_finish", pass_user_data=True)]
 )
-
 
 '''
 # Post on channel -> Send a Poll -> no polls. wanna create one?(yes, back) -> 

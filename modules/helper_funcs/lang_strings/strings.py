@@ -103,6 +103,11 @@ Say Hello to the admin!
         cancel_button_survey="🔚 Cancel survey",
         donate_button="💰 Manage payments",
         back_button="🔙 Back",
+        cancel_button="Cancel",
+        remove_button="Remove",
+        send_survey_to_channel='Send a survey',
+        send_poll_to_channel='Send a poll',
+        send_post_to_channel='Write a post',
         done_button="✅ Done",
         create_button="Create",
         delete_button="🗑 Delete",
@@ -285,7 +290,8 @@ Here you can:\n
         add_menu_buttons_str_7="""Oops. You don't have buttons yet. Click "Create""",
         add_menu_buttons_str_8='🗑 Button {} removed',
         add_menu_buttons_str_9="🛑 You canceled the creation of a button.",
-        add_menu_buttons_str_10="You can crete a new button or return to menu"),
+        add_menu_buttons_str_10="You can crete a new button or return to menu",
+        add_button="Add"),
 
     "RUS": dict(
         channels_str_1='Here u can manage your channels',
@@ -357,6 +363,11 @@ Here you can:\n
 
         answer_button_str="Ответить",
         cancel_button_survey="🔚 Отменить опрос",
+        cancel_button="Отменить",
+        remove_button="Удалить",
+        send_survey_to_channel='Отправить открытый опрос',
+        send_poll_to_channel='Отправить опрос',
+        send_a_post_to_channel='Написать пост',
         donate_button="💰 Управлять платежами",
         back_button="🔙 Назад",
         done_button="✅ Готово",
@@ -545,7 +556,10 @@ instructions then you will get a token-access, that you should copy.\n3nd Step :
         add_menu_buttons_str_7="""Упс. У тебя ещё нет кнопок.Нажми "Создать""",
         add_menu_buttons_str_8='🗑 Кнопка {} удалена',
         add_menu_buttons_str_9="🛑 Ты отменил создание кнопки",
-        add_menu_buttons_str_10="Можешь создать нувую кнопку или вернуться в меню")}
+        add_menu_buttons_str_10="Можешь создать нувую кнопку или вернуться в меню",
+
+        add_button="Добавить"
+    )}
 
 
 def string_dict(bot):

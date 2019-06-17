@@ -4,25 +4,11 @@ from telegram import ParseMode, InlineKeyboardMarkup, Bot, Update, InlineKeyboar
 from telegram.ext import run_async
 
 from database import custom_buttons_table, chats_table, chatbots_table, users_table, user_mode_table
+from modules.helper_funcs.lang_strings.help_strings import helpable_dict
 
 HELP_STRINGS = """
 {}
 """
-
-ALL_MODULES = ["channels", "donation_enable", "donation_payment", "donations_send_promotion",
-               "donations_edit_delete_results", "manage_button", "menu_buttons", "menu_description",
-               "messages", "polls", "surveys_answer", "surveys_create", "user_mode"]
-ADMIN_HELPABLE = {"Edit menu": "menu_buttons",
-                  "💰 Manage payments": "donation_payment",
-                  'Surveys': "surveys",
-                  "✉️ Messages": "messages",
-                  "Polls": "polls",
-                  "User view": "user_mode",
-                  "Channels": "channels"}
-ADMIN_USER_MODE = {"💰 Manage payments": "donation_payment",
-                   "✉️ Messages": "messages",
-                   "User view": "user_mode"}
-VISITOR_HELPABLE = {"💰 Manage payments": "donation_payment", "✉️ Messages": "messages"}
 
 
 class EqInlineKeyboardButton(InlineKeyboardButton):
@@ -127,10 +113,9 @@ def get_help(bot: Bot, update: Update):
 
 
 def send_admin_user_mode(bot, chat_id, text, keyboard=None):
-
     if not keyboard:
-        keyboard = paginate_modules(0, VISITOR_HELPABLE, "help", bot.id)
-    keyboard = keyboard+[[EqInlineKeyboardButton(text="ADMIN MODE", callback_data="turn_user_mode_off")]]
+        keyboard = paginate_modules(0, helpable_dict(bot)["VISITOR_HELPABLE"], "help", bot.id)
+    keyboard = keyboard + [[EqInlineKeyboardButton(text="ADMIN MODE", callback_data="turn_user_mode_off")]]
     bot.send_message(chat_id=chat_id,
                      text=text,
                      parse_mode=ParseMode.MARKDOWN,
@@ -141,7 +126,7 @@ def send_admin_user_mode(bot, chat_id, text, keyboard=None):
 
 def send_admin_help(bot, chat_id, text, keyboard=None):
     if not keyboard:
-        keyboard = InlineKeyboardMarkup(paginate_modules(0, ADMIN_HELPABLE, "help", bot.id))
+        keyboard = InlineKeyboardMarkup(paginate_modules(0, helpable_dict(bot)["ADMIN_HELPABLE"], "help", bot.id))
     bot.send_message(chat_id=chat_id,
                      text=text,
                      parse_mode=ParseMode.MARKDOWN,
@@ -150,7 +135,7 @@ def send_admin_help(bot, chat_id, text, keyboard=None):
 
 def send_visitor_help(bot, chat_id, text, keyboard=None):
     if not keyboard:
-        keyboard = InlineKeyboardMarkup(paginate_modules(0, VISITOR_HELPABLE, "help", bot.id))
+        keyboard = InlineKeyboardMarkup(paginate_modules(0, helpable_dict(bot)["VISITOR_HELPABLE"], "help", bot.id))
     bot.send_message(chat_id=chat_id,
                      text=text,
                      parse_mode=ParseMode.MARKDOWN,

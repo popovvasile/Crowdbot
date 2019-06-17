@@ -97,3 +97,44 @@ def help_strings(bot):
 
     chatbot = chatbots_table.find_one({"bot_id": bot.id})
     return help_dict[chatbot["lang"]]
+
+
+def helpable_dict(bot):
+    lang_dicts = {"ENG": dict(
+        ALL_MODULES=["channels", "donation_enable", "donation_payment", "donations_send_promotion",
+                     "donations_edit_delete_results", "manage_button", "menu_buttons", "menu_description",
+                     "messages", "polls", "surveys_answer", "surveys_create", "user_mode"],
+        ADMIN_HELPABLE={"Edit menu": "menu_buttons",
+                        "💰 Manage payments": "donation_payment",
+                        'Surveys': "surveys",
+                        "✉️ Messages": "messages",
+                        "Polls": "polls",
+                        "User view": "user_mode",
+                        "Channels": "channels"},
+        ADMIN_USER_MODE={"💰 Manage payments": "donation_payment",
+                         "✉️ Messages": "messages",
+                         "User view": "user_mode"},
+        VISITOR_HELPABLE={"💰 Manage payments": "donation_payment", "✉️ Messages": "messages"}
+
+    ),
+        "RUS": dict(
+            ALL_MODULES=["channels", "donation_enable", "donation_payment", "donations_send_promotion",
+                         "donations_edit_delete_results", "manage_button", "menu_buttons", "menu_description",
+                         "messages", "polls", "surveys_answer", "surveys_create", "user_mode"],
+            ADMIN_HELPABLE={"Редактировать меню": "menu_buttons",
+                            "Платёжи": "donation_payment",
+                            "Открытые опросы": "surveys",
+                            "✉️ Сообщения": "messages",
+                            "Опросы": "polls",
+                            "Режим юзера": "user_mode",
+                            "Каналы": "channels"},
+            ADMIN_USER_MODE={"Сделать платёж": "donation_payment",
+                             "✉️ Messages": "messages",
+                             "Режим админа": "user_mode"},
+            VISITOR_HELPABLE={"Сделать платёж": "donation_payment", "✉️ Отправить сообщение": "messages"}
+
+        ),
+    }
+    chatbot = chatbots_table.find_one({"bot_id": bot.id})
+
+    return lang_dicts[chatbot["lang"]]
