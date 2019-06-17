@@ -195,9 +195,9 @@ class Channels(object):
                                   [InlineKeyboardButton(string_dict(bot)["send_post_to_channel"],
                                                         callback_data='channel_write_post')],
                                   [InlineKeyboardButton(string_dict(bot)["back_button"], callback_data='back')]])
-        delete_messages(bot, user_data, update)
         channel = channels_table.find_one({'bot_id': bot.id, 'channel_username': update.message.text})
         if channel:
+            delete_messages(bot, user_data, update)
             user_data['channel'] = channel['channel_username']
             user_data['to_delete'].append(
                 bot.send_message(update.message.chat_id, channel['channel_username'],
@@ -213,10 +213,10 @@ class Channels(object):
 
     # call this when user have choose channel for remove
     def finish_remove(self, bot, update, user_data):
-        delete_messages(bot, user_data, update)
         channel_username = user_data['channel'] if update.callback_query else update.message.text
         channel = channels_table.find_one({'bot_id': bot.id, 'channel_username': channel_username})
         if channel:
+            delete_messages(bot, user_data, update)
             channels_table.delete_one({'bot_id': bot.id, 'channel_username': channel_username})
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id, string_dict(bot)["channel_has_been_removed"]
@@ -428,7 +428,7 @@ MY_CHANNELS_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=Channels().my_channels, pattern=r"my_channels", pass_user_data=True)],
     states={
         MY_CHANNELS: [RegexHandler('^Back$', Channels().back, pass_user_data=True),
-                      MessageHandler(Filters.text, Channels().channel, pass_user_data=True)],
+                      RegexHandler(r"@", Channels().channel, pass_user_data=True)],
 
         MANAGE_CHANNEL: [CallbackQueryHandler(Channels().back, pattern=r"back", pass_user_data=True),
                          CallbackQueryHandler(Channels().finish_remove, pattern=r"channel_remove", pass_user_data=True),
