@@ -221,9 +221,9 @@ class Channels(object):
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id, string_dict(bot)["channel_has_been_removed"]
                                  .format(channel_username),
-                                 reply_markup=InlineKeyboardMarkup([InlineKeyboardButton(
+                                 reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
                                      text=string_dict(bot)["back_button"],
-                                     callback_data="help_back")])
+                                     callback_data="help_back")]])
                                  ))
             return ConversationHandler.END
         else:
