@@ -367,7 +367,7 @@ Here you can:\n
         remove_button="Удалить",
         send_survey_to_channel='Отправить открытый опрос',
         send_poll_to_channel='Отправить опрос',
-        send_a_post_to_channel='Написать пост',
+        send_post_to_channel='Написать пост',
         donate_button="💰 Управлять платежами",
         back_button="🔙 Назад",
         done_button="✅ Готово",
