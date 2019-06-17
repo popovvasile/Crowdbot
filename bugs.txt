@@ -3,6 +3,7 @@
 Вася
 # TODO on error, return to menu
 # TODO delete and answer buttons in messages to look better. Delete old messages using user_data
+# TODO send surveys and polls and donation request to channels
 # TODO add button "answer" for users + make it clear that is from admin
 # TODO save messages from users that contain files + make it continues
 # TODO two clicks on donate and send message from user side - fix
@@ -14,9 +15,9 @@
 
 Юра
 # TODO implement https://github.com/CubexX/confstat-bot  with channels
-# TODO categories for messages. Ask what this message is about
+# TODO categories for messages. Ask what is this message about
 # TODO send a message to everyone who donated
-# TODO results for users and donations - send csv as file
+# TODO results for users, donations and surveys - send csv file
 # TODO add content to button
 # TODO make content in buttons to return in the same order as was sent
 # TODO support bot - answer to the users messages exactly as in messages.py
