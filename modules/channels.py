@@ -192,7 +192,7 @@ class Channels(object):
                                                         callback_data='PASS'),
                                    InlineKeyboardButton(string_dict(bot)["send_poll_to_channel"],
                                                         callback_data='PASS')],
-                                  [InlineKeyboardButton(string_dict(bot)["send_a_post_to_channel"],
+                                  [InlineKeyboardButton(string_dict(bot)["send_post_to_channel"],
                                                         callback_data='channel_write_post')],
                                   [InlineKeyboardButton(string_dict(bot)["back_button"], callback_data='back')]])
         delete_messages(bot, user_data, update)
