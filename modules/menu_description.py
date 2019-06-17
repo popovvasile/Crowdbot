@@ -22,13 +22,13 @@ class EditBotDescription(object):
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                              callback_data="cancel_edit_description")])
-        self.reply_markup = InlineKeyboardMarkup(
+        reply_markup = InlineKeyboardMarkup(
             buttons)
 
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(bot)["edit_button_str_1"], reply_markup=self.reply_markup)
+                         string_dict(bot)["edit_button_str_1"], reply_markup=reply_markup)
         return MESSAGE
 
     @run_async

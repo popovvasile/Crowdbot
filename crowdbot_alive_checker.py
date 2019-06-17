@@ -33,14 +33,6 @@ def multiple_bot_daemon():
                     new_process.start()
                     my_process[doc["token"]] = new_process
 
-        # for key, process in my_process.items():
-        #     if not process.is_alive():
-        #         doc = dict()
-        #         doc["token"] = key
-        #         new_process = Process(target=main, args=(doc,), name=doc["token"])
-        #         new_process.start()
-        #         my_process[doc["token"]] = new_process
-        #         print("restarted process " + doc["token"])
         for process_key in list(my_process):  # stop the unused tokens
             list_of_tokens = [d['token'] for d in crowdbot_bots_table.find() if 'token' in d]
             if process_key not in list_of_tokens:

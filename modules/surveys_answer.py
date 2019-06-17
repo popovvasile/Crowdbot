@@ -45,7 +45,7 @@ class AnswerSurveys(object):
     def start_answering(self, bot, update, user_data):  # TODO add the "skip" button
         buttons = [[InlineKeyboardButton(text=string_dict(bot)["cancel_button_survey"],
                                          callback_data="cancel_survey_answering")]]
-        self.reply_markup = InlineKeyboardMarkup(
+        reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
@@ -64,7 +64,7 @@ class AnswerSurveys(object):
                          )
         bot.send_message(update.callback_query.message.chat_id,
                          survey["questions"][int(user_data["question_id"])]["text"],
-                         reply_markup=self.reply_markup)
+                         reply_markup=reply_markup)
 
         return ANSWERING
 
@@ -72,7 +72,7 @@ class AnswerSurveys(object):
     def received_information(self, bot, update, user_data):
         buttons = [[InlineKeyboardButton(text=string_dict(bot)["cancel_button_survey"],
                                          callback_data="cancel_survey_answering")]]
-        self.reply_markup = InlineKeyboardMarkup(
+        reply_markup = InlineKeyboardMarkup(
             buttons)
         user_data["question_id"] += 1
         survey = surveys_table.find_one({
@@ -108,7 +108,7 @@ class AnswerSurveys(object):
 
             question = survey["questions"][int(user_data["question_id"])]["text"]
             bot.send_message(update.message.chat_id, question,
-                             reply_markup=self.reply_markup)
+                             reply_markup=reply_markup)
             user_data["last_question"] = question
 
             return ANSWERING

@@ -1,5 +1,3 @@
-import os
-
 from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import (CommandHandler, MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
@@ -25,7 +23,7 @@ class AddCommands(object):
     def start(self, bot, update):
         reply_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                callback_data="cancel_add_button")]]
-        self.reply_markup = InlineKeyboardMarkup(
+        reply_markup = InlineKeyboardMarkup(
             reply_buttons)
 
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -37,12 +35,15 @@ class AddCommands(object):
                          string_dict(bot)["add_menu_buttons_str_1"],
                          reply_markup=markup)
         bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(bot)["back_text"], reply_markup=self.reply_markup)
+                         string_dict(bot)["back_text"], reply_markup=reply_markup)
         return TYPING_BUTTON
 
     def button_handler(self, bot, update, user_data):
         # TODO create a chatbot specially for OG
-
+        reply_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                               callback_data="cancel_add_button")]]
+        reply_markup = InlineKeyboardMarkup(
+            reply_buttons)
         chat_id, txt = initiate_chat_id(update)
         button_list_of_dicts = custom_buttons_table.find({
             "bot_id": bot.id,
@@ -52,28 +53,19 @@ class AddCommands(object):
             user_data['button'] = txt
             update.message.reply_text(string_dict(bot)["great_text"], reply_markup=ReplyKeyboardRemove())
             update.message.reply_text(string_dict(bot)["add_menu_buttons_str_2"],
-                                      reply_markup=self.reply_markup)
+                                      reply_markup=reply_markup)
             return TYPING_DESCRIPTION
         else:
             update.message.reply_text(string_dict(bot)["add_menu_buttons_str_3"],
-                                      reply_markup=self.reply_markup)
+                                      reply_markup=reply_markup)
 
             return TYPING_BUTTON
 
     def description_handler(self, bot, update, user_data):
-        photo_directory = "files/{bot_id}/photo".format(bot_id=bot.id)
-        audio_directory = "files/{bot_id}/audio".format(bot_id=bot.id)
-        document_directory = "files/{bot_id}/document".format(bot_id=bot.id)
-        video_directory = "files/{bot_id}/video".format(bot_id=bot.id)
-
-        if not os.path.exists(photo_directory):
-            os.makedirs(photo_directory)
-        if not os.path.exists(audio_directory):
-            os.makedirs(audio_directory)
-        if not os.path.exists(document_directory):
-            os.makedirs(document_directory)
-        if not os.path.exists(video_directory):
-            os.makedirs(video_directory)
+        reply_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                               callback_data="cancel_add_button")]]
+        reply_markup = InlineKeyboardMarkup(
+            reply_buttons)
 
         if update.callback_query:
             if update.message.callback_query.data == string_dict(bot)["done_button"]:
@@ -146,7 +138,7 @@ class AddCommands(object):
             done_buttons)
         update.message.reply_text(string_dict(bot)["add_menu_buttons_str_4"],
                                   reply_markup=done_reply_markup)
-        update.message.reply_text(string_dict(bot)["back_text"], reply_markup=self.reply_markup)
+        update.message.reply_text(string_dict(bot)["back_text"], reply_markup=reply_markup)
         return TYPING_DESCRIPTION
 
     def description_finish(self, bot, update, user_data):
@@ -173,7 +165,7 @@ class AddCommands(object):
     def delete_button(self, bot, update):
         finish_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                 callback_data="cancel_delete_button")]]
-        self.finish_markup = InlineKeyboardMarkup(
+        finish_markup = InlineKeyboardMarkup(
             finish_buttons)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
@@ -186,7 +178,7 @@ class AddCommands(object):
                              string_dict(bot)["add_menu_buttons_str_6"],  # TODO remove this message later
                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
             bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(bot)["back_text"], reply_markup=self.finish_markup)
+                             string_dict(bot)["back_text"], reply_markup=finish_markup)
 
             return TYPING_TO_DELETE_BUTTON
         else:

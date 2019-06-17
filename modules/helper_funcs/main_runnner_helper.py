@@ -12,20 +12,19 @@ HELP_STRINGS = """
 {}
 """
 
-ALL_MODULES = ['add_menu_buttons', 'answer_surveys', 'create_donation', 'create_survey',
-               'donations_edit_delete_results', 'pay_donation',
-               'report_chatbot_scam', 'send_message', "polls", "user_mode"]
-ADMIN_HELPABLE = {"Edit menu": "",
-                  "💰 Manage payments": "",
-                  'Surveys': "",
-                  "✉️ Messages": "",
-                  "Polls": "",
-                  "User view": "",
-                  "Promotion":""}
-ADMIN_USER_MODE = {"💰 Manage payments": "",
-                   "✉️ Messages": "",
-                   "User view": ""}
-VISITOR_HELPABLE = {"💰 Manage payments": "", "✉️ Messages": "", "Promotion":""}
+ALL_MODULES = ["channels", "donation_enable", "donation_payment", "donations_send_promotion",
+               "donations_edit_delete_results", "manage_button", "menu_buttons", "menu_description",
+               "messages", "polls", "surveys_answer", "surveys_create", "user_mode"]
+ADMIN_HELPABLE = {"Edit menu": "menu_buttons",
+                  "💰 Manage payments": "donation_payment",
+                  'Surveys': "surveys",
+                  "✉️ Messages": "messages",
+                  "Polls": "polls",
+                  "User view": "user_mode"}
+ADMIN_USER_MODE = {"💰 Manage payments": "donation_payment",
+                   "✉️ Messages": "messages",
+                   "User view": "user_mode"}
+VISITOR_HELPABLE = {"💰 Manage payments": "donation_payment", "✉️ Messages": "messages"}
 
 
 # do not async

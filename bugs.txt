@@ -7,7 +7,7 @@
 # TODO add button "answer" for users + make it clear that is from admin
 # TODO save messages from users that contain files + make it continues
 # TODO on error, return to menu
-
+# TODO support bot - answer to the users messages exactly as in messages.py
 # TODO results for users and donations - send csv as file !
 # TODO two clicks on donate and send message from user side - fix
 # TODO fix polls

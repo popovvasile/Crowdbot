@@ -73,8 +73,7 @@ class EditPaymentHandler(object):
             user_data.clear()
             return ConversationHandler.END
 
-    def handle_action_finish(self, bot, update, user_data):  # TODO add if leifs for every action
-
+    def handle_action_finish(self, bot, update, user_data):  # TODO add if elifs for every action
         chat_id, txt = initiate_chat_id(update)
         if txt == string_dict(bot)["delete_donation_button"]:
 
@@ -97,7 +96,7 @@ class EditPaymentHandler(object):
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                              callback_data="cancel_donation_edit")])
-        self.reply_markup = InlineKeyboardMarkup(
+        reply_markup = InlineKeyboardMarkup(
             buttons)
 
         chat_id, txt = initiate_chat_id(update)
@@ -106,13 +105,13 @@ class EditPaymentHandler(object):
             bot.send_message(chat_id, string_dict(bot)["great_text"], reply_markup=ReplyKeyboardRemove())
             bot.send_message(chat_id,
                              string_dict(bot)["donations_edit_str_7"],
-                             reply_markup=self.reply_markup)
+                             reply_markup=reply_markup)
         elif txt == string_dict(bot)["description_button"]:
             bot.send_message(chat_id, string_dict(bot)["great_text"], reply_markup=ReplyKeyboardRemove())
 
             update.message.reply_text(
                 string_dict(bot)["donations_edit_str_8"],
-                reply_markup=self.reply_markup)
+                reply_markup=reply_markup)
         elif txt == string_dict(bot)["currency_button"]:
             bot.send_message(chat_id, string_dict(bot)["great_text"], reply_markup=ReplyKeyboardRemove())
 
@@ -128,7 +127,7 @@ class EditPaymentHandler(object):
         finish_buttons = list()
         finish_buttons.append([InlineKeyboardButton(text=string_dict(bot)["menu_button"],
                                                     callback_data="help_back")])
-        self.finish_markup = InlineKeyboardMarkup(
+        finish_markup = InlineKeyboardMarkup(
             finish_buttons)
 
         chat_id, txt = initiate_chat_id(update)
@@ -143,7 +142,7 @@ class EditPaymentHandler(object):
         chatbot = chatbots_table.find_one({"bot_id": bot.id})
         chatbot["donate"].update(user_data)
         chatbots_table.replace_one({"bot_id": bot.id}, chatbot)
-        update.message.reply_text(string_dict(bot)["donations_edit_str_10"], reply_markup=self.finish_markup)
+        update.message.reply_text(string_dict(bot)["donations_edit_str_10"], reply_markup=finish_markup)
 
         logger.info("Admin {} on bot {}:{} did  the following edit on donation: {}".format(
             update.effective_user.first_name, bot.first_name, bot.id, user_data["action"]))
@@ -180,14 +179,22 @@ class EditPaymentHandler(object):
 
     @run_async
     def change_donation_token(self, bot, update, user_data):
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                             callback_data="cancel_donation_edit")])
+        reply_markup = InlineKeyboardMarkup(
+            buttons)
         update.message.reply_text(
-            string_dict(bot)["donations_edit_str_12"], reply_markup=self.reply_markup
+            string_dict(bot)["donations_edit_str_12"], reply_markup=reply_markup
         )
         return TYPING_TOKEN
 
     @run_async
     def change_donation_token_finish(self, bot, update, user_data):
-
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                             callback_data="cancel_donation_edit")])
+        reply_markup = InlineKeyboardMarkup(buttons)
         chat_id, txt = initiate_chat_id(update)
         if check_provider_token(provider_token=txt, bot=bot):
             chatbot = chatbots_table.find_one({"bot_id": bot.id}) or {}
@@ -195,7 +202,7 @@ class EditPaymentHandler(object):
             chatbot["donate"]["payment_token"] = txt
             chatbots_table.update_one({"bot_id": bot.id}, {'$set': chatbot}, upsert=True)
             update.message.reply_text(string_dict(bot)["donations_edit_str_13"],
-                                      reply_markup=self.reply_markup)
+                                      reply_markup=reply_markup)
             get_help(bot, update)
             logger.info("Admin {} on bot {}:{} did  the following edit on donation: {}".format(
                 update.effective_user.first_name, bot.first_name, bot.id, user_data["action"]))
@@ -203,7 +210,7 @@ class EditPaymentHandler(object):
         else:
             update.message.reply_text(
                 string_dict(bot)["donations_edit_str_14"],
-                reply_markup=self.reply_markup)
+                reply_markup=reply_markup)
 
             return TYPING_TOKEN
 

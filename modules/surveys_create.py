@@ -36,17 +36,20 @@ class SurveyHandler(object):
     @run_async
     def start(self, bot, update, user_data):
         buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_survey")]]
-        self.reply_markup = InlineKeyboardMarkup(
+        reply_markup = InlineKeyboardMarkup(
             buttons)
         user_data["question_id"] = 0
         bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(bot)["survey_str_1"], reply_markup=self.reply_markup)
+                         string_dict(bot)["survey_str_1"], reply_markup=reply_markup)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         return CHOOSING_TITLE
 
     @run_async
     def handle_title(self, bot, update, user_data):
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_survey")]]
+        reply_markup = InlineKeyboardMarkup(
+            buttons)
         chat_id, txt = initiate_chat_id(update)
         if txt == string_dict(bot)["main_survey_button"]:
             user_data["title"] = "initial"
@@ -64,13 +67,13 @@ class SurveyHandler(object):
                     "questions": []
                 })
                 user_data["title"] = title
-                update.message.reply_text(string_dict(bot)["survey_str_2"], reply_markup=self.reply_markup)
+                update.message.reply_text(string_dict(bot)["survey_str_2"], reply_markup=reply_markup)
                 user_data["question_id"] = 1
                 return CHOOSING_QUESTIONS
 
             else:
 
-                update.message.reply_text(string_dict(bot)["survey_str_3"], reply_markup=self.reply_markup)
+                update.message.reply_text(string_dict(bot)["survey_str_3"], reply_markup=reply_markup)
                 return CHOOSING_TITLE
 
     # surveys = [{"admin_id": "",
@@ -84,7 +87,7 @@ class SurveyHandler(object):
     def receive_questions(self, bot, update, user_data):
         done_buttons = [[InlineKeyboardButton(text=string_dict(bot)["done_button"],
                                               callback_data="done_survey")]]
-        self.done_markup = InlineKeyboardMarkup(
+        done_markup = InlineKeyboardMarkup(
             done_buttons)
         question = update.message.text
         if user_data["question_id"] > 0:
@@ -98,7 +101,7 @@ class SurveyHandler(object):
             surveys_table.update({"title": survey["title"]}, survey)
             user_data["question_id"] = int(user_data["question_id"]) + 1
             update.message.reply_text(string_dict(bot)["survey_str_4"],
-                                      reply_markup=self.done_markup)
+                                      reply_markup=done_markup)
 
             return CHOOSING_QUESTIONS
 
@@ -207,10 +210,13 @@ class SurveyHandler(object):
 
     @run_async
     def delete_surveys(self, bot, update):
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_survey")]]
+        reply_markup = InlineKeyboardMarkup(
+            buttons)
         surveys = surveys_table.find({"bot_id": bot.id})
         if surveys.count() != 0:
             bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(bot)["survey_str_14"], reply_markup=self.reply_markup)
+                             string_dict(bot)["survey_str_14"], reply_markup=reply_markup)
             command_list = [survey['title'] for survey in surveys_table.find({"bot_id": bot.id})]
             reply_keyboard = [command_list]
             bot.send_message(update.callback_query.message.chat.id,
@@ -253,12 +259,15 @@ class SurveyHandler(object):
 
     @run_async
     def handle_send_survey(self, bot, update):
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_survey")]]
+        reply_markup = InlineKeyboardMarkup(
+            buttons)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         surveys_list = surveys_table.find({"bot_id": bot.id})
         if surveys_list.count() != 0:
             bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(bot)["survey_str_18"], reply_markup=self.reply_markup)
+                             string_dict(bot)["survey_str_18"], reply_markup=reply_markup)
             command_list = [survey['title'] for survey in surveys_table.find({"bot_id": bot.id})]
             reply_keyboard = [command_list]
             bot.send_message(update.callback_query.message.chat.id,

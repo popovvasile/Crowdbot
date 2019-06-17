@@ -5,7 +5,7 @@ from modules.helper_funcs.lang_strings.strings import string_dict
 
 def help_strings(bot):
     help_dict = {"ENG": {
-        "add_menu_buttons": dict(
+        "menu_buttons": dict(
             mod_name=string_dict(bot)["add_menu_module_button"],
             admin_keyboard=[InlineKeyboardButton(text=string_dict(bot)["create_button"],
                                                      callback_data="create_button"),
@@ -18,7 +18,7 @@ def help_strings(bot):
 
             admin_help=string_dict(bot)["add_menu_buttons_help"]
         ),
-        "answer_buttons": dict(
+        "surveys": dict(
             mod_name=string_dict(bot)["survey_mode_str"],
             admin_help=string_dict(bot)["survey_help_admin"],
 
@@ -45,7 +45,7 @@ def help_strings(bot):
                                      callback_data="inbox_message"),
             ]
         ),
-        "pay_donation": dict(
+        "donation_payment": dict(
             mod_name=string_dict(bot)["pay_donation_mode_str"],
             admin_help=string_dict(bot)["pay_donation_str_admin"],
 
