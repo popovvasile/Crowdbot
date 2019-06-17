@@ -20,7 +20,8 @@ ADMIN_HELPABLE = {"Edit menu": "menu_buttons",
                   'Surveys': "surveys",
                   "✉️ Messages": "messages",
                   "Polls": "polls",
-                  "User view": "user_mode"}
+                  "User view": "user_mode",
+                  "Channels": "channels"}
 ADMIN_USER_MODE = {"💰 Manage payments": "donation_payment",
                    "✉️ Messages": "messages",
                    "User view": "user_mode"}

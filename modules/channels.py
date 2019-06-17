@@ -15,46 +15,6 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-channels_str_1 = 'Here u can manage your channels'
-channels_str_2 = 'List of your channels'
-# Click "Add" to configure your first channel or "Back" for main menu
-no_channels = 'You have no channel configured yet. Click "Add channel" to configure your first channel'
-wrong_channel_link_format = 'Send me link or username of your channel. ' \
-                            'For Example "https://t.me/name" or "t.me/name" or "@name" or just "name"'
-bot_is_not_admin_of_channel = 'Bot is not admin in this({}) channel. ' \
-                              'Add bot as admin to the channel and then back to this menu ' \
-                              'and send me link or username of your channel. ' \
-                              'For Example "https://t.me/name" or "t.me/name" or "@name" or just "name"'
-bot_is_not_admin_of_channel_2 = "Bot is not admin in this({}) channel or can't send message to the channel" \
-                                "So channel was deleted. Add bot as admin to the channel, " \
-                                "let it send message to the channel " \
-                                "and then add channel again by Clicking 'Add channel'"
-channels_str_4 = "To add channel u need to add this bot as admin to your channel " \
-                 "and then back to this menu and send " \
-                 "link or username of your channel. " \
-                 "Send me link or username of your channel"
-allow_bot_send_messages = 'U need to allow bot send messages to the channel. ' \
-                          'And than back to this menu and send username of channel'
-no_such_channel = 'There are no such channel. '
-choose_channel_to_remove = 'Choose channel you want to remove'
-channel_has_been_removed = 'Channel({}) has been deleted.'
-channel_added_success = 'Now you can send posts to the channel({}) using this commands.'
-choose_channel_to_post = 'Choose channel u want to post'
-post_message = 'What do u want to do?'
-send_post = "What do you want to post on your channel({})?\n"\
-            "We will forward your message to channel."
-choose_channel_to_send_poll = 'Choose channel u want to send poll'
-choose_channel_to_send_survey = 'Choose channel u want to send survey'
-try_to_add_already_exist_channel = 'This channel already exists'  # You can Post on channel
-
-__mod_name__ = 'Channels'
-# start 'Channels' message
-__admin_help__ = channels_str_1
-# and keyboard for start message
-__admin_keyboard__ = [InlineKeyboardButton('My Channels', callback_data='my_channels'),
-                      InlineKeyboardButton('Add channel', callback_data='add_channel'),
-                      InlineKeyboardButton('Remove channel', callback_data='remove_channel'),
-                      InlineKeyboardButton('Post on channel', callback_data='post_on_channel')]
 
 # TODO: When we need to use @run_async decorator?
 #       before every send check that bot admin and can send message
@@ -110,12 +70,12 @@ def check_channel(bot, channel_username):
         # print(e)
         # if bot is not admin in the channel
         if str(e).startswith("Supergroup members are unavailable"):
-            return bot_is_not_admin_of_channel.format(channel_username)
+            return string_dict(bot)["bot_is_not_admin_of_channel"].format(channel_username)
         elif str(e).startswith("There is no administrators in the private chat"):
-            return str(e) + "\n" + wrong_channel_link_format
+            return str(e) + "\n" + string_dict(bot)["wrong_channel_link_format"]
         # if channel link is wrong
         else:
-            return wrong_channel_link_format
+            return string_dict(bot)["wrong_channel_link_format"]
     # Check that bot is able to send messages to the channel
     for admin in admins:
         # bot is admin
@@ -124,7 +84,7 @@ def check_channel(bot, channel_username):
             if admin.can_post_messages:
                 return True
             else:
-                return allow_bot_send_messages
+                return string_dict(bot)["allow_bot_send_messages"]
 
 
 # DELETING USING USER_DATA
@@ -156,7 +116,8 @@ class Channels(object):
             if check is not True:
                 user_data['to_delete'].append(
                     bot.send_message(chat_id,
-                                     bot_is_not_admin_of_channel_2.format(channel['channel_username'])))
+                                     string_dict(bot)["bot_is_not_admin_of_channel_2"]
+                                     .format(channel['channel_username'])))
                 channels_table.delete_one({'bot_id': bot.id, 'chat_id': channel['chat_id']})
                 continue
             # bot.get_chat() works with delay ?
@@ -166,15 +127,6 @@ class Channels(object):
                                           {'$set': {'channel_username': '@{}'.format(current_username)}})
         return channels_table.find({'bot_id': bot.id})
 
-    # Copy from main_runner_helper -> def help_button. when click back button -> return to channels menu
-    def make_main_keyboard(self):
-        pairs = list(zip(__admin_keyboard__[::2], __admin_keyboard__[1::2]))
-        if len(__admin_keyboard__) % 2 == 1:
-            pairs.append((__admin_keyboard__[-1],))
-        pairs.append(
-            [InlineKeyboardButton(text="Back", callback_data="help_back")]
-        )
-        return InlineKeyboardMarkup(pairs)
 
     # to make keyboard with channels
     def make_channels_layout(self, bot, update, state, text: str, user_data):
@@ -182,7 +134,7 @@ class Channels(object):
         delete_messages(bot, user_data, update)
         if channels_table.find({'bot_id': bot.id}).count() == 0:
             user_data['to_delete'].append(
-                bot.send_message(update.effective_chat.id, no_channels,
+                bot.send_message(update.effective_chat.id, string_dict(bot)["no_channels"],
                                  reply_markup=self.no_channel_keyboard))
             return ConversationHandler.END
         else:
@@ -197,7 +149,8 @@ class Channels(object):
     def send_wrong_format_message(self, bot, update, user_data, text: str = None):
         delete_messages(bot, user_data, update)
         user_data['to_delete'].append(
-            bot.send_message(update.message.chat_id, wrong_channel_link_format if text is None else text,
+            bot.send_message(update.message.chat_id, string_dict(bot)["wrong_channel_link_format"]
+            if text is None else text,
                              reply_markup=self.cancel_keyboard))
         return ADD_CHANNEL
 
@@ -230,14 +183,16 @@ class Channels(object):
                                            'chat_id': channel_chat_id})
                 return True
             else:
-                return self.send_wrong_format_message(bot, update, user_data, try_to_add_already_exist_channel)
+                return self.send_wrong_format_message(bot, update, user_data,
+                                                      string_dict(bot)["try_to_add_already_exist_channel"])
         else:
             return self.send_wrong_format_message(bot, update, user_data, check)
 ################################################################
 
     # 'My Channels' button
     def my_channels(self, bot, update, user_data):
-        return self.make_channels_layout(bot, update, MY_CHANNELS, channels_str_2, user_data)
+        return self.make_channels_layout(bot, update, MY_CHANNELS, string_dict(bot)["channels_str_2"],
+                                         user_data)
 
     # when user click on channel name in 'My channels' menu
     def channel(self, bot, update, user_data):
@@ -250,11 +205,12 @@ class Channels(object):
                                  reply_markup=self.one_channel_keyboard))
             return MANAGE_CHANNEL
         else:
-            return self.make_channels_layout(bot, update, MY_CHANNELS, channels_str_2, user_data)
+            return self.make_channels_layout(bot, update, MY_CHANNELS, string_dict(bot)["channels_str_2"], user_data)
 
     # 'Remove channel' button
     def choose_to_remove(self, bot, update, user_data):
-        return self.make_channels_layout(bot, update, CHOOSE_TO_REMOVE, choose_channel_to_remove, user_data)
+        return self.make_channels_layout(bot, update, CHOOSE_TO_REMOVE, string_dict(bot)["choose_channel_to_remove"],
+                                         user_data)
 
     # call this when user have choose channel for remove
     def finish_remove(self, bot, update, user_data):
@@ -264,18 +220,22 @@ class Channels(object):
         if channel:
             channels_table.delete_one({'bot_id': bot.id, 'channel_username': channel_username})
             user_data['to_delete'].append(
-                bot.send_message(update.effective_chat.id, channel_has_been_removed.format(channel_username),
-                                 reply_markup=self.make_main_keyboard()))
+                bot.send_message(update.effective_chat.id, string_dict(bot)["channel_has_been_removed"]
+                                 .format(channel_username),
+                                 reply_markup=InlineKeyboardMarkup([InlineKeyboardButton(text="Back",
+                                                                                         callback_data="help_back")])
+                                 ))
             return ConversationHandler.END
         else:
             return self.make_channels_layout(bot, update, CHOOSE_TO_REMOVE,
-                                             no_such_channel + choose_channel_to_remove, user_data)
+                                             string_dict(bot)["no_such_channel"]
+                                             + string_dict(bot)["choose_channel_to_remove"], user_data)
 
     # 'Add Channels' button
     def add_channel(self, bot, update, user_data):
         delete_messages(bot, user_data, update)
         user_data['to_delete'].append(
-            bot.send_message(update.callback_query.message.chat_id, channels_str_4,
+            bot.send_message(update.callback_query.message.chat_id, string_dict(bot)["channels_str_4"],
                              reply_markup=self.cancel_keyboard))
         return ADD_CHANNEL
 
@@ -285,7 +245,8 @@ class Channels(object):
         if have_added is True:
             delete_messages(bot, user_data, update)
             user_data['to_delete'].append(
-                bot.send_message(update.message.chat_id, channel_added_success.format(update.message.text),
+                bot.send_message(update.message.chat_id, string_dict(bot)["channel_added_success"]
+                                 .format(update.message.text),
                                  reply_markup=self.post_keyboard))
             return ConversationHandler.END
 
@@ -295,12 +256,12 @@ class Channels(object):
 
         if channels_table.find({'bot_id': bot.id}).count() == 0:
             user_data['to_delete'].append(
-                bot.send_message(update.callback_query.message.chat.id, no_channels,
+                bot.send_message(update.callback_query.message.chat.id, string_dict(bot)["no_channels"],
                                  reply_markup=self.no_channel_keyboard))
             return ConversationHandler.END
         else:
             user_data['to_delete'].append(
-                bot.send_message(update.callback_query.message.chat_id, post_message,
+                bot.send_message(update.callback_query.message.chat_id, string_dict(bot)["post_message"],
                                  reply_markup=self.post_keyboard))
             return ConversationHandler.END
 
@@ -335,7 +296,8 @@ class SendPost(object):
             buttons)
 
     def choose_channel(self, bot, update, user_data):
-        return Channels().make_channels_layout(bot, update, CHOOSE_TO_SEND_POST, choose_channel_to_post, user_data)
+        return Channels().make_channels_layout(bot, update, CHOOSE_TO_SEND_POST,
+                                               string_dict(bot)["choose_channel_to_post"], user_data)
 
     @run_async
     def send_message(self, bot, update, user_data):
@@ -345,11 +307,12 @@ class SendPost(object):
             delete_messages(bot, user_data, update)
             user_data['channel'] = update.message.text
             user_data['to_delete'].append(
-                bot.send_message(update.message.chat.id, send_post.format(update.message.text),
+                bot.send_message(update.message.chat.id, string_dict(bot)["send_post"].format(update.message.text),
                                  reply_markup=self.reply_markup))
             return MESSAGE_TO_USERS
         else:
-            return Channels().make_channels_layout(bot, update, CHOOSE_TO_SEND_POST, choose_channel_to_post, user_data)
+            return Channels().make_channels_layout(bot, update, CHOOSE_TO_SEND_POST,
+                                                   string_dict(bot)["choose_channel_to_post"], user_data)
 
     @run_async
     def received_message(self, bot, update, user_data):

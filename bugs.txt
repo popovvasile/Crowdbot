@@ -1,21 +1,29 @@
 
 
 Вася
-# TODO fix the language thing. Create a function that will return the string
+# TODO channels
+# TODO on error, return to menu
+
 # TODO categories for messages. Ask what this message is about
 # TODO delete and answer buttons to look better. Delete old messages using user_data
 # TODO add button "answer" for users + make it clear that is from admin
 # TODO save messages from users that contain files + make it continues
-# TODO on error, return to menu
-# TODO support bot - answer to the users messages exactly as in messages.py
-# TODO results for users and donations - send csv as file !
+
+# TODO add content to button
+
 # TODO two clicks on donate and send message from user side - fix
 # TODO fix polls
 # TODO payment token fix
 # TODO think about an example chatbot (TV8)
-# TODO add content to button
+
+
+Юра
 # TODO implement https://github.com/CubexX/confstat-bot  with channels
-# TODO send a message to all who donated
+# TODO make content in buttons to return in the same order as was sent !
+# TODO support bot - answer to the users messages exactly as in messages.py
+# TODO send a message to everyone who donated
+# TODO results for users and donations - send csv as file !
+
 
 
 
@@ -27,7 +35,6 @@
 
 
 
-# TODO make content to return in the same order as was sent !
 # TODO pics and other content for surveys and polls
 # TODO hidden content
 

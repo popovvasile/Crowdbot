@@ -5,16 +5,27 @@ from modules.helper_funcs.lang_strings.strings import string_dict
 
 def help_strings(bot):
     help_dict = {"ENG": {
+        "channels": dict(
+            mod_name='Channels',
+            # start 'Channels' message
+            admin_help=string_dict(bot)["channels_str_1"],
+            # and keyboard for start message
+            admin_keyboard=[InlineKeyboardButton('My Channels', callback_data='my_channels'),
+                            InlineKeyboardButton('Add channel', callback_data='add_channel'),
+                            InlineKeyboardButton('Remove channel', callback_data='remove_channel'),
+                            InlineKeyboardButton('Post on channel', callback_data='post_on_channel')]
+
+        ),
         "menu_buttons": dict(
             mod_name=string_dict(bot)["add_menu_module_button"],
             admin_keyboard=[InlineKeyboardButton(text=string_dict(bot)["create_button"],
-                                                     callback_data="create_button"),
-                                InlineKeyboardButton(text=string_dict(bot)["delete_button"],
-                                                     callback_data="delete_button"),
-                                InlineKeyboardButton(text=string_dict(bot)["edit_button_button"],
-                                                     callback_data="edit_button"),
-                                InlineKeyboardButton(text=string_dict(bot)["edit_menu_text"],
-                                                     callback_data="edit_bot_description")],
+                                                 callback_data="create_button"),
+                            InlineKeyboardButton(text=string_dict(bot)["delete_button"],
+                                                 callback_data="delete_button"),
+                            InlineKeyboardButton(text=string_dict(bot)["edit_button_button"],
+                                                 callback_data="edit_button"),
+                            InlineKeyboardButton(text=string_dict(bot)["edit_menu_text"],
+                                                 callback_data="edit_bot_description")],
 
             admin_help=string_dict(bot)["add_menu_buttons_help"]
         ),
@@ -34,7 +45,7 @@ def help_strings(bot):
             mod_name=string_dict(bot)["send_message_module_str"],
             visitor_help=string_dict(bot)["send_message_user"],
             visitor_keyboard=[InlineKeyboardButton(text=string_dict(bot)["send_message_button_1"],
-                                                       callback_data="send_message_to_admin")],
+                                                   callback_data="send_message_to_admin")],
 
             admin_help=string_dict(bot)["send_message_admin"],
 
