@@ -1,28 +1,27 @@
 
 
 Вася
-# TODO channels
 # TODO on error, return to menu
-
-# TODO categories for messages. Ask what this message is about
-# TODO delete and answer buttons to look better. Delete old messages using user_data
+# TODO delete and answer buttons in messages to look better. Delete old messages using user_data
 # TODO add button "answer" for users + make it clear that is from admin
 # TODO save messages from users that contain files + make it continues
-
-# TODO add content to button
-
 # TODO two clicks on donate and send message from user side - fix
 # TODO fix polls
 # TODO payment token fix
+# TODO pics and other content for surveys and polls
 # TODO think about an example chatbot (TV8)
 
 
 Юра
 # TODO implement https://github.com/CubexX/confstat-bot  with channels
-# TODO make content in buttons to return in the same order as was sent !
-# TODO support bot - answer to the users messages exactly as in messages.py
+# TODO categories for messages. Ask what this message is about
 # TODO send a message to everyone who donated
-# TODO results for users and donations - send csv as file !
+# TODO results for users and donations - send csv as file
+# TODO add content to button
+# TODO make content in buttons to return in the same order as was sent
+# TODO support bot - answer to the users messages exactly as in messages.py
+
+
 
 
 
@@ -31,24 +30,3 @@
 
 
 # TODO Kirill add the option "pause the bot"
-
-
-
-
-# TODO pics and other content for surveys and polls
-# TODO hidden content
-
-
-# TODO credit card token for shop  410694247:TEST:c374c3a5-04b2-4f5d-a923-062cd4adc358
-# TODO connect e-shop button
-# TODO return the amount of money received by both bots
-# TODO make buying easier in the shop - don't enforce funds
-
-TODO learn how to use  ForceReply https://python-tel:egram-bot.readthedocs.io/en/stable/telegram.forcereply.html
-
-Кнопки
-    2. Добавил 03.06-09.06.docx, но в кнопке он называется document_27798_.docx
-    3. Текст вне правильной последовательности. Он всегда добавляется сверху.
-Message:
-    2. Юзер: Чтобы задонатить надо два раза жать на Donate. Чтобы отправить сообщение надо тоже два раза жать
-
