@@ -41,7 +41,7 @@ def facts_to_str(user_data):
 
 
 class AnswerSurveys(object):
-    @run_async
+    
     def start_answering(self, bot, update, user_data):  # TODO add the "skip" button
         buttons = [[InlineKeyboardButton(text=string_dict(bot)["cancel_button_survey"],
                                          callback_data="cancel_survey_answering")]]
@@ -68,7 +68,7 @@ class AnswerSurveys(object):
 
         return ANSWERING
 
-    @run_async
+    
     def received_information(self, bot, update, user_data):
         buttons = [[InlineKeyboardButton(text=string_dict(bot)["cancel_button_survey"],
                                          callback_data="cancel_survey_answering")]]
@@ -97,8 +97,8 @@ class AnswerSurveys(object):
                     to_send_text += string_dict(bot)["answer_survey_str_2"].format(question, answer['answer'])
 
             bot.send_message(update.message.chat_id,
-                             string_dict(bot)["answer_survey_str_3 + to_send_text"] + "\n" +
-                             string_dict(bot)["answer_survey_str_4"])
+                             string_dict(bot)["answer_survey_str_3"] + "\n" +
+                             string_dict(bot)["answer_survey_str_4"] + "\n" + to_send_text)
             get_help(bot, update)
             del user_data
             del answer
@@ -112,8 +112,7 @@ class AnswerSurveys(object):
             user_data["last_question"] = question
 
             return ANSWERING
-
-    @run_async
+    
     def done(self, bot, update, user_data):
         update.message.reply_text(string_dict(bot)["answer_survey_str_3"] + "{}" +
                                   string_dict(bot)["answer_survey_str_4"].format(facts_to_str(user_data)))
@@ -121,18 +120,6 @@ class AnswerSurveys(object):
         logger.info("User {} on bot {}:{} answered to survey:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, user_data["title"]))
         user_data.clear()
-        return ConversationHandler.END
-
-    @run_async
-    def error(self, bot, update, error):
-        """Log Errors caused by Updates."""
-        logger.warning('Update "%s" caused error "%s"', update, error)
-
-    def cancel(self, bot, update):
-        update.message.reply_text(
-            "Command is cancelled =("
-        )
-        get_help(bot, update)
         return ConversationHandler.END
 
     def back(self, bot, update):
@@ -154,8 +141,10 @@ ANSWER_SURVEY_HANDLER = ConversationHandler(
 
     fallbacks=[
         CallbackQueryHandler(AnswerSurveys().back, pattern=r"cancel_survey_answering"),
+        CallbackQueryHandler(callback=AnswerSurveys().back, pattern=r"error_back"),
         CommandHandler('done', AnswerSurveys().back),
-        CommandHandler('cancel', AnswerSurveys().cancel),
-        MessageHandler(filters=Filters.command, callback=AnswerSurveys().back)]
+        CommandHandler('cancel', AnswerSurveys().back),
+        MessageHandler(filters=Filters.command, callback=AnswerSurveys().back),
+    ]
 )
 

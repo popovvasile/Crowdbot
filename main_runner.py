@@ -31,8 +31,9 @@ LOGGER = logging.getLogger(__name__)
 
 
 def main(token):
-    updater = tg.Updater(token, workers=15)  # TODO check the docs
+    updater = tg.Updater(token)  # TODO check the docs
     dispatcher = updater.dispatcher
+    dispatcher.add_error_handler(error_callback)
     start_handler = CommandHandler("start", WelcomeBot().start)
     help_handler = CommandHandler("help", get_help)
     rex_help_handler = RegexHandler(r"^help$", get_help)
@@ -57,7 +58,6 @@ def main(token):
     dispatcher.add_handler(ADMIN_AUTHENTICATION_HANDLER)
 
     dispatcher.add_handler(help_callback_handler)
-    dispatcher.add_error_handler(error_callback)
     dispatcher.add_handler(EDIT_BOT_DESCRIPTION_HANDLER)
     # ADD_BUTTONS
     dispatcher.add_handler(BUTTON_ADD_HANDLER)

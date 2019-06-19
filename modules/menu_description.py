@@ -17,7 +17,7 @@ MESSAGE_TO_USERS = 1
 
 
 class EditBotDescription(object):
-    @run_async
+
     def send_message(self, bot, update):
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
@@ -31,7 +31,6 @@ class EditBotDescription(object):
                          string_dict(bot)["edit_button_str_1"], reply_markup=reply_markup)
         return MESSAGE
 
-    @run_async
     def received_message(self, bot, update):
         bot.send_message(update.message.chat_id,
                          string_dict(bot)["edit_button_str_2"])
@@ -42,26 +41,9 @@ class EditBotDescription(object):
         get_help(bot, update)
         return ConversationHandler.END
 
-    @run_async
-    def error(self, bot, update, error):
-        """Log Errors caused by Updates."""
-        bot.send_message(update.message.chat_id,
-                         "Command canceled")
-
-        logger.warning('Update "%s" caused error "%s"', update, error)
-        return ConversationHandler.END
-
     def back(self, bot, update):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        get_help(bot, update)
-        return ConversationHandler.END
-
-    def cancel(self, bot, update):
-        update.message.reply_text(
-            "Command is cancelled =("
-        )
-
         get_help(bot, update)
         return ConversationHandler.END
 
@@ -80,8 +62,10 @@ EDIT_BOT_DESCRIPTION_HANDLER = ConversationHandler(
     },
 
     fallbacks=[
-               CallbackQueryHandler(callback=EditBotDescription().back,
-                                    pattern=r"cancel_edit_description"),
-               CommandHandler('cancel', EditBotDescription().error),
-               MessageHandler(filters=Filters.command, callback=EditBotDescription().error)]
+        CallbackQueryHandler(callback=EditBotDescription().back,
+                             pattern=r"cancel_edit_description"),
+        CommandHandler('cancel', EditBotDescription().back),
+        MessageHandler(filters=Filters.command, callback=EditBotDescription().back),
+        CallbackQueryHandler(callback=EditBotDescription().back, pattern=r"error_back"),
+    ]
 )

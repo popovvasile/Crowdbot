@@ -16,7 +16,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# TODO: When we need to use @run_async decorator?
+# TODO: When we need to use  decorator?
 #       before every send check that bot admin and can send message
 #       problem with delete messages - DELETE ALL MESSAGES BEFORE CURRENT
 #       back to Channels menu
@@ -316,7 +316,7 @@ class SendPost(object):
         return Channels().make_channels_layout(bot, update, CHOOSE_TO_SEND_POST,
                                                string_dict(bot)["choose_channel_to_post"], user_data)
 
-    @run_async
+    
     def send_message(self, bot, update, user_data):
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_send_post")])
@@ -336,7 +336,7 @@ class SendPost(object):
             return Channels().make_channels_layout(bot, update, CHOOSE_TO_SEND_POST,
                                                    string_dict(bot)["choose_channel_to_post"], user_data)
 
-    @run_async
+    
     def received_message(self, bot, update, user_data):
         delete_messages(bot, user_data, update)
         if update.message.text:
@@ -401,7 +401,7 @@ class SendPost(object):
             update.effective_user.first_name, bot.first_name, bot.id))
         return ConversationHandler.END
 
-    @run_async
+    
     def error(self, bot, update, error):
         """Log Errors caused by Updates."""
         bot.send_message(update.message.chat_id,
@@ -434,7 +434,7 @@ MY_CHANNELS_HANDLER = ConversationHandler(
                          CallbackQueryHandler(Channels().finish_remove, pattern=r"channel_remove", pass_user_data=True),
                          CallbackQueryHandler(Channels())]
     },
-    fallbacks=[]
+    fallbacks=[ CallbackQueryHandler(callback=Channels().back, pattern=r"error_back"),]
 )
 
 ADD_CHANNEL_HANDLER = ConversationHandler(
@@ -499,7 +499,7 @@ class SendPoll(object):
         else:
             return Channels().make_channels_layout(bot, update, CHOOSE_TO_SEND_POLL, choose_channel_to_send_poll)
 
-    @run_async
+    
     def handle_send_poll(self, bot, update, user_data):
         channel = channels_table.find_one({'bot_id': bot.id, 'channel_username': update.message.text})
         if channel:
@@ -523,7 +523,7 @@ class SendPoll(object):
         else:
             return Channels().make_channels_layout(bot, update, CHOOSE_TO_SEND_POST, choose_channel_to_send_poll)
 
-    @run_async
+    
     def handle_send_title(self, bot, update, user_data):  # TODO save more poll instances
         chat_id, txt = initiate_chat_id(update)
         # sent = []
@@ -582,7 +582,7 @@ class SendSurvey(object):
         return Channels().make_channels_layout(bot, update, CHOOSE_CHANNEL_TO_SEND_SURVEY,
                                                choose_channel_to_send_survey)
 
-    @run_async
+    
     def handle_send_survey(self, bot, update, user_data):
         channel = channels_table.find_one({'bot_id': bot.id, 'channel_username': update.message.text})
         if channel:
@@ -609,7 +609,7 @@ class SendSurvey(object):
             return Channels().make_channels_layout(bot, update, CHOOSE_CHANNEL_TO_SEND_SURVEY,
                                                    choose_channel_to_send_survey)
 
-    @run_async
+    
     def handle_send_title(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
         user_data["title"] = txt

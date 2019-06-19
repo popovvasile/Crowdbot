@@ -44,7 +44,7 @@ CHOOSE_TITLE_RESULTS = 13
 
 
 class PollBot(object):
-    @run_async
+
     def start(self, bot, update):
         buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                          callback_data="cancel_poll")]]
@@ -57,7 +57,6 @@ class PollBot(object):
                            message_id=update.callback_query.message.message_id)
         return TYPING_TITLE
 
-    @run_async
     def handle_title(self, bot, update, user_data):
         text = update.message.text
         user_data['title'] = text
@@ -66,7 +65,6 @@ class PollBot(object):
 
         return TYPING_TYPE
 
-    @run_async
     def handle_type(self, bot, update, user_data):
         buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_poll")]]
         reply_markup = InlineKeyboardMarkup(
@@ -86,7 +84,6 @@ class PollBot(object):
             update.message.reply_text(string_dict(bot)["polls_str_3"], reply_markup=reply_markup)
             return TYPING_OPTION
 
-    @run_async
     def handle_meta(self, bot, update, user_data):
         buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                          callback_data="cancel_poll")]]
@@ -132,7 +129,6 @@ class PollBot(object):
 
         return TYPING_OPTION
 
-    @run_async
     def handle_done(self, bot, update, user_data):
         send_buttons = [[InlineKeyboardButton(text=string_dict(bot)["menu_button"],
                                               callback_data="cancel_poll"),
@@ -367,27 +363,12 @@ class PollBot(object):
                               **kwargs)
         return ConversationHandler.END
 
-    def cancel(self, bot, update):
-        update.message.reply_text(
-            "Command is cancelled =("
-        )
-        get_help(bot, update)
-
-        return ConversationHandler.END
-
     def back(self, bot, update):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         get_help(bot, update)
         return ConversationHandler.END
 
-    # Error handler
-    def error(self, bot, update, error):
-        """Log Errors caused by Updates."""
-        logger.warning('Update "%s" caused error "%s"', update, error)
-        return
-
-    @run_async
     def handle_send_poll(self, bot, update):
         create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["create_button"],
                                                 callback_data="create_poll"),
@@ -421,7 +402,6 @@ class PollBot(object):
                                message_id=update.callback_query.message.message_id)
             return TYPING_SEND_TITLE
 
-    @run_async
     def handle_send_title(self, bot, update, user_data):  # TODO save more poll instances
         chat_id, txt = initiate_chat_id(update)
         sent = []
@@ -450,7 +430,6 @@ class PollBot(object):
 
         return ConversationHandler.END
 
-    @run_async
     def handle_polls_results(self, bot, update):
         buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                          callback_data="cancel_poll")]]
@@ -471,7 +450,6 @@ class PollBot(object):
                          string_dict(bot)["polls_str_15"], reply_markup=reply_markup)
         return CHOOSE_TITLE_RESULTS
 
-    @run_async
     def handle_polls_results_title(self, bot, update):  # TODO made miserably, need to refactor
         create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["create_button"],
                                                 callback_data="create_poll"),
@@ -513,7 +491,6 @@ class PollBot(object):
 
         return ConversationHandler.END
 
-    @run_async
     def handle_delete_poll(self, bot, update):
         buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_poll")]]
         reply_markup = InlineKeyboardMarkup(buttons)
@@ -543,12 +520,12 @@ class PollBot(object):
                              reply_markup=InlineKeyboardMarkup([admin_keyboard]))
             return ConversationHandler.END
 
-    @run_async
     def handle_delete_poll_finish(self, bot, update):
         chat_id, txt = initiate_chat_id(update)
         poll_to_delete_instances = poll_instances_table.find({"bot_id": bot.id, "title": txt})
 
         for poll_instance in poll_to_delete_instances:
+            print(poll_instance)
             bot.delete_message(chat_id=poll_instance["chat_id"],
                                message_id=poll_instance["message_id"])
 
@@ -575,10 +552,12 @@ DELETE_POLLS_HANDLER = ConversationHandler(
 
         CHOOSE_TITLE_DELETE: [MessageHandler(Filters.text, PollBot().handle_delete_poll_finish),
                               CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
-                              CommandHandler('cancel', PollBot().cancel)],
+                              CommandHandler('cancel', PollBot().back)],
 
     },
-    fallbacks=[CallbackQueryHandler(callback=PollBot().cancel, pattern=r"cancel_poll")]
+    fallbacks=[CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
+               CallbackQueryHandler(callback=PollBot().back, pattern=r"error_back"),
+               ]
 )
 
 POLLS_RESULTS_HANDLER = ConversationHandler(
@@ -589,11 +568,13 @@ POLLS_RESULTS_HANDLER = ConversationHandler(
 
         CHOOSE_TITLE_RESULTS: [MessageHandler(Filters.text, PollBot().handle_polls_results_title),
                                CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
-                               CommandHandler('cancel', PollBot().cancel)],
+                               CommandHandler('cancel', PollBot().back)],
 
     },
     fallbacks=[CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
-               CommandHandler('cancel', PollBot().cancel, pass_user_data=True)]
+               CommandHandler('cancel', PollBot().back, pass_user_data=True),
+               CallbackQueryHandler(callback=PollBot().back, pattern=r"error_back"),
+               ]
 )
 
 POLL_HANDLER = ConversationHandler(
@@ -606,32 +587,33 @@ POLL_HANDLER = ConversationHandler(
                                       PollBot().handle_title,
                                       pass_user_data=True),
                        CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
-                       CommandHandler('cancel', PollBot().cancel),
+                       CommandHandler('cancel', PollBot().back),
                        ],
         TYPING_TYPE: [RegexHandler(PollBot().assemble_type_regex(),
                                    PollBot().handle_type,
                                    pass_user_data=True),
                       CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
-                      CommandHandler('cancel', PollBot().cancel),
+                      CommandHandler('cancel', PollBot().back),
                       ],
         TYPING_META: [MessageHandler(Filters.text,
                                      PollBot().handle_meta,
                                      pass_user_data=True),
                       CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
-                      CommandHandler('cancel', PollBot().cancel),
+                      CommandHandler('cancel', PollBot().back),
                       ],
         TYPING_OPTION: [MessageHandler(Filters.text,
                                        PollBot().handle_option,
                                        pass_user_data=True),
                         CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
-                        CommandHandler('cancel', PollBot().cancel),
+                        CommandHandler('cancel', PollBot().back),
                         ]
     },
     fallbacks=[
         CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
         CallbackQueryHandler(callback=PollBot().handle_done, pattern=r"done_poll", pass_user_data=True),
-        CommandHandler('cancel', PollBot().cancel),
+        CommandHandler('cancel', PollBot().back),
         MessageHandler(filters=Filters.command, callback=PollBot().back),
+        CallbackQueryHandler(callback=PollBot().back, pattern=r"error_back"),
     ]
 )
 BUTTON_HANDLER = CallbackQueryHandler(PollBot().button, pattern='{"i":')
@@ -646,16 +628,17 @@ SEND_POLLS_HANDLER = ConversationHandler(
     states={
         NOT_ENGAGED_SEND: [CommandHandler('send_poll', PollBot().handle_send_poll),
                            CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
-                           CommandHandler('cancel', PollBot().cancel), ],
+                           CommandHandler('cancel', PollBot().back), ],
         TYPING_SEND_TITLE: [MessageHandler(Filters.text, PollBot().handle_send_title, pass_user_data=True),
                             CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
-                            CommandHandler('cancel', PollBot().cancel), ],
+                            CommandHandler('cancel', PollBot().back), ],
 
     },
     fallbacks=[
         CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
-        CommandHandler('cancel', PollBot().cancel),
+        CommandHandler('cancel', PollBot().back),
         MessageHandler(filters=Filters.command, callback=PollBot().back),
+        CallbackQueryHandler(callback=PollBot().back, pattern=r"error_back"),
 
     ]
 )

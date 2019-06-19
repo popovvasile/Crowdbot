@@ -41,7 +41,7 @@ class PaymentBot(object):
         logger.warning('Update "%s" caused error "%s"', update, error)
     # @if_admin
     @staticmethod
-    @run_async
+    
     def payments_list(bot, update):  # TODO make this with buttons as well
         chat_id, txt = initiate_chat_id(update)
         chat = chats_table.find_one({"chat_id": chat_id})
@@ -55,7 +55,7 @@ class PaymentBot(object):
                     payment_request['paid_status']
                 )) + '\n\n'
         bot.send_message(chat_id, "To make a payment, click /execute_payment")
-    @run_async
+    
     def start_payment(self, bot, update, user_data):
         text_to_send_answer = ''
         for payment_request in payment_requests:

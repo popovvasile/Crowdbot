@@ -4,7 +4,7 @@ from modules.helper_funcs.lang_strings.strings import string_dict
 
 
 def help_strings(bot):
-    help_dict = {"ENG": {
+    help_dict = {
         "channels": dict(
             mod_name='Channels',
             # start 'Channels' message
@@ -93,10 +93,10 @@ def help_strings(bot):
                 InlineKeyboardButton(text=string_dict(bot)["user_mode_str"], callback_data="turn_user_mode_on")]
 
         )
-    }}
+    }
 
     chatbot = chatbots_table.find_one({"bot_id": bot.id})
-    return help_dict[chatbot["lang"]]
+    return help_dict
 
 
 def helpable_dict(bot):

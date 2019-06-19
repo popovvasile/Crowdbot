@@ -2,10 +2,12 @@ import re
 from telegram import ParseMode, InlineKeyboardMarkup, Bot, Update, InlineKeyboardButton
 from telegram.error import Unauthorized, BadRequest, TimedOut, NetworkError, TelegramError, ChatMigrated
 from telegram.ext import run_async, ConversationHandler
+from urllib3.exceptions import HTTPError
 
 from database import custom_buttons_table, users_table, chatbots_table, user_mode_table
 from modules.helper_funcs.auth import if_admin, initiate_chat_id, register_chat
 from modules.helper_funcs.lang_strings.help_strings import help_strings, helpable_dict
+from modules.helper_funcs.lang_strings.strings import string_dict
 from modules.helper_funcs.misc import paginate_modules, LOGGER, EqInlineKeyboardButton
 
 HELP_STRINGS = """
@@ -46,33 +48,32 @@ def send_admin_user_mode(bot, chat_id, text, keyboard=None):
 
 # for test purposes
 def error_callback(bot, update, error):
+    back_buttons = InlineKeyboardMarkup(
+                                 [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                   callback_data="error_back")]])
+    print(error)
     try:
-        raise error
-    except Unauthorized:
-        print(error)
-        # remove update.message.chat_id from conversation list
-    except BadRequest:
-        print("BadRequest caught")
-        print(error)
 
-        # handle malformed requests - read more below!
+        if hasattr(update, 'callback_query'):
+            update.message.reply_text("An error accured =( Please proceed to the main menu",
+                                      reply_markup=back_buttons)
+        elif hasattr(update, 'message'):
+            bot.send_message(update.callback_query.message.chat.id,
+                             "An error happened =( Please proceed to the main menu",
+                             reply_markup=back_buttons)
+
+        return
+
     except TimedOut as err:
         print("TimedOut")
         print(err)
+
         # handle slow connection problems
-    except NetworkError:
-        print("NetworkError")
+    except HTTPError:
+        print("HTTPError")
         # handle other connection problems
-    except ChatMigrated as err:
-        print("ChatMigrated")
-        print(err)
-        # the chat_id of a group has changed, use e.new_chat_id instead
-    except TelegramError:
-        print(error)
-        # handle all other telegram related errors
 
 
-@run_async
 def button_handler(bot: Bot, update: Update):
     query = update.callback_query
     button_callback_data = query.data
@@ -124,7 +125,7 @@ def button_handler(bot: Bot, update: Update):
 # ADMIN_USER_MODE = {'Donate': "",
 #                    'Send a message': "",
 #                    "User view": ""}
-@run_async
+
 def help_button(bot: Bot, update: Update):
     # users_table.update({"user_id": update.message.from_user.id},
     #                    {'bot_id': bot.id,
@@ -226,7 +227,7 @@ def help_button(bot: Bot, update: Update):
             LOGGER.exception("Exception in help buttons. %s", str(query.data))
 
 
-@run_async
+
 def get_help(bot: Bot, update: Update):
     chatbot = chatbots_table.find_one({"bot_id": bot.id})
     register_chat(bot, update)

@@ -228,6 +228,7 @@ BUTTON_EDIT_HANDLER = ConversationHandler(
     fallbacks=[
         CallbackQueryHandler(callback=ButtonEdit().back,
                              pattern=r"cancel_edit_button", pass_user_data=True),
+        CallbackQueryHandler(callback=ButtonEdit().back, pattern=r"error_back"),
         CommandHandler('cancel', ButtonEdit().cancel),
         MessageHandler(filters=Filters.command, callback=ButtonEdit().cancel)
     ]
@@ -248,7 +249,9 @@ BUTTON_EDIT_FINISH_HANDLER = ConversationHandler(
     fallbacks=[
         CallbackQueryHandler(callback=ButtonEdit().back,
                              pattern=r"cancel_edit_button", pass_user_data=True),
+        CallbackQueryHandler(callback=ButtonEdit().back, pattern=r"error_back"),
         CommandHandler('cancel', ButtonEdit().cancel),
-        MessageHandler(filters=Filters.command, callback=ButtonEdit().cancel)
+        MessageHandler(filters=Filters.command, callback=ButtonEdit().cancel),
+
     ]
 )

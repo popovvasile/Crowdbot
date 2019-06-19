@@ -50,7 +50,7 @@ class EditPaymentHandler(object):
 
         return "\n".join(facts).join(['\n', '\n'])
 
-    @run_async
+    
     def start_donation(self, bot, update, user_data):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id, )
@@ -122,7 +122,7 @@ class EditPaymentHandler(object):
         user_data["action"] = txt
         return EDIT_FINISH
 
-    @run_async
+    
     def handle_edit_finish(self, bot, update, user_data):  # TODO double check
         finish_buttons = list()
         finish_buttons.append([InlineKeyboardButton(text=string_dict(bot)["menu_button"],
@@ -150,7 +150,7 @@ class EditPaymentHandler(object):
 
         return ConversationHandler.END
 
-    @run_async
+    
     def handle_finish_delete(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
         if txt == string_dict(bot)["donations_edit_str_3"]:
@@ -177,7 +177,7 @@ class EditPaymentHandler(object):
                 user_data['action'] = txt
                 return EDIT_PAYMENT
 
-    @run_async
+    
     def change_donation_token(self, bot, update, user_data):
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
@@ -189,7 +189,7 @@ class EditPaymentHandler(object):
         )
         return TYPING_TOKEN
 
-    @run_async
+    
     def change_donation_token_finish(self, bot, update, user_data):
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
@@ -272,5 +272,7 @@ EDIT_DONATION_HANDLER = ConversationHandler(
     fallbacks=[
         CommandHandler('cancel', EditPaymentHandler().cancel),
         CallbackQueryHandler(callback=EditPaymentHandler().back, pattern=r"cancel_donation_edit"),
-        MessageHandler(filters=Filters.command, callback=EditPaymentHandler().back)]
+        MessageHandler(filters=Filters.command, callback=EditPaymentHandler().back),
+        CallbackQueryHandler(callback=EditPaymentHandler().back, pattern=r"error_back"),
+    ]
 )

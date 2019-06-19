@@ -29,11 +29,11 @@ def paginate_modules(page_n: int, module_dict: Dict, prefix, bot_id, chat=None) 
 
     if not chat:
         modules = sorted([
-            EqInlineKeyboardButton(x, callback_data="{}_module({})".format(prefix, x.lower())) for x in module_dict
+            EqInlineKeyboardButton(x, callback_data="{}_module({})".format(prefix, module_dict[x])) for x in module_dict
         ]) + buttons
     else:
         modules = sorted([
-            EqInlineKeyboardButton(x, callback_data="{}_module({},{})".format(prefix, chat, x.lower())) for x in
+            EqInlineKeyboardButton(x, callback_data="{}_module({},{})".format(prefix, chat, module_dict[x])) for x in
             module_dict
         ])
 
@@ -83,7 +83,7 @@ def register_chat(bot, update):
                        upsert=True)
 
 
-@run_async
+
 def get_help(bot: Bot, update: Update):
     chatbot = chatbots_table.find_one({"bot_id": bot.id})
     register_chat(bot, update)

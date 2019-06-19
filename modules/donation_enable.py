@@ -1,6 +1,6 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
-import requests  
+import requests
 import json
 
 from telegram import LabeledPrice
@@ -14,6 +14,7 @@ from modules.helper_funcs.auth import initiate_chat_id
 # Enable logging
 from modules.helper_funcs.helper import get_help
 from modules.helper_funcs.lang_strings.strings import string_dict
+
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
@@ -48,7 +49,6 @@ class CreateDonationHandler(object):
 
         return "\n".join(facts).join(['\n', '\n'])
 
-    @run_async
     def start_create_donation(self, bot, update, user_data):
         buttons = list()
         buttons.append(
@@ -76,7 +76,6 @@ class CreateDonationHandler(object):
                              reply_markup=reply_markup)
             return TYPING_TOKEN
 
-    @run_async
     def handle_token(self, bot, update, user_data):
         buttons = list()
         buttons.append(
@@ -99,7 +98,6 @@ class CreateDonationHandler(object):
 
         return TYPING_TOKEN
 
-    @run_async
     def handle_title(self, bot, update, user_data):
         buttons = list()
         buttons.append(
@@ -115,7 +113,6 @@ class CreateDonationHandler(object):
 
         return TYPING_DESCRIPTION
 
-    @run_async
     def handle_description(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
         user_data["description"] = txt
@@ -125,7 +122,6 @@ class CreateDonationHandler(object):
 
         return DONATION_FINISH
 
-    @run_async
     def handle_donation_finish(self, bot, update, user_data):
 
         create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["send_donation_request_button"],
@@ -208,5 +204,6 @@ CREATE_DONATION_HANDLER = ConversationHandler(
 
     fallbacks=[CallbackQueryHandler(callback=CreateDonationHandler().back, pattern=r"cancel_donation_create"),
                MessageHandler(filters=Filters.command, callback=CreateDonationHandler().back),
+               CallbackQueryHandler(callback=CreateDonationHandler().back, pattern=r"error_back"),
                ]
 )

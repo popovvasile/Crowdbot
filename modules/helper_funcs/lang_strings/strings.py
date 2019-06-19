@@ -42,6 +42,7 @@ Press “Off" to return to the normal mode
         user_mode_off_finish="🔚 User mode is off",
 
         user_mode_str="User mode",
+        send_a_post_to_channel='Write a post on the channel',
 
         promotion_send_message_module_str="Promotion",
         promotion_send_message_button_1="📤 Send message",
@@ -99,7 +100,7 @@ Say Hello to the admin!
         send_donation_request_3="💸 The message is sent!",
 
         answer_button_str="Answer",
-        send_donation_request_button="Send donation requst",
+        send_donation_request_button="Send donation request",
         cancel_button_survey="🔚 Cancel survey",
         donate_button="💰 Manage payments",
         back_button="🔙 Back",

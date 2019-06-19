@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class UserMode(object):
-    @run_async
+    
     def turn_user_mode_on(self, bot, update):
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["menu_button"], callback_data="help_back")])
@@ -42,7 +42,6 @@ class UserMode(object):
             update.effective_user.first_name, bot.first_name, bot.id))
         return ConversationHandler.END
 
-    @run_async
     def turn_user_mode_off(self, bot, update):
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["menu_button"],

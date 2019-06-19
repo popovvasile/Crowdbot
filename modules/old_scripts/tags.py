@@ -22,7 +22,7 @@ class TagBot(object):   # TODO allow users to send messages to the bots admins
             txt = txt + update.message.caption
         return chat_id, txt
 
-    @run_async
+    
     def handle_add(self, bot, update):
         chat_id, txt = self.initiate_chat_id(update)
         if update.message.chat.type == "group":
@@ -79,7 +79,7 @@ class TagBot(object):   # TODO allow users to send messages to the bots admins
                 bot.send_message(chat_id, name + " added with tag " + tag)
         return ConversationHandler.END
 
-    @run_async
+    
     def handle_rm_chat_tag(self, bot, update):
         chat_id, txt = self.initiate_chat_id(update)
         chats_list_of_dicts = chats_table.find({
@@ -115,7 +115,7 @@ class TagBot(object):   # TODO allow users to send messages to the bots admins
         else:
             bot.send_message(chat_id, "You can't delete this tag. This is not allowed. Choose another tag")
 
-    @run_async
+    
     def handle_rmtag(self, bot, update):
         chat_id, txt = self.initiate_chat_id(update)
         chats_list_of_dicts = chats_table.find({
@@ -143,7 +143,7 @@ class TagBot(object):   # TODO allow users to send messages to the bots admins
 
         return ConversationHandler.END
 
-    @run_async
+    
     def handle_taglist(self, bot, update):
         chat_id, txt = self.initiate_chat_id(update)
         tags_names = []
@@ -198,7 +198,7 @@ class TagBot(object):   # TODO allow users to send messages to the bots admins
             bot.send_message(chat_id, "Failed to send a message which is  a reply to another message")
         return
 
-    @run_async
+    
     def handle_mytags(self, bot, update):
         chat_id, txt = self.initiate_chat_id(update)
         mytags = chats_table.find({"chat_id": chat_id})

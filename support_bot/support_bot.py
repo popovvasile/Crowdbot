@@ -23,7 +23,7 @@ class SendScamReport(object):  # TODO
         self.reply_markup = InlineKeyboardMarkup(
             buttons)
 
-    @run_async
+    
     def start_answering(self, bot, update, user_data):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
@@ -31,7 +31,7 @@ class SendScamReport(object):  # TODO
                          "Please describe your problem and we will try to solve this issue")
         return MESSAGE
 
-    @run_async
+    
     def received_message(self, bot, update, user_data):
         bot.send_message(update.message.chat_id,
                          "Thank you! We will review your this chatbot asap")
@@ -43,7 +43,7 @@ class SendScamReport(object):  # TODO
                                               "bot_id": bot.id})
         return ConversationHandler.END
 
-    @run_async
+    
     def error(self, bot, update, error):
         """Log Errors caused by Updates."""
         bot.send_message(update.message.chat_id,

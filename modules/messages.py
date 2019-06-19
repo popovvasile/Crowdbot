@@ -18,7 +18,7 @@ MESSAGE_TO_USERS = 1
 
 
 class SendMessageToAdmin(object):  # TODO save messages that contain files
-    @run_async
+
     def send_message(self, bot, update):
         buttons = list()
         buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_send_message")])
@@ -30,7 +30,6 @@ class SendMessageToAdmin(object):  # TODO save messages that contain files
                          string_dict(bot)["send_message_1"], reply_markup=reply_markup)
         return MESSAGE
 
-    @run_async
     def received_message(self, bot, update):
         bot.send_message(update.message.chat_id,
                          string_dict(bot)["send_message_2"])
@@ -44,32 +43,15 @@ class SendMessageToAdmin(object):  # TODO save messages that contain files
         get_help(bot, update)
         return ConversationHandler.END
 
-    @run_async
-    def error(self, bot, update, error):
-        """Log Errors caused by Updates."""
-        bot.send_message(update.message.chat_id,
-                         "Command canceled")
-
-        logger.warning('Update "%s" caused error "%s"', update, error)
-        return ConversationHandler.END
-
     def back(self, bot, update):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         get_help(bot, update)
         return ConversationHandler.END
 
-    def cancel(self, bot, update):
-        update.message.reply_text(
-            "Command is cancelled =("
-        )
-
-        get_help(bot, update)
-        return ConversationHandler.END
-
 
 class SendMessageToUsers(object):
-    @run_async
+
     def send_message(self, bot, update):
         buttons = list()
         buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_send_message")])
@@ -81,7 +63,6 @@ class SendMessageToUsers(object):
                          reply_markup=reply_markup)
         return MESSAGE_TO_USERS
 
-    @run_async
     def received_message(self, bot, update):
         chats = chats_table.find({"bot_id": bot.id})
         for chat in chats:
@@ -154,32 +135,15 @@ class SendMessageToUsers(object):
             update.effective_user.first_name, bot.first_name, bot.id))
         return ConversationHandler.END
 
-    @run_async
-    def error(self, bot, update, error):
-        """Log Errors caused by Updates."""
-        bot.send_message(update.message.chat_id,
-                         "Command canceled")
-
-        logger.warning('Update "%s" caused error "%s"', update, error)
-        return ConversationHandler.END
-
     def back(self, bot, update):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         get_help(bot, update)
         return ConversationHandler.END
 
-    def cancel(self, bot, update):
-        update.message.reply_text(
-            "Command is cancelled =("
-        )
-
-        get_help(bot, update)
-        return ConversationHandler.END
-
 
 class AnswerToMessage(object):
-    @run_async
+
     def send_message(self, bot, update, user_data):
         buttons = list()
         buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_send_message")])
@@ -193,7 +157,6 @@ class AnswerToMessage(object):
                          reply_markup=reply_markup)
         return MESSAGE_TO_USERS
 
-    @run_async
     def received_message(self, bot, update, user_data):
         if update.message.text:
             bot.send_message(user_data["chat_id"], update.message.text)
@@ -258,32 +221,15 @@ class AnswerToMessage(object):
             update.effective_user.first_name, bot.first_name, bot.id))
         return ConversationHandler.END
 
-    @run_async
-    def error(self, bot, update, error, user_data):
-        """Log Errors caused by Updates."""
-        bot.send_message(update.message.chat_id,
-                         "Command canceled")
-
-        logger.warning('Update "%s" caused error "%s"', update, error)
-        return ConversationHandler.END
-
     def back(self, bot, update, user_data):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         get_help(bot, update)
         return ConversationHandler.END
 
-    def cancel(self, bot, update, user_data):
-        update.message.reply_text(
-            "Command is cancelled =("
-        )
-
-        get_help(bot, update)
-        return ConversationHandler.END
-
 
 class DeleteMessage(object):
-    @run_async
+
     def delete_message(self, bot, update):
         buttons = list()
         buttons.append([InlineKeyboardButton(text="Back", callback_data="help_back")])
@@ -317,7 +263,7 @@ class DeleteMessage(object):
 
 
 class SeeMessageToAdmin(object):
-    @run_async
+
     def see_messages(self, bot, update):
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")])
@@ -380,7 +326,9 @@ SEND_MESSAGE_TO_ADMIN_HANDLER = ConversationHandler(
         CallbackQueryHandler(callback=SendMessageToUsers().back,
                              pattern=r"cancel_send_message"),
         CommandHandler('cancel', SendMessageToUsers().back),
-        MessageHandler(filters=Filters.command, callback=SendMessageToUsers().back)]
+        MessageHandler(filters=Filters.command, callback=SendMessageToUsers().back),
+        CallbackQueryHandler(callback=AnswerToMessage().back, pattern=r"error_back"),
+    ]
 )
 
 SEND_MESSAGE_TO_USERS_HANDLER = ConversationHandler(
@@ -401,7 +349,9 @@ SEND_MESSAGE_TO_USERS_HANDLER = ConversationHandler(
                CallbackQueryHandler(callback=SendMessageToUsers().back,
                                     pattern=r"cancel_send_message"),
                CommandHandler('cancel', SendMessageToUsers().back),
-               MessageHandler(filters=Filters.command, callback=SendMessageToUsers().back)]
+               MessageHandler(filters=Filters.command, callback=SendMessageToUsers().back),
+               CallbackQueryHandler(callback=AnswerToMessage().back, pattern=r"error_back"),
+               ]
 )
 
 SEE_MESSAGES_HANDLER = CallbackQueryHandler(pattern="inbox_message", callback=SeeMessageToAdmin().see_messages)
@@ -429,7 +379,7 @@ ANSWER_TO_MESSAGE_HANDLER = ConversationHandler(
                               pass_user_data=True),
                MessageHandler(filters=Filters.command,
                               callback=AnswerToMessage().back,
-                              pass_user_data=True)]
+                              pass_user_data=True),
+               CallbackQueryHandler(callback=AnswerToMessage().back, pattern=r"error_back"),
+               ]
 )
-
-

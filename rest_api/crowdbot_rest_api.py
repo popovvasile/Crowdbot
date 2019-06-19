@@ -43,7 +43,9 @@ def crowdbot_on_put():  # TODO
 
 @app.route('/crowdbot', methods=['POST'])
 def crowdbot_on_post():
+
     doc = request.get_json()["params"]
+    print(doc)
     # Crowdbot token
     crowdbot_token = doc["token"]
     chatbot = requests.get(url="https://api.telegram.org/bot{}/getMe".format(crowdbot_token))

@@ -217,21 +217,6 @@ class AddCommands(object):
         user_data.clear()
         return ConversationHandler.END
 
-    def cancel(self, bot, update):
-        bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
-        bot.send_message(update.callback_query.message.chat.id,
-                         "Command is cancelled", reply_markup=ReplyKeyboardRemove()
-                         )
-
-        get_help(bot, update)
-        return ConversationHandler.END
-
-    def error(self, bot, update, error):
-        """Log Errors caused by Updates."""
-        logger.warning('Update "%s" caused error "%s"', update, error)
-
-
 # Get the dispatcher to register handlers
 
 
@@ -260,8 +245,8 @@ BUTTON_ADD_HANDLER = ConversationHandler(
 
         CallbackQueryHandler(callback=AddCommands().back,
                              pattern=r"cancel_add_button", pass_user_data=True),
-        CommandHandler('cancel', AddCommands().cancel),
-        MessageHandler(filters=Filters.command, callback=AddCommands().cancel)
+        CommandHandler('cancel', AddCommands().back),
+        MessageHandler(filters=Filters.command, callback=AddCommands().back)
     ]
 )
 DELETE_BUTTON_HANDLER = ConversationHandler(
@@ -275,10 +260,11 @@ DELETE_BUTTON_HANDLER = ConversationHandler(
                                                  AddCommands().delete_button_finish)],
     },
 
-    fallbacks=[CallbackQueryHandler(callback=AddCommands().cancel,
+    fallbacks=[CallbackQueryHandler(callback=AddCommands().back,
                                     pattern=r"cancel_delete_button"),
-               CommandHandler('cancel', AddCommands().cancel),
-               MessageHandler(filters=Filters.command, callback=AddCommands().cancel)
+               CommandHandler('cancel', AddCommands().back),
+               MessageHandler(filters=Filters.command, callback=AddCommands().back),
+               CallbackQueryHandler(callback=AddCommands().back, pattern=r"error_back"),
                ]
 )
 

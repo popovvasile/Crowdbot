@@ -10,14 +10,14 @@ TYPING_EMAIL, TYPING_PASS = range(2)
 
 
 class UserAuthentication(object):
-    @run_async
+    
     def handle_addme_user(self, bot, update):
         print("Message: " + str(update.message))
         chat_id, txt = initiate_chat_id(update)
         bot.send_message(chat_id, update.message.chat.first_name + " please enter your email")
         return TYPING_EMAIL
 
-    @run_async
+    
     def handle_email(self, bot, update, user_data):
         print("Message: " + str(update.message))
         chat_id, txt = initiate_chat_id(update)
@@ -33,7 +33,7 @@ class UserAuthentication(object):
                              " Please enter a valid email or click /cancel")
             return TYPING_EMAIL
 
-    @run_async
+    
     def handle_password(self, bot, update, user_data):
         print("Message: " + str(update.message))
         user_id = update.message.from_user.id
@@ -83,7 +83,7 @@ class UserAuthentication(object):
             bot.send_message(chat_id, "Wrong password. Please send a  valid password or click /cancel")
             return TYPING_PASS
 
-    @run_async
+    
     def handle_rmme(self, bot, update):
         user_id = update.message.from_user.id
         chat_id = update.message.chat_id
@@ -97,7 +97,7 @@ class UserAuthentication(object):
         else:
             bot.send_message(chat_id, "You didn't have the permission to use this bot")
 
-    @run_async
+    
     def show_users(self, bot, update):  # TODO why no full_name is save?
         chat_id = update.message.chat_id
         users = users_table.find({'bot_id': bot.id})
@@ -107,7 +107,7 @@ class UserAuthentication(object):
             text_to_return += 'Name: {}, email: {} \n'.format(user["full_name"], user['email'])
         bot.send_message(chat_id, "This is the full list on the users of this bot: \n" + text_to_return)
 
-    @run_async
+    
     def cancel(self, bot, update):
         update.message.reply_text("Until next time!")
         return ConversationHandler.END

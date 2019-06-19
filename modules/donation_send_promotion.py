@@ -8,7 +8,6 @@ from database import chats_table, chatbots_table
 from modules.helper_funcs.helper import get_help
 from modules.helper_funcs.lang_strings.strings import string_dict
 
-
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
@@ -17,8 +16,6 @@ DONATION_TO_USERS, DONATION_TO_USERS_FINISH = range(2)
 
 
 class SendDonationToUsers(object):
-
-    @run_async
     def send_donation(self, bot, update):
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
@@ -44,7 +41,6 @@ class SendDonationToUsers(object):
                              reply_markup=InlineKeyboardMarkup([admin_keyboard]))
             return ConversationHandler.END
 
-    @run_async
     def received_donation(self, bot, update):
         chats = chats_table.find({"bot_id": bot.id})
         for chat in chats:
@@ -119,15 +115,6 @@ class SendDonationToUsers(object):
                                  reply_markup=final_reply_markup)
         return ConversationHandler.END
 
-    @run_async
-    def error(self, bot, update, error):
-        """Log Errors caused by Updates."""
-        bot.send_message(update.message.chat_id,
-                         "Command canceled")
-
-        logger.warning('Update "%s" caused error "%s"', update, error)
-        return ConversationHandler.END
-
     def back(self, bot, update):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
@@ -160,6 +147,8 @@ SEND_DONATION_TO_USERS_HANDLER = ConversationHandler(
                                     pattern=r"send_donation_finish"),
                CallbackQueryHandler(callback=SendDonationToUsers().back,
                                     pattern=r"cancel_send_donation"),
-               CommandHandler('cancel', SendDonationToUsers().error),
-               MessageHandler(filters=Filters.command, callback=SendDonationToUsers().error)]
+               CommandHandler('cancel', SendDonationToUsers().cancel),
+               MessageHandler(filters=Filters.command, callback=SendDonationToUsers().cancel),
+               CallbackQueryHandler(callback=SendDonationToUsers().back, pattern=r"error_back"),
+               ]
 )

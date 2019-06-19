@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, Filters, RegexHandler
+from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, Filters, RegexHandler, \
+    CallbackQueryHandler
 from telegram.ext.dispatcher import run_async
 
 from database import users_table
@@ -11,7 +12,7 @@ TYPING_PASS = 1
 
 
 class AdminAuthentication(object):
-    @run_async
+    
     def handle_email(self, bot, update, user_data):
         print("Message: " + str(update.message))
         chat_id, txt = initiate_chat_id(update)
@@ -26,7 +27,7 @@ class AdminAuthentication(object):
                              "This email is not listed in the list of users.")
             return ConversationHandler.END
 
-    @run_async
+    
     def handle_password(self, bot, update, user_data):
         print("Message: " + str(update.message))
         user_id = update.message.from_user.id
@@ -79,10 +80,15 @@ class AdminAuthentication(object):
             bot.send_message(chat_id, "Wrong password. Please send a  valid password or click /cancel")
             return TYPING_PASS
 
-    @run_async
     def cancel(self, bot, update):
         get_help(bot, update)
         update.message.reply_text("Until next time!")
+        return ConversationHandler.END
+
+    def back(self, bot, update):
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        get_help(bot, update)
         return ConversationHandler.END
 
 
@@ -97,5 +103,7 @@ ADMIN_AUTHENTICATION_HANDLER = ConversationHandler(
     },
 
     fallbacks=[CommandHandler('cancel', AdminAuthentication().cancel),
-               MessageHandler(filters=Filters.command, callback=AdminAuthentication().cancel)]
+               MessageHandler(filters=Filters.command, callback=AdminAuthentication().cancel),
+               CallbackQueryHandler(callback=AdminAuthentication().back, pattern=r"error_back"),
+               ]
 )
