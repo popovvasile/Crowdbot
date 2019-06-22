@@ -132,14 +132,10 @@ class SendDonationToUsers(object):
 
 SEND_DONATION_TO_USERS_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(pattern="send_donation_to_users",
-                                       callback=SendDonationToUsers().send_donation),
-                  CallbackQueryHandler(callback=SendDonationToUsers().back,
-                                       pattern=r"cancel_send_donation")],
+                                       callback=SendDonationToUsers().send_donation)],
 
     states={
-        DONATION_TO_USERS: [MessageHandler(Filters.all, SendDonationToUsers().received_donation),
-                            CallbackQueryHandler(callback=SendDonationToUsers().back,
-                                                 pattern=r"cancel_send_donation")],
+        DONATION_TO_USERS: [MessageHandler(Filters.all, SendDonationToUsers().received_donation),],
 
     },
 

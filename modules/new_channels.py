@@ -13,9 +13,9 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# TODO: When we need to use  decorator?
+# TODO:
 #       before every send check that bot admin and can send message
-#       problem with delete messages - DELETE ALL MESSAGES BEFORE CURRENT+
+#       problem with delete messages - DELETE ALL MESSAGES BEFORE CURRENT
 #       back to Channels menu
 #       if there are only one channel don't ask to choose channel
 #       Markdown support in write a post
@@ -111,7 +111,8 @@ class Channels(object):
 
     # to make keyboard with channels
     def make_channels_layout(self, bot, update, state, text: str, user_data):
-        no_channel_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(string_dict(bot)["add_button"], callback_data='add_channel')],
+        no_channel_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(string_dict(bot)["add_button"],
+                                                                          callback_data='add_channel')],
                                                     [InlineKeyboardButton(string_dict(bot)["back_button"],
                                                                           callback_data='help_back')]])
 
@@ -193,18 +194,18 @@ class Channels(object):
                                   [InlineKeyboardButton(string_dict(bot)["send_post_to_channel"],
                                                         callback_data='channel_write_post')],
                                   [InlineKeyboardButton(string_dict(bot)["back_button"], callback_data='back')]])
+        bot.send_message(update.message.chat_id, "TESTETEEVFBFG", reply_markup=one_channel_keyboard)
         channel = channels_table.find_one({'bot_id': bot.id, 'channel_username': update.message.text})
-        if channel:
-            delete_messages(bot, user_data, update)
-            user_data['channel'] = channel['channel_username']
-            user_data['to_delete'].append(
-                bot.send_message(update.message.chat_id, channel['channel_username'],
-                                 reply_markup=one_channel_keyboard))
+        # if channel:
+        #     delete_messages(bot, user_data, update)
+        #     user_data['channel'] = channel['channel_username']
+        #     user_data['to_delete'].append(
+        #         bot.send_message(update.message.chat_id, channel['channel_username'],
+        #                          reply_markup=one_channel_keyboard))
         #     return MANAGE_CHANNEL
         # else:
         #     return self.make_channels_layout(bot, update, MY_CHANNELS, string_dict(bot)["channels_str_2"], user_data)
         return ConversationHandler.END
-
     # 'Remove channel' button
     def choose_to_remove(self, bot, update, user_data):
         return self.make_channels_layout(bot, update, CHOOSE_TO_REMOVE, string_dict(bot)["choose_channel_to_remove"],
@@ -431,7 +432,7 @@ MY_CHANNELS_HANDLER = ConversationHandler(
 
         MANAGE_CHANNEL: [CallbackQueryHandler(Channels().back, pattern=r"back", pass_user_data=True),
                          CallbackQueryHandler(Channels().finish_remove, pattern=r"channel_remove", pass_user_data=True),
-                         CallbackQueryHandler(Channels())]
+                         CallbackQueryHandler(Channels().channel)]
     },
     fallbacks=[ CallbackQueryHandler(callback=Channels().back, pattern=r"error_back"),]
 )

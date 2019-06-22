@@ -1,16 +1,13 @@
 
 
 Вася
-# TODO on error, return to menu
-# TODO delete and answer buttons in messages to look better. Delete old messages using user_data
 # TODO send surveys and polls and donation request to channels
+
+# TODO delete and answer buttons in messages to look better. Delete old messages using user_data
 # TODO add button "answer" for users + make it clear that is from admin
 # TODO save messages from users that contain files + make it continues
-# TODO two clicks on donate and send message from user side - fix
 # TODO fix polls
-# TODO payment token fix
-# TODO pics and other content for surveys and polls
-# TODO think about an example chatbot (TV8)
+# TODO think about an example chatbot (TV8) with CommentBot
 
 
 Юра
@@ -29,5 +26,5 @@
 
 
 
-
+# TODO later- add the option for the user to choose the language adn for admin to edit multiple versions of the bot
 # TODO Kirill add the option "pause the bot"

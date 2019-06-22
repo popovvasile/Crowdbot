@@ -550,9 +550,7 @@ DELETE_POLLS_HANDLER = ConversationHandler(
                   ],
     states={
 
-        CHOOSE_TITLE_DELETE: [MessageHandler(Filters.text, PollBot().handle_delete_poll_finish),
-                              CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
-                              CommandHandler('cancel', PollBot().back)],
+        CHOOSE_TITLE_DELETE: [MessageHandler(Filters.text, PollBot().handle_delete_poll_finish),],
 
     },
     fallbacks=[CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
@@ -567,8 +565,7 @@ POLLS_RESULTS_HANDLER = ConversationHandler(
     states={
 
         CHOOSE_TITLE_RESULTS: [MessageHandler(Filters.text, PollBot().handle_polls_results_title),
-                               CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
-                               CommandHandler('cancel', PollBot().back)],
+],
 
     },
     fallbacks=[CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
@@ -585,27 +582,19 @@ POLL_HANDLER = ConversationHandler(
         NOT_ENGAGED: [CommandHandler('poll', PollBot().start)],
         TYPING_TITLE: [MessageHandler(Filters.text,
                                       PollBot().handle_title,
-                                      pass_user_data=True),
-                       CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
-                       CommandHandler('cancel', PollBot().back),
+                                      pass_user_data=True)
                        ],
         TYPING_TYPE: [RegexHandler(PollBot().assemble_type_regex(),
                                    PollBot().handle_type,
-                                   pass_user_data=True),
-                      CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
-                      CommandHandler('cancel', PollBot().back),
+                                   pass_user_data=True)
                       ],
         TYPING_META: [MessageHandler(Filters.text,
                                      PollBot().handle_meta,
-                                     pass_user_data=True),
-                      CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
-                      CommandHandler('cancel', PollBot().back),
+                                     pass_user_data=True)
                       ],
         TYPING_OPTION: [MessageHandler(Filters.text,
                                        PollBot().handle_option,
-                                       pass_user_data=True),
-                        CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
-                        CommandHandler('cancel', PollBot().back),
+                                       pass_user_data=True)
                         ]
     },
     fallbacks=[
@@ -623,15 +612,10 @@ NOT_ENGAGED_SEND, TYPING_SEND_TITLE = range(2)
 SEND_POLLS_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=PollBot().handle_send_poll,
                                        pattern=r"send_poll"),
-                  CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll")
                   ],
     states={
-        NOT_ENGAGED_SEND: [CommandHandler('send_poll', PollBot().handle_send_poll),
-                           CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
-                           CommandHandler('cancel', PollBot().back), ],
-        TYPING_SEND_TITLE: [MessageHandler(Filters.text, PollBot().handle_send_title, pass_user_data=True),
-                            CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
-                            CommandHandler('cancel', PollBot().back), ],
+        NOT_ENGAGED_SEND: [CommandHandler('send_poll', PollBot().handle_send_poll)],
+        TYPING_SEND_TITLE: [MessageHandler(Filters.text, PollBot().handle_send_title, pass_user_data=True),],
 
     },
     fallbacks=[

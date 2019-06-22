@@ -21,7 +21,8 @@ class SendMessageToAdmin(object):  # TODO save messages that contain files
 
     def send_message(self, bot, update):
         buttons = list()
-        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_send_message")])
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                             callback_data="cancel_send_message")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -44,6 +45,7 @@ class SendMessageToAdmin(object):  # TODO save messages that contain files
         return ConversationHandler.END
 
     def back(self, bot, update):
+        print("TESTteswts")
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         get_help(bot, update)
@@ -54,7 +56,8 @@ class SendMessageToUsers(object):
 
     def send_message(self, bot, update):
         buttons = list()
-        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_send_message")])
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                             callback_data="cancel_send_message")])
         reply_markup = InlineKeyboardMarkup(buttons)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
@@ -119,7 +122,7 @@ class SendMessageToUsers(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         buttons = list()
-        buttons.append([InlineKeyboardButton(text="Back", callback_data="help_back")])
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.send_message(update.callback_query.message.chat_id,
@@ -146,7 +149,8 @@ class AnswerToMessage(object):
 
     def send_message(self, bot, update, user_data):
         buttons = list()
-        buttons.append([InlineKeyboardButton(text="Back", callback_data="cancel_send_message")])
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                             callback_data="cancel_send_message")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
         user_data["chat_id"] = update.callback_query.data.replace("answer_to_message_", "")  # chat_id
@@ -210,7 +214,7 @@ class AnswerToMessage(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         buttons = list()
-        buttons.append([InlineKeyboardButton(text="Back", callback_data="help_back")])
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.send_message(update.callback_query.message.chat_id,
@@ -232,7 +236,7 @@ class DeleteMessage(object):
 
     def delete_message(self, bot, update):
         buttons = list()
-        buttons.append([InlineKeyboardButton(text="Back", callback_data="help_back")])
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
 
@@ -312,45 +316,33 @@ DELETE_MESSAGES_HANDLER = CallbackQueryHandler(pattern="delete_message",
 SEND_MESSAGE_TO_ADMIN_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(pattern="send_message_to_admin",
                                        callback=SendMessageToAdmin().send_message),
-                  CallbackQueryHandler(callback=SendMessageToUsers().back,
-                                       pattern=r"cancel_send_message")],
+                  ],
 
     states={
-        MESSAGE: [MessageHandler(Filters.all, SendMessageToAdmin().received_message),
-                  CallbackQueryHandler(callback=SendMessageToUsers().back,
-                                       pattern=r"cancel_send_message")],
+        MESSAGE: [MessageHandler(Filters.all, SendMessageToAdmin().received_message),],
+
+    },
+
+    fallbacks=[
+        CallbackQueryHandler(callback=SendMessageToAdmin().back,
+                             pattern=r"cancel_send_message"),
+    ]
+)
+
+SEND_MESSAGE_TO_USERS_HANDLER = ConversationHandler(
+    entry_points=[CallbackQueryHandler(pattern="send_message_to_users",
+                                       callback=SendMessageToUsers().send_message)],
+
+    states={
+        MESSAGE_TO_USERS: [MessageHandler(Filters.all, SendMessageToUsers().received_message)],
 
     },
 
     fallbacks=[
         CallbackQueryHandler(callback=SendMessageToUsers().back,
                              pattern=r"cancel_send_message"),
-        CommandHandler('cancel', SendMessageToUsers().back),
-        MessageHandler(filters=Filters.command, callback=SendMessageToUsers().back),
-        CallbackQueryHandler(callback=AnswerToMessage().back, pattern=r"error_back"),
-    ]
-)
-
-SEND_MESSAGE_TO_USERS_HANDLER = ConversationHandler(
-    entry_points=[CallbackQueryHandler(pattern="send_message_to_users",
-                                       callback=SendMessageToUsers().send_message),
-                  CallbackQueryHandler(callback=SendMessageToUsers().back,
-                                       pattern=r"cancel_send_message")],
-
-    states={
-        MESSAGE_TO_USERS: [MessageHandler(Filters.all, SendMessageToUsers().received_message),
-                           CallbackQueryHandler(callback=SendMessageToUsers().back,
-                                                pattern=r"cancel_send_message")],
-
-    },
-
-    fallbacks=[CallbackQueryHandler(callback=SendMessageToUsers().send_message_finish,
+        CallbackQueryHandler(callback=SendMessageToUsers().send_message_finish,
                                     pattern=r"send_message_finish"),
-               CallbackQueryHandler(callback=SendMessageToUsers().back,
-                                    pattern=r"cancel_send_message"),
-               CommandHandler('cancel', SendMessageToUsers().back),
-               MessageHandler(filters=Filters.command, callback=SendMessageToUsers().back),
-               CallbackQueryHandler(callback=AnswerToMessage().back, pattern=r"error_back"),
                ]
 )
 
@@ -358,14 +350,10 @@ SEE_MESSAGES_HANDLER = CallbackQueryHandler(pattern="inbox_message", callback=Se
 
 ANSWER_TO_MESSAGE_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(pattern=r"answer_to_message",
-                                       callback=AnswerToMessage().send_message, pass_user_data=True),
-                  CallbackQueryHandler(callback=AnswerToMessage().back,
-                                       pattern=r"cancel_send_message", pass_user_data=True)],
+                                       callback=AnswerToMessage().send_message, pass_user_data=True)],
 
     states={
-        MESSAGE_TO_USERS: [MessageHandler(Filters.all, AnswerToMessage().received_message, pass_user_data=True),
-                           CallbackQueryHandler(callback=AnswerToMessage().back,
-                                                pattern=r"cancel_send_message", pass_user_data=True)],
+        MESSAGE_TO_USERS: [MessageHandler(Filters.all, AnswerToMessage().received_message, pass_user_data=True)],
 
     },
 
@@ -375,11 +363,5 @@ ANSWER_TO_MESSAGE_HANDLER = ConversationHandler(
                CallbackQueryHandler(callback=AnswerToMessage().back,
                                     pattern=r"cancel_send_message",
                                     pass_user_data=True),
-               CommandHandler('cancel', AnswerToMessage().back,
-                              pass_user_data=True),
-               MessageHandler(filters=Filters.command,
-                              callback=AnswerToMessage().back,
-                              pass_user_data=True),
-               CallbackQueryHandler(callback=AnswerToMessage().back, pattern=r"error_back"),
                ]
 )

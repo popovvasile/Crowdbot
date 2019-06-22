@@ -5,6 +5,7 @@ from telegram.ext import run_async
 
 from database import custom_buttons_table, chats_table, chatbots_table, users_table, user_mode_table
 from modules.helper_funcs.lang_strings.help_strings import helpable_dict
+from modules.helper_funcs.lang_strings.strings import string_dict
 
 HELP_STRINGS = """
 {}
@@ -83,7 +84,6 @@ def register_chat(bot, update):
                        upsert=True)
 
 
-
 def get_help(bot: Bot, update: Update):
     chatbot = chatbots_table.find_one({"bot_id": bot.id})
     register_chat(bot, update)
@@ -112,18 +112,7 @@ def get_help(bot: Bot, update: Update):
         send_visitor_help(bot, chat.id, HELP_STRINGS.format(welcome_message))
 
 
-def send_admin_user_mode(bot, chat_id, text, keyboard=None):
-    if not keyboard:
-        keyboard = paginate_modules(0, helpable_dict(bot)["VISITOR_HELPABLE"], "help", bot.id)
-    keyboard = keyboard + [[EqInlineKeyboardButton(text="ADMIN MODE", callback_data="turn_user_mode_off")]]
-    bot.send_message(chat_id=chat_id,
-                     text=text,
-                     parse_mode=ParseMode.MARKDOWN,
-                     reply_markup=InlineKeyboardMarkup(
-                         keyboard
-                     ))
-
-
+# do not async
 def send_admin_help(bot, chat_id, text, keyboard=None):
     if not keyboard:
         keyboard = InlineKeyboardMarkup(paginate_modules(0, helpable_dict(bot)["ADMIN_HELPABLE"], "help", bot.id))
@@ -134,9 +123,33 @@ def send_admin_help(bot, chat_id, text, keyboard=None):
 
 
 def send_visitor_help(bot, chat_id, text, keyboard=None):
-    if not keyboard:
-        keyboard = InlineKeyboardMarkup(paginate_modules(0, helpable_dict(bot)["VISITOR_HELPABLE"], "help", bot.id))
+    buttons = [InlineKeyboardButton(string_dict(bot)["user_messages_str"], callback_data="send_message_to_admin"),
+               InlineKeyboardButton(string_dict(bot)["pay_donation_mode_str"], callback_data='pay_donation')]
+    buttons += [InlineKeyboardButton(button["button"],
+                                     callback_data="button_{}".format(button["button"].replace(" ", "").lower()))
+                for button in custom_buttons_table.find({"bot_id": bot.id})]
+    pairs = list(zip(buttons[::2], buttons[1::2]))
+
     bot.send_message(chat_id=chat_id,
                      text=text,
                      parse_mode=ParseMode.MARKDOWN,
-                     reply_markup=keyboard)
+                     reply_markup=InlineKeyboardMarkup(
+                         pairs
+                     ))
+
+
+def send_admin_user_mode(bot, chat_id, text, keyboard=None):
+    buttons = [InlineKeyboardButton(string_dict(bot)["user_messages_str"], callback_data="send_message_to_admin"),
+               InlineKeyboardButton(string_dict(bot)["pay_donation_mode_str"], callback_data='pay_donation')]
+    buttons += [InlineKeyboardButton(button["button"],
+                                     callback_data="button_{}".format(button["button"].replace(" ", "").lower()))
+                for button in custom_buttons_table.find({"bot_id": bot.id})]
+    buttons += [InlineKeyboardButton(text="ADMIN MODE", callback_data="turn_user_mode_off")]
+    pairs = list(zip(buttons[::2], buttons[1::2]))
+
+    bot.send_message(chat_id=chat_id,
+                     text=text,
+                     parse_mode=ParseMode.MARKDOWN,
+                     reply_markup=InlineKeyboardMarkup(
+                         pairs
+                     ))

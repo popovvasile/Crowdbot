@@ -4,6 +4,7 @@ import logging
 import telegram.ext as tg
 from telegram.ext import CommandHandler, CallbackQueryHandler,RegexHandler
 
+from modules.channels_polls_surveys_donate import SEND_SURVEY_TO_CHANNEL_HANDLER, SEND_POLL_TO_CHANNEL_HANDLER
 from modules.menu_description import EDIT_BOT_DESCRIPTION_HANDLER
 from modules.helper_funcs.admin_login import ADMIN_AUTHENTICATION_HANDLER
 from modules.menu_buttons import BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER, AddCommands
@@ -20,7 +21,7 @@ from modules.donation_send_promotion import SEND_DONATION_TO_USERS_HANDLER
 from modules.messages import SEND_MESSAGE_TO_ADMIN_HANDLER, SEND_MESSAGE_TO_USERS_HANDLER, SEE_MESSAGES_HANDLER, \
     SendMessageToUsers, ANSWER_TO_MESSAGE_HANDLER, DELETE_MESSAGES_HANDLER
 from modules.user_mode import USER_MODE_OFF, USER_MODE_ON
-from modules.channels import MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER, REMOVE_CHANNEL_HANDLER, \
+from modules.new_channels import MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER, REMOVE_CHANNEL_HANDLER, \
     POST_ON_CHANNEL_HANDLER, SEND_POST_HANDLER
 
 logging.basicConfig(
@@ -41,14 +42,6 @@ def main(token):
 
     custom_button_callback_handler = CallbackQueryHandler(button_handler, pattern=r"button_")
     help_callback_handler = CallbackQueryHandler(help_button, pattern=r"help_")
-
-    # dispatcher.add_handler(CallbackQueryHandler(callback=SendMessageToUsers().back, pattern=r"cancel_send_message"))
-    # dispatcher.add_handler(CallbackQueryHandler(callback=AddCommands().back,
-    #                                             pattern=r"cancel_add_button",
-    #                                             pass_user_data=True))
-    # dispatcher.add_handler(CallbackQueryHandler(callback=SurveyHandler().back, pattern=r"cancel_survey"))
-    # dispatcher.add_handler(CallbackQueryHandler(callback=DonationBot().back, pattern=r"cancel_donation_payment"))
-
     dispatcher.add_handler(custom_button_callback_handler)
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(help_handler)
@@ -102,7 +95,8 @@ def main(token):
     dispatcher.add_handler(REMOVE_CHANNEL_HANDLER)
     dispatcher.add_handler(POST_ON_CHANNEL_HANDLER)
     dispatcher.add_handler(SEND_POST_HANDLER)
-
+    dispatcher.add_handler(SEND_POLL_TO_CHANNEL_HANDLER)
+    dispatcher.add_handler(SEND_SURVEY_TO_CHANNEL_HANDLER)
     LOGGER.info("Using long polling.")
     # updater.start_webhook(listen='0.0.0.0',
     #                       port=8443,

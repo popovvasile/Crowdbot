@@ -16,6 +16,38 @@ MESSAGE = 1
 MESSAGE_TO_USERS = 1
 
 
+class ChangeBotLanguage(object):
+
+    def send_message(self, bot, update):
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                             callback_data="cancel_edit_description")])
+        reply_markup = InlineKeyboardMarkup(
+            buttons)
+
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        bot.send_message(update.callback_query.message.chat.id,
+                         string_dict(bot)["edit_button_str_1"], reply_markup=reply_markup) # TODO
+        return MESSAGE
+
+    def received_message(self, bot, update):
+        bot.send_message(update.message.chat_id,
+                         string_dict(bot)["edit_button_str_2"])
+
+        old_bot = chatbots_table.find_one({"bot_id": bot.id})
+        old_bot['lang'] = update.message.text
+        chatbots_table.update_one({"bot_id": bot.id}, {"$set": old_bot})
+        get_help(bot, update)
+        return ConversationHandler.END
+
+    def back(self, bot, update):
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        get_help(bot, update)
+        return ConversationHandler.END
+
+
 class EditBotDescription(object):
 
     def send_message(self, bot, update):
@@ -50,14 +82,28 @@ class EditBotDescription(object):
 
 EDIT_BOT_DESCRIPTION_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(pattern="edit_bot_description",
-                                       callback=EditBotDescription().send_message),
-                  CallbackQueryHandler(callback=EditBotDescription().back,
-                                       pattern=r"cancel_edit_description")],
+                                       callback=EditBotDescription().send_message)],
 
     states={
-        MESSAGE: [MessageHandler(Filters.all, EditBotDescription().received_message),
-                  CallbackQueryHandler(callback=EditBotDescription().back,
-                                       pattern=r"cancel_edit_description")],
+        MESSAGE: [MessageHandler(Filters.all, EditBotDescription().received_message)],
+
+    },
+
+    fallbacks=[
+        CallbackQueryHandler(callback=EditBotDescription().back,
+                             pattern=r"cancel_edit_description"),
+        CommandHandler('cancel', EditBotDescription().back),
+        MessageHandler(filters=Filters.command, callback=EditBotDescription().back),
+        CallbackQueryHandler(callback=EditBotDescription().back, pattern=r"error_back"),
+    ]
+)
+
+CHANGE_BOT_LANGUAGE_HANDLER = ConversationHandler(
+    entry_points=[CallbackQueryHandler(pattern="change_bot_language",
+                                       callback=EditBotDescription().send_message)],
+
+    states={
+        MESSAGE: [MessageHandler(Filters.all, EditBotDescription().received_message)],
 
     },
 

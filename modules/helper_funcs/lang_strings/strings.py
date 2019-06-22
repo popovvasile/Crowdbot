@@ -2,6 +2,10 @@ from database import chatbots_table
 
 string_dict_dict = {
     "ENG": dict(
+        user_donate_str="Donate",
+        start_help="Hello, I’m {} and ready to use. \n"
+                   "To add new content for your audience, press the 'Custom buttons'.\n"
+                   "To ask audience use Polls or survey.",
         channels_str_1='Here u can manage your channels',
         channels_str_2='List of your channels',
         # Click "Add" to configure your first channel or "Back" for main menu
@@ -73,6 +77,7 @@ Here you can order promotion from this chatbot and their channels
 
         delete_message_str_1="Chosen messages have been deleted",
         send_message_module_str="✉️ Messages",
+        user_messages_str="Send message",
         send_message_button_1="📤 Send message",
         send_message_button_2="📥 Mailbox",
         send_message_1="Write a message",
@@ -204,7 +209,8 @@ Here you can:
         donations_edit_str_5="🗑 Are you sure you want to delete this payment?",
         donations_edit_str_6="What exactly do you want to change? Or press '🔙 Back'",
         donations_edit_str_7="Write a new name for the payment. Or press '🔙 Back'",
-        donations_edit_str_8="Do description of payment for users or write how you will utilize the money? Or press '🔙 Back'",
+        donations_edit_str_8="Do description of payment for users or write how you will utilize the money?"
+                             " Or press '🔙 Back'",
         donations_edit_str_9=" Choose the main currency. Or press '🔙 Back'",
         donations_edit_str_10="✅ It’s in the bag!",
         donations_edit_str_11="🗑 The payment is deleted",
@@ -295,6 +301,9 @@ Here you can:\n
         add_button="Add"),
 
     "RUS": dict(
+        start_help="Здравствуйте, я {} и готов к использованию. \n"
+                   "Чтобы добавить новый контент для вашей аудитории, нажмите 'Пользовательскиекнопки '.\n"
+                   "Чтобы опросить свойх пользователей, используйте опросы или открытые опросы.",
         channels_str_1='Here u can manage your channels',
         channels_str_2='List of your channels',
         # Click "Add" to configure your first channel or "Back" for main menu
@@ -328,9 +337,9 @@ Here you can:\n
         try_to_add_already_exist_channel='This channel already exists',
 
         user_mode_help_admin="""
-Нажми «Вкл», чтобы включить бота в режиме юзера.
+Нажми "Вкл", чтобы включить бота в режиме юзера.
 
-Нажми «Выкл», чтобы вернутся в нормальный режим
+Нажми "Выкл", чтобы вернутся в нормальный режим
 """,
         user_mode_on_finish="✅ Готово, теперь посмотри на бот в режиме юзера",
         user_mode_off_finish="🔚 Режим юзера выключен",
@@ -354,8 +363,10 @@ Here you can:\n
 
 Отправь сообщение юзерам и получай обратную связь
 """,
+        user_messages_str="Отправить сообщение",
+
         send_message_user="""
-Скажи «привет» админу!
+Скажи "привет" админу!
 """,
         send_donation_request_1="Расскажи всем про сбор денег и на что ты их потратишь\n" \
                                 "К сообщению будет прикреплена кнопка 'Поддержать проект'",

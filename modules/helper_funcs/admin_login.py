@@ -26,7 +26,6 @@ class AdminAuthentication(object):
             bot.send_message(chat_id,
                              "This email is not listed in the list of users.")
             return ConversationHandler.END
-
     
     def handle_password(self, bot, update, user_data):
         print("Message: " + str(update.message))

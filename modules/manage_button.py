@@ -52,7 +52,7 @@ class ButtonEdit(object):
                         text=descr,
                         reply_markup=InlineKeyboardMarkup([[
                             InlineKeyboardButton(text=string_dict(bot)["edit_button"],
-                                                 callback_data="btn_edit_{}___{}".format(descr[:10],
+                                                 callback_data="b_{}___{}".format(descr[:10],
                                                                                          update.message.text))]])
                     )
             if "audio_files" in button_info:
@@ -61,8 +61,8 @@ class ButtonEdit(object):
                         filename,
                         reply_markup=InlineKeyboardMarkup([[
                             InlineKeyboardButton(text=string_dict(bot)["edit_button"],
-                                                 callback_data="btn_edit_{}___{}".format(
-                                                     filename, update.message.text))]])
+                                                 callback_data="b_{}___{}".format(
+                                                     filename[:10], update.message.text))]])
                     )
             if "video_files" in button_info:
                 for filename in button_info["video_files"]:
@@ -70,8 +70,8 @@ class ButtonEdit(object):
                         filename,
                         reply_markup=InlineKeyboardMarkup([[
                             InlineKeyboardButton(text=string_dict(bot)["edit_button"],
-                                                 callback_data="btn_edit_{}___{}".format(
-                                                     filename, update.message.text))]])
+                                                 callback_data="b_{}___{}".format(
+                                                     filename[:10], update.message.text))]])
                     )
             if "document_files" in button_info:
                 for filename in button_info["document_files"]:
@@ -79,17 +79,18 @@ class ButtonEdit(object):
                         filename,
                         reply_markup=InlineKeyboardMarkup([[
                             InlineKeyboardButton(text=string_dict(bot)["edit_button"],
-                                                 callback_data="btn_edit_{}___{}".format(
-                                                     filename, update.message.text))]])
+                                                 callback_data="b_{}___{}".format(
+                                                     filename[:10], update.message.text))]])
                     )
             if "photo_files" in button_info:
                 for filename in button_info["photo_files"]:
+                    print(filename)
                     update.message.reply_photo(
                         filename,
                         reply_markup=InlineKeyboardMarkup([[
                             InlineKeyboardButton(text=string_dict(bot)["edit_button"],
-                                                 callback_data="btn_edit_{}___{}".format(
-                                                     filename, update.message.text))]])
+                                                 callback_data="b_{}___{}".format(
+                                                     filename[:10], update.message.text))]])
                     )
         except BadRequest as excp:
             if excp.message == "Message is not modified":
@@ -117,7 +118,7 @@ class ButtonEdit(object):
             reply_buttons)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        content_data = update.callback_query.data.replace("btn_edit_", "").split("___")  # here is the problem
+        content_data = update.callback_query.data.replace("b_", "").split("___")  # here is the problem
         user_data["content_id"] = content_data[0]
         user_data["button"] = content_data[1]
         bot.send_message(chat_id=update.callback_query.message.chat_id,
@@ -133,8 +134,9 @@ class ButtonEdit(object):
         user_data["button_info"] = button_info
         for key, value in user_data["button_info"].items():
             if "_files" in key:
-                if user_data["content_id"] in button_info[key]:
-                    button_info[key].remove(user_data["content_id"])
+                for content in button_info[key]:
+                    if user_data["content_id"] in content:
+                        button_info[key].remove(content)
 
         if update.message.text:
             if "descriptions" not in button_info:
@@ -142,7 +144,7 @@ class ButtonEdit(object):
             button_info["descriptions"].append(update.message.text)
 
         elif update.message.photo:
-            photo_file = update.message.photo[-1].get_file().id
+            photo_file = update.message.photo[-1].get_file().file_id
             if "photo_files" not in button_info:
                 button_info["photo_files"] = []
             button_info["photo_files"].append(photo_file)
@@ -150,29 +152,29 @@ class ButtonEdit(object):
         elif update.message.audio:
             if "audio_files" not in button_info:
                 button_info["audio_files"] = []
-            audio_file = update.message.audio.get_file().id
+            audio_file = update.message.audio.get_file().file_id
             button_info["audio_files"].append(audio_file)
 
         elif update.message.voice:
             if "audio_files" not in button_info:
                 button_info["audio_files"] = []
-            voice_file = update.message.voice.get_file().id
+            voice_file = update.message.voice.get_file().file_id
             button_info["audio_files"].append(voice_file)
 
         elif update.message.document:
-            document_file = update.message.document.get_file().id
+            document_file = update.message.document.get_file().file_id
             button_info["document_files"].append(document_file)
 
         elif update.message.video:
             if "video_files" not in button_info:
                 button_info["video_files"] = []
-            video_file = update.message.video.get_file().id
+            video_file = update.message.video.get_file().file_id
             button_info["video_files"].append(video_file)
 
         elif update.message.video_note:
             if "video_files" not in button_info:
                 button_info["video_files"] = []
-            video_note_file = update.message.audio.get_file().id
+            video_note_file = update.message.audio.get_file().file_id
             button_info["video_files"].append(video_note_file)
 
         custom_buttons_table.replace_one(
@@ -236,7 +238,7 @@ BUTTON_EDIT_HANDLER = ConversationHandler(
 
 BUTTON_EDIT_FINISH_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=ButtonEdit().edit_button,
-                                       pattern=r"btn_edit_", pass_user_data=True)],
+                                       pattern=r"b_", pass_user_data=True)],
 
     states={
 

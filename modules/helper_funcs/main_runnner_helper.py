@@ -26,23 +26,36 @@ def send_admin_help(bot, chat_id, text, keyboard=None):
 
 
 def send_visitor_help(bot, chat_id, text, keyboard=None):
-    if not keyboard:
-        keyboard = InlineKeyboardMarkup(paginate_modules(0, helpable_dict(bot)["VISITOR_HELPABLE"], "help", bot.id))
-    bot.send_message(chat_id=chat_id,
-                     text=text,
-                     parse_mode=ParseMode.MARKDOWN,
-                     reply_markup=keyboard)
+    buttons = [InlineKeyboardButton(string_dict(bot)["user_messages_str"], callback_data="send_message_to_admin"),
+               InlineKeyboardButton(string_dict(bot)["pay_donation_mode_str"], callback_data='pay_donation')]
+    buttons += [InlineKeyboardButton(button["button"],
+                                       callback_data="button_{}".format(button["button"].replace(" ", "").lower()))
+                for button in custom_buttons_table.find({"bot_id": bot.id})]
+    pairs = list(zip(buttons[::2], buttons[1::2]))
 
-
-def send_admin_user_mode(bot, chat_id, text, keyboard=None):
-    if not keyboard:
-        keyboard = paginate_modules(0, helpable_dict(bot)["VISITOR_HELPABLE"], "help", bot.id)
-    keyboard = keyboard + [[EqInlineKeyboardButton(text="ADMIN MODE", callback_data="turn_user_mode_off")]]
     bot.send_message(chat_id=chat_id,
                      text=text,
                      parse_mode=ParseMode.MARKDOWN,
                      reply_markup=InlineKeyboardMarkup(
-                         keyboard
+                         pairs
+                     ))
+
+
+def send_admin_user_mode(bot, chat_id, text, keyboard=None):
+
+    buttons = [InlineKeyboardButton(string_dict(bot)["user_messages_str"], callback_data="send_message_to_admin"),
+               InlineKeyboardButton(string_dict(bot)["pay_donation_mode_str"], callback_data='pay_donation')]
+    buttons += [InlineKeyboardButton(button["button"],
+                                     callback_data="button_{}".format(button["button"].replace(" ", "").lower()))
+                for button in custom_buttons_table.find({"bot_id": bot.id})]
+    buttons += [InlineKeyboardButton(text="ADMIN MODE", callback_data="turn_user_mode_off")]
+    pairs = list(zip(buttons[::2], buttons[1::2]))
+
+    bot.send_message(chat_id=chat_id,
+                     text=text,
+                     parse_mode=ParseMode.MARKDOWN,
+                     reply_markup=InlineKeyboardMarkup(
+                         pairs
                      ))
 
 
@@ -77,7 +90,7 @@ def error_callback(bot, update, error):
 def button_handler(bot: Bot, update: Update):
     query = update.callback_query
     button_callback_data = query.data
-    buttons = [[InlineKeyboardButton(text="Back", callback_data="help_back")]]
+    buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]]
     bot.delete_message(chat_id=update.callback_query.message.chat_id,
                        message_id=update.callback_query.message.message_id)
     try:
@@ -116,7 +129,7 @@ def button_handler(bot: Bot, update: Update):
         else:
             LOGGER.exception("Exception in help buttons. %s", str(query.data))
     bot.send_message(chat_id=update.callback_query.message.chat_id,
-                     text="Back to menu", reply_markup=InlineKeyboardMarkup(
+                     text=string_dict(bot)["back_button"], reply_markup=InlineKeyboardMarkup(
             buttons))
 
 
@@ -186,7 +199,7 @@ def help_button(bot: Bot, update: Update):
             if len(commands_keyboard) % 2 == 1:
                 pairs.append((commands_keyboard[-1],))
             pairs.append(
-                [InlineKeyboardButton(text="Back", callback_data="help_back")]
+                [InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]
             )
             query.message.reply_text(text=text,
                                      reply_markup=InlineKeyboardMarkup(pairs))
@@ -225,7 +238,6 @@ def help_button(bot: Bot, update: Update):
             pass
         else:
             LOGGER.exception("Exception in help buttons. %s", str(query.data))
-
 
 
 def get_help(bot: Bot, update: Update):
@@ -277,9 +289,7 @@ class WelcomeBot(object):
                             }, upsert=True)
         if if_admin(update=update, bot=bot):
             bot.send_message(chat_id,
-                             "Hello, I’m {} and ready to use. \n"
-                             "To add new content for your audience, press the 'Custom buttons'.\n"
-                             "To ask audience use Polls or survey.".format(bot.first_name))
+                             help_strings(bot)["start_help"].format(bot.first_name))
         get_help(bot=bot, update=update)
         # initial_survey = surveys_table.find_one({
         #     "bot_id": bot.id,

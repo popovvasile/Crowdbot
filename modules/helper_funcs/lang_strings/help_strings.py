@@ -114,7 +114,7 @@ def helpable_dict(bot):
         ADMIN_USER_MODE={"💰 Manage payments": "donation_payment",
                          "✉️ Messages": "messages",
                          "User view": "user_mode"},
-        VISITOR_HELPABLE={"💰 Manage payments": "donation_payment", "✉️ Messages": "messages"}
+        VISITOR_HELPABLE={}
 
     ),
         "RUS": dict(
@@ -128,10 +128,9 @@ def helpable_dict(bot):
                             "Опросы": "polls",
                             "Режим юзера": "user_mode",
                             "Каналы": "channels"},
-            ADMIN_USER_MODE={"Сделать платёж": "donation_payment",
-                             "✉️ Messages": "messages",
+            ADMIN_USER_MODE={
                              "Режим админа": "user_mode"},
-            VISITOR_HELPABLE={"Сделать платёж": "donation_payment", "✉️ Отправить сообщение": "messages"}
+            VISITOR_HELPABLE={}
 
         ),
     }

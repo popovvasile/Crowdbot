@@ -230,13 +230,9 @@ BUTTON_ADD_HANDLER = ConversationHandler(
             MessageHandler(Filters.text,
                            AddCommands().button_handler, pass_user_data=True)],
         TYPING_DESCRIPTION: [MessageHandler(Filters.all,
-                                            AddCommands().description_handler, pass_user_data=True),
-                             CallbackQueryHandler(callback=AddCommands().back,
-                                                  pattern=r"cancel_add_button", pass_user_data=True)],
+                                            AddCommands().description_handler, pass_user_data=True)],
         DESCRIPTION_FINISH: [MessageHandler(Filters.text,
-                                            AddCommands().description_finish, pass_user_data=True),
-                             CallbackQueryHandler(callback=AddCommands().back,
-                                                  pattern=r"cancel_add_button", pass_user_data=True)],
+                                            AddCommands().description_finish, pass_user_data=True)],
 
     },
 
