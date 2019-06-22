@@ -131,7 +131,7 @@ class PollBot(object):
 
     def handle_done(self, bot, update, user_data):
         send_buttons = [[InlineKeyboardButton(text=string_dict(bot)["menu_button"],
-                                              callback_data="cancel_poll"),
+                                              callback_data="help_back"),
                          InlineKeyboardButton(text=string_dict(bot)["send_button"],
                                               callback_data="send_poll")]]
         send_markup = InlineKeyboardMarkup(
