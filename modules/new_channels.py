@@ -186,7 +186,7 @@ class Channels(object):
     def channel(self, bot, update, user_data): # string_dict(bot)["string_dict(bot)["back_button"]"] todo
         one_channel_keyboard = \
             InlineKeyboardMarkup([[InlineKeyboardButton(string_dict(bot)["remove_button"],
-                                                        callback_data='channel_remove')],
+                                                        callback_data='remove_channel')],
                                   [InlineKeyboardButton(string_dict(bot)["send_survey_to_channel"],
                                                         callback_data="post_survey_to_channel"),
                                    InlineKeyboardButton(string_dict(bot)["send_poll_to_channel"],
@@ -458,7 +458,7 @@ POST_ON_CHANNEL_HANDLER = CallbackQueryHandler(Channels().post_on_channel,
                                                pattern=r"post_on_channel", pass_user_data=True)
 
 SEND_POST_HANDLER = ConversationHandler(
-    entry_points=[CallbackQueryHandler(SendPost().choose_channel, pattern=r"write_post", pass_user_data=True)],
+    entry_points=[CallbackQueryHandler(SendPost().choose_channel, pattern=r"channel_write_post", pass_user_data=True)],
     states={
         CHOOSE_TO_SEND_POST: [RegexHandler(r"@", SendPost().send_message, pass_user_data=True),
                               RegexHandler('^Back$', SendPost().back, pass_user_data=True)],

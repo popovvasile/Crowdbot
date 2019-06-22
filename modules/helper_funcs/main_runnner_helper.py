@@ -287,10 +287,19 @@ class WelcomeBot(object):
                             "is_admin": False,
                             "tags": ["#all", "#user"]
                             }, upsert=True)
-        if if_admin(update=update, bot=bot):
-            bot.send_message(chat_id,
-                             help_strings(bot)["start_help"].format(bot.first_name))
-        get_help(bot=bot, update=update)
+        if "survey_" in txt:
+            bot.send_message(chat_id=chat_id, text=string_dict(bot)["survey_str_20"],
+                             reply_markup=InlineKeyboardMarkup(
+                                 [[InlineKeyboardButton(text=string_dict(bot)["start_button"],
+                                                        callback_data="{}".format(
+                                                            str(txt.replace("/start ", ""))
+                                                        ))]]
+                             ))
+        else:
+            if if_admin(update=update, bot=bot):
+                bot.send_message(chat_id,
+                                 string_dict(bot)["start_help"].format(bot.first_name))
+            get_help(bot=bot, update=update)
         # initial_survey = surveys_table.find_one({
         #     "bot_id": bot.id,
         #     "title": "initial"

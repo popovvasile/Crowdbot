@@ -6,6 +6,7 @@ from database import channels_table, polls_table, surveys_table
 from telegram.error import TelegramError
 
 # from modules.channels import Channels
+from modules.new_channels import Channels
 from modules.helper_funcs.auth import initiate_chat_id
 from modules.helper_funcs.helper import get_help
 from modules.helper_funcs.lang_strings.strings import string_dict
@@ -35,8 +36,7 @@ logger = logging.getLogger(__name__)
 
 # TODO: need to refactor
 class SendPoll(object):
-    def choose_channel(self, bot, update):
-        print("TEgbnST")
+    def choose_channel(self, bot, update, user_data):
         create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["create_button"], callback_data="create_poll"),
                            InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]]
         create_markup = InlineKeyboardMarkup(
@@ -48,10 +48,10 @@ class SendPoll(object):
                              string_dict(bot)["polls_str_8"],
                              reply_markup=create_markup)
             return ConversationHandler.END
-        # else:
-        #     return Channels().make_channels_layout(bot, update, CHOOSE_TO_SEND_POLL,
-        #                                            string_dict(bot)["choose_channel_to_send_poll"],
-        #                                            user_data)
+        else:
+            return Channels().make_channels_layout(bot, update, CHOOSE_TO_SEND_POLL,
+                                                   string_dict(bot)["choose_channel_to_send_poll"],
+                                                   user_data)
 
     def handle_send_poll(self, bot, update, user_data):
         create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["create_button"], callback_data="create_poll"),
@@ -135,12 +135,11 @@ class SendPoll(object):
 
 class SendSurvey(object):
 
-    def choose_channel(self, bot, update):
-        print("TEST")
-        # return Channels().make_channels_layout(bot, update, CHOOSE_CHANNEL_TO_SEND_SURVEY,
-        #                                        string_dict(bot)["choose_channel_to_send_survey"],
-        #                                        user_data)
-        return
+    def choose_channel(self, bot, update, user_data):
+        return Channels().make_channels_layout(bot, update, CHOOSE_CHANNEL_TO_SEND_SURVEY,
+                                               string_dict(bot)["choose_channel_to_send_survey"],
+                                               user_data)
+
     def handle_send_survey(self, bot, update, user_data):
         buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_survey")]]
         reply_markup = InlineKeyboardMarkup(
@@ -168,10 +167,10 @@ class SendSurvey(object):
                                  string_dict(bot)["survey_str_23"],
                                  reply_markup=InlineKeyboardMarkup([admin_keyboard]))
                 return ConversationHandler.END
-        # else:
-        #     return Channels().make_channels_layout(bot, update, CHOOSE_CHANNEL_TO_SEND_SURVEY,
-        #                                            string_dict(bot)["choose_channel_to_send_survey"],
-        #                                            user_data)
+        else:
+            return Channels().make_channels_layout(bot, update, CHOOSE_CHANNEL_TO_SEND_SURVEY,
+                                                   string_dict(bot)["choose_channel_to_send_survey"],
+                                                   user_data)
 
     def handle_send_title(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
@@ -187,6 +186,8 @@ class SendSurvey(object):
         bot.send_message(chat_id=user_data['channel'], text=string_dict(bot)["survey_str_20"],
                          reply_markup=InlineKeyboardMarkup(
                              [[InlineKeyboardButton(text=string_dict(bot)["start_button"],
+                                                    url="https://t.me/{}?start=survey_{}".format(bot.username,
+                                                                                                 user_data["title"]),
                                                     callback_data="survey_{}".format(
                                                         str(txt)
                                                     ))]]
@@ -222,7 +223,7 @@ class SendSurvey(object):
 
 # There are already 'send_poll' pattern handler - mb use it
 SEND_POLL_TO_CHANNEL_HANDLER = ConversationHandler(
-    entry_points=[CallbackQueryHandler(SendPoll().choose_channel, pattern=r"post_poll_to_channel"),],
+    entry_points=[CallbackQueryHandler(SendPoll().choose_channel, pattern=r"post_poll_to_channel", pass_user_data=True),],
     states={
         CHOOSE_TO_SEND_POLL: [RegexHandler(r"@", SendPoll().handle_send_poll, pass_user_data=True),
                               RegexHandler('^Back$', SendPoll().back, pass_user_data=True)],
@@ -234,7 +235,8 @@ SEND_POLL_TO_CHANNEL_HANDLER = ConversationHandler(
 )
 
 SEND_SURVEY_TO_CHANNEL_HANDLER = ConversationHandler(
-    entry_points=[CallbackQueryHandler(SendSurvey().choose_channel, pattern="post_survey_to_channel")],
+    entry_points=[CallbackQueryHandler(SendSurvey().choose_channel,
+                                       pattern="post_survey_to_channel", pass_user_data=True)],
     states={
         CHOOSE_CHANNEL_TO_SEND_SURVEY: [RegexHandler(r"@", SendSurvey().handle_send_survey, pass_user_data=True),
                                         RegexHandler('^Back$', SendSurvey().back, pass_user_data=True)],

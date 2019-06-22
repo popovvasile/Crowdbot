@@ -80,9 +80,7 @@ def crowdbot_on_post():
 def on_delete():
     doc = request.args
     print(doc)
-    chatbot_id = requests.get(url="https://api.telegram.org/bot{}/getMe".format(doc["token"])
-                              ).json()
-
+    chatbot_id = requests.get(url="https://api.telegram.org/bot{}/getMe".format(doc["token"])).json()
     chatbot_id = chatbot_id["result"]["id"]
     crowdbot_db["users"].delete_many({"bot_id": chatbot_id})
     crowdbot_db["crowdbot_chatbots"].delete_many({"bot_id": chatbot_id})
@@ -127,4 +125,4 @@ def admin_on_delete(self, req, resp):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000)
+    app.run(host='127.0.0.1', port=8000)

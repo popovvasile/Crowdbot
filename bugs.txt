@@ -1,5 +1,3 @@
-
-
 Вася
 # TODO send surveys and polls and donation request to channels
 

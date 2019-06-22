@@ -3,7 +3,7 @@
 import logging
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (CommandHandler, MessageHandler, Filters,
-                          ConversationHandler, run_async, CallbackQueryHandler)
+                          ConversationHandler, run_async, CallbackQueryHandler, RegexHandler)
 from modules.helper_funcs.helper import get_help
 from database import surveys_table
 from modules.helper_funcs.lang_strings.strings import string_dict
@@ -55,6 +55,8 @@ class AnswerSurveys(object):
             "bot_id": bot.id,
             "title": user_data["title"]
         })
+        if not "answers" in survey:
+            survey["answers"] = []
         for answer in survey["answers"]:
             if answer.get('user_id', "") == update.callback_query.message.from_user.id:
                 survey["answers"] = []
@@ -68,7 +70,6 @@ class AnswerSurveys(object):
 
         return ANSWERING
 
-    
     def received_information(self, bot, update, user_data):
         buttons = [[InlineKeyboardButton(text=string_dict(bot)["cancel_button_survey"],
                                          callback_data="cancel_survey_answering")]]
@@ -81,7 +82,8 @@ class AnswerSurveys(object):
         })
         answer = update.message.text
         user_id = update.message.from_user.id
-
+        if not "answers" in survey:
+            survey["answers"] = []
         survey["answers"].append({"user_id": user_id,
                                   "question_id": int(user_data["question_id"]),
                                   "title": survey["title"],
