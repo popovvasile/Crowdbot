@@ -6,7 +6,7 @@ from database import channels_table, polls_table, surveys_table
 from telegram.error import TelegramError
 
 # from modules.channels import Channels
-from modules.new_channels import Channels
+from modules.channels import Channels
 from modules.helper_funcs.auth import initiate_chat_id
 from modules.helper_funcs.helper import get_help
 from modules.helper_funcs.lang_strings.strings import string_dict
@@ -17,6 +17,7 @@ from modules.helper_funcs.lang_strings.strings import string_dict
 import logging
 
 from modules.polls import PollBot
+
 MY_CHANNELS, MANAGE_CHANNEL, ADD_CHANNEL, \
 CHOOSE_TO_REMOVE, REMOVE_CHANNEL, \
 CHOOSE_TO_SEND_POST, POST_TO_CHANNEL, MESSAGE_TO_USERS = range(8)
@@ -223,26 +224,27 @@ class SendSurvey(object):
 
 # There are already 'send_poll' pattern handler - mb use it
 SEND_POLL_TO_CHANNEL_HANDLER = ConversationHandler(
-    entry_points=[CallbackQueryHandler(SendPoll().choose_channel, pattern=r"post_poll_to_channel", pass_user_data=True),],
+    entry_points=[
+        CallbackQueryHandler(SendPoll().choose_channel, pattern=r"post_poll_to_channel", pass_user_data=True), ],
     states={
         CHOOSE_TO_SEND_POLL: [RegexHandler(r"@", SendPoll().handle_send_poll, pass_user_data=True),
-                              RegexHandler('^Back$', SendPoll().back, pass_user_data=True)],
+                              ],
 
-        CHOOSE_POLL_TO_SEND: [MessageHandler(Filters.text, SendPoll().handle_send_title, pass_user_data=True),
-                              CallbackQueryHandler(callback=SendPoll().back, pattern=r"cancel_send_poll")],
+        CHOOSE_POLL_TO_SEND: [MessageHandler(Filters.text, SendPoll().handle_send_title, pass_user_data=True), ],
     },
-    fallbacks=[]
+    fallbacks=[CallbackQueryHandler(callback=SendPoll().back, pattern=r"cancel_send_poll"),
+               RegexHandler('^Back$', SendPoll().back)]
 )
 
 SEND_SURVEY_TO_CHANNEL_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(SendSurvey().choose_channel,
                                        pattern="post_survey_to_channel", pass_user_data=True)],
     states={
-        CHOOSE_CHANNEL_TO_SEND_SURVEY: [RegexHandler(r"@", SendSurvey().handle_send_survey, pass_user_data=True),
-                                        RegexHandler('^Back$', SendSurvey().back, pass_user_data=True)],
+        CHOOSE_CHANNEL_TO_SEND_SURVEY: [RegexHandler(r"@", SendSurvey().handle_send_survey, pass_user_data=True)],
 
         CHOOSE_SURVEY_TO_SEND: [MessageHandler(Filters.text, SendSurvey().handle_send_title, pass_user_data=True),
-                                CallbackQueryHandler(callback=SendSurvey().back, pattern=r"cancel_survey")]
+                                ]
     },
-    fallbacks=[]
+    fallbacks=[CallbackQueryHandler(callback=SendSurvey().back, pattern=r"cancel_survey"),
+               RegexHandler('^Back$', SendSurvey().back)]
 )

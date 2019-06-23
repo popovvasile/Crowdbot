@@ -193,7 +193,8 @@ class Channels(object):
                                                         callback_data="post_poll_to_channel")],
                                   [InlineKeyboardButton(string_dict(bot)["send_post_to_channel"],
                                                         callback_data='channel_write_post')],
-                                  [InlineKeyboardButton(string_dict(bot)["back_button"], callback_data='back')]])
+                                  [InlineKeyboardButton(string_dict(bot)["back_button"],
+                                                        callback_data='help_back')]])
         bot.send_message(update.message.chat_id, "TESTETEEVFBFG", reply_markup=one_channel_keyboard)
         channel = channels_table.find_one({'bot_id': bot.id, 'channel_username': update.message.text})
         # if channel:
@@ -430,11 +431,10 @@ MY_CHANNELS_HANDLER = ConversationHandler(
         MY_CHANNELS: [RegexHandler('^Back$', Channels().back, pass_user_data=True),
                       RegexHandler(r"@", Channels().channel, pass_user_data=True)],
 
-        MANAGE_CHANNEL: [CallbackQueryHandler(Channels().back, pattern=r"back", pass_user_data=True),
-                         CallbackQueryHandler(Channels().finish_remove, pattern=r"channel_remove", pass_user_data=True),
+        MANAGE_CHANNEL: [CallbackQueryHandler(Channels().finish_remove, pattern=r"channel_remove", pass_user_data=True),
                          CallbackQueryHandler(Channels().channel)]
     },
-    fallbacks=[ CallbackQueryHandler(callback=Channels().back, pattern=r"error_back"),]
+    fallbacks=[ CallbackQueryHandler(callback=Channels().back, pattern=r"cancel_my_channels", pass_user_data=True),]
 )
 
 ADD_CHANNEL_HANDLER = ConversationHandler(
@@ -453,9 +453,9 @@ REMOVE_CHANNEL_HANDLER = ConversationHandler(
     },
     fallbacks=[ RegexHandler('^Back$', Channels().back, pass_user_data=True),]
 )
-
-POST_ON_CHANNEL_HANDLER = CallbackQueryHandler(Channels().post_on_channel,
-                                               pattern=r"post_on_channel", pass_user_data=True)
+#
+# POST_ON_CHANNEL_HANDLER = CallbackQueryHandler(Channels().post_on_channel,
+#                                                pattern=r"post_on_channel", pass_user_data=True)
 
 SEND_POST_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(SendPost().choose_channel, pattern=r"channel_write_post", pass_user_data=True)],

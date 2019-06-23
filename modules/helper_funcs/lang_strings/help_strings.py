@@ -13,7 +13,7 @@ def help_strings(bot):
             admin_keyboard=[InlineKeyboardButton('My Channels', callback_data='my_channels'),
                             InlineKeyboardButton('Add channel', callback_data='add_channel'),
                             InlineKeyboardButton('Remove channel', callback_data='remove_channel'),
-                            InlineKeyboardButton('Post on channel', callback_data='post_on_channel')]
+                            InlineKeyboardButton('Post on channel', callback_data='channel_write_post')]
 
         ),
         "menu_buttons": dict(

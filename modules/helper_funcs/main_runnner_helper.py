@@ -42,15 +42,16 @@ def send_visitor_help(bot, chat_id, text, keyboard=None):
 
 
 def send_admin_user_mode(bot, chat_id, text, keyboard=None):
-
     buttons = [InlineKeyboardButton(string_dict(bot)["user_messages_str"], callback_data="send_message_to_admin"),
                InlineKeyboardButton(string_dict(bot)["pay_donation_mode_str"], callback_data='pay_donation')]
-    buttons += [InlineKeyboardButton(button["button"],
+    buttons = buttons + [InlineKeyboardButton(button["button"],
                                      callback_data="button_{}".format(button["button"].replace(" ", "").lower()))
                 for button in custom_buttons_table.find({"bot_id": bot.id})]
-    buttons += [InlineKeyboardButton(text="ADMIN MODE", callback_data="turn_user_mode_off")]
-    pairs = list(zip(buttons[::2], buttons[1::2]))
-
+    buttons = buttons + [InlineKeyboardButton(text="ADMIN MODE", callback_data="turn_user_mode_off")]
+    if len(buttons)%2==0:
+        pairs = list(zip(buttons[::2], buttons[1::2]))
+    else:
+        pairs = list(zip(buttons[::2], buttons[1::2])) + [(buttons[-1],)]
     bot.send_message(chat_id=chat_id,
                      text=text,
                      parse_mode=ParseMode.MARKDOWN,
@@ -68,10 +69,10 @@ def error_callback(bot, update, error):
     try:
 
         if hasattr(update, 'callback_query'):
-            update.message.reply_text("An error accured =( Please proceed to the main menu",
+            update.callback_query.message.reply_text("An error accured =( Please proceed to the main menu",
                                       reply_markup=back_buttons)
         elif hasattr(update, 'message'):
-            bot.send_message(update.callback_query.message.chat.id,
+            bot.send_message(update.callback_query.chat_instance,
                              "An error happened =( Please proceed to the main menu",
                              reply_markup=back_buttons)
 
@@ -255,6 +256,7 @@ def get_help(bot: Bot, update: Update):
     else:
         welcome_message = "Hello"
     if if_admin(bot=bot, update=update):
+        print(current_user_mode)
         if current_user_mode:
             if current_user_mode.get("user_mode") is True:
                 send_admin_user_mode(bot, chat.id, HELP_STRINGS.format(welcome_message))
