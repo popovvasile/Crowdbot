@@ -10,10 +10,10 @@ def help_strings(bot):
             # start 'Channels' message
             admin_help=string_dict(bot)["channels_str_1"],
             # and keyboard for start message
-            admin_keyboard=[InlineKeyboardButton('My Channels', callback_data='my_channels'),
-                            InlineKeyboardButton('Add channel', callback_data='add_channel'),
-                            InlineKeyboardButton('Remove channel', callback_data='remove_channel'),
-                            InlineKeyboardButton('Post on channel', callback_data='channel_write_post')]
+            admin_keyboard=[InlineKeyboardButton(string_dict(bot)["my_channels"], callback_data='my_channels'),
+                            InlineKeyboardButton(string_dict(bot)["add_channel"], callback_data='add_channel'),
+                            InlineKeyboardButton(string_dict(bot)["remove_channel"], callback_data='remove_channel'),
+                            InlineKeyboardButton(string_dict(bot)["post_on_channel"], callback_data='channel_write_post')]
 
         ),
         "menu_buttons": dict(

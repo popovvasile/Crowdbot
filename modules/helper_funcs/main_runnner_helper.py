@@ -26,7 +26,7 @@ def send_admin_help(bot, chat_id, text, keyboard=None):
 
 
 def send_visitor_help(bot, chat_id, text, keyboard=None):
-    buttons = [InlineKeyboardButton(string_dict(bot)["user_messages_str"], callback_data="send_message_to_admin"),
+    buttons = [InlineKeyboardButton(string_dict(bot)["send_message_1"], callback_data="send_message_to_admin"),
                InlineKeyboardButton(string_dict(bot)["pay_donation_mode_str"], callback_data='pay_donation')]
     buttons += [InlineKeyboardButton(button["button"],
                                        callback_data="button_{}".format(button["button"].replace(" ", "").lower()))
@@ -42,7 +42,7 @@ def send_visitor_help(bot, chat_id, text, keyboard=None):
 
 
 def send_admin_user_mode(bot, chat_id, text, keyboard=None):
-    buttons = [InlineKeyboardButton(string_dict(bot)["user_messages_str"], callback_data="send_message_to_admin"),
+    buttons = [InlineKeyboardButton(string_dict(bot)["send_message_1"], callback_data="send_message_to_admin"),
                InlineKeyboardButton(string_dict(bot)["pay_donation_mode_str"], callback_data='pay_donation')]
     buttons = buttons + [InlineKeyboardButton(button["button"],
                                      callback_data="button_{}".format(button["button"].replace(" ", "").lower()))

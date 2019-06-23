@@ -68,7 +68,7 @@ class EditPaymentHandler(object):
                                                    callback_data="allow_donation"),
                               InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]
             bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(bot)[" allow_donation_text"],
+                             string_dict(bot)["allow_donation_text"],
                              reply_markup=InlineKeyboardMarkup([admin_keyboard]))
             user_data.clear()
             return ConversationHandler.END
