@@ -22,7 +22,7 @@ class ButtonEdit(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         all_buttons = custom_buttons_table.find({"bot_id": bot.id})
-        if all_buttons:
+        if all_buttons.count() >0:
             bot.send_message(chat_id=update.callback_query.message.chat_id,
                              text=string_dict(bot)["manage_button_str_1"],
                              reply_markup=ReplyKeyboardMarkup(
@@ -127,6 +127,7 @@ class ButtonEdit(object):
         return EDIT_FINISH
 
     def edit_button_finish(self, bot, update, user_data):
+        print("TEST123")
         # Remove the old file or text
         button_info = custom_buttons_table.find_one(
             {"bot_id": bot.id, "button": user_data["button"]}
@@ -163,6 +164,8 @@ class ButtonEdit(object):
 
         elif update.message.document:
             document_file = update.message.document.get_file().file_id
+            if "document_files" not in button_info:
+                button_info["document_files"] = []
             button_info["document_files"].append(document_file)
 
         elif update.message.video:
