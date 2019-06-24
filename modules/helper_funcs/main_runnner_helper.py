@@ -29,7 +29,7 @@ def send_visitor_help(bot, chat_id, text, keyboard=None):
     buttons = [InlineKeyboardButton(string_dict(bot)["send_message_1"], callback_data="send_message_to_admin"),
                InlineKeyboardButton(string_dict(bot)["pay_donation_mode_str"], callback_data='pay_donation')]
     buttons += [InlineKeyboardButton(button["button"],
-                                       callback_data="button_{}".format(button["button"].replace(" ", "").lower()))
+                                     callback_data="button_{}".format(button["button"].replace(" ", "").lower()))
                 for button in custom_buttons_table.find({"bot_id": bot.id})]
     pairs = list(zip(buttons[::2], buttons[1::2]))
 
@@ -45,10 +45,11 @@ def send_admin_user_mode(bot, chat_id, text, keyboard=None):
     buttons = [InlineKeyboardButton(string_dict(bot)["send_message_1"], callback_data="send_message_to_admin"),
                InlineKeyboardButton(string_dict(bot)["pay_donation_mode_str"], callback_data='pay_donation')]
     buttons = buttons + [InlineKeyboardButton(button["button"],
-                                     callback_data="button_{}".format(button["button"].replace(" ", "").lower()))
-                for button in custom_buttons_table.find({"bot_id": bot.id})]
+                                              callback_data="button_{}".format(
+                                                  button["button"].replace(" ", "").lower()))
+                         for button in custom_buttons_table.find({"bot_id": bot.id})]
     buttons = buttons + [InlineKeyboardButton(text="ADMIN MODE", callback_data="turn_user_mode_off")]
-    if len(buttons)%2==0:
+    if len(buttons) % 2 == 0:
         pairs = list(zip(buttons[::2], buttons[1::2]))
     else:
         pairs = list(zip(buttons[::2], buttons[1::2])) + [(buttons[-1],)]
@@ -63,21 +64,24 @@ def send_admin_user_mode(bot, chat_id, text, keyboard=None):
 # for test purposes
 def error_callback(bot, update, error):
     back_buttons = InlineKeyboardMarkup(
-                                 [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                   callback_data="error_back")]])
+        [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                               callback_data="error_back")]])
     print(error)
     try:
 
         if hasattr(update, 'callback_query'):
-            update.callback_query.message.reply_text("An error accured =( Please proceed to the main menu",
-                                      reply_markup=back_buttons)
-        elif hasattr(update, 'message'):
             bot.send_message(update.callback_query.chat_instance,
+                             "An error accured =( Please proceed to the main menu",
+                             reply_markup=back_buttons)
+        elif hasattr(update, 'message'):
+            bot.send_message(update.message.chat.id,
                              "An error happened =( Please proceed to the main menu",
                              reply_markup=back_buttons)
 
         return
-
+    except ConnectionError as err:
+        print("ConnectionError")
+        print(err)
     except TimedOut as err:
         print("TimedOut")
         print(err)
@@ -97,28 +101,25 @@ def button_handler(bot: Bot, update: Update):
     try:
         button_info = custom_buttons_table.find_one(
             {"bot_id": bot.id, "button_lower": button_callback_data.replace("button_", "")}
-        )  # TODO add files and images
-        if "descriptions" in button_info:
-            for descr in button_info["descriptions"]:  # TODO adjust for images and files
-                query.message.reply_text(text=descr)
-        if "audio_files" in button_info:
-            for filename in button_info["audio_files"]:
-                query.message.reply_audio(filename)
-        if "video_files" in button_info:
-            for filename in button_info["video_files"]:
-                query.message.reply_video(filename)
-        if "document_files" in button_info:
-            for filename in button_info["document_files"]:
-                if ".png" in filename or ".jpg" in filename:
+        )
+        print(button_info)
+        for content_dict in button_info["content"]:
+            if "text" in content_dict:
+                query.message.reply_text(text=content_dict["text"])
+            if "audio_file" in content_dict:
+                query.message.reply_audio(content_dict["audio_file"])
+            if "video_file" in content_dict:
+                query.message.reply_video(content_dict["video_file"])
+            if "document_file" in content_dict:
+                if ".png" in content_dict["document_file"] or ".jpg" in content_dict["document_file"]:
                     bot.send_photo(chat_id=query.message.chat.id,
-                                   photo=filename)
+                                   photo=content_dict["document_file"])
                 else:
                     bot.send_document(chat_id=query.message.chat.id,
-                                      document=filename)
-        if "photo_files" in button_info:
-            for filename in button_info["photo_files"]:
+                                      document=content_dict["document_file"])
+            if "photo_file" in content_dict:
                 bot.send_photo(chat_id=query.message.chat.id,
-                               photo=filename)
+                               photo=content_dict["photo_file"])
 
     except BadRequest as excp:
         if excp.message == "Message is not modified":

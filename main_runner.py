@@ -7,20 +7,20 @@ from telegram.ext import CommandHandler, CallbackQueryHandler,RegexHandler
 from modules.channels_polls_surveys_donate import SEND_SURVEY_TO_CHANNEL_HANDLER, SEND_POLL_TO_CHANNEL_HANDLER
 from modules.menu_description import EDIT_BOT_DESCRIPTION_HANDLER
 from modules.helper_funcs.admin_login import ADMIN_AUTHENTICATION_HANDLER
-from modules.menu_buttons import BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER, AddCommands
+from modules.menu_buttons import BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER
 from modules.surveys_answer import ANSWER_SURVEY_HANDLER
 from modules.donation_enable import CREATE_DONATION_HANDLER
 from modules.surveys_create import DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_HANDLER, SEND_SURVEYS_HANDLER, \
-    CREATE_SURVEY_HANDLER, SurveyHandler
+    CREATE_SURVEY_HANDLER
 from modules.donations_edit_delete_results import EDIT_DONATION_HANDLER
 from modules.helper_funcs.main_runnner_helper import help_button, button_handler, get_help, WelcomeBot, error_callback
 from modules.manage_button import BUTTON_EDIT_HANDLER, BUTTON_EDIT_FINISH_HANDLER, DELETE_CONTENT_HANDLER, \
     BUTTON_ADD_FINISH_HANDLER
-from modules.donation_payment import DONATE_HANDLER, DonationBot, HANDLE_SUCCES, HANDLE_PRECHECKOUT
+from modules.donation_payment import DONATE_HANDLER, HANDLE_SUCCES, HANDLE_PRECHECKOUT
 from modules.polls import POLL_HANDLER, SEND_POLLS_HANDLER, BUTTON_HANDLER, DELETE_POLLS_HANDLER, POLLS_RESULTS_HANDLER
 from modules.donation_send_promotion import SEND_DONATION_TO_USERS_HANDLER
 from modules.messages import SEND_MESSAGE_TO_ADMIN_HANDLER, SEND_MESSAGE_TO_USERS_HANDLER, SEE_MESSAGES_HANDLER, \
-    SendMessageToUsers, ANSWER_TO_MESSAGE_HANDLER, DELETE_MESSAGES_HANDLER
+    ANSWER_TO_MESSAGE_HANDLER, DELETE_MESSAGES_HANDLER
 from modules.user_mode import USER_MODE_OFF, USER_MODE_ON
 from modules.channels import MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER, REMOVE_CHANNEL_HANDLER,  SEND_POST_HANDLER
 

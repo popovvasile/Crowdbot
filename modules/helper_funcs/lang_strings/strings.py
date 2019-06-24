@@ -10,6 +10,7 @@ string_dict_dict = {
         post_on_channel='Post on channel',
         channels_str_1='Here u can manage your channels',
         channels_str_2='List of your channels',
+        channels_menu="What do you wan to do with your channel?",
         # Click "Add" to configure your first channel or "Back" for main menu
         no_channels='You have no channel configured yet. Click "Add channel" to configure your first channel',
         wrong_channel_link_format='Send me link or username of your channel. ' \
@@ -287,8 +288,8 @@ Insert the token: \n""",
         add_channel="Добавить канал",
         remove_channel = "Удалить канал",
         post_on_channel="Написать в канал",
-
-        channels_str_1='Here u can manage your channels',
+        channels_menu="Что вы хотите сделать с этим каналом?",
+        channels_str_1='Здесь вы можете управлять свойм каналом',
         channels_str_2='List of your channels',
         # Click "Add" to configure your first channel or "Back" for main menu
         no_channels='You have no channel configured yet. Click "Add channel" to configure your first channel',

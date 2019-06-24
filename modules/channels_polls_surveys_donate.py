@@ -1,19 +1,11 @@
 import ast
 
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
-from telegram.ext import ConversationHandler, CallbackQueryHandler, MessageHandler, Filters, RegexHandler, run_async
-from database import channels_table, polls_table, surveys_table
-from telegram.error import TelegramError
-
-# from modules.channels import Channels
-from modules.channels import Channels
+from telegram.ext import ConversationHandler, CallbackQueryHandler, MessageHandler, Filters, RegexHandler
+from database import polls_table, surveys_table
 from modules.helper_funcs.auth import initiate_chat_id
 from modules.helper_funcs.helper import get_help
 from modules.helper_funcs.lang_strings.strings import string_dict
-
-# from modules.helper_funcs.auth import initiate_chat_id
-# from modules.polls import PollBot
-
 import logging
 
 from modules.polls import PollBot
@@ -35,67 +27,48 @@ logger = logging.getLogger(__name__)
 
 # for sending polls to channels
 
-# TODO: need to refactor
 class SendPoll(object):
-    def choose_channel(self, bot, update, user_data):
-        create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["create_button"], callback_data="create_poll"),
-                           InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]]
-        create_markup = InlineKeyboardMarkup(
-            create_buttons)
-
-        polls_list_of_dicts = polls_table.find({"bot_id": bot.id})
-        if polls_list_of_dicts.count() == 0:
-            bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(bot)["polls_str_8"],
-                             reply_markup=create_markup)
-            return ConversationHandler.END
-        else:
-            return Channels().make_channels_layout(bot, update, CHOOSE_TO_SEND_POLL,
-                                                   string_dict(bot)["choose_channel_to_send_poll"],
-                                                   user_data)
-
     def handle_send_poll(self, bot, update, user_data):
-        create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["create_button"], callback_data="create_poll"),
-                           InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]]
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id, )
+        create_buttons = [
+            [InlineKeyboardButton(text=string_dict(bot)["create_button_str"], callback_data="create_poll"),
+             InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]]
         create_markup = InlineKeyboardMarkup(
             create_buttons)
         back_keyboard = \
             InlineKeyboardMarkup([[InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                         callback_data="cancel_send_poll")]])
 
-        channel = channels_table.find_one({'bot_id': bot.id, 'channel_username': update.message.text})
-        if channel:
-            bot.delete_message(update.message.chat_id, update.message.message_id)
-            user_data['channel'] = update.message.text
+        polls_list_of_dicts = polls_table.find({"bot_id": bot.id})
+        channel_username = update.callback_query.data.replace("post_poll_to_channel_", "")
+        if polls_list_of_dicts.count() == 0:
+            bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(bot)["polls_str_8"],
+                             reply_markup=create_markup)
+            return ConversationHandler.END
+        else:
+            user_data['channel'] = channel_username
             polls_list_of_dicts = polls_table.find({"bot_id": bot.id})
             if polls_list_of_dicts.count() != 0:
                 command_list = [command['title'] for command in polls_list_of_dicts]
-                bot.send_message(update.message.chat.id,
+                bot.send_message(update.callback_query.message.chat.id,
                                  string_dict(bot)["polls_str_9"], reply_markup=back_keyboard)
                 reply_keyboard = [command_list]
-                bot.send_message(update.message.chat.id,
+                bot.send_message(update.callback_query.message.chat.id,
                                  string_dict(bot)["polls_str_10"],
                                  reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
                 return CHOOSE_POLL_TO_SEND
             else:
-                bot.send_message(update.message.chat.id,
+                bot.send_message(update.callback_query.message.chat.id,
                                  string_dict(bot)["polls_str_8"],
                                  reply_markup=create_markup)
                 return ConversationHandler.END
-        # else:
-        #     return Channels().make_channels_layout(bot, update, CHOOSE_TO_SEND_POST,
-        #                                            string_dict(bot)["choose_channel_to_send_poll"], user_data)
 
     def handle_send_title(self, bot, update, user_data):  # TODO save more poll instances
         chat_id, txt = initiate_chat_id(update)
-        # sent = []
         poll_name = txt
         user_data["poll_name_to_send"] = poll_name
-        # chats = chats_table.find({"bot_id": bot.id})
-        # for chat in chats:
-        #     if chat['chat_id'] != chat_id:
-        #         if not any(sent_d['id'] == chat['chat_id'] for sent_d in sent):
-        #             sent.append(chat['chat_id'])
         poll = polls_table.find_one({'title': poll_name})
         poll['options'] = ast.literal_eval(poll['options'])
         poll['meta'] = ast.literal_eval(poll['meta'])
@@ -135,55 +108,36 @@ class SendPoll(object):
 # for sending surveys to channels
 
 class SendSurvey(object):
-
-    def choose_channel(self, bot, update, user_data):
-        return Channels().make_channels_layout(bot, update, CHOOSE_CHANNEL_TO_SEND_SURVEY,
-                                               string_dict(bot)["choose_channel_to_send_survey"],
-                                               user_data)
-
     def handle_send_survey(self, bot, update, user_data):
+        channel_username = update.callback_query.data.replace("post_survey_to_channel_", "")
         buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_survey")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
-        channel = channels_table.find_one({'bot_id': bot.id, 'channel_username': update.message.text})
-        if channel:
-            bot.delete_message(update.message.chat_id, update.message.message_id)
-            user_data['channel'] = update.message.text
-            surveys_list = surveys_table.find({"bot_id": bot.id})
-            if surveys_list.count() != 0:
-                bot.send_message(update.message.chat.id,
-                                 string_dict(bot)["survey_str_18"], reply_markup=reply_markup)
-                command_list = [survey['title'] for survey in surveys_list]
-                reply_keyboard = [command_list]
-                bot.send_message(update.message.chat.id,
-                                 string_dict(bot)["survey_str_19"],
-                                 reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
-                return CHOOSE_SURVEY_TO_SEND
-            else:
-                admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["create_button"],
-                                                       callback_data="create_survey"),
-                                  InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                                       callback_data="help_back")]
-                bot.send_message(update.message.chat.id,
-                                 string_dict(bot)["survey_str_23"],
-                                 reply_markup=InlineKeyboardMarkup([admin_keyboard]))
-                return ConversationHandler.END
+        bot.delete_message(update.callback_query.message.chat.id, update.callback_query.message.message_id)
+        user_data['channel'] = channel_username
+        surveys_list = surveys_table.find({"bot_id": bot.id})
+        if surveys_list.count() != 0:
+            bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(bot)["survey_str_18"], reply_markup=reply_markup)
+            command_list = [survey['title'] for survey in surveys_list]
+            reply_keyboard = [command_list]
+            bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(bot)["survey_str_19"],
+                             reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+            return CHOOSE_SURVEY_TO_SEND
         else:
-            return Channels().make_channels_layout(bot, update, CHOOSE_CHANNEL_TO_SEND_SURVEY,
-                                                   string_dict(bot)["choose_channel_to_send_survey"],
-                                                   user_data)
+            admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["create_button_str"],
+                                                   callback_data="create_survey"),
+                              InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                   callback_data="help_back")]
+            bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(bot)["survey_str_23"],
+                             reply_markup=InlineKeyboardMarkup([admin_keyboard]))
+            return ConversationHandler.END
 
     def handle_send_title(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
         user_data["title"] = txt
-        survey = surveys_table.find_one({"bot_id": bot.id, 'title': txt})
-
-        sent = []
-        # chats = chats_table.find({"bot_id": bot.id})
-        # for chat in chats:
-        #     # if chat['chat_id'] != chat_id:
-        #     if not any(sent_d == chat['chat_id'] for sent_d in sent):
-        #         sent.append(chat['chat_id'])
         bot.send_message(chat_id=user_data['channel'], text=string_dict(bot)["survey_str_20"],
                          reply_markup=InlineKeyboardMarkup(
                              [[InlineKeyboardButton(text=string_dict(bot)["start_button"],
@@ -193,11 +147,6 @@ class SendSurvey(object):
                                                         str(txt)
                                                     ))]]
                          ))
-
-        # if len(sent) == 0:
-        #     bot.send_message(chat_id, survey_str_21, reply_markup=ReplyKeyboardRemove())
-        # else:
-        #     bot.send_message(chat_id=chat_id, text=survey_str_22, reply_markup=ReplyKeyboardRemove())
         get_help(bot, update)
         logger.info("Admin {} on bot {}:{} sent a survey to the users:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, txt))
@@ -225,10 +174,8 @@ class SendSurvey(object):
 # There are already 'send_poll' pattern handler - mb use it
 SEND_POLL_TO_CHANNEL_HANDLER = ConversationHandler(
     entry_points=[
-        CallbackQueryHandler(SendPoll().choose_channel, pattern=r"post_poll_to_channel", pass_user_data=True), ],
+        CallbackQueryHandler(SendPoll().handle_send_poll, pattern=r"post_poll_to_channel", pass_user_data=True), ],
     states={
-        CHOOSE_TO_SEND_POLL: [RegexHandler(r"@", SendPoll().handle_send_poll, pass_user_data=True),
-                              ],
 
         CHOOSE_POLL_TO_SEND: [MessageHandler(Filters.text, SendPoll().handle_send_title, pass_user_data=True), ],
     },
@@ -237,11 +184,9 @@ SEND_POLL_TO_CHANNEL_HANDLER = ConversationHandler(
 )
 
 SEND_SURVEY_TO_CHANNEL_HANDLER = ConversationHandler(
-    entry_points=[CallbackQueryHandler(SendSurvey().choose_channel,
+    entry_points=[CallbackQueryHandler(SendSurvey().handle_send_survey,
                                        pattern="post_survey_to_channel", pass_user_data=True)],
     states={
-        CHOOSE_CHANNEL_TO_SEND_SURVEY: [RegexHandler(r"@", SendSurvey().handle_send_survey, pass_user_data=True)],
-
         CHOOSE_SURVEY_TO_SEND: [MessageHandler(Filters.text, SendSurvey().handle_send_title, pass_user_data=True),
                                 ]
     },

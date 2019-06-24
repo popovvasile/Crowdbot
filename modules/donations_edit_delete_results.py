@@ -56,7 +56,7 @@ class EditPaymentHandler(object):
                            message_id=update.callback_query.message.message_id, )
         chatbot = chatbots_table.find_one({"bot_id": bot.id})
         if chatbot.get("donate") != {} and "donate" in chatbot:
-            reply_keyboard = [[string_dict(bot)["delete_donation_button"]], [string_dict(bot)["edit_button"]]]
+            reply_keyboard = [[string_dict(bot)["edit_button"]], [string_dict(bot)["delete_donation_button"]]]
 
             bot.send_message(update.callback_query.message.chat.id,
                              string_dict(bot)["donations_edit_str_2"],

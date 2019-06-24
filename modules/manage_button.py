@@ -46,68 +46,64 @@ class ButtonEdit(object):
             button_info = custom_buttons_table.find_one(
                 {"bot_id": bot.id, "button": update.message.text}
             )
-            if "descriptions" in button_info:
-                for descr in button_info["descriptions"]:
+            for content in button_info["content"]:
+                if "text" in content:
                     update.message.reply_text(
-                        text=descr,
+                        text=content["text"],
                         reply_markup=InlineKeyboardMarkup([[
                             InlineKeyboardButton(text=string_dict(bot)["edit_button"],
-                                                 callback_data="b_{}___{}".format(descr[:10],
+                                                 callback_data="b_{}___{}".format(content["text"][:10],
                                                                                   update.message.text)),
                             InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
-                                                 callback_data="d_{}___{}".format(descr[:10],
+                                                 callback_data="d_{}___{}".format(content["text"][:10],
                                                                                   update.message.text))
                         ]])
                     )
-            if "audio_files" in button_info:
-                for filename in button_info["audio_files"]:
+                if "audio_file" in content:
                     update.message.reply_audio(
-                        filename,
+                        content["audio_file"],
                         reply_markup=InlineKeyboardMarkup([[
                             InlineKeyboardButton(text=string_dict(bot)["edit_button"],
                                                  callback_data="b_{}___{}".format(
-                                                     filename[:10], update.message.text)),
+                                                     content["audio_file"][:10], update.message.text)),
                             InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
-                                                 callback_data="d_{}___{}".format(filename[:10],
+                                                 callback_data="d_{}___{}".format(content["audio_file"][:10],
                                                                                   update.message.text))
                         ]])
                     )
-            if "video_files" in button_info:
-                for filename in button_info["video_files"]:
+                if "video_file" in content:
                     update.message.reply_video(
-                        filename,
+                        content["video_file"],
                         reply_markup=InlineKeyboardMarkup([[
                             InlineKeyboardButton(text=string_dict(bot)["edit_button"],
                                                  callback_data="b_{}___{}".format(
-                                                     filename[:10], update.message.text)),
+                                                     content["video_file"][:10], update.message.text)),
                             InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
-                                                 callback_data="d_{}___{}".format(filename[:10],
+                                                 callback_data="d_{}___{}".format(content["video_file"][:10],
                                                                                   update.message.text))
                         ]])
                     )
-            if "document_files" in button_info:
-                for filename in button_info["document_files"]:
+                if "document_file" in content:
                     update.message.reply_document(
-                        filename,
+                        content["document_file"],
                         reply_markup=InlineKeyboardMarkup([[
                             InlineKeyboardButton(text=string_dict(bot)["edit_button"],
                                                  callback_data="b_{}___{}".format(
-                                                     filename[:10], update.message.text)),
+                                                     content["document_file"][:10], update.message.text)),
                             InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
-                                                 callback_data="d_{}___{}".format(filename[:10],
+                                                 callback_data="d_{}___{}".format(content["document_file"][:10],
                                                                                   update.message.text))
                         ]])
                     )
-            if "photo_files" in button_info:
-                for filename in button_info["photo_files"]:
+                if "photo_file" in content:
                     update.message.reply_photo(
-                        filename,
+                        content["photo_file"],
                         reply_markup=InlineKeyboardMarkup([[
                             InlineKeyboardButton(text=string_dict(bot)["edit_button"],
                                                  callback_data="b_{}___{}".format(
-                                                     filename[:10], update.message.text)),
+                                                     content["photo_file"][:10], update.message.text)),
                             InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
-                                                 callback_data="d_{}___{}".format(filename[:10],
+                                                 callback_data="d_{}___{}".format(content["photo_file"][:10],
                                                                                   update.message.text))
                         ]])
                     )
@@ -158,56 +154,38 @@ class ButtonEdit(object):
         button_info = custom_buttons_table.find_one(
             {"bot_id": bot.id, "button": user_data["button"]}
         )
-        user_data["button_info"] = button_info
-        for key, value in user_data["button_info"].items():
-            if "_files" or "descriptions" in key:
-                try:
-                    for content in button_info[key]:
-                        if user_data["content_id"] in content:
-                            button_info[key].remove(content)
-                except TypeError:
-                    continue
+        content_index = len(button_info["content"])
+        for index, content_dict in enumerate(button_info["content"]):
+            if any(user_data["content_id"] in ext for ext in content_dict.values()):
+                content_index = index
+                button_info["content"].remove(content_dict)
 
         if update.message.text:
-            if "descriptions" not in button_info:
-                button_info["descriptions"] = []
-            button_info["descriptions"].append(update.message.text)
+            button_info["content"].insert(content_index, {"text": update.message.text})
 
         elif update.message.photo:
             photo_file = update.message.photo[-1].get_file().file_id
-            if "photo_files" not in button_info:
-                button_info["photo_files"] = []
-            button_info["photo_files"].append(photo_file)
+            button_info["content"].insert(content_index, {"photo_file": photo_file})
 
         elif update.message.audio:
-            if "audio_files" not in button_info:
-                button_info["audio_files"] = []
             audio_file = update.message.audio.get_file().file_id
-            button_info["audio_files"].append(audio_file)
+            button_info["content"].insert(content_index, {"audio_file": audio_file})
 
         elif update.message.voice:
-            if "audio_files" not in button_info:
-                button_info["audio_files"] = []
             voice_file = update.message.voice.get_file().file_id
-            button_info["audio_files"].append(voice_file)
+            button_info["content"].insert(content_index, {"audio_file": voice_file})
 
         elif update.message.document:
             document_file = update.message.document.get_file().file_id
-            if "document_files" not in button_info:
-                button_info["document_files"] = []
-            button_info["document_files"].append(document_file)
+            button_info["content"].insert(content_index, {"document_file": document_file})
 
         elif update.message.video:
-            if "video_files" not in button_info:
-                button_info["video_files"] = []
             video_file = update.message.video.get_file().file_id
-            button_info["video_files"].append(video_file)
+            button_info["content"].insert(content_index, {"video_file": video_file})
 
         elif update.message.video_note:
-            if "video_files" not in button_info:
-                button_info["video_files"] = []
             video_note_file = update.message.audio.get_file().file_id
-            button_info["video_files"].append(video_note_file)
+            button_info["content"].insert(content_index, {"video_file": video_note_file})
 
         custom_buttons_table.replace_one(
             {"bot_id": bot.id, "button": user_data["button"]},
@@ -259,50 +237,35 @@ class AddButtonContent(object):
         return EDIT_FINISH
 
     def add_content_button_finish(self, bot, update, user_data):
-        # Remove the old file or text
         button_info = custom_buttons_table.find_one(
             {"bot_id": bot.id, "button": user_data["button"]}
         )
         if update.message.text:
-            if "descriptions" not in button_info:
-                button_info["descriptions"] = []
-            button_info["descriptions"].append(update.message.text)
+            button_info["content"].append({"text": update.message.text})
 
         elif update.message.photo:
             photo_file = update.message.photo[-1].get_file().file_id
-            if "photo_files" not in button_info:
-                button_info["photo_files"] = []
-            button_info["photo_files"].append(photo_file)
+            button_info["content"].append({"photo_file": photo_file})
 
         elif update.message.audio:
-            if "audio_files" not in button_info:
-                button_info["audio_files"] = []
             audio_file = update.message.audio.get_file().file_id
-            button_info["audio_files"].append(audio_file)
+            button_info["content"].append({"audio_file": audio_file})
 
         elif update.message.voice:
-            if "audio_files" not in button_info:
-                button_info["audio_files"] = []
             voice_file = update.message.voice.get_file().file_id
-            button_info["audio_files"].append(voice_file)
+            button_info["content"].append({"audio_file": voice_file})
 
         elif update.message.document:
             document_file = update.message.document.get_file().file_id
-            if "document_files" not in button_info:
-                button_info["document_files"] = []
-            button_info["document_files"].append(document_file)
+            button_info["content"].append({"document_file": document_file})
 
         elif update.message.video:
-            if "video_files" not in button_info:
-                button_info["video_files"] = []
             video_file = update.message.video.get_file().file_id
-            button_info["video_files"].append(video_file)
+            button_info["content"].append({"video_file": video_file})
 
         elif update.message.video_note:
-            if "video_files" not in button_info:
-                button_info["video_files"] = []
             video_note_file = update.message.audio.get_file().file_id
-            button_info["video_files"].append(video_note_file)
+            button_info["content"].append({"video_file": video_note_file})
 
         custom_buttons_table.replace_one(
             {"bot_id": bot.id, "button": user_data["button"]},
@@ -354,18 +317,16 @@ class DeleteButtonContent(object):
         button_info = custom_buttons_table.find_one(
             {"bot_id": bot.id, "button": user_data["button"]}
         )
-        user_data["button_info"] = button_info
-        for key, value in user_data["button_info"].items():
-            if "_files" or "descriptions" in key:
-                try:
-                    for content in button_info[key]:
-                        if user_data["content_id"] in content:
-                            button_info[key].remove(content)
-                except TypeError:
-                    continue
+        for content_dict in button_info["content"]:
+            if any(user_data["content_id"] in ext for ext in content_dict.values()):
+                button_info["content"].remove(content_dict)
         bot.send_message(chat_id=update.callback_query.message.chat_id,
                          text=string_dict(bot)["delete_content"],
                          reply_markup=reply_markup)
+        custom_buttons_table.replace_one(
+            {"bot_id": bot.id, "button": user_data["button"]},
+            button_info
+        )
         return ConversationHandler.END
 
 

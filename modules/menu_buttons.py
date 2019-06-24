@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import (CommandHandler, MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
@@ -66,79 +68,47 @@ class AddCommands(object):
                                                callback_data="cancel_add_button")]]
         reply_markup = InlineKeyboardMarkup(
             reply_buttons)
-
+        if "content" not in user_data:
+            user_data["content"] = []
+        general_list = user_data["content"]
         if update.callback_query:
             if update.message.callback_query.data == string_dict(bot)["done_button"]:
                 self.description_finish(bot, update, user_data)
                 return ConversationHandler.END
         if update.message.text:
-            if "descriptions" not in user_data:
-                user_data["descriptions"] = [update.message.text]
-            elif user_data["descriptions"] is not None:
-                user_data["descriptions"].append(update.message.text)
-            else:
-                user_data["descriptions"] = list()
+            general_list.append({"text": update.message.text})
 
         if update.message.photo:
             photo_file = update.message.photo[-1].get_file().file_id
-            if "photo_files" not in user_data:
-                user_data["photo_files"] = [photo_file]
-            elif user_data["photo_files"] is not None:
-                user_data["photo_files"] = user_data["photo_files"] + [photo_file]
-            else:
-                user_data["photo_files"] = list()
+            general_list.append({"photo_file": photo_file})
 
         if update.message.audio:
-
             audio_file = update.message.audio.get_file().file_id
-            if "audio_files" not in user_data:
-                user_data["audio_files"] = [audio_file]
-            elif user_data["audio_files"] is not None:
-                user_data["audio_files"] = user_data["audio_files"] + [audio_file]
-            else:
-                user_data["audio_files"] = list()
+            general_list.append({"audio_file": audio_file})
 
         if update.message.voice:
             voice_file = update.message.voice.get_file().file_id
-            if "audio_files" not in user_data:
-                user_data["audio_files"] = [voice_file]
-            elif user_data["audio_files"] is not None:
-                user_data["audio_files"] = user_data["audio_files"] + [voice_file]
-            else:
-                user_data["audio_files"] = list()
+            general_list.append({"audio_file": voice_file})
 
         if update.message.document:
             document_file = update.message.document.get_file().file_id
-            if "document_files" not in user_data:
-                user_data["document_files"] = [document_file]
-            elif user_data["document_files"] is not None:
-                user_data["document_files"] = user_data["document_files"] + [document_file]
-            else:
-                user_data["document_files"] = list()
+            general_list.append({"document_file": document_file})
 
         if update.message.video:
             video_file = update.message.video.get_file().file_id
-            if "video_files" not in user_data:
-                user_data["video_files"] = [video_file]
-            elif user_data["video_files"] is not None:
-                user_data["video_files"] = user_data["video_files"] + [video_file]
-            else:
-                user_data["video_files"] = list()
+            general_list.append({"video_file": video_file})
 
         if update.message.video_note:
             video_note_file = update.message.audio.get_file().file_id
-            if "video_files" not in user_data:
-                user_data["video_files"] = [video_note_file]
-            elif user_data["video_files"] is not None:
-                user_data["video_files"] = user_data["video_files"] + [video_note_file]
-            else:
-                user_data["video_files"] = list()
+            general_list.append({"video_file": video_note_file})
+
         done_buttons = [[InlineKeyboardButton(text=string_dict(bot)["done_button"], callback_data="DONE")]]
         done_reply_markup = InlineKeyboardMarkup(
             done_buttons)
         update.message.reply_text(string_dict(bot)["add_menu_buttons_str_4"],
                                   reply_markup=done_reply_markup)
         update.message.reply_text(string_dict(bot)["back_text"], reply_markup=reply_markup)
+        user_data["content"]=general_list
         return TYPING_DESCRIPTION
 
     def description_finish(self, bot, update, user_data):
