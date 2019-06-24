@@ -22,7 +22,7 @@ class ButtonEdit(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         all_buttons = custom_buttons_table.find({"bot_id": bot.id})
-        if all_buttons.count() >0:
+        if all_buttons.count() > 0:
             bot.send_message(chat_id=update.callback_query.message.chat_id,
                              text=string_dict(bot)["manage_button_str_1"],
                              reply_markup=ReplyKeyboardMarkup(
@@ -30,7 +30,7 @@ class ButtonEdit(object):
                              )
             return CHOOSE_BUTTON
         else:
-            bot.send_message(chat_id=update.callback_query.message.chat_id,  # TODO send as in polls
+            bot.send_message(chat_id=update.callback_query.message.chat_id,
                              text=string_dict(bot)["manage_button_str_2"],
                              reply_markup=InlineKeyboardMarkup(
                                  [[InlineKeyboardButton(string_dict(bot)["create_button_button"],
@@ -53,7 +53,11 @@ class ButtonEdit(object):
                         reply_markup=InlineKeyboardMarkup([[
                             InlineKeyboardButton(text=string_dict(bot)["edit_button"],
                                                  callback_data="b_{}___{}".format(descr[:10],
-                                                                                         update.message.text))]])
+                                                                                  update.message.text)),
+                            InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
+                                                 callback_data="d_{}___{}".format(descr[:10],
+                                                                                  update.message.text))
+                        ]])
                     )
             if "audio_files" in button_info:
                 for filename in button_info["audio_files"]:
@@ -62,7 +66,11 @@ class ButtonEdit(object):
                         reply_markup=InlineKeyboardMarkup([[
                             InlineKeyboardButton(text=string_dict(bot)["edit_button"],
                                                  callback_data="b_{}___{}".format(
-                                                     filename[:10], update.message.text))]])
+                                                     filename[:10], update.message.text)),
+                            InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
+                                                 callback_data="d_{}___{}".format(filename[:10],
+                                                                                  update.message.text))
+                        ]])
                     )
             if "video_files" in button_info:
                 for filename in button_info["video_files"]:
@@ -71,7 +79,11 @@ class ButtonEdit(object):
                         reply_markup=InlineKeyboardMarkup([[
                             InlineKeyboardButton(text=string_dict(bot)["edit_button"],
                                                  callback_data="b_{}___{}".format(
-                                                     filename[:10], update.message.text))]])
+                                                     filename[:10], update.message.text)),
+                            InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
+                                                 callback_data="d_{}___{}".format(filename[:10],
+                                                                                  update.message.text))
+                        ]])
                     )
             if "document_files" in button_info:
                 for filename in button_info["document_files"]:
@@ -80,17 +92,24 @@ class ButtonEdit(object):
                         reply_markup=InlineKeyboardMarkup([[
                             InlineKeyboardButton(text=string_dict(bot)["edit_button"],
                                                  callback_data="b_{}___{}".format(
-                                                     filename[:10], update.message.text))]])
+                                                     filename[:10], update.message.text)),
+                            InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
+                                                 callback_data="d_{}___{}".format(filename[:10],
+                                                                                  update.message.text))
+                        ]])
                     )
             if "photo_files" in button_info:
                 for filename in button_info["photo_files"]:
-                    print(filename)
                     update.message.reply_photo(
                         filename,
                         reply_markup=InlineKeyboardMarkup([[
                             InlineKeyboardButton(text=string_dict(bot)["edit_button"],
                                                  callback_data="b_{}___{}".format(
-                                                     filename[:10], update.message.text))]])
+                                                     filename[:10], update.message.text)),
+                            InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
+                                                 callback_data="d_{}___{}".format(filename[:10],
+                                                                                  update.message.text))
+                        ]])
                     )
         except BadRequest as excp:
             if excp.message == "Message is not modified":
@@ -105,10 +124,18 @@ class ButtonEdit(object):
                          text=string_dict(bot)["manage_button_str_3"],
                          reply_markup=ReplyKeyboardRemove())
         bot.send_message(chat_id=update.message.chat_id,
+                         text=string_dict(bot)["add_button_content"],
+                         reply_markup=InlineKeyboardMarkup(
+                             [[InlineKeyboardButton(text=string_dict(bot)["add_button"],
+                                                    callback_data="add_content{}".format(update.message.text))]])
+                         )
+        bot.send_message(chat_id=update.message.chat_id,
                          text=string_dict(bot)["back_text"],
                          reply_markup=InlineKeyboardMarkup(
-                             [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]])
-                         )
+                             [[
+                               InlineKeyboardButton(string_dict(bot)["back_button"],
+                                                    callback_data="cancel_edit_button")]]
+                         ))
         return ConversationHandler.END
 
     def edit_button(self, bot, update, user_data):
@@ -127,17 +154,19 @@ class ButtonEdit(object):
         return EDIT_FINISH
 
     def edit_button_finish(self, bot, update, user_data):
-        print("TEST123")
         # Remove the old file or text
         button_info = custom_buttons_table.find_one(
             {"bot_id": bot.id, "button": user_data["button"]}
         )
         user_data["button_info"] = button_info
         for key, value in user_data["button_info"].items():
-            if "_files" in key:
-                for content in button_info[key]:
-                    if user_data["content_id"] in content:
-                        button_info[key].remove(content)
+            if "_files" or "descriptions" in key:
+                try:
+                    for content in button_info[key]:
+                        if user_data["content_id"] in content:
+                            button_info[key].remove(content)
+                except TypeError:
+                    continue
 
         if update.message.text:
             if "descriptions" not in button_info:
@@ -213,9 +242,131 @@ class ButtonEdit(object):
         get_help(bot, update)
         return ConversationHandler.END
 
-    def error(self, bot, update, error):
-        """Log Errors caused by Updates."""
-        LOGGER.warning('Update "%s" caused error "%s"', update, error)
+
+class AddButtonContent(object):
+    def add_content_button(self, bot, update, user_data):
+        reply_buttons = [
+            [InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_edit_button")]]
+        reply_markup = InlineKeyboardMarkup(
+            reply_buttons)
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        content_data = update.callback_query.data.replace("add_content", "") # here is the problem
+        user_data["button"] = content_data
+        bot.send_message(chat_id=update.callback_query.message.chat_id,
+                         text=string_dict(bot)["manage_button_str_4"],
+                         reply_markup=reply_markup)
+        return EDIT_FINISH
+
+    def add_content_button_finish(self, bot, update, user_data):
+        # Remove the old file or text
+        button_info = custom_buttons_table.find_one(
+            {"bot_id": bot.id, "button": user_data["button"]}
+        )
+        if update.message.text:
+            if "descriptions" not in button_info:
+                button_info["descriptions"] = []
+            button_info["descriptions"].append(update.message.text)
+
+        elif update.message.photo:
+            photo_file = update.message.photo[-1].get_file().file_id
+            if "photo_files" not in button_info:
+                button_info["photo_files"] = []
+            button_info["photo_files"].append(photo_file)
+
+        elif update.message.audio:
+            if "audio_files" not in button_info:
+                button_info["audio_files"] = []
+            audio_file = update.message.audio.get_file().file_id
+            button_info["audio_files"].append(audio_file)
+
+        elif update.message.voice:
+            if "audio_files" not in button_info:
+                button_info["audio_files"] = []
+            voice_file = update.message.voice.get_file().file_id
+            button_info["audio_files"].append(voice_file)
+
+        elif update.message.document:
+            document_file = update.message.document.get_file().file_id
+            if "document_files" not in button_info:
+                button_info["document_files"] = []
+            button_info["document_files"].append(document_file)
+
+        elif update.message.video:
+            if "video_files" not in button_info:
+                button_info["video_files"] = []
+            video_file = update.message.video.get_file().file_id
+            button_info["video_files"].append(video_file)
+
+        elif update.message.video_note:
+            if "video_files" not in button_info:
+                button_info["video_files"] = []
+            video_note_file = update.message.audio.get_file().file_id
+            button_info["video_files"].append(video_note_file)
+
+        custom_buttons_table.replace_one(
+            {"bot_id": bot.id, "button": user_data["button"]},
+            button_info
+        )
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]]
+        bot.send_message(chat_id=update.message.chat_id,
+                         text=string_dict(bot)["manage_button_str_5"],
+                         reply_markup=InlineKeyboardMarkup(buttons))
+        logger.info("Admin {} on bot {}:{} did  the following edit button: {}".format(
+            update.effective_user.first_name, bot.first_name, bot.id, user_data["button"]))
+        user_data.clear()
+        return ConversationHandler.END
+
+    def back(self, bot, update, user_data):
+        bot.send_message(update.callback_query.message.chat.id,
+                         string_dict(bot)["manage_button_str_6"], reply_markup=ReplyKeyboardRemove()
+                         )
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        get_help(bot, update)
+        user_data.clear()
+        return ConversationHandler.END
+
+    def cancel(self, bot, update):
+        bot.delete_message(chat_id=update.message.chat_id,
+                           message_id=update.message.message_id)
+        bot.send_message(update.message.chat.id,
+                         "Command is cancelled", reply_markup=ReplyKeyboardRemove()
+                         )
+
+        get_help(bot, update)
+        return ConversationHandler.END
+
+
+class DeleteButtonContent(object):
+
+    def delete_message(self, bot, update, user_data):
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")])
+        reply_markup = InlineKeyboardMarkup(
+            buttons)
+
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        content_data = update.callback_query.data.replace("d_", "").split("___")  # here is the problem
+        user_data["content_id"] = content_data[0]
+        user_data["button"] = content_data[1]
+        button_info = custom_buttons_table.find_one(
+            {"bot_id": bot.id, "button": user_data["button"]}
+        )
+        user_data["button_info"] = button_info
+        for key, value in user_data["button_info"].items():
+            if "_files" or "descriptions" in key:
+                try:
+                    for content in button_info[key]:
+                        if user_data["content_id"] in content:
+                            button_info[key].remove(content)
+                except TypeError:
+                    continue
+        bot.send_message(chat_id=update.callback_query.message.chat_id,
+                         text=string_dict(bot)["delete_content"],
+                         reply_markup=reply_markup)
+        return ConversationHandler.END
 
 
 # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
@@ -260,3 +411,26 @@ BUTTON_EDIT_FINISH_HANDLER = ConversationHandler(
 
     ]
 )
+BUTTON_ADD_FINISH_HANDLER = ConversationHandler(
+    entry_points=[CallbackQueryHandler(callback=AddButtonContent().add_content_button,
+                                       pattern=r"add_content", pass_user_data=True)],
+
+    states={
+
+        EDIT_FINISH: [MessageHandler(Filters.all, AddButtonContent().add_content_button_finish, pass_user_data=True),
+                      CallbackQueryHandler(callback=ButtonEdit().back,
+                                           pattern=r"cancel_edit_button", pass_user_data=True),
+                      ],
+    },
+
+    fallbacks=[
+        CallbackQueryHandler(callback=ButtonEdit().back,
+                             pattern=r"cancel_edit_button", pass_user_data=True),
+        CallbackQueryHandler(callback=ButtonEdit().back, pattern=r"error_back"),
+        CommandHandler('cancel', ButtonEdit().cancel),
+        MessageHandler(filters=Filters.command, callback=ButtonEdit().cancel),
+
+    ]
+)
+DELETE_CONTENT_HANDLER = CallbackQueryHandler(pattern="d_",
+                                              callback=DeleteButtonContent().delete_message, pass_user_data=True)

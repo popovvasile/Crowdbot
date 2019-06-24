@@ -370,7 +370,7 @@ class PollBot(object):
         return ConversationHandler.END
 
     def handle_send_poll(self, bot, update):
-        create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["create_button"],
+        create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["create_button_str"],
                                                 callback_data="create_poll"),
                            InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                 callback_data="help_back")]]
@@ -451,7 +451,7 @@ class PollBot(object):
         return CHOOSE_TITLE_RESULTS
 
     def handle_polls_results_title(self, bot, update):  # TODO made miserably, need to refactor
-        create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["create_button"],
+        create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["create_button_str"],
                                                 callback_data="create_poll"),
                            InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                 callback_data="help_back")]]
@@ -511,7 +511,7 @@ class PollBot(object):
         else:
             bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                message_id=update.callback_query.message.message_id)
-            admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["create_button"],
+            admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["create_button_str"],
                                                    callback_data="create_poll"),
                               InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                    callback_data="help_back")]
@@ -533,7 +533,7 @@ class PollBot(object):
         poll_instances_table.delete_many({"bot_id": bot.id, "title": txt})
 
         update.message.reply_text("Ok!", reply_markup=ReplyKeyboardRemove())
-        admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["create_button"],
+        admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["create_button_str"],
                                                callback_data="create_poll"),
                           InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                callback_data="help_back")]

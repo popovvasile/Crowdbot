@@ -3,8 +3,8 @@
 import datetime
 import logging
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import (CommandHandler, MessageHandler, Filters,
-                          ConversationHandler, run_async, CallbackQueryHandler)
+from telegram.ext import (MessageHandler, Filters,
+                          ConversationHandler, CallbackQueryHandler)
 from database import users_messages_to_admin_table, chats_table
 from modules.helper_funcs.helper import get_help
 from modules.helper_funcs.lang_strings.strings import string_dict
@@ -128,12 +128,6 @@ class SendMessageToUsers(object):
         bot.send_message(update.callback_query.message.chat_id,
                          string_dict(bot)["send_message_5"],
                          reply_markup=final_reply_markup)
-        chats = chats_table.find({"bot_id": bot.id})
-        for chat in chats:
-            if chat["chat_id"] != update.callback_query.message.chat_id:
-                bot.send_message(chat["chat_id"],
-                                 "Click here for menu",
-                                 reply_markup=final_reply_markup)
         logger.info("Admin {} on bot {}:{} sent a message to the users".format(
             update.effective_user.first_name, bot.first_name, bot.id))
         return ConversationHandler.END
@@ -257,8 +251,6 @@ class DeleteMessage(object):
                                                        "timestamp": {'$gt': time_past}})
             # delete all messages from the users
         else:
-            print(bot.id)
-            print(message_id)
             users_messages_to_admin_table.delete_one({"bot_id": bot.id, "message_id": int(message_id)})
         bot.send_message(update.callback_query.message.chat.id,
                          string_dict(bot)["delete_message_str_1"],
@@ -319,7 +311,7 @@ SEND_MESSAGE_TO_ADMIN_HANDLER = ConversationHandler(
                   ],
 
     states={
-        MESSAGE: [MessageHandler(Filters.all, SendMessageToAdmin().received_message),],
+        MESSAGE: [MessageHandler(Filters.all, SendMessageToAdmin().received_message), ],
 
     },
 
@@ -342,8 +334,8 @@ SEND_MESSAGE_TO_USERS_HANDLER = ConversationHandler(
         CallbackQueryHandler(callback=SendMessageToUsers().back,
                              pattern=r"cancel_send_message"),
         CallbackQueryHandler(callback=SendMessageToUsers().send_message_finish,
-                                    pattern=r"send_message_finish"),
-               ]
+                             pattern=r"send_message_finish"),
+    ]
 )
 
 SEE_MESSAGES_HANDLER = CallbackQueryHandler(pattern="inbox_message", callback=SeeMessageToAdmin().see_messages)

@@ -182,9 +182,15 @@ class AddCommands(object):
 
             return TYPING_TO_DELETE_BUTTON
         else:
+            reply_buttons = [[InlineKeyboardButton(text=string_dict(bot)["create_button"],
+                                                   callback_data="create_button"),
+                              InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                   callback_data="cancel_add_button")
+                              ]]
+            reply_markup = InlineKeyboardMarkup(
+                reply_buttons)
             bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(bot)["add_menu_buttons_str_7"])
-            get_help(bot, update)
+                             string_dict(bot)["add_menu_buttons_str_7"], reply_markup=reply_markup)
 
             return ConversationHandler.END
 

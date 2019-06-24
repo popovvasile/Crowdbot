@@ -11,9 +11,7 @@ def help_strings(bot):
             admin_help=string_dict(bot)["channels_str_1"],
             # and keyboard for start message
             admin_keyboard=[InlineKeyboardButton(string_dict(bot)["my_channels"], callback_data='my_channels'),
-                            InlineKeyboardButton(string_dict(bot)["add_channel"], callback_data='add_channel'),
-                            InlineKeyboardButton(string_dict(bot)["remove_channel"], callback_data='remove_channel'),
-                            InlineKeyboardButton(string_dict(bot)["post_on_channel"], callback_data='channel_write_post')]
+                            InlineKeyboardButton(string_dict(bot)["add_channel"], callback_data='add_channel')]
 
         ),
         "menu_buttons": dict(
@@ -34,8 +32,8 @@ def help_strings(bot):
             admin_help=string_dict(bot)["survey_help_admin"],
 
             admin_keyboard=[
-                InlineKeyboardButton(text=string_dict(bot)["create_button"], callback_data="create_survey"),
-                InlineKeyboardButton(text=string_dict(bot)["delete_button"], callback_data="delete_survey"),
+                InlineKeyboardButton(text=string_dict(bot)["create_button_str"], callback_data="create_survey"),
+                InlineKeyboardButton(text=string_dict(bot)["delete_button_str"], callback_data="delete_survey"),
                 InlineKeyboardButton(text=string_dict(bot)["send_button"], callback_data="send_survey"),
                 InlineKeyboardButton(text=string_dict(bot)["results_button"], callback_data="surveys_results")
             ]
@@ -76,8 +74,8 @@ def help_strings(bot):
         ),
         "polls": dict(
             admin_keyboard=[
-                InlineKeyboardButton(text=string_dict(bot)["create_button"], callback_data="create_poll"),
-                InlineKeyboardButton(text=string_dict(bot)["delete_button"], callback_data="delete_poll"),
+                InlineKeyboardButton(text=string_dict(bot)["create_button_str"], callback_data="create_poll"),
+                InlineKeyboardButton(text=string_dict(bot)["delete_button_str"], callback_data="delete_poll"),
                 InlineKeyboardButton(text=string_dict(bot)["send_button"], callback_data="send_poll"),
                 InlineKeyboardButton(text=string_dict(bot)["results_button"], callback_data="poll_results"),
 
@@ -95,7 +93,6 @@ def help_strings(bot):
         )
     }
 
-    chatbot = chatbots_table.find_one({"bot_id": bot.id})
     return help_dict
 
 

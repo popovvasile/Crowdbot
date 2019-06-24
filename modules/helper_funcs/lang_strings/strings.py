@@ -2,7 +2,9 @@ from database import chatbots_table
 
 string_dict_dict = {
     "ENG": dict(
-        my_channels = "My Channels",
+        create_button_str="Create",
+        start_help="Welcome! My name is {} and I am ready to use!",
+        my_channels="My Channels",
         add_channel='Add channel',
         remove_channel='Remove channel',
         post_on_channel='Post on channel',
@@ -65,6 +67,7 @@ Send a message to users and get feedback
         promotion_send_message_user="""
 Here you can order promotion from this chatbot and their channels
 """,
+        delete_content="This content has been deleted from the button.",
         delete_button_str="Delete",
         delete_button_str_all="Delete all messages",
         delete_button_str_last_week="Delete for last week",
@@ -144,7 +147,8 @@ Say Hello to the admin!
         polls_str_8="You haven't done the poll yet. Click 'Create'",
         polls_str_9="List of active polls",
         polls_str_10="Choose a poll to send to users",
-        polls_str_11="Damn it, the poll is not sent 🤨 \n You have no users. Share the link of your bot in the social networks and  online resource or invite your friends. Somebody will come along soon 🐣",
+        polls_str_11="Damn it, the poll is not sent 🤨 \n You have no users. Share the link of your bot in the social"
+                     " networks and  online resource or invite your friends. Somebody will come along soon 🐣",
         polls_str_12="✅ The poll is sent",
         polls_str_13="Choose a poll to view 📊 theresults",
         polls_str_14="🗑 Choose a poll to delete",
@@ -190,7 +194,8 @@ Click 'Create' or '🔙 Back'""",
         donations_edit_str_5="🗑 Are you sure you want to delete this payment?",
         donations_edit_str_6="What exactly do you want to change? Or press '🔙 Back'",
         donations_edit_str_7="Write a new name for the payment. Or press '🔙 Back'",
-        donations_edit_str_8="Do description of payment for users or write how you will utilize the money? Or press '🔙 Back'",
+        donations_edit_str_8="Do description of payment for users or write how you will "
+                             "utilize the money? Or press '🔙 Back'",
         donations_edit_str_9=" Choose the main currency. Or press '🔙 Back'",
         donations_edit_str_10="✅ It’s in the bag!",
         donations_edit_str_11="🗑 The payment is deleted",
@@ -225,7 +230,8 @@ Press "Create" or '🔙 Back'""",
         survey_str_19="Choose the survey you want to send to users",
         survey_str_20="Hi, please take the survey..\n" \
                       "Press '🏁 Start' to begin ",
-        survey_str_21="Damn it, the survey is not sent 🤨 \n you have no users. Share the link of your bot in the social networks and  online resource or invite your friends. Somebody will come along soon 🐣",
+        survey_str_21="Damn it, the survey is not sent 🤨 \n you have no users. Share the link of your bot in the social"
+                      "networks and  online resource or invite your friends. Somebody will come along soon 🐣",
         survey_str_22="✅ The survey is sent.",
         survey_str_23="""You haven't done the survey yet.\n
 Press "Create" or '🔙 Back'""",
@@ -271,9 +277,12 @@ Insert the token: \n""",
         add_menu_buttons_str_8='🗑 Button {} removed',
         add_menu_buttons_str_9="🛑 You canceled the creation of a button.",
         add_menu_buttons_str_10="You can crete a new button or return to menu",
-        add_button="Add"),
+        add_button="Add",
+        add_button_content="Or add content to the button"
+    ),
 
     "RUS": dict(
+        start_help="Добро пожаловать! Меня зовут {}, и я готов к использованию!",
         my_channels="Мои каналы",
         add_channel="Добавить канал",
         remove_channel = "Удалить канал",
@@ -319,6 +328,7 @@ Insert the token: \n""",
         user_mode_on_finish="✅ Готово, теперь посмотри на бот в режиме юзера",
         user_mode_off_finish="🔚 Режим юзера выключен",
         user_mode_str="Подтвердить",
+        delete_message_str_1="Выбраные вообщения были удалены",
 
         send_message_module_str="✉️ Сообщения",
         send_message_button_1="📤 Отправить",
@@ -352,8 +362,9 @@ Insert the token: \n""",
         back_button="🔙 Назад",
         done_button="✅ Готово",
         create_button="🙌🏻 Создать кнопку",
+        delete_content="Контент был удален из кнопки",
         delete_button="🗑 Удалить кнопку",
-delete_button_str="Удалить сообщения",
+        delete_button_str="Удалить",
         delete_button_str_all="Удалить все сообщения",
         delete_button_str_last_week="🗑Удалить за последнюю неделю",
         delete_button_str_last_month="🗑Удалить за последний месяц",
@@ -494,7 +505,8 @@ instructions then you will get a token-access, that you should copy.\n3nd Step :
         create_donation_str_5="Неправильный токен. Проверь его и отправь снова.",
         create_donation_str_6="Сделай описание платежа для юзеров или напиши на что ты потратишь деньги?",
         create_donation_str_7="Выбери основную валюту расчёта",
-        create_donation_str_8="✅Отлично! Теперь ты можешь принимать платежи от юзеров бота. ❗️Юзерам нужна лишь банковская карта.\nНе забудь рассказать об этом.",
+        create_donation_str_8="✅Отлично! Теперь ты можешь принимать платежи от юзеров бота❗️ "
+                              "Юзерам нужна лишь банковская карта.\nНе забудь рассказать об этом.",
 
         answer_survey_str_1="Будь добр, ответь на вопрос.\n\n",
         answer_survey_str_2="Вопрос:{}, Ответ: {} \n",
@@ -503,6 +515,7 @@ instructions then you will get a token-access, that you should copy.\n3nd Step :
         survey_help_admin="""
 ❓Опрос с открытым ответом❓
 """,
+        create_button_str="Создать",
         survey_mode_str="Открытый опрос",
         add_menu_module_button="🛠Настройки 🛠",
         edit_button_button="✏️ Редактировать кнопку",
@@ -522,8 +535,10 @@ instructions then you will get a token-access, that you should copy.\n3nd Step :
         add_menu_buttons_str_9="🛑 Ты отменил создание кнопки",
         add_menu_buttons_str_10="Можешь создать нувую кнопку или вернуться в меню",
 
-        add_button="Добавить"
-    )}
+        add_button="Добавить",
+        add_button_content="Или добавить контент в кнопку"
+
+)}
 
 
 def string_dict(bot):

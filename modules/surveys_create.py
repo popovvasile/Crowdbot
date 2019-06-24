@@ -106,20 +106,6 @@ class SurveyHandler(object):
     def done(self, bot, update, user_data):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        sent = []
-        chats = chats_table.find({"bot_id": bot.id})
-        for chat in chats:
-            if chat['chat_id'] != update.callback_query.message.chat_id:
-                if not any(sent_d['id'] == chat['chat_id'] for sent_d in sent):
-                    sent.append(chat['chat_id'])
-
-                    bot.send_message(text=string_dict(bot)["survey_str_5"],
-                                     reply_markup=InlineKeyboardMarkup(
-                                         [[InlineKeyboardButton(text=string_dict(bot)["start_button"],
-                                                                callback_data="survey_{}".format(
-                                                                    user_data["title"]
-                                                                ))]]),
-                                     chat_id=chat['chat_id'])
         survey = surveys_table.find_one({
             "bot_id": bot.id,
             "title": user_data["title"]
@@ -149,6 +135,7 @@ class SurveyHandler(object):
         survey_list = surveys_table.find({"bot_id": bot.id})
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
+        print(survey_list.count() )
         if survey_list.count() != 0:
 
             bot.send_message(update.callback_query.message.chat.id,
@@ -168,7 +155,7 @@ class SurveyHandler(object):
         else:
 
             admin_keyboard = [
-                InlineKeyboardButton(text=string_dict(bot)["create_button"], callback_data="create_survey"),
+                InlineKeyboardButton(text=string_dict(bot)["create_button_str"], callback_data="create_survey"),
                 InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]
             bot.send_message(update.callback_query.message.chat.id,
                              string_dict(bot)["survey_str_9"],
@@ -228,7 +215,7 @@ class SurveyHandler(object):
             bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                message_id=update.callback_query.message.message_id)
             admin_keyboard = [
-                InlineKeyboardButton(text=string_dict(bot)["create_button"], callback_data="create_survey"),
+                InlineKeyboardButton(text=string_dict(bot)["create_button_str"], callback_data="create_survey"),
                 InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]
             bot.send_message(update.callback_query.message.chat.id,
                              string_dict(bot)["survey_str_16"],
@@ -242,7 +229,7 @@ class SurveyHandler(object):
                                   reply_markup=ReplyKeyboardRemove())
         logger.info("Admin {} on bot {}:{} deleted a survey:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, txt))
-        admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["create_button"], callback_data="create_survey"),
+        admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["create_button_str"], callback_data="create_survey"),
                           InlineKeyboardButton(text=string_dict(bot)["menu_button"], callback_data="help_back")]
         bot.send_message(update.message.chat.id,
                          string_dict(bot)["survey_str_24"],
@@ -290,6 +277,7 @@ class SurveyHandler(object):
         for chat in chats:
             # if chat['chat_id'] != chat_id:
             if not any(sent_d == chat['chat_id'] for sent_d in sent):
+                # TODO TypeError: 'int' object is not subscriptable
                 sent.append(chat['chat_id'])
                 bot.send_message(chat_id=chat['chat_id'], text=string_dict(bot)["survey_str_20"],
                                  reply_markup=InlineKeyboardMarkup(

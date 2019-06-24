@@ -14,7 +14,8 @@ from modules.surveys_create import DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_HANDLER,
     CREATE_SURVEY_HANDLER, SurveyHandler
 from modules.donations_edit_delete_results import EDIT_DONATION_HANDLER
 from modules.helper_funcs.main_runnner_helper import help_button, button_handler, get_help, WelcomeBot, error_callback
-from modules.manage_button import BUTTON_EDIT_HANDLER, BUTTON_EDIT_FINISH_HANDLER
+from modules.manage_button import BUTTON_EDIT_HANDLER, BUTTON_EDIT_FINISH_HANDLER, DELETE_CONTENT_HANDLER, \
+    BUTTON_ADD_FINISH_HANDLER
 from modules.donation_payment import DONATE_HANDLER, DonationBot, HANDLE_SUCCES, HANDLE_PRECHECKOUT
 from modules.polls import POLL_HANDLER, SEND_POLLS_HANDLER, BUTTON_HANDLER, DELETE_POLLS_HANDLER, POLLS_RESULTS_HANDLER
 from modules.donation_send_promotion import SEND_DONATION_TO_USERS_HANDLER
@@ -56,6 +57,8 @@ def main(token):
     dispatcher.add_handler(DELETE_BUTTON_HANDLER)
     dispatcher.add_handler(BUTTON_EDIT_HANDLER)
     dispatcher.add_handler(BUTTON_EDIT_FINISH_HANDLER)
+    dispatcher.add_handler(DELETE_CONTENT_HANDLER)
+    dispatcher.add_handler(BUTTON_ADD_FINISH_HANDLER)
     # USER MODE
     dispatcher.add_handler(USER_MODE_ON)
     dispatcher.add_handler(USER_MODE_OFF)

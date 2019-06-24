@@ -23,11 +23,11 @@ logger = logging.getLogger(__name__)
 TYPING_TOKEN, TYPING_TITLE, TYPING_DESCRIPTION, DONATION_FINISH = range(4)
 
 
-def check_provider_token(provider_token, bot):
+def check_provider_token(provider_token, bot, update):
     bot_token = chatbots_table.find_one({"bot_id": bot.id})["token"]
     prices = [LabeledPrice(string_dict(bot)["create_donation_str_1"], 10000)]
     data = requests.get("https://api.telegram.org/bot{}/sendInvoice".format(bot_token),
-
+                        # TODO it sends to all users- should send only to admin
                         params=dict(title="test",
                                     description="test",
                                     payload="test",
@@ -35,7 +35,7 @@ def check_provider_token(provider_token, bot):
                                     currency="USD",
                                     start_parameter="test",
                                     prices=json.dumps([p.to_dict() for p in prices]),
-                                    chat_id=244356086))
+                                    chat_id=update.effective_chat.id))
     return json.loads(data.content)["ok"]
 
 
@@ -84,7 +84,7 @@ class CreateDonationHandler(object):
         reply_markup = InlineKeyboardMarkup(
             buttons)
         chat_id, txt = initiate_chat_id(update)
-        if check_provider_token(provider_token=txt, bot=bot):
+        if check_provider_token(provider_token=txt, bot=bot, update=update):
 
             user_data['payment_token'] = txt
 
