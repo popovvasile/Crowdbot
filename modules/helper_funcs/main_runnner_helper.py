@@ -298,6 +298,12 @@ class WelcomeBot(object):
                                                             str(txt.replace("/start ", ""))
                                                         ))]]
                              ))
+        if "pay_donation" in txt:
+            bot.send_message(chat_id=chat_id, text=string_dict(bot)["pay_donation_start"],
+                             reply_markup=InlineKeyboardMarkup(
+                                 [[InlineKeyboardButton(text=string_dict(bot)["donation_button"],
+                                                        callback_data="pay_donation")]]
+                             ))
         else:
             if if_admin(update=update, bot=bot):
                 bot.send_message(chat_id,

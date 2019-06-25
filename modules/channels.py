@@ -268,7 +268,6 @@ class Channels(object):
         return ConversationHandler.END
 
 
-# TODO: ask user if he/she sure to send posts to the channel
 class SendPost(object):
     def send_message(self, bot, update, user_data):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -278,7 +277,6 @@ class SendPost(object):
         reply_markup = InlineKeyboardMarkup(
             buttons)
         channel_username = update.callback_query.data.replace("channel_write_post", "")
-        # TODO: use of 'update.effective_chat.id' to get id of chat
         channel = channels_table.find_one({'bot_id': bot.id,
                                            'channel_username': channel_username})
         if channel:

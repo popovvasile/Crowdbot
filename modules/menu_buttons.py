@@ -41,7 +41,6 @@ class AddCommands(object):
         return TYPING_BUTTON
 
     def button_handler(self, bot, update, user_data):
-        # TODO create a chatbot specially for OG
         reply_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                callback_data="cancel_add_button")]]
         reply_markup = InlineKeyboardMarkup(

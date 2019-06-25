@@ -171,6 +171,55 @@ class SendSurvey(object):
         logger.warning('Update "%s" caused error "%s"', update, error)
 
 
+class SendDonationRequest(object):  # TODO
+    def handle_send_donation(self, bot, update, user_data):
+        channel_username = update.callback_query.data.replace("post_survey_to_channel_", "")
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_survey")]]
+        reply_markup = InlineKeyboardMarkup(
+            buttons)
+        bot.delete_message(update.callback_query.message.chat.id, update.callback_query.message.message_id)
+        user_data['channel'] = channel_username
+        surveys_list = surveys_table.find({"bot_id": bot.id})
+        if surveys_list.count() != 0:
+            bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(bot)["survey_str_18"], reply_markup=reply_markup)
+            command_list = [survey['title'] for survey in surveys_list]
+            reply_keyboard = [command_list]
+            bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(bot)["survey_str_19"],
+                             reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+            return CHOOSE_SURVEY_TO_SEND
+        else:
+            admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["create_button_str"],
+                                                   callback_data="create_survey"),
+                              InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                   callback_data="help_back")]
+            bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(bot)["survey_str_23"],
+                             reply_markup=InlineKeyboardMarkup([admin_keyboard]))
+
+        return ConversationHandler.END
+
+
+    def cancel(self, bot, update):
+        update.message.reply_text(
+            "Command is cancelled =("
+        )
+        get_help(bot, update)
+        return ConversationHandler.END
+
+    def back(self, bot, update):
+        bot.delete_message(update.effective_chat.id,
+                           update.effective_message.message_id)
+        get_help(bot, update)
+        return ConversationHandler.END
+
+    @staticmethod
+    def error(bot, update, error):
+        """Log Errors caused by Updates."""
+        logger.warning('Update "%s" caused error "%s"', update, error)
+
+
 # There are already 'send_poll' pattern handler - mb use it
 SEND_POLL_TO_CHANNEL_HANDLER = ConversationHandler(
     entry_points=[
