@@ -29,6 +29,7 @@ class AddUsersCategory(object):
         return TOPIC
 
     def add_category_finish(self, bot, update):
+        # TODO make it continues- add more than one category + ask if he wants to send teh message to teh users about that
         user_categories_table.update({"category": update.message.text},
                                      {"$set": {"category": update.message.text}},
                                      upsert=True)
@@ -59,8 +60,6 @@ class UsersCategory(object):
                     ]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
-        bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(bot)["send_user_category16"], reply_markup=reply_markup)
 
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
@@ -73,7 +72,8 @@ class UsersCategory(object):
                 delete_buttons)
             bot.send_message(update.callback_query.message.chat.id, category["category"],
                              reply_markup=delete_markup)
-
+        bot.send_message(update.callback_query.message.chat.id,
+                         string_dict(bot)["send_user_category_16"], reply_markup=reply_markup)
         return ConversationHandler.END
 
 
@@ -105,9 +105,12 @@ class UsersChooseCategory(object):
             buttons)
         new_category = update.callback_query.data.replace("user_chooses_category_", "").split("__")
         user_data = users_table.find_one({"user_id": update.callback_query.from_user.id})
-        user_categories_table.update_one(
+        if "categories" not in user_data:
+            user_data["categories"] = []
+        user_data["categories"].append(new_category)
+        users_table.update_one(
             {"user_id": update.callback_query.from_user.id},
-            {"$set": {"category": user_data["categories"].append(new_category)}}
+            {"$set": user_data}
         )
 
         bot.send_message(update.callback_query.message.chat.id,
@@ -119,48 +122,32 @@ class UsersChooseCategory(object):
 class SendQuestionToUsers(object):
 
     def send_question(self, bot, update):
-        buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                             callback_data="cancel_send_message")])
-        reply_markup = InlineKeyboardMarkup(buttons)
-        categories = user_categories_table.find()
-
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(bot)["send_category_question_1"],
-                         reply_markup=reply_markup)
-        bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(bot)["send_category_question_2"],
-                         reply_markup=ReplyKeyboardMarkup([[
-                             x["user_category"]] for x in categories
-                         ]))
-        return MESSAGE_TO_USERS
-
-    def send_question_finish(self, bot, update):
-        chats = chats_table.find({"bot_id": bot.id, "category": update.message.text})
+        chats = chats_table.find({"bot_id": bot.id})
         categories = user_categories_table.find()
+        print(categories)
         buttons = list()
         for category in categories:
-            buttons.append([InlineKeyboardButton(text=category["user_category"],
+            buttons.append([InlineKeyboardButton(text=category["category"],
                                                  callback_data="user_chooses_category_{}".format(
-                                                     category["user_category"],
+                                                     category["category"],
                                                  )
                                                  )])
         choose_markup = InlineKeyboardMarkup(
             buttons)
         for chat in chats:
-            if chat["chat_id"] != update.message.chat_id:
-                if update.message.text:
-                    bot.send_message(update.callback_query.message.chat.id,
-                                     string_dict(bot)["send_category_question_3"],
-                                     reply_markup=choose_markup)
+            # if chat["chat_id"] != update.callback_query.message.chat.id:
+            if update.callback_query.message.text:
+                bot.send_message(update.callback_query.message.chat.id,
+                                 string_dict(bot)["send_category_question_3"],
+                                 reply_markup=choose_markup)
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                              callback_data="help_back")])
         reply_markup = InlineKeyboardMarkup(buttons)
         bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(bot)["send_category_question_2"], reply_markup=reply_markup)
+                         string_dict(bot)["send_category_question_4"], reply_markup=reply_markup)
 
         return ConversationHandler.END
 
@@ -191,17 +178,5 @@ ADD_USER_CATEGORY_HANDLER = ConversationHandler(
                              pattern=r"cancel_send_user")
     ]
 )
-SEND_USER_QUESTION_HANDLER = ConversationHandler(
-    entry_points=[CallbackQueryHandler(pattern="send_user_category_question",
-                                       callback=SendQuestionToUsers().send_question)],
-
-    states={
-        TOPIC: [MessageHandler(Filters.all, SendQuestionToUsers().send_question_finish)],
-
-    },
-
-    fallbacks=[
-        CallbackQueryHandler(callback=SendQuestionToUsers().back,
-                             pattern=r"cancel_send_user")
-    ]
-)
+SEND_USER_QUESTION_HANDLER = CallbackQueryHandler(pattern="send_user_category_question",
+                                                  callback=SendQuestionToUsers().send_question)

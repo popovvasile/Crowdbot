@@ -24,6 +24,8 @@ from modules.messages import SEND_MESSAGE_TO_ADMIN_HANDLER, SEND_MESSAGE_TO_USER
     DELETE_MESSAGE_CATEGORY_HANDLER, MESSAGE_CATEGORY_HANDLER
 from modules.user_mode import USER_MODE_OFF, USER_MODE_ON
 from modules.channels import MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER, REMOVE_CHANNEL_HANDLER,  SEND_POST_HANDLER
+from modules.users import USER_CATEGORY_HANDLER, DELETE_USER_CATEGORY_HANDLER, USER_CHOOSES_CATEGORY_HANDLER, \
+    ADD_USER_CATEGORY_HANDLER, SEND_USER_QUESTION_HANDLER
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -64,6 +66,12 @@ def main(token):
     dispatcher.add_handler(USER_MODE_ON)
     dispatcher.add_handler(USER_MODE_OFF)
 
+    # USERS
+    dispatcher.add_handler(USER_CATEGORY_HANDLER)
+    dispatcher.add_handler(DELETE_USER_CATEGORY_HANDLER)
+    dispatcher.add_handler(USER_CHOOSES_CATEGORY_HANDLER)
+    dispatcher.add_handler(ADD_USER_CATEGORY_HANDLER)
+    dispatcher.add_handler(SEND_USER_QUESTION_HANDLER)
     # DONATIONS
     dispatcher.add_handler(CREATE_DONATION_HANDLER)
     dispatcher.add_handler(DONATE_HANDLER)

@@ -41,6 +41,19 @@ string_dict_dict = {
         choose_channel_to_send_survey='Choose channel u want to send survey',
         try_to_add_already_exist_channel='This channel already exists',
 
+        users_module="Users",
+        users_module_help="Your bots users",
+        show_user_categories_button="User categories",
+        send_user_category_question_button="Ask users",
+        add_user_category="Add category",
+        send_user_category_16="You can add a new category of the users or return to menu",
+        send_user_category_14="What category do you want to create?",
+        send_user_category_15="Great! Now you can ask your users if they belong to the categories mentioned above!",
+        send_category_question_3="What category do you associate with?",
+        send_category_question_4="The category question has been sent to your users",
+        users_help_admin="You can ask your users what category they belong to or create a new category",
+        user_chooses_category="Thank you for your vote!",
+
         user_mode_help_admin="""
 Press “Accept" to turn on the bot in the user mode. 
 Press “Back" to return to the normal mode 
@@ -73,6 +86,7 @@ Here you can order promotion from this chatbot and their channels
         delete_button_str_all="Delete all messages",
         delete_button_str_last_week="Delete for last week",
         delete_button_str_last_month="Delete for last month",
+        view_message_str="Read",
 
         delete_message_str_1="Chosen messages have been deleted",
         send_message_module_str="✉️ Messages",
@@ -80,6 +94,7 @@ Here you can order promotion from this chatbot and their channels
         send_message_button_2="📥 Mailbox",
         send_message_button_3="Message topics",
         send_message_1="Write your message",
+        send_message_1_1="Choose the category of users to whom you want o send your message",
         send_message_12="What do you want to tell us about?",
         send_message_13="Choose the subject of your message",
         send_message_14="TEST",
@@ -90,8 +105,7 @@ Here you can order promotion from this chatbot and their channels
         add_message_category="Add topic",
 
         send_message_2="Thanks, the homing pigeon's on its way. 🕊!",
-        send_message_3="Write a message to users\n" \
-                       "Thanks, the homing pigeon's on its way. 🕊!",
+        send_message_3="Write a message to users\n",
         send_message_4="Write a new message and press '✅ Done",
         send_message_5="✅The message is sent",
         send_message_6="Forever alone 😉 ",
@@ -136,7 +150,7 @@ Say Hello to the admin!
         edit_button="✏️ Edit the button",
         start_button="🏁 Start",
         main_survey_button="The main survey",
-        back_text="Press '🔙 Back ' to return to the menu ",
+        back_text="You can press '🔙 Back ' to return to the menu ",
         polls_affirmations=[
             "OK",
             "Cool",
@@ -296,7 +310,7 @@ Insert the token: \n""",
         start_help="Добро пожаловать! Меня зовут {}, и я готов к использованию!",
         my_channels="Мои каналы",
         add_channel="Добавить канал",
-        remove_channel = "Удалить канал",
+        remove_channel="Удалить канал",
         post_on_channel="Написать в канал",
         channels_menu="Что вы хотите сделать с этим каналом?",
         channels_str_1='Здесь вы можете управлять свойм каналом',
@@ -331,6 +345,19 @@ Insert the token: \n""",
         choose_channel_to_send_survey='Choose channel u want to send survey',
         try_to_add_already_exist_channel='This channel already exists',
 
+        users_module="Пользователи",
+        users_module_help="Пользователи вашего бота",
+        add_user_category="Добавить категорию",
+        show_user_categories_button="Категории пользователей",
+        send_user_category_question_button="Опросить пользователей",
+        send_user_category_16="You can add a new category of the users or return to menu",
+        send_user_category_14="What category do you want to create?",
+        send_user_category_15="Great! Now you can ask your users if they belong to the categories mentioned above!",
+
+        send_category_question_3="What category do you associate with?",
+        send_category_question_4="The category question has been sent to your users",
+        users_help_admin="You can ask your users what category they belong to or create a new category",
+        user_chooses_category="Thank you for your vote!",
         user_mode_help_admin="""
 Нажми «Подтвердить», чтобы включить бота в режиме юзера.
 
@@ -340,7 +367,7 @@ Insert the token: \n""",
         user_mode_off_finish="🔚 Режим юзера выключен",
         user_mode_str="Подтвердить",
         delete_message_str_1="Выбраные вообщения были удалены",
-
+        view_message_str="Прочитать",
         send_message_module_str="✉️ Сообщения",
         send_message_button_3="Категории сообщений",
         send_message_button_1="📤 Отправить",
@@ -354,9 +381,10 @@ Insert the token: \n""",
         send_message_18="TEST",
         add_message_category="Добавить категорию",
         send_message_1="Напиши свое сообщение",
+        send_message_1_1="Choose the category of users to whom you want o send your message",
+
         send_message_2="Спасибо, голубь уже в пути 🕊!",
-        send_message_3="Напиши сообщение юзерам\n" \
-                       "Спасибо, голубь уже в пути 🕊!",
+        send_message_3="Напиши сообщение юзерам\n",
         send_message_4="Напиши новое сообщение или нажми '✅ Готово'",
         send_message_5="✅Сообщение отправлено",
         send_message_6="😉 Полковнику никто не пишет 😉",
@@ -558,7 +586,7 @@ instructions then you will get a token-access, that you should copy.\n3nd Step :
         add_button="Добавить",
         add_button_content="Или добавить контент в кнопку"
 
-)}
+    )}
 
 
 def string_dict(bot):

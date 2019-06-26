@@ -1,11 +1,13 @@
+from collections import OrderedDict
+
 from telegram import InlineKeyboardButton
 from database import chatbots_table
 from modules.helper_funcs.lang_strings.strings import string_dict
 
 
 def help_strings(bot):
-    help_dict = {
-        "channels": dict(
+    help_dict = OrderedDict(
+        channels=dict(
             mod_name='Channels',
             # start 'Channels' message
             admin_help=string_dict(bot)["channels_str_1"],
@@ -14,7 +16,7 @@ def help_strings(bot):
                             InlineKeyboardButton(string_dict(bot)["add_channel"], callback_data='add_channel')]
 
         ),
-        "menu_buttons": dict(
+        menu_buttons=dict(
             mod_name=string_dict(bot)["add_menu_module_button"],
             admin_keyboard=[InlineKeyboardButton(text=string_dict(bot)["create_button"],
                                                  callback_data="create_button"),
@@ -27,7 +29,7 @@ def help_strings(bot):
 
             admin_help=string_dict(bot)["add_menu_buttons_help"]
         ),
-        "surveys": dict(
+        surveys=dict(
             mod_name=string_dict(bot)["survey_mode_str"],
             admin_help=string_dict(bot)["survey_help_admin"],
 
@@ -39,7 +41,7 @@ def help_strings(bot):
             ]
 
         ),
-        "messages": dict(
+        messages=dict(
             mod_name=string_dict(bot)["send_message_module_str"],
             visitor_help=string_dict(bot)["send_message_user"],
             visitor_keyboard=[InlineKeyboardButton(text=string_dict(bot)["send_message_button_1"],
@@ -56,7 +58,7 @@ def help_strings(bot):
                                      callback_data="show_message_categories"),
             ]
         ),
-        "donation_payment": dict(
+        donation_payment=dict(
             mod_name=string_dict(bot)["pay_donation_mode_str"],
             admin_help=string_dict(bot)["pay_donation_str_admin"],
 
@@ -71,29 +73,36 @@ def help_strings(bot):
                 InlineKeyboardButton(text=string_dict(bot)["ask_donation_button"],
                                      callback_data="send_donation_to_users")],
             visitor_keyboard=[
-                InlineKeyboardButton(text=string_dict(bot)["donate_button"], callback_data="pay_donation")],
-
+                InlineKeyboardButton(text=string_dict(bot)["donate_button"], callback_data="pay_donation")]
         ),
-        "polls": dict(
+
+        polls=dict(
             admin_keyboard=[
                 InlineKeyboardButton(text=string_dict(bot)["create_button_str"], callback_data="create_poll"),
                 InlineKeyboardButton(text=string_dict(bot)["delete_button_str"], callback_data="delete_poll"),
                 InlineKeyboardButton(text=string_dict(bot)["send_button"], callback_data="send_poll"),
-                InlineKeyboardButton(text=string_dict(bot)["results_button"], callback_data="poll_results"),
-
-            ],
-
+                InlineKeyboardButton(text=string_dict(bot)["results_button"], callback_data="poll_results")],
             mod_name=string_dict(bot)["polls_module_str"],
+            admin_help=string_dict(bot)["polls_help_admin"]
+        ),
 
-            admin_help=string_dict(bot)["polls_help_admin"]),
-        "user_mode": dict(
+        user_mode=dict(
             mod_name=string_dict(bot)["user_mode_str"],
             admin_help=string_dict(bot)["user_mode_help_admin"],
             admin_keyboard=[
                 InlineKeyboardButton(text=string_dict(bot)["user_mode_str"], callback_data="turn_user_mode_on")]
+        ),
 
+        users=dict(
+            mod_name=string_dict(bot)["users_module"],
+            admin_help=string_dict(bot)["users_help_admin"],
+            admin_keyboard=[
+                InlineKeyboardButton(text=string_dict(bot)["show_user_categories_button"],
+                                     callback_data="show_user_categories"),
+                InlineKeyboardButton(text=string_dict(bot)["send_user_category_question_button"],
+                                     callback_data="send_user_category_question")]
         )
-    }
+    )
 
     return help_dict
 
@@ -109,7 +118,8 @@ def helpable_dict(bot):
                         "✉️ Messages": "messages",
                         "Polls": "polls",
                         "User view": "user_mode",
-                        "Channels": "channels"},
+                        "Channels": "channels",
+                        "Users": "users"},
         ADMIN_USER_MODE={"💰 Manage payments": "donation_payment",
                          "✉️ Messages": "messages",
                          "User view": "user_mode"},
@@ -126,9 +136,10 @@ def helpable_dict(bot):
                             "✉️ Сообщения": "messages",
                             "Опросы": "polls",
                             "Режим юзера": "user_mode",
-                            "Каналы": "channels"},
+                            "Каналы": "channels",
+                            "Пользователи": "users"},
             ADMIN_USER_MODE={
-                             "Режим админа": "user_mode"},
+                "Режим админа": "user_mode"},
             VISITOR_HELPABLE={}
 
         ),

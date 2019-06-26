@@ -2,7 +2,9 @@
 # # -*- coding: utf-8 -*-
 import datetime
 import logging
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
+import random
+
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import (MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
 from database import users_messages_to_admin_table, chats_table, categories_table, user_categories_table
@@ -105,7 +107,7 @@ class SendMessageToAdmin(object):  # TODO save messages that contain files
         bot.send_message(update.callback_query.message.chat.id,
                          string_dict(bot)["send_message_12"], reply_markup=reply_markup)
         categories = categories_table.find()
-        if len(categories) > 1:
+        if categories.count() > 0:
             bot.send_message(update.callback_query.message.chat.id,
                              string_dict(bot)["send_message_13"],
                              reply_markup=ReplyKeyboardMarkup([[
@@ -117,17 +119,24 @@ class SendMessageToAdmin(object):  # TODO save messages that contain files
         return TOPIC
 
     def send_topic(self, bot, update, user_data):
+        bot.send_message(update.message.chat.id,
+                         random.choice(string_dict(bot)["polls_affirmations"]), reply_markup=ReplyKeyboardRemove())
         user_data["topic"] = update.message.text
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                              callback_data="cancel_send_message")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
-        bot.send_message(update.callback_query.message.chat.id,
+        bot.send_message(update.message.chat.id,
                          string_dict(bot)["send_message_1"], reply_markup=reply_markup)
+        user_data["user_full_name"] = update.message.from_user.full_name
+        user_data["user_id"] = update.message.from_user.id
+        user_data["chat_id"] = update.message.chat_id
         return MESSAGE
 
     def received_message(self, bot, update, user_data):
+        if "content" not in user_data:
+            user_data["content"] = []
         if update.message.text:
             user_data["content"].append({"text": update.message.text})
 
@@ -176,10 +185,10 @@ class SendMessageToAdmin(object):  # TODO save messages that contain files
                          reply_markup=final_reply_markup)
         logger.info("Admin {} on bot {}:{} sent a message to the users".format(
             update.effective_user.first_name, bot.first_name, bot.id))
-        users_messages_to_admin_table.insert({"user_full_name": update.message.from_user.full_name,
-                                              "chat_id": update.message.chat_id,
-                                              "user_id": update.message.from_user.id,
-                                              "message_id": update.message.message_id,
+        users_messages_to_admin_table.insert({"user_full_name": user_data["user_full_name"],
+                                              "chat_id": user_data["chat_id"],
+                                              "user_id": user_data["user_id"],
+                                              "message_id": update.callback_query.message.message_id,
                                               "content": user_data["content"],
                                               "timestamp": datetime.datetime.now(),
                                               "topic": user_data["topic"],
@@ -188,7 +197,6 @@ class SendMessageToAdmin(object):  # TODO save messages that contain files
         return ConversationHandler.END
 
     def back(self, bot, update):
-        print("TESTteswts")
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         get_help(bot, update)
@@ -206,20 +214,20 @@ class SendMessageToUsers(object):
                            message_id=update.callback_query.message.message_id)
 
         categories = user_categories_table.find()
-        if len(categories)>0:
+        if categories.count()>0:
             bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(bot)["send_message_3"],
+                             string_dict(bot)["back_text"],
                              reply_markup=reply_markup)
-            categories_list = ["All"]+[x["user_category"] for x in categories]
+            categories_list = ["All"]+[x["category"] for x in categories]
             category_markup = ReplyKeyboardMarkup([categories_list])
 
             bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(bot)["send_message_4"],
+                             string_dict(bot)["send_message_1_1"],
                              reply_markup=category_markup)
             return CHOOSE_CATEGORY
         else:
             bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(bot)["send_message_5"])
+                             string_dict(bot)["send_message_4"])
             return MESSAGE_TO_USERS
 
     def choose_question(self, bot, update, user_data):
@@ -228,7 +236,10 @@ class SendMessageToUsers(object):
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                              callback_data="cancel_send_message")])
         reply_markup = InlineKeyboardMarkup(buttons)
-        bot.send_message(update.callback_query.message.chat.id,
+        bot.send_message(update.message.chat.id,
+                         "Cool",
+                         reply_markup=ReplyKeyboardRemove())
+        bot.send_message(update.message.chat.id,
                          string_dict(bot)["send_message_1"],
                          reply_markup=reply_markup)
         return MESSAGE_TO_USERS
@@ -320,7 +331,9 @@ class AnswerToMessage(object):
         reply_markup = InlineKeyboardMarkup(
             buttons)
         user_data["message_id"] = update.callback_query.data.replace("answer_to_message_", "")
-        user_data["chat_id"] = users_messages_to_admin_table.find_one({"message_id": user_data["message_id"]})["chat_id"]
+        user_data["chat_id"] = users_messages_to_admin_table.find_one(
+            {"message_id": int(user_data["message_id"])})["chat_id"]
+
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         bot.send_message(update.callback_query.message.chat.id,
@@ -388,10 +401,10 @@ class AnswerToMessage(object):
                          string_dict(bot)["send_message_5"],
                          reply_markup=final_reply_markup)
         ask_if_markup = InlineKeyboardMarkup(
-             [InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
-                                   callback_data="delete_message_" +
+             [[InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
+                                    callback_data="delete_message_" +
                                                  str(user_data["message_id"]))
-             ]
+             ]]
         )
         bot.send_message(update.callback_query.message.chat_id,
                          string_dict(bot)["send_message_6"],
@@ -463,9 +476,9 @@ class SeeMessageToAdmin(object):
             for message in messages:
                 if message["timestamp"] + datetime.timedelta(days=14) > datetime.datetime.now():
                     bot.send_message(update.callback_query.message.chat.id,
-                                     "User's name: {}, \nTimestamp: {}\nTopic {}".format(
+                                     "User's name: {}, \n\nTime: {}\n\nTopic {}".format(
                                          message["user_full_name"],
-                                         message["timestamp"],
+                                         message["timestamp"].strftime('%d, %b %Y, %H:%M'),
                                          message["topic"]
                                      ),
                                      reply_markup=InlineKeyboardMarkup(
@@ -483,9 +496,8 @@ class SeeMessageToAdmin(object):
 
     def view_message(self, bot, update):
         query = update.callback_query
-        message = users_messages_to_admin_table.find({"bot_id": bot.id,
-                                                      "message_id": query.data.replace("view_message_", "")})
-
+        message = users_messages_to_admin_table.find_one({"bot_id": bot.id,
+                                                          "message_id": int(query.data.replace("view_message_", ""))})
         for content_dict in message["content"]:
             if "text" in content_dict:
                 query.message.reply_text(text=content_dict["text"])
@@ -508,12 +520,18 @@ class SeeMessageToAdmin(object):
                          reply_markup=InlineKeyboardMarkup(
                              [[InlineKeyboardButton(text=string_dict(bot)["answer_button_str"],
                                                     callback_data="answer_to_message_" +
-                                                                  str(message["chat_id"]))],
+                                                                  str(message["message_id"]))],
                               [InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
                                                     callback_data="delete_message_" +
-                                                                  str(message["message_id"]))]
+                                                                  str(message["message_id"]))],
+
                               ]
                          ))
+        bot.send_message(update.callback_query.message.chat.id,
+                         string_dict(bot)["back_text"],
+                         reply_markup=InlineKeyboardMarkup(
+                             [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                    callback_data="help_back")]]))
         return ConversationHandler.END
 
 
@@ -526,13 +544,14 @@ SEND_MESSAGE_TO_ADMIN_HANDLER = ConversationHandler(
                   ],
 
     states={
-        MESSAGE: [MessageHandler(Filters.all, SendMessageToAdmin().received_message), ],
+        MESSAGE: [MessageHandler(Filters.all, SendMessageToAdmin().received_message, pass_user_data=True), ],
+        TOPIC: [MessageHandler(Filters.all, SendMessageToAdmin().send_topic, pass_user_data=True), ]
 
     },
 
     fallbacks=[
         CallbackQueryHandler(callback=SendMessageToAdmin().send_message_finish,
-                             pattern=r"send_message_finish"),
+                             pattern=r"send_message_finish", pass_user_data=True),
         CallbackQueryHandler(callback=SendMessageToAdmin().back,
                              pattern=r"cancel_send_message"),
     ]
@@ -542,8 +561,8 @@ SEND_MESSAGE_TO_USERS_HANDLER = ConversationHandler(
                                        callback=SendMessageToUsers().send_message)],
 
     states={
-        CHOOSE_CATEGORY: [MessageHandler(Filters.all, SendMessageToUsers().choose_question)],
-        MESSAGE_TO_USERS: [MessageHandler(Filters.all, SendMessageToUsers().received_message)],
+        CHOOSE_CATEGORY: [MessageHandler(Filters.all, SendMessageToUsers().choose_question, pass_user_data=True)],
+        MESSAGE_TO_USERS: [MessageHandler(Filters.all, SendMessageToUsers().received_message, pass_user_data=True)],
 
     },
 
@@ -575,7 +594,7 @@ ADD_MESSAGE_CATEGORY_HANDLER = ConversationHandler(
 )
 
 SEE_MESSAGES_HANDLER = CallbackQueryHandler(pattern="inbox_message", callback=SeeMessageToAdmin().see_messages)
-SEE_MESSAGES_FINISH_HANDLER = CallbackQueryHandler(pattern="inbox_message_view",
+SEE_MESSAGES_FINISH_HANDLER = CallbackQueryHandler(pattern="view_message_",
                                                    callback=SeeMessageToAdmin().view_message)
 
 ANSWER_TO_MESSAGE_HANDLER = ConversationHandler(
