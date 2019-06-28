@@ -107,7 +107,8 @@ class UsersChooseCategory(object):
         user_data = users_table.find_one({"user_id": update.callback_query.from_user.id})
         if "categories" not in user_data:
             user_data["categories"] = []
-        user_data["categories"].append(new_category)
+        if new_category not in user_data["categories"]:
+            user_data["categories"].append(new_category)
         users_table.update_one(
             {"user_id": update.callback_query.from_user.id},
             {"$set": user_data}
@@ -137,9 +138,10 @@ class SendQuestionToUsers(object):
         choose_markup = InlineKeyboardMarkup(
             buttons)
         for chat in chats:
+            print(chat["chat_id"])
             # if chat["chat_id"] != update.callback_query.message.chat.id:
             if update.callback_query.message.text:
-                bot.send_message(update.callback_query.message.chat.id,
+                bot.send_message(chat["chat_id"],
                                  string_dict(bot)["send_category_question_3"],
                                  reply_markup=choose_markup)
         buttons = list()

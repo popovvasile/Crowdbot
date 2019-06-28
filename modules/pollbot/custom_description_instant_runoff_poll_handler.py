@@ -1,24 +1,15 @@
-import ast
-
 from .instant_runoff_poll_handler import InstantRunoffPollHandler
 from .custom_description_poll_handler import CustomDescriptionHandler
 
 
-class CustomDescriptionInstantRunoffPollHandler(CustomDescriptionHandler, InstantRunoffPollHandler):
+class CustomDescriptionInstantRunoffPollHandler(InstantRunoffPollHandler, CustomDescriptionHandler):
     def __init__(self):
         super(CustomDescriptionInstantRunoffPollHandler, self).__init__()
-        self.name = "Order of preference with custom description"
-        self.desc = "Order of preference with custom description"
+        self.name = "Order of preference poll with custom description"
+        self.desc = "Order of preference poll, but with a custom description"
 
     def evaluation(self, poll):
-        print(poll)
         votes = poll.get('votes', {})
-        if type(poll["options"]) is str:
-            poll["options"] = ast.literal_eval(poll["options"])
-        if type(poll["meta"]) is str:
-            poll["meta"] = ast.literal_eval(poll["meta"])
-        if type(votes) is str:
-            votes = ast.literal_eval(votes)
         candidates = [opt['index'] for opt in poll['options']]
 
         explanation = "Click on only those options that work for you, in the order of your preference."

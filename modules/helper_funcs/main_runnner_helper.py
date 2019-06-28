@@ -68,17 +68,20 @@ def error_callback(bot, update, error):
                                callback_data="error_back")]])
     print(error)
     try:
+        if update.effective_message.chat_id > 0:
+            if hasattr(update, 'callback_query'):
+                bot.send_message(update.effective_message.chat_id,
+                                 "An error accured =( Please proceed to the main menu",
+                                 reply_markup=back_buttons)
+            elif hasattr(update, 'message'):
+                bot.send_message(update.effective_message.chat.id,
+                                 "An error happened =( Please proceed to the main menu",
+                                 reply_markup=back_buttons)
 
-        if hasattr(update, 'callback_query'):
-            bot.send_message(update.callback_query.chat_instance,
-                             "An error accured =( Please proceed to the main menu",
-                             reply_markup=back_buttons)
-        elif hasattr(update, 'message'):
-            bot.send_message(update.message.chat.id,
-                             "An error happened =( Please proceed to the main menu",
-                             reply_markup=back_buttons)
+            return
+        else:
+            return
 
-        return
     except ConnectionError as err:
         print("ConnectionError")
         print(err)
@@ -102,7 +105,6 @@ def button_handler(bot: Bot, update: Update):
         button_info = custom_buttons_table.find_one(
             {"bot_id": bot.id, "button_lower": button_callback_data.replace("button_", "")}
         )
-        print(button_info)
         for content_dict in button_info["content"]:
             if "text" in content_dict:
                 query.message.reply_text(text=content_dict["text"])
@@ -257,7 +259,6 @@ def get_help(bot: Bot, update: Update):
     else:
         welcome_message = "Hello"
     if if_admin(bot=bot, update=update):
-        print(current_user_mode)
         if current_user_mode:
             if current_user_mode.get("user_mode") is True:
                 send_admin_user_mode(bot, chat.id, HELP_STRINGS.format(welcome_message))
@@ -298,7 +299,7 @@ class WelcomeBot(object):
                                                             str(txt.replace("/start ", ""))
                                                         ))]]
                              ))
-        if "pay_donation" in txt:
+        elif "pay_donation" in txt:
             bot.send_message(chat_id=chat_id, text=string_dict(bot)["pay_donation_start"],
                              reply_markup=InlineKeyboardMarkup(
                                  [[InlineKeyboardButton(text=string_dict(bot)["donation_button"],

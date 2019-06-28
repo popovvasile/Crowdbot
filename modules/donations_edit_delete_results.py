@@ -50,7 +50,6 @@ class EditPaymentHandler(object):
 
         return "\n".join(facts).join(['\n', '\n'])
 
-    
     def start_donation(self, bot, update, user_data):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id, )
@@ -122,7 +121,6 @@ class EditPaymentHandler(object):
         user_data["action"] = txt
         return EDIT_FINISH
 
-    
     def handle_edit_finish(self, bot, update, user_data):  # TODO double check
         finish_buttons = list()
         finish_buttons.append([InlineKeyboardButton(text=string_dict(bot)["menu_button"],
@@ -150,7 +148,6 @@ class EditPaymentHandler(object):
 
         return ConversationHandler.END
 
-    
     def handle_finish_delete(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
         if txt == string_dict(bot)["donations_edit_str_3"]:
@@ -167,7 +164,8 @@ class EditPaymentHandler(object):
             chat_id, txt = initiate_chat_id(update)
             if txt == string_dict(bot)["delete_donation_button"]:
                 user_data['action'] = txt
-                reply_keyboard = [[string_dict(bot)["donations_edit_str_3"]], [string_dict(bot)["donations_edit_str_4"]]]
+                reply_keyboard = [[string_dict(bot)["donations_edit_str_3"]],
+                                  [string_dict(bot)["donations_edit_str_4"]]]
                 update.message.reply_text(
                     string_dict(bot)["donations_edit_str_5"],
                     reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
@@ -177,7 +175,6 @@ class EditPaymentHandler(object):
                 user_data['action'] = txt
                 return EDIT_PAYMENT
 
-    
     def change_donation_token(self, bot, update, user_data):
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
@@ -189,7 +186,6 @@ class EditPaymentHandler(object):
         )
         return TYPING_TOKEN
 
-    
     def change_donation_token_finish(self, bot, update, user_data):
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],

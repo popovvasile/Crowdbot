@@ -100,13 +100,12 @@ class AddCommands(object):
         if update.message.video_note:
             video_note_file = update.message.audio.get_file().file_id
             general_list.append({"video_file": video_note_file})
-
+        update.message.reply_text(string_dict(bot)["back_text"], reply_markup=reply_markup)
         done_buttons = [[InlineKeyboardButton(text=string_dict(bot)["done_button"], callback_data="DONE")]]
         done_reply_markup = InlineKeyboardMarkup(
             done_buttons)
         update.message.reply_text(string_dict(bot)["add_menu_buttons_str_4"],
                                   reply_markup=done_reply_markup)
-        update.message.reply_text(string_dict(bot)["back_text"], reply_markup=reply_markup)
         user_data["content"]=general_list
         return TYPING_DESCRIPTION
 
@@ -144,11 +143,10 @@ class AddCommands(object):
             button_list = [button['button'] for button in button_list_of_dicts]
             reply_keyboard = [button_list]
             bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(bot)["add_menu_buttons_str_6"],  # TODO remove this message later
-                             reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
-            bot.send_message(update.callback_query.message.chat.id,
                              string_dict(bot)["back_text"], reply_markup=finish_markup)
-
+            bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(bot)["add_menu_buttons_str_6"],
+                             reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
             return TYPING_TO_DELETE_BUTTON
         else:
             reply_buttons = [[InlineKeyboardButton(text=string_dict(bot)["create_button"],

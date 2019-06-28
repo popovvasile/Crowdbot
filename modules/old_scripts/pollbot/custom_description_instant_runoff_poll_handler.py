@@ -12,7 +12,7 @@ class CustomDescriptionInstantRunoffPollHandler(InstantRunoffPollHandler, Custom
         votes = poll.get('votes', {})
         candidates = [opt['index'] for opt in poll['options']]
 
-        explanation = "Click on only those options that work for you, in the order of your preference."
+        explanation = "Order of preference"
 
         if votes:
             elected = self.run_election(candidates, list(votes.values()))

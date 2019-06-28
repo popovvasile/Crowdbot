@@ -41,7 +41,7 @@ def facts_to_str(user_data):
 
 
 class AnswerSurveys(object):
-    
+
     def start_answering(self, bot, update, user_data):  # TODO add the "skip" button
         buttons = [[InlineKeyboardButton(text=string_dict(bot)["cancel_button_survey"],
                                          callback_data="cancel_survey_answering")]]
@@ -82,14 +82,17 @@ class AnswerSurveys(object):
         })
         answer = update.message.text
         user_id = update.message.from_user.id
-        if not "answers" in survey:
-            survey["answers"] = []
-        survey["answers"].append({"user_id": user_id,
-                                  "question_id": int(user_data["question_id"]),
-                                  "title": survey["title"],
-                                  "answer": answer})
-        surveys_table.update({"title": survey["title"]}, survey)
+        if not "answers" in user_data:
+            user_data["answers"] = list()
+        user_data["answers"].append({"user_id": user_id,
+                        "question_id": int(user_data["question_id"]),
+                        "title": survey["title"],
+                        "answer": answer})
+
         if user_data["question_id"] > len(survey["questions"]) - 1:
+            survey["answers"] = user_data["answers"]
+            surveys_table.update({"title": survey["title"]}, survey)
+
             to_send_text = ""
             users_answers = []
             for answer in survey["answers"]:
@@ -97,7 +100,7 @@ class AnswerSurveys(object):
                     users_answers.append(answer)
                     question = survey["questions"][int(answer["question_id"]) - 1]["text"]
                     to_send_text += string_dict(bot)["answer_survey_str_2"].format(question, answer['answer'])
-
+            user_data.clear()
             bot.send_message(update.message.chat_id,
                              string_dict(bot)["answer_survey_str_3"] + "\n" +
                              string_dict(bot)["answer_survey_str_4"] + "\n" + to_send_text)
@@ -114,7 +117,7 @@ class AnswerSurveys(object):
             user_data["last_question"] = question
 
             return ANSWERING
-    
+
     def done(self, bot, update, user_data):
         update.message.reply_text(string_dict(bot)["answer_survey_str_3"] + "{}" +
                                   string_dict(bot)["answer_survey_str_4"].format(facts_to_str(user_data)))
@@ -149,4 +152,3 @@ ANSWER_SURVEY_HANDLER = ConversationHandler(
         MessageHandler(filters=Filters.command, callback=AnswerSurveys().back),
     ]
 )
-

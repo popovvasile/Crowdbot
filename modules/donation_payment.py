@@ -136,12 +136,15 @@ class DonationBot(object):
     def successful_payment_callback(self, bot, update):
         # TODO add counting of donations and prepare for callback_query
         # do something after successful receive of donation?
+        buttons=[[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                callback_data="help_back")]]
+        markup = InlineKeyboardMarkup(buttons)
         user_data = dict()
         user_data["status"] = "Paid"
         user_data['timestamp_paid'] = datetime.datetime.now()
         user_data["amount"] = update.message.successful_payment.total_amount
         donations_table.insert_one(user_data)
-        update.message.reply_text("Thank you for your donation!")
+        update.message.reply_text("Thank you for your donation!", markup=markup)
         user_data.clear()
         return ConversationHandler.END
 

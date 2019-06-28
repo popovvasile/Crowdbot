@@ -1,6 +1,4 @@
-import ast
-
-from modules.old_scripts.basic_poll_handler import BasicPoll
+from .basic_poll_handler import BasicPoll
 
 
 class MultipleOptionsHandler(BasicPoll):
@@ -27,17 +25,12 @@ class MultipleOptionsHandler(BasicPoll):
 
     def evaluation(self, poll):
         message = ""
-        if type(poll['options']) is str:
-            poll['options'] = ast.literal_eval(poll['options'])
-
         for option in poll['options']:
             message += "\n"
             message += "{}: {}".format(option['text'], self.num_votes_on_option(poll, option['index']))
         return message
 
     def handle_vote(self, votes, user, name, callback_data):
-        # print(callback_data)
-        votes[user] = []
         old_vote = None
         if user in votes:
             old_vote = votes.pop(user)

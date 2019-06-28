@@ -4,7 +4,8 @@ import logging
 import telegram.ext as tg
 from telegram.ext import CommandHandler, CallbackQueryHandler,RegexHandler
 
-from modules.channels_polls_surveys_donate import SEND_SURVEY_TO_CHANNEL_HANDLER, SEND_POLL_TO_CHANNEL_HANDLER
+from modules.channels_polls_surveys_donate import SEND_SURVEY_TO_CHANNEL_HANDLER, SEND_POLL_TO_CHANNEL_HANDLER, \
+    SEND_DONATION_TO_CHANNEL_HANDLER
 from modules.menu_description import EDIT_BOT_DESCRIPTION_HANDLER
 from modules.helper_funcs.admin_login import ADMIN_AUTHENTICATION_HANDLER
 from modules.menu_buttons import BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER
@@ -111,6 +112,7 @@ def main(token):
     dispatcher.add_handler(SEND_POST_HANDLER)
     dispatcher.add_handler(SEND_POLL_TO_CHANNEL_HANDLER)
     dispatcher.add_handler(SEND_SURVEY_TO_CHANNEL_HANDLER)
+    dispatcher.add_handler(SEND_DONATION_TO_CHANNEL_HANDLER)
     LOGGER.info("Using long polling.")
     # updater.start_webhook(listen='0.0.0.0',
     #                       port=8443,

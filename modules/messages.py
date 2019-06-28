@@ -94,7 +94,7 @@ class DeleteMessageCategory(object):
         return ConversationHandler.END
 
 
-class SendMessageToAdmin(object):  # TODO save messages that contain files
+class SendMessageToAdmin(object):
 
     def send_message(self, bot, update):
         buttons = list()
@@ -115,7 +115,7 @@ class SendMessageToAdmin(object):  # TODO save messages that contain files
                              ]))
         else:
             bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(bot)["send_message_13"])
+                             string_dict(bot)["send_message_1"])
         return TOPIC
 
     def send_topic(self, bot, update, user_data):
@@ -129,12 +129,13 @@ class SendMessageToAdmin(object):  # TODO save messages that contain files
             buttons)
         bot.send_message(update.message.chat.id,
                          string_dict(bot)["send_message_1"], reply_markup=reply_markup)
-        user_data["user_full_name"] = update.message.from_user.full_name
-        user_data["user_id"] = update.message.from_user.id
-        user_data["chat_id"] = update.message.chat_id
+
         return MESSAGE
 
     def received_message(self, bot, update, user_data):
+        user_data["user_full_name"] = update.message.from_user.full_name
+        user_data["user_id"] = update.message.from_user.id
+        user_data["chat_id"] = update.message.chat_id
         if "content" not in user_data:
             user_data["content"] = []
         if update.message.text:
@@ -185,15 +186,10 @@ class SendMessageToAdmin(object):  # TODO save messages that contain files
                          reply_markup=final_reply_markup)
         logger.info("Admin {} on bot {}:{} sent a message to the users".format(
             update.effective_user.first_name, bot.first_name, bot.id))
-        users_messages_to_admin_table.insert({"user_full_name": user_data["user_full_name"],
-                                              "chat_id": user_data["chat_id"],
-                                              "user_id": user_data["user_id"],
-                                              "message_id": update.callback_query.message.message_id,
-                                              "content": user_data["content"],
-                                              "timestamp": datetime.datetime.now(),
-                                              "topic": user_data["topic"],
-                                              "bot_id": bot.id}
-                                             )
+        user_data["timestamp"] = datetime.datetime.now()
+        user_data["message_id"] = update.callback_query.message.message_id
+        user_data["bot_id"] = bot.id
+        users_messages_to_admin_table.insert(user_data)
         return ConversationHandler.END
 
     def back(self, bot, update):
@@ -214,11 +210,11 @@ class SendMessageToUsers(object):
                            message_id=update.callback_query.message.message_id)
 
         categories = user_categories_table.find()
-        if categories.count()>0:
+        if categories.count() > 0:
             bot.send_message(update.callback_query.message.chat.id,
                              string_dict(bot)["back_text"],
                              reply_markup=reply_markup)
-            categories_list = ["All"]+[x["category"] for x in categories]
+            categories_list = ["All"] + [x["category"] for x in categories]
             category_markup = ReplyKeyboardMarkup([categories_list])
 
             bot.send_message(update.callback_query.message.chat.id,
@@ -401,10 +397,10 @@ class AnswerToMessage(object):
                          string_dict(bot)["send_message_5"],
                          reply_markup=final_reply_markup)
         ask_if_markup = InlineKeyboardMarkup(
-             [[InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
-                                    callback_data="delete_message_" +
+            [[InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
+                                   callback_data="delete_message_" +
                                                  str(user_data["message_id"]))
-             ]]
+              ]]
         )
         bot.send_message(update.callback_query.message.chat_id,
                          string_dict(bot)["send_message_6"],

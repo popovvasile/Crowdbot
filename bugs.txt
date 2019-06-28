@@ -1,10 +1,7 @@
 Вася
-# TODO fix message category
-# TODO fix users category
-# TODO fix send donation to channel
-# TODO fix payments
 # TODO fix polls
 # TODO think about an example chatbot (TV8) with CommentBot
+
 
 
 Юра

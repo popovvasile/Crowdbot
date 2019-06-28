@@ -41,23 +41,22 @@ CHOOSE_CHANNEL_TO_SEND_SURVEY, CHOOSE_SURVEY_TO_SEND = range(2)
 
 
 def delete_messages(bot, user_data, update):
-    # print(update.effective_message.message_id)
-    # if update.callback_query:
-    #     print(update.callback_query.data)
-    # else:
-    #     print(update.message.text)
-    bot.delete_message(update.effective_chat.id, update.effective_message.message_id)
-    if 'to_delete' in user_data:
-        for msg in user_data['to_delete']:
-            try:
-                if msg.message_id != update.effective_message.message_id:
-                    bot.delete_message(update.effective_chat.id, msg.message_id)
-            except TelegramError:
-                # print('except in delete_message---> {}, {}'.format(e, msg_id))
-                continue
-        user_data['to_delete'] = list()
-    else:
-        user_data['to_delete'] = list()
+    try:
+        bot.delete_message(update.effective_message.chat.id, update.effective_message.message_id)
+
+        if 'to_delete' in user_data:
+            for msg in user_data['to_delete']:
+                try:
+                    if msg.message_id != update.effective_message.message_id:
+                        bot.delete_message(update.effective_message.chat.id, msg.message_id)
+                except TelegramError:
+                    # print('except in delete_message---> {}, {}'.format(e, msg_id))
+                    continue
+            user_data['to_delete'] = list()
+        else:
+            user_data['to_delete'] = list()
+    except:
+        pass
 
 
 # check that bot is admin and can send messages to the channel
@@ -186,17 +185,20 @@ class Channels(object):
     # when user click on channel name in 'My channels' menu
     def channel(self, bot, update):
         one_channel_keyboard = \
-            InlineKeyboardMarkup([[InlineKeyboardButton(string_dict(bot)["remove_button"],
-                                                        callback_data='remove_channel_{}'.format(
+            InlineKeyboardMarkup([[InlineKeyboardButton(string_dict(bot)["send_donation_to_channel"],
+                                                        callback_data='send_donation_to_channel_{}'.format(
                                                             update.message.text))],
                                   [InlineKeyboardButton(string_dict(bot)["send_survey_to_channel"],
                                                         callback_data="post_survey_to_channel_{}".format(
-                                                            update.message.text)),
-                                   InlineKeyboardButton(string_dict(bot)["send_poll_to_channel"],
+                                                            update.message.text))],
+                                  [InlineKeyboardButton(string_dict(bot)["send_poll_to_channel"],
                                                         callback_data="post_poll_to_channel_{}".format(
                                                             update.message.text))],
                                   [InlineKeyboardButton(string_dict(bot)["send_post_to_channel"],
                                                         callback_data='channel_write_post_{}'.format(
+                                                            update.message.text))],
+                                  [InlineKeyboardButton(string_dict(bot)["remove_button"],
+                                                        callback_data='remove_channel_{}'.format(
                                                             update.message.text))],
                                   [InlineKeyboardButton(string_dict(bot)["back_button"],
                                                         callback_data='help_back')]])
@@ -270,8 +272,8 @@ class Channels(object):
 
 class SendPost(object):
     def send_message(self, bot, update, user_data):
-        bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+        # bot.delete_message(chat_id=update.callback_query.message.chat_id,
+        #                    message_id=update.callback_query.message.message_id)
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_send_post")])
         reply_markup = InlineKeyboardMarkup(
@@ -279,20 +281,20 @@ class SendPost(object):
         channel_username = update.callback_query.data.replace("channel_write_post", "")
         channel = channels_table.find_one({'bot_id': bot.id,
                                            'channel_username': channel_username})
-        if channel:
-            delete_messages(bot, user_data, update)
-            user_data['channel'] = update.message.text
-            user_data['to_delete'].append(
-                bot.send_message(update.callback_query.message.chat.id,
-                                 string_dict(bot)["send_post"].format(channel_username),
-                                 reply_markup=reply_markup))
-            return MESSAGE_TO_USERS
-        else:
-            return Channels().make_channels_layout(bot, update, CHOOSE_TO_SEND_POST,
-                                                   string_dict(bot)["choose_channel_to_post"], user_data)
+        print(update.callback_query.data)
+        # if channel:
+        delete_messages(bot, user_data, update)
+        user_data['channel'] = update.callback_query.data.replace("channel_write_post_", "")
+        user_data['to_delete'].append(
+            bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(bot)["send_post"].format(channel_username),
+                             reply_markup=reply_markup))
+        return MESSAGE_TO_USERS
+        # else:
+        #     return Channels().make_channels_layout(bot, update, CHOOSE_TO_SEND_POST,
+        #                                            string_dict(bot)["choose_channel_to_post"], user_data)
 
     def received_message(self, bot, update, user_data):
-        delete_messages(bot, user_data, update)
         if update.message.text:
             bot.send_message(user_data['channel'], update.message.text)
 
@@ -375,7 +377,9 @@ MY_CHANNELS_HANDLER = ConversationHandler(
         MY_CHANNELS: [RegexHandler(r"@", Channels().channel)]
     },
     fallbacks=[CallbackQueryHandler(callback=Channels().back, pattern=r"cancel_my_channels", pass_user_data=True),
-               RegexHandler('^Back$', Channels().back, pass_user_data=True)]
+               RegexHandler('^Back$', Channels().back, pass_user_data=True),
+               CallbackQueryHandler(callback=SendPost().back, pattern=r"error_back"),
+               ]
 )
 
 ADD_CHANNEL_HANDLER = ConversationHandler(
@@ -383,7 +387,9 @@ ADD_CHANNEL_HANDLER = ConversationHandler(
     states={
         ADD_CHANNEL: [MessageHandler(Filters.text, callback=Channels().confirm_add, pass_user_data=True)]
     },
-    fallbacks=[CallbackQueryHandler(callback=Channels().back, pattern=r'cancel_add', pass_user_data=True), ]
+    fallbacks=[CallbackQueryHandler(callback=Channels().back, pattern=r'cancel_add', pass_user_data=True),
+               CallbackQueryHandler(callback=SendPost().back, pattern=r"error_back"),
+               ]
 )
 
 REMOVE_CHANNEL_HANDLER = CallbackQueryHandler(Channels().finish_remove,
@@ -400,5 +406,7 @@ SEND_POST_HANDLER = ConversationHandler(
                                                 pass_user_data=True)]
     },
     fallbacks=[CallbackQueryHandler(callback=SendPost().send_post_finish,
-                                    pattern=r"send_post_finish", pass_user_data=True)]
+                                    pattern=r"send_post_finish", pass_user_data=True),
+               CallbackQueryHandler(callback=SendPost().back, pattern=r"error_back"),
+               ]
 )
