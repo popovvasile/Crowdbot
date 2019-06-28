@@ -359,7 +359,8 @@ class PollBot(object):
             vote_instances.append(instance["votes"])
             print(instance["votes"])
 
-        if len(vote_instances) > 0:  # TODO this makes no sense at all- we should have the posibility to add toghether the results of different instaces of the polls
+        if len(vote_instances) > 0:
+            # TODO this makes no sense at all- we should have the posibility to add toghether the results of different instaces of the polls
             vote_instances[0] = ast.literal_eval(vote_instances[0])
             vote_instances[0].update(poll["votes"])
             poll["votes"] = vote_instances[0]

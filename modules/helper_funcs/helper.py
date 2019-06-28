@@ -142,11 +142,14 @@ def send_admin_user_mode(bot, chat_id, text, keyboard=None):
     buttons = [InlineKeyboardButton(string_dict(bot)["send_message_1"], callback_data="send_message_to_admin"),
                InlineKeyboardButton(string_dict(bot)["pay_donation_mode_str"], callback_data='pay_donation')]
     buttons = buttons + [InlineKeyboardButton(button["button"],
-                                     callback_data="button_{}".format(button["button"].replace(" ", "").lower()))
-                for button in custom_buttons_table.find({"bot_id": bot.id})]
+                                              callback_data="button_{}".format(
+                                                  button["button"].replace(" ", "").lower()))
+                         for button in custom_buttons_table.find({"bot_id": bot.id})]
     buttons = buttons + [InlineKeyboardButton(text="ADMIN MODE", callback_data="turn_user_mode_off")]
-    pairs = list(zip(buttons[::2], buttons[1::2]))
-
+    if len(buttons) % 2 == 0:
+        pairs = list(zip(buttons[::2], buttons[1::2]))
+    else:
+        pairs = list(zip(buttons[::2], buttons[1::2])) + [(buttons[-1],)]
     bot.send_message(chat_id=chat_id,
                      text=text,
                      parse_mode=ParseMode.MARKDOWN,

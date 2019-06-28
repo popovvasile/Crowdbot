@@ -49,15 +49,16 @@ string_dict_dict = {
         send_user_category_16="You can add a new category of the users or return to menu",
         send_user_category_14="What category do you want to create?",
         send_user_category_15="Great! Now you can ask your users if they belong to the categories mentioned above!",
+        send_user_category_17="User category has been deleted",
         send_category_question_3="What category do you associate with?",
         send_category_question_4="The category question has been sent to your users",
         users_help_admin="You can ask your users what category they belong to or create a new category",
         user_chooses_category="Thank you for your vote!",
 
         user_mode_help_admin="""
-Press “Accept" to turn on the bot in the user mode. 
-Press “Back" to return to the normal mode 
-""",
+    Press “Accept" to turn on the bot in the user mode. 
+    Press “Back" to return to the normal mode 
+    """,
         user_mode_on_finish="✅ Ready, now look at the bot in user mode",
         user_mode_off_finish="🔚 User mode is off",
 
@@ -75,9 +76,9 @@ Press “Back" to return to the normal mode
         promotion_send_message_5="✅The message is sent",
         promotion_send_message_6="Forever alone 😉 ",
         promotion_send_message_admin="""
-✉ Messages 📧
-Send a message to users and get feedback
-""",
+    ✉ Messages 📧
+    Send a message to users and get feedback
+    """,
         promotion_send_message_user="""
 Here you can order promotion from this chatbot and their channels
 """,
@@ -112,13 +113,13 @@ Here you can order promotion from this chatbot and their channels
         send_message_5="✅The message is sent",
         send_message_6="Forever alone 😉 ",
         send_message_admin="""
-✉ Messages 📧
-Send a message to users and get feedback
+    ✉ Messages 📧
+    Send a message to users and get feedback
 
-""",
+    """,
         send_message_user="""
-Say Hello to the admin!
-""",
+    Say Hello to the admin!
+    """,
         send_donation_request_1="Tell everyone about the fundraising and how you will utilize the money\n" \
                                 "The 'Support project' button will be attached to the message'",
         send_donation_request_2="Write a new message and press '✅ Done",
@@ -153,7 +154,7 @@ Say Hello to the admin!
         edit_button="✏️ Edit the button",
         start_button="🏁 Start",
         main_survey_button="The main survey",
-        back_text="You can press '🔙 Back ' to return to the menu ",
+        back_text="Press '🔙 Back ' to return to the menu ",
         polls_affirmations=[
             "OK",
             "Cool",
@@ -182,25 +183,25 @@ Say Hello to the admin!
         polls_str_14="🗑 Choose a poll to delete",
         polls_str_15="Press '🔙 Back' to cancel",
         polls_str_16=""" You haven't created a survey yet. \n
-Click 'Create' or '🔙 Back'""",
+    Click 'Create' or '🔙 Back'""",
         polls_str_17="🗑 Poll with name {} removed from all chats.",
         polls_str_18="These are the results. You can create a new poll or return to menu",
         polls_help_admin="""
-❓ Polls ❓
+    ❓ Polls ❓
 
-""",
+    """,
         polls_module_str="Poll",
 
         pay_donation_str_admin="""
-💸 Payments 💰
+    💸 Payments 💰
 
 
-""",
+    """,
         pay_donation_mode_str="Make a payment",
         pay_donation_str_1="How much do you want to pay? Enter the amount. ❗️ Cents and pennies separated by commas.",
         pay_donation_str_2="The main currency of the administrator ❗️ {}",
         allow_donation_text="Press '💰 Create a payment'\n'\
-'or press '🔙 Back'",
+    'or press '🔙 Back'",
         pay_donation_str_4="Admin has not set up payments yet 🤷‍",
         pay_donation_str_5="Oops, you entered the wrong number. Try again.",
 
@@ -244,7 +245,7 @@ Click 'Create' or '🔙 Back'""",
         survey_str_7="This is a list of active surveys:",
         survey_str_8="Choose a survey to check 📊 results",
         survey_str_9=""" You haven't created a survey yet. \n
-Press "Create" or '🔙 Back'""",
+    Press "Create" or '🔙 Back'""",
         survey_str_10='The name of the user: {},\nQuestion: {}\nAnswer :{} \n\n',
         survey_str_11="The data you requested: \n {}",
         survey_str_12="Wait until someone answers. =/",
@@ -252,7 +253,7 @@ Press "Create" or '🔙 Back'""",
         survey_str_14="List of surveys:",
         survey_str_15="🗑 Choose a survey to delete ",
         survey_str_16="""You haven't created a survey yet. \n,
-Press "Create" or '🔙 Back'""",
+    Press "Create" or '🔙 Back'""",
         survey_str_17="🗑 Survey called '{}' removed",
         survey_str_18="List of active surveys:",
         survey_str_19="Choose the survey you want to send to users",
@@ -262,16 +263,16 @@ Press "Create" or '🔙 Back'""",
                       "networks and  online resource or invite your friends. Somebody will come along soon 🐣",
         survey_str_22="✅ The survey is sent.",
         survey_str_23="""You haven't done the survey yet.\n
-Press "Create" or '🔙 Back'""",
+    Press "Create" or '🔙 Back'""",
         survey_str_24="Survey has been deleted. You can create a new one or return to menu",
 
         create_donation_str_1="Test payment. Ignore it",
         create_donation_str_2="✏️ Write the name of the payment",
         create_donation_str_3="""How to get a token payment system:\n1st Step: Go to @botfather and enter /mybots.
-Choose your bot and press “Payments". Choose a provider. \nWe advise to use „Stripe“ because of low Acquiring
-comisson for European card. \n2nd Step: Authorize yourself in the chatbot of the chosen provider. Just follow
-instructions then you will get a token-access, that you should copy.\n3nd Step :Go back to your bot and create /newdonate.
-Insert the token: \n""",
+    Choose your bot and press “Payments". Choose a provider. \nWe advise to use „Stripe“ because of low Acquiring
+    comisson for European card. \n2nd Step: Authorize yourself in the chatbot of the chosen provider. Just follow
+    instructions then you will get a token-access, that you should copy.\n3nd Step :Go back to your bot and create /newdonate.
+    Insert the token: \n""",
         create_donation_str_4="✏️ Write the name of the payment",
         create_donation_str_5="Wrong token. Check it and send it again.",
         create_donation_str_6="Tell everyone about the fundraising and how you will utilize the money",
@@ -284,21 +285,21 @@ Insert the token: \n""",
         answer_survey_str_3="☺️ Thank you for answering my questions!\n",
         answer_survey_str_4="See you later!",
         survey_help_admin="""
-❓ Surveys ❓
-""",
+    ❓ Surveys ❓
+    """,
         survey_mode_str="Survey",
 
         edit_button_button="✏️ Edit a button",
         edit_menu_text="🤝 Change the greeting",
         add_menu_buttons_help="""
-🛠 Settings ⚙️
-""",
+    🛠 Settings ⚙️
+    """,
         add_menu_buttons_str_1="Write the name of the button or choose from the template.",
         add_menu_buttons_str_2='Send text, picture, document, video or music. ' \
                                '❗️ The text added to the description is not displayed in the button.',
         add_menu_buttons_str_3='A button with this name already exists. Think of another name.',
         add_menu_buttons_str_4="Great! Add something else.\n'\
-'or press '✅ Done'",
+    'or press '✅ Done'",
         add_menu_buttons_str_5='✅Done! The button will be available in the title menu \n {}',
         add_menu_buttons_str_6="🗑 Choose the button you want to delete ",
         add_menu_buttons_str_7="""Oops. You don't have buttons yet. Click "Create""",
@@ -356,6 +357,7 @@ Insert the token: \n""",
         send_user_category_16="You can add a new category of the users or return to menu",
         send_user_category_14="What category do you want to create?",
         send_user_category_15="Great! Now you can ask your users if they belong to the categories mentioned above!",
+        send_user_category_17="User category has been deleted",
 
         send_category_question_3="What category do you associate with?",
         send_category_question_4="The category question has been sent to your users",
@@ -391,16 +393,16 @@ Insert the token: \n""",
         send_message_2="Спасибо, голубь уже в пути 🕊!",
         send_message_3="Напиши сообщение юзерам\n",
         send_message_4="Напиши новое сообщение или нажми '✅ Готово'",
-        send_message_5="✅Сообщение отправлено",
-        send_message_6="😉 Полковнику никто не пишет 😉",
+        send_message_5="✅ Спасибо, голубь уже в пути 🕊 ",
+        send_message_6="😉 Полковнику никто не пишет ",
         send_message_admin="""
 ✉️ Сообщения✉️
 """,
         send_message_user="""
 Скажи «привет» админу!
 """,
-        send_donation_request_1="Расскажи всем про сбор денег. Скажи юзерам куда ты их потратишь.\n" \
-                                "К сообщению будет прикреплена кнопка 'Поддержать проект'",
+        send_donation_request_1="Расскажи юзерам на что ты потратишь деньги.\n" \
+                                "К сообщению, будет прикреплена кнопка 'Поддержать проект'",
         send_donation_request_2="Напиши новое сообщение или нажми '✅ Готово'",
         send_donation_request_3="💸 Сообщение отправлено!",
 
@@ -418,7 +420,7 @@ Insert the token: \n""",
         create_button="🙌🏻 Создать кнопку",
         delete_content="Контент был удален из кнопки",
         delete_button="🗑 Удалить кнопку",
-        delete_button_str="Удалить",
+        delete_button_str="🗑 Удалить",
         delete_button_str_all="Удалить все сообщения",
         delete_button_str_last_week="🗑Удалить за последнюю неделю",
         delete_button_str_last_month="🗑Удалить за последний месяц",
@@ -450,44 +452,41 @@ Insert the token: \n""",
             "Хорошо",
         ],
         polls_str_1='Введи название опроса',
-        polls_str_2="Выбери тип опроса?",
+        polls_str_2="Выбери тип опроса",
         polls_str_3="Введи первый вариант ответа",
         polls_str_4="Отправь следующий вариант ответа",
         polls_str_5="Введи следующий ответ или нажми '✅ Готово'",
         polls_str_6="Упс, слишком много ответов. Остался ещё один вариант",
-        polls_str_7="Спасибо! Нажми '📤 Отправить', чтобы юзеры прошли опрос.\n",
-        polls_str_8="Ты ещё не сделал опрос. Нажми 'Создать'",
-        polls_str_9="Список активных опросов",
-        polls_str_10="Выбери опрос для отправки юзерам",
-        polls_str_11="Блин, опрос не отправлен 🤨 \n У тебя ещё нет юзеров."
-                     " Вставь ссылку на бота в соц. сетях и своих ресурсах или пригласи друзей."
-                     " Скоро кто-нибудь придёт 🐣",
+        polls_str_7="Нажми '📤 Отправить', чтобы юзеры прошли опрос.",
+        polls_str_8="Нажми '🙌🏻 Создать опрос'",
+        polls_str_9="Список опросов",
+        polls_str_10="Выбери опрос чтобы отправить",
+        polls_str_11="Блин, опрос не отправлен 🤨\n У тебя ещё нет юзеров.\n"
+                     "Вставь ссылку на бота в соц. сетях или пригласи друзей. \n "
+                     "🐣 Скоро кто-нибудь придёт",
         polls_str_12="✅ Опрос отправлен",
         polls_str_13="Выбери опрос для просмотра 📊 результатов",
-        polls_str_14="🗑 Выбери опрос для удаления",
+        polls_str_14="🗑 Выбери опрос чтобы удалить",
         polls_str_15="Нажми '🔙 Назад' для отмены",
-        polls_str_16=""" Ты ещё не создал опрос. \n
-Нажми "Создать", или '🔙 Назад'""",
-        polls_str_17="🗑 Опрос с названием {} удален из всех чатов.",
-        polls_str_18=" Вот твои результаты. Можешь создать новый опрос или вернуться в гланое меню",
-        polls_str_19=" Никто еще не проголосовал. Ждем результатов",
-
+        polls_str_16="""Нажми "🙌🏻 Создать опрос", или '🔙 Назад'""",
+        polls_str_17="🗑 Опрос {} удален из всех чатов.",
+        polls_str_18=" Вот результаты. Создай новый опрос или вернись в главное меню",
+        polls_str_19=" Никто не проголосовал. Ждем результатов",
         polls_help_admin="""
-❓Опрос❓ 
+Опросы 
 """,
         polls_module_str="Опрос",
 
         pay_donation_str_admin="""
-💸 Платежи 💰
-""",
-        pay_donation_mode_str="Сделать платёж",
-        pay_donation_str_1="Сколько ты хочешь заплатить? Введи сумму. ❗️ Центы и копейки через запятую.",
+Платежи
+""", pay_donation_mode_str="Сделать платёж",
+        pay_donation_str_1="Сколько ты хочешь заплатить?\n"
+                           "Введи сумму.  ❗️ Центы и копейки через запятую.",
         pay_donation_str_2="Основная валюта админа ❗️ {}",
-        allow_donation_text="""Хопла, ты ещё не создал платёж \n 
-                       Нажми ' Создать платёж' или нажми '🔙 Назад'""",
-        pay_donation_str_4="Админ ещё не настроил платежи 🤷‍♂️ ",
-        pay_donation_str_5="Упс, ты ввёл неправильное число. Попробуй ещё раз. Может через запятую?",
-
+        allow_donation_text="""Хопла, ты ещё не создал платёж. \n 
+       Нажми ' Создать платёж' или нажми '🔙 Назад'""",
+        pay_donation_str_4="🤷‍♂️ Админ не настроил платежи.",
+        pay_donation_str_5="Упс, ты ввёл неправильное число. Попробуй ещё раз. \n",
         manage_button_str_1="✏️Выбери кнопку, которую хочешь отредактировать или нажми '🔙 Назад'",
         manage_button_str_2="Хопла, ты ещё не сделал кнопку. Нажми '📌 Создать кнопку'",
         manage_button_str_3="✏️ Выбери контент, который хочешь заменить",
@@ -505,15 +504,14 @@ Insert the token: \n""",
         donations_edit_str_5="🗑 Уверен, что хочешь удалить этот платёж?",
         donations_edit_str_6="Что именно ты хочешь изменить? Или нажми '🔙 Назад'",
         donations_edit_str_7="Напиши новое название для платежа. Или нажми '🔙 Назад'",
-        donations_edit_str_8="Сделай описание платежа для юзеров или напиши, "
-                             "на что ты потратишь деньги?  Или нажми '🔙 Назад'",
-        donations_edit_str_9=" Выбери основную валюту расчёта. Или нажми '🔙 Назад'",
+        donations_edit_str_8=" Добавь описание платежа или нажми '🔙 Назад'",
+        donations_edit_str_9=" Выбери основную валюту расчёта или нажми '🔙 Назад'",
         donations_edit_str_10="✅ Дело в шляпе",
         donations_edit_str_11="🗑 Платёж удалён",
         donations_edit_str_12="Введи новый токен твоей платёжной системы",
-        donations_edit_str_13="✅ Новый токен обновлён!",
+        donations_edit_str_13="✅ Токен обновлён!",
         donations_edit_str_14="Неправильный токен. Проверь его и отправь снова.",
-        send_donation_request_button="Попросить пользователей о донате",
+        send_donation_request_button="Попросить денег",
         survey_str_1="Введи название для опроса с открытым ответом",
         survey_str_2="Напиши первый вопрос",
         survey_str_3="Вопрос с таким названием уже есть.\n" \
@@ -541,23 +539,23 @@ Insert the token: \n""",
         survey_str_19="Выбери опрос, который хочешь отправить юзерам",
         survey_str_20="Привет, пройди, пожалуйста, опрос.\n" \
                       "Нажми '🏁 Старт', чтобы начать ",
-        survey_str_21="Упс, опрос не отправлен 🤨 \n "
-                      "У тебя ещё нет юзеров. Вставь ссылку на бота в соц. сетях "
-                      "и своих ресурсах или пригласи друзей. Скоро кто-нибудь придёт 🐣",
+        survey_str_21="Упс, опрос не отправлен 🤨 \n"
+                      "У тебя ещё нет юзеров. Вставь ссылку на бота в соц. сетях или пригласи друзей. \n" "Скоро кто-нибудь придёт 🐣",
         survey_str_22="✅ Опрос отправлен",
         survey_str_23="""Ты ещё не сделал опрос.\n
 Нажми "Создать", или '🔙 Назад'""",
-        survey_str_24="Твой опрос был удален. Можешь создать новый или перейти в главное меню",
+        survey_str_24="Опрос удален. Создай новый или перейди в главное меню",
         create_donation_str_1="Тестовый платёж. Не обращай внимание",
         create_donation_str_2="✏️ Напиши название платежа",
         create_donation_str_3="""Как получить токен платёжной системы:\n 1st Step: Go to @botfather and enter /mybots. 
-Choose your bot and press “Payments”. Choose a provider. \nWe advise to use „Stripe“ because of low Acquiring 
+Choose your bot and press “Payments”. Choose a provider. \n
+We advise to use „Stripe“ because of low Acquiring 
 comisson for European card. \n2nd Step: Authorize yourself in the chatbot of the chosen provider. Just follow 
 instructions then you will get a token-access, that you should copy.\n3nd Step :Go back to your bot and create /newdonate. 
 Вставь токен: \n""",
         create_donation_str_4="✏️ Напиши название платежа",
         create_donation_str_5="Неправильный токен. Проверь его и отправь снова.",
-        create_donation_str_6="Сделай описание платежа для юзеров или напиши на что ты потратишь деньги?",
+        create_donation_str_6="Сделай описание платёжа для юзеров или напиши на что ты потратишь деньги?",
         create_donation_str_7="Выбери основную валюту расчёта",
         create_donation_str_8="✅Отлично! Теперь ты можешь принимать платежи от юзеров бота❗️ "
                               "Юзерам нужна лишь банковская карта.\nНе забудь рассказать об этом.",
@@ -571,23 +569,25 @@ instructions then you will get a token-access, that you should copy.\n3nd Step :
 """,
         create_button_str="Создать",
         survey_mode_str="Открытый опрос",
-        add_menu_module_button="🛠Настройки 🛠",
+        add_menu_module_button="Настройки",
         edit_button_button="✏️ Редактировать кнопку",
         edit_menu_text="🤝 Изменить приветствие",
         add_menu_buttons_help="""
-🛠Настройки 🛠 
+Настройки\n
+Добавляй контент в кнопки.
 """,
         add_menu_buttons_str_1="Напиши название кнопки или выбери из шаблона.",
-        add_menu_buttons_str_2='Отправь текст, картинку, документ, видео или музыку. '
+        add_menu_buttons_str_2='Отправь текст, картинку, документ, видео или музыку. \n '
                                '❗️ Текст, добавленный к описанию, не отображается в кнопке.',
-        add_menu_buttons_str_3='Кнопка с этим названием уже есть. Придумай другое название',
+        add_menu_buttons_str_3="Кнопка с этим названием уже есть.\n"
+                               "Придумай другое название",
         add_menu_buttons_str_4="Отлично! Добавь что-нибудь ещё.\n или нажми  '✅ Готово' ",
         add_menu_buttons_str_5='✅Сделано! Кнопка будет доступна в меню названием \n {}',
         add_menu_buttons_str_6="🗑 Выбери кнопку, которую хочешь удалить ",
-        add_menu_buttons_str_7="""Упс. У тебя ещё нет кнопок.Нажми "Создать""",
+        add_menu_buttons_str_7="""Упс. У тебя ещё нет кнопок. Нажми "🙌🏻 Создать кнопку""",
         add_menu_buttons_str_8='🗑 Кнопка {} удалена',
         add_menu_buttons_str_9="🛑 Ты отменил создание кнопки",
-        add_menu_buttons_str_10="Можешь создать нувую кнопку или вернуться в меню",
+        add_menu_buttons_str_10="Создай новую кнопку или возвращайся в главное меню",
 
         add_button="Добавить",
         add_button_content="Или добавить контент в кнопку"
