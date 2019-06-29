@@ -35,7 +35,7 @@ class AddUsersCategory(object):
                                      upsert=True)
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                             callback_data="help_back")])
+                                             callback_data="help_module(users)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.send_message(update.message.chat.id,
@@ -54,7 +54,7 @@ class UsersCategory(object):
 
     def show_category(self, bot, update):
         buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                         callback_data="help_back"),
+                                         callback_data="help_module(users)"),
                     InlineKeyboardButton(text=string_dict(bot)["add_user_category"],
                                          callback_data="add_user_category"),
                     ]]
@@ -83,7 +83,7 @@ class DeleteUsersCategory(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                         callback_data="help_back")]]
+                                         callback_data="help_module(users)")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
         user_categories_table.delete_one({"category": update.callback_query.data.replace("delete_user_category_", "")})
@@ -100,7 +100,7 @@ class UsersChooseCategory(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                         callback_data="help_back")]]
+                                         callback_data="help_module(users)")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
         new_category = update.callback_query.data.replace("user_chooses_category_", "").split("__")
@@ -127,30 +127,37 @@ class SendQuestionToUsers(object):
                            message_id=update.callback_query.message.message_id)
         chats = chats_table.find({"bot_id": bot.id})
         categories = user_categories_table.find()
-        print(categories)
-        buttons = list()
-        for category in categories:
-            buttons.append([InlineKeyboardButton(text=category["category"],
-                                                 callback_data="user_chooses_category_{}".format(
-                                                     category["category"],
-                                                 )
-                                                 )])
-        choose_markup = InlineKeyboardMarkup(
-            buttons)
-        for chat in chats:
-            print(chat["chat_id"])
-            # if chat["chat_id"] != update.callback_query.message.chat.id:
-            if update.callback_query.message.text:
-                bot.send_message(chat["chat_id"],
-                                 string_dict(bot)["send_category_question_3"],
-                                 reply_markup=choose_markup)
-        buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                             callback_data="help_back")])
-        reply_markup = InlineKeyboardMarkup(buttons)
-        bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(bot)["send_category_question_4"], reply_markup=reply_markup)
-
+        if categories.count() > 0:
+            print(categories)
+            buttons = list()
+            for category in categories:
+                buttons.append([InlineKeyboardButton(text=category["category"],
+                                                     callback_data="user_chooses_category_{}".format(
+                                                         category["category"],
+                                                     )
+                                                     )])
+            choose_markup = InlineKeyboardMarkup(
+                buttons)
+            for chat in chats:
+                print(chat["chat_id"])
+                # if chat["chat_id"] != update.callback_query.message.chat.id:
+                if update.callback_query.message.text:
+                    bot.send_message(chat["chat_id"],
+                                     string_dict(bot)["send_category_question_3"],
+                                     reply_markup=choose_markup)
+            buttons = list()
+            buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                 callback_data="help_module(users)")])
+            reply_markup = InlineKeyboardMarkup(buttons)
+            bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(bot)["send_category_question_4"], reply_markup=reply_markup)
+        else:
+            buttons = list()
+            buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                 callback_data="help_module(users)")])
+            reply_markup = InlineKeyboardMarkup(buttons)
+            bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(bot)["send_category_question_5"], reply_markup=reply_markup)
         return ConversationHandler.END
 
     def back(self, bot, update):
@@ -177,7 +184,9 @@ ADD_USER_CATEGORY_HANDLER = ConversationHandler(
 
     fallbacks=[
         CallbackQueryHandler(callback=AddUsersCategory().back,
-                             pattern=r"cancel_send_user")
+                             pattern=r"cancel_send_user"),
+        CallbackQueryHandler(callback=AddUsersCategory().back, pattern=r"error_back"),
+
     ]
 )
 SEND_USER_QUESTION_HANDLER = CallbackQueryHandler(pattern="send_user_category_question",

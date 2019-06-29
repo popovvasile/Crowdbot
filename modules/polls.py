@@ -7,7 +7,7 @@ import random
 import logging
 from uuid import uuid4
 # from dropbox import dropbox, sharing
-
+import telegram
 from telegram import InlineKeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import CommandHandler, ConversationHandler, MessageHandler, Filters, RegexHandler, \
     CallbackQueryHandler, run_async
@@ -19,8 +19,6 @@ from database import polls_table, poll_instances_table, chats_table
 from modules.helper_funcs.auth import initiate_chat_id
 from modules.helper_funcs.helper import get_help
 from modules.helper_funcs.lang_strings.strings import string_dict
-from modules.pollbot.basic_poll_handler import BasicPoll
-from modules.pollbot.instant_runoff_poll_handler import InstantRunoffPollHandler
 from modules.pollbot.custom_description_poll_handler import CustomDescriptionHandler
 from modules.pollbot.multiple_options_poll_handler import MultipleOptionsHandler
 from modules.pollbot.custom_description_instant_runoff_poll_handler import CustomDescriptionInstantRunoffPollHandler
@@ -63,7 +61,7 @@ AFFIRMATIONS = [
 __admin_keyboard__ = [
     InlineKeyboardButton(text="Create", callback_data="create_poll"),
     InlineKeyboardButton(text="Delete", callback_data="delete_poll"),
-    InlineKeyboardButton(text="Send", callback_data="send_poll"),
+    InlineKeyboardButton(text="Send", callback_data="send_survey_to_users"),
 ]
 
 
@@ -75,10 +73,6 @@ class PollBot(object):
         done_buttons = [[InlineKeyboardButton(text="Done", callback_data="done_poll")]]
         self.done_markup = InlineKeyboardMarkup(
             done_buttons)
-        send_buttons = [[InlineKeyboardButton(text="Menu", callback_data="cancel_poll"),
-                         InlineKeyboardButton(text="Send", callback_data="send_poll")]]
-        self.send_markup = InlineKeyboardMarkup(
-            send_buttons)
 
     # Conversation handlers:
 
@@ -186,10 +180,18 @@ class PollBot(object):
                          )
 
         user_data.clear()
+        send_buttons = [[InlineKeyboardButton(text="Menu", callback_data="cancel_poll"),
+                         InlineKeyboardButton(text="Send", callback_data="send_survey_to_users"),
+                         InlineKeyboardButton(text=string_dict(bot)["send_poll_to_channel"],
+                                              callback_data="send_poll_to_channel"),
+                         ]]
+        send_markup = InlineKeyboardMarkup(
+            send_buttons)
+
         bot.send_message(update.callback_query.message.chat.id,
                          "Thank you! you can send this poll to your users "
                          "by clicking 'Send' \n",
-                         reply_markup=self.send_markup
+                         reply_markup=send_markup
                          )
         return ConversationHandler.END
 
@@ -468,9 +470,9 @@ class PollBot(object):
         create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["create_button_str"],
                                                 callback_data="create_poll"),
                            InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                                callback_data="help_back")],
+                                                callback_data="help_module(polls)")],
                           [InlineKeyboardButton(text=string_dict(bot)["send_button"],
-                                                callback_data="send_poll")]]
+                                                callback_data="send_survey_to_users")]]
         create_markup = InlineKeyboardMarkup(create_buttons)
         chat_id, txt = initiate_chat_id(update)
         poll_instance = self.deserialize(polls_table.find_one({"title": txt, "bot_id": bot.id}))
@@ -507,7 +509,7 @@ class PollBot(object):
             bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                message_id=update.callback_query.message.message_id)
             admin_keyboard = [InlineKeyboardButton(text="Create", callback_data="create_poll"),
-                              InlineKeyboardButton(text="Back", callback_data="help_back")]
+                              InlineKeyboardButton(text="Back", callback_data="help_module(polls)")]
             bot.send_message(update.callback_query.message.chat.id,
                              """You have no polls created yet. \n"""
                              """Click "Create" to configure your first poll or "Back" for main menu""",
@@ -520,9 +522,12 @@ class PollBot(object):
         poll_to_delete_instances = poll_instances_table.find({"bot_id": bot.id, "title": txt})
 
         for poll_instance in poll_to_delete_instances:
-            print(poll_instance)
-            bot.delete_message(chat_id=poll_instance["chat_id"],
-                               message_id=poll_instance["message_id"])
+            try:
+                print(poll_instance)
+                bot.delete_message(chat_id=poll_instance["chat_id"],
+                                   message_id=poll_instance["message_id"])
+            except telegram.error.BadRequest:
+                continue
         poll_instances_table.delete_one({"bot_id": bot.id, "title": txt})
 
         update.message.reply_text("Ok!", reply_markup=ReplyKeyboardRemove())
@@ -553,21 +558,14 @@ DELETE_POLLS_HANDLER = ConversationHandler(
                               CommandHandler('cancel', PollBot().cancel)],
 
     },
-    fallbacks=[CallbackQueryHandler(callback=PollBot().cancel, pattern=r"cancel_poll")]
+    fallbacks=[CallbackQueryHandler(callback=PollBot().cancel, pattern=r"cancel_poll"),
+               CallbackQueryHandler(callback=PollBot().back, pattern=r"error_back"),
+               CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
+
+               ]
 )
 
-# BOTS_POLLS_HANDLER = ConversationHandler(
-#     entry_points=[CommandHandler('bots_polls', PollBot().handle_bots_polls),
-#
-#                   ],
-#     states={
-#
-#         CHOOSE_TITLE_RESULTS: [MessageHandler(Filters.text, PollBot().handle_bots_polls_title),
-#                        CommandHandler('cancel', PollBot().cancel)],
-#
-#     },
-#     fallbacks=[CommandHandler('cancel', PollBot().cancel, pass_user_data=True)]
-# )
+
 POLL_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=PollBot().start,
                                        pattern=r"create_poll"),
@@ -604,6 +602,8 @@ POLL_HANDLER = ConversationHandler(
         CallbackQueryHandler(callback=PollBot().handle_done, pattern=r"done_poll", pass_user_data=True),
         CommandHandler('cancel', PollBot().cancel),
         MessageHandler(filters=Filters.command, callback=PollBot().back),
+        CallbackQueryHandler(callback=PollBot().back, pattern=r"error_back"),
+
     ]
 )
 BUTTON_HANDLER = CallbackQueryHandler(PollBot().button, pattern='{"i":')
@@ -612,11 +612,11 @@ NOT_ENGAGED_SEND, TYPING_SEND_TITLE = range(2)
 
 SEND_POLLS_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=PollBot().handle_send_poll,
-                                       pattern=r"send_poll"),
+                                       pattern=r"send_survey_to_users"),
                   CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll")
                   ],
     states={
-        NOT_ENGAGED_SEND: [CommandHandler('send_poll', PollBot().handle_send_poll),
+        NOT_ENGAGED_SEND: [CommandHandler('send_survey_to_users', PollBot().handle_send_poll),
                            CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
                            CommandHandler('cancel', PollBot().cancel), ],
         TYPING_SEND_TITLE: [MessageHandler(Filters.text, PollBot().handle_send_title, pass_user_data=True),
@@ -628,6 +628,7 @@ SEND_POLLS_HANDLER = ConversationHandler(
         CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
         CommandHandler('cancel', PollBot().cancel),
         MessageHandler(filters=Filters.command, callback=PollBot().back),
+        CallbackQueryHandler(callback=PollBot().back, pattern=r"error_back"),
 
     ]
 )

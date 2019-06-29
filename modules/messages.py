@@ -40,7 +40,7 @@ class AddMessageCategory(object):
                                 upsert=True)
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                             callback_data="help_back")])
+                                             callback_data="help_module(messages)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.send_message(update.message.chat.id,
@@ -53,7 +53,7 @@ class MessageCategory(object):
 
     def show_category(self, bot, update):
         buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                         callback_data="help_back"),
+                                         callback_data="help_module(messages)"),
                     InlineKeyboardButton(text=string_dict(bot)["add_message_category"],
                                          callback_data="add_message_category"),
                     ]]
@@ -83,7 +83,7 @@ class DeleteMessageCategory(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                         callback_data="help_back")]]
+                                         callback_data="help_module(messages)")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
         categories_table.delete_one({"category": update.callback_query.data.replace("delete_category_", "")})
@@ -178,7 +178,7 @@ class SendMessageToAdmin(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")])
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(messages)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.send_message(update.callback_query.message.chat_id,
@@ -301,7 +301,7 @@ class SendMessageToUsers(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")])
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(messages)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.send_message(update.callback_query.message.chat_id,
@@ -390,7 +390,7 @@ class AnswerToMessage(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")])
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(messages)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.send_message(update.callback_query.message.chat_id,
@@ -420,7 +420,7 @@ class DeleteMessage(object):
 
     def delete_message(self, bot, update):
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")])
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(messages)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
 
@@ -431,7 +431,7 @@ class DeleteMessage(object):
             users_messages_to_admin_table.delete_many({"bot_id": bot.id})  # delete all messages from the users
         elif message_id == "week":
             time_past = datetime.datetime.now() - datetime.timedelta(days=7)
-            users_messages_to_admin_table.delete_many({"bot_id": bot,
+            users_messages_to_admin_table.delete_many({"bot_id": bot.id,
                                                        "timestamp": {'$gt': time_past}})
             # delete all messages from the users
         elif message_id == "month":
@@ -452,7 +452,7 @@ class SeeMessageToAdmin(object):
 
     def see_messages(self, bot, update):
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")])
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(messages)")])
         delete_buttons = buttons
         delete_buttons.append([InlineKeyboardButton(text=string_dict(bot)["delete_button_str_all"],
                                                     callback_data="delete_message_all")
@@ -527,7 +527,7 @@ class SeeMessageToAdmin(object):
                          string_dict(bot)["back_text"],
                          reply_markup=InlineKeyboardMarkup(
                              [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                                    callback_data="help_back")]]))
+                                                    callback_data="help_module(messages)")]]))
         return ConversationHandler.END
 
 
@@ -550,6 +550,8 @@ SEND_MESSAGE_TO_ADMIN_HANDLER = ConversationHandler(
                              pattern=r"send_message_finish", pass_user_data=True),
         CallbackQueryHandler(callback=SendMessageToAdmin().back,
                              pattern=r"cancel_send_message"),
+        CallbackQueryHandler(callback=AnswerToMessage().back, pattern=r"error_back"),
+
     ]
 )
 SEND_MESSAGE_TO_USERS_HANDLER = ConversationHandler(
@@ -567,6 +569,8 @@ SEND_MESSAGE_TO_USERS_HANDLER = ConversationHandler(
                              pattern=r"cancel_send_message"),
         CallbackQueryHandler(callback=SendMessageToUsers().send_message_finish,
                              pattern=r"send_message_finish"),
+        CallbackQueryHandler(callback=AnswerToMessage().back, pattern=r"error_back"),
+
     ]
 )
 
@@ -585,7 +589,9 @@ ADD_MESSAGE_CATEGORY_HANDLER = ConversationHandler(
 
     fallbacks=[
         CallbackQueryHandler(callback=SendMessageToUsers().back,
-                             pattern=r"cancel_send_message")
+                             pattern=r"cancel_send_message"),
+        CallbackQueryHandler(callback=AnswerToMessage().back, pattern=r"error_back"),
+
     ]
 )
 
@@ -608,5 +614,7 @@ ANSWER_TO_MESSAGE_HANDLER = ConversationHandler(
                CallbackQueryHandler(callback=AnswerToMessage().back,
                                     pattern=r"cancel_send_message",
                                     pass_user_data=True),
+               CallbackQueryHandler(callback=AnswerToMessage().back, pattern=r"error_back"),
+
                ]
 )

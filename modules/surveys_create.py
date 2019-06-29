@@ -60,14 +60,10 @@ class SurveyHandler(object):
                 "title": user_data["title"]
             })
             if not survey:
-                surveys_table.insert({
-                    "bot_id": bot.id,
-                    "title": user_data["title"],
-                    "questions": []
-                })
                 user_data["title"] = title
                 update.message.reply_text(string_dict(bot)["survey_str_2"], reply_markup=reply_markup)
                 user_data["question_id"] = 1
+                user_data["questions"] = []
                 return CHOOSING_QUESTIONS
 
             else:
@@ -89,14 +85,8 @@ class SurveyHandler(object):
             done_buttons)
         question = update.message.text
         if user_data["question_id"] > 0:
-            survey = surveys_table.find_one({
-                "bot_id": bot.id,
-                "title": user_data["title"]
-            })
-            user_data['questions'] = survey["questions"].append({"question_id": int(user_data["question_id"]) - 1,
-                                                                 "text": question})
-
-            surveys_table.update({"title": survey["title"]}, survey)
+            user_data["questions"].append({"question_id": int(user_data["question_id"]) - 1,
+                                           "text": question})
             user_data["question_id"] = int(user_data["question_id"]) + 1
             update.message.reply_text(string_dict(bot)["survey_str_4"],
                                       reply_markup=done_markup)
@@ -106,22 +96,22 @@ class SurveyHandler(object):
     def done(self, bot, update, user_data):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        survey = surveys_table.find_one({
-            "bot_id": bot.id,
-            "title": user_data["title"]
-        })
         questions = ''
-        for question in survey["questions"]:
+        for question in user_data["questions"]:
             questions += str(question['question_id'] + 1) + ") " + question['text'] + "\n"
-        user_data["questions"] = survey["questions"]
+        user_data["questions"] = user_data["questions"]
         user_data["answers"] = []
         texr_to_send = "\nQuestions: \n{}".format(questions)
-        admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["send_button"], callback_data="send_survey"),
-                          InlineKeyboardButton(text=string_dict(bot)["menu_button"], callback_data="help_back")]
+        admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["send_button"],
+                                               callback_data="send_survey_to_users"),
+                          InlineKeyboardButton(text=string_dict(bot)["menu_button"],
+                                               callback_data="help_module(surveys)")]
         bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(bot)["survey_str_6"].format(survey['title'], texr_to_send),
-                         reply_markup=InlineKeyboardMarkup([admin_keyboard]))
-
+                         string_dict(bot)["survey_str_6"].format(user_data['title'], texr_to_send),
+                         reply_markup=InlineKeyboardMarkup(
+                             [admin_keyboard , [InlineKeyboardButton(text=string_dict(bot)["send_survey_to_channel"],
+                                                                     callback_data="send_survey_to_channel")]]))
+        user_data.pop('to_delete', None)
         surveys_table.update_one({
             "bot_id": bot.id,
             "title": user_data["title"]
@@ -135,7 +125,7 @@ class SurveyHandler(object):
         survey_list = surveys_table.find({"bot_id": bot.id})
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        print(survey_list.count() )
+        print(survey_list.count())
         if survey_list.count() != 0:
 
             bot.send_message(update.callback_query.message.chat.id,
@@ -156,7 +146,7 @@ class SurveyHandler(object):
 
             admin_keyboard = [
                 InlineKeyboardButton(text=string_dict(bot)["create_button_str"], callback_data="create_survey"),
-                InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]
+                InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(surveys)")]
             bot.send_message(update.callback_query.message.chat.id,
                              string_dict(bot)["survey_str_9"],
                              reply_markup=InlineKeyboardMarkup([admin_keyboard]))
@@ -176,15 +166,15 @@ class SurveyHandler(object):
                 update.message.reply_text(string_dict(bot)["survey_str_11"].format(txt_to_send),
                                           reply_markup=ReplyKeyboardRemove())
                 admin_keyboard = [
-                    InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]
+                    InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(surveys)")]
                 update.message.reply_text(string_dict(bot)["back_text"],
                                           reply_markup=InlineKeyboardMarkup([admin_keyboard]))
             else:
                 update.message.reply_text(string_dict(bot)["survey_str_12"],
                                           reply_markup=ReplyKeyboardRemove())
                 admin_keyboard = [
-                    InlineKeyboardButton(text=string_dict(bot)["send_button"], callback_data="send_survey"),
-                    InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]
+                    InlineKeyboardButton(text=string_dict(bot)["send_button"], callback_data="send_survey_to_users"),
+                    InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(surveys)")]
                 update.message.reply_text(string_dict(bot)["survey_str_13"],
                                           reply_markup=InlineKeyboardMarkup([admin_keyboard]))
         except KeyError:
@@ -216,7 +206,7 @@ class SurveyHandler(object):
                                message_id=update.callback_query.message.message_id)
             admin_keyboard = [
                 InlineKeyboardButton(text=string_dict(bot)["create_button_str"], callback_data="create_survey"),
-                InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]
+                InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(surveys)")]
             bot.send_message(update.callback_query.message.chat.id,
                              string_dict(bot)["survey_str_16"],
                              reply_markup=InlineKeyboardMarkup([admin_keyboard]))
@@ -229,8 +219,9 @@ class SurveyHandler(object):
                                   reply_markup=ReplyKeyboardRemove())
         logger.info("Admin {} on bot {}:{} deleted a survey:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, txt))
-        admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["create_button_str"], callback_data="create_survey"),
-                          InlineKeyboardButton(text=string_dict(bot)["menu_button"], callback_data="help_back")]
+        admin_keyboard = [
+            InlineKeyboardButton(text=string_dict(bot)["create_button_str"], callback_data="create_survey"),
+            InlineKeyboardButton(text=string_dict(bot)["menu_button"], callback_data="help_module(surveys)")]
         bot.send_message(update.message.chat.id,
                          string_dict(bot)["survey_str_24"],
                          reply_markup=InlineKeyboardMarkup([admin_keyboard]))
@@ -261,7 +252,7 @@ class SurveyHandler(object):
 
             admin_keyboard = [
                 InlineKeyboardButton(text=string_dict(bot)["create_button"], callback_data="create_survey"),
-                InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]
+                InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(surveys)")]
             bot.send_message(update.callback_query.message.chat.id,
                              string_dict(bot)["survey_str_23"],
                              reply_markup=InlineKeyboardMarkup([admin_keyboard]))
@@ -292,9 +283,12 @@ class SurveyHandler(object):
         else:
             bot.send_message(chat_id=chat_id, text=string_dict(bot)["survey_str_22"],
                              reply_markup=ReplyKeyboardRemove())
-        get_help(bot, update)
         logger.info("Admin {} on bot {}:{} sent a survey to the users:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, txt))
+        create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                callback_data="help_back")]]
+        create_markup = InlineKeyboardMarkup(create_buttons)
+        bot.send_message(chat_id, string_dict(bot)["back_text"], reply_markup=create_markup)
         return ConversationHandler.END
 
     def back(self, bot, update):
@@ -349,7 +343,7 @@ CREATE_SURVEY_HANDLER = ConversationHandler(
 )
 SEND_SURVEYS_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=SurveyHandler().handle_send_survey,
-                                       pattern=r"send_survey"),
+                                       pattern=r"send_survey_to_users"),
 
                   ],
     states={

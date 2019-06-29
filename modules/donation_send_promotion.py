@@ -35,7 +35,7 @@ class SendDonationToUsers(object):
             admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["allow_donations_button"],
                                                    callback_data="allow_donation"),
                               InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                                   callback_data="help_back")]
+                                                   callback_data="help_module(donation_payment)")]
             bot.send_message(update.callback_query.message.chat.id,
                              string_dict(bot)["allow_donation_text"],
                              reply_markup=InlineKeyboardMarkup([admin_keyboard]))
@@ -101,7 +101,7 @@ class SendDonationToUsers(object):
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["donate_button"],
                                              callback_data="pay_donation"),
                         InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                             callback_data="help_back")])
+                                             callback_data="help_module(donation_payment)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.send_message(update.callback_query.message.chat_id,

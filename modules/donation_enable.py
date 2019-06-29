@@ -126,8 +126,10 @@ class CreateDonationHandler(object):
 
         create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["send_donation_request_button"],
                                                 callback_data="send_donation_to_users"),
+                           InlineKeyboardButton(text=string_dict(bot)["send_donation_to_channel"],
+                                                callback_data="send_donation_to_channel"),
                            InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                                callback_data="help_back")]]
+                                                callback_data="help_module(donation_payment)")]]
         create_markup = InlineKeyboardMarkup(
             create_buttons)
 

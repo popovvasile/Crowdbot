@@ -55,7 +55,7 @@ class AnswerSurveys(object):
             "bot_id": bot.id,
             "title": user_data["title"]
         })
-        if not "answers" in survey:
+        if "answers" not in survey:
             survey["answers"] = []
         for answer in survey["answers"]:
             if answer.get('user_id', "") == update.callback_query.message.from_user.id:
@@ -82,12 +82,12 @@ class AnswerSurveys(object):
         })
         answer = update.message.text
         user_id = update.message.from_user.id
-        if not "answers" in user_data:
+        if "answers" not in user_data:
             user_data["answers"] = list()
         user_data["answers"].append({"user_id": user_id,
-                        "question_id": int(user_data["question_id"]),
-                        "title": survey["title"],
-                        "answer": answer})
+                                     "question_id": int(user_data["question_id"]),
+                                     "title": survey["title"],
+                                     "answer": answer})
 
         if user_data["question_id"] > len(survey["questions"]) - 1:
             survey["answers"] = user_data["answers"]
@@ -101,10 +101,12 @@ class AnswerSurveys(object):
                     question = survey["questions"][int(answer["question_id"]) - 1]["text"]
                     to_send_text += string_dict(bot)["answer_survey_str_2"].format(question, answer['answer'])
             user_data.clear()
+            create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                    callback_data="help_back")]]
+            create_markup = InlineKeyboardMarkup(create_buttons)
             bot.send_message(update.message.chat_id,
                              string_dict(bot)["answer_survey_str_3"] + "\n" +
-                             string_dict(bot)["answer_survey_str_4"] + "\n" + to_send_text)
-            get_help(bot, update)
+                             string_dict(bot)["answer_survey_str_4"] + "\n" + to_send_text, reply_markup=create_markup)
             del user_data
             del answer
             return ConversationHandler.END
@@ -119,11 +121,15 @@ class AnswerSurveys(object):
             return ANSWERING
 
     def done(self, bot, update, user_data):
+        create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                callback_data="help_back")]]
+        create_markup = InlineKeyboardMarkup(create_buttons)
         update.message.reply_text(string_dict(bot)["answer_survey_str_3"] + "{}" +
-                                  string_dict(bot)["answer_survey_str_4"].format(facts_to_str(user_data)))
-        get_help(bot, update)
+                                  string_dict(bot)["answer_survey_str_4"].format(facts_to_str(user_data)),
+                                  reply_markup=create_markup)
         logger.info("User {} on bot {}:{} answered to survey:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, user_data["title"]))
+
         user_data.clear()
         return ConversationHandler.END
 

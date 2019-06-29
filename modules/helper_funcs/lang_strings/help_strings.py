@@ -35,7 +35,7 @@ def help_strings(bot):
         admin_keyboard=[
             InlineKeyboardButton(text=string_dict(bot)["create_button_str"], callback_data="create_survey"),
             InlineKeyboardButton(text=string_dict(bot)["delete_button_str"], callback_data="delete_survey"),
-            InlineKeyboardButton(text=string_dict(bot)["send_button"], callback_data="send_survey"),
+            InlineKeyboardButton(text=string_dict(bot)["send_button"], callback_data="send_survey_to_users"),
             InlineKeyboardButton(text=string_dict(bot)["results_button"], callback_data="surveys_results")
         ]
 
@@ -79,7 +79,7 @@ def help_strings(bot):
     help_dict["polls"] = dict(
         admin_keyboard=[
             InlineKeyboardButton(text=string_dict(bot)["create_button_str"], callback_data="create_poll"),
-            InlineKeyboardButton(text=string_dict(bot)["send_button"], callback_data="send_poll"),
+            InlineKeyboardButton(text=string_dict(bot)["send_button"], callback_data="send_survey_to_users"),
             InlineKeyboardButton(text=string_dict(bot)["delete_button_str"], callback_data="delete_poll"),
             InlineKeyboardButton(text=string_dict(bot)["results_button"], callback_data="poll_results")],
         mod_name=string_dict(bot)["polls_module_str"],
@@ -108,24 +108,24 @@ def help_strings(bot):
 
 def helpable_dict(bot):
     admin_rus = OrderedDict()
-    admin_rus["Каналы"] = "channels"
     admin_rus["✉️ Сообщения"] = "messages"
+    admin_rus["Каналы"] = "channels"
     admin_rus["Открытые опросы"] = "surveys"
     admin_rus["Опросы"] = "polls"
     admin_rus["Платёжи"] = "donation_payment"
     admin_rus["Пользователи"] = "users"
+    admin_rus["Настройки"] = "menu_buttons"
     admin_rus["Режим юзера"] = "user_mode"
-    admin_rus["Редактировать меню"] = "menu_buttons"
 
     admin_eng = OrderedDict()
-    admin_eng["Channels"] = "channels"
     admin_eng["✉️ Messages"] = "messages"
+    admin_eng["Channels"] = "channels"
     admin_eng['Surveys'] = "surveys"
     admin_eng["Polls"] = "polls"
     admin_eng["💰 Manage payments"] = "donation_payment"
     admin_eng["Users"] = "users"
+    admin_eng["Settings"] = "menu_buttons"
     admin_eng["User view"] = "user_mode"
-    admin_eng["Edit menu"] = "menu_buttons"
 
     lang_dicts = {"ENG": dict(
         ALL_MODULES=[],

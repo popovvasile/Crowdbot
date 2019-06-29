@@ -36,7 +36,7 @@ class ButtonEdit(object):
                                  [[InlineKeyboardButton(string_dict(bot)["create_button_button"],
                                                         callback_data="create_button"),
                                    InlineKeyboardButton(string_dict(bot)["back_button"],
-                                                        callback_data="help_back")]]
+                                                        callback_data="help_module(menu_buttons)")]]
                              ))
             return ConversationHandler.END
 
@@ -191,7 +191,7 @@ class ButtonEdit(object):
             {"bot_id": bot.id, "button": user_data["button"]},
             button_info
         )
-        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]]
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(menu_buttons)")]]
         bot.send_message(chat_id=update.message.chat_id,
                          text=string_dict(bot)["manage_button_str_5"],
                          reply_markup=InlineKeyboardMarkup(buttons))
@@ -271,7 +271,7 @@ class AddButtonContent(object):
             {"bot_id": bot.id, "button": user_data["button"]},
             button_info
         )
-        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]]
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(menu_buttons)")]]
         bot.send_message(chat_id=update.message.chat_id,
                          text=string_dict(bot)["manage_button_str_5"],
                          reply_markup=InlineKeyboardMarkup(buttons))
@@ -305,7 +305,7 @@ class DeleteButtonContent(object):
 
     def delete_message(self, bot, update, user_data):
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")])
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(menu_buttons)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
 

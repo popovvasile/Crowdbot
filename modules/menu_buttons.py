@@ -152,7 +152,7 @@ class AddCommands(object):
             reply_buttons = [[InlineKeyboardButton(text=string_dict(bot)["create_button"],
                                                    callback_data="create_button"),
                               InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                                   callback_data="cancel_add_button")
+                                                   callback_data="help_module(menu_buttons)")
                               ]]
             reply_markup = InlineKeyboardMarkup(
                 reply_buttons)
@@ -174,7 +174,8 @@ class AddCommands(object):
                          reply_markup=InlineKeyboardMarkup(
                              [[InlineKeyboardButton(string_dict(bot)["create_button_button"],
                                                     callback_data="create_button"),
-                               InlineKeyboardButton(string_dict(bot)["menu_button"], callback_data="help_back")]]
+                               InlineKeyboardButton(string_dict(bot)["menu_button"],
+                                                    callback_data="help_module(menu_buttons)")]]
                          ))
         logger.info("Admin {} on bot {}:{} deleted the button:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, txt))

@@ -57,7 +57,7 @@ class DonationBot(object):
                     admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["allow_donations_button"],
                                                            callback_data="allow_donation"),
                                       InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                                           callback_data="help_back")]
+                                                           callback_data="help_module(donation_payment)")]
                     bot.send_message(update.callback_query.message.chat.id,
                                      string_dict(bot)["allow_donation_text"],
                                      reply_markup=InlineKeyboardMarkup([admin_keyboard]))
@@ -89,7 +89,7 @@ class DonationBot(object):
     def execute_donation(self, bot, update, user_data):
         query = update.callback_query
         if query:
-            if query.data == "help_back":
+            if query.data == "help_back" or query.data == "help_module(donation_payment)":
                 return ConversationHandler.END
 
         chat_id, txt = initiate_chat_id(update)
@@ -125,7 +125,7 @@ class DonationBot(object):
     def precheckout_callback(self, bot, update):
         # query = update.callback_query
         # if query:
-        #     if query.data == "help_back":
+        #     if query.data == "help_module(donation_payment)":
         #         return ConversationHandler.END
         query = update.pre_checkout_query
 
@@ -137,7 +137,7 @@ class DonationBot(object):
         # TODO add counting of donations and prepare for callback_query
         # do something after successful receive of donation?
         buttons=[[InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                                callback_data="help_back")]]
+                                       callback_data="help_back")]]
         markup = InlineKeyboardMarkup(buttons)
         user_data = dict()
         user_data["status"] = "Paid"

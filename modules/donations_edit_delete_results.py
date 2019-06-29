@@ -55,17 +55,23 @@ class EditPaymentHandler(object):
                            message_id=update.callback_query.message.message_id, )
         chatbot = chatbots_table.find_one({"bot_id": bot.id})
         if chatbot.get("donate") != {} and "donate" in chatbot:
-            reply_keyboard = [[string_dict(bot)["edit_button"]], [string_dict(bot)["delete_donation_button"]]]
+            reply_keyboard = [[string_dict(bot)["edit_donation"]], [string_dict(bot)["delete_donation_button"]]]
 
             bot.send_message(update.callback_query.message.chat.id,
                              string_dict(bot)["donations_edit_str_2"],
                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+            create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                    callback_data="cancel_donation_edit")]]
+            create_markup = InlineKeyboardMarkup(create_buttons)
+            bot.send_message(update.callback_query.message.chat.id, string_dict(bot)["back_text"],
+                             reply_markup=create_markup)
 
             return FINISH_ACTION
         else:
             admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["allow_donations_button"],
                                                    callback_data="allow_donation"),
-                              InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]
+                              InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                   callback_data="help_module(donation_payment)")]
             bot.send_message(update.callback_query.message.chat.id,
                              string_dict(bot)["allow_donation_text"],
                              reply_markup=InlineKeyboardMarkup([admin_keyboard]))
@@ -81,6 +87,12 @@ class EditPaymentHandler(object):
             update.message.reply_text(
                 string_dict(bot)["donations_edit_str_5"],
                 reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+            create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                    callback_data="cancel_donation_edit")]]
+            create_markup = InlineKeyboardMarkup(create_buttons)
+            bot.send_message(update.callback_query.message.chat.id, string_dict(bot)["back_text"],
+                             reply_markup=create_markup)
+
             return DELETE_FINISH
 
         elif txt == string_dict(bot)["edit_button"]:
@@ -89,6 +101,12 @@ class EditPaymentHandler(object):
             chat_id, txt = initiate_chat_id(update)
             bot.send_message(chat_id, string_dict(bot)["donations_edit_str_6"],
                              reply_markup=ReplyKeyboardMarkup(keyboard_markup))
+            create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                    callback_data="cancel_donation_edit")]]
+            create_markup = InlineKeyboardMarkup(create_buttons)
+            bot.send_message(update.callback_query.message.chat.id, string_dict(bot)["back_text"],
+                             reply_markup=create_markup)
+
             return CHOOSING_EDIT_ACTION
 
     def handle_edit_action_finish(self, bot, update, user_data):
@@ -119,12 +137,18 @@ class EditPaymentHandler(object):
                                       reply_markup=ReplyKeyboardMarkup(currency_keyboard,
                                                                        one_time_keyboard=True))
         user_data["action"] = txt
+        create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                callback_data="cancel_donation_edit")]]
+        create_markup = InlineKeyboardMarkup(create_buttons)
+        bot.send_message(update.callback_query.message.chat.id, string_dict(bot)["back_text"],
+                         reply_markup=create_markup)
+
         return EDIT_FINISH
 
     def handle_edit_finish(self, bot, update, user_data):  # TODO double check
         finish_buttons = list()
         finish_buttons.append([InlineKeyboardButton(text=string_dict(bot)["menu_button"],
-                                                    callback_data="help_back")])
+                                                    callback_data="help_module(donation_payment)")])
         finish_markup = InlineKeyboardMarkup(
             finish_buttons)
 
@@ -157,7 +181,11 @@ class EditPaymentHandler(object):
             update.message.reply_text(string_dict(bot)["donations_edit_str_11"])
             logger.info("Admin {} on bot {}:{} did  the following edit on donation: {}".format(
                 update.effective_user.first_name, bot.first_name, bot.id, user_data["action"]))
-            get_help(bot, update)
+            create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                    callback_data="help_module(donation_payment)")]]
+            create_markup = InlineKeyboardMarkup(create_buttons)
+            bot.send_message(update.callback_query.message.chat.id, string_dict(bot)["back_text"],
+                             reply_markup=create_markup)
             user_data.clear()
             return ConversationHandler.END
         elif txt == string_dict(bot)["donations_edit_str_4"]:
@@ -199,7 +227,12 @@ class EditPaymentHandler(object):
             chatbots_table.update_one({"bot_id": bot.id}, {'$set': chatbot}, upsert=True)
             update.message.reply_text(string_dict(bot)["donations_edit_str_13"],
                                       reply_markup=reply_markup)
-            get_help(bot, update)
+            create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                    callback_data="help_module(donation_payment)")]]
+            create_markup = InlineKeyboardMarkup(create_buttons)
+            bot.send_message(update.callback_query.message.chat.id, string_dict(bot)["back_text"],
+                             reply_markup=create_markup)
+
             logger.info("Admin {} on bot {}:{} did  the following edit on donation: {}".format(
                 update.effective_user.first_name, bot.first_name, bot.id, user_data["action"]))
             return ConversationHandler.END

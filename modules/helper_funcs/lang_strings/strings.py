@@ -52,6 +52,8 @@ string_dict_dict = {
         send_user_category_17="User category has been deleted",
         send_category_question_3="What category do you associate with?",
         send_category_question_4="The category question has been sent to your users",
+        send_category_question_5="You have no user categories created. "
+                                 "Please return to the user menu and create a category to assign your users to",
         users_help_admin="You can ask your users what category they belong to or create a new category",
         user_chooses_category="Thank you for your vote!",
 
@@ -215,17 +217,17 @@ Here you can order promotion from this chatbot and their channels
 
         edit_button_str_1="Enter a new 🤝 greeting for users",
         edit_button_str_2="✅ It's done.!",
-
+        edit_donation="Edit donation",
         donations_edit_str_1="Test payment. Ignore it",
-        donations_edit_str_2="What to do with the payment? Or press '🔙 Back",
+        donations_edit_str_2="What to do with the payment?",
         donations_edit_str_3="Yes, I'm sure.",
         donations_edit_str_4="No, cancel",
         donations_edit_str_5="🗑 Are you sure you want to delete this payment?",
-        donations_edit_str_6="What exactly do you want to change? Or press '🔙 Back'",
-        donations_edit_str_7="Write a new name for the payment. Or press '🔙 Back'",
+        donations_edit_str_6="What exactly do you want to change? ",
+        donations_edit_str_7="Write a new name for the payment. ",
         donations_edit_str_8="Do description of payment for users or write how you will "
-                             "utilize the money? Or press '🔙 Back'",
-        donations_edit_str_9=" Choose the main currency. Or press '🔙 Back'",
+                             "utilize the money? ",
+        donations_edit_str_9=" Choose the main currency.",
         donations_edit_str_10="✅ It’s in the bag!",
         donations_edit_str_11="🗑 The payment is deleted",
         donations_edit_str_12="Enter a new token of your payment system",
@@ -361,6 +363,9 @@ Here you can order promotion from this chatbot and their channels
 
         send_category_question_3="What category do you associate with?",
         send_category_question_4="The category question has been sent to your users",
+
+        send_category_question_5="You have no user categories created. "
+                         "Please return to the user menu and create a category to assign your users to",
         users_help_admin="You can ask your users what category they belong to or create a new category",
         user_chooses_category="Thank you for your vote!",
         user_mode_help_admin="""
@@ -496,6 +501,7 @@ Here you can order promotion from this chatbot and their channels
 
         edit_button_str_1="Введи новое 🤝 приветствие для юзеров",
         edit_button_str_2="✅ Дело сделано!",
+        edit_donation="Редактировать",
 
         donations_edit_str_1="Тестовый платёж. Не обращай внимание",
         donations_edit_str_2="Что сделать с платежом? Или нажми '🔙 Назад'",

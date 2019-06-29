@@ -1,4 +1,6 @@
 import re
+
+import urllib3
 from telegram import ParseMode, InlineKeyboardMarkup, Bot, Update, InlineKeyboardButton
 from telegram.error import Unauthorized, BadRequest, TimedOut, NetworkError, TelegramError, ChatMigrated
 from telegram.ext import run_async, ConversationHandler
@@ -63,11 +65,12 @@ def send_admin_user_mode(bot, chat_id, text, keyboard=None):
 
 # for test purposes
 def error_callback(bot, update, error):
-    back_buttons = InlineKeyboardMarkup(
-        [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                               callback_data="error_back")]])
-    print(error)
+
     try:
+        back_buttons = InlineKeyboardMarkup(
+            [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                   callback_data="error_back")]])
+        print(error)
         if update.effective_message.chat_id > 0:
             if hasattr(update, 'callback_query'):
                 bot.send_message(update.effective_message.chat_id,
@@ -81,7 +84,12 @@ def error_callback(bot, update, error):
             return
         else:
             return
-
+    except BadRequest:  # TODO
+        bot.send_message(update.effective_message.chat.id,
+                         "An error happened =( Please proceed to the main menu",
+                         reply_markup=InlineKeyboardMarkup(
+            [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                   callback_data="help_back")]]))
     except ConnectionError as err:
         print("ConnectionError")
         print(err)
@@ -92,7 +100,17 @@ def error_callback(bot, update, error):
         # handle slow connection problems
     except HTTPError:
         print("HTTPError")
-        # handle other connection problems
+
+
+    except NetworkError:
+        print("Neworkerror")
+    # handle other connection problems
+    except ChatMigrated as e:
+    # the chat_id of a group has changed, use e.new_chat_id instead
+        print("ChatMigrated")
+
+    except TelegramError:
+        print("TeelgramError")
 
 
 def button_handler(bot: Bot, update: Update):
@@ -160,6 +178,7 @@ def help_button(bot: Bot, update: Update):
     else:
         HELPABLE = helpable_dict(bot)["VISITOR_HELPABLE"]
     query = update.callback_query
+    print(query.data)
     mod_match = re.match(r"help_module\((.+?)\)", query.data)
     prev_match = re.match(r"help_prev\((.+?)\)", query.data)
     next_match = re.match(r"help_next\((.+?)\)", query.data)

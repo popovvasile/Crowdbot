@@ -113,7 +113,7 @@ class Channels(object):
         no_channel_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(string_dict(bot)["add_button"],
                                                                           callback_data='add_channel')],
                                                     [InlineKeyboardButton(string_dict(bot)["back_button"],
-                                                                          callback_data='help_back')]])
+                                                                          callback_data="help_module(channels)")]])
 
         # bot.delete_message(update.effective_chat.id, update.effective_message.message_id)
         delete_messages(bot, user_data, update)
@@ -189,10 +189,10 @@ class Channels(object):
                                                         callback_data='send_donation_to_channel_{}'.format(
                                                             update.message.text))],
                                   [InlineKeyboardButton(string_dict(bot)["send_survey_to_channel"],
-                                                        callback_data="post_survey_to_channel_{}".format(
+                                                        callback_data="send_survey_to_channel_{}".format(
                                                             update.message.text))],
                                   [InlineKeyboardButton(string_dict(bot)["send_poll_to_channel"],
-                                                        callback_data="post_poll_to_channel_{}".format(
+                                                        callback_data="send_poll_to_channel_{}".format(
                                                             update.message.text))],
                                   [InlineKeyboardButton(string_dict(bot)["send_post_to_channel"],
                                                         callback_data='channel_write_post_{}'.format(
@@ -201,7 +201,7 @@ class Channels(object):
                                                         callback_data='remove_channel_{}'.format(
                                                             update.message.text))],
                                   [InlineKeyboardButton(string_dict(bot)["back_button"],
-                                                        callback_data='help_back')]])
+                                                        callback_data="help_module(channels)")]])
         bot.send_message(update.message.chat_id, string_dict(bot)["channels_menu"],
                          reply_markup=one_channel_keyboard)
         return ConversationHandler.END
@@ -218,7 +218,7 @@ class Channels(object):
                                  .format(channel_username),
                                  reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
                                      text=string_dict(bot)["back_button"],
-                                     callback_data="help_back")]])
+                                     callback_data="help_module(channels)")]])
                                  ))
             return ConversationHandler.END
         else:
@@ -242,13 +242,13 @@ class Channels(object):
                                                                     callback_data="channel_write_post_{}".format(
                                                                         update.message.text))],
                                               [InlineKeyboardButton(string_dict(bot)["send_poll_to_channel"],
-                                                                    callback_data="post_poll_to_channel_{}".format(
+                                                                    callback_data="send_poll_to_channel_{}".format(
                                                                         update.message.text))],
                                               [InlineKeyboardButton(string_dict(bot)["send_survey_to_channel"],
                                                                     callback_data="post_survey_{}".format(
                                                                         update.message.text))],
                                               [InlineKeyboardButton(string_dict(bot)["back_button"],
-                                                                    callback_data='help_back')]])
+                                                                    callback_data="help_module(channels)")]])
         have_added = self.register_channel(bot, update, user_data)
         if have_added is True:
             delete_messages(bot, user_data, update)
@@ -346,7 +346,8 @@ class SendPost(object):
     def send_post_finish(self, bot, update, user_data):
         delete_messages(bot, user_data, update)
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")])
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                             callback_data="help_module(channels)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         user_data['to_delete'].append(
