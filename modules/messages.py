@@ -115,7 +115,7 @@ class SendMessageToAdmin(object):
                              ]))
         else:
             bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(bot)["send_message_1"])
+                             string_dict(bot)["send_message_13"])
         return TOPIC
 
     def send_topic(self, bot, update, user_data):
@@ -178,7 +178,7 @@ class SendMessageToAdmin(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(messages)")])
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.send_message(update.callback_query.message.chat_id,
@@ -186,9 +186,12 @@ class SendMessageToAdmin(object):
                          reply_markup=final_reply_markup)
         logger.info("Admin {} on bot {}:{} sent a message to the users".format(
             update.effective_user.first_name, bot.first_name, bot.id))
+        if "_id" in user_data:
+            user_data.pop("_id", None)
         user_data["timestamp"] = datetime.datetime.now()
         user_data["message_id"] = update.callback_query.message.message_id
         user_data["bot_id"] = bot.id
+        print(user_data)
         users_messages_to_admin_table.insert(user_data)
         return ConversationHandler.END
 

@@ -58,28 +58,20 @@ AFFIRMATIONS = [
     "Wonderful",
     "Splendid",
 ]
-__admin_keyboard__ = [
-    InlineKeyboardButton(text="Create", callback_data="create_poll"),
-    InlineKeyboardButton(text="Delete", callback_data="delete_poll"),
-    InlineKeyboardButton(text="Send", callback_data="send_survey_to_users"),
-]
 
 
 class PollBot(object):
-    def __init__(self):
-        buttons = [[InlineKeyboardButton(text="Back", callback_data="cancel_poll")]]
-        self.reply_markup = InlineKeyboardMarkup(
-            buttons)
-        done_buttons = [[InlineKeyboardButton(text="Done", callback_data="done_poll")]]
-        self.done_markup = InlineKeyboardMarkup(
-            done_buttons)
 
     # Conversation handlers:
 
     def start(self, bot, update):
         """Send a message when the command /start is issued."""
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_poll")]]
+        reply_markup = InlineKeyboardMarkup(
+            buttons)
+
         bot.send_message(update.callback_query.message.chat.id,
-                         'Hi! Please send me the title of your new poll', reply_markup=self.reply_markup)
+                         string_dict(bot)["polls_str_1"], reply_markup=reply_markup)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         return TYPING_TITLE
@@ -87,13 +79,15 @@ class PollBot(object):
     def handle_title(self, bot, update, user_data):
         text = update.message.text
         user_data['title'] = text
-        update.message.reply_text("{}! What kind of poll is it going to be?"
-                                  .format(self.get_affirmation()),
+        update.message.reply_text(string_dict(bot)["polls_str_2"],
                                   reply_markup=self.assemble_reply_keyboard())
 
         return TYPING_TYPE
 
     def handle_type(self, bot, update, user_data):
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_poll")]]
+        reply_markup = InlineKeyboardMarkup(
+            buttons)
         text = update.message.text
         polltype = next((i for i, handler in POLL_HANDLERS.items() if handler.name == text), None)
         user_data['type'] = polltype
@@ -102,29 +96,37 @@ class PollBot(object):
 
         if POLL_HANDLERS[polltype].requires_extra_config(user_data['meta']):
             update.message.reply_text(POLL_HANDLERS[polltype].ask_for_extra_config(user_data.get('meta')),
-                                      reply_markup=self.reply_markup)
+                                      reply_markup=reply_markup)
             return TYPING_META
         else:
-            update.message.reply_text("{}! Now, send me the first answer option".format(
-                self.get_affirmation()
-            ), reply_markup=self.reply_markup)
+            update.message.reply_text(string_dict(bot)["polls_str_3"], reply_markup=reply_markup)
             return TYPING_OPTION
 
     def handle_meta(self, bot, update, user_data):
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_poll")]]
+        reply_markup = InlineKeyboardMarkup(
+            buttons)
+
         text = update.message.text
         polltype = user_data['type']
         POLL_HANDLERS[polltype].register_extra_config(text, user_data.get('meta'))
 
         if POLL_HANDLERS[polltype].requires_extra_config(user_data.get('meta')):
             update.message.reply_text(POLL_HANDLERS[polltype].ask_for_extra_config(user_data.get('meta')),
-                                      replu_markup=self.reply_markup)
+                                      replu_markup=reply_markup)
             return TYPING_META
         else:
-            update.message.reply_text("{}, that's it! Next, please send me the first answer option."
-                                      .format(self.get_affirmation()), replu_markup=self.reply_markup)
+            update.message.reply_text(string_dict(bot)["polls_str_4"], replu_markup=reply_markup)
             return TYPING_OPTION
 
     def handle_option(self, bot, update, user_data):
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_poll")]]
+        reply_markup = InlineKeyboardMarkup(
+            buttons)
+        done_buttons = [[InlineKeyboardButton(text=string_dict(bot)["done_button"], callback_data="done_poll")]]
+        done_markup = InlineKeyboardMarkup(
+            done_buttons)
+
         text = update.message.text
         handler = POLL_HANDLERS[user_data['type']]
         user_data['options'].append(text)
@@ -132,12 +134,12 @@ class PollBot(object):
         if len(user_data['options']) >= handler.max_options:
             return self.handle_done(bot, update, user_data)
         update.message.reply_text("{}!".format(self.get_affirmation()), reply_markup=ReplyKeyboardRemove())
-        update.message.reply_text("Now, send me another answer option or click DONE to publish.",
-                                  reply_markup=self.done_markup)
+        update.message.reply_text(string_dict(bot)["polls_str_5"],
+                                  reply_markup=done_markup)
 
         if len(user_data['options']) >= handler.max_options - 1:
-            update.message.reply_text("Uh oh, you're running out of options. You can only have one more option.",
-                                      replu_markup=self.reply_markup)
+            update.message.reply_text(string_dict(bot)["polls_str_6"],
+                                      replu_markup=reply_markup)
 
         return TYPING_OPTION
 
@@ -180,8 +182,10 @@ class PollBot(object):
                          )
 
         user_data.clear()
-        send_buttons = [[InlineKeyboardButton(text="Menu", callback_data="cancel_poll"),
-                         InlineKeyboardButton(text="Send", callback_data="send_survey_to_users"),
+        send_buttons = [[InlineKeyboardButton(text=string_dict(bot)["menu_button"],
+                                              callback_data="cancel_poll"),
+                         InlineKeyboardButton(text=string_dict(bot)["send_button"],
+                                              callback_data="send_survey_to_users"),
                          InlineKeyboardButton(text=string_dict(bot)["send_poll_to_channel"],
                                               callback_data="send_poll_to_channel"),
                          ]]
@@ -189,8 +193,7 @@ class PollBot(object):
             send_buttons)
 
         bot.send_message(update.callback_query.message.chat.id,
-                         "Thank you! you can send this poll to your users "
-                         "by clicking 'Send' \n",
+                         string_dict(bot)["polls_str_7"],
                          reply_markup=send_markup
                          )
         return ConversationHandler.END
@@ -405,14 +408,18 @@ class PollBot(object):
         return
 
     def handle_send_poll(self, bot, update):
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_poll")]]
+        reply_markup = InlineKeyboardMarkup(
+            buttons)
+
         bot.send_message(update.callback_query.message.chat.id,
-                         "This is the list of the current polls. ", reply_keyboard=self.reply_markup)
+                         string_dict(bot)["polls_str_9"], reply_keyboard=reply_markup)
 
         polls_list_of_dicts = polls_table.find({"bot_id": bot.id})
         command_list = [command['title'] for command in polls_list_of_dicts]
         reply_keyboard = [command_list]
         bot.send_message(update.callback_query.message.chat.id,
-                         "Choose the poll that you want to send",
+                         string_dict(bot)["polls_str_10"],
                          reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
@@ -437,10 +444,9 @@ class PollBot(object):
                                      parse_mode='Markdown'
                                      )
         if len(sent) == 0:
-            bot.send_message(chat_id, "Looks like there are yet no users to send this poll to.\n "
-                                      "No polls sent :( ", reply_markup=ReplyKeyboardRemove())
+            bot.send_message(chat_id, string_dict(bot)["polls_str_11"], reply_markup=ReplyKeyboardRemove())
         else:
-            bot.send_message(chat_id, "Your poll was sent to all you users! ", reply_markup=ReplyKeyboardRemove())
+            bot.send_message(chat_id, string_dict(bot)["polls_str_12"], reply_markup=ReplyKeyboardRemove())
 
         get_help(bot, update)
 
@@ -479,7 +485,7 @@ class PollBot(object):
 
         # if poll_instance:
         bot.send_message(update.message.chat.id,
-                         "Results",
+                         string_dict(bot)["polls_str_13"],
                          reply_markup=self.assemble_inline_keyboard(poll_instance, True),
                          parse_mode='Markdown'
                          )
@@ -492,27 +498,32 @@ class PollBot(object):
         return ConversationHandler.END
 
     def handle_delete_poll(self, bot, update):
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_poll")]]
+        reply_markup = InlineKeyboardMarkup(
+            buttons)
+
         # TODO delete not just the instance in the databse, but the messages themselves as well
         polls_list_of_dicts = polls_table.find({"bot_id": bot.id})
         if polls_list_of_dicts.count() != 0:
             command_list = [command['title'] for command in polls_list_of_dicts]
             reply_keyboard = [command_list]
             bot.send_message(update.callback_query.message.chat.id,
-                             "Please choose the poll that you want to delete",
+                             string_dict(bot)["polls_str_14"],
                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
             bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                message_id=update.callback_query.message.message_id)
             bot.send_message(update.callback_query.message.chat.id,
-                             "Click 'Back' to cancel", reply_keyboard=self.reply_markup)
+                             string_dict(bot)["polls_str_15"], reply_keyboard=reply_markup)
             return CHOOSE_TITLE_DELETE
         else:
             bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                message_id=update.callback_query.message.message_id)
-            admin_keyboard = [InlineKeyboardButton(text="Create", callback_data="create_poll"),
-                              InlineKeyboardButton(text="Back", callback_data="help_module(polls)")]
+            admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["create_button_str"],
+                                                   callback_data="create_poll"),
+                              InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                   callback_data="help_module(polls)")]
             bot.send_message(update.callback_query.message.chat.id,
-                             """You have no polls created yet. \n"""
-                             """Click "Create" to configure your first poll or "Back" for main menu""",
+                             string_dict(bot)["polls_str_16"],
                              reply_markup=InlineKeyboardMarkup([admin_keyboard]))
             return ConversationHandler.END
 
@@ -533,7 +544,7 @@ class PollBot(object):
         update.message.reply_text("Ok!", reply_markup=ReplyKeyboardRemove())
 
         update.message.reply_text(
-            "Poll with title {} has been deleted".format(txt))
+            string_dict(bot)["polls_str_17"].format(txt))
         get_help(bot, update)
         return ConversationHandler.END
 

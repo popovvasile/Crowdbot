@@ -43,7 +43,7 @@ class SendPoll(object):
             update_data = update
 
         bot.delete_message(chat_id=update_data.message.chat_id,
-                           message_id=update_data.message.message_id, )
+                           message_id=update_data.message.message_id)
         create_buttons = [
             [InlineKeyboardButton(text=string_dict(bot)["create_button_str"], callback_data="create_poll"),
              InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]]
@@ -299,7 +299,9 @@ class SendDonationToChannel(object):  # TODO
                            message_id=update.callback_query.message.message_id)
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["donate_button"],
-                                             callback_data="pay_donation")])
+
+                                             url="https://t.me/{}?start=pay_donation".format(bot.username),
+                                             )])
         donation_reply_markup = InlineKeyboardMarkup(
             buttons)
         create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],

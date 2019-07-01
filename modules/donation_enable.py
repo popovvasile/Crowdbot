@@ -142,7 +142,7 @@ class CreateDonationHandler(object):
                          reply_markup=create_markup)
         chatbot = chatbots_table.find_one({"bot_id": bot.id}) or {}
 
-        print(user_data)
+        user_data.pop("to_delete", None)
         if 'payment_token' not in user_data:
             # chatbot["donate"]["payment_token"] = user_data['payment_token']
             user_data["payment_token"] = chatbot["donate"]["payment_token"]

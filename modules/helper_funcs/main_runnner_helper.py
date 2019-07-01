@@ -319,9 +319,9 @@ class WelcomeBot(object):
                                                         ))]]
                              ))
         elif "pay_donation" in txt:
-            bot.send_message(chat_id=chat_id, text=string_dict(bot)["pay_donation_start"],
+            bot.send_message(chat_id=chat_id, text=string_dict(bot)["donate_button"],
                              reply_markup=InlineKeyboardMarkup(
-                                 [[InlineKeyboardButton(text=string_dict(bot)["donation_button"],
+                                 [[InlineKeyboardButton(text=string_dict(bot)["donate_button"],
                                                         callback_data="pay_donation")]]
                              ))
         else:

@@ -168,7 +168,7 @@ class Channels(object):
                 channels_table.insert_one({'bot_id': bot.id,
                                            'channel_username': channel_username,
                                            'chat_id': channel_chat_id})
-                return True
+                return channel_username
             else:
                 return self.send_wrong_format_message(bot, update, user_data,
                                                       string_dict(bot)["try_to_add_already_exist_channel"])
@@ -238,26 +238,28 @@ class Channels(object):
 
     # call this when message with channel link arrive
     def confirm_add(self, bot, update, user_data):
-        post_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(string_dict(bot)["send_post_to_channel"],
-                                                                    callback_data="channel_write_post_{}".format(
-                                                                        update.message.text))],
-                                              [InlineKeyboardButton(string_dict(bot)["send_poll_to_channel"],
-                                                                    callback_data="send_poll_to_channel_{}".format(
-                                                                        update.message.text))],
-                                              [InlineKeyboardButton(string_dict(bot)["send_survey_to_channel"],
-                                                                    callback_data="post_survey_{}".format(
-                                                                        update.message.text))],
-                                              [InlineKeyboardButton(string_dict(bot)["back_button"],
-                                                                    callback_data="help_module(channels)")]])
-        have_added = self.register_channel(bot, update, user_data)
-        if have_added is True:
+
+        channel_username = self.register_channel(bot, update, user_data)
+        if type(channel_username) is str:
+            post_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(string_dict(bot)["send_post_to_channel"],
+                                                                        callback_data="channel_write_post_{}".format(
+                                                                            channel_username))],
+                                                  [InlineKeyboardButton(string_dict(bot)["send_poll_to_channel"],
+                                                                        callback_data="send_poll_to_channel_{}".format(
+                                                                            channel_username))],
+                                                  [InlineKeyboardButton(string_dict(bot)["send_survey_to_channel"],
+                                                                        callback_data="post_survey_{}".format(
+                                                                            channel_username))],
+                                                  [InlineKeyboardButton(string_dict(bot)["back_button"],
+                                                                        callback_data="help_module(channels)")]])
             delete_messages(bot, user_data, update)
             user_data['to_delete'].append(
                 bot.send_message(update.message.chat_id, string_dict(bot)["channel_added_success"]
                                  .format(update.message.text),
                                  reply_markup=post_keyboard))
             return ConversationHandler.END
-
+        else:
+            return ADD_CHANNEL
     @staticmethod
     def error(bot, update, error):
         """Log Errors caused by Updates."""
@@ -284,6 +286,7 @@ class SendPost(object):
         print(update.callback_query.data)
         # if channel:
         delete_messages(bot, user_data, update)
+        print()
         user_data['channel'] = update.callback_query.data.replace("channel_write_post_", "")
         user_data['to_delete'].append(
             bot.send_message(update.callback_query.message.chat.id,

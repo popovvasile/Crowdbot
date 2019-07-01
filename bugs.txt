@@ -1,5 +1,4 @@
 Вася
-# TODO register admin using /help as well - or make a proper link for botfather
 # TODO fix polls multiple choice
 # TODO ask on beginning what message and user categories should be added
 # TODO fix error handler

@@ -1,10 +1,10 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
 from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
-from telegram.ext import (CommandHandler, MessageHandler, Filters, ConversationHandler, run_async,
+from telegram.ext import (CommandHandler, MessageHandler, Filters, ConversationHandler,
                           CallbackQueryHandler)
 import logging
-import requests  # TODO
+import requests
 import json
 
 from telegram import LabeledPrice
@@ -90,12 +90,12 @@ class EditPaymentHandler(object):
             create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                     callback_data="cancel_donation_edit")]]
             create_markup = InlineKeyboardMarkup(create_buttons)
-            bot.send_message(update.callback_query.message.chat.id, string_dict(bot)["back_text"],
+            bot.send_message(chat_id, string_dict(bot)["back_text"],
                              reply_markup=create_markup)
 
             return DELETE_FINISH
 
-        elif txt == string_dict(bot)["edit_button"]:
+        elif txt == string_dict(bot)["edit_donation"]:
             keyboard_markup = [[string_dict(bot)["title_button"], string_dict(bot)["description_button"]],
                                [string_dict(bot)["currency_button"]]]
             chat_id, txt = initiate_chat_id(update)
@@ -104,7 +104,7 @@ class EditPaymentHandler(object):
             create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                     callback_data="cancel_donation_edit")]]
             create_markup = InlineKeyboardMarkup(create_buttons)
-            bot.send_message(update.callback_query.message.chat.id, string_dict(bot)["back_text"],
+            bot.send_message(chat_id, string_dict(bot)["back_text"],
                              reply_markup=create_markup)
 
             return CHOOSING_EDIT_ACTION
@@ -140,8 +140,7 @@ class EditPaymentHandler(object):
         create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                 callback_data="cancel_donation_edit")]]
         create_markup = InlineKeyboardMarkup(create_buttons)
-        bot.send_message(update.callback_query.message.chat.id, string_dict(bot)["back_text"],
-                         reply_markup=create_markup)
+        bot.send_message(chat_id, string_dict(bot)["back_text"], reply_markup=create_markup)
 
         return EDIT_FINISH
 
