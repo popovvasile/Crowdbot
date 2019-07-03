@@ -10,7 +10,7 @@ string_dict_dict = {
         post_on_channel='✍️ Write a post',
         channels_str_1='Channels',
         channels_str_2='Choose a channel',
-        # Click "➕ Add a channel" or "🔙 Back"
+        channels_menu="What do you wan to do with your channel?",
         no_channels='You have no channel configured yet. Click "➕Add channel" to configure your first channel',
         wrong_channel_link_format='Send me link or username of your channel. ' \
                                   'For Example "https://t.me/name" or "t.me/name" or "@name" or just "name"',
@@ -83,6 +83,7 @@ Send messages to users and get feedback
         promotion_send_message_user="""
 Write your message. I’ll read it.
 """,
+        delete_content="This content has been deleted from the button.",
         delete_button_str="🗑 Delete",
         delete_button_str_all="🗑 Delete all messages",
         delete_button_str_last_week="Delete for last week",
@@ -93,7 +94,27 @@ Write your message. I’ll read it.
         send_message_module_str="✉️ Messages",
         send_message_button_1="📤 Send message",
         send_message_button_2="📥 Mailbox",
+        send_message_button_3="Message topics",
         send_message_1="Write a message",
+        send_message_1_1="Choose the category of users to whom you want o send your message",
+
+        send_message_12="What do you want to tell us about?",
+
+        send_message_13="What do you want to tell us about? Choose a topic for you message",
+
+        send_message_131="Write the subject of your message",
+
+        send_message_14="TEST",
+
+        send_message_15="TEST",
+
+        send_message_16="TEST",
+
+        send_message_17="TEST",
+
+        send_message_18="TEST",
+
+        add_message_category="Add topic",
         send_message_2="Thanks, the homing pigeon's on its way. 🕊!",
         send_message_3="Write a message to users\n",
         send_message_4="Write a new message and press '✅ Done",
@@ -184,6 +205,7 @@ Payments
 
 
 """,
+        edit_donation="Edit donation",
         pay_donation_mode_str="Donate",
         pay_donation_str_1="How much do you want to pay? Enter the amount.\n"
                            "❗️ Cents and pennies separated by commas.\n"
@@ -295,7 +317,9 @@ Click "📌 Create a button", to add a content.
         add_menu_buttons_str_8='🗑 Button {} removed',
         add_menu_buttons_str_9="🛑 You canceled the creation of a button.",
         add_menu_buttons_str_10="You can create a new button or return to menu",
-        add_button="Add"),
+        add_button="Add",
+        add_button_content="Or add content to the button"
+    ),
 
     "RUS": dict(
         start_help="Привет! Меня зовут {}. Управляй мной в этом меню. "
