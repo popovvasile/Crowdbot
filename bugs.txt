@@ -1,4 +1,5 @@
 Вася
+# TODO can't change the payments token in payments
 # TODO fix polls multiple choice
 # TODO ask on beginning what message and user categories should be added
 # TODO fix error handler

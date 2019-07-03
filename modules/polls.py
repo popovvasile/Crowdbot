@@ -623,7 +623,7 @@ NOT_ENGAGED_SEND, TYPING_SEND_TITLE = range(2)
 
 SEND_POLLS_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=PollBot().handle_send_poll,
-                                       pattern=r"send_survey_to_users"),
+                                       pattern=r"send_poll_to_users"),
                   CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll")
                   ],
     states={
