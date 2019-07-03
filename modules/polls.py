@@ -34,7 +34,7 @@ POLL_HANDLERS = {
     # POLL_TYPE_INSTANT_RUNOFF: InstantRunoffPollHandler(),
     POLL_TYPE_INSTANT_RUNOFF_CUSTOM_DESCRIPTION: CustomDescriptionInstantRunoffPollHandler(),
     POLL_TYPE_CUSTOM_DESCRIPTION: CustomDescriptionHandler(),
-    POLL_TYPE_MULTIPLE_OPTIONS: MultipleOptionsHandler(),
+    # POLL_TYPE_MULTIPLE_OPTIONS: MultipleOptionsHandler(),
 }
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
