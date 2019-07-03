@@ -2,17 +2,16 @@ from database import chatbots_table
 
 string_dict_dict = {
     "ENG": dict(
-        create_button_str="Create",
-        start_help="Welcome! My name is {} and I am ready to use!",
-        my_channels="My Channels",
-        add_channel='Add channel',
-        remove_channel='Remove channel',
-        post_on_channel='Post on channel',
-        channels_str_1='Here u can manage your channels',
-        channels_str_2='List of your channels',
-        channels_menu="What do you wan to do with your channel?",
-        # Click "Add" to configure your first channel or "Back" for main menu
-        no_channels='You have no channel configured yet. Click "Add channel" to configure your first channel',
+        create_button_str="📌 Create",
+        start_help="Welcome! My name is {} and I am ready to use! Add a channel, start polls and get donations ",
+        my_channels="🛠 Manage channels",
+        add_channel='➕ Add a channel',
+        remove_channel='🗑 Remove',
+        post_on_channel='✍️ Write a post',
+        channels_str_1='Channels',
+        channels_str_2='Choose a channel',
+        # Click "➕ Add a channel" or "🔙 Back"
+        no_channels='You have no channel configured yet. Click "➕Add channel" to configure your first channel',
         wrong_channel_link_format='Send me link or username of your channel. ' \
                                   'For Example "https://t.me/name" or "t.me/name" or "@name" or just "name"',
         bot_is_not_admin_of_channel='Bot is not admin in this({}) channel. ' \
@@ -22,19 +21,19 @@ string_dict_dict = {
         bot_is_not_admin_of_channel_2="Bot is not admin in this({}) channel or can't send message to the channel" \
                                       "So channel was deleted. Add bot as admin to the channel, " \
                                       "let it send message to the channel " \
-                                      "and then add channel again by Clicking 'Add channel'",
+                                      "and then try again",
         channels_str_4="To add channel u need to add this bot as admin to your channel " \
                        "and then back to this menu and send " \
                        "link or username of your channel. " \
                        "Send me link or username of your channel",
-        allow_bot_send_messages='U need to allow bot send messages to the channel. ' \
+        allow_bot_send_messages='Allow the bot to send messages to the channel. ' \
                                 'And than back to this menu and send username of channel',
         no_such_channel='There are no such channel. ',
-        choose_channel_to_remove='Choose channel you want to remove',
+        choose_channel_to_remove='Choose channel to 🗑 remove',
         channel_has_been_removed='Channel({}) has been deleted.',
-        channel_added_success='Now you can send posts to the channel({}) using this commands.',
+        channel_added_success='Now send posts to the channel({}) using this commands.',
         choose_channel_to_post='Choose channel u want to post',
-        post_message='What do u want to do?',
+        post_message='Choose an action',
         send_post="What do you want to post on your channel({})?\n" \
                   "We will forward your message to channel.",
         choose_channel_to_send_poll='Choose channel u want to send poll',
@@ -58,16 +57,16 @@ string_dict_dict = {
         user_chooses_category="Thank you for your vote!",
 
         user_mode_help_admin="""
-    Press “Accept" to turn on the bot in the user mode. 
-    Press “Back" to return to the normal mode 
-    """,
+Press “Accept" to turn on the bot in the user mode. 
+Press “Back" to return to the normal mode 
+""",
         user_mode_on_finish="✅ Ready, now look at the bot in user mode",
         user_mode_off_finish="🔚 User mode is off",
 
         user_mode_str="Accept",
         send_a_post_to_channel='Write a post on the channel',
 
-        promotion_send_message_module_str="Promotion",
+        promotion_send_message_module_str="✉️ Messages ",
         promotion_send_message_button_1="📤 Send message",
         promotion_send_message_button_2="📥 Mailbox",
         promotion_send_message_1="Write a message",
@@ -78,15 +77,14 @@ string_dict_dict = {
         promotion_send_message_5="✅The message is sent",
         promotion_send_message_6="Forever alone 😉 ",
         promotion_send_message_admin="""
-    ✉ Messages 📧
-    Send a message to users and get feedback
-    """,
-        promotion_send_message_user="""
-Here you can order promotion from this chatbot and their channels
+Messages
+Send messages to users and get feedback
 """,
-        delete_content="This content has been deleted from the button.",
-        delete_button_str="Delete",
-        delete_button_str_all="Delete all messages",
+        promotion_send_message_user="""
+Write your message. I’ll read it.
+""",
+        delete_button_str="🗑 Delete",
+        delete_button_str_all="🗑 Delete all messages",
         delete_button_str_last_week="Delete for last week",
         delete_button_str_last_month="Delete for last month",
         view_message_str="Read",
@@ -95,34 +93,21 @@ Here you can order promotion from this chatbot and their channels
         send_message_module_str="✉️ Messages",
         send_message_button_1="📤 Send message",
         send_message_button_2="📥 Mailbox",
-        send_message_button_3="Message topics",
-        send_message_1="Write your message",
-        send_message_1_1="Choose the category of users to whom you want o send your message",
-        send_message_12="What do you want to tell us about?",
-        send_message_13="What do you want to tell us about? Choose a topic for you message",
-        send_message_131="Write the subject of your message",
-
-        send_message_14="TEST",
-        send_message_15="TEST",
-        send_message_16="TEST",
-        send_message_17="TEST",
-        send_message_18="TEST",
-        add_message_category="Add topic",
-
+        send_message_1="Write a message",
         send_message_2="Thanks, the homing pigeon's on its way. 🕊!",
         send_message_3="Write a message to users\n",
         send_message_4="Write a new message and press '✅ Done",
         send_message_5="✅The message is sent",
         send_message_6="Forever alone 😉 ",
         send_message_admin="""
-    ✉ Messages 📧
-    Send a message to users and get feedback
+Messages
+Send messages to users and get feedback
 
-    """,
+""",
         send_message_user="""
-    Say Hello to the admin!
-    """,
-        send_donation_request_1="Tell everyone about the fundraising and how you will utilize the money\n" \
+Say Hello to the admin!
+""",
+        send_donation_request_1="Tell everyone about the donation and how you will utilize the money\n" \
                                 "The 'Support project' button will be attached to the message'",
         send_donation_request_2="Write a new message and press '✅ Done",
         send_donation_request_3="💸 The message is sent!",
@@ -130,16 +115,16 @@ Here you can order promotion from this chatbot and their channels
         answer_button_str="Answer",
         send_donation_request_button="Send donation request",
         cancel_button_survey="🔚 Cancel survey",
-        donate_button="Donate",
+        donate_button="💸 donate",
         back_button="🔙 Back",
-        cancel_button="Cancel",
-        remove_button="Remove",
-        send_survey_to_channel='Send survey to channel',
-        send_poll_to_channel='Send poll to channel',
+        cancel_button="🛑 Cancel",
+        remove_button="🗑 Remove",
+        send_survey_to_channel='Survey to channel',
+        send_poll_to_channel='Poll to channel',
         send_post_to_channel='Write a post',
         send_donation_to_channel="Send a 'Donate' button",
         done_button="✅ Done",
-        create_button="🙌🏻 Create",
+        create_button=" 📌 Create",
         delete_button="🗑 Delete a button",
         send_button="📤 Send",
         results_button="📊 Results",
@@ -150,7 +135,7 @@ Here you can order promotion from this chatbot and their channels
         title_button="Name",
         description_button="Description",
         currency_button="Currency",
-        delete_donation_button="🗑 Delete the payment",
+        delete_donation_button="🗑 Delete the donation",
         great_text="Well done!",
         create_button_button="📌 Create a button ",
         edit_button="✏️ Edit the button",
@@ -168,10 +153,10 @@ Here you can order promotion from this chatbot and their channels
             "Yo",
             "Good",
         ],
-        polls_str_1='Enter the name of the poll',
-        polls_str_2="Choose your poll type",
-        polls_str_3="Enter the first option",
-        polls_str_4="Send the next answer",
+        polls_str_1='Write your question',
+        polls_str_2="Choose poll type",
+        polls_str_3="Enter the first answer",
+        polls_str_4="Send a next one",
         polls_str_5="Enter the next answer and press'✅ Done'",
         polls_str_6="Oops, too many answers. There is one more option",
         polls_str_7="Thank you! Press '📤 Send' to allow users to take the poll.\n",
@@ -179,31 +164,32 @@ Here you can order promotion from this chatbot and their channels
         polls_str_9="List of active polls",
         polls_str_10="Choose a poll to send to users",
         polls_str_11="Damn it, the poll is not sent 🤨 \n You have no users. Share the link of your bot in the social"
-                     " networks and  online resource or invite your friends. Somebody will come along soon 🐣",
+                     " networks and  online resource or invite your friends. Somebody will come along soon",
         polls_str_12="✅ The poll is sent",
-        polls_str_13="Choose a poll to see the results",
+        polls_str_13="Choose a poll to see 📊 the results",
         polls_str_14="🗑 Choose a poll to delete",
         polls_str_15="Press '🔙 Back' to cancel",
-        polls_str_16=""" You haven't created a poll yet. \n
-    Click 'Create' or '🔙 Back'""",
+        polls_str_16=""" You haven't created a survey yet. \n
+Click 'Create' or '🔙 Back'""",
         polls_str_17="🗑 Poll with name {} removed from all chats.",
         polls_str_18="These are the results. You can create a new poll or return to menu",
         polls_help_admin="""
-    ❓ Polls ❓
+Polls
 
-    """,
+""",
         polls_module_str="Poll",
 
         pay_donation_str_admin="""
-    💸 Payments 💰
+Payments
 
 
-    """,
-        pay_donation_mode_str="Make a payment",
-        pay_donation_str_1="How much do you want to pay? Enter the amount. ❗️ Cents and pennies separated by commas.",
-        pay_donation_str_2="Our currency is {}",
-        allow_donation_text="Press '💰 Create a payment'\n'\
-    'or press '🔙 Back'",
+""",
+        pay_donation_mode_str="Donate",
+        pay_donation_str_1="How much do you want to pay? Enter the amount.\n"
+                           "❗️ Cents and pennies separated by commas.\n"
+                           "Enter the amount:",
+        pay_donation_str_2="The main currency of the administrator ❗️ {}",
+        allow_donation_text="Press '💰 Create a donation or press '🔙 Back'",
         pay_donation_str_4="Admin has not set up payments yet 🤷‍",
         pay_donation_str_5="Oops, you entered the wrong number. Try again.",
 
@@ -217,17 +203,17 @@ Here you can order promotion from this chatbot and their channels
 
         edit_button_str_1="Enter a new 🤝 greeting for users",
         edit_button_str_2="✅ It's done.!",
-        edit_donation="Edit donation",
-        donations_edit_str_1="Test payment. Ignore it",
-        donations_edit_str_2="What to do with the payment?",
+
+        donations_edit_str_1="Test donation. Ignore it",
+        donations_edit_str_2="What to do with the payment? Or press '🔙 Back",
         donations_edit_str_3="Yes, I'm sure.",
         donations_edit_str_4="No, cancel",
         donations_edit_str_5="🗑 Are you sure you want to delete this payment?",
-        donations_edit_str_6="What exactly do you want to change? ",
-        donations_edit_str_7="Write a new name for the payment. ",
-        donations_edit_str_8="Do description of payment for users or write how you will "
-                             "utilize the money? ",
-        donations_edit_str_9=" Choose the main currency.",
+        donations_edit_str_6="What exactly do you want to change? Or press '🔙 Back'",
+        donations_edit_str_7="Write a new title for the payment. Or press '🔙 Back'",
+        donations_edit_str_8="Do description of payment for users or write "
+                             "how you will utilize the money? Or press '🔙 Back'",
+        donations_edit_str_9=" Choose the main currency. Or press '🔙 Back'",
         donations_edit_str_10="✅ It’s in the bag!",
         donations_edit_str_11="🗑 The payment is deleted",
         donations_edit_str_12="Enter a new token of your payment system",
@@ -247,7 +233,7 @@ Here you can order promotion from this chatbot and their channels
         survey_str_7="This is a list of active surveys:",
         survey_str_8="Choose a survey to check 📊 results",
         survey_str_9=""" You haven't created a survey yet. \n
-    Press "Create" or '🔙 Back'""",
+Press "Create" or '🔙 Back'""",
         survey_str_10='The name of the user: {},\nQuestion: {}\nAnswer :{} \n\n',
         survey_str_11="The data you requested: \n {}",
         survey_str_12="Wait until someone answers. =/",
@@ -255,63 +241,61 @@ Here you can order promotion from this chatbot and their channels
         survey_str_14="List of surveys:",
         survey_str_15="🗑 Choose a survey to delete ",
         survey_str_16="""You haven't created a survey yet. \n,
-    Press "Create" or '🔙 Back'""",
+Press "Create" or '🔙 Back'""",
         survey_str_17="🗑 Survey called '{}' removed",
         survey_str_18="List of active surveys:",
         survey_str_19="Choose the survey you want to send to users",
         survey_str_20="Hi, please take the survey..\n" \
                       "Press '🏁 Start' to begin ",
         survey_str_21="Damn it, the survey is not sent 🤨 \n you have no users. Share the link of your bot in the social"
-                      "networks and  online resource or invite your friends. Somebody will come along soon 🐣",
+                      "networks and  online resource or invite your friends. Somebody will come along soon ",
         survey_str_22="✅ The survey is sent.",
         survey_str_23="""You haven't done the survey yet.\n
-    Press "Create" or '🔙 Back'""",
+Press "Create" or '🔙 Back'""",
         survey_str_24="Survey has been deleted. You can create a new one or return to menu",
 
-        create_donation_str_1="Test payment. Ignore it",
-        create_donation_str_2="✏️ Write the name of the payment",
+        create_donation_str_1="Test donation. Ignore it",
+        create_donation_str_2="✏️ Write the name of the donation",
         create_donation_str_3="""How to get a token payment system:\n1st Step: Go to @botfather and enter /mybots.
-    Choose your bot and press “Payments". Choose a provider. \nWe advise to use „Stripe“ because of low Acquiring
-    comisson for European card. \n2nd Step: Authorize yourself in the chatbot of the chosen provider. Just follow
-    instructions then you will get a token-access, that you should copy.\n
-    3nd Step :Go back to your bot and create /newdonate.
-    Insert the token: \n""",
-        create_donation_str_4="✏️ Write the name of the payment",
-        create_donation_str_5="Wrong token. Check it and send it again.",
-        create_donation_str_6="Tell everyone about the fundraising and how you will utilize the money",
+Choose your bot and press “Payments". Choose a provider. \nWe advise to use „Stripe“ because of low Acquiring
+comisson for European card. \n2nd Step: Authorize yourself in the chatbot of the chosen provider. Just follow
+instructions then you will get a token-access, that you should copy.\n3nd Step :Go back to your bot and create /newdonate.
+Insert the token: \n""",
+        create_donation_str_4="✏️ Write the title of the donation",
+        create_donation_str_5="Wrong token. Check it and send again.",
+        create_donation_str_6="Tell everyone about the donation and how you will utilize the money",
         create_donation_str_7="Choose the main currency",
         create_donation_str_8="✅Great! Now you can accept payments from bot users. ❗ ️Users only need a Bank card.\n" \
                               "Don't forget to tell about it.",
 
         answer_survey_str_1="Please answer the question.\n\n",
         answer_survey_str_2="Question:{}, Answer: {} \n",
-        answer_survey_str_3="☺️ Thank you for answering my questions!\n",
+        answer_survey_str_3="☺️ Thank you for answering.\n",
         answer_survey_str_4="See you later!",
         survey_help_admin="""
-    ❓ Surveys ❓
-    """,
-        survey_mode_str="Survey",
+Surveys
+""",
+        survey_mode_str="❔ Survey",
 
         edit_button_button="✏️ Edit a button",
         edit_menu_text="🤝 Change the greeting",
         add_menu_buttons_help="""
-    🛠 Settings ⚙️
-    """,
+Settings
+Click "📌 Create a button", to add a content.
+""",
         add_menu_buttons_str_1="Write the name of the button or choose from the template.",
         add_menu_buttons_str_2='Send text, picture, document, video or music. ' \
                                '❗️ The text added to the description is not displayed in the button.',
         add_menu_buttons_str_3='A button with this name already exists. Think of another name.',
         add_menu_buttons_str_4="Great! Add something else.\n'\
-    'or press '✅ Done'",
+'or press '✅ Done'",
         add_menu_buttons_str_5='✅Done! The button will be available in the title menu \n {}',
-        add_menu_buttons_str_6="🗑 Choose the button you want to delete ",
+        add_menu_buttons_str_6="🗑 Choose the button to delete ",
         add_menu_buttons_str_7="""Oops. You don't have buttons yet. Click "Create""",
         add_menu_buttons_str_8='🗑 Button {} removed',
         add_menu_buttons_str_9="🛑 You canceled the creation of a button.",
-        add_menu_buttons_str_10="You can crete a new button or return to menu",
-        add_button="Add",
-        add_button_content="Or add content to the button"
-    ),
+        add_menu_buttons_str_10="You can create a new button or return to menu",
+        add_button="Add"),
 
     "RUS": dict(
         start_help="Привет! Меня зовут {}. Управляй мной в этом меню. "
@@ -353,6 +337,7 @@ Here you can order promotion from this chatbot and their channels
         choose_channel_to_send_poll='Выбери канал, чтобы отправить опрос',
         choose_channel_to_send_survey='Выбери канал, чтобы отправить открытый опрос',
         try_to_add_already_exist_channel='✅ Этот канал уже добавлен',
+
         users_module="👨‍👩‍👧‍👦Юзеры",
         users_module_help="Юзеры бота",
         add_user_category="Добавить группу",
@@ -364,15 +349,15 @@ Here you can order promotion from this chatbot and their channels
                               "Нажми «Опросить юзеров», чтобы они добавили себя в группу.",
         send_user_category_17="🗑 Название группы удалено",
 
-        send_category_question_3="Выбери группу. От этого зависит контент, которые ты получаешь и"
-                                 " в какой почтовый ящик приходят твои сообщения",
+        send_category_question_3="Выбери группу. От этого зависит контент,"
+                                 " которые ты получаешь и в какой почтовый ящик приходят твои сообщения",
         send_category_question_4="✅Опрос отправлен",
         users_help_admin="Добавь группу юзеров чтобы сортировать их сообщения.\n"
-                         "Например, ты хочешь продать рекламный пост. Создай группу юзеров «Реклама» и"
-                         " получай предложения в этот почтовый ящик.",
+                         "Например, ты хочешь продать рекламный пост."
+                         " Создай группу юзеров «Реклама» и получай предложения в этот почтовый ящик.",
         user_chooses_category="✅Спасибо",
         user_mode_help_admin="""
-        Нажми «Подтвердить», чтобы включить бота в режиме юзера.
+Нажми «Подтвердить», чтобы включить бота в режиме юзера.
 
         Нажми «Назад», чтобы вернутся в нормальный режим
         """,
@@ -387,7 +372,7 @@ Here you can order promotion from this chatbot and their channels
         send_message_button_1="📤 Отправить",
         send_message_button_2="📥 Входящие",
         send_message_12="Напиши сообщение. Админ его прочитает",
-        send_message_13="О чем ты хочешь нам расказать? Выбери тему своего сообщения",
+        send_message_13="Выбери тему сообщения",
         send_message_14="TEST",
         send_message_15="TEST",
         send_message_16="TEST",
@@ -403,26 +388,27 @@ Here you can order promotion from this chatbot and their channels
         send_message_5="✅ Спасибо, почтовый голубь в пути 🕊 ",
         send_message_6="😉 Полковнику никто не пишет ",
         send_message_admin="""
-        Сообщения
-        """,
+Сообщения
+""",
         send_message_user="""
-        Напиши сообщение. Я прочту.
-        """,
+Напиши сообщение. Я прочту.
+""",
         send_donation_request_1="Напиши юзерам куда ты потратишь деньги. ",
         send_donation_request_2="Напиши ещё сообщение или нажми '✅ Готово'",
         send_donation_request_3="💸 Отправлено",
+
         answer_button_str="Ответить",
         cancel_button_survey="🔚 Отменить опрос",
         cancel_button="🛑 Отменить",
         remove_button="🗑 Удалить",
-        send_survey_to_channel='Открытй опрос в канал',
-        send_poll_to_channel='Опрос в канал',
+        send_survey_to_channel='Отправить открытый опрос',
+        send_poll_to_channel='Отправить опрос',
         send_post_to_channel='Запостить',
         send_donation_to_channel="Напомнить о донатах",
-        donate_button='Задонатить',
+        donate_button='💸 Задонатить',
         back_button="🔙 Назад",
         done_button="✅ Готово",
-        create_button="📌 Создать кнопку",
+        create_button="📌 Создать",
         delete_content="🗑Контент удален ",
         delete_button="🗑 Удалить кнопку",
         delete_button_str="🗑 Удалить",
@@ -477,19 +463,19 @@ Here you can order promotion from this chatbot and their channels
         polls_str_18=" Вот результаты. Проведи новый опрос или вернись в главное меню",
         polls_str_19=" Никто не проголосовал. Ждем результатов",
         polls_help_admin="""
-        Опросы 
-        """,
+Опросы 
+""",
         polls_module_str="Опрос",
 
         pay_donation_str_admin="""
-        Платежи
-        """, pay_donation_mode_str="Задонатить",
+Платежи
+""",
+        pay_donation_mode_str="Задонатить",
         pay_donation_str_1="Сколько хочешь задонатить?\n"
-                           "❗️ Центы и копейки через запятую.\n"
-                           "Введи сумму:",
-        pay_donation_str_2="❗️ Не забудь- сумма будет в следующей валюте- {}",
+                           "❗️ Центы и копейки через запятую.\nВведи сумму:",
+        pay_donation_str_2="❗️ Основная валюта админа {}",
         allow_donation_text="""Хопла, ты ещё не создал донат. \n 
-               Нажми '💰Создать донат' или нажми '🔙 Назад'""",
+       Нажми '💰Создать донат' или нажми '🔙 Назад'""",
         pay_donation_str_4="🤷‍♂️ Админ не настроил платежи.",
         pay_donation_str_5="Упс, ты ввёл неправильное число. Попробуй ещё раз. \n",
         manage_button_str_1="✏️Выбери кнопку, чтобы её отредактировать или нажми '🔙 Назад'",
@@ -531,7 +517,7 @@ Here you can order promotion from this chatbot and their channels
         survey_str_7="Список активных опросов с открытым ответом:",
         survey_str_8="Выбери опрос, чтобы проверить 📊 результаты",
         survey_str_9=""" Ты ещё не создал опрос. \n
-        Нажми "Создать", или '🔙 Назад'""",
+Нажми "Создать", или '🔙 Назад'""",
         survey_str_10='Имя юзера: {},\nВопрос: {}\nОтвет :{} \n\n',
         survey_str_11="Данные, которые ты хотел: \n {}",
         survey_str_12="Подожди, пока ещё никто не ответил =/",
@@ -539,18 +525,17 @@ Here you can order promotion from this chatbot and their channels
         survey_str_14="Список активных опросов с открытым ответом:",
         survey_str_15="🗑 Выбери опрос для удаления ",
         survey_str_16="""Ты ещё не создал опрос. \n
-        Нажми "❓ Опросить", или '🔙 Назад'""",
+Нажми "❓ Опросить", или '🔙 Назад'""",
         survey_str_17="🗑 Опрос '{}' удалён",
         survey_str_18="Список активных опросов с открытым ответом:",
         survey_str_19="Выбери опрос, чтобы отправить юзерам",
         survey_str_20="Привет, пройди опрос.\n" \
                       "Нажми '🏁 Старт', чтобы начать ",
         survey_str_21="Упс, опрос не отправлен 🤨 \n"
-                      "У тебя ещё нет юзеров. Вставь ссылку на бота в соц. сетях или пригласи друзей. \n" 
-                      "Скоро кто-нибудь придёт 🐣",
+                      "У тебя ещё нет юзеров. Вставь ссылку на бота в соц. сетях или пригласи друзей. \n" "Скоро кто-нибудь придёт 🐣",
         survey_str_22="✅ Опрос отправлен",
         survey_str_23="""Ты ещё не сделал опрос.\n
-        Нажми "Создать", или '🔙 Назад'""",
+Нажми "Создать", или '🔙 Назад'""",
         survey_str_24="🗑Опрос удален. Создай новый или перейди в главное меню",
         create_donation_str_1="Тестовый платёж. Не обращай внимание",
         create_donation_str_2="Напиши заголовок для доната",
@@ -561,6 +546,7 @@ Here you can order promotion from this chatbot and their channels
 2nd Шаг: Авторизуйтесь в чат-боте выбранного провайдера. Просто следуйте
 инструкции, то вы получите токен-доступ, который вы должны скопировать. \n
 3-й шаг: вернись к своему боту и вставь платежный токен.
+https://telegra.ph/Gajd-Podklyuchit-donaty-07-03
 """,
         create_donation_str_4="Напиши заголовок для доната",
         create_donation_str_5="Неверный токен. Проверь его и отправь снова.",
@@ -574,17 +560,17 @@ Here you can order promotion from this chatbot and their channels
         answer_survey_str_3="☺️ Спасибо за ответы!\n",
         answer_survey_str_4="Увидимся!",
         survey_help_admin="""
-        Опрос с открытым ответом
-        """,
-        create_button_str=" 📌 Создать",
-        survey_mode_str="❓Открытые опросы",
+Опрос с открытым ответом
+""",
+        create_button_str="📌 Создать",
+        survey_mode_str="❔ Открытые опросы",
         add_menu_module_button="🛠 Настройки",
         edit_button_button="✏️ Редактировать кнопку",
         edit_menu_text="🤝 Изменить приветствие",
         add_menu_buttons_help="""
-        🛠Настройки\n
-        Нажми "📌 Создать кнопку", чтобы добавить контент
-        """,
+🛠Настройки\n
+Нажми "📌 Создать кнопку", чтобы добавить контент
+""",
         add_menu_buttons_str_1="Названии кнопки или выбери её из шаблона.",
         add_menu_buttons_str_2='Отправь текст, картинку, документ, видео или музыку. \n '
                                '❗️ Не добавляй описание в всплывающем окне. \n '
@@ -602,6 +588,7 @@ Here you can order promotion from this chatbot and their channels
 
         add_button="Добавить",
         add_button_content="Или добавить контент в кнопку"
+
     )}
 
 
