@@ -439,7 +439,7 @@ class PollBot(object):
         chats = chats_table.find({"bot_id": bot.id})
         for chat in chats:
             if chat['chat_id'] != chat_id:
-                if not any(sent_d['id'] == chat['chat_id'] for sent_d in sent):
+                if not any(sent_d == chat['chat_id'] for sent_d in sent):
                     sent.append(chat['chat_id'])
                     poll = polls_table.find_one({'title': poll_name})
                     poll['options'] = ast.literal_eval(poll['options'])
