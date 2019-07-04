@@ -27,7 +27,6 @@ def check_provider_token(provider_token, bot, update):
     bot_token = chatbots_table.find_one({"bot_id": bot.id})["token"]
     prices = [LabeledPrice(string_dict(bot)["create_donation_str_1"], 10000)]
     data = requests.get("https://api.telegram.org/bot{}/sendInvoice".format(bot_token),
-                        # TODO it sends to all users- should send only to admin
                         params=dict(title="test",
                                     description="test",
                                     payload="test",

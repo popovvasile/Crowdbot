@@ -24,11 +24,10 @@ TYPING_TITLE, TYPING_DESCRIPTION, TYPING_CURRENCY, \
 TYPING_TOKEN, TYPING_TOKEN_FINISH, EDIT_FINISH, DOUBLE_CHECK_DELETE, DELETE_FINISH = range(13)
 
 
-def check_provider_token(provider_token, bot):
+def check_provider_token(provider_token, bot, update):
     bot_token = chatbots_table.find_one({"bot_id": bot.id})["token"]
     prices = [LabeledPrice(string_dict(bot)["create_donation_str_1"], 10000)]
     data = requests.get("https://api.telegram.org/bot{}/sendInvoice".format(bot_token),
-
                         params=dict(title="test",
                                     description="test",
                                     payload="test",
@@ -36,8 +35,9 @@ def check_provider_token(provider_token, bot):
                                     currency="USD",
                                     start_parameter="test",
                                     prices=json.dumps([p.to_dict() for p in prices]),
-                                    chat_id=244356086))
+                                    chat_id=update.effective_chat.id))
     return json.loads(data.content)["ok"]
+
 
 
 class EditPaymentHandler(object):
@@ -144,10 +144,7 @@ class EditPaymentHandler(object):
                 reply_markup=reply_markup)
 
         user_data["action"] = txt
-        create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                                callback_data="cancel_donation_edit")]]
-        create_markup = InlineKeyboardMarkup(create_buttons)
-        bot.send_message(chat_id, string_dict(bot)["back_text"], reply_markup=create_markup)
+
 
         return EDIT_FINISH
 
@@ -157,7 +154,10 @@ class EditPaymentHandler(object):
                                                     callback_data="help_module(donation_payment)")])
         finish_markup = InlineKeyboardMarkup(
             finish_buttons)
-
+        buttons = []
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                             callback_data="cancel_donation_edit")])
+        reply_markup = InlineKeyboardMarkup(buttons)
         chat_id, txt = initiate_chat_id(update)
         if user_data["action"] == string_dict(bot)["title_button"]:
             user_data['title'] = txt
@@ -166,11 +166,27 @@ class EditPaymentHandler(object):
         if user_data["action"] == string_dict(bot)["currency_button"]:
             user_data["currency"] = txt
         if user_data["action"] == string_dict(bot)["payment_token_button"]:
-            user_data["payment_token"] = txt
+            if check_provider_token(provider_token=txt, bot=bot, update=update):
+                chatbot = chatbots_table.find_one({"bot_id": bot.id}) or {}
+
+                chatbot["donate"]["payment_token"] = txt
+                chatbots_table.update_one({"bot_id": bot.id}, {'$set': chatbot}, upsert=True)
+                update.message.reply_text(string_dict(bot)["donations_edit_str_13"],
+                                          reply_markup=reply_markup)
+
+                logger.info("Admin {} on bot {}:{} did  the following edit on donation: {}".format(
+                    update.effective_user.first_name, bot.first_name, bot.id, user_data["action"]))
+                return ConversationHandler.END
+            else:
+                update.message.reply_text(
+                    string_dict(bot)["donations_edit_str_14"],
+                    reply_markup=reply_markup)
+
+                return TYPING_TOKEN
 
         chatbot = chatbots_table.find_one({"bot_id": bot.id})
         chatbot["donate"].update(user_data)
-        chatbots_table.replace_one({"bot_id": bot.id}, chatbot)
+        chatbots_table.update_one({"bot_id": bot.id}, {'$set': chatbot}, upsert=True)
         update.message.reply_text(string_dict(bot)["donations_edit_str_10"], reply_markup=finish_markup)
 
         logger.info("Admin {} on bot {}:{} did  the following edit on donation: {}".format(
@@ -210,16 +226,16 @@ class EditPaymentHandler(object):
                 user_data['action'] = txt
                 return EDIT_PAYMENT
 
-    def change_donation_token(self, bot, update, user_data):
-        buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                             callback_data="cancel_donation_edit")])
-        reply_markup = InlineKeyboardMarkup(
-            buttons)
-        update.message.reply_text(
-            string_dict(bot)["donations_edit_str_12"], reply_markup=reply_markup
-        )
-        return TYPING_TOKEN
+    # def change_donation_token(self, bot, update, user_data):
+    #     buttons = list()
+    #     buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
+    #                                          callback_data="cancel_donation_edit")])
+    #     reply_markup = InlineKeyboardMarkup(
+    #         buttons)
+    #     update.message.reply_text(
+    #         string_dict(bot)["donations_edit_str_12"], reply_markup=reply_markup
+    #     )
+    #     return TYPING_TOKEN
 
     def change_donation_token_finish(self, bot, update, user_data):
         buttons = list()
@@ -227,7 +243,7 @@ class EditPaymentHandler(object):
                                              callback_data="cancel_donation_edit")])
         reply_markup = InlineKeyboardMarkup(buttons)
         chat_id, txt = initiate_chat_id(update)
-        if check_provider_token(provider_token=txt, bot=bot):
+        if check_provider_token(provider_token=txt, bot=bot, update=update):
             chatbot = chatbots_table.find_one({"bot_id": bot.id}) or {}
 
             chatbot["donate"]["payment_token"] = txt
@@ -285,11 +301,11 @@ EDIT_DONATION_HANDLER = ConversationHandler(
                                               pass_user_data=True)],
 
         TYPING_TOKEN: [MessageHandler(Filters.text,
-                                      EditPaymentHandler().change_donation_token,
+                                      EditPaymentHandler().change_donation_token_finish,
                                       pass_user_data=True)],
-        TYPING_TOKEN_FINISH: [MessageHandler(Filters.text,
-                                             EditPaymentHandler().change_donation_token_finish,
-                                             pass_user_data=True)],
+        # TYPING_TOKEN_FINISH: [MessageHandler(Filters.text,
+        #                                      EditPaymentHandler().change_donation_token_finish,
+        #                                      pass_user_data=True)],
         DELETE_FINISH: [MessageHandler(Filters.text,
                                        EditPaymentHandler().handle_finish_delete,
                                        pass_user_data=True)],
