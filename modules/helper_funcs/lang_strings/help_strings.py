@@ -53,8 +53,8 @@ def help_strings(bot):
                                  callback_data="send_message_to_users"),
             InlineKeyboardButton(text=string_dict(bot)["send_message_button_2"],
                                  callback_data="inbox_message"),
-            InlineKeyboardButton(text=string_dict(bot)["send_message_button_3"],
-                                 callback_data="show_message_categories"),
+            # InlineKeyboardButton(text=string_dict(bot)["send_message_button_3"],
+            #                      callback_data="show_message_categories"),
         ]
     )
     help_dict["donation_payment"] = dict(
