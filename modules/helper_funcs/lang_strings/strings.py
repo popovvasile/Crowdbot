@@ -194,7 +194,11 @@ Say Hello to the admin!
         polls_str_16=""" You haven't created a survey yet. \n
 Click 'Create' or '🔙 Back'""",
         polls_str_17="🗑 Poll with name {} removed from all chats.",
-        polls_str_18="These are the results. You can create a new poll or return to menu",
+        polls_str_18="These are the results. ",
+        polls_str_18_1="You can create a new poll or return to menu",
+        polls_str_19="Nobody voted yet. Let's wait for results",
+        polls_str_20="You didn't create any polls yet. Create a new one and send it to your users",
+
         polls_help_admin="""
 Polls
 
@@ -424,8 +428,8 @@ Click "📌 Create a button", to add a content.
         cancel_button_survey="🔚 Отменить опрос",
         cancel_button="🛑 Отменить",
         remove_button="🗑 Удалить",
-        send_survey_to_channel='Отправить открытый опрос',
-        send_poll_to_channel='Отправить опрос',
+        send_survey_to_channel='Отправить от. опрос на канал',
+        send_poll_to_channel='Отправить опрос на канал',
         send_post_to_channel='Запостить',
         send_donation_to_channel="Напомнить о донатах в канал",
         donate_button='💸 Задонатить',
@@ -484,9 +488,11 @@ Click "📌 Create a button", to add a content.
         polls_str_14="🗑 Выбери опрос, чтобы удалить",
         polls_str_15="Нажми '🔙 Назад' для отмены",
         polls_str_16="""Нажми '❓ Опросить' или '🔙 Назад'""",
-        polls_str_17="🗑 Опрос {} удален из всех чатов.",
-        polls_str_18=" Вот результаты. Проведи новый опрос или вернись в главное меню",
-        polls_str_19=" Никто не проголосовал. Ждем результатов",
+        polls_str_17="Опрос {} удален из всех чатов.",
+        polls_str_18="Вот результаты.",
+        polls_str_18_1="Проведи новый опрос или вернись в главное меню",
+        polls_str_19="Никто не проголосовал. Ждем результатов",
+        polls_str_20="У тебя еще нет опросов. Создай новый опрос чтобы отправить его юзерам",
         polls_help_admin="""
 Опросы 
 """,

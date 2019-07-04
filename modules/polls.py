@@ -34,7 +34,7 @@ POLL_HANDLERS = {
     # POLL_TYPE_INSTANT_RUNOFF: InstantRunoffPollHandler(),
     POLL_TYPE_INSTANT_RUNOFF_CUSTOM_DESCRIPTION: CustomDescriptionInstantRunoffPollHandler(),
     POLL_TYPE_CUSTOM_DESCRIPTION: CustomDescriptionHandler(),
-    # POLL_TYPE_MULTIPLE_OPTIONS: MultipleOptionsHandler(),
+    POLL_TYPE_MULTIPLE_OPTIONS: MultipleOptionsHandler(),
 }
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -183,10 +183,10 @@ class PollBot(object):
 
         user_data.clear()
         send_buttons = [[InlineKeyboardButton(text=string_dict(bot)["menu_button"],
-                                              callback_data="cancel_poll"),
-                         InlineKeyboardButton(text=string_dict(bot)["send_button"],
-                                              callback_data="send_poll_to_users"),
-                         InlineKeyboardButton(text=string_dict(bot)["send_poll_to_channel"],
+                                              callback_data="cancel_poll")],
+                        [InlineKeyboardButton(text=string_dict(bot)["send_button"],
+                                              callback_data="send_poll_to_users")],
+                        [InlineKeyboardButton(text=string_dict(bot)["send_poll_to_channel"],
                                               callback_data="send_poll_to_channel"),
                          ]]
         send_markup = InlineKeyboardMarkup(
@@ -362,10 +362,8 @@ class PollBot(object):
         vote_instances = []
         for instance in old_instances:
             vote_instances.append(instance["votes"])
-            print(instance["votes"])
 
         if len(vote_instances) > 0:
-            # TODO this makes no sense at all- we should have the posibility to add toghether the results of different instaces of the polls
             vote_instances[0] = ast.literal_eval(vote_instances[0])
             vote_instances[0].update(poll["votes"])
             poll["votes"] = vote_instances[0]
@@ -380,7 +378,6 @@ class PollBot(object):
             votes_dict.update(ast.literal_eval(d))
         if votes_dict:
             poll["votes"] = votes_dict
-
         bot.edit_message_text(text=self.assemble_message_text(poll),
                               parse_mode='Markdown',
                               reply_markup=self.assemble_inline_keyboard(poll),
@@ -416,14 +413,23 @@ class PollBot(object):
                          string_dict(bot)["polls_str_9"], reply_keyboard=reply_markup)
 
         polls_list_of_dicts = polls_table.find({"bot_id": bot.id})
-        command_list = [command['title'] for command in polls_list_of_dicts]
-        reply_keyboard = [command_list]
-        bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(bot)["polls_str_10"],
-                         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
-        bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
-        return TYPING_SEND_TITLE
+        if polls_list_of_dicts.count() != 0:
+            command_list = [command['title'] for command in polls_list_of_dicts]
+            reply_keyboard = [command_list]
+            bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(bot)["polls_str_10"],
+                             reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+            bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                               message_id=update.callback_query.message.message_id)
+            return TYPING_SEND_TITLE
+        else:
+            admin_keyboard = [
+                InlineKeyboardButton(text=string_dict(bot)["create_button_str"], callback_data="create_poll"),
+                InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(polls)")]
+            bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(bot)["polls_str_20"],
+                             reply_markup=InlineKeyboardMarkup([admin_keyboard]))
+            return ConversationHandler.END
 
     def handle_send_title(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
@@ -461,16 +467,26 @@ class PollBot(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         polls_list_of_dicts = polls_table.find({"bot_id": bot.id})
-        command_list = [command['title'] for command in polls_list_of_dicts]
-        reply_keyboard = [command_list]
+        if polls_list_of_dicts.count() > 0:
 
-        bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(bot)["polls_str_13"],
-                         reply_markup=ReplyKeyboardMarkup(reply_keyboard,
-                                                          one_time_keyboard=True))
-        bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(bot)["polls_str_15"], reply_markup=reply_markup)
-        return CHOOSE_TITLE_RESULTS
+            command_list = [command['title'] for command in polls_list_of_dicts]
+            reply_keyboard = [command_list]
+
+            bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(bot)["polls_str_13"],
+                             reply_markup=ReplyKeyboardMarkup(reply_keyboard,
+                                                              one_time_keyboard=True))
+            bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(bot)["polls_str_15"], reply_markup=reply_markup)
+            return CHOOSE_TITLE_RESULTS
+        else:
+            admin_keyboard = [
+                InlineKeyboardButton(text=string_dict(bot)["create_button_str"], callback_data="create_poll"),
+                InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(polls)")]
+            bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(bot)["polls_str_20"],
+                             reply_markup=InlineKeyboardMarkup([admin_keyboard]))
+            return ConversationHandler.END
 
     def handle_polls_results_title(self, bot, update):
         create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["create_button_str"],
@@ -478,22 +494,37 @@ class PollBot(object):
                            InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                 callback_data="help_module(polls)")],
                           [InlineKeyboardButton(text=string_dict(bot)["send_button"],
-                                                callback_data="send_survey_to_users")]]
+                                                callback_data="send_poll_to_users")]]
         create_markup = InlineKeyboardMarkup(create_buttons)
         chat_id, txt = initiate_chat_id(update)
-        poll_instance = self.deserialize(polls_table.find_one({"title": txt, "bot_id": bot.id}))
+        poll_instances = poll_instances_table.find({"title": txt, "bot_id": bot.id})
+        new_poll_instances = []
+        for poll_instance in poll_instances:
+            if "options" in poll_instance:
+                poll_instance["options"] = ast.literal_eval(poll_instance["options"])
+            if "meta" in poll_instance:
+                poll_instance["meta"] = ast.literal_eval(poll_instance["meta"])
+            if "votes" in poll_instance:
+                poll_instance["votes"] = ast.literal_eval(poll_instance["votes"])
 
-        # if poll_instance:
+            new_poll_instances.append(poll_instance)
+        poll = new_poll_instances[0]
+        for other_poll in poll_instances:
+            poll.update(other_poll)
+        poll["options"] = json.dumps(poll["options"])
+        if "meta" in poll:
+            poll["meta"] = json.dumps(poll["meta"])
+
+        print(poll)
+        poll_instance = self.deserialize(poll)
         bot.send_message(update.message.chat.id,
-                         string_dict(bot)["polls_str_13"],
+                         string_dict(bot)["polls_str_18_1"],
                          reply_markup=self.assemble_inline_keyboard(poll_instance, True),
                          parse_mode='Markdown'
                          )
         bot.send_message(update.message.chat.id, string_dict(bot)["polls_str_18"],
                          reply_markup=create_markup)
-        # else:
-        #     bot.send_message(update.message.chat.id, string_dict(bot)["polls_str_18"],
-        #                      reply_markup=send_markup)
+
 
         return ConversationHandler.END
 
@@ -575,7 +606,6 @@ DELETE_POLLS_HANDLER = ConversationHandler(
 
                ]
 )
-
 
 POLL_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=PollBot().start,

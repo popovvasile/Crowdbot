@@ -113,9 +113,9 @@ def helpable_dict(bot):
     admin_rus["❔ Открытые опросы"] = "surveys"
     admin_rus["❓ Опросы"] = "polls"
     admin_rus["💸 Донаты"] = "donation_payment"
-    admin_rus["Пользователи"] = "users"
-    admin_rus["🛠 Настройки"] = "menu_buttons"
+    # admin_rus["Пользователи"] = "users"
     admin_rus["👤 Режим юзера"] = "user_mode"
+    admin_rus["🛠 Настройки"] = "menu_buttons"
 
     admin_eng = OrderedDict()
     admin_eng["✉️ Messages"] = "messages"
@@ -123,9 +123,10 @@ def helpable_dict(bot):
     admin_eng['❔ Surveys'] = "surveys"
     admin_eng["❓ Polls"] = "polls"
     admin_eng["💸 Donations"] = "donation_payment"
-    admin_eng["Users"] = "users"
-    admin_eng["🛠 Settings"] = "menu_buttons"
+    # admin_eng["Users"] = "users"
     admin_eng["👤 User view"] = "user_mode"
+    admin_eng["🛠 Settings"] = "menu_buttons"
+
 
     lang_dicts = {"ENG": dict(
         ALL_MODULES=[],

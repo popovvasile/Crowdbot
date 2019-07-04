@@ -57,6 +57,7 @@ class AnswerSurveys(object):
         })
         if "answers" not in survey:
             survey["answers"] = []
+            surveys_table.update({"title": survey["title"]}, survey)
         for index, answer in enumerate(survey["answers"]):
             if answer.get('user_id', "") == update.callback_query.message.from_user.id:
                 survey["answers"][index] = []
@@ -83,7 +84,7 @@ class AnswerSurveys(object):
         answer = update.message.text
         user_id = update.message.from_user.id
         if "answers" not in user_data:
-            user_data["answers"] = list()
+            user_data["answers"] = survey["answers"]
         user_data["answers"].append({"user_id": user_id,
                                      "question_id": int(user_data["question_id"]),
                                      "title": survey["title"],
