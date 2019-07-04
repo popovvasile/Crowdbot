@@ -116,7 +116,7 @@ class PollBot(object):
                                       replu_markup=reply_markup)
             return TYPING_META
         else:
-            update.message.reply_text(string_dict(bot)["polls_str_4"], replu_markup=reply_markup)
+            update.message.reply_text(string_dict(bot)["polls_str_3"], replu_markup=reply_markup)
             return TYPING_OPTION
 
     def handle_option(self, bot, update, user_data):
@@ -185,7 +185,7 @@ class PollBot(object):
         send_buttons = [[InlineKeyboardButton(text=string_dict(bot)["menu_button"],
                                               callback_data="cancel_poll"),
                          InlineKeyboardButton(text=string_dict(bot)["send_button"],
-                                              callback_data="send_survey_to_users"),
+                                              callback_data="send_poll_to_users"),
                          InlineKeyboardButton(text=string_dict(bot)["send_poll_to_channel"],
                                               callback_data="send_poll_to_channel"),
                          ]]
@@ -627,7 +627,7 @@ SEND_POLLS_HANDLER = ConversationHandler(
                   CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll")
                   ],
     states={
-        NOT_ENGAGED_SEND: [CommandHandler('send_survey_to_users', PollBot().handle_send_poll),
+        NOT_ENGAGED_SEND: [CommandHandler('send_poll_to_users', PollBot().handle_send_poll),
                            CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
                            CommandHandler('cancel', PollBot().cancel), ],
         TYPING_SEND_TITLE: [MessageHandler(Filters.text, PollBot().handle_send_title, pass_user_data=True),
