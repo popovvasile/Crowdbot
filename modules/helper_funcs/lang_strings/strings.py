@@ -191,7 +191,7 @@ Say Hello to the admin!
         polls_str_13="Choose a poll to see 📊 the results",
         polls_str_14="🗑 Choose a poll to delete",
         polls_str_15="Press '🔙 Back' to cancel",
-        polls_str_16=""" You haven't created a survey yet. \n
+        polls_str_16=""" You haven't created a poll yet. \n
 Click 'Create' or '🔙 Back'""",
         polls_str_17="🗑 Poll with name {} removed from all chats.",
         polls_str_18="These are the results. ",
