@@ -29,7 +29,7 @@ class AddMessageCategory(object):
             buttons)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        bot.send_message(update.callback_query.message.chat.id,
+        bot.send_message(update.callback_query.message.chat_id,
                          string_dict(bot)["send_message_14"], reply_markup=reply_markup)
 
         return TOPIC
@@ -43,7 +43,7 @@ class AddMessageCategory(object):
                                              callback_data="help_module(messages)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
-        bot.send_message(update.message.chat.id,
+        bot.send_message(update.message.chat_id,
                          string_dict(bot)["send_message_15"],
                          reply_markup=reply_markup)
         return ConversationHandler.END
@@ -59,7 +59,7 @@ class MessageCategory(object):
                     ]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
-        bot.send_message(update.callback_query.message.chat.id,
+        bot.send_message(update.callback_query.message.chat_id,
                          string_dict(bot)["send_message_16"], reply_markup=reply_markup)
 
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -71,7 +71,7 @@ class MessageCategory(object):
                                                     .format(category["category"]))]]
             delete_markup = InlineKeyboardMarkup(
                 delete_buttons)
-            bot.send_message(update.callback_query.message.chat.id, category["category"],
+            bot.send_message(update.callback_query.message.chat_id, category["category"],
                              reply_markup=delete_markup)
 
         return ConversationHandler.END
@@ -88,7 +88,7 @@ class DeleteMessageCategory(object):
             buttons)
         categories_table.delete_one({"category": update.callback_query.data.replace("delete_category_", "")})
 
-        bot.send_message(update.callback_query.message.chat.id,
+        bot.send_message(update.callback_query.message.chat_id,
                          string_dict(bot)["send_message_17"], reply_markup=reply_markup)
 
         return ConversationHandler.END
@@ -104,24 +104,24 @@ class SendMessageToAdmin(object):
             buttons)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        bot.send_message(update.callback_query.message.chat.id,
+        bot.send_message(update.callback_query.message.chat_id,
                          string_dict(bot)["send_message_12"], reply_markup=reply_markup)
         # categories = categories_table.find()
         # if categories.count() > 0:
-        #     bot.send_message(update.callback_query.message.chat.id,
+        #     bot.send_message(update.callback_query.message.chat_id,
         #                      string_dict(bot)["send_message_13"],
         #                      reply_markup=ReplyKeyboardMarkup([[
         #                          x["category"]] for x in categories
         #                      ]))
         #
         # else:
-        #     bot.send_message(update.callback_query.message.chat.id,
+        #     bot.send_message(update.callback_query.message.chat_id,
         #                      string_dict(bot)["send_message_13"])
 
         return MESSAGE
 
     def send_topic(self, bot, update, user_data):
-        bot.send_message(update.message.chat.id,
+        bot.send_message(update.message.chat_id,
                          random.choice(string_dict(bot)["polls_affirmations"]), reply_markup=ReplyKeyboardRemove())
         user_data["topic"] = update.message.text
         buttons = list()
@@ -129,7 +129,7 @@ class SendMessageToAdmin(object):
                                              callback_data="cancel_send_message")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
-        bot.send_message(update.message.chat.id,
+        bot.send_message(update.message.chat_id,
                          string_dict(bot)["send_message_1"], reply_markup=reply_markup)
 
         return MESSAGE
@@ -216,23 +216,21 @@ class SendMessageToUsers(object):
 
         categories = user_categories_table.find()
         if categories.count() > 0:
-            bot.send_message(update.callback_query.message.chat.id,
+            bot.send_message(update.callback_query.message.chat_id,
                              string_dict(bot)["back_text"],
                              reply_markup=reply_markup)
             categories_list = ["All"] + [x["category"] for x in categories]
             category_markup = ReplyKeyboardMarkup([categories_list])
 
-            bot.send_message(update.callback_query.message.chat.id,
+            bot.send_message(update.callback_query.message.chat_id,
                              string_dict(bot)["send_message_1_1"],
                              reply_markup=category_markup)
             return CHOOSE_CATEGORY
         else:
-            bot.send_message(update.callback_query.message.chat.id,
+            bot.send_message(update.callback_query.message.chat_id,
                              string_dict(bot)["send_message_4"],
-                             reply_markup=InlineKeyboardMarkup(
-                                 [[InlineKeyboardButton(string_dict(bot)["back_button"],
-                                                        "cancel_send_message")]]
-                             ))
+                             reply_markup=reply_markup
+                             )
             return MESSAGE_TO_USERS
 
     def choose_question(self, bot, update, user_data):
@@ -241,10 +239,10 @@ class SendMessageToUsers(object):
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                              callback_data="cancel_send_message")])
         reply_markup = InlineKeyboardMarkup(buttons)
-        bot.send_message(update.message.chat.id,
+        bot.send_message(update.message.chat_id,
                          "Cool",
                          reply_markup=ReplyKeyboardRemove())
-        bot.send_message(update.message.chat.id,
+        bot.send_message(update.message.chat_id,
                          string_dict(bot)["send_message_1"],
                          reply_markup=reply_markup)
         return MESSAGE_TO_USERS
@@ -341,7 +339,7 @@ class AnswerToMessage(object):
 
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        bot.send_message(update.callback_query.message.chat.id,
+        bot.send_message(update.callback_query.message.chat_id,
                          string_dict(bot)["send_message_3"],
                          reply_markup=reply_markup)
         return MESSAGE_TO_USERS
@@ -451,7 +449,7 @@ class DeleteMessage(object):
             # delete all messages from the users
         else:
             users_messages_to_admin_table.delete_one({"bot_id": bot.id, "message_id": int(message_id)})
-        bot.send_message(update.callback_query.message.chat.id,
+        bot.send_message(update.callback_query.message.chat_id,
                          string_dict(bot)["delete_message_str_1"],
                          reply_markup=reply_markup)
         return ConversationHandler.END
@@ -480,7 +478,7 @@ class SeeMessageToAdmin(object):
         if messages.count() != 0:
             for message in messages:
                 if message["timestamp"] + datetime.timedelta(days=14) > datetime.datetime.now():
-                    bot.send_message(update.callback_query.message.chat.id,
+                    bot.send_message(update.callback_query.message.chat_id,
                                      "User's name: {}, \n\nTime: {}".format(
                                          message["user_full_name"],
                                          message["timestamp"].strftime('%d, %b %Y, %H:%M'),
@@ -493,9 +491,9 @@ class SeeMessageToAdmin(object):
                                           ]
                                      ))
         else:
-            bot.send_message(update.callback_query.message.chat.id,
+            bot.send_message(update.callback_query.message.chat_id,
                              string_dict(bot)["send_message_6"])
-        bot.send_message(update.callback_query.message.chat.id,
+        bot.send_message(update.callback_query.message.chat_id,
                          string_dict(bot)["back_text"], reply_markup=delete_markup)
         return ConversationHandler.END
 
@@ -519,7 +517,7 @@ class SeeMessageToAdmin(object):
                     query.message.reply_document(document=content_dict["document_file"])
             if "photo_file" in content_dict:
                 query.message.reply_photo(photo=content_dict["photo_file"])
-        bot.send_message(update.callback_query.message.chat.id,
+        bot.send_message(update.callback_query.message.chat_id,
                          "User's name: {}, \n Timestamp:{}".format(
                              message["user_full_name"],
                              message["timestamp"]
@@ -534,7 +532,7 @@ class SeeMessageToAdmin(object):
 
                               ]
                          ))
-        bot.send_message(update.callback_query.message.chat.id,
+        bot.send_message(update.callback_query.message.chat_id,
                          string_dict(bot)["back_text"],
                          reply_markup=InlineKeyboardMarkup(
                              [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
