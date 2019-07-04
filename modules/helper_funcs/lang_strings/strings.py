@@ -100,7 +100,7 @@ Write your message. I’ll read it.
 
         send_message_12="What do you want to tell us about?",
 
-        send_message_13="What do you want to tell us about? Choose a topic for you message",
+        send_message_13="Choose a topic for you message",
 
         send_message_131="Write the subject of your message",
 
@@ -134,16 +134,16 @@ Say Hello to the admin!
         send_donation_request_3="💸 The message is sent!",
 
         answer_button_str="Answer",
-        send_donation_request_button="Send donation request",
+        send_donation_request_button="Send a 'Donate' button to users",
         cancel_button_survey="🔚 Cancel survey",
-        donate_button="💸 donate",
+        donate_button="💸 Donate",
         back_button="🔙 Back",
         cancel_button="🛑 Cancel",
         remove_button="🗑 Remove",
         send_survey_to_channel='Survey to channel',
         send_poll_to_channel='Poll to channel',
         send_post_to_channel='Write a post',
-        send_donation_to_channel="Send a 'Donate' button",
+        send_donation_to_channel="Send a 'Donate' button to channel",
         done_button="✅ Done",
         create_button=" 📌 Create",
         delete_button="🗑 Delete a button",
@@ -156,6 +156,7 @@ Say Hello to the admin!
         title_button="Name",
         description_button="Description",
         currency_button="Currency",
+        payment_token_button="Provider token",
         delete_donation_button="🗑 Delete the donation",
         great_text="Well done!",
         create_button_button="📌 Create a button ",
@@ -278,10 +279,8 @@ Press "Create" or '🔙 Back'""",
 
         create_donation_str_1="Test donation. Ignore it",
         create_donation_str_2="✏️ Write the name of the donation",
-        create_donation_str_3="""How to get a token payment system:\n1st Step: Go to @botfather and enter /mybots.
-Choose your bot and press “Payments". Choose a provider. \nWe advise to use „Stripe“ because of low Acquiring
-comisson for European card. \n2nd Step: Authorize yourself in the chatbot of the chosen provider. Just follow
-instructions then you will get a token-access, that you should copy.\n3nd Step :Go back to your bot and create /newdonate.
+        create_donation_str_3="""To get a token payment system, follow the instructions:
+https://telegra.ph/Guide-Connect-donations-07-03
 Insert the token: \n""",
         create_donation_str_4="✏️ Write the title of the donation",
         create_donation_str_5="Wrong token. Check it and send again.",
@@ -428,7 +427,7 @@ Click "📌 Create a button", to add a content.
         send_survey_to_channel='Отправить открытый опрос',
         send_poll_to_channel='Отправить опрос',
         send_post_to_channel='Запостить',
-        send_donation_to_channel="Напомнить о донатах",
+        send_donation_to_channel="Напомнить о донатах в канал",
         donate_button='💸 Задонатить',
         back_button="🔙 Назад",
         done_button="✅ Готово",
@@ -448,6 +447,8 @@ Click "📌 Create a button", to add a content.
         title_button="Название",
         description_button="Описание",
         currency_button="Валюта",
+        payment_token_button="Токен оплаты",
+
         delete_donation_button="🗑 Удалить донат",
         great_text="Отлично!",
         create_button_button="📌 Создать кнопку",
@@ -527,7 +528,7 @@ Click "📌 Create a button", to add a content.
         donations_edit_str_12="Введи новый токен твоей платёжной системы",
         donations_edit_str_13="✅ Токен обновлён!",
         donations_edit_str_14="Неверный токен. Проверь его и отправь снова.",
-        send_donation_request_button="Напомнить о донатах",
+        send_donation_request_button="Напомнить юзерам о донатах",
         survey_str_1="Напиши свой заголовок для Опроса. Юзеры ответят на него развёрнуто.",
         survey_str_2="Напиши первый вопрос",
         survey_str_3="Вопрос с таким названием уже есть.\n" \

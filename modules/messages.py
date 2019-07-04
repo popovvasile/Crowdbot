@@ -106,17 +106,19 @@ class SendMessageToAdmin(object):
                            message_id=update.callback_query.message.message_id)
         bot.send_message(update.callback_query.message.chat.id,
                          string_dict(bot)["send_message_12"], reply_markup=reply_markup)
-        categories = categories_table.find()
-        if categories.count() > 0:
-            bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(bot)["send_message_13"],
-                             reply_markup=ReplyKeyboardMarkup([[
-                                 x["category"]] for x in categories
-                             ]))
-        else:
-            bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(bot)["send_message_13"])
-        return TOPIC
+        # categories = categories_table.find()
+        # if categories.count() > 0:
+        #     bot.send_message(update.callback_query.message.chat.id,
+        #                      string_dict(bot)["send_message_13"],
+        #                      reply_markup=ReplyKeyboardMarkup([[
+        #                          x["category"]] for x in categories
+        #                      ]))
+        #
+        # else:
+        #     bot.send_message(update.callback_query.message.chat.id,
+        #                      string_dict(bot)["send_message_13"])
+
+        return MESSAGE
 
     def send_topic(self, bot, update, user_data):
         bot.send_message(update.message.chat.id,
@@ -226,7 +228,11 @@ class SendMessageToUsers(object):
             return CHOOSE_CATEGORY
         else:
             bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(bot)["send_message_4"])
+                             string_dict(bot)["send_message_4"],
+                             reply_markup=InlineKeyboardMarkup(
+                                 [[InlineKeyboardButton(string_dict(bot)["back_button"],
+                                                        "cancel_send_message")]]
+                             ))
             return MESSAGE_TO_USERS
 
     def choose_question(self, bot, update, user_data):
@@ -475,10 +481,10 @@ class SeeMessageToAdmin(object):
             for message in messages:
                 if message["timestamp"] + datetime.timedelta(days=14) > datetime.datetime.now():
                     bot.send_message(update.callback_query.message.chat.id,
-                                     "User's name: {}, \n\nTime: {}\n\nTopic {}".format(
+                                     "User's name: {}, \n\nTime: {}".format(
                                          message["user_full_name"],
                                          message["timestamp"].strftime('%d, %b %Y, %H:%M'),
-                                         message["topic"]
+                                         # message["topic"] \n\nTopic {}
                                      ),
                                      reply_markup=InlineKeyboardMarkup(
                                          [[InlineKeyboardButton(text=string_dict(bot)["view_message_str"],
@@ -494,6 +500,8 @@ class SeeMessageToAdmin(object):
         return ConversationHandler.END
 
     def view_message(self, bot, update):
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
         query = update.callback_query
         message = users_messages_to_admin_table.find_one({"bot_id": bot.id,
                                                           "message_id": int(query.data.replace("view_message_", ""))})

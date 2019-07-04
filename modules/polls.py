@@ -463,7 +463,7 @@ class PollBot(object):
         polls_list_of_dicts = polls_table.find({"bot_id": bot.id})
         command_list = [command['title'] for command in polls_list_of_dicts]
         reply_keyboard = [command_list]
-        print(reply_keyboard)
+
         bot.send_message(update.callback_query.message.chat.id,
                          string_dict(bot)["polls_str_13"],
                          reply_markup=ReplyKeyboardMarkup(reply_keyboard,

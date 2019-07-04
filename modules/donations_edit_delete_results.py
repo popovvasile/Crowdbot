@@ -97,7 +97,7 @@ class EditPaymentHandler(object):
 
         elif txt == string_dict(bot)["edit_donation"]:
             keyboard_markup = [[string_dict(bot)["title_button"], string_dict(bot)["description_button"]],
-                               [string_dict(bot)["currency_button"]]]
+                               [string_dict(bot)["currency_button"], string_dict(bot)["payment_token_button"]]]
             chat_id, txt = initiate_chat_id(update)
             bot.send_message(chat_id, string_dict(bot)["donations_edit_str_6"],
                              reply_markup=ReplyKeyboardMarkup(keyboard_markup))
@@ -136,6 +136,13 @@ class EditPaymentHandler(object):
             update.message.reply_text(string_dict(bot)["donations_edit_str_9"],
                                       reply_markup=ReplyKeyboardMarkup(currency_keyboard,
                                                                        one_time_keyboard=True))
+            # payment_token_button
+        elif txt == string_dict(bot)["payment_token_button"]:
+            bot.send_message(chat_id, string_dict(bot)["great_text"], reply_markup=ReplyKeyboardRemove())
+            update.message.reply_text(
+                string_dict(bot)["donations_edit_str_12"],
+                reply_markup=reply_markup)
+
         user_data["action"] = txt
         create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                 callback_data="cancel_donation_edit")]]
@@ -154,12 +161,13 @@ class EditPaymentHandler(object):
         chat_id, txt = initiate_chat_id(update)
         if user_data["action"] == string_dict(bot)["title_button"]:
             user_data['title'] = txt
-
         if user_data["action"] == string_dict(bot)["description_button"]:
             user_data["description"] = txt
-
         if user_data["action"] == string_dict(bot)["currency_button"]:
             user_data["currency"] = txt
+        if user_data["action"] == string_dict(bot)["payment_token_button"]:
+            user_data["payment_token"] = txt
+
         chatbot = chatbots_table.find_one({"bot_id": bot.id})
         chatbot["donate"].update(user_data)
         chatbots_table.replace_one({"bot_id": bot.id}, chatbot)

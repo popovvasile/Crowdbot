@@ -68,7 +68,7 @@ def help_strings(bot):
                                  callback_data="configure_donation"),
             InlineKeyboardButton(text=string_dict(bot)["ask_donation_button"],
                                  callback_data="send_donation_to_users"),
-            InlineKeyboardButton(text=string_dict(bot)["donate_button"], callback_data="pay_donation"),
+            # InlineKeyboardButton(text=string_dict(bot)["donate_button"], callback_data="pay_donation"),
 
         ],
 
@@ -109,30 +109,30 @@ def help_strings(bot):
 def helpable_dict(bot):
     admin_rus = OrderedDict()
     admin_rus["✉️ Сообщения"] = "messages"
-    admin_rus["Каналы"] = "channels"
-    admin_rus["Открытые опросы"] = "surveys"
-    admin_rus["Опросы"] = "polls"
-    admin_rus["Платёжи"] = "donation_payment"
+    admin_rus["📱 Каналы"] = "channels"
+    admin_rus["❔ Открытые опросы"] = "surveys"
+    admin_rus["❓ Опросы"] = "polls"
+    admin_rus["💸 Донаты"] = "donation_payment"
     admin_rus["Пользователи"] = "users"
-    admin_rus["Настройки"] = "menu_buttons"
-    admin_rus["Режим юзера"] = "user_mode"
+    admin_rus["🛠 Настройки"] = "menu_buttons"
+    admin_rus["👤 Режим юзера"] = "user_mode"
 
     admin_eng = OrderedDict()
     admin_eng["✉️ Messages"] = "messages"
-    admin_eng["Channels"] = "channels"
-    admin_eng['Surveys'] = "surveys"
-    admin_eng["Polls"] = "polls"
-    admin_eng["💰 Manage payments"] = "donation_payment"
+    admin_eng["📱 Channels"] = "channels"
+    admin_eng['❔ Surveys'] = "surveys"
+    admin_eng["❓ Polls"] = "polls"
+    admin_eng["💸 Donations"] = "donation_payment"
     admin_eng["Users"] = "users"
-    admin_eng["Settings"] = "menu_buttons"
-    admin_eng["User view"] = "user_mode"
+    admin_eng["🛠 Settings"] = "menu_buttons"
+    admin_eng["👤 User view"] = "user_mode"
 
     lang_dicts = {"ENG": dict(
         ALL_MODULES=[],
         ADMIN_HELPABLE=admin_eng,
-        ADMIN_USER_MODE={"💰 Manage payments": "donation_payment",
+        ADMIN_USER_MODE={"💸 Donations ": "donation_payment",
                          "✉️ Messages": "messages",
-                         "User view": "user_mode"},
+                         "Admin view": "user_mode"},
         VISITOR_HELPABLE={}
 
     ),
@@ -140,7 +140,9 @@ def helpable_dict(bot):
             ALL_MODULES=[],
             ADMIN_HELPABLE=admin_rus,
             ADMIN_USER_MODE={
-                "Режим админа": "user_mode"},
+                "Режим админа": "user_mode",
+                "💸 Донаты ": "donation_payment",
+                "✉️ Сообщения": "messages",},
             VISITOR_HELPABLE={}
 
         ),

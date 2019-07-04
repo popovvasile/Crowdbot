@@ -57,9 +57,9 @@ class AnswerSurveys(object):
         })
         if "answers" not in survey:
             survey["answers"] = []
-        for answer in survey["answers"]:
+        for index, answer in enumerate(survey["answers"]):
             if answer.get('user_id', "") == update.callback_query.message.from_user.id:
-                survey["answers"] = []
+                survey["answers"][index] = []
                 surveys_table.update({"title": survey["title"]}, survey)
         bot.send_message(update.callback_query.message.chat_id,
                          string_dict(bot)["answer_survey_str_1"]
