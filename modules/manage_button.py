@@ -130,7 +130,7 @@ class ButtonEdit(object):
                          reply_markup=InlineKeyboardMarkup(
                              [[
                                InlineKeyboardButton(string_dict(bot)["back_button"],
-                                                    callback_data="cancel_edit_button")]]
+                                                    callback_data="help_back(menu_buttons)")]]
                          ))
         return ConversationHandler.END
 
@@ -345,7 +345,7 @@ BUTTON_EDIT_HANDLER = ConversationHandler(
     fallbacks=[
         CallbackQueryHandler(callback=ButtonEdit().back,
                              pattern=r"cancel_edit_button", pass_user_data=True),
-        CallbackQueryHandler(callback=ButtonEdit().back, pattern=r"error_back"),
+        CallbackQueryHandler(callback=ButtonEdit().back, pattern=r"error_back", pass_user_data=True),
         CommandHandler('cancel', ButtonEdit().cancel),
         MessageHandler(filters=Filters.command, callback=ButtonEdit().cancel)
     ]
@@ -366,7 +366,7 @@ BUTTON_EDIT_FINISH_HANDLER = ConversationHandler(
     fallbacks=[
         CallbackQueryHandler(callback=ButtonEdit().back,
                              pattern=r"cancel_edit_button", pass_user_data=True),
-        CallbackQueryHandler(callback=ButtonEdit().back, pattern=r"error_back"),
+        CallbackQueryHandler(callback=ButtonEdit().back, pattern=r"error_back", pass_user_data=True),
         CommandHandler('cancel', ButtonEdit().cancel),
         MessageHandler(filters=Filters.command, callback=ButtonEdit().cancel),
 
@@ -387,7 +387,7 @@ BUTTON_ADD_FINISH_HANDLER = ConversationHandler(
     fallbacks=[
         CallbackQueryHandler(callback=ButtonEdit().back,
                              pattern=r"cancel_edit_button", pass_user_data=True),
-        CallbackQueryHandler(callback=ButtonEdit().back, pattern=r"error_back"),
+        CallbackQueryHandler(callback=ButtonEdit().back, pattern=r"error_back", pass_user_data=True),
         CommandHandler('cancel', ButtonEdit().cancel),
         MessageHandler(filters=Filters.command, callback=ButtonEdit().cancel),
 

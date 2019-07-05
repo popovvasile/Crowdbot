@@ -127,7 +127,6 @@ def helpable_dict(bot):
     admin_eng["👤 User view"] = "user_mode"
     admin_eng["🛠 Settings"] = "menu_buttons"
 
-
     lang_dicts = {"ENG": dict(
         ALL_MODULES=[],
         ADMIN_HELPABLE=admin_eng,

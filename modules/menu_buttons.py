@@ -231,7 +231,7 @@ DELETE_BUTTON_HANDLER = ConversationHandler(
     },
 
     fallbacks=[CallbackQueryHandler(callback=AddCommands().back,
-                                    pattern=r"cancel_delete_button"),
+                                    pattern=r"cancel_delete_button", pass_user_data=True),
                CommandHandler('cancel', AddCommands().back),
                MessageHandler(filters=Filters.command, callback=AddCommands().back),
                CallbackQueryHandler(callback=AddCommands().back, pattern=r"error_back"),
