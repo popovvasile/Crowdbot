@@ -134,7 +134,7 @@ bot_schema = \
             'token': str,
             'name': str,
             'superuser': str,
-            'welcomeMessage': str,  # really need to save if it is dynamic component?
+            'welcomeMessage': str,
             'buttons': list([str]),
             'lang': 'ENG',
         },
@@ -407,18 +407,20 @@ class BotFather(object):
         delete_messages(bot, update, user_data)
         # why can access bots variable only one time?
         bots = bot_father_bots_table.find({'admins': update.effective_user.id})
-        user_data['processed_bots'] = [{str(i['_id']): i} for i in bots]
+        user_data['processed_bots'] = dict()
+        for i in bots:
+            user_data['processed_bots'][str(i['_id'])] = i
         if bots.count() > 0:
-            keyboard = create_keyboard([InlineKeyboardButton(i['bot_name'],
-                                                             callback_data=str(i['_id']))
-                                        for i in user_data['processed_bots']],
+            keyboard = create_keyboard([InlineKeyboardButton(bot['bot_name'],
+                                                             callback_data=_id)
+                                        for _id, bot in user_data['processed_bots'].items()],
                                        [self.back_button])
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id,
                                  strings.SELECT_BOT_TO_MANAGE +
                                  your_bots.format(
                                      '\n'.join([f"{i['bot_name']} - {i['bot_username']}"
-                                                for i in user_data['processed_bots']])),
+                                                for _id, i in user_data['processed_bots'].items()])),
                                  reply_markup=keyboard))
             return CHOOSE_BOT_FOR_MANAGE
         else:
@@ -430,8 +432,7 @@ class BotFather(object):
 
     def bot_menu(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
-        user_data['processed_bot'] = bot_father_bots_table.find_one(
-            {'_id': ObjectId(update.callback_query.data)})
+        user_data['processed_bot'] = user_data['processed_bots'][update.callback_query.data]
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id,
                              strings.CHOOSE_ACTION +
