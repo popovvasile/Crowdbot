@@ -1,0 +1,526 @@
+# #!/usr/bin/env python
+# # -*- coding: utf-8 -*-
+import datetime
+from math import ceil
+from pprint import pprint
+from bson import ObjectId
+import requests
+from validate_email import validate_email
+from uuid import uuid4
+from pprint import pprint
+from datetime import datetime
+
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
+from telegram.ext import (CommandHandler, MessageHandler, Filters,
+                          ConversationHandler, RegexHandler, run_async, CallbackQueryHandler, Updater)
+from telegram.error import TelegramError
+import logging
+from bot_father.db import bot_father_bots_table, bot_father_users_table
+from bot_father import strings
+
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# TODO: 1) realy need third step in guide?
+#       3) how to know that bot token not in use
+#       4) unknown commands
+#       5) restriction on bot count
+#       6) changing name loop
+
+categories = {
+  "Musician": [
+    "Discography",
+    "Concerts",
+    "Battles",
+    "New Projects",
+    "Live photos"
+  ],
+  "Art": [
+    "Works ",
+    "Sketches-New Projects ",
+    "Exhibitions  ",
+    "Photos of Studio "
+  ],
+  "Start up": [
+    "Idea ",
+    "Business plan ",
+    "Outlay  ",
+    "Team  "
+  ],
+  "Society": [
+    "Activity",
+    "Archive of Project",
+    "New projects",
+    "Report and accreditation"
+  ],
+  "Writer": [
+    "Bibliography",
+    "Drafts and Passages",
+    "Thoughts",
+    "Poems"
+  ],
+  "Blog": [
+    "Activity",
+    "My Life",
+    "Adventure",
+    "Links"
+  ],
+  "Food": [
+    "Recipes",
+    "Food",
+    "Videos",
+    "Kitchen"
+  ],
+  "Fashion": [
+    "My Style",
+    "Clothes",
+    "References",
+    "Exhibitions"
+  ],
+  "Events": [
+    "Idea",
+    "Calendar",
+    "Team",
+    "Last Events"
+  ]
+}
+
+
+en = '🇬🇧English'
+ru = '🇷🇺Russsian'
+terms_of_use_menu = 'By clicking continue you agree with terms of use. Read it before continue'
+terms_of_use_in_text = 'Вы должны ознакомиться с условиями использования сервиса CrowdRobot и его ограничениями.' \
+                    '\nНастоящее пользовательское соглашение заключается между мной и CrowdRobot. ' \
+                    '\n- Да, я согласен с тем, CrowdRobot не несёт ответственности за любые действия ' \
+                    'или бездействия пользователей и администраторов чатботов.' \
+                    '\n- Да, при использовании CrowdRobot, я обязуюсь не нарушать нормы международного права и нормы ' \
+                    'законодательства страны моего проживания.' \
+                    '\n- Да, до третьего числа каждого месяца, я обязуюсь переводить абонентскую плату в ' \
+                    'размере 12,99 евро, через сервис PayPal в пользу CrowdRobot. В случае неуплаты ' \
+                    'в установленный срок, CrowdRobot приостановит работу вашего бота' \
+                    '\n- CrowdRoBot оставляет за собой право вносить изменения в данное соглашение' \
+                    '\n- CrowdRobot обязуется не передавать персональные данные клиентов третьим лицам.' \
+                    '\n*Я-администратор(владелец) созданного при помощи Crowdrobot чатбота' \
+                    '\n*Чатбот-виртуальный, автоматизированный собеседник на платформе Telegram' \
+                    '\n*CrowdRobot – программа в Telegram. Создаёт чатботов с следующими функциями: ' \
+                    'Обмен платежами, проведение опросов, размещение легального контента, обмен сообщениями.' \
+                    '\n*CrowdRobot подключается к API той платёжной системы, которую выбрал администратор' \
+                    '\nчатбота. Все платежи записываются в базу данных.' \
+                    '\n*CrowdRobot выступает посредником между администратором чатбота и платёжной системой, ' \
+                    'без доступа на изменение суммы платежа. Деньги переводятся с банковского счёта' \
+                    '\nпользователя чатбота на на счёт администратора в выбранной им платёжной системе.' \
+                    '\n(У платёжки с админом тоже есть договор, который это регулирует)' \
+                    '\n✅Да, я согласен с условиями использования сервиса CrowdRoBot '
+token_already_exist = 'You already got bot with this token -> {}. If you want to create new one send me new token that ' \
+                      'you can take from @BotFather'
+
+manage_bots_button = 'Manage my bots'
+contact_button = 'Contact with Crowd Team'
+terms_as_text_button = 'Send as text'
+terms_as_doc_button = 'Send as .docx file'
+agree_with_terms_button = 'I have read. Continue'
+continue_button_text = 'Continue'
+your_bots = '\nYour bots: \n{}'
+bot_template = '\nName: {}' \
+               '\nAdmins: {}' \
+               '\nCreation date: {}'
+
+
+bot_schema = \
+    {
+        'request': {
+            'admins': list([str]),
+            'token': str,
+            'name': str,
+            'superuser': str,
+            'welcomeMessage': str,  # really need to save if it is dynamic component?
+            'buttons': list([str]),
+            'lang': 'ENG',
+        },
+        'timestamp': datetime.now(),
+        'bot_id': int,
+    }
+
+bot_father_users_schema = \
+    {
+        'user_id': int,
+        'chat_id': int,
+        'bots': list([int]),
+        'lang': str,
+
+        # 'change_request': {  # ????
+        #     'bot': str,
+        #     'action': str,
+        #     'started': bool,
+        #     'payload': str
+        # },  # ????
+        # 'info_request_started': bool,  # ????
+
+    }
+
+"""
+FOR CREATING BOT
+
+{'_id': '5d20dacf428e68614b84f685',
+ 'admins': [{'email': 'keikoobro@gmail.com', 'password': '0rSMdQY27BL'}],
+ 'buttons': ['Discography',
+             'Concerts',
+             'Battles',
+             'New Projects',
+             'Live photos'],
+ 'lang': 'ENG',
+ 'name': 'TEST_CROWD',
+ 'superuser': 321858998,
+ 'token': '816134752:AAHYL9pZ8zf3r25Ki-x4KeYURbLZpeLLa3A',
+ 'welcomeMessage': 'HELLO'}
+ 
+FOR DELETING BOT
+{'token': str}
+
+FOR ADD ADMIN
+
+FOR DELETE ADMIN
+
+
+"""
+
+
+def delete_messages(bot, update, user_data):
+    # print(update.effective_message.message_id)
+    # if update.callback_query:
+    #     print(update.callback_query.data)
+    # else:
+    #     print(update.message.text)
+    bot.delete_message(update.effective_chat.id, update.effective_message.message_id)
+    if 'to_delete' in user_data:
+        for msg in user_data['to_delete']:
+            try:
+                if msg.message_id != update.effective_message.message_id:
+                    bot.delete_message(update.effective_chat.id, msg.message_id)
+            except TelegramError as e:
+                print('except in delete_message---> {}, {}'.format(e, msg.message_id))
+                continue
+        user_data['to_delete'] = list()
+    else:
+        user_data['to_delete'] = list()
+
+
+def map_email(email):
+    return {
+        'email': email,
+        'password': str(uuid4())[:8]
+    }
+
+
+def create_keyboard(buttons, extra_buttons):
+    pairs = list(zip(buttons[::2], buttons[1::2]))
+    if len(buttons) % 2 == 1:
+        pairs.append((buttons[-1],))
+    pairs.extend([extra_buttons])
+    return InlineKeyboardMarkup(pairs)
+
+
+TERMS_OF_USE, TOKEN_REQUEST, ADMIN_EMAILS_REQUEST, ADD_EMAIL, WELCOME_MESSAGE, CHOOSE_CATEGORY, \
+    CHOOSE_BOT_FOR_MANAGE, BOT_MANAGE = range(8)
+
+
+class BotFather(object):
+    def __init__(self):
+        self.cancel_creation_button = InlineKeyboardButton(strings.CANCEL_CREATION,
+                                                           callback_data='cancel_creation')
+        self.continue_button = InlineKeyboardButton(continue_button_text,
+                                                    callback_data='continue')
+        self.back_button = InlineKeyboardButton(strings.BACK,
+                                                callback_data='back')
+
+        self.cancel_keyboard = InlineKeyboardMarkup([[self.cancel_creation_button]])
+        self.continue_cancel_keyboard = InlineKeyboardMarkup([[self.cancel_creation_button,
+                                                              self.continue_button]])
+
+        self.lang_keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton(en, callback_data='en')],
+            [InlineKeyboardButton(ru, callback_data='ru')]])
+
+        self.main_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(strings.CREATE_NEW_BOT,
+                                                                         callback_data='create_new_bot'),
+                                                    InlineKeyboardButton(manage_bots_button,
+                                                                         callback_data='manage_bots')],
+                                                   [InlineKeyboardButton(contact_button,
+                                                                         callback_data='contact')]])
+
+        self.terms_of_use_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(terms_as_text_button,
+                                                                                 callback_data='as_text_terms'),
+                                                           InlineKeyboardButton(terms_as_doc_button,
+                                                                                callback_data='as_doc_terms')],
+                                                           [InlineKeyboardButton(agree_with_terms_button,
+                                                                                 callback_data='agree_with_terms')],
+                                                           [self.cancel_creation_button]])
+
+        self.bot_manage_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(strings.DELETE,
+                                                                               callback_data='delete_bot'),
+                                                          InlineKeyboardButton(strings.ADD_ADMINS,
+                                                                               callback_data='add_admins'),
+                                                          InlineKeyboardButton(strings.DELETE_ADMIN,
+                                                                               callback_data='delete_admins')],
+                                                         [self.back_button]])
+
+    # Start conversation /start
+    def start(self, bot, update, user_data):
+        user_data.clear()
+        delete_messages(bot, update, user_data)
+        user_data['to_delete'].append(
+            bot.send_message(update.effective_chat.id,
+                             strings.NO_CONTEXT,
+                             reply_markup=self.main_keyboard))
+        return ConversationHandler.END
+
+    # 'Create bot' button
+    def terms_of_use(self, bot, update, user_data):
+        delete_messages(bot, update, user_data)
+        if update.callback_query.data == 'as_text_terms':
+            user_data['to_delete'].append(
+                bot.send_message(update.effective_chat.id,
+                                 terms_of_use_in_text + terms_of_use_menu,
+                                 reply_markup=self.terms_of_use_keyboard))
+
+        elif update.callback_query.data == 'as_doc_terms':
+            user_data['to_delete'].append(
+                bot.send_document(update.effective_chat.id,
+                                  open('bot_father/terms_of_use.docx', 'rb'),
+                                  caption=terms_of_use_menu,
+                                  reply_markup=self.terms_of_use_keyboard))
+
+        else:
+            user_data['to_delete'].append(
+                bot.send_message(update.effective_chat.id,
+                                 terms_of_use_menu,
+                                 reply_markup=self.terms_of_use_keyboard))
+        return TERMS_OF_USE
+
+    def request_token(self, bot, update, user_data):
+        delete_messages(bot, update, user_data)
+        user_data['to_delete'].append(
+            bot.send_message(update.effective_chat.id,
+                             strings.TOKEN_REQUEST,
+                             reply_markup=self.cancel_keyboard))
+        return TOKEN_REQUEST
+
+    def request_email(self, bot, update, user_data):
+        delete_messages(bot, update, user_data)
+        resp = requests.get(f'https://api.telegram.org/bot{update.message.text}/getMe').json()
+        print(resp)
+        if resp.get('ok'):
+            if not bot_father_bots_table.find_one({'token': update.message.text}):
+                user_data['request'] = dict()
+                user_data['request']['admins'] = list()
+                user_data['request']['token'] = update.message.text
+                # email request
+                user_data['to_delete'].append(
+                    bot.send_message(update.effective_chat.id,
+                                     strings.ADMIN_EMAILS_REQUEST,
+                                     reply_markup=self.cancel_keyboard))
+                return ADMIN_EMAILS_REQUEST
+            else:
+                # bot exist in db
+                user_data['to_delete'].append(
+                    bot.send_message(update.effective_chat.id,
+                                     token_already_exist.format(f"@{resp['result']['username']}"),
+                                     reply_markup=self.cancel_keyboard))
+                return TOKEN_REQUEST
+        else:
+            # wrong token
+            user_data['to_delete'].append(
+                bot.send_message(update.effective_chat.id,
+                                 strings.WRONG_TOKEN,
+                                 reply_markup=self.cancel_keyboard))
+            return TOKEN_REQUEST
+
+    def add_email(self, bot, update, user_data):
+        delete_messages(bot, update, user_data)
+        # https://pypi.org/project/validate_email/
+        is_valid = validate_email(update.message.text)
+        if is_valid:
+            user_data['request']['admins'].append(map_email(update.message.text))
+            user_data['to_delete'].append(
+                bot.send_message(update.effective_chat.id,
+                                 strings.NEXT_EMAIL_REQUEST,
+                                 reply_markup=self.continue_cancel_keyboard))
+        else:
+            user_data['to_delete'].append(
+                bot.send_message(update.effective_chat.id,
+                                 strings.WRONG_EMAIL,
+                                 reply_markup=self.continue_cancel_keyboard
+                                 if user_data['request']['admins'] else
+                                 self.cancel_keyboard))
+        return ADD_EMAIL
+
+    def enter_welcome_message(self, bot, update, user_data):
+        delete_messages(bot, update, user_data)
+        user_data['to_delete'].append(
+            bot.send_message(update.effective_chat.id,
+                             strings.WELCOME_MESSAGE_REQUEST,
+                             reply_markup=self.cancel_keyboard))
+        return WELCOME_MESSAGE
+
+    def category_choose(self, bot, update, user_data):
+        delete_messages(bot, update, user_data)
+        user_data['request']['welcomeMessage'] = update.message.text
+        keyboard = create_keyboard([InlineKeyboardButton(i, callback_data=i)
+                                    for i in categories],
+                                   [self.cancel_creation_button])
+        user_data['to_delete'].append(
+            bot.send_message(update.effective_chat.id,
+                             strings.OCCUPATION_REQUEST,
+                             reply_markup=keyboard))
+        return CHOOSE_CATEGORY
+
+    def finish_creating(self, bot, update, user_data):
+        delete_messages(bot, update, user_data)
+        # request to get bot username for finish message and bot name for api request
+        resp = requests.get(f"https://api.telegram.org/bot{user_data['request']['token']}/getMe").json()
+        # get name before sending coz user can change it between state
+        user_data['request']['name'] = resp['result']['first_name']
+        user_data['request']['buttons'] = categories.get(update.callback_query.data)
+        user_data['request']['lang'] = 'ENG'
+        user_data['request']['superuser'] = update.effective_user.id
+        user_data['to_save'] = dict()
+        user_data['to_save']['request'] = user_data['request']
+        user_data['to_save']['timestamp'] = datetime.now()
+        user_data['to_save']['bot_id'] = resp['result']['id']
+        user_data['to_save']['bot_username'] = '@' + resp['result']['username']
+        user_data['to_save']['bot_name'] = resp['result']['first_name']
+        user_data['to_save']['admins'] = [update.effective_user.id]
+
+        pprint(user_data['to_save'])
+        # resp = requests.post('http://localhost:8000/crowdbot', params=user_data['request'])
+        # pprint(resp)
+        bot_father_bots_table.insert_one(user_data['to_save'])
+        user_data['to_delete'].append(
+            bot.send_message(update.effective_chat.id,
+                             strings.BOT_READY.format(user_data['to_save']['bot_username']),
+                             reply_markup=self.main_keyboard))
+        user_data.clear()
+        return ConversationHandler.END
+
+    def manage_bots(self, bot, update, user_data):
+        delete_messages(bot, update, user_data)
+        # why can access bots variable only one time?
+        bots = bot_father_bots_table.find({'admins': update.effective_user.id})
+        user_data['processed_bots'] = [{str(i['_id']): i} for i in bots]
+        if bots.count() > 0:
+            keyboard = create_keyboard([InlineKeyboardButton(i['bot_name'],
+                                                             callback_data=str(i['_id']))
+                                        for i in user_data['processed_bots']],
+                                       [self.back_button])
+            user_data['to_delete'].append(
+                bot.send_message(update.effective_chat.id,
+                                 strings.SELECT_BOT_TO_MANAGE +
+                                 your_bots.format(
+                                     '\n'.join([f"{i['bot_name']} - {i['bot_username']}"
+                                                for i in user_data['processed_bots']])),
+                                 reply_markup=keyboard))
+            return CHOOSE_BOT_FOR_MANAGE
+        else:
+            user_data['to_delete'].append(
+                bot.send_message(update.effective_chat.id,
+                                 strings.NO_BOTS,
+                                 reply_markup=self.main_keyboard))
+            return ConversationHandler.END
+
+    def bot_menu(self, bot, update, user_data):
+        delete_messages(bot, update, user_data)
+        user_data['processed_bot'] = bot_father_bots_table.find_one(
+            {'_id': ObjectId(update.callback_query.data)})
+        user_data['to_delete'].append(
+            bot.send_message(update.effective_chat.id,
+                             strings.CHOOSE_ACTION +
+                             bot_template.format(user_data['processed_bot']['bot_name'],
+                                                 '\n'.join([i['email']
+                                                            for i in user_data['processed_bot']['request']['admins']]),
+                                                 str(user_data['processed_bot']['timestamp']).split('.')[0]),
+                             reply_markup=self.bot_manage_keyboard))
+        return BOT_MANAGE
+
+    def delete_bot(self, bot, update, user_data):
+        delete_messages(bot, update, user_data)
+
+    def add_admins(self, bot, update, user_data):
+        delete_messages(bot, update, user_data)
+
+    def delete_admins(self, bot, update, user_data):
+        delete_messages(bot, update, user_data)
+
+    def cancel_creation(self, bot, update, user_data):
+        delete_messages(bot, update, user_data)
+
+
+START_HANDLER = CommandHandler('start', BotFather().start, pass_user_data=True)
+
+CREATE_BOT_HANDLER = ConversationHandler(
+    entry_points=[CallbackQueryHandler(BotFather().terms_of_use,
+                                       pattern=r"create_new_bot", pass_user_data=True)],
+    states={
+        TERMS_OF_USE: [CallbackQueryHandler(BotFather().terms_of_use,
+                                            pattern=r"as_text_terms", pass_user_data=True),
+                       CallbackQueryHandler(BotFather().terms_of_use,
+                                            pattern=r"as_doc_terms", pass_user_data=True),
+                       CallbackQueryHandler(BotFather().request_token,
+                                            pattern=r"agree_with_terms", pass_user_data=True)],
+
+        TOKEN_REQUEST: [MessageHandler(Filters.text, BotFather().request_email, pass_user_data=True)],
+
+        ADMIN_EMAILS_REQUEST: [MessageHandler(Filters.text, BotFather().add_email, pass_user_data=True)],
+
+        ADD_EMAIL: [MessageHandler(Filters.text, BotFather().add_email, pass_user_data=True),
+                    CallbackQueryHandler(BotFather().enter_welcome_message,
+                                         pattern=r"continue", pass_user_data=True),
+                    ],
+
+
+        WELCOME_MESSAGE: [MessageHandler(Filters.text, BotFather().category_choose, pass_user_data=True)],
+
+
+        CHOOSE_CATEGORY: [CallbackQueryHandler(BotFather().finish_creating, pass_user_data=True)]
+    },
+
+    fallbacks=[CallbackQueryHandler(BotFather().start,
+                                    pattern=r"cancel_creation", pass_user_data=True)]
+)
+
+MANAGE_BOT_HANDLER = ConversationHandler(
+    entry_points=[CallbackQueryHandler(BotFather().manage_bots,
+                                       pattern=r"manage_bots", pass_user_data=True)],
+    states={
+        CHOOSE_BOT_FOR_MANAGE: [CallbackQueryHandler(BotFather().start,
+                                                     pattern=r"back", pass_user_data=True),
+                                CallbackQueryHandler(BotFather().bot_menu, pass_user_data=True)],
+
+        BOT_MANAGE: [CallbackQueryHandler(BotFather().delete_bot,
+                                          pattern=r"delete_bot", pass_user_data=True),
+                     CallbackQueryHandler(BotFather().add_admins,
+                                          pattern=r"add_admins", pass_user_data=True),
+                     CallbackQueryHandler(BotFather().delete_admins,
+                                          pattern=r"delete_admins", pass_user_data=True)]
+    },
+
+    fallbacks=[CallbackQueryHandler(BotFather().start,
+                                    pattern=r"back", pass_user_data=True)]
+)
+
+
+def main():
+    updater = Updater("836123673:AAE6AyfFCcRxjHZZhJHtdE8mKt8WNfgRm5Q")  # @crowd_supportbot
+    dp = updater.dispatcher
+
+    dp.add_handler(START_HANDLER)
+
+    dp.add_handler(CREATE_BOT_HANDLER)
+    dp.add_handler(MANAGE_BOT_HANDLER)
+
+    updater.start_polling()
+    updater.idle()
+
+
+if __name__ == '__main__':
+    main()
