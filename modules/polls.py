@@ -544,7 +544,7 @@ class PollBot(object):
             bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                message_id=update.callback_query.message.message_id)
             bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(bot)["polls_str_15"], reply_keyboard=reply_markup)
+                             string_dict(bot)["polls_str_15"], reply_markup=reply_markup)
             return CHOOSE_TITLE_DELETE
         else:
             bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -600,7 +600,7 @@ DELETE_POLLS_HANDLER = ConversationHandler(
                               CommandHandler('cancel', PollBot().cancel)],
 
     },
-    fallbacks=[CallbackQueryHandler(callback=PollBot().cancel, pattern=r"cancel_poll"),
+    fallbacks=[
                CallbackQueryHandler(callback=PollBot().back, pattern=r"error_back"),
                CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
 

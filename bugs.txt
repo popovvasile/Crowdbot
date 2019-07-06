@@ -1,8 +1,5 @@
 Вася
-# TODO can't change the payments token in payments
-# TODO fix polls multiple choice
-# TODO ask on beginning what message and user categories should be added
-# TODO fix error handler
+# TODO fix error handler - restart the bot
 # TODO think about an example chatbot (TV8) with CommentBot
 https://github.com/python-telegram-bot/python-telegram-bot/wiki/Code-snippets#simple-way-of-restarting-the-bot
 
