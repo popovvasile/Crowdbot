@@ -28,7 +28,7 @@ WELCOME_MESSAGE_REQUEST = "Enter a welcome message for your users✌️. Don't w
 OCCUPATION_REQUEST = "What do you do? To skip click /next"
 NEXT_EMAIL_REQUEST = "Enter E-Mail addresses of the other admins. " \
                              "They'll get a one-time password that they have to send to your bot."\
-                             "If you are already ready — write 'ok' "
+                             "If you are already ready — press 'continue' "
 YOU_ARE_THE_ONLY_ADMIN = "You are the only admin of this bot"
 COMMANDS = '/new – 🤖 Create a bot'
 '/mybots – 📋 Get list of bots'
@@ -48,7 +48,7 @@ BOT_READY = "Admins are added, the bot is ready ✅"\
 SELECT_BOT_FOR_INFO = "Choose bot"
 SELECT_BOT_TO_MANAGE = "Choose bot"
 ALL_BOTS_COMPLETED = " There is no exit. Create bot🤖 /create"
-BOT_DELETED = 'Bot is deleted 🤕'
+BOT_DELETED = 'Bot({}) is deleted 🤕'
 CANCEL_CREATION = "🛑 Cancel"
 
 """ 
@@ -104,7 +104,7 @@ BOT_READY = "Админы добавлены, бот(@{}) готов ✅ "\
 SELECT_BOT_FOR_INFO = "Выбери бота"
 SELECT_BOT_TO_MANAGE = "Выбери бота"
 ALL_BOTS_COMPLETED = " Выхода нет. Создай бота🤖 /create"
-BOT_DELETED = 'Бот удалён 🤕'
+BOT_DELETED = 'Бот({}) удалён 🤕'
 CANCEL_CREATION = "🛑 Отменить"
 """
 

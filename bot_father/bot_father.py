@@ -17,7 +17,9 @@ from telegram.error import TelegramError
 import logging
 from bot_father.db import bot_father_bots_table, bot_father_users_table
 from bot_father import strings
-
+from bot_father.support_bot import \
+    START_SUPPORT_HANDLER, CONTACTS_HANDLER, SEND_REPORT_HANDLER, \
+    USER_REPORTS_HANDLER, ADMIN_REPORTS_HANDLER, Welcome
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -26,7 +28,7 @@ logger = logging.getLogger(__name__)
 #       3) how to know that bot token not in use
 #       4) unknown commands
 #       5) restriction on bot count
-#       6) changing name loop
+#       6) changing bot_name and bot_username loop
 
 categories = {
   "Musician": [
@@ -121,43 +123,21 @@ terms_as_text_button = 'Send as text'
 terms_as_doc_button = 'Send as .docx file'
 agree_with_terms_button = 'I have read. Continue'
 continue_button_text = 'Continue'
+add_button = 'Add'
+
 your_bots = '\nYour bots: \n{}'
 bot_template = '\nName: {}' \
                '\nAdmins: {}' \
                '\nCreation date: {}'
-
-
-bot_schema = \
-    {
-        'request': {
-            'admins': list([str]),
-            'token': str,
-            'name': str,
-            'superuser': str,
-            'welcomeMessage': str,
-            'buttons': list([str]),
-            'lang': 'ENG',
-        },
-        'timestamp': datetime.now(),
-        'bot_id': int,
-    }
-
-bot_father_users_schema = \
-    {
-        'user_id': int,
-        'chat_id': int,
-        'bots': list([int]),
-        'lang': str,
-
-        # 'change_request': {  # ????
-        #     'bot': str,
-        #     'action': str,
-        #     'started': bool,
-        #     'payload': str
-        # },  # ????
-        # 'info_request_started': bool,  # ????
-
-    }
+confirm_delete = "Are u sure u want to delete bot({})?"
+ENTER_NEW_ADMIN_EMAIL = "Enter E-Mail addresses of the admins. " \
+                        "They'll get a one-time password that they have to send to your bot."\
+                             "If you are already ready — press 'Add' "
+admins_added = 'Admins successfully added'
+only_one_admin = "There are only one admin and it is you"
+add_already_exist_admin = 'Admin => {} already exist. '
+confirm_delete_admin = 'Are u sure u want to delete {} from {} admins?'
+admin_removed_success = '{} have been removed successfully'
 
 """
 FOR CREATING BOT
@@ -181,7 +161,6 @@ FOR DELETING BOT
 FOR ADD ADMIN
 
 FOR DELETE ADMIN
-
 
 """
 
@@ -221,22 +200,40 @@ def create_keyboard(buttons, extra_buttons):
     return InlineKeyboardMarkup(pairs)
 
 
+def emails_layout(user_data, text):
+    result = text + '\n'
+    if len(user_data['request']['admins']) > 0:
+        result += 'Admins:'
+        for i in user_data['request']['admins']:
+            result += f"\n{i['email']}"
+    return result
+
+
 TERMS_OF_USE, TOKEN_REQUEST, ADMIN_EMAILS_REQUEST, ADD_EMAIL, WELCOME_MESSAGE, CHOOSE_CATEGORY, \
-    CHOOSE_BOT_FOR_MANAGE, BOT_MANAGE = range(8)
+    CHOOSE_BOT_FOR_MANAGE, BOT_MANAGE, CONFIRM_DELETE_BOT, ADD_ADMINS, DELETE_ADMIN, CONFIRM_DELETE_ADMIN = range(12)
 
 
 class BotFather(object):
     def __init__(self):
-        self.cancel_creation_button = InlineKeyboardButton(strings.CANCEL_CREATION,
-                                                           callback_data='cancel_creation')
+        self.cancel_button = InlineKeyboardButton(strings.CANCEL_CREATION,
+                                                  callback_data='cancel')
         self.continue_button = InlineKeyboardButton(continue_button_text,
                                                     callback_data='continue')
         self.back_button = InlineKeyboardButton(strings.BACK,
                                                 callback_data='back')
 
-        self.cancel_keyboard = InlineKeyboardMarkup([[self.cancel_creation_button]])
-        self.continue_cancel_keyboard = InlineKeyboardMarkup([[self.cancel_creation_button,
+        self.cancel_keyboard = InlineKeyboardMarkup([[self.cancel_button]])
+        self.continue_cancel_keyboard = InlineKeyboardMarkup([[self.cancel_button,
                                                               self.continue_button]])
+        self.delete_back_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(strings.DELETE,
+                                                                                callback_data='delete_bot'),
+                                                           self.back_button]])
+        self.add_cancel_keyboard = InlineKeyboardMarkup([[self.cancel_button,
+                                                          InlineKeyboardButton(add_button,
+                                                                               callback_data='add_admins')]])
+        self.delete_cancel_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(strings.DELETE_ADMIN,
+                                                                                  callback_data='delete_admin'),
+                                                             self.cancel_button]])
 
         self.lang_keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton(en, callback_data='en')],
@@ -255,10 +252,10 @@ class BotFather(object):
                                                                                 callback_data='as_doc_terms')],
                                                            [InlineKeyboardButton(agree_with_terms_button,
                                                                                  callback_data='agree_with_terms')],
-                                                           [self.cancel_creation_button]])
+                                                           [self.cancel_button]])
 
         self.bot_manage_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(strings.DELETE,
-                                                                               callback_data='delete_bot'),
+                                                                               callback_data='confirm_delete'),
                                                           InlineKeyboardButton(strings.ADD_ADMINS,
                                                                                callback_data='add_admins'),
                                                           InlineKeyboardButton(strings.DELETE_ADMIN,
@@ -344,12 +341,12 @@ class BotFather(object):
             user_data['request']['admins'].append(map_email(update.message.text))
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id,
-                                 strings.NEXT_EMAIL_REQUEST,
+                                 emails_layout(user_data, strings.NEXT_EMAIL_REQUEST),
                                  reply_markup=self.continue_cancel_keyboard))
         else:
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id,
-                                 strings.WRONG_EMAIL,
+                                 emails_layout(user_data, strings.WRONG_EMAIL),
                                  reply_markup=self.continue_cancel_keyboard
                                  if user_data['request']['admins'] else
                                  self.cancel_keyboard))
@@ -368,7 +365,7 @@ class BotFather(object):
         user_data['request']['welcomeMessage'] = update.message.text
         keyboard = create_keyboard([InlineKeyboardButton(i, callback_data=i)
                                     for i in categories],
-                                   [self.cancel_creation_button])
+                                   [self.cancel_button])
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id,
                              strings.OCCUPATION_REQUEST,
@@ -384,29 +381,44 @@ class BotFather(object):
         user_data['request']['buttons'] = categories.get(update.callback_query.data)
         user_data['request']['lang'] = 'ENG'
         user_data['request']['superuser'] = update.effective_user.id
+
         user_data['to_save'] = dict()
-        user_data['to_save']['request'] = user_data['request']
+        # user_data['to_save']['request'] = user_data['request']
+
+        # first entered email is superuser email
+        user_data['to_save']['super_user'] = user_data['request']['admins'][0]
+        user_data['to_save']['super_user']['id'] = update.effective_user.id
+        # admins + super_user
+        user_data['to_save']['all_admins'] = user_data['request']['admins']
+        # admins without super user
+        user_data['to_save']['admins'] = user_data['request']['admins'][1:]
         user_data['to_save']['timestamp'] = datetime.now()
         user_data['to_save']['bot_id'] = resp['result']['id']
         user_data['to_save']['bot_username'] = '@' + resp['result']['username']
         user_data['to_save']['bot_name'] = resp['result']['first_name']
-        user_data['to_save']['admins'] = [update.effective_user.id]
+        user_data['to_save']['admins_id'] = [update.effective_user.id]
+        user_data['to_save']['token'] = user_data['request']['token']
+        user_data['to_save']['lang'] = user_data['request']['lang'] = 'ENG'  # ?
 
         pprint(user_data['to_save'])
-        # resp = requests.post('http://localhost:8000/crowdbot', params=user_data['request'])
-        # pprint(resp)
-        bot_father_bots_table.insert_one(user_data['to_save'])
-        user_data['to_delete'].append(
-            bot.send_message(update.effective_chat.id,
-                             strings.BOT_READY.format(user_data['to_save']['bot_username']),
-                             reply_markup=self.main_keyboard))
-        user_data.clear()
+        resp = requests.post('http://localhost:8000/crowdbot',
+                             json={'params': user_data['request']})
+        if resp.status_code == 200:
+            bot_father_bots_table.insert_one(user_data['to_save'])
+            user_data['to_delete'].append(
+                bot.send_message(update.effective_chat.id,
+                                 strings.BOT_READY.format(user_data['to_save']['bot_username']),
+                                 reply_markup=self.main_keyboard))
+            user_data.clear()
+        else:
+            print('status code not 200!')
+            print(resp)
         return ConversationHandler.END
 
     def manage_bots(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
         # why can access bots variable only one time?
-        bots = bot_father_bots_table.find({'admins': update.effective_user.id})
+        bots = bot_father_bots_table.find({'admins_id': update.effective_user.id})
         user_data['processed_bots'] = dict()
         for i in bots:
             user_data['processed_bots'][str(i['_id'])] = i
@@ -432,25 +444,164 @@ class BotFather(object):
 
     def bot_menu(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
-        user_data['processed_bot'] = user_data['processed_bots'][update.callback_query.data]
+        if update.callback_query.data != 'back':
+            user_data['processed_bot'] = user_data['processed_bots'][update.callback_query.data]
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id,
                              strings.CHOOSE_ACTION +
                              bot_template.format(user_data['processed_bot']['bot_name'],
                                                  '\n'.join([i['email']
-                                                            for i in user_data['processed_bot']['request']['admins']]),
+                                                            for i in user_data['processed_bot']['all_admins']]),
                                                  str(user_data['processed_bot']['timestamp']).split('.')[0]),
                              reply_markup=self.bot_manage_keyboard))
         return BOT_MANAGE
 
-    def delete_bot(self, bot, update, user_data):
+    def confirm_delete_bot(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
+
+        user_data['to_delete'].append(
+            bot.send_message(update.effective_chat.id,
+                             confirm_delete.format(user_data['processed_bot']['bot_username']),
+                             reply_markup=self.delete_back_keyboard))
+        return CONFIRM_DELETE_BOT
+
+    def finish_delete_bot(self, bot, update, user_data):
+        """
+        import requests
+        requests.delete('http://localhost:8000/crowdbot',
+                        params={'token': '771382519:AAECrrClX0pTBqkquXJGVo8zV26G1xakoIM'})
+        import requests
+        requests.delete('http://localhost:8000/crowdbot',
+                        params={'token': '816134752:AAHYL9pZ8zf3r25Ki-x4KeYURbLZpeLLa3A'})
+        """
+        delete_messages(bot, update, user_data)
+        resp = requests.delete('http://localhost:8000/crowdbot',
+                               params={'token': user_data['processed_bot']['token']})
+        if resp.status_code == 200:
+            bot_father_bots_table.delete_one({'_id': user_data['processed_bot']['_id']})
+            user_data['to_delete'].append(
+                bot.send_message(update.effective_chat.id,
+                                 strings.BOT_DELETED.format(
+                                     user_data['processed_bot']['bot_username']),
+                                 reply_markup=self.main_keyboard))
+            user_data.clear()
+        else:
+            print('status code not 200!')
+            print(resp)
+        return ConversationHandler.END
 
     def add_admins(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
+        user_data['request'] = dict()
+        user_data['request']['admins'] = list()
+        user_data['to_delete'].append(
+            bot.send_message(update.effective_chat.id,
+                             ENTER_NEW_ADMIN_EMAIL,
+                             reply_markup=self.cancel_keyboard))
+        # keyboard = create_keyboard([InlineKeyboardButton(i) for ])
+        return ADD_ADMINS
 
-    def delete_admins(self, bot, update, user_data):
+    def continue_add_admins(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
+        # https://pypi.org/project/validate_email/
+        is_valid = validate_email(update.message.text)
+        if is_valid:
+            for admin in user_data['processed_bot']['admins']:
+                if admin['email'] == update.message.text:
+                    user_data['to_delete'].append(
+                        bot.send_message(update.effective_chat.id,
+                                         add_already_exist_admin.format(
+                                             update.message.text),
+                                         reply_markup=self.add_cancel_keyboard
+                                         if user_data['request']['admins'] else
+                                         self.cancel_keyboard))
+                    return ADD_ADMINS
+            user_data['request']['admins'].append(map_email(update.message.text))
+            user_data['to_delete'].append(
+                bot.send_message(update.effective_chat.id,
+                                 emails_layout(user_data, strings.NEXT_EMAIL_REQUEST),
+                                 reply_markup=self.add_cancel_keyboard))
+        else:
+            user_data['to_delete'].append(
+                bot.send_message(update.effective_chat.id,
+                                 emails_layout(user_data, strings.WRONG_EMAIL),
+                                 reply_markup=self.add_cancel_keyboard
+                                 if user_data['request']['admins'] else
+                                 self.cancel_keyboard))
+        return ADD_ADMINS
+
+    def finish_add_admins(self, bot, update, user_data):
+        delete_messages(bot, update, user_data)
+        user_data['request']['token'] = user_data['processed_bot']['token']
+        print('here is user_data["request"]')
+        pprint(user_data['request'])
+        resp = requests.post('http://localhost:8000/crowdbot/admin', json=user_data['request'])
+        if resp.status_code == 200:
+            bot_father_bots_table.update_one({'_id': user_data['processed_bot']['_id']},
+                                             {'$push': {'admins': {'$each': user_data['request']['admins']},
+                                                        'all_admins': {'$each': user_data['request']['admins']}}})
+            user_data['to_delete'].append(
+                bot.send_message(update.effective_chat.id,
+                                 admins_added,
+                                 reply_markup=self.main_keyboard))
+            user_data.clear()
+        else:
+            print('status code not 200!')
+            print(resp)
+        return ConversationHandler.END
+
+    def delete_admin(self, bot, update, user_data):
+        delete_messages(bot, update, user_data)
+        if len(user_data['processed_bot']['admins']) < 2:
+            user_data['to_delete'].append(
+                bot.send_message(update.effective_chat.id,
+                                 only_one_admin,
+                                 reply_markup=self.main_keyboard))
+            user_data.clear()
+            return ConversationHandler.END
+        else:
+            # user_data['proccessed_admins'] = \
+            #     [i['email'] for i in user_data['processed_bot']['admins']]
+            keyboard = create_keyboard([InlineKeyboardButton(admin['email'], callback_data=admin['email'])
+                                        for admin in user_data['processed_bot']['admins']],
+                                       [self.cancel_button])
+            user_data['to_delete'].append(
+                bot.send_message(update.effective_chat.id,
+                                 strings.SELECT_ADMIN_TO_REMOVE,
+                                 reply_markup=keyboard))
+            return DELETE_ADMIN
+
+    def confirm_delete_admin(self, bot, update, user_data):
+        delete_messages(bot, update, user_data)
+        user_data['email_to_delete'] = update.callback_query.data
+        user_data['to_delete'].append(
+            bot.send_message(update.effective_chat.id,
+                             confirm_delete_admin.format(
+                                 user_data['email_to_delete'],
+                                 user_data['processed_bot']['bot_username']),
+                             reply_markup=self.delete_cancel_keyboard))
+        return CONFIRM_DELETE_ADMIN
+
+    def finish_delete_admin(self, bot, update, user_data):
+        delete_messages(bot, update, user_data)
+
+        resp = requests.delete('http://localhost:8000/crowdbot/admin',
+                               json={'params': {'token': user_data['processed_bot']['token'],
+                                                'email': user_data['email_to_delete']}})
+        if resp.status_code == 200:
+            bot_father_bots_table.update_one({'token': user_data['processed_bot']['token']},
+                                             {'$pull': {'admins': {'email': user_data['email_to_delete']},
+                                                        'all_admins': {'email': user_data['email_to_delete']}}})
+            user_data['to_delete'].append(
+                bot.send_message(update.effective_chat.id,
+                                 admin_removed_success.format(user_data['email_to_delete']),
+                                 reply_markup=self.main_keyboard))
+            user_data.clear()
+            return ConversationHandler.END
+        else:
+            print('status code not 200!')
+            print(resp)
+        return ConversationHandler.END
 
     def cancel_creation(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
@@ -486,7 +637,7 @@ CREATE_BOT_HANDLER = ConversationHandler(
     },
 
     fallbacks=[CallbackQueryHandler(BotFather().start,
-                                    pattern=r"cancel_creation", pass_user_data=True)]
+                                    pattern=r"cancel", pass_user_data=True)]
 )
 
 MANAGE_BOT_HANDLER = ConversationHandler(
@@ -497,17 +648,40 @@ MANAGE_BOT_HANDLER = ConversationHandler(
                                                      pattern=r"back", pass_user_data=True),
                                 CallbackQueryHandler(BotFather().bot_menu, pass_user_data=True)],
 
-        BOT_MANAGE: [CallbackQueryHandler(BotFather().delete_bot,
-                                          pattern=r"delete_bot", pass_user_data=True),
+        BOT_MANAGE: [CallbackQueryHandler(BotFather().confirm_delete_bot,
+                                          pattern=r"confirm_delete", pass_user_data=True),
                      CallbackQueryHandler(BotFather().add_admins,
                                           pattern=r"add_admins", pass_user_data=True),
-                     CallbackQueryHandler(BotFather().delete_admins,
-                                          pattern=r"delete_admins", pass_user_data=True)]
+                     CallbackQueryHandler(BotFather().delete_admin,
+                                          pattern=r"delete_admins", pass_user_data=True)],
+
+        CONFIRM_DELETE_BOT: [CallbackQueryHandler(BotFather().bot_menu,
+                                                  pattern='back', pass_user_data=True),
+                             CallbackQueryHandler(BotFather().finish_delete_bot,
+                                                  pattern=r"delete_bot", pass_user_data=True)],
+
+        ADD_ADMINS: [MessageHandler(Filters.text, BotFather().continue_add_admins, pass_user_data=True),
+                     CallbackQueryHandler(BotFather().finish_add_admins,
+                                          pattern=r"add_admins", pass_user_data=True)],
+
+        DELETE_ADMIN: [CallbackQueryHandler(BotFather().start,
+                                            pattern=r"cancel", pass_user_data=True),
+                       CallbackQueryHandler(BotFather().confirm_delete_admin,
+                                            pass_user_data=True)],
+
+        CONFIRM_DELETE_ADMIN: [CallbackQueryHandler(BotFather().finish_delete_admin,
+                                                    pattern=r"delete_admin", pass_user_data=True)]
+
     },
 
     fallbacks=[CallbackQueryHandler(BotFather().start,
-                                    pattern=r"back", pass_user_data=True)]
+                                    pattern=r"back", pass_user_data=True),
+               CallbackQueryHandler(BotFather().start,
+                                    pattern=r"cancel", pass_user_data=True)]
 )
+
+BACK_TO_MAIN_MENU_HANDLER = CallbackQueryHandler(BotFather().start,
+                                                 pattern=r'to_main_menu', pass_user_data=True)
 
 
 def main():
@@ -518,6 +692,15 @@ def main():
 
     dp.add_handler(CREATE_BOT_HANDLER)
     dp.add_handler(MANAGE_BOT_HANDLER)
+
+    dp.add_handler(START_SUPPORT_HANDLER)
+    dp.add_handler(CommandHandler('admin', Welcome().test_admin, pass_user_data=True))
+    dp.add_handler(CONTACTS_HANDLER)
+    dp.add_handler(SEND_REPORT_HANDLER)
+    dp.add_handler(USER_REPORTS_HANDLER)
+    dp.add_handler(ADMIN_REPORTS_HANDLER)
+
+    dp.add_handler(BACK_TO_MAIN_MENU_HANDLER)
 
     updater.start_polling()
     updater.idle()

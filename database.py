@@ -23,7 +23,7 @@ DROPBOX_TOKEN = "xPAGp5mkaqgAAAAAAAABwK7yiygvq9ITgQj7j4KlBU8SYQ3WEmHCQnUxCIZUD-m
 
 # in bot_father.db
 
-# users_messages_to_admin_table = db["users_messages_to_admin"]
+users_messages_to_admin_table = db["users_messages_to_admin"]
 # support_admins_table = db['support_admins']
 # bot_father_bots_table = db['bot_father_bots']
 # bot_father_users_table = db['bot_father_users']

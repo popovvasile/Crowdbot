@@ -3,6 +3,7 @@
 from flask import Flask, request, Response
 import requests
 from pymongo import MongoClient
+from pprint import pprint
 
 app = Flask(__name__)
 client = MongoClient('localhost', 27017)
@@ -99,22 +100,34 @@ def on_delete():
 
 @app.route('/crowdbot/admin', methods=['POST'])
 def admin_on_post():
+    # {"token": str,
+    #  "admins": [{"email": doc["email"],
+    #              "password": doc["password"],
+    #              "active": doc["active"]}]
+    #   }
     doc = request.get_json()  # {token: bot.token, email: chat.changeRequest.payload}
     """Handles POST requests"""
     chatbot = requests.get(url="https://api.telegram.org/bot{}/getMe".format(doc["token"])
                            ).json()
     chatbot_id = chatbot["result"]["id"]
-    users_table.insert_one({"bot_id": chatbot_id,
-                            "email": doc["email"],
-                            "password": doc["password"],
-                            "active": doc["active"]})  # TODO update
+    # users_table.insert_one({"bot_id": chatbot_id,
+    #                         "email": doc["email"],
+    #                         "password": doc["password"],
+    #                         "active": doc["active"]})  # TODO update
+
+    for admin in doc['admins']:
+        users_table.insert_one({"bot_id": chatbot_id,
+                                "email": admin["email"],
+                                "password": admin["password"],
+                                "active": False})  # TODO update
+
     resp = Response({}, status=200, mimetype='application/json')
     return resp
 
 
 @app.route('/crowdbot/admin', methods=['DELETE'])
-def admin_on_delete(self, req, resp):
-    doc = req.params  # {token: bot.token, email: chat.changeRequest.payload}
+def admin_on_delete():
+    doc = request.get_json()["params"]  # {token: bot.token, email: chat.changeRequest.payload}
     chatbot = requests.get(url="https://api.telegram.org/bot{}/getMe".format(doc["token"])
                            ).json()
     chatbot_id = chatbot["result"]["id"]

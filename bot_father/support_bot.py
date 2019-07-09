@@ -461,13 +461,15 @@ class Welcome(object):
         self.user_start_keyboard = InlineKeyboardMarkup(
             list(([InlineKeyboardButton('Send report', callback_data='send_report')],
                   [InlineKeyboardButton('Contacts', callback_data='contacts')],
-                  [InlineKeyboardButton('My reports', callback_data='user_inbox_messages')])))
+                  [InlineKeyboardButton('My reports', callback_data='user_inbox_messages')],
+                  [InlineKeyboardButton('Back', callback_data='to_main_menu')])))
 
         self.admin_start_keyboard = InlineKeyboardMarkup(
             list(([InlineKeyboardButton('Inbox messages', callback_data='admin_inbox_messages')],
                   [InlineKeyboardButton('Manage admins', callback_data='manage_admins')],
                   [InlineKeyboardButton("Black list", callback_data='black_list')],
-                  [InlineKeyboardButton('Trash', callback_data='trash')])))
+                  [InlineKeyboardButton('Trash', callback_data='trash')],
+                  [InlineKeyboardButton('Back', callback_data='to_main_menu')])))
 
         admins = ['@keikoobro']
         admins_schema = {'user_id': int,
@@ -480,8 +482,8 @@ class Welcome(object):
         delete_messages(bot, update, user_data)
         if support_admins_table.find().count() == 0:
             support_admins_table.insert_one({'user_id': update.effective_user.id,
-                                       'chat_id': update.effective_chat.id,
-                                       'username': update.effective_user.name})
+                                             'chat_id': update.effective_chat.id,
+                                             'username': update.effective_user.name})
 
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id, start_message,
@@ -812,7 +814,9 @@ class AdminSupportBot(object):
         pass
 
 
-START_HANDLER = CommandHandler('start', Welcome().start, pass_user_data=True)
+# START_HANDLER = CommandHandler('start', Welcome().start, pass_user_data=True)
+START_SUPPORT_HANDLER = CallbackQueryHandler(Welcome().start,
+                                             pattern=r"contact", pass_user_data=True)
 
 # USER SIDE
 CONTACTS_HANDLER = CallbackQueryHandler(UserSupportBot().contacts, pattern=r"contacts", pass_user_data=True)
@@ -943,7 +947,7 @@ def main():
     updater = Updater("836123673:AAE6AyfFCcRxjHZZhJHtdE8mKt8WNfgRm5Q")  # @crowd_supportbot
     dp = updater.dispatcher
 
-    dp.add_handler(START_HANDLER)
+    dp.add_handler(START_SUPPORT_HANDLER)
 
     # TEST HANDLER TO ENTER ADMIN MODE
     dp.add_handler(CommandHandler('admin', Welcome().test_admin, pass_user_data=True))
