@@ -196,55 +196,6 @@ def keyboard(lang, kb_name):
 
 
 class BotFather(object):
-    """
-    def __init__(self):
-        self.cancel_button = InlineKeyboardButton(strings.CANCEL_CREATION,
-                                                  callback_data='cancel')
-        self.continue_button = InlineKeyboardButton(continue_button_text,
-                                                    callback_data='continue')
-        self.back_button = InlineKeyboardButton(strings.BACK,
-                                                callback_data='back')
-
-        self.cancel_keyboard = InlineKeyboardMarkup([[self.cancel_button]])
-        self.continue_cancel_keyboard = InlineKeyboardMarkup([[self.cancel_button,
-                                                              self.continue_button]])
-        self.delete_back_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(strings.DELETE,
-                                                                                callback_data='delete_bot'),
-                                                           self.back_button]])
-        self.add_cancel_keyboard = InlineKeyboardMarkup([[self.cancel_button,
-                                                          InlineKeyboardButton(add_button,
-                                                                               callback_data='add_admins')]])
-        self.delete_cancel_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(strings.DELETE_ADMIN,
-                                                                                  callback_data='delete_admin'),
-                                                             self.cancel_button]])
-
-        self.lang_keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton(en, callback_data='language/ENG')],
-            [InlineKeyboardButton(ru, callback_data='language/RUS')]])
-
-        self.main_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(strings.CREATE_NEW_BOT,
-                                                                         callback_data='create_new_bot'),
-                                                    InlineKeyboardButton(manage_bots_button,
-                                                                         callback_data='manage_bots')],
-                                                   [InlineKeyboardButton(contact_button,
-                                                                         callback_data='contact')]])
-
-        self.terms_of_use_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(terms_as_text_button,
-                                                                                 callback_data='as_text_terms'),
-                                                           InlineKeyboardButton(terms_as_doc_button,
-                                                                                callback_data='as_doc_terms')],
-                                                           [InlineKeyboardButton(agree_with_terms_button,
-                                                                                 callback_data='agree_with_terms')],
-                                                           [self.cancel_button]])
-
-        self.bot_manage_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(strings.DELETE,
-                                                                               callback_data='confirm_delete'),
-                                                          InlineKeyboardButton(strings.ADD_ADMINS,
-                                                                               callback_data='add_admins'),
-                                                          InlineKeyboardButton(strings.DELETE_ADMIN,
-                                                                               callback_data='delete_admins')],
-                                                         [self.back_button]])
-    """
     # Start conversation /start
     def start(self, bot, update, user_data):
         user_data.clear()
@@ -280,7 +231,13 @@ class BotFather(object):
     def terms_of_use(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
         lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
-        if update.callback_query.data == 'as_text_terms':
+        if update.message.text:
+            user_data['to_delete'].append(
+                bot.send_message(update.effective_chat.id,
+                                 get_str(lang, 'terms_of_use_menu'),
+                                 reply_markup=keyboard(lang, 'terms_of_use_keyboard')))
+
+        elif update.callback_query.data == 'as_text_terms':
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id,
                                  get_str(lang, 'terms_of_use_in_text') +
@@ -463,7 +420,7 @@ class BotFather(object):
             user_data['processed_bot'] = user_data['processed_bots'][update.callback_query.data]
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id,
-                             strings.CHOOSE_ACTION +
+                             get_str(lang, 'CHOOSE_ACTION') +
                              get_str(lang, 'bot_template',
                                      user_data['processed_bot']['bot_name'],
                                      '\n'.join([i['email'] for i in user_data['processed_bot']['all_admins']]),
@@ -516,7 +473,6 @@ class BotFather(object):
             bot.send_message(update.effective_chat.id,
                              get_str(lang, 'ENTER_NEW_ADMIN_EMAIL'),
                              reply_markup=keyboard(lang, 'cancel_keyboard')))
-        # keyboard = create_keyboard([InlineKeyboardButton(i) for ])
         return ADD_ADMINS
 
     def continue_add_admins(self, bot, update, user_data):
@@ -581,8 +537,6 @@ class BotFather(object):
             user_data.clear()
             return ConversationHandler.END
         else:
-            # user_data['proccessed_admins'] = \
-            #     [i['email'] for i in user_data['processed_bot']['admins']]
             kb = create_keyboard([InlineKeyboardButton(admin['email'], callback_data=admin['email'])
                                   for admin in user_data['processed_bot']['admins']],
                                  [keyboard(lang, 'cancel_button')])
@@ -634,7 +588,10 @@ LANG_MENU = CallbackQueryHandler(BotFather().set_lang,
 
 CREATE_BOT_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(BotFather().terms_of_use,
-                                       pattern=r"create_new_bot", pass_user_data=True)],
+                                       pattern=r"create_new_bot", pass_user_data=True),
+                  CommandHandler('create', BotFather().terms_of_use,
+                                 pass_user_data=True)
+                  ],
     states={
         TERMS_OF_USE: [CallbackQueryHandler(BotFather().terms_of_use,
                                             pattern=r"as_text_terms", pass_user_data=True),
