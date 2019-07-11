@@ -177,7 +177,7 @@ class BotFather(object):
     def terms_of_use(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
         lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
-        if update.message.text:
+        if update.message:
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id,
                                  get_str(lang, 'terms_of_use_menu'),
