@@ -20,6 +20,8 @@ from bot_father import strings
 from bot_father.support_bot import \
     START_SUPPORT_HANDLER, CONTACTS_HANDLER, SEND_REPORT_HANDLER, \
     USER_REPORTS_HANDLER, ADMIN_REPORTS_HANDLER, Welcome
+from bot_father.strings import str_dict, get_str, categories
+
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -29,68 +31,13 @@ logger = logging.getLogger(__name__)
 #       4) unknown commands
 #       5) restriction on bot count
 #       6) changing bot_name and bot_username loop
-
-categories = {
-  "Musician": [
-    "Discography",
-    "Concerts",
-    "Battles",
-    "New Projects",
-    "Live photos"
-  ],
-  "Art": [
-    "Works ",
-    "Sketches-New Projects ",
-    "Exhibitions  ",
-    "Photos of Studio "
-  ],
-  "Start up": [
-    "Idea ",
-    "Business plan ",
-    "Outlay  ",
-    "Team  "
-  ],
-  "Society": [
-    "Activity",
-    "Archive of Project",
-    "New projects",
-    "Report and accreditation"
-  ],
-  "Writer": [
-    "Bibliography",
-    "Drafts and Passages",
-    "Thoughts",
-    "Poems"
-  ],
-  "Blog": [
-    "Activity",
-    "My Life",
-    "Adventure",
-    "Links"
-  ],
-  "Food": [
-    "Recipes",
-    "Food",
-    "Videos",
-    "Kitchen"
-  ],
-  "Fashion": [
-    "My Style",
-    "Clothes",
-    "References",
-    "Exhibitions"
-  ],
-  "Events": [
-    "Idea",
-    "Calendar",
-    "Team",
-    "Last Events"
-  ]
-}
+#       7) lang remember using user_data
+#       8) adding already added or exist emails ! !
 
 
+"""
 en = '🇬🇧English'
-ru = '🇷🇺Russsian'
+ru = '🇷🇺Русский'
 terms_of_use_menu = 'By clicking continue you agree with terms of use. Read it before continue'
 terms_of_use_in_text = 'Вы должны ознакомиться с условиями использования сервиса CrowdRobot и его ограничениями.' \
                     '\nНастоящее пользовательское соглашение заключается между мной и CrowdRobot. ' \
@@ -129,7 +76,7 @@ your_bots = '\nYour bots: \n{}'
 bot_template = '\nName: {}' \
                '\nAdmins: {}' \
                '\nCreation date: {}'
-confirm_delete = "Are u sure u want to delete bot({})?"
+confirm_delete_bot = "Are u sure u want to delete bot({})?"
 ENTER_NEW_ADMIN_EMAIL = "Enter E-Mail addresses of the admins. " \
                         "They'll get a one-time password that they have to send to your bot."\
                              "If you are already ready — press 'Add' "
@@ -138,30 +85,7 @@ only_one_admin = "There are only one admin and it is you"
 add_already_exist_admin = 'Admin => {} already exist. '
 confirm_delete_admin = 'Are u sure u want to delete {} from {} admins?'
 admin_removed_success = '{} have been removed successfully'
-
-"""
-FOR CREATING BOT
-
-{'_id': '5d20dacf428e68614b84f685',
- 'admins': [{'email': 'keikoobro@gmail.com', 'password': '0rSMdQY27BL'}],
- 'buttons': ['Discography',
-             'Concerts',
-             'Battles',
-             'New Projects',
-             'Live photos'],
- 'lang': 'ENG',
- 'name': 'TEST_CROWD',
- 'superuser': 321858998,
- 'token': '816134752:AAHYL9pZ8zf3r25Ki-x4KeYURbLZpeLLa3A',
- 'welcomeMessage': 'HELLO'}
- 
-FOR DELETING BOT
-{'token': str}
-
-FOR ADD ADMIN
-
-FOR DELETE ADMIN
-
+language_menu = 'Please select language you want to use.'
 """
 
 
@@ -213,7 +137,66 @@ TERMS_OF_USE, TOKEN_REQUEST, ADMIN_EMAILS_REQUEST, ADD_EMAIL, WELCOME_MESSAGE, C
     CHOOSE_BOT_FOR_MANAGE, BOT_MANAGE, CONFIRM_DELETE_BOT, ADD_ADMINS, DELETE_ADMIN, CONFIRM_DELETE_ADMIN = range(12)
 
 
+def keyboard(lang, kb_name):
+    keyboard_dict = dict(
+        cancel_button=InlineKeyboardButton(get_str(lang, 'CANCEL_CREATION'),
+                                           callback_data='cancel'),
+        continue_button=InlineKeyboardButton(get_str(lang, 'continue_button_text'),
+                                             callback_data='continue'),
+        back_button=InlineKeyboardButton(get_str(lang, 'BACK'),
+                                         callback_data='back'),
+
+        cancel_keyboard=InlineKeyboardMarkup([[InlineKeyboardButton(get_str(lang, 'CANCEL_CREATION'),
+                                                                    callback_data='cancel')]]),
+        continue_cancel_keyboard=InlineKeyboardMarkup([[InlineKeyboardButton(get_str(lang, 'CANCEL_CREATION'),
+                                                                             callback_data='cancel'),
+                                                        InlineKeyboardButton(get_str(lang, 'continue_button_text'),
+                                                                             callback_data='continue')]]),
+        delete_back_keyboard=InlineKeyboardMarkup([[InlineKeyboardButton(get_str(lang, 'DELETE'),
+                                                                         callback_data='delete_bot'),
+                                                    InlineKeyboardButton(get_str(lang, 'BACK'),
+                                                                         callback_data='back')]]),
+        add_cancel_keyboard=InlineKeyboardMarkup([[InlineKeyboardButton(get_str(lang, 'CANCEL_CREATION'),
+                                                                        callback_data='cancel'),
+                                                   InlineKeyboardButton(get_str(lang, 'add_button'),
+                                                                        callback_data='add_admins')]]),
+        delete_cancel_keyboard=InlineKeyboardMarkup([[InlineKeyboardButton(get_str(lang, 'DELETE_ADMIN'),
+                                                                           callback_data='delete_admin'),
+                                                      InlineKeyboardButton(get_str(lang, 'CANCEL_CREATION'),
+                                                                           callback_data='cancel')]]),
+        lang_keyboard=InlineKeyboardMarkup([
+            [InlineKeyboardButton(get_str(lang, 'en'), callback_data='language/ENG')],
+            [InlineKeyboardButton(get_str(lang, 'ru'), callback_data='language/RUS')]]),
+
+        main_keyboard=InlineKeyboardMarkup([[InlineKeyboardButton(text=get_str(lang, 'CREATE_NEW_BOT'),
+                                                                  callback_data='create_new_bot'),
+                                             InlineKeyboardButton(text=get_str(lang, 'manage_bots_button'),
+                                                                  callback_data='manage_bots')],
+                                            [InlineKeyboardButton(text=get_str(lang, 'contact_button'),
+                                                                  callback_data='contact')]]),
+        terms_of_use_keyboard=InlineKeyboardMarkup([[InlineKeyboardButton(get_str(lang, 'terms_as_text_button'),
+                                                                          callback_data='as_text_terms'),
+                                                     InlineKeyboardButton(get_str(lang, 'terms_as_doc_button'),
+                                                                          callback_data='as_doc_terms')],
+                                                    [InlineKeyboardButton(get_str(lang, 'agree_with_terms_button'),
+                                                                          callback_data='agree_with_terms')],
+                                                    [InlineKeyboardButton(get_str(lang, 'CANCEL_CREATION'),
+                                                                          callback_data='cancel')]]),
+
+        bot_manage_keyboard=InlineKeyboardMarkup([[InlineKeyboardButton(get_str(lang, 'DELETE'),
+                                                                        callback_data='confirm_delete'),
+                                                   InlineKeyboardButton(get_str(lang, 'ADD_ADMINS'),
+                                                                        callback_data='add_admins'),
+                                                   InlineKeyboardButton(get_str(lang, 'DELETE_ADMIN'),
+                                                                        callback_data='delete_admins')],
+                                                  [InlineKeyboardButton(get_str(lang, 'BACK'),
+                                                                        callback_data='back')]])
+    )
+    return keyboard_dict[kb_name]
+
+
 class BotFather(object):
+    """
     def __init__(self):
         self.cancel_button = InlineKeyboardButton(strings.CANCEL_CREATION,
                                                   callback_data='cancel')
@@ -236,8 +219,8 @@ class BotFather(object):
                                                              self.cancel_button]])
 
         self.lang_keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton(en, callback_data='en')],
-            [InlineKeyboardButton(ru, callback_data='ru')]])
+            [InlineKeyboardButton(en, callback_data='language/ENG')],
+            [InlineKeyboardButton(ru, callback_data='language/RUS')]])
 
         self.main_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(strings.CREATE_NEW_BOT,
                                                                          callback_data='create_new_bot'),
@@ -261,50 +244,75 @@ class BotFather(object):
                                                           InlineKeyboardButton(strings.DELETE_ADMIN,
                                                                                callback_data='delete_admins')],
                                                          [self.back_button]])
-
+    """
     # Start conversation /start
     def start(self, bot, update, user_data):
         user_data.clear()
         delete_messages(bot, update, user_data)
+        user = bot_father_users_table.find_one({'user_id': update.effective_user.id})
+        if user:
+            user_data['to_delete'].append(
+                bot.send_message(update.effective_chat.id,
+                                 get_str(user['lang'], 'NO_CONTEXT'),
+                                 reply_markup=keyboard(user['lang'], 'main_keyboard')))
+        else:
+            bot_father_users_table.insert_one({'user_id': update.effective_user.id,
+                                               'lang': 'ENG',
+                                               'username': update.effective_user.username})
+            user_data['to_delete'].append(
+                bot.send_message(update.effective_chat.id,
+                                 get_str('ENG', 'language_menu'),
+                                 reply_markup=keyboard('ENG', 'lang_keyboard')))
+        return ConversationHandler.END
+
+    def set_lang(self, bot, update, user_data):
+        delete_messages(bot, update, user_data)
+        new_lang = update.callback_query.data.split('/')[1]
+        bot_father_users_table.update_one({'user_id': update.effective_user.id},
+                                          {'$set': {'lang': new_lang}})
         user_data['to_delete'].append(
-            bot.send_message(update.effective_chat.id,
-                             strings.NO_CONTEXT,
-                             reply_markup=self.main_keyboard))
+            bot.send_message(update.effective_user.id,
+                             get_str(new_lang, 'NO_CONTEXT'),
+                             reply_markup=keyboard(new_lang, 'main_keyboard')))
         return ConversationHandler.END
 
     # 'Create bot' button
     def terms_of_use(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
+        lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
         if update.callback_query.data == 'as_text_terms':
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id,
-                                 terms_of_use_in_text + terms_of_use_menu,
-                                 reply_markup=self.terms_of_use_keyboard))
+                                 get_str(lang, 'terms_of_use_in_text') +
+                                 get_str(lang, 'terms_of_use_menu'),
+                                 reply_markup=keyboard(lang, 'terms_of_use_keyboard')))
 
         elif update.callback_query.data == 'as_doc_terms':
             user_data['to_delete'].append(
                 bot.send_document(update.effective_chat.id,
                                   open('bot_father/terms_of_use.docx', 'rb'),
-                                  caption=terms_of_use_menu,
-                                  reply_markup=self.terms_of_use_keyboard))
+                                  caption=get_str(lang, 'terms_of_use_menu'),
+                                  reply_markup=keyboard(lang, 'terms_of_use_keyboard')))
 
         else:
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id,
-                                 terms_of_use_menu,
-                                 reply_markup=self.terms_of_use_keyboard))
+                                 get_str(lang, 'terms_of_use_menu'),
+                                 reply_markup=keyboard(lang, 'terms_of_use_keyboard')))
         return TERMS_OF_USE
 
     def request_token(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
+        lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id,
-                             strings.TOKEN_REQUEST,
-                             reply_markup=self.cancel_keyboard))
+                             get_str(lang, 'TOKEN_REQUEST'),
+                             reply_markup=keyboard(lang, 'cancel_keyboard')))
         return TOKEN_REQUEST
 
     def request_email(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
+        lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
         resp = requests.get(f'https://api.telegram.org/bot{update.message.text}/getMe').json()
         print(resp)
         if resp.get('ok'):
@@ -315,76 +323,80 @@ class BotFather(object):
                 # email request
                 user_data['to_delete'].append(
                     bot.send_message(update.effective_chat.id,
-                                     strings.ADMIN_EMAILS_REQUEST,
-                                     reply_markup=self.cancel_keyboard))
+                                     get_str(lang, 'ADMIN_EMAILS_REQUEST'),
+                                     reply_markup=keyboard(lang, 'cancel_keyboard')))
                 return ADMIN_EMAILS_REQUEST
             else:
                 # bot exist in db
                 user_data['to_delete'].append(
                     bot.send_message(update.effective_chat.id,
-                                     token_already_exist.format(f"@{resp['result']['username']}"),
-                                     reply_markup=self.cancel_keyboard))
+                                     get_str(lang, 'token_already_exist',
+                                             f"@{resp['result']['username']}"),
+                                     reply_markup=keyboard(lang, 'cancel_keyboard')))
                 return TOKEN_REQUEST
         else:
             # wrong token
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id,
-                                 strings.WRONG_TOKEN,
-                                 reply_markup=self.cancel_keyboard))
+                                 get_str(lang, 'WRONG_TOKEN'),
+                                 reply_markup=keyboard(lang, 'cancel_keyboard')))
             return TOKEN_REQUEST
 
     def add_email(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
+        lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
         # https://pypi.org/project/validate_email/
         is_valid = validate_email(update.message.text)
         if is_valid:
             user_data['request']['admins'].append(map_email(update.message.text))
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id,
-                                 emails_layout(user_data, strings.NEXT_EMAIL_REQUEST),
-                                 reply_markup=self.continue_cancel_keyboard))
+                                 emails_layout(user_data, get_str(lang, 'NEXT_EMAIL_REQUEST')),
+                                 reply_markup=keyboard(lang, 'continue_cancel_keyboard')))
         else:
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id,
-                                 emails_layout(user_data, strings.WRONG_EMAIL),
-                                 reply_markup=self.continue_cancel_keyboard
+                                 emails_layout(user_data, get_str(lang, 'WRONG_EMAIL')),
+                                 reply_markup=keyboard(lang, 'continue_cancel_keyboard')
                                  if user_data['request']['admins'] else
-                                 self.cancel_keyboard))
+                                 keyboard(lang, 'cancel_keyboard')))
         return ADD_EMAIL
 
     def enter_welcome_message(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
+        lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id,
-                             strings.WELCOME_MESSAGE_REQUEST,
-                             reply_markup=self.cancel_keyboard))
+                             get_str(lang, 'WELCOME_MESSAGE_REQUEST'),
+                             reply_markup=keyboard(lang, 'cancel_keyboard')))
         return WELCOME_MESSAGE
 
     def category_choose(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
+        lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
         user_data['request']['welcomeMessage'] = update.message.text
-        keyboard = create_keyboard([InlineKeyboardButton(i, callback_data=i)
-                                    for i in categories],
-                                   [self.cancel_button])
+        kb = create_keyboard([InlineKeyboardButton(i, callback_data=i)
+                              for i in categories.get(lang)],
+                             [keyboard(lang, 'cancel_button')])
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id,
-                             strings.OCCUPATION_REQUEST,
-                             reply_markup=keyboard))
+                             get_str(lang, 'OCCUPATION_REQUEST'),
+                             reply_markup=kb))
         return CHOOSE_CATEGORY
 
     def finish_creating(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
+        lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
         # request to get bot username for finish message and bot name for api request
         resp = requests.get(f"https://api.telegram.org/bot{user_data['request']['token']}/getMe").json()
         # get name before sending coz user can change it between state
         user_data['request']['name'] = resp['result']['first_name']
         user_data['request']['buttons'] = categories.get(update.callback_query.data)
-        user_data['request']['lang'] = 'ENG'
+        user_data['request']['lang'] = lang
         user_data['request']['superuser'] = update.effective_user.id
 
         user_data['to_save'] = dict()
         # user_data['to_save']['request'] = user_data['request']
-
         # first entered email is superuser email
         user_data['to_save']['super_user'] = user_data['request']['admins'][0]
         user_data['to_save']['super_user']['id'] = update.effective_user.id
@@ -398,7 +410,7 @@ class BotFather(object):
         user_data['to_save']['bot_name'] = resp['result']['first_name']
         user_data['to_save']['admins_id'] = [update.effective_user.id]
         user_data['to_save']['token'] = user_data['request']['token']
-        user_data['to_save']['lang'] = user_data['request']['lang'] = 'ENG'  # ?
+        user_data['to_save']['lang'] = user_data['request']['lang']  # ?
 
         pprint(user_data['to_save'])
         resp = requests.post('http://localhost:8000/crowdbot',
@@ -407,8 +419,9 @@ class BotFather(object):
             bot_father_bots_table.insert_one(user_data['to_save'])
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id,
-                                 strings.BOT_READY.format(user_data['to_save']['bot_username']),
-                                 reply_markup=self.main_keyboard))
+                                 get_str(lang, 'BOT_READY',
+                                         user_data['to_save']['bot_username']),
+                                 reply_markup=keyboard(lang, 'main_keyboard')))
             user_data.clear()
         else:
             print('status code not 200!')
@@ -417,52 +430,55 @@ class BotFather(object):
 
     def manage_bots(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
+        lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
         # why can access bots variable only one time?
         bots = bot_father_bots_table.find({'admins_id': update.effective_user.id})
         user_data['processed_bots'] = dict()
         for i in bots:
             user_data['processed_bots'][str(i['_id'])] = i
         if bots.count() > 0:
-            keyboard = create_keyboard([InlineKeyboardButton(bot['bot_name'],
-                                                             callback_data=_id)
-                                        for _id, bot in user_data['processed_bots'].items()],
-                                       [self.back_button])
+            kb = create_keyboard([InlineKeyboardButton(bot['bot_name'],
+                                                       callback_data=_id)
+                                  for _id, bot in user_data['processed_bots'].items()],
+                                 [keyboard(lang, 'back_button')])
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id,
-                                 strings.SELECT_BOT_TO_MANAGE +
-                                 your_bots.format(
-                                     '\n'.join([f"{i['bot_name']} - {i['bot_username']}"
-                                                for _id, i in user_data['processed_bots'].items()])),
-                                 reply_markup=keyboard))
+                                 get_str(lang, 'SELECT_BOT_TO_MANAGE') +
+                                 get_str(lang, 'your_bots',
+                                         '\n'.join([f"{i['bot_name']} - {i['bot_username']}"
+                                                    for _id, i in user_data['processed_bots'].items()])),
+                                 reply_markup=kb))
             return CHOOSE_BOT_FOR_MANAGE
         else:
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id,
-                                 strings.NO_BOTS,
-                                 reply_markup=self.main_keyboard))
+                                 get_str(lang, 'NO_BOTS'),
+                                 reply_markup=keyboard(lang, 'main_keyboard')))
             return ConversationHandler.END
 
     def bot_menu(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
+        lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
         if update.callback_query.data != 'back':
             user_data['processed_bot'] = user_data['processed_bots'][update.callback_query.data]
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id,
                              strings.CHOOSE_ACTION +
-                             bot_template.format(user_data['processed_bot']['bot_name'],
-                                                 '\n'.join([i['email']
-                                                            for i in user_data['processed_bot']['all_admins']]),
-                                                 str(user_data['processed_bot']['timestamp']).split('.')[0]),
-                             reply_markup=self.bot_manage_keyboard))
+                             get_str(lang, 'bot_template',
+                                     user_data['processed_bot']['bot_name'],
+                                     '\n'.join([i['email'] for i in user_data['processed_bot']['all_admins']]),
+                                     str(user_data['processed_bot']['timestamp']).split('.')[0]),
+                             reply_markup=keyboard(lang, 'bot_manage_keyboard')))
         return BOT_MANAGE
 
     def confirm_delete_bot(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
-
+        lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id,
-                             confirm_delete.format(user_data['processed_bot']['bot_username']),
-                             reply_markup=self.delete_back_keyboard))
+                             get_str(lang, 'confirm_delete_bot',
+                                     user_data['processed_bot']['bot_username']),
+                             reply_markup=keyboard(lang, 'delete_back_keyboard')))
         return CONFIRM_DELETE_BOT
 
     def finish_delete_bot(self, bot, update, user_data):
@@ -475,15 +491,16 @@ class BotFather(object):
                         params={'token': '816134752:AAHYL9pZ8zf3r25Ki-x4KeYURbLZpeLLa3A'})
         """
         delete_messages(bot, update, user_data)
+        lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
         resp = requests.delete('http://localhost:8000/crowdbot',
                                params={'token': user_data['processed_bot']['token']})
         if resp.status_code == 200:
             bot_father_bots_table.delete_one({'_id': user_data['processed_bot']['_id']})
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id,
-                                 strings.BOT_DELETED.format(
-                                     user_data['processed_bot']['bot_username']),
-                                 reply_markup=self.main_keyboard))
+                                 get_str(lang, 'BOT_DELETED',
+                                         user_data['processed_bot']['bot_username']),
+                                 reply_markup=keyboard(lang, 'main_keyboard')))
             user_data.clear()
         else:
             print('status code not 200!')
@@ -492,17 +509,19 @@ class BotFather(object):
 
     def add_admins(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
+        lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
         user_data['request'] = dict()
         user_data['request']['admins'] = list()
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id,
-                             ENTER_NEW_ADMIN_EMAIL,
-                             reply_markup=self.cancel_keyboard))
+                             get_str(lang, 'ENTER_NEW_ADMIN_EMAIL'),
+                             reply_markup=keyboard(lang, 'cancel_keyboard')))
         # keyboard = create_keyboard([InlineKeyboardButton(i) for ])
         return ADD_ADMINS
 
     def continue_add_admins(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
+        lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
         # https://pypi.org/project/validate_email/
         is_valid = validate_email(update.message.text)
         if is_valid:
@@ -510,31 +529,32 @@ class BotFather(object):
                 if admin['email'] == update.message.text:
                     user_data['to_delete'].append(
                         bot.send_message(update.effective_chat.id,
-                                         add_already_exist_admin.format(
-                                             update.message.text),
-                                         reply_markup=self.add_cancel_keyboard
+                                         get_str(lang, 'add_already_exist_admin',
+                                                 update.message.text),
+                                         reply_markup=keyboard(lang, 'add_cancel_keyboard')
                                          if user_data['request']['admins'] else
-                                         self.cancel_keyboard))
+                                         keyboard(lang, 'cancel_keyboard')))
                     return ADD_ADMINS
             user_data['request']['admins'].append(map_email(update.message.text))
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id,
-                                 emails_layout(user_data, strings.NEXT_EMAIL_REQUEST),
-                                 reply_markup=self.add_cancel_keyboard))
+                                 emails_layout(user_data, get_str(lang, 'NEXT_EMAIL_REQUEST')),
+                                 reply_markup=keyboard(lang, 'add_cancel_keyboard')))
         else:
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id,
-                                 emails_layout(user_data, strings.WRONG_EMAIL),
-                                 reply_markup=self.add_cancel_keyboard
+                                 emails_layout(user_data, get_str(lang, 'WRONG_EMAIL')),
+                                 reply_markup=keyboard(lang, 'add_cancel_keyboard')
                                  if user_data['request']['admins'] else
-                                 self.cancel_keyboard))
+                                 keyboard(lang, 'cancel_keyboard')))
         return ADD_ADMINS
 
     def finish_add_admins(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
+        lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
         user_data['request']['token'] = user_data['processed_bot']['token']
-        print('here is user_data["request"]')
-        pprint(user_data['request'])
+        # print('here is user_data["request"]')
+        # pprint(user_data['request'])
         resp = requests.post('http://localhost:8000/crowdbot/admin', json=user_data['request'])
         if resp.status_code == 200:
             bot_father_bots_table.update_one({'_id': user_data['processed_bot']['_id']},
@@ -542,8 +562,8 @@ class BotFather(object):
                                                         'all_admins': {'$each': user_data['request']['admins']}}})
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id,
-                                 admins_added,
-                                 reply_markup=self.main_keyboard))
+                                 get_str(lang, 'admins_added'),
+                                 reply_markup=keyboard(lang, 'main_keyboard')))
             user_data.clear()
         else:
             print('status code not 200!')
@@ -552,39 +572,41 @@ class BotFather(object):
 
     def delete_admin(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
-        if len(user_data['processed_bot']['admins']) < 2:
+        lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
+        if len(user_data['processed_bot']['admins']) == 0:
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id,
-                                 only_one_admin,
-                                 reply_markup=self.main_keyboard))
+                                 get_str(lang, 'only_one_admin'),
+                                 reply_markup=keyboard(lang, 'main_keyboard')))
             user_data.clear()
             return ConversationHandler.END
         else:
             # user_data['proccessed_admins'] = \
             #     [i['email'] for i in user_data['processed_bot']['admins']]
-            keyboard = create_keyboard([InlineKeyboardButton(admin['email'], callback_data=admin['email'])
-                                        for admin in user_data['processed_bot']['admins']],
-                                       [self.cancel_button])
+            kb = create_keyboard([InlineKeyboardButton(admin['email'], callback_data=admin['email'])
+                                  for admin in user_data['processed_bot']['admins']],
+                                 [keyboard(lang, 'cancel_button')])
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id,
-                                 strings.SELECT_ADMIN_TO_REMOVE,
-                                 reply_markup=keyboard))
+                                 get_str(lang, 'SELECT_ADMIN_TO_REMOVE'),
+                                 reply_markup=kb))
             return DELETE_ADMIN
 
     def confirm_delete_admin(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
+        lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
         user_data['email_to_delete'] = update.callback_query.data
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id,
-                             confirm_delete_admin.format(
-                                 user_data['email_to_delete'],
-                                 user_data['processed_bot']['bot_username']),
-                             reply_markup=self.delete_cancel_keyboard))
+                             get_str(lang, 'confirm_delete_admin',
+                                     user_data['email_to_delete'],
+                                     user_data['processed_bot']['bot_username']),
+                             reply_markup=keyboard(lang, 'delete_cancel_keyboard')))
         return CONFIRM_DELETE_ADMIN
 
     def finish_delete_admin(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
-
+        lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
         resp = requests.delete('http://localhost:8000/crowdbot/admin',
                                json={'params': {'token': user_data['processed_bot']['token'],
                                                 'email': user_data['email_to_delete']}})
@@ -594,8 +616,9 @@ class BotFather(object):
                                                         'all_admins': {'email': user_data['email_to_delete']}}})
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id,
-                                 admin_removed_success.format(user_data['email_to_delete']),
-                                 reply_markup=self.main_keyboard))
+                                 get_str(lang, 'admin_removed_success',
+                                         user_data['email_to_delete']),
+                                 reply_markup=keyboard(lang, 'main_keyboard')))
             user_data.clear()
             return ConversationHandler.END
         else:
@@ -603,11 +626,11 @@ class BotFather(object):
             print(resp)
         return ConversationHandler.END
 
-    def cancel_creation(self, bot, update, user_data):
-        delete_messages(bot, update, user_data)
-
 
 START_HANDLER = CommandHandler('start', BotFather().start, pass_user_data=True)
+
+LANG_MENU = CallbackQueryHandler(BotFather().set_lang,
+                                 pattern=r"language", pass_user_data=True)
 
 CREATE_BOT_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(BotFather().terms_of_use,
@@ -633,7 +656,9 @@ CREATE_BOT_HANDLER = ConversationHandler(
         WELCOME_MESSAGE: [MessageHandler(Filters.text, BotFather().category_choose, pass_user_data=True)],
 
 
-        CHOOSE_CATEGORY: [CallbackQueryHandler(BotFather().finish_creating, pass_user_data=True)]
+        CHOOSE_CATEGORY: [CallbackQueryHandler(BotFather().start,
+                                               pattern="^cancel$", pass_user_data=True),
+                          CallbackQueryHandler(BotFather().finish_creating, pass_user_data=True)]
     },
 
     fallbacks=[CallbackQueryHandler(BotFather().start,
@@ -692,6 +717,7 @@ def main():
 
     dp.add_handler(CREATE_BOT_HANDLER)
     dp.add_handler(MANAGE_BOT_HANDLER)
+    dp.add_handler(LANG_MENU)
 
     dp.add_handler(START_SUPPORT_HANDLER)
     dp.add_handler(CommandHandler('admin', Welcome().test_admin, pass_user_data=True))
