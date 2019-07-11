@@ -123,7 +123,7 @@ strings_dict = {
         # GET_BOTS_INFO="ℹ️ Information about bot",
         ADMIN="Admin",
         REMOVED="Removed",
-        IS_DELETED='Deleted',
+        # IS_DELETED='Deleted',
         # BOT='Bot',
         TOKEN_REQUEST="How to create a bot and get a token: https://telegra.ph/Gajd-Sozdat-chatbota-06-03"
                         " ❗️ IMPORTANT: the bot should not be connected to other chatbot platforms"
@@ -214,7 +214,7 @@ strings_dict = {
         confirm_delete_admin='Are u sure u want to delete {} from {} admins?',
         admin_removed_success='{} have been removed successfully',
         language_menu='Please select language you want to use.',
-
+        # SENDING REPORT PART
         start_message="Hello. I'm support bot.\n" 
                         "U can send message to developers - click 'Send message'",
         choose_category="Choose what your message about, or send a message "
@@ -265,7 +265,19 @@ strings_dict = {
         user_report_template="\nCategory: {}" 
                                "\nTime: {}" 
                                "\nYour Report: {}" 
-                               "\nAnswer: {}"
+                               "\nAnswer: {}",
+        send_report_button='Send report',
+        contacts_button='Contacts',
+        my_reports_button='My reports',
+        inbox_msg_button='Inbox messages',
+        manage_admins_button='Manage admins',
+        black_list_button="Black list",
+        trash_button='Trash',
+        admin_menu='here is admin side',
+        send_btn='Send',
+        yes='Yes',
+        delete_btn='Delete',
+        reply_btn='Reply'
     ),
     'RUS': dict(
         UNKNOWN_COMMAND=" Упс. Я такого не знаю. Нажми 🚑  /help, чтобы посмотреть все команды",
@@ -424,6 +436,18 @@ strings_dict = {
                              "\nTime: {}"
                              "\nYour Report: {}"
                              "\nAnswer: {}",
+        send_report_button='Send report',
+        contacts_button='Contacts',
+        my_reports_button='My reports',
+        inbox_msg_button='Inbox messages',
+        manage_admins_button='Manage admins',
+        black_list_button="Black list",
+        trash_button='Trash',
+        admin_menu='here is admin side',
+        send_btn='Send',
+        yes='Yes',
+        delete_btn='Delete',
+        reply_btn='Reply'
     )}
 
 categories = {
@@ -542,13 +566,18 @@ categories = {
         ]
     }}
 
+report_categories = {
+                        'ENG': ['Sentence', 'Complaint', 'Usage Question'],
+                        'RUS': ['Предложение', 'Жалоба', 'Usage Question']
+                    }
+
 
 def get_str(lang, string, *args):
     # if param:
     #     return strings_dict.get(lang).get(string).format(param)
     # else:
     #     strings_dict.get(lang).get(string)
-    return strings_dict.get(lang).get(string).format(*args)
+    return strings_dict.get(lang)[string].format(*args)
 
 
 def str_dict(update, string):

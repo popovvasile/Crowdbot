@@ -12,7 +12,7 @@ from telegram.error import TelegramError
 import logging
 from bot_father.db import users_messages_to_admin_table, support_admins_table, bot_father_users_table
 from bot_father.strings import get_str
-from bot_father.bot_father import delete_messages
+# from bot_father.bot_father import delete_messages
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -72,13 +72,42 @@ user_report_template = "\nCategory: {}" \
                        "\nAnswer: {}"
 
 
-send_report_button = 'Send report'
-contacts_button = 'Contacts'
-my_reports_button = 'My reports'
-inbox_msg_button = 'Inbox messages'
-manage_admins_button = 'Manage admins'
-black_list_button = "Black list"
-trash_button = 'Trash'
+send_report_button='Send report'
+contacts_button='Contacts'
+my_reports_button='My reports'
+inbox_msg_button='Inbox messages'
+manage_admins_button='Manage admins'
+black_list_button="Black list"
+trash_button='Trash'
+admin_menu='here is admin side'
+report_categories={
+    'ENG': ['Sentence', 'Complaint', 'Usage Question'],
+    'RUS': ['Предложение', 'Жалоба', 'Usage Question']
+}
+send_btn = 'Send'
+yes = 'Yes'
+delete_btn = 'Delete'
+reply_btn = 'Reply'
+
+
+def delete_messages(bot, update, user_data):
+    # print(update.effective_message.message_id)
+    # if update.callback_query:
+    #     print(update.callback_query.data)
+    # else:
+    #     print(update.message.text)
+    bot.delete_message(update.effective_chat.id, update.effective_message.message_id)
+    if 'to_delete' in user_data:
+        for msg in user_data['to_delete']:
+            try:
+                if msg.message_id != update.effective_message.message_id:
+                    bot.delete_message(update.effective_chat.id, msg.message_id)
+            except TelegramError as e:
+                print('except in delete_message---> {}, {}'.format(e, msg.message_id))
+                continue
+        user_data['to_delete'] = list()
+    else:
+        user_data['to_delete'] = list()
 
 
 def keyboard(lang, kb_name):
@@ -94,8 +123,37 @@ def keyboard(lang, kb_name):
                   [InlineKeyboardButton(get_str(lang, 'manage_admins_button'), callback_data='manage_admins')],
                   [InlineKeyboardButton(get_str(lang, 'black_list_button'), callback_data='black_list')],
                   [InlineKeyboardButton(get_str(lang, 'trash_button'), callback_data='trash')],
-                  [InlineKeyboardButton(get_str(lang, 'BACK'), callback_data='to_main_menu')])))
+                  [InlineKeyboardButton(get_str(lang, 'BACK'), callback_data='to_main_menu')]))),
 
+        categories_keyboard=InlineKeyboardMarkup([
+                                                     [InlineKeyboardButton(x, callback_data=f'category/{x}')]
+                                                     for x in report_categories.get(lang)] +
+                                                 [[InlineKeyboardButton('Back', callback_data='cancel_report')]]),
+
+        confirm_keyboard=InlineKeyboardMarkup([
+            [InlineKeyboardButton(get_str(lang, 'send_btn'), callback_data='send')],
+            [InlineKeyboardButton(get_str(lang, 'BACK'), callback_data='cancel_report')]]),
+
+        final_keyboard=InlineKeyboardMarkup([
+            [InlineKeyboardButton(text=get_str(lang, 'done_button'), callback_data="confirm_send")],
+            [InlineKeyboardButton(get_str(lang, 'CANCEL_CREATION'), callback_data="cancel_report")]]),
+
+        back_to_inbox_keyboard=InlineKeyboardMarkup(
+            [[InlineKeyboardButton(get_str(lang, 'BACK'), callback_data='back_to_user_inbox')]]),
+
+        cancel_report=InlineKeyboardMarkup(
+            [[InlineKeyboardButton(get_str(lang, 'CANCEL_CREATION'), callback_data='cancel_report')]]),
+        confirm_delete_keyboard=InlineKeyboardMarkup([
+            [InlineKeyboardButton(get_str(lang, 'yes'), callback_data='remove'),
+             InlineKeyboardButton(get_str(lang, 'BACK'), callback_data='return_to_admin_inbox')]]),
+
+        admin_final_keyboard=InlineKeyboardMarkup([
+            [InlineKeyboardButton(text=get_str(lang, 'done_button'), callback_data="confirm_answer_send")],
+            [InlineKeyboardButton(get_str(lang, 'CANCEL_CREATION'), callback_data="return_to_admin_inbox")]]),
+
+        admin_confirm_keyboard=InlineKeyboardMarkup([
+            [InlineKeyboardButton(get_str(lang, 'send_btn'), callback_data='send_answer')],
+            [InlineKeyboardButton(get_str(lang, 'BACK'), callback_data='return_to_admin_inbox')]])
     )
     return keyboard_dict[kb_name]
 
@@ -487,15 +545,14 @@ class Welcome(object):
         user_data['report'] = list()
         delete_messages(bot, update, user_data)
         lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
-
         if support_admins_table.find().count() == 0:
             support_admins_table.insert_one({'user_id': update.effective_user.id,
                                              'chat_id': update.effective_chat.id,
                                              'username': update.effective_user.name})
-
         user_data['to_delete'].append(
-            bot.send_message(update.effective_chat.id, start_message,
-                             reply_markup=self.user_start_keyboard))
+            bot.send_message(update.effective_chat.id,
+                             get_str(lang, 'start_message'),
+                             reply_markup=keyboard(lang, 'user_start_keyboard')))
         return ConversationHandler.END
 
     def test_admin(self, bot, update, user_data):
@@ -503,8 +560,9 @@ class Welcome(object):
         delete_messages(bot, update, user_data)
         lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
         user_data['to_delete'].append(
-            bot.send_message(update.effective_chat.id, 'here is admin side',
-                             reply_markup=self.admin_start_keyboard))
+            bot.send_message(update.effective_chat.id,
+                             get_str(lang, 'admin_menu'),
+                             reply_markup=keyboard(lang, 'admin_start_keyboard')))
         return ConversationHandler.END
 
 
@@ -546,7 +604,8 @@ class UserSupportBot(object):
         lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
 
         user_data['to_delete'].append(
-            bot.send_message(update.callback_query.message.chat_id, choose_category,
+            bot.send_message(update.callback_query.message.chat_id,
+                             get_str(lang, 'choose_category'),
                              reply_markup=self.categories_keyboard))
         return CHOOSE_CATEGORY
 
@@ -564,7 +623,8 @@ class UserSupportBot(object):
             user_data['category'] = update.message.text
 
         user_data['to_delete'].append(
-            bot.send_message(update.effective_chat.id, enter_message,
+            bot.send_message(update.effective_chat.id,
+                             get_str(lang, 'enter_message'),
                              reply_markup=self.cancel_report))
         return MESSAGE
 
@@ -577,10 +637,12 @@ class UserSupportBot(object):
         message = get_message(update.message)
         user_data['report'].append(message)
         user_data['to_delete'].append(
-            bot.send_message(update.effective_chat.id, report_contains))
+            bot.send_message(update.effective_chat.id,
+                             get_str(lang, 'report_contains')))
         send_messages_from_report(bot, update, user_data, user_data['report'])
         user_data['to_delete'].append(
-            bot.send_message(update.effective_chat.id, enter_message_2,
+            bot.send_message(update.effective_chat.id,
+                             get_str(lang, 'enter_message_2'),
                              reply_markup=self.final_keyboard))
         return MESSAGE
 
@@ -589,10 +651,12 @@ class UserSupportBot(object):
         lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
 
         user_data['to_delete'].append(
-            bot.send_message(update.effective_chat.id, report_contains))
+            bot.send_message(update.effective_chat.id,
+                             get_str(lang, 'report_contains')))
         send_messages_from_report(bot, update, user_data, user_data['report'])
         user_data['to_delete'].append(
-            bot.send_message(update.callback_query.message.chat_id, confirm_message,
+            bot.send_message(update.callback_query.message.chat_id,
+                             get_str(lang, 'confirm_message'),
                              reply_markup=self.confirm_keyboard))
         return CONFIRM_SEND_REPORT
 
@@ -618,7 +682,8 @@ class UserSupportBot(object):
         send_notification_to_admins(bot, user_data,
                                     users_messages_to_admin_table.find_one({'_id': _id}))
         user_data['to_delete'].append(
-            bot.send_message(update.callback_query.message.chat_id, finish_send_report,
+            bot.send_message(update.callback_query.message.chat_id,
+                             get_str(lang, 'finish_send_report'),
                              reply_markup=Welcome().user_start_keyboard))
         user_data['report'] = list()
         return ConversationHandler.END
@@ -649,10 +714,11 @@ class UserSupportBot(object):
         report = users_messages_to_admin_table.find_one({'_id': ObjectId(update.callback_query.data.split('/')[1])})
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id,
-                             user_report_template.format(report['category'],
-                                                         str(report['timestamp']).split('.')[0],
-                                                         report['user_msg_string'],
-                                                         report['answer_msg_string']),
+                             get_str(lang, 'user_report_template',
+                                     report['category'],
+                                     str(report['timestamp']).split('.')[0],
+                                     report['user_msg_string'],
+                                     report['answer_msg_string']),
                              reply_markup=self.back_to_inbox_keyboard))
         open_report(bot, update, user_data, report)
         return SINGLE_REPORT
@@ -685,11 +751,11 @@ class AdminSupportBot(object):
             [InlineKeyboardButton('Yes', callback_data='remove'),
              InlineKeyboardButton('Back', callback_data='return_to_admin_inbox')]])
 
-        self.final_keyboard = InlineKeyboardMarkup([
+        self.admin_final_keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton(text=done_button, callback_data="confirm_answer_send")],
             [InlineKeyboardButton('Cancel', callback_data="return_to_admin_inbox")]])
 
-        self.confirm_keyboard = InlineKeyboardMarkup([
+        self.admin_confirm_keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton('Send', callback_data='send_answer')],
             [InlineKeyboardButton('Back', callback_data='return_to_admin_inbox')]])
 
@@ -713,19 +779,20 @@ class AdminSupportBot(object):
         lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
 
         report = users_messages_to_admin_table.find_one({'_id': ObjectId(update.callback_query.data.split('/')[1])})
-        single_report_keyboard = [[InlineKeyboardButton('Back', callback_data='return_to_admin_inbox')]] + \
-                                 [[InlineKeyboardButton('Delete', callback_data=f"delete_report/{report['_id']}")]] \
+        single_report_keyboard = [[InlineKeyboardButton(get_str(lang, 'BACK'), callback_data='return_to_admin_inbox')]] + \
+                                 [[InlineKeyboardButton(get_str(lang, 'delete_btn'), callback_data=f"delete_report/{report['_id']}")]] \
             if report['answer'] else \
-            [[InlineKeyboardButton('Delete', callback_data=f"delete_report/{report['_id']}"),
-              InlineKeyboardButton('Reply', callback_data=f"reply_on_report/{report['_id']}")]]
+            [[InlineKeyboardButton(get_str(lang, 'delete_btn'), callback_data=f"delete_report/{report['_id']}"),
+              InlineKeyboardButton(get_str(lang, 'reply_btn'), callback_data=f"reply_on_report/{report['_id']}")]]
 
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id,
-                             admin_report_template.format(report['username'],
-                                                          report['category'],
-                                                          str(report['timestamp']).split('.')[0],
-                                                          report['user_msg_string'],
-                                                          report['answer_msg_string']),
+                             get_str(lang, 'admin_report_template',
+                                     report['username'],
+                                     report['category'],
+                                     str(report['timestamp']).split('.')[0],
+                                     report['user_msg_string'],
+                                     report['answer_msg_string']),
                              reply_markup=InlineKeyboardMarkup(single_report_keyboard)))
         open_report(bot, update, user_data, report)
         return ADMIN_SINGLE_REPORT
@@ -738,14 +805,16 @@ class AdminSupportBot(object):
         user_data['move_to_trash'] = report
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id,
-                             admin_report_template.format(report['username'],
-                                                          report['category'],
-                                                          str(report['timestamp']).split('.')[0],
-                                                          report['user_msg_string'],
-                                                          report['answer_msg_string'])))
+                             get_str(lang, 'admin_report_template',
+                                     report['username'],
+                                     report['category'],
+                                     str(report['timestamp']).split('.')[0],
+                                     report['user_msg_string'],
+                                     report['answer_msg_string'])))
         open_report(bot, update, user_data, report)
         user_data['to_delete'].append(
-            bot.send_message(update.effective_chat.id, confirm_delete,
+            bot.send_message(update.effective_chat.id,
+                             get_str(lang, 'confirm_delete'),
                              reply_markup=self.confirm_delete_keyboard))
         return CONFIRM_DELETE
 
@@ -758,7 +827,7 @@ class AdminSupportBot(object):
         send_reports_layout(bot, update, user_data, 1, to_admin=True)
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id,
-                             finish_move_to_trash))
+                             get_str(lang, 'finish_move_to_trash')))
         return ADMIN_INBOX
 
     def start_answering(self, bot, update, user_data):
@@ -768,11 +837,12 @@ class AdminSupportBot(object):
         report = users_messages_to_admin_table.find_one({'_id': ObjectId(update.callback_query.data.split('/')[1])})
         user_data['processed_report'] = report
         user_data['processed_report_template'] = \
-            admin_report_template.format(report['username'],
-                                         report['category'],
-                                         str(report['timestamp']).split('.')[0],
-                                         report['user_msg_string'],
-                                         report['answer_msg_string'])
+            get_str(lang, 'admin_report_template',
+                    report['username'],
+                    report['category'],
+                    str(report['timestamp']).split('.')[0],
+                    report['user_msg_string'],
+                    report['answer_msg_string'])
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id,
                              user_data['processed_report_template']))
@@ -780,7 +850,8 @@ class AdminSupportBot(object):
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id, admin_give_answer,
                              reply_markup=InlineKeyboardMarkup(
-                                 [[InlineKeyboardButton('Cancel', callback_data='return_to_admin_inbox')]])))
+                                 [[InlineKeyboardButton(get_str(lang, 'CANCEL_CREATION'),
+                                                        callback_data='return_to_admin_inbox')]])))
         return ANSWERING
 
     def received_message(self, bot, update, user_data):
@@ -794,11 +865,13 @@ class AdminSupportBot(object):
                              user_data['processed_report_template']))
         open_report(bot, update, user_data, user_data['processed_report'])
         user_data['to_delete'].append(
-            bot.send_message(update.effective_chat.id, admin_give_answer_3))
+            bot.send_message(update.effective_chat.id,
+                             get_str(lang, 'admin_give_answer_3')))
         send_messages_from_report(bot, update, user_data, user_data['answer_to_report'])
         user_data['to_delete'].append(
-            bot.send_message(update.effective_chat.id, admin_give_answer_2,
-                             reply_markup=self.final_keyboard))
+            bot.send_message(update.effective_chat.id,
+                             get_str(lang, 'admin_give_answer_2'),
+                             reply_markup=self.admin_final_keyboard))
         return ANSWERING
 
     def confirm_send_answer(self, bot, update, user_data):
@@ -810,11 +883,13 @@ class AdminSupportBot(object):
                              user_data['processed_report_template']))
         open_report(bot, update, user_data, user_data['processed_report'])
         user_data['to_delete'].append(
-            bot.send_message(update.effective_chat.id, admin_give_answer_3))
+            bot.send_message(update.effective_chat.id,
+                             get_str(lang, 'admin_give_answer_3')))
         send_messages_from_report(bot, update, user_data, user_data['answer_to_report'])
         user_data['to_delete'].append(
-            bot.send_message(update.callback_query.message.chat_id, confirm_answer,
-                             reply_markup=self.confirm_keyboard))
+            bot.send_message(update.callback_query.message.chat_id,
+                             get_str(lang, 'confirm_answer'),
+                             reply_markup=self.admin_confirm_keyboard))
         return CONFIRM_SEND_ANSWER
 
     def finish_send_answer(self, bot, update, user_data):
@@ -833,7 +908,8 @@ class AdminSupportBot(object):
         send_notification_to_user(bot, user_data,
                                   users_messages_to_admin_table.find_one({'_id': user_data['processed_report']['_id']}))
         user_data['to_delete'].append(
-            bot.send_message(update.callback_query.message.chat_id, finish_send_answer,
+            bot.send_message(update.callback_query.message.chat_id,
+                             get_str(lang, 'finish_send_answer'),
                              reply_markup=Welcome().admin_start_keyboard))
         user_data['answer_to_report'] = list()
         return ConversationHandler.END
@@ -854,7 +930,6 @@ class AdminSupportBot(object):
     def manage_admins(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
         lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
-
 
     def black_list(self, bot, update, user_data):
         lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
@@ -990,7 +1065,7 @@ BLACK_LIST_HANDLER = ConversationHandler(
     fallbacks=[]
 )
 
-
+"""
 def main():
     updater = Updater("836123673:AAE6AyfFCcRxjHZZhJHtdE8mKt8WNfgRm5Q")  # @crowd_supportbot
     dp = updater.dispatcher
@@ -1017,3 +1092,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+"""
