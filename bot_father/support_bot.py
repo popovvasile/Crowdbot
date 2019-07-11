@@ -381,60 +381,6 @@ def get_message(message):
     return message
 
 
-"""
-    если только только текст в вопросе и в ответе-> 
-        вставляем текст в шаблон
-            [без клавиатуры]
-
-    если в вопросе или в ответе не текст ->
-        вставляем в шаблон количество и тип сообщений
-            [open]
-    если вопрос текст, а ответ не текст или наоборот ->
-        вставляем в шаблон что текст -> 
-            вставляем в шаблон количество и тип сообщений там где не текст ->
-                [open]
-
-
-    Все возможные выводы:
-    1) когда пишешь сообщения:
-        
-        user - Your report contains:
-               {messages_from_report}
-               Send a new message if u want to add more 
-               [[Send], [Cancel]]
-        admin -
-    
-    2) Потдверждение на отправку
-        
-        # user - Your report contains:
-        #        {messages_from report}
-        #        Are you sure u want to send your report?
-        #        [[Send], [back_to_main]]
-        
-        # admin - 
-    
-    3) Список сообщений:
-        
-        user - Here is the list of your reports
-               {user_report_template}
-                [[Open] or None] -> Open 
-               Current page
-               [[back] or + [pages_keyboard]]
-        
-        admin - 
-    
-    4) Open -> если в вопросе или в ответе есть файлы. меню для просмотра этих файлов из репорта 
-        
-        user - {user_report_template}
-                     [Back]
-                Here is your Messages:
-                {user_files_from_report}
-                
-                
-        
-"""
-
-
 # TODO: better, and how to delete it without user_data
 def send_notification_to_admins(bot, user_data, report, lang):
     for admin in support_admins_table.find():
@@ -666,11 +612,15 @@ class AdminSupportBot(object):
         lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
 
         report = users_messages_to_admin_table.find_one({'_id': ObjectId(update.callback_query.data.split('/')[1])})
-        single_report_keyboard = [[InlineKeyboardButton(get_str(lang, 'BACK'), callback_data='return_to_admin_inbox')]] + \
-                                 [[InlineKeyboardButton(get_str(lang, 'delete_btn'), callback_data=f"delete_report/{report['_id']}")]] \
+        single_report_keyboard = [[InlineKeyboardButton(get_str(lang, 'BACK'),
+                                                        callback_data='return_to_admin_inbox')]] + \
+                                 [[InlineKeyboardButton(get_str(lang, 'delete_btn'),
+                                                        callback_data=f"delete_report/{report['_id']}")]] \
             if report['answer'] else \
-            [[InlineKeyboardButton(get_str(lang, 'delete_btn'), callback_data=f"delete_report/{report['_id']}"),
-              InlineKeyboardButton(get_str(lang, 'reply_btn'), callback_data=f"reply_on_report/{report['_id']}")]]
+            [[InlineKeyboardButton(get_str(lang, 'delete_btn'),
+                                   callback_data=f"delete_report/{report['_id']}"),
+              InlineKeyboardButton(get_str(lang, 'reply_btn'),
+                                   callback_data=f"reply_on_report/{report['_id']}")]]
 
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id,

@@ -20,7 +20,7 @@ from bot_father import strings
 from bot_father.support_bot import \
     START_SUPPORT_HANDLER, CONTACTS_HANDLER, SEND_REPORT_HANDLER, \
     USER_REPORTS_HANDLER, ADMIN_REPORTS_HANDLER, Welcome
-from bot_father.strings import str_dict, get_str, categories
+from bot_father.strings import get_str, categories
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -33,60 +33,6 @@ logger = logging.getLogger(__name__)
 #       6) changing bot_name and bot_username loop
 #       7) lang remember using user_data
 #       8) adding already added or exist emails ! !
-
-
-"""
-en = '🇬🇧English'
-ru = '🇷🇺Русский'
-terms_of_use_menu = 'By clicking continue you agree with terms of use. Read it before continue'
-terms_of_use_in_text = 'Вы должны ознакомиться с условиями использования сервиса CrowdRobot и его ограничениями.' \
-                    '\nНастоящее пользовательское соглашение заключается между мной и CrowdRobot. ' \
-                    '\n- Да, я согласен с тем, CrowdRobot не несёт ответственности за любые действия ' \
-                    'или бездействия пользователей и администраторов чатботов.' \
-                    '\n- Да, при использовании CrowdRobot, я обязуюсь не нарушать нормы международного права и нормы ' \
-                    'законодательства страны моего проживания.' \
-                    '\n- Да, до третьего числа каждого месяца, я обязуюсь переводить абонентскую плату в ' \
-                    'размере 12,99 евро, через сервис PayPal в пользу CrowdRobot. В случае неуплаты ' \
-                    'в установленный срок, CrowdRobot приостановит работу вашего бота' \
-                    '\n- CrowdRoBot оставляет за собой право вносить изменения в данное соглашение' \
-                    '\n- CrowdRobot обязуется не передавать персональные данные клиентов третьим лицам.' \
-                    '\n*Я-администратор(владелец) созданного при помощи Crowdrobot чатбота' \
-                    '\n*Чатбот-виртуальный, автоматизированный собеседник на платформе Telegram' \
-                    '\n*CrowdRobot – программа в Telegram. Создаёт чатботов с следующими функциями: ' \
-                    'Обмен платежами, проведение опросов, размещение легального контента, обмен сообщениями.' \
-                    '\n*CrowdRobot подключается к API той платёжной системы, которую выбрал администратор' \
-                    '\nчатбота. Все платежи записываются в базу данных.' \
-                    '\n*CrowdRobot выступает посредником между администратором чатбота и платёжной системой, ' \
-                    'без доступа на изменение суммы платежа. Деньги переводятся с банковского счёта' \
-                    '\nпользователя чатбота на на счёт администратора в выбранной им платёжной системе.' \
-                    '\n(У платёжки с админом тоже есть договор, который это регулирует)' \
-                    '\n✅Да, я согласен с условиями использования сервиса CrowdRoBot '
-token_already_exist = 'You already got bot with this token -> {}. If you want to create new one send me new token that ' \
-                      'you can take from @BotFather'
-
-manage_bots_button = 'Manage my bots'
-contact_button = 'Contact with Crowd Team'
-terms_as_text_button = 'Send as text'
-terms_as_doc_button = 'Send as .docx file'
-agree_with_terms_button = 'I have read. Continue'
-continue_button_text = 'Continue'
-add_button = 'Add'
-
-your_bots = '\nYour bots: \n{}'
-bot_template = '\nName: {}' \
-               '\nAdmins: {}' \
-               '\nCreation date: {}'
-confirm_delete_bot = "Are u sure u want to delete bot({})?"
-ENTER_NEW_ADMIN_EMAIL = "Enter E-Mail addresses of the admins. " \
-                        "They'll get a one-time password that they have to send to your bot."\
-                             "If you are already ready — press 'Add' "
-admins_added = 'Admins successfully added'
-only_one_admin = "There are only one admin and it is you"
-add_already_exist_admin = 'Admin => {} already exist. '
-confirm_delete_admin = 'Are u sure u want to delete {} from {} admins?'
-admin_removed_success = '{} have been removed successfully'
-language_menu = 'Please select language you want to use.'
-"""
 
 
 def delete_messages(bot, update, user_data):
@@ -439,14 +385,6 @@ class BotFather(object):
         return CONFIRM_DELETE_BOT
 
     def finish_delete_bot(self, bot, update, user_data):
-        """
-        import requests
-        requests.delete('http://localhost:8000/crowdbot',
-                        params={'token': '771382519:AAECrrClX0pTBqkquXJGVo8zV26G1xakoIM'})
-        import requests
-        requests.delete('http://localhost:8000/crowdbot',
-                        params={'token': '816134752:AAHYL9pZ8zf3r25Ki-x4KeYURbLZpeLLa3A'})
-        """
         delete_messages(bot, update, user_data)
         lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
         resp = requests.delete('http://localhost:8000/crowdbot',
