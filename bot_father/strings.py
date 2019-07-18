@@ -744,7 +744,7 @@ strings_dict = {
         terms_as_doc_button='Send as .docx file',
         agree_with_terms_button='Я согласен',
         continue_button_text='Продолжить',
-        add_button='➕ Add',
+        add_button='➕ Добавить',
 
         your_bots='\nТвои боты: \n{}',
         bot_template='\nНазвание: {}'

@@ -132,8 +132,8 @@ def keyboard(lang, kb_name):
                                                                           callback_data='cancel')]]),
 
         bot_manage_keyboard=InlineKeyboardMarkup([[InlineKeyboardButton(get_str(lang, 'DELETE'),
-                                                                        callback_data='confirm_delete'),
-                                                   InlineKeyboardButton(get_str(lang, 'ADD_ADMINS'),
+                                                                        callback_data='confirm_delete')],
+                                                  [InlineKeyboardButton(get_str(lang, 'ADD_ADMINS'),
                                                                         callback_data='add_admins'),
                                                    InlineKeyboardButton(get_str(lang, 'DELETE_ADMIN'),
                                                                         callback_data='delete_admins')],

@@ -157,9 +157,11 @@ def send_reports_layout(bot, update, user_data, page, to_admin=False, show_trash
 
     user_data['to_delete'].append(
         bot.send_message(update.callback_query.message.chat_id,
-                         get_str(lang, 'trash_menu' if show_trash
-                         else 'admin_all_reports_menu' if to_admin
-                         else 'my_reports_menu'), ParseMode.MARKDOWN))
+                         get_str(lang, 'trash_menu'
+                         if show_trash else
+                         'admin_all_reports_menu'
+                         if to_admin else
+                         'my_reports_menu'), ParseMode.MARKDOWN))
 
     for report in data_to_send:
         if to_admin:
