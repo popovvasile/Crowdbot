@@ -65,9 +65,10 @@ def keyboard(lang, kb_name):
                   [InlineKeyboardButton(get_str(lang, 'BACK'), callback_data='to_main_menu')]))),
 
         categories_keyboard=InlineKeyboardMarkup([
-                                                     [InlineKeyboardButton(x, callback_data=f'category/{x}')]
-                                                     for x in report_categories.get(lang)] +
-                                                 [[InlineKeyboardButton('Back', callback_data='cancel_report')]]),
+            [InlineKeyboardButton(x, callback_data=f'category/{x}')]
+            for x in report_categories.get(lang)] +
+            [[InlineKeyboardButton(get_str(lang, 'BACK'),
+                                   callback_data='cancel_report')]]),
 
         confirm_keyboard=InlineKeyboardMarkup([
             [InlineKeyboardButton(get_str(lang, 'send_btn'), callback_data='send')],

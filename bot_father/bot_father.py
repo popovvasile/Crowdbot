@@ -119,7 +119,9 @@ def keyboard(lang, kb_name):
                                              InlineKeyboardButton(text=get_str(lang, 'manage_bots_button'),
                                                                   callback_data='manage_bots')],
                                             [InlineKeyboardButton(text=get_str(lang, 'contact_button'),
-                                                                  callback_data='contact')]]),
+                                                                  callback_data='contact')],
+                                            [InlineKeyboardButton(get_str(lang, 'lang_button'),
+                                                                  callback_data='lang_menu')]]),
         terms_of_use_keyboard=InlineKeyboardMarkup([[InlineKeyboardButton(get_str(lang, 'terms_as_text_button'),
                                                                           callback_data='as_text_terms'),
                                                      InlineKeyboardButton(get_str(lang, 'terms_as_doc_button'),
@@ -160,6 +162,15 @@ class BotFather(object):
                 bot.send_message(update.effective_chat.id,
                                  get_str('ENG', 'language_menu'),
                                  reply_markup=keyboard('ENG', 'lang_keyboard')))
+        return ConversationHandler.END
+
+    def lang_menu(self, bot, update, user_data):
+        delete_messages(bot, update, user_data)
+        lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
+        user_data['to_delete'].append(
+            bot.send_message(update.effective_chat.id,
+                             get_str(lang, 'language_menu'),
+                             reply_markup=keyboard(lang, 'lang_keyboard')))
         return ConversationHandler.END
 
     def set_lang(self, bot, update, user_data):
@@ -521,8 +532,12 @@ class BotFather(object):
 
 START_HANDLER = CommandHandler('start', BotFather().start, pass_user_data=True)
 
-LANG_MENU = CallbackQueryHandler(BotFather().set_lang,
-                                 pattern=r"language", pass_user_data=True)
+LANG_MENU = CallbackQueryHandler(BotFather().lang_menu,
+                                 pattern=r"lang_menu", pass_user_data=True)
+
+SET_LANG = CallbackQueryHandler(BotFather().set_lang,
+                                pattern=r"language", pass_user_data=True)
+
 
 CREATE_BOT_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(BotFather().terms_of_use,
@@ -613,6 +628,7 @@ def main():
     dp.add_handler(CREATE_BOT_HANDLER)
     dp.add_handler(MANAGE_BOT_HANDLER)
     dp.add_handler(LANG_MENU)
+    dp.add_handler(SET_LANG)
 
     dp.add_handler(START_SUPPORT_HANDLER)
     dp.add_handler(CommandHandler('admin', Welcome().test_admin, pass_user_data=True))
