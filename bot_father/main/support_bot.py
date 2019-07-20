@@ -23,9 +23,10 @@ logger = logging.getLogger(__name__)
 #       notification and disable notifications setting
 #       answered by:
 #       different text for different category
-#       join text messages in formating report and answer
+#       [DONE] join text messages in formating report and answer
 # TODO: AttributeError: 'NoneType' object has no attribute 'get_file' when video message
 #       user_data['page'] - fix between states
+#       give content without using help variables like to_admin and show_trash...
 
 
 def delete_messages(bot, update, user_data):
@@ -64,12 +65,12 @@ def keyboard(lang, kb_name):
             [[InlineKeyboardButton(get_str(lang, 'BACK'),
                                    callback_data='cancel_report')]]),
 
-        confirm_keyboard=InlineKeyboardMarkup([
-            [InlineKeyboardButton(get_str(lang, 'send_btn'), callback_data='send')],
-            [InlineKeyboardButton(get_str(lang, 'BACK'), callback_data='cancel_report')]]),
+        # confirm_keyboard=InlineKeyboardMarkup([
+        #     [InlineKeyboardButton(get_str(lang, 'send_btn'), callback_data='send')],
+        #     [InlineKeyboardButton(get_str(lang, 'BACK'), callback_data='cancel_report')]]),
 
         final_keyboard=InlineKeyboardMarkup([
-            [InlineKeyboardButton(text=get_str(lang, 'done_button'), callback_data="confirm_send")],
+            [InlineKeyboardButton(text=get_str(lang, 'send_btn'), callback_data="confirm_send")],
             [InlineKeyboardButton(get_str(lang, 'CANCEL_CREATION'), callback_data="cancel_report")]]),
 
         back_to_inbox_keyboard=InlineKeyboardMarkup(
@@ -82,12 +83,12 @@ def keyboard(lang, kb_name):
              InlineKeyboardButton(get_str(lang, 'BACK'), callback_data='return_to_admin_inbox')]]),
 
         admin_final_keyboard=InlineKeyboardMarkup([
-            [InlineKeyboardButton(text=get_str(lang, 'done_button'), callback_data="confirm_answer_send")],
+            [InlineKeyboardButton(text=get_str(lang, 'send_btn'), callback_data="confirm_answer_send")],
             [InlineKeyboardButton(get_str(lang, 'CANCEL_CREATION'), callback_data="return_to_admin_inbox")]]),
 
-        admin_confirm_keyboard=InlineKeyboardMarkup([
-            [InlineKeyboardButton(get_str(lang, 'send_btn'), callback_data='send_answer')],
-            [InlineKeyboardButton(get_str(lang, 'BACK'), callback_data='return_to_admin_inbox')]])
+        # admin_confirm_keyboard=InlineKeyboardMarkup([
+        #     [InlineKeyboardButton(get_str(lang, 'send_btn'), callback_data='send_answer')],
+        #     [InlineKeyboardButton(get_str(lang, 'BACK'), callback_data='return_to_admin_inbox')]])
     )
     return keyboard_dict[kb_name]
 
@@ -315,12 +316,16 @@ def create_template_part(messages, have_file=False):
 
 
 # from user input
-def get_message(message):
+def add_message(message, user_data):
     # TODO: remember captions?
-    #       join text messages
-    #       switch case as a dict ?
+    if 'messages' not in user_data:
+        user_data['messages'] = list()
 
     if message.text:
+        if len(user_data['messages']) > 0:
+            if user_data['messages'][-1]['type'] == 'text':
+                user_data['messages'][-1]['file_id'] += f'\n{message.text}'
+                return True
         message = dict(file_id=message.text, type='text')
 
     elif message.photo:
@@ -360,10 +365,11 @@ def get_message(message):
     elif message.video_note:
         video_note_file = message.audio.get_file().file_id
         message = dict(file_id=video_note_file, type='video_note')
-
+    # !!!
     else:
-        message = dict(file_id=None, type=None)
-    return message
+        return False
+    user_data['messages'].append(message)
+    return True
 
 
 # TODO: better, and how to delete it without user_data
@@ -400,7 +406,7 @@ def send_notification_to_user(bot, user_data, report, lang):
 
 class Welcome(object):
     def start(self, bot, update, user_data):
-        user_data['report'] = list()
+        # user_data['report'] = list()
         delete_messages(bot, update, user_data)
         lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
         if support_admins_table.find().count() == 0:
@@ -415,7 +421,7 @@ class Welcome(object):
         return ConversationHandler.END
 
     def test_admin(self, bot, update, user_data):
-        user_data['answer_to_report'] = list()
+        # user_data['answer_to_report'] = list()
         delete_messages(bot, update, user_data)
         lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
         user_data['to_delete'].append(
@@ -476,18 +482,18 @@ class UserSupportBot(object):
         lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
 
         # TODO: AttributeError: 'NoneType' object has no attribute 'get_file' when video message
-        message = get_message(update.message)
-        user_data['report'].append(message)
+        add_message(update.message, user_data)
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id,
                              get_str(lang, 'report_contains')))
-        send_messages_from_report(bot, update, user_data, user_data['report'])
+        send_messages_from_report(bot, update, user_data, user_data['messages'])
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id,
                              get_str(lang, 'enter_message_2'),
                              reply_markup=keyboard(lang, 'final_keyboard')))
         return MESSAGE
 
+    """ 
     def confirm_send(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
         lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
@@ -495,25 +501,26 @@ class UserSupportBot(object):
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id,
                              get_str(lang, 'report_contains')))
-        send_messages_from_report(bot, update, user_data, user_data['report'])
+        send_messages_from_report(bot, update, user_data, user_data['messages'])
         user_data['to_delete'].append(
             bot.send_message(update.callback_query.message.chat_id,
                              get_str(lang, 'confirm_message'),
                              reply_markup=keyboard(lang, 'confirm_keyboard')))
         return CONFIRM_SEND_REPORT
+    """
 
     def finish_send_report(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
         lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
 
-        user_msg_string, have_file = create_template_part(user_data['report'])
+        user_msg_string, have_file = create_template_part(user_data['messages'])
         _id = users_messages_to_admin_table.insert_one({"user_full_name": update.effective_user.full_name,
                                                         "username": update.effective_user.name,
                                                         "chat_id": update.effective_chat.id,
                                                         "user_id": update.effective_user.id,
                                                         "timestamp": datetime.datetime.now(),
                                                         "category": user_data['category'],
-                                                        "messages": user_data["report"],
+                                                        "messages": user_data["messages"],
                                                         'user_msg_string': user_msg_string,
                                                         'answer': None,
                                                         'answer_msg_string': get_str(lang, 'not_yet'),
@@ -522,12 +529,13 @@ class UserSupportBot(object):
                                                         }).inserted_id
         update.callback_query.answer(text=get_str(lang, 'blink_success_send_report'))
         send_notification_to_admins(bot, user_data,
-                                    users_messages_to_admin_table.find_one({'_id': _id}), lang)
+                                    users_messages_to_admin_table.find_one({'_id': _id}),
+                                    lang)
         user_data['to_delete'].append(
             bot.send_message(update.callback_query.message.chat_id,
                              get_str(lang, 'finish_send_report'),
                              reply_markup=keyboard(lang, 'user_start_keyboard')))
-        user_data['report'] = list()
+        user_data['messages'] = list()
         return ConversationHandler.END
 
     # 'My reports' button
@@ -584,7 +592,7 @@ class AdminSupportBot(object):
         lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
 
         # !!!!!!!!!!
-        user_data['answer_to_report'] = list()
+        user_data['messages'] = list()
         # !!!!!!!!!!
         try:
             user_data['page'] = int(update.callback_query.data)
@@ -684,8 +692,7 @@ class AdminSupportBot(object):
         delete_messages(bot, update, user_data)
         lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
 
-        message = get_message(update.message)
-        user_data['answer_to_report'].append(message)
+        add_message(update.message, user_data)
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id,
                              user_data['processed_report_template']))
@@ -693,13 +700,14 @@ class AdminSupportBot(object):
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id,
                              get_str(lang, 'admin_give_answer_3')))
-        send_messages_from_report(bot, update, user_data, user_data['answer_to_report'])
+        send_messages_from_report(bot, update, user_data, user_data['messages'])
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id,
                              get_str(lang, 'admin_give_answer_2'),
                              reply_markup=keyboard(lang, 'admin_final_keyboard')))
         return ANSWERING
 
+    """ 
     def confirm_send_answer(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
         lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
@@ -711,21 +719,22 @@ class AdminSupportBot(object):
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id,
                              get_str(lang, 'admin_give_answer_3')))
-        send_messages_from_report(bot, update, user_data, user_data['answer_to_report'])
+        send_messages_from_report(bot, update, user_data, user_data['messages'])
         user_data['to_delete'].append(
             bot.send_message(update.callback_query.message.chat_id,
                              get_str(lang, 'confirm_answer'),
                              reply_markup=keyboard(lang, 'admin_confirm_keyboard')))
         return CONFIRM_SEND_ANSWER
+    """
 
     def finish_send_answer(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
         lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
 
         answer_msg_string, have_file = \
-            create_template_part(user_data['answer_to_report'], user_data['processed_report']['have_file'])
+            create_template_part(user_data['messages'], user_data['processed_report']['have_file'])
         users_messages_to_admin_table.update_one({'_id': user_data['processed_report']['_id']},
-                                                 {'$set': {'answer': user_data['answer_to_report'],
+                                                 {'$set': {'answer': user_data['messages'],
                                                            # 'answer_messages_types': admin_answer_messages_types,
                                                            'answer_msg_string': answer_msg_string,
                                                            'have_file': have_file}})
@@ -738,7 +747,7 @@ class AdminSupportBot(object):
             bot.send_message(update.callback_query.message.chat_id,
                              get_str(lang, 'finish_send_answer'),
                              reply_markup=keyboard(lang, 'admin_start_keyboard')))
-        user_data['answer_to_report'] = list()
+        user_data['messages'] = list()
         return ConversationHandler.END
 
     def trash(self, bot, update, user_data):
@@ -781,13 +790,13 @@ SEND_REPORT_HANDLER = ConversationHandler(
                           ],
 
         MESSAGE: [MessageHandler(Filters.all, UserSupportBot().received_message, pass_user_data=True),
-                  CallbackQueryHandler(UserSupportBot().confirm_send,
+                  CallbackQueryHandler(UserSupportBot().finish_send_report,
                                        pattern=r"confirm_send", pass_user_data=True)
                   # CallbackQueryHandler(Welcome().start, pattern=r"cancel_report", pass_user_data=True)
                   ],
 
-        CONFIRM_SEND_REPORT: [CallbackQueryHandler(UserSupportBot().finish_send_report,
-                                                   pattern=r"send", pass_user_data=True)]
+        # CONFIRM_SEND_REPORT: [CallbackQueryHandler(UserSupportBot().finish_send_report,
+        #                                            pattern=r"send", pass_user_data=True)]
     },
 
     fallbacks=[CallbackQueryHandler(Welcome().start, pattern=r"cancel_report", pass_user_data=True)
@@ -831,17 +840,16 @@ ADMIN_REPORTS_HANDLER = ConversationHandler(
                                            pattern='^[0-9]+$', pass_user_data=True)],
 
         ANSWERING: [MessageHandler(Filters.all, AdminSupportBot().received_message, pass_user_data=True),
-                    CallbackQueryHandler(AdminSupportBot().confirm_send_answer,
+                    CallbackQueryHandler(AdminSupportBot().finish_send_answer,
                                          pattern=r"confirm_answer_send", pass_user_data=True),
 
                     CallbackQueryHandler(AdminSupportBot().inbox_reports,
                                          pattern=r"return_to_admin_inbox", pass_user_data=True)],
 
-        CONFIRM_SEND_ANSWER: [CallbackQueryHandler(AdminSupportBot().finish_send_answer,
-                                                   pattern=r"send_answer", pass_user_data=True),
-
-                              CallbackQueryHandler(AdminSupportBot().inbox_reports,
-                                                   pattern=r"return_to_admin_inbox", pass_user_data=True)],
+        # CONFIRM_SEND_ANSWER: [CallbackQueryHandler(AdminSupportBot().finish_send_answer,
+        #                                            pattern=r"send_answer", pass_user_data=True),
+        #                       CallbackQueryHandler(AdminSupportBot().inbox_reports,
+        #                                            pattern=r"return_to_admin_inbox", pass_user_data=True)],
 
         ADMIN_SINGLE_REPORT: [CallbackQueryHandler(AdminSupportBot().confirm_move_to_trash,
                                                    pattern=r"delete_report", pass_user_data=True),
