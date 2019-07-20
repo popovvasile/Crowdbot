@@ -571,8 +571,7 @@ strings_dict = {
                              '\n*CrowdRobot выступает посредником между администратором чатбота и платёжной системой, '
                              'без доступа на изменение суммы платежа. Деньги переводятся с банковского счёта'
                              '\nпользователя чатбота на на счёт администратора в выбранной им платёжной системе.'
-                             '\n(У платёжки с админом тоже есть договор, который это регулирует)'
-                             '\n✅Да, я согласен с условиями использования сервиса CrowdRoBot ',
+                             '\n(У платёжки с админом тоже есть договор, который это регулирует)',
         token_already_exist='You already got bot with this token -> {}. '
                             'If you want to create new one send me new token that '
                             'you can take from @BotFather',
@@ -667,7 +666,17 @@ strings_dict = {
         message='Here is your Messages',
         answer='Here is the Answer',
         lang_button='Language',
-        accept='Yes, I agree to the terms of use of the CrowdRoBot service'
+        accept='Yes, I agree to the terms of use of the CrowdRoBot service',
+        admin_already_in_list='Admin already in the list\n',
+
+        api_error_creating_bot='Sorry, but bot creation was interrupted due to internal error. '
+                               '\nA notification was sent to the developers.',
+        api_error_deleting_bot='Sorry, but the bot deletion was interrupted due to internal error. '
+                               '\nA notification was sent to the developers.',
+        api_error_adding_admins='Sorry, but the addition of administrators was interrupted due to internal error. '
+                                '\nA notification was sent to the developers.',
+        api_error_deleting_admins='Sorry, but the deletion of administrators was interrupted due to internal errors. '
+                                  '\nA notification was sent to the developers.'
     ),
 
     'RUS': dict(
@@ -827,7 +836,18 @@ strings_dict = {
         message='Твоё сообщение',
         answer='Ответ',
         lang_button='Язык',
-        accept='Да, я согласен с условиями использования сервиса CrowdRoBot '
+        accept='Да, я согласен с условиями использования сервиса CrowdRoBot ',
+        admin_already_in_list='Администратор уже добавлен в список\n',
+
+        api_error_creating_bot='Извини но создание бота было прервано из за внутренней ошибки. '
+                               '\nРазработчикам было отправлено уведомление.',
+        api_error_deleting_bot='Извини но удаление бота было прервано из за внутренней ошибки. '
+                               '\nРазработчикам было отправлено уведомление.',
+        api_error_adding_admins='Извини но добавление администраторов было прервано из за внутренней ошибки. '
+                                '\nРазработчикам было отправлено уведомление.',
+        api_error_deleting_admins='Извини но удаление администраторов было прервано из за внутренних ошибок. '
+                                  '\nРазработчикам было отправлено уведомление.'
+
     )}
 
 categories = {

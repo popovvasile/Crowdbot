@@ -35,16 +35,10 @@ logger = logging.getLogger(__name__)
 #       5) restriction on bot count
 #       6) changing bot_name and bot_username loop
 #       7) lang remember using user_data
-#       8) adding already added or exist emails ! !
+#       9) markdown
 
 
 def delete_messages(bot, update, user_data):
-    # print(update.effective_message.message_id)
-    # if update.callback_query:
-    #     print(update.callback_query.data)
-    # else:
-    #     print(update.message.text)
-
     bot.delete_message(update.effective_chat.id, update.effective_message.message_id)
     if 'to_delete' in user_data:
         for msg in user_data['to_delete']:
@@ -83,7 +77,7 @@ def emails_layout(user_data, text):
     return result
 
 
-TERMS_OF_USE, TOKEN_REQUEST, ADMIN_EMAILS_REQUEST, ADD_EMAIL, WELCOME_MESSAGE, CHOOSE_CATEGORY, \
+TERMS_OF_USE, TOKEN_REQUEST, ADMIN_EMAIL_REQUEST, ADD_EMAIL, WELCOME_MESSAGE, CHOOSE_CATEGORY, \
     CHOOSE_BOT_FOR_MANAGE, BOT_MANAGE, CONFIRM_DELETE_BOT, ADD_ADMINS, DELETE_ADMIN, CONFIRM_DELETE_ADMIN = range(12)
 
 
@@ -206,8 +200,7 @@ class BotFather(object):
     # 'Create bot' button
     def terms_of_use(self, bot, update, user_data):
         lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
-
-        if update.callback_query.data == 'create_new_bot':
+        if update.message or update.callback_query.data == 'create_new_bot':
             delete_messages(bot, update, user_data)
             user_data['checkbox_id'] = \
                 bot.send_message(update.effective_chat.id,
@@ -245,7 +238,7 @@ class BotFather(object):
                     bot.send_message(update.effective_chat.id,
                                      get_str(lang, 'ADMIN_EMAILS_REQUEST'),
                                      reply_markup=keyboard(lang, 'cancel_keyboard')))
-                return ADMIN_EMAILS_REQUEST
+                return ADMIN_EMAIL_REQUEST
             else:
                 # bot exist in db
                 user_data['to_delete'].append(
@@ -268,11 +261,19 @@ class BotFather(object):
         # https://pypi.org/project/validate_email/
         is_valid = validate_email(update.message.text)
         if is_valid:
-            user_data['request']['admins'].append(map_email(update.message.text))
-            user_data['to_delete'].append(
-                bot.send_message(update.effective_chat.id,
-                                 emails_layout(user_data, get_str(lang, 'NEXT_EMAIL_REQUEST')),
-                                 reply_markup=keyboard(lang, 'continue_cancel_keyboard')))
+            if not any(admin['email'] == update.message.text
+                       for admin in user_data['request']['admins']):
+                user_data['request']['admins'].append(map_email(update.message.text))
+                user_data['to_delete'].append(
+                    bot.send_message(update.effective_chat.id,
+                                     emails_layout(user_data, get_str(lang, 'NEXT_EMAIL_REQUEST')),
+                                     reply_markup=keyboard(lang, 'continue_cancel_keyboard')))
+            else:
+                user_data['to_delete'].append(
+                    bot.send_message(update.effective_chat.id,
+                                     emails_layout(user_data, get_str(lang, 'admin_already_in_list') +
+                                                   get_str(lang, 'NEXT_EMAIL_REQUEST')),
+                                     reply_markup=keyboard(lang, 'continue_cancel_keyboard')))
         else:
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id,
@@ -344,15 +345,18 @@ class BotFather(object):
                                          user_data['to_save']['bot_username']),
                                  reply_markup=keyboard(lang, 'main_keyboard')))
 
-            # SendGridMailer().async_send(user_data['request']['admins'],
-            #                             user_data['request']['name'])
             thr = Thread(target=self.mailer().send,
                          args=(user_data['request']['admins'],
                                user_data['request']['name']))
             thr.start()
             user_data.clear()
         else:
-            print('status code not 200!')
+            user_data['to_delete'].append(
+                bot.send_message(update.effective_chat.id,
+                                 get_str(lang,
+                                         'api_error_creating_bot'),
+                                 reply_markup=keyboard(lang, 'main_keyboard')))
+            print('Status Code Not 200!')
             print(resp)
         return ConversationHandler.END
 
@@ -423,7 +427,12 @@ class BotFather(object):
                                  reply_markup=keyboard(lang, 'main_keyboard')))
             user_data.clear()
         else:
-            print('status code not 200!')
+            user_data['to_delete'].append(
+                bot.send_message(update.effective_chat.id,
+                                 get_str(lang,
+                                         'api_error_deleting_bot'),
+                                 reply_markup=keyboard(lang, 'main_keyboard')))
+            print('Status Code Not 200!')
             print(resp)
         return ConversationHandler.END
 
@@ -441,31 +450,37 @@ class BotFather(object):
     def continue_add_admins(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
         lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
+        k = keyboard(lang, 'add_cancel_keyboard') \
+            if user_data['request']['admins'] \
+            else keyboard(lang, 'cancel_keyboard')
+
         # https://pypi.org/project/validate_email/
         is_valid = validate_email(update.message.text)
         if is_valid:
-            for admin in user_data['processed_bot']['admins']:
-                if admin['email'] == update.message.text:
-                    user_data['to_delete'].append(
-                        bot.send_message(update.effective_chat.id,
-                                         get_str(lang, 'add_already_exist_admin',
-                                                 update.message.text),
-                                         reply_markup=keyboard(lang, 'add_cancel_keyboard')
-                                         if user_data['request']['admins'] else
-                                         keyboard(lang, 'cancel_keyboard')))
-                    return ADD_ADMINS
-            user_data['request']['admins'].append(map_email(update.message.text))
-            user_data['to_delete'].append(
-                bot.send_message(update.effective_chat.id,
-                                 emails_layout(user_data, get_str(lang, 'NEXT_EMAIL_REQUEST')),
-                                 reply_markup=keyboard(lang, 'add_cancel_keyboard')))
+            if not any(admin['email'] == update.message.text
+                       for admin in user_data['request']['admins']) \
+                    and not any(admin['email'] == update.message.text
+                                for admin in user_data['processed_bot']['all_admins']):
+                user_data['request']['admins'].append(map_email(update.message.text))
+                user_data['to_delete'].append(
+                    bot.send_message(update.effective_chat.id,
+                                     emails_layout(user_data,
+                                                   get_str(lang, 'NEXT_EMAIL_REQUEST')),
+                                     reply_markup=keyboard(lang, 'add_cancel_keyboard')))
+            else:
+                user_data['to_delete'].append(
+                    bot.send_message(update.effective_chat.id,
+                                     emails_layout(user_data,
+                                                   get_str(lang, 'add_already_exist_admin',
+                                                           update.message.text) +
+                                                   get_str(lang, 'NEXT_EMAIL_REQUEST')),
+                                     reply_markup=k))
         else:
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id,
-                                 emails_layout(user_data, get_str(lang, 'WRONG_EMAIL')),
-                                 reply_markup=keyboard(lang, 'add_cancel_keyboard')
-                                 if user_data['request']['admins'] else
-                                 keyboard(lang, 'cancel_keyboard')))
+                                 emails_layout(user_data,
+                                               get_str(lang, 'WRONG_EMAIL')),
+                                 reply_markup=k))
         return ADD_ADMINS
 
     def finish_add_admins(self, bot, update, user_data):
@@ -483,14 +498,18 @@ class BotFather(object):
                 bot.send_message(update.effective_chat.id,
                                  get_str(lang, 'admins_added'),
                                  reply_markup=keyboard(lang, 'main_keyboard')))
-
             thr = Thread(target=self.mailer().send,
                          args=(user_data['request']['admins'],
-                               user_data['request']['name']))
+                               user_data['processed_bot']['bot_name']))
             thr.start()
             user_data.clear()
         else:
-            print('status code not 200!')
+            user_data['to_delete'].append(
+                bot.send_message(update.effective_chat.id,
+                                 get_str(lang,
+                                         'api_error_adding_admins'),
+                                 reply_markup=keyboard(lang, 'main_keyboard')))
+            print('Status Code Not 200!')
             print(resp)
         return ConversationHandler.END
 
@@ -544,7 +563,12 @@ class BotFather(object):
             user_data.clear()
             return ConversationHandler.END
         else:
-            print('status code not 200!')
+            user_data['to_delete'].append(
+                bot.send_message(update.effective_chat.id,
+                                 get_str(lang,
+                                         'api_error_deleting_admins'),
+                                 reply_markup=keyboard(lang, 'main_keyboard')))
+            print('Status Code Not 200!')
             print(resp)
         return ConversationHandler.END
 
@@ -577,7 +601,7 @@ CREATE_BOT_HANDLER = ConversationHandler(
 
         TOKEN_REQUEST: [MessageHandler(Filters.text, BotFather().request_email, pass_user_data=True)],
 
-        ADMIN_EMAILS_REQUEST: [MessageHandler(Filters.text, BotFather().add_email, pass_user_data=True)],
+        ADMIN_EMAIL_REQUEST: [MessageHandler(Filters.text, BotFather().add_email, pass_user_data=True)],
 
         ADD_EMAIL: [MessageHandler(Filters.text, BotFather().add_email, pass_user_data=True),
                     CallbackQueryHandler(BotFather().enter_welcome_message,

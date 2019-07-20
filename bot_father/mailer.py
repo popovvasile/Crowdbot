@@ -90,6 +90,7 @@ class SendGridMailer(MessageText):
         return 'HERE IS RETURN'
 
 
+# https://realpython.com/python-send-email/#loop-over-rows-to-send-multiple-emails
 class SMTPMailer(MessageText):
     def __init__(self):
         super(SMTPMailer, self).__init__()
@@ -120,7 +121,8 @@ class SMTPMailer(MessageText):
                     print('Mailer Exception', e)
 
     # Asynchronous Mail Send
-
+    # https://howto.lintel.in/sending-asynchronous-emails-using-twisted-part-2/
+    # https: // aiosmtplib.readthedocs.io / en / stable / overview.html
     async def async_sending(self, admins, bot_name, loop):
         for admin in admins:
             message = MIMEMultipart('alternative')
