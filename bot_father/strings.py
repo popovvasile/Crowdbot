@@ -579,9 +579,9 @@ strings_dict = {
 
         manage_bots_button='Manage my bots',
         contact_button='Contact with Crowd Team',
-        terms_as_text_button='Send as text',
-        terms_as_doc_button='Send as .docx file',
-        agree_with_terms_button='I have read. Continue',
+        # terms_as_text_button='Send as text',
+        # terms_as_doc_button='Send as .docx file',
+        agree_with_terms_button='Continue',
         continue_button_text='Continue',
         add_button='Add',
 
@@ -666,7 +666,8 @@ strings_dict = {
         current_page='Current page: {}',
         message='Here is your Messages',
         answer='Here is the Answer',
-        lang_button='Language'
+        lang_button='Language',
+        accept='Yes, I agree to the terms of use of the CrowdRoBot service'
     ),
 
     'RUS': dict(
@@ -733,16 +734,15 @@ strings_dict = {
                              '\n*CrowdRobot выступает посредником между администратором чатбота и платёжной системой, '
                              'без доступа на изменение суммы платежа. Деньги переводятся с банковского счёта'
                              '\nпользователя чатбота на на счёт администратора в выбранной им платёжной системе.'
-                             '\n(У платёжки с админом тоже есть договор, который это регулирует)'
-                             '\n✅Да, я согласен с условиями использования сервиса CrowdRoBot ',
+                             '\n(У платёжки с админом тоже есть договор, который это регулирует)\n',
         token_already_exist='Бот {} с этим токеном уже есть.'
                             'Если тебе нужен ещё один бот, то возьми его у @BotFather',
 
         manage_bots_button='🛠 Настроить ботов',
         contact_button='❓Поддержка',
-        terms_as_text_button='Показать соглашение',
-        terms_as_doc_button='Send as .docx file',
-        agree_with_terms_button='Я согласен',
+        # terms_as_text_button='Показать соглашение',
+        # terms_as_doc_button='Send as .docx file',
+        agree_with_terms_button='Продолжить',
         continue_button_text='Продолжить',
         add_button='➕ Добавить',
 
@@ -826,7 +826,8 @@ strings_dict = {
         current_page='Страница: {}',
         message='Твоё сообщение',
         answer='Ответ',
-        lang_button='Язык'
+        lang_button='Язык',
+        accept='Да, я согласен с условиями использования сервиса CrowdRoBot '
     )}
 
 categories = {
@@ -949,6 +950,16 @@ report_categories = {
     'ENG': ['Complaint', 'Suggestion', 'Advertising'],
     'RUS': ['Предложение', 'Жалоба', 'Реклама']
 }
+
+
+def boolmoji(boolean: bool):
+    # emoji_yes = "✅"
+    # emoji_no = "🔲"
+
+    emoji_yes = "✅"
+    # emoji_no = "❎"
+    emoji_no = '🔲'
+    return emoji_yes if boolean else emoji_no
 
 
 def get_str(lang, string, *args):

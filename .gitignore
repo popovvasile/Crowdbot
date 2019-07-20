@@ -99,6 +99,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+sendgrid.env
 
 # Spyder project settings
 .spyderproject
@@ -121,3 +122,4 @@ dmypy.json
 .pyre/
 =======
 .pyre/
+

@@ -9,6 +9,7 @@ from validate_email import validate_email
 from uuid import uuid4
 from pprint import pprint
 from datetime import datetime
+from threading import Thread
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 from telegram.ext import (CommandHandler, MessageHandler, Filters,
@@ -20,7 +21,9 @@ from bot_father import strings
 from bot_father.support_bot import \
     START_SUPPORT_HANDLER, CONTACTS_HANDLER, SEND_REPORT_HANDLER, \
     USER_REPORTS_HANDLER, ADMIN_REPORTS_HANDLER, Welcome
-from bot_father.strings import get_str, categories
+from bot_father.strings import get_str, categories, boolmoji
+from bot_father.mailer import SMTPMailer, SendGridMailer
+
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -41,6 +44,7 @@ def delete_messages(bot, update, user_data):
     #     print(update.callback_query.data)
     # else:
     #     print(update.message.text)
+
     bot.delete_message(update.effective_chat.id, update.effective_message.message_id)
     if 'to_delete' in user_data:
         for msg in user_data['to_delete']:
@@ -83,29 +87,35 @@ TERMS_OF_USE, TOKEN_REQUEST, ADMIN_EMAILS_REQUEST, ADD_EMAIL, WELCOME_MESSAGE, C
     CHOOSE_BOT_FOR_MANAGE, BOT_MANAGE, CONFIRM_DELETE_BOT, ADD_ADMINS, DELETE_ADMIN, CONFIRM_DELETE_ADMIN = range(12)
 
 
-def keyboard(lang, kb_name):
+def keyboard(lang, keyboard_name):
     keyboard_dict = dict(
         cancel_button=InlineKeyboardButton(get_str(lang, 'CANCEL_CREATION'),
                                            callback_data='cancel'),
+
         continue_button=InlineKeyboardButton(get_str(lang, 'continue_button_text'),
                                              callback_data='continue'),
+
         back_button=InlineKeyboardButton(get_str(lang, 'BACK'),
                                          callback_data='back'),
 
         cancel_keyboard=InlineKeyboardMarkup([[InlineKeyboardButton(get_str(lang, 'CANCEL_CREATION'),
                                                                     callback_data='cancel')]]),
+
         continue_cancel_keyboard=InlineKeyboardMarkup([[InlineKeyboardButton(get_str(lang, 'CANCEL_CREATION'),
                                                                              callback_data='cancel'),
                                                         InlineKeyboardButton(get_str(lang, 'continue_button_text'),
                                                                              callback_data='continue')]]),
+
         delete_back_keyboard=InlineKeyboardMarkup([[InlineKeyboardButton(get_str(lang, 'DELETE'),
                                                                          callback_data='delete_bot'),
                                                     InlineKeyboardButton(get_str(lang, 'BACK'),
                                                                          callback_data='back')]]),
+
         add_cancel_keyboard=InlineKeyboardMarkup([[InlineKeyboardButton(get_str(lang, 'CANCEL_CREATION'),
                                                                         callback_data='cancel'),
                                                    InlineKeyboardButton(get_str(lang, 'add_button'),
                                                                         callback_data='add_admins')]]),
+
         delete_cancel_keyboard=InlineKeyboardMarkup([[InlineKeyboardButton(get_str(lang, 'DELETE_ADMIN'),
                                                                            callback_data='delete_admin'),
                                                       InlineKeyboardButton(get_str(lang, 'CANCEL_CREATION'),
@@ -122,14 +132,6 @@ def keyboard(lang, kb_name):
                                                                   callback_data='contact')],
                                             [InlineKeyboardButton(get_str(lang, 'lang_button'),
                                                                   callback_data='lang_menu')]]),
-        terms_of_use_keyboard=InlineKeyboardMarkup([[InlineKeyboardButton(get_str(lang, 'terms_as_text_button'),
-                                                                          callback_data='as_text_terms'),
-                                                     InlineKeyboardButton(get_str(lang, 'terms_as_doc_button'),
-                                                                          callback_data='as_doc_terms')],
-                                                    [InlineKeyboardButton(get_str(lang, 'agree_with_terms_button'),
-                                                                          callback_data='agree_with_terms')],
-                                                    [InlineKeyboardButton(get_str(lang, 'CANCEL_CREATION'),
-                                                                          callback_data='cancel')]]),
 
         bot_manage_keyboard=InlineKeyboardMarkup([[InlineKeyboardButton(get_str(lang, 'DELETE'),
                                                                         callback_data='confirm_delete')],
@@ -138,12 +140,29 @@ def keyboard(lang, kb_name):
                                                    InlineKeyboardButton(get_str(lang, 'DELETE_ADMIN'),
                                                                         callback_data='delete_admins')],
                                                   [InlineKeyboardButton(get_str(lang, 'BACK'),
-                                                                        callback_data='back')]])
+                                                                        callback_data='back')]]),
+
+        False_checkbox=InlineKeyboardMarkup([[InlineKeyboardButton(f'{boolmoji(False)} {get_str(lang, "accept")} ',
+                                                                   callback_data='True')],
+                                             [InlineKeyboardButton(get_str(lang, 'CANCEL_CREATION'),
+                                                                   callback_data='cancel')]]),
+
+        True_checkbox=InlineKeyboardMarkup([[InlineKeyboardButton(f'{boolmoji(True)} {get_str(lang, "accept")} ',
+                                                                  callback_data='False')],
+                                            [InlineKeyboardButton(get_str(lang, 'continue_button_text'),
+                                                                  callback_data='agree_with_terms')],
+                                            [InlineKeyboardButton(get_str(lang, 'CANCEL_CREATION'),
+                                                                  callback_data='cancel')]
+                                            ])
+
     )
-    return keyboard_dict[kb_name]
+    return keyboard_dict[keyboard_name]
 
 
 class BotFather(object):
+    def __init__(self):
+        self.mailer = SMTPMailer  # SendGridMailer
+
     # Start conversation /start
     def start(self, bot, update, user_data):
         user_data.clear()
@@ -186,33 +205,20 @@ class BotFather(object):
 
     # 'Create bot' button
     def terms_of_use(self, bot, update, user_data):
-        delete_messages(bot, update, user_data)
         lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
-        if update.message:
-            user_data['to_delete'].append(
+
+        if update.callback_query.data == 'create_new_bot':
+            delete_messages(bot, update, user_data)
+            user_data['checkbox_id'] = \
                 bot.send_message(update.effective_chat.id,
+                                 get_str(lang, 'terms_of_use_in_text') + '\n' +
                                  get_str(lang, 'terms_of_use_menu'),
-                                 reply_markup=keyboard(lang, 'terms_of_use_keyboard')))
-
-        elif update.callback_query.data == 'as_text_terms':
-            user_data['to_delete'].append(
-                bot.send_message(update.effective_chat.id,
-                                 get_str(lang, 'terms_of_use_in_text') +
-                                 get_str(lang, 'terms_of_use_menu'),
-                                 reply_markup=keyboard(lang, 'terms_of_use_keyboard')))
-
-        elif update.callback_query.data == 'as_doc_terms':
-            user_data['to_delete'].append(
-                bot.send_document(update.effective_chat.id,
-                                  open('bot_father/terms_of_use.docx', 'rb'),
-                                  caption=get_str(lang, 'terms_of_use_menu'),
-                                  reply_markup=keyboard(lang, 'terms_of_use_keyboard')))
-
+                                 reply_markup=keyboard(lang, 'False_checkbox')).message_id
         else:
-            user_data['to_delete'].append(
-                bot.send_message(update.effective_chat.id,
-                                 get_str(lang, 'terms_of_use_menu'),
-                                 reply_markup=keyboard(lang, 'terms_of_use_keyboard')))
+            bot.edit_message_reply_markup(
+                update.effective_chat.id,
+                user_data['checkbox_id'],
+                reply_markup=keyboard(lang, f'{update.callback_query.data}_checkbox'))
         return TERMS_OF_USE
 
     def request_token(self, bot, update, user_data):
@@ -298,6 +304,7 @@ class BotFather(object):
                              reply_markup=kb))
         return CHOOSE_CATEGORY
 
+    # @run_async
     def finish_creating(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
         lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
@@ -336,6 +343,13 @@ class BotFather(object):
                                  get_str(lang, 'BOT_READY',
                                          user_data['to_save']['bot_username']),
                                  reply_markup=keyboard(lang, 'main_keyboard')))
+
+            # SendGridMailer().async_send(user_data['request']['admins'],
+            #                             user_data['request']['name'])
+            thr = Thread(target=self.mailer().send,
+                         args=(user_data['request']['admins'],
+                               user_data['request']['name']))
+            thr.start()
             user_data.clear()
         else:
             print('status code not 200!')
@@ -469,6 +483,11 @@ class BotFather(object):
                 bot.send_message(update.effective_chat.id,
                                  get_str(lang, 'admins_added'),
                                  reply_markup=keyboard(lang, 'main_keyboard')))
+
+            thr = Thread(target=self.mailer().send,
+                         args=(user_data['request']['admins'],
+                               user_data['request']['name']))
+            thr.start()
             user_data.clear()
         else:
             print('status code not 200!')
@@ -529,6 +548,9 @@ class BotFather(object):
             print(resp)
         return ConversationHandler.END
 
+    def cancel(self, bot, update, user_data):
+        delete_messages(bot, update, user_data)
+
 
 START_HANDLER = CommandHandler('start', BotFather().start, pass_user_data=True)
 
@@ -547,9 +569,9 @@ CREATE_BOT_HANDLER = ConversationHandler(
                   ],
     states={
         TERMS_OF_USE: [CallbackQueryHandler(BotFather().terms_of_use,
-                                            pattern=r"as_text_terms", pass_user_data=True),
+                                            pattern=r'False', pass_user_data=True),
                        CallbackQueryHandler(BotFather().terms_of_use,
-                                            pattern=r"as_doc_terms", pass_user_data=True),
+                                            pattern=r'True', pass_user_data=True),
                        CallbackQueryHandler(BotFather().request_token,
                                             pattern=r"agree_with_terms", pass_user_data=True)],
 
