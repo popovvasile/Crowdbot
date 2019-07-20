@@ -1,9 +1,6 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
 import datetime
-from math import ceil
-from pprint import pprint
-from bson import ObjectId
 import requests
 from validate_email import validate_email
 from uuid import uuid4
@@ -11,19 +8,14 @@ from pprint import pprint
 from datetime import datetime
 from threading import Thread
 
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (CommandHandler, MessageHandler, Filters,
-                          ConversationHandler, RegexHandler, run_async, CallbackQueryHandler, Updater)
+                          ConversationHandler, CallbackQueryHandler)
 from telegram.error import TelegramError
 import logging
 from bot_father.db import bot_father_bots_table, bot_father_users_table
-from bot_father import strings
-from bot_father.support_bot import \
-    START_SUPPORT_HANDLER, CONTACTS_HANDLER, SEND_REPORT_HANDLER, \
-    USER_REPORTS_HANDLER, ADMIN_REPORTS_HANDLER, Welcome
-from bot_father.strings import get_str, categories, boolmoji
-from bot_father.mailer import SMTPMailer, SendGridMailer
-
+from bot_father.helper.strings import get_str, categories, boolmoji
+from bot_father.helper.mailer import SMTPMailer
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -318,7 +310,6 @@ class BotFather(object):
         user_data['request']['superuser'] = update.effective_user.id
 
         user_data['to_save'] = dict()
-        # user_data['to_save']['request'] = user_data['request']
         # first entered email is superuser email
         user_data['to_save']['super_user'] = user_data['request']['admins'][0]
         user_data['to_save']['super_user']['id'] = update.effective_user.id
@@ -584,6 +575,9 @@ LANG_MENU = CallbackQueryHandler(BotFather().lang_menu,
 SET_LANG = CallbackQueryHandler(BotFather().set_lang,
                                 pattern=r"language", pass_user_data=True)
 
+# FOR SUPPORT BOT
+BACK_TO_MAIN_MENU_HANDLER = CallbackQueryHandler(BotFather().start,
+                                                 pattern=r'to_main_menu', pass_user_data=True)
 
 CREATE_BOT_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(BotFather().terms_of_use,
@@ -661,10 +655,8 @@ MANAGE_BOT_HANDLER = ConversationHandler(
                                     pattern=r"cancel", pass_user_data=True)]
 )
 
-BACK_TO_MAIN_MENU_HANDLER = CallbackQueryHandler(BotFather().start,
-                                                 pattern=r'to_main_menu', pass_user_data=True)
 
-
+""" 
 def main():
     updater = Updater("836123673:AAE6AyfFCcRxjHZZhJHtdE8mKt8WNfgRm5Q")  # @crowd_supportbot
     dp = updater.dispatcher
@@ -678,7 +670,7 @@ def main():
 
     dp.add_handler(START_SUPPORT_HANDLER)
     dp.add_handler(CommandHandler('admin', Welcome().test_admin, pass_user_data=True))
-    dp.add_handler(CONTACTS_HANDLER)
+    # dp.add_handler(CONTACTS_HANDLER)
     dp.add_handler(SEND_REPORT_HANDLER)
     dp.add_handler(USER_REPORTS_HANDLER)
     dp.add_handler(ADMIN_REPORTS_HANDLER)
@@ -691,3 +683,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+"""
+

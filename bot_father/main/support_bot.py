@@ -2,16 +2,15 @@
 # # -*- coding: utf-8 -*-
 import datetime
 from math import ceil
-from pprint import pprint
 from bson import ObjectId
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
-from telegram.ext import (CommandHandler, MessageHandler, Filters,
-                          ConversationHandler, RegexHandler, run_async, CallbackQueryHandler, Updater)
+from telegram.ext import (MessageHandler, Filters,
+                          ConversationHandler, run_async, CallbackQueryHandler)
 from telegram.error import TelegramError
 import logging
 from bot_father.db import users_messages_to_admin_table, support_admins_table, bot_father_users_table
-from bot_father.strings import get_str, report_categories
+from bot_father.helper.strings import get_str, report_categories
 # from bot_father.bot_father import delete_messages
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -30,11 +29,6 @@ logger = logging.getLogger(__name__)
 
 
 def delete_messages(bot, update, user_data):
-    # print(update.effective_message.message_id)
-    # if update.callback_query:
-    #     print(update.callback_query.data)
-    # else:
-    #     print(update.message.text)
     bot.delete_message(update.effective_chat.id, update.effective_message.message_id)
     if 'to_delete' in user_data:
         for msg in user_data['to_delete']:
@@ -53,7 +47,7 @@ def keyboard(lang, kb_name):
     keyboard_dict = dict(
         user_start_keyboard=InlineKeyboardMarkup(
             list(([InlineKeyboardButton(get_str(lang, 'send_report_button'), callback_data='send_report')],
-                  [InlineKeyboardButton(get_str(lang, 'contacts_button'), callback_data='contacts')],
+                  # [InlineKeyboardButton(get_str(lang, 'contacts_button'), callback_data='contacts')],
                   [InlineKeyboardButton(get_str(lang, 'my_reports_button'), callback_data='user_inbox_messages')],
                   [InlineKeyboardButton(get_str(lang, 'BACK'), callback_data='to_main_menu')]))),
 
@@ -327,56 +321,44 @@ def get_message(message):
     #       switch case as a dict ?
 
     if message.text:
-        # bot.send_message(user_data['channel'], update.message.text)
         message = dict(file_id=message.text, type='text')
 
     elif message.photo:
         photo_file = message.photo[0].get_file().file_id
-        # bot.send_photo(chat_id=user_data['channel'], photo=photo_file)
-        # if update.message.caption:
-        #     print(update.message.caption)
         message = dict(file_id=photo_file, type='photo')
 
         # pprint(update.to_dict())
 
     elif message.audio:  # or update.message.video_note:
         audio_file = message.audio.get_file().file_id
-        # bot.send_audio(user_data['channel'], audio_file)
         message = dict(file_id=audio_file, type='audio')
 
     elif message.voice:
         voice_file = message.voice.get_file().file_id
-        # bot.send_voice(user_data['channel'], voice_file)
         message = dict(file_id=voice_file, type='voice')
 
     elif message.document:
         document_file = message.document.get_file().file_id
-        # bot.send_document(user_data['channel'], document_file)
         message = dict(file_id=document_file, type='document')
 
     elif message.sticker:
         sticker_file = message.sticker.get_file().file_id
-        # bot.send_sticker(user_data['channel'], sticker_file)
         message = dict(file_id=sticker_file, type='sticker')
 
     elif message.game:
         sticker_file = message.game.get_file().file_id
-        # bot.send_game(user_data['channel'], sticker_file)
         message = dict(file_id=sticker_file, type='game')
 
     elif message.animation:
         animation_file = message.animation.get_file().file_id
-        # bot.send_animation(user_data['channel'], animation_file)
         message = dict(file_id=animation_file, type='animation')
 
     elif message.video:
         video_file = message.video.get_file().file_id
-        # bot.send_video(user_data['channel'], video_file)
         message = dict(file_id=video_file, type='video')
 
     elif message.video_note:
         video_note_file = message.audio.get_file().file_id
-        # bot.send_video_note(user_data['channel'], video_note_file)
         message = dict(file_id=video_note_file, type='video_note')
 
     else:
@@ -427,7 +409,8 @@ class Welcome(object):
                                              'username': update.effective_user.name})
         user_data['to_delete'].append(
             bot.send_message(update.effective_chat.id,
-                             get_str(lang, 'start_message'),
+                             get_str(lang, 'start_message') +
+                             get_str(lang, 'contacts'),
                              reply_markup=keyboard(lang, 'user_start_keyboard')))
         return ConversationHandler.END
 
@@ -445,6 +428,7 @@ class Welcome(object):
 # USER SIDE
 class UserSupportBot(object):
     # 'Contacts' button
+    """
     def contacts(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
         lang = bot_father_users_table.find_one({'user_id': update.effective_user.id})['lang']
@@ -454,6 +438,7 @@ class UserSupportBot(object):
                              # reply_markup=user_start_keyboard
                              ))
         return ConversationHandler.END
+    """
 
     # 'Send report' button
     def choose_category(self, bot, update, user_data):
@@ -782,7 +767,7 @@ START_SUPPORT_HANDLER = CallbackQueryHandler(Welcome().start,
                                              pattern=r"contact", pass_user_data=True)
 
 # USER SIDE
-CONTACTS_HANDLER = CallbackQueryHandler(UserSupportBot().contacts, pattern=r"contacts", pass_user_data=True)
+# CONTACTS_HANDLER = CallbackQueryHandler(UserSupportBot().contacts, pattern=r"contacts", pass_user_data=True)
 
 SEND_REPORT_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(UserSupportBot().choose_category,
