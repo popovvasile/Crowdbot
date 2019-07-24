@@ -1,11 +1,11 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
 from telegram.ext import CommandHandler, Updater
-from bot_father.main.support_bot import \
+from main.support_bot import \
     START_SUPPORT_HANDLER, SEND_REPORT_HANDLER, \
     USER_REPORTS_HANDLER, ADMIN_REPORTS_HANDLER, Welcome
 
-from bot_father.main.bot_father import \
+from main.bot_father import \
     START_HANDLER, CREATE_BOT_HANDLER, MANAGE_BOT_HANDLER, \
     LANG_MENU, SET_LANG, BACK_TO_MAIN_MENU_HANDLER
 

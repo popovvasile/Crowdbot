@@ -309,6 +309,8 @@ Settings
 Click "📌 Create a button", to add a content.
 """,
         add_menu_buttons_str_1="Write the name of the button or choose from the template.",
+        add_menu_buttons_str_1_1="Write the name of your new button",
+
         add_menu_buttons_str_2='Send text, picture, document, video or music. ' \
                                '❗️ The text added to the description is not displayed in the button.',
         add_menu_buttons_str_3='A button with this name already exists. Think of another name.',
@@ -597,7 +599,9 @@ https://telegra.ph/Gajd-Podklyuchit-donaty-07-03
 🛠Настройки\n
 Нажми "📌 Создать кнопку", чтобы добавить контент
 """,
-        add_menu_buttons_str_1="Названии кнопки или выбери её из шаблона.",
+        add_menu_buttons_str_1="Напиши или выбери название новой кнопки",
+        add_menu_buttons_str_1_1="Напиши название новой кнопки",
+
         add_menu_buttons_str_2='Отправь текст, картинку, документ, видео или музыку. \n '
                                '❗️ Не добавляй описание в всплывающем окне. \n '
                                'Чтобы сделать описание, добавь отдельно картинку и текст.',

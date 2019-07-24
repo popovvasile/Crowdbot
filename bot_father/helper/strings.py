@@ -1,4 +1,3 @@
-from bot_father.db import bot_father_users_table
 
 """
 тип данных - 'строка' в питоне обозначается в ' ' или " " кавычках

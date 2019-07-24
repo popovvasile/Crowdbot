@@ -31,14 +31,21 @@ class AddCommands(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
 
-        reply_keyboard = [chatbots_table.find_one({"bot_id": bot.id})["buttons"]]
-        markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
-        bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(bot)["add_menu_buttons_str_1"],
-                         reply_markup=markup)
-        bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(bot)["back_text"], reply_markup=reply_markup)
-        return TYPING_BUTTON
+        buttons = chatbots_table.find_one({"bot_id": bot.id})["buttons"]
+        if buttons is not None and buttons != []:
+            markup = ReplyKeyboardMarkup([buttons], one_time_keyboard=True)
+            bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(bot)["add_menu_buttons_str_1"],
+                             reply_markup=markup)
+            bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(bot)["back_text"], reply_markup=reply_markup)
+            return TYPING_BUTTON
+        else:
+            bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(bot)["add_menu_buttons_str_1_1"])
+            bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(bot)["back_text"], reply_markup=reply_markup)
+            return TYPING_BUTTON
 
     def button_handler(self, bot, update, user_data):
         reply_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],

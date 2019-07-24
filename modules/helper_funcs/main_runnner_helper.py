@@ -33,8 +33,10 @@ def send_visitor_help(bot, chat_id, text, keyboard=None):
     buttons += [InlineKeyboardButton(button["button"],
                                      callback_data="button_{}".format(button["button"].replace(" ", "").lower()))
                 for button in custom_buttons_table.find({"bot_id": bot.id})]
-    pairs = list(zip(buttons[::2], buttons[1::2]))
-
+    if len(buttons) % 2 == 0:
+        pairs = list(zip(buttons[::2], buttons[1::2]))
+    else:
+        pairs = list(zip(buttons[::2], buttons[1::2])) + [(buttons[-1],)]
     bot.send_message(chat_id=chat_id,
                      text=text,
                      parse_mode=ParseMode.MARKDOWN,

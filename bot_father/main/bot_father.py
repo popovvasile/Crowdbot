@@ -13,9 +13,9 @@ from telegram.ext import (CommandHandler, MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
 from telegram.error import TelegramError
 import logging
-from bot_father.db import bot_father_bots_table, bot_father_users_table
-from bot_father.helper.strings import get_str, categories, boolmoji
-from bot_father.helper.mailer import SMTPMailer
+from db import bot_father_bots_table, bot_father_users_table
+from helper.strings import get_str, categories, boolmoji
+from helper.mailer import SMTPMailer
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -305,7 +305,7 @@ class BotFather(object):
         resp = requests.get(f"https://api.telegram.org/bot{user_data['request']['token']}/getMe").json()
         # get name before sending coz user can change it between state
         user_data['request']['name'] = resp['result']['first_name']
-        user_data['request']['buttons'] = categories.get(update.callback_query.data)
+        user_data['request']['buttons'] = categories.get(update.callback_query.data)  # TODO problem with buttons
         user_data['request']['lang'] = lang
         user_data['request']['superuser'] = update.effective_user.id
 

@@ -9,8 +9,8 @@ from telegram.ext import (MessageHandler, Filters,
                           ConversationHandler, run_async, CallbackQueryHandler)
 from telegram.error import TelegramError
 import logging
-from bot_father.db import users_messages_to_admin_table, support_admins_table, bot_father_users_table
-from bot_father.helper.strings import get_str, report_categories
+from db import users_messages_to_admin_table, support_admins_table, bot_father_users_table
+from helper.strings import get_str, report_categories
 # from bot_father.bot_father import delete_messages
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
