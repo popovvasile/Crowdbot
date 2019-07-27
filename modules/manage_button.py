@@ -8,6 +8,7 @@ import logging
 from database import custom_buttons_table
 from modules.helper_funcs.helper import get_help
 from modules.helper_funcs.lang_strings.strings import string_dict
+from modules.helper_funcs.misc import delete_messages
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -18,29 +19,32 @@ EDIT_FINISH = 1
 
 
 class ButtonEdit(object):
-    def start(self, bot, update):
+    def start(self, bot, update, user_data):
+        user_data["to_delete"] = []
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         all_buttons = custom_buttons_table.find({"bot_id": bot.id})
         if all_buttons.count() > 0:
-            bot.send_message(chat_id=update.callback_query.message.chat_id,
-                             text=string_dict(bot)["manage_button_str_1"],
-                             reply_markup=ReplyKeyboardMarkup(
-                                 [[button_name["button"]] for button_name in all_buttons])
-                             )
+            user_data["to_delete"].append(bot.send_message(chat_id=update.callback_query.message.chat_id,
+                                                           text=string_dict(bot)["manage_button_str_1"],
+                                                           reply_markup=ReplyKeyboardMarkup(
+                                                               [[button_name["button"]] for button_name in all_buttons])
+                                                           ))
             return CHOOSE_BUTTON
         else:
-            bot.send_message(chat_id=update.callback_query.message.chat_id,
-                             text=string_dict(bot)["manage_button_str_2"],
-                             reply_markup=InlineKeyboardMarkup(
-                                 [[InlineKeyboardButton(string_dict(bot)["create_button_button"],
-                                                        callback_data="create_button"),
-                                   InlineKeyboardButton(string_dict(bot)["back_button"],
-                                                        callback_data="help_module(menu_buttons)")]]
-                             ))
+            user_data["to_delete"].append(bot.send_message(chat_id=update.callback_query.message.chat_id,
+                                                           text=string_dict(bot)["manage_button_str_2"],
+                                                           reply_markup=InlineKeyboardMarkup(
+                                                               [[InlineKeyboardButton(
+                                                                   string_dict(bot)["create_button_button"],
+                                                                   callback_data="create_button"),
+                                                                 InlineKeyboardButton(
+                                                                     string_dict(bot)["back_button"],
+                                                                     callback_data="back_from_edit_button")]]
+                                                           )))
             return ConversationHandler.END
 
-    def choose_button(self, bot, update):
+    def choose_button(self, bot, update, user_data):
 
         try:
             button_info = custom_buttons_table.find_one(
@@ -48,7 +52,7 @@ class ButtonEdit(object):
             )
             for content in button_info["content"]:
                 if "text" in content:
-                    update.message.reply_text(
+                    user_data["to_delete"].append(update.message.reply_text(
                         text=content["text"],
                         reply_markup=InlineKeyboardMarkup([[
                             InlineKeyboardButton(text=string_dict(bot)["edit_button"],
@@ -58,9 +62,9 @@ class ButtonEdit(object):
                                                  callback_data="d_{}___{}".format(content["text"][:10],
                                                                                   update.message.text))
                         ]])
-                    )
+                    ))
                 if "audio_file" in content:
-                    update.message.reply_audio(
+                    user_data["to_delete"].append(update.message.reply_audio(
                         content["audio_file"],
                         reply_markup=InlineKeyboardMarkup([[
                             InlineKeyboardButton(text=string_dict(bot)["edit_button"],
@@ -70,9 +74,9 @@ class ButtonEdit(object):
                                                  callback_data="d_{}___{}".format(content["audio_file"][:10],
                                                                                   update.message.text))
                         ]])
-                    )
+                    ))
                 if "video_file" in content:
-                    update.message.reply_video(
+                    user_data["to_delete"].append(update.message.reply_video(
                         content["video_file"],
                         reply_markup=InlineKeyboardMarkup([[
                             InlineKeyboardButton(text=string_dict(bot)["edit_button"],
@@ -82,9 +86,9 @@ class ButtonEdit(object):
                                                  callback_data="d_{}___{}".format(content["video_file"][:10],
                                                                                   update.message.text))
                         ]])
-                    )
+                    ))
                 if "document_file" in content:
-                    update.message.reply_document(
+                    user_data["to_delete"].append(update.message.reply_document(
                         content["document_file"],
                         reply_markup=InlineKeyboardMarkup([[
                             InlineKeyboardButton(text=string_dict(bot)["edit_button"],
@@ -94,9 +98,9 @@ class ButtonEdit(object):
                                                  callback_data="d_{}___{}".format(content["document_file"][:10],
                                                                                   update.message.text))
                         ]])
-                    )
+                    ))
                 if "photo_file" in content:
-                    update.message.reply_photo(
+                    user_data["to_delete"].append(update.message.reply_photo(
                         content["photo_file"],
                         reply_markup=InlineKeyboardMarkup([[
                             InlineKeyboardButton(text=string_dict(bot)["edit_button"],
@@ -106,7 +110,7 @@ class ButtonEdit(object):
                                                  callback_data="d_{}___{}".format(content["photo_file"][:10],
                                                                                   update.message.text))
                         ]])
-                    )
+                    ))
         except BadRequest as excp:
             if excp.message == "Message is not modified":
                 pass
@@ -116,22 +120,22 @@ class ButtonEdit(object):
                 pass
             else:
                 LOGGER.exception("Exception in edit buttons")
-        bot.send_message(chat_id=update.message.chat_id,
-                         text=string_dict(bot)["manage_button_str_3"],
-                         reply_markup=ReplyKeyboardRemove())
-        bot.send_message(chat_id=update.message.chat_id,
-                         text=string_dict(bot)["add_button_content"],
-                         reply_markup=InlineKeyboardMarkup(
-                             [[InlineKeyboardButton(text=string_dict(bot)["add_button"],
-                                                    callback_data="add_content{}".format(update.message.text))]])
-                         )
-        bot.send_message(chat_id=update.message.chat_id,
-                         text=string_dict(bot)["back_text"],
-                         reply_markup=InlineKeyboardMarkup(
-                             [[
-                               InlineKeyboardButton(string_dict(bot)["back_button"],
-                                                    callback_data="help_back(menu_buttons)")]]
-                         ))
+        user_data["to_delete"].append(bot.send_message(chat_id=update.message.chat_id,
+                                                       text=string_dict(bot)["manage_button_str_3"],
+                                                       reply_markup=ReplyKeyboardRemove()))
+        user_data["to_delete"].append(bot.send_message(chat_id=update.message.chat_id,
+                                                       text=string_dict(bot)["add_button_content"],
+                                                       reply_markup=InlineKeyboardMarkup(
+                                                           [[InlineKeyboardButton(text=string_dict(bot)["add_button"],
+                                                                                  callback_data="add_content{}".format(
+                                                                                      update.message.text))]])))
+        user_data["to_delete"].append(bot.send_message(chat_id=update.message.chat_id,
+                                                       text=string_dict(bot)["back_text"],
+                                                       reply_markup=InlineKeyboardMarkup(
+                                                           [[
+                                                               InlineKeyboardButton(
+                                                                   string_dict(bot)["back_button"],
+                                                                   callback_data="back_from_edit_button")]])))
         return ConversationHandler.END
 
     def edit_button(self, bot, update, user_data):
@@ -144,9 +148,9 @@ class ButtonEdit(object):
         content_data = update.callback_query.data.replace("b_", "").split("___")  # here is the problem
         user_data["content_id"] = content_data[0]
         user_data["button"] = content_data[1]
-        bot.send_message(chat_id=update.callback_query.message.chat_id,
+        user_data["to_delete"].append(bot.send_message(chat_id=update.callback_query.message.chat_id,
                          text=string_dict(bot)["manage_button_str_4"],
-                         reply_markup=reply_markup)
+                         reply_markup=reply_markup))
         return EDIT_FINISH
 
     def edit_button_finish(self, bot, update, user_data):
@@ -191,7 +195,8 @@ class ButtonEdit(object):
             {"bot_id": bot.id, "button": user_data["button"]},
             button_info
         )
-        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(menu_buttons)")]]
+        buttons = [
+            [InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="back_from_edit_button")]]
         bot.send_message(chat_id=update.message.chat_id,
                          text=string_dict(bot)["manage_button_str_5"],
                          reply_markup=InlineKeyboardMarkup(buttons))
@@ -199,6 +204,13 @@ class ButtonEdit(object):
             update.effective_user.first_name, bot.first_name, bot.id, user_data["button"]))
         user_data.clear()
         return ConversationHandler.END
+
+    # help_module(menu_buttons)
+    def back_from_edit_button(self, bot, update, user_data):
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        delete_messages(bot, update, user_data)
+        get_help(bot, update)
 
     def back(self, bot, update, user_data):
         bot.send_message(update.callback_query.message.chat.id,
@@ -229,7 +241,7 @@ class AddButtonContent(object):
             reply_buttons)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        content_data = update.callback_query.data.replace("add_content", "") # here is the problem
+        content_data = update.callback_query.data.replace("add_content", "")  # here is the problem
         user_data["button"] = content_data
         bot.send_message(chat_id=update.callback_query.message.chat_id,
                          text=string_dict(bot)["manage_button_str_4"],
@@ -271,7 +283,8 @@ class AddButtonContent(object):
             {"bot_id": bot.id, "button": user_data["button"]},
             button_info
         )
-        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(menu_buttons)")]]
+        buttons = [
+            [InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(menu_buttons)")]]
         bot.send_message(chat_id=update.message.chat_id,
                          text=string_dict(bot)["manage_button_str_5"],
                          reply_markup=InlineKeyboardMarkup(buttons))
@@ -305,7 +318,8 @@ class DeleteButtonContent(object):
 
     def delete_message(self, bot, update, user_data):
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(menu_buttons)")])
+        buttons.append(
+            [InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(menu_buttons)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
 
@@ -333,10 +347,11 @@ class DeleteButtonContent(object):
 # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
 BUTTON_EDIT_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=ButtonEdit().start,
-                                       pattern=r"edit_button")],
+                                       pattern=r"edit_button",
+                                       pass_user_data=True)],
 
     states={
-        CHOOSE_BUTTON: [MessageHandler(Filters.text, ButtonEdit().choose_button),
+        CHOOSE_BUTTON: [MessageHandler(Filters.text, ButtonEdit().choose_button, pass_user_data=True),
                         CallbackQueryHandler(callback=ButtonEdit().back,
                                              pattern=r"cancel_edit_button", pass_user_data=True),
                         ],
@@ -395,3 +410,6 @@ BUTTON_ADD_FINISH_HANDLER = ConversationHandler(
 )
 DELETE_CONTENT_HANDLER = CallbackQueryHandler(pattern="d_",
                                               callback=DeleteButtonContent().delete_message, pass_user_data=True)
+back_from_edit_button_handler = CallbackQueryHandler(callback=ButtonEdit().back_from_edit_button,
+                                                     pattern="back_from_edit_button", pass_user_data=True)
+

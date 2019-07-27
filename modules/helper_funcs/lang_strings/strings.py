@@ -67,7 +67,7 @@ Press “Back" to return to the normal mode
         send_a_post_to_channel='Write a post on the channel',
 
         promotion_send_message_module_str="✉️ Messages ",
-        promotion_send_message_button_1="📤 Send message",
+        promotion_send_message_button_1="📤✉️ Send message",
         promotion_send_message_button_2="📥 Mailbox",
         promotion_send_message_1="Write a message",
         promotion_send_message_2="Thanks, the homing pigeon's on its way. 🕊!",
@@ -211,7 +211,7 @@ Payments
 
 """,
         edit_donation="Edit donation",
-        pay_donation_mode_str="Donate",
+        pay_donation_mode_str="💸 Donate ",
         pay_donation_str_1="How much do you want to pay? Enter the amount.\n"
                            "❗️ Cents and pennies separated by commas.\n"
                            "Enter the amount:",
@@ -398,7 +398,7 @@ Click "📌 Create a button", to add a content.
         view_message_str="Прочитать",
         send_message_module_str="✉️ Сообщения",
         send_message_button_3="Почтовые ящики",
-        send_message_button_1="📤 Отправить",
+        send_message_button_1="✉️ Отправить сообщение",
         send_message_button_2="📥 Входящие",
         send_message_12="Напиши сообщение. Админ его прочитает",
         send_message_13="Выбери тему сообщения",
@@ -503,7 +503,7 @@ Click "📌 Create a button", to add a content.
         pay_donation_str_admin="""
 Платежи
 """,
-        pay_donation_mode_str="Задонатить",
+        pay_donation_mode_str=" Задонатить",
         pay_donation_str_1="Сколько хочешь задонатить?\n"
                            "❗️ Центы и копейки через запятую.\nВведи сумму:",
         pay_donation_str_2="❗️ Основная валюта админа {}",

@@ -10,11 +10,13 @@ from database import custom_buttons_table, users_table, chatbots_table, user_mod
 from modules.helper_funcs.auth import if_admin, initiate_chat_id, register_chat
 from modules.helper_funcs.lang_strings.help_strings import help_strings, helpable_dict
 from modules.helper_funcs.lang_strings.strings import string_dict
-from modules.helper_funcs.misc import paginate_modules, LOGGER, EqInlineKeyboardButton
+from modules.helper_funcs.misc import paginate_modules, LOGGER, EqInlineKeyboardButton, delete_messages
 
 HELP_STRINGS = """
 {}
 """
+
+
 
 
 # do not async
@@ -67,7 +69,6 @@ def send_admin_user_mode(bot, chat_id, text, keyboard=None):
 
 # for test purposes
 def error_callback(bot, update, error):
-
     try:
         back_buttons = InlineKeyboardMarkup(
             [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
@@ -90,8 +91,8 @@ def error_callback(bot, update, error):
         bot.send_message(update.effective_message.chat.id,
                          "An error happened =( Please proceed to the main menu",
                          reply_markup=InlineKeyboardMarkup(
-            [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                   callback_data="help_back")]]))
+                             [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                    callback_data="help_back")]]))
     except ConnectionError as err:
         print("ConnectionError")
         print(err)
@@ -108,17 +109,18 @@ def error_callback(bot, update, error):
         print("Neworkerror")
     # handle other connection problems
     except ChatMigrated as e:
-    # the chat_id of a group has changed, use e.new_chat_id instead
+        # the chat_id of a group has changed, use e.new_chat_id instead
         print("ChatMigrated")
 
     except TelegramError:
         print("TeelgramError")
 
 
-def button_handler(bot: Bot, update: Update):
+def button_handler(bot: Bot, update: Update, user_data):
+    user_data['to_delete'] = []
     query = update.callback_query
     button_callback_data = query.data
-    buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]]
+    buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="back_from_button")]]
     bot.delete_message(chat_id=update.callback_query.message.chat_id,
                        message_id=update.callback_query.message.message_id)
     try:
@@ -127,21 +129,21 @@ def button_handler(bot: Bot, update: Update):
         )
         for content_dict in button_info["content"]:
             if "text" in content_dict:
-                query.message.reply_text(text=content_dict["text"])
+                user_data['to_delete'].append(query.message.reply_text(text=content_dict["text"]))
             if "audio_file" in content_dict:
-                query.message.reply_audio(content_dict["audio_file"])
+                user_data['to_delete'].append(query.message.reply_audio(content_dict["audio_file"]))
             if "video_file" in content_dict:
-                query.message.reply_video(content_dict["video_file"])
+                user_data['to_delete'].append(query.message.reply_video(content_dict["video_file"]))
             if "document_file" in content_dict:
                 if ".png" in content_dict["document_file"] or ".jpg" in content_dict["document_file"]:
-                    bot.send_photo(chat_id=query.message.chat.id,
-                                   photo=content_dict["document_file"])
+                    user_data['to_delete'].append(bot.send_photo(chat_id=query.message.chat.id,
+                                                                 photo=content_dict["document_file"]))
                 else:
-                    bot.send_document(chat_id=query.message.chat.id,
-                                      document=content_dict["document_file"])
+                    user_data['to_delete'].append(bot.send_document(chat_id=query.message.chat.id,
+                                                                    document=content_dict["document_file"]))
             if "photo_file" in content_dict:
-                bot.send_photo(chat_id=query.message.chat.id,
-                               photo=content_dict["photo_file"])
+                user_data['to_delete'].append(bot.send_photo(chat_id=query.message.chat.id,
+                                                             photo=content_dict["photo_file"]))
 
     except BadRequest as excp:
         if excp.message == "Message is not modified":
@@ -153,8 +155,12 @@ def button_handler(bot: Bot, update: Update):
         else:
             LOGGER.exception("Exception in help buttons. %s", str(query.data))
     bot.send_message(chat_id=update.callback_query.message.chat_id,
-                     text=string_dict(bot)["back_button"], reply_markup=InlineKeyboardMarkup(
-            buttons))
+                     text=string_dict(bot)["back_button"], reply_markup=InlineKeyboardMarkup(buttons))
+
+
+def back_from_button_handler(bot: Bot, update: Update, user_data):
+    delete_messages(bot, update, user_data)
+    help_button(bot, update)
 
 
 # chatbots_table.find_one({"bot_id": bot.id})["donation"]["description"]
@@ -185,6 +191,7 @@ def help_button(bot: Bot, update: Update):
     prev_match = re.match(r"help_prev\((.+?)\)", query.data)
     next_match = re.match(r"help_next\((.+?)\)", query.data)
     back_match = re.match(r"help_back", query.data)
+    back_button_match = re.match(r"back_from_button", query.data)
     chatbot = chatbots_table.find_one({"bot_id": bot.id})
     if chatbot:
         if 'welcomeMessage' in chatbot:
@@ -240,7 +247,7 @@ def help_button(bot: Bot, update: Update):
                                      reply_markup=InlineKeyboardMarkup(
                                          paginate_modules(next_page + 1, HELPABLE, "help", bot.id)))
 
-        elif back_match:
+        elif back_match or back_button_match:
             bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                message_id=update.callback_query.message.message_id)
             get_help(bot, update)

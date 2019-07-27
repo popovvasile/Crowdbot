@@ -83,6 +83,9 @@ class AnswerSurveys(object):
         })
         answer = update.message.text
         user_id = update.message.from_user.id
+
+        survey["answers"] = list(filter(lambda i: i['user_id'] != update.effective_user.id, survey["answers"]))
+
         if "answers" not in user_data:
             user_data["answers"] = survey["answers"]
         user_data["answers"].append({"user_id": user_id,
@@ -92,7 +95,8 @@ class AnswerSurveys(object):
 
         if user_data["question_id"] > len(survey["questions"]) - 1:
             survey["answers"] = user_data["answers"]
-            surveys_table.update({"title": survey["title"]}, survey)
+            print(user_data)
+            surveys_table.replace_one({"title": survey["title"]}, survey)
 
             to_send_text = ""
             users_answers = []

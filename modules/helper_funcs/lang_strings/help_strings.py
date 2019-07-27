@@ -46,7 +46,7 @@ def help_strings(bot):
         visitor_keyboard=[InlineKeyboardButton(text=string_dict(bot)["send_message_button_1"],
                                                callback_data="send_message_to_admin")],
 
-        admin_help=string_dict(bot)["send_message_admin"],
+        admin_help=string_dict(bot)["send_message_user"],
 
         admin_keyboard=[
             InlineKeyboardButton(text=string_dict(bot)["send_message_button_1"],
@@ -130,10 +130,11 @@ def helpable_dict(bot):
     lang_dicts = {"ENG": dict(
         ALL_MODULES=[],
         ADMIN_HELPABLE=admin_eng,
-        ADMIN_USER_MODE={"💸 Donations ": "donation_payment",
-                         "✉️ Messages": "messages",
+        ADMIN_USER_MODE={"💸 Donate ": "donation_payment",
+                         "✉️ Message": "messages",
                          "Admin view": "user_mode"},
-        VISITOR_HELPABLE={}
+        VISITOR_HELPABLE={"💸 Donate ": "donation_payment",
+                          "✉️ Message": "messages"},
 
     ),
         "RUS": dict(
@@ -141,9 +142,10 @@ def helpable_dict(bot):
             ADMIN_HELPABLE=admin_rus,
             ADMIN_USER_MODE={
                 "Режим админа": "user_mode",
-                "💸 Донаты ": "donation_payment",
-                "✉️ Сообщения": "messages",},
-            VISITOR_HELPABLE={}
+                "💸 Задонатить": "donation_payment",
+                "✉️ Сообщения": "messages"},
+            VISITOR_HELPABLE={"💸💸 Задонатить": "donation_payment",
+                              "✉️ Сообщения": "messages"},
 
         ),
     }

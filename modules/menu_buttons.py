@@ -10,7 +10,7 @@ from modules.helper_funcs.helper import get_help
 
 
 from modules.helper_funcs.lang_strings.strings import string_dict
-
+from modules.helper_funcs.misc import delete_messages
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -22,7 +22,8 @@ TYPING_TO_DELETE_BUTTON = 17
 
 class AddCommands(object):
 
-    def start(self, bot, update):
+    def start(self, bot, update, user_data):
+        user_data["to_delete"] = []
         reply_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                callback_data="cancel_add_button")]]
         reply_markup = InlineKeyboardMarkup(
@@ -34,20 +35,21 @@ class AddCommands(object):
         buttons = chatbots_table.find_one({"bot_id": bot.id})["buttons"]
         if buttons is not None and buttons != []:
             markup = ReplyKeyboardMarkup([buttons], one_time_keyboard=True)
-            bot.send_message(update.callback_query.message.chat.id,
+            user_data["to_delete"].append(bot.send_message(update.callback_query.message.chat.id,
                              string_dict(bot)["add_menu_buttons_str_1"],
-                             reply_markup=markup)
-            bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(bot)["back_text"], reply_markup=reply_markup)
+                             reply_markup=markup))
+            user_data["to_delete"].append(bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(bot)["back_text"], reply_markup=reply_markup))
             return TYPING_BUTTON
         else:
-            bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(bot)["add_menu_buttons_str_1_1"])
-            bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(bot)["back_text"], reply_markup=reply_markup)
+            user_data["to_delete"].append(bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(bot)["add_menu_buttons_str_1_1"]))
+            user_data["to_delete"].append(bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(bot)["back_text"], reply_markup=reply_markup))
             return TYPING_BUTTON
 
     def button_handler(self, bot, update, user_data):
+        user_data["to_delete"].append(update.message)
         reply_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                callback_data="cancel_add_button")]]
         reply_markup = InlineKeyboardMarkup(
@@ -59,17 +61,19 @@ class AddCommands(object):
         if button_list_of_dicts.count() == 0:
 
             user_data['button'] = txt
-            update.message.reply_text(string_dict(bot)["great_text"], reply_markup=ReplyKeyboardRemove())
-            update.message.reply_text(string_dict(bot)["add_menu_buttons_str_2"],
-                                      reply_markup=reply_markup)
+            user_data["to_delete"].append(update.message.reply_text(string_dict(bot)["great_text"],
+                                                                    reply_markup=ReplyKeyboardRemove()))
+            user_data["to_delete"].append(update.message.reply_text(string_dict(bot)["add_menu_buttons_str_2"],
+                                      reply_markup=reply_markup))
             return TYPING_DESCRIPTION
         else:
-            update.message.reply_text(string_dict(bot)["add_menu_buttons_str_3"],
-                                      reply_markup=reply_markup)
+            user_data["to_delete"].append(update.message.reply_text(string_dict(bot)["add_menu_buttons_str_3"],
+                                      reply_markup=reply_markup))
 
             return TYPING_BUTTON
 
     def description_handler(self, bot, update, user_data):
+        user_data["to_delete"].append(update.message)
         reply_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                callback_data="cancel_add_button")]]
         reply_markup = InlineKeyboardMarkup(
@@ -107,17 +111,20 @@ class AddCommands(object):
         if update.message.video_note:
             video_note_file = update.message.audio.get_file().file_id
             general_list.append({"video_file": video_note_file})
-        update.message.reply_text(string_dict(bot)["back_text"], reply_markup=reply_markup)
+        user_data["to_delete"].append(update.message.reply_text(string_dict(bot)["back_text"],
+                                                                reply_markup=reply_markup))
         done_buttons = [[InlineKeyboardButton(text=string_dict(bot)["done_button"], callback_data="DONE")]]
         done_reply_markup = InlineKeyboardMarkup(
             done_buttons)
-        update.message.reply_text(string_dict(bot)["add_menu_buttons_str_4"],
-                                  reply_markup=done_reply_markup)
-        user_data["content"]=general_list
+        user_data["to_delete"].append(update.message.reply_text(string_dict(bot)["add_menu_buttons_str_4"],
+                                      reply_markup=done_reply_markup))
+        user_data["content"] = general_list
         return TYPING_DESCRIPTION
 
     def description_finish(self, bot, update, user_data):
         print(user_data)
+        delete_messages(bot, update, user_data)
+
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         user_id = update.effective_user.id
@@ -126,18 +133,21 @@ class AddCommands(object):
                           "admin_id": user_id,
                           "bot_id": bot.id,
                           })
+        user_data.pop('to_delete', None)
         custom_buttons_table.save(user_data)
-
+        reply_buttons = [
+            [InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]]
+        reply_markup = InlineKeyboardMarkup(
+            reply_buttons)
         bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(bot)["add_menu_buttons_str_5"].format(user_data["button"]))
-        get_help(bot, update)
+                         string_dict(bot)["add_menu_buttons_str_5"].format(user_data["button"]),
+                         reply_markup=reply_markup)
         logger.info("Admin {} on bot {}:{} added a new button:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, user_data["button"]))
         user_data.clear()
-
         return ConversationHandler.END
 
-    def delete_button(self, bot, update):
+    def delete_button(self, bot, update, user_data):
         finish_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                 callback_data="cancel_delete_button")]]
         finish_markup = InlineKeyboardMarkup(
@@ -168,7 +178,7 @@ class AddCommands(object):
 
             return ConversationHandler.END
 
-    def delete_button_finish(self, bot, update):
+    def delete_button_finish(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
         custom_buttons_table.delete_one({
             "button": txt,
@@ -204,7 +214,8 @@ class AddCommands(object):
 # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
 BUTTON_ADD_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=AddCommands().start,
-                                       pattern=r"create_button")],
+                                       pattern=r"create_button",
+                                       pass_user_data=True)],
 
     states={
         TYPING_BUTTON: [

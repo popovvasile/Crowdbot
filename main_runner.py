@@ -14,9 +14,10 @@ from modules.donation_enable import CREATE_DONATION_HANDLER
 from modules.surveys_create import DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_HANDLER, SEND_SURVEYS_HANDLER, \
     CREATE_SURVEY_HANDLER
 from modules.donations_edit_delete_results import EDIT_DONATION_HANDLER
-from modules.helper_funcs.main_runnner_helper import help_button, button_handler, get_help, WelcomeBot, error_callback
+from modules.helper_funcs.main_runnner_helper import help_button, button_handler, get_help, WelcomeBot, error_callback, \
+    back_from_button_handler
 from modules.manage_button import BUTTON_EDIT_HANDLER, BUTTON_EDIT_FINISH_HANDLER, DELETE_CONTENT_HANDLER, \
-    BUTTON_ADD_FINISH_HANDLER
+    BUTTON_ADD_FINISH_HANDLER, AddButtonContent, back_from_edit_button_handler
 from modules.donation_payment import DONATE_HANDLER, HANDLE_SUCCES, HANDLE_PRECHECKOUT
 from modules.polls import POLL_HANDLER, SEND_POLLS_HANDLER, BUTTON_HANDLER, DELETE_POLLS_HANDLER, POLLS_RESULTS_HANDLER
 from modules.donation_send_promotion import SEND_DONATION_TO_USERS_HANDLER
@@ -44,9 +45,13 @@ def main(token):
     rex_help_handler = RegexHandler(r"^help$", get_help)
     rex_help_handler2 = RegexHandler(r"^Help$", get_help)
 
-    custom_button_callback_handler = CallbackQueryHandler(button_handler, pattern=r"button_")
+    custom_button_callback_handler = CallbackQueryHandler(button_handler, pattern=r"button_", pass_user_data=True)
+    custom_button_back_callback_handler = CallbackQueryHandler(back_from_button_handler,
+                                                               pattern=r"back_from_button", pass_user_data=True)
     help_callback_handler = CallbackQueryHandler(help_button, pattern=r"help_")
+    dispatcher.add_handler(custom_button_back_callback_handler)
     dispatcher.add_handler(custom_button_callback_handler)
+    dispatcher.add_handler(back_from_edit_button_handler)
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(help_handler)
     dispatcher.add_handler(rex_help_handler)
