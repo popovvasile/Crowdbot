@@ -205,41 +205,53 @@ CHOOSE_CHANNEL_TO_SEND_DONATION = 23
 CHOOSE_POLL_TO_SEND_DONATION = 34
 
 
-class SendDonationToChannel(object):  # TODO
+class SendDonationToChannel(object):
     def send_donation(self, bot, update, user_data):
+        channels = channels_table.find({'bot_id': bot.id})
         if update.callback_query:
-            channel_username = update.callback_query.data.replace("send_donation_to_channel_", "")
             update_data = update.callback_query
+        else:
+            update_data = update
+        if channels != 0:
+            channel_username = update_data.callback_query.data.replace("send_donation_to_channel_", "")
+
             if channel_username == "send_donation_to_channel":
-                channels_markup = [channel['channel_username'] for channel in channels_table.find({'bot_id': bot.id})]
-                bot.send_message(update.callback_query.message.chat.id, "Choose a channel that you want to send",
+                channels_markup = [channel['channel_username'] for channel in channels]
+                bot.send_message(update_data.message.chat.id, "Choose a channel that you want to send",
                                  reply_markup=ReplyKeyboardMarkup([channels_markup]))
                 return CHOOSE_CHANNEL_TO_SEND_DONATION
-        else:
-            channel_username = update.message.text
-            update_data = update
-        user_data["channel_username"] = channel_username
-        buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                             callback_data="cancel_send_donation")])
-        reply_markup = InlineKeyboardMarkup(
-            buttons)
 
-        bot.delete_message(chat_id=update_data.message.chat_id,
-                           message_id=update_data.message.message_id)
-        chatbot = chatbots_table.find_one({"bot_id": bot.id})
-        if chatbot.get("donate") != {} and "donate" in chatbot:
-            bot.send_message(update_data.message.chat.id,
-                             string_dict(bot)["send_donation_request_1"],
-                             reply_markup=reply_markup)
-            return DONATION_TO_USERS
+            user_data["channel_username"] = channel_username
+            buttons = list()
+            buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                 callback_data="cancel_send_donation")])
+            reply_markup = InlineKeyboardMarkup(
+                buttons)
+
+            bot.delete_message(chat_id=update_data.message.chat_id,
+                               message_id=update_data.message.message_id)
+            chatbot = chatbots_table.find_one({"bot_id": bot.id})
+            if chatbot.get("donate") != {} and "donate" in chatbot:
+                bot.send_message(update_data.message.chat.id,
+                                 string_dict(bot)["send_donation_request_1"],
+                                 reply_markup=reply_markup)
+                return DONATION_TO_USERS
+            else:
+                admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["allow_donations_button"],
+                                                       callback_data="allow_donation"),
+                                  InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                       callback_data="help_back")]
+                bot.send_message(update_data.message.chat.id,
+                                 string_dict(bot)["allow_donation_text"],
+                                 reply_markup=InlineKeyboardMarkup([admin_keyboard]))
+                return ConversationHandler.END
         else:
-            admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["allow_donations_button"],
-                                                   callback_data="allow_donation"),
+            admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["add_channel"],
+                                                   callback_data="add_channel"),
                               InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                    callback_data="help_back")]
             bot.send_message(update_data.message.chat.id,
-                             string_dict(bot)["allow_donation_text"],
+                             string_dict(bot)["no_channels"],
                              reply_markup=InlineKeyboardMarkup([admin_keyboard]))
             return ConversationHandler.END
 
@@ -334,7 +346,6 @@ class SendDonationToChannel(object):  # TODO
     def error(bot, update, error):
         """Log Errors caused by Updates."""
         logger.warning('Update "%s" caused error "%s"', update, error)
-
 
 
 # There are already 'send_survey_to_users' pattern handler - mb use it

@@ -248,7 +248,7 @@ class Channels(object):
                                                                         callback_data="send_poll_to_channel_{}".format(
                                                                             channel_username))],
                                                   [InlineKeyboardButton(string_dict(bot)["send_survey_to_channel"],
-                                                                        callback_data="post_survey_{}".format(
+                                                                        callback_data="send_survey_to_channel_{}".format(
                                                                             channel_username))],
                                                   [InlineKeyboardButton(string_dict(bot)["back_button"],
                                                                         callback_data="help_module(channels)")]])

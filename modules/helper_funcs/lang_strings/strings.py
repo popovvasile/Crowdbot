@@ -69,13 +69,14 @@ Press “Back" to return to the normal mode
         promotion_send_message_module_str="✉️ Messages ",
         promotion_send_message_button_1="📤✉️ Send message",
         promotion_send_message_button_2="📥 Mailbox",
-        promotion_send_message_1="Write a message",
+        promotion_send_message_1="✉️ Send message",
         promotion_send_message_2="Thanks, the homing pigeon's on its way. 🕊!",
-        promotion_send_message_3="Write a message to users\n" \
-                                 "Thanks, the homing pigeon's on its way. 🕊!",
+        promotion_send_message_3="Write a message to users\n"
+                                 "You can send as well files of all kinds, video or audio messages",
         promotion_send_message_4="Write a new message and press '✅ Done",
         promotion_send_message_5="✅The message is sent",
         promotion_send_message_6="Forever alone 😉 ",
+
         promotion_send_message_admin="""
 Messages
 Send messages to users and get feedback
@@ -92,10 +93,10 @@ Write your message. I’ll read it.
 
         delete_message_str_1="Chosen messages have been deleted",
         send_message_module_str="✉️ Messages",
-        send_message_button_1="📤 Send message",
+        send_message_button_1="✉️ Send message",
         send_message_button_2="📥 Mailbox",
         send_message_button_3="Message topics",
-        send_message_1="Write a message",
+        send_message_1="✉️ Send message",
         send_message_1_1="Choose the category of users to whom you want o send your message",
 
         send_message_12="What do you want to tell us about?",
@@ -116,10 +117,15 @@ Write your message. I’ll read it.
 
         add_message_category="Add topic",
         send_message_2="Thanks, the homing pigeon's on its way. 🕊!",
-        send_message_3="Write a message to users\n",
+        send_message_3="Write a message to users\n"
+                       "You can send as well files of all kinds, video or audio messages",
         send_message_4="Write a new message and press '✅ Done",
         send_message_5="✅The message is sent",
-        send_message_6="Forever alone 😉 ",
+        send_message_6="Forever alone 😉 You didn't receive any messages yet",
+        send_message_7="What do you want to answer to this user?",
+        send_message_8="You can delete this message",
+        send_message_9="Message has been canceled",
+
         send_message_admin="""
 Messages
 Send messages to users and get feedback
@@ -212,9 +218,10 @@ Payments
 """,
         edit_donation="Edit donation",
         pay_donation_mode_str="💸 Donate ",
-        pay_donation_str_1="How much do you want to pay? Enter the amount.\n"
-                           "❗️ Cents and pennies separated by commas.\n"
-                           "Enter the amount:",
+        pay_donation_str_1="How much do you want to pay? \n"
+                           "Enter the amount of money that you want to donate.\n"
+                           "❗️ Cents and pennies separated by floating points, like this'10.50'.",
+
         pay_donation_str_2="The main currency of the administrator ❗️ {}",
         allow_donation_text="Press '💰 Create a donation or press '🔙 Back'",
         pay_donation_str_4="Admin has not set up payments yet 🤷‍",
@@ -246,6 +253,7 @@ Payments
         donations_edit_str_12="Enter a new token of your payment system",
         donations_edit_str_13="✅ New token updated!",
         donations_edit_str_14="Wrong token. Check it and send it again.",
+        thank_donation="Thank you for donation!",
 
         survey_str_1="Enter a name for the survey",
         survey_str_2="Write the first question",
@@ -408,14 +416,17 @@ Click "📌 Create a button", to add a content.
         send_message_17="TEST",
         send_message_18="TEST",
         add_message_category="Добавить ящик",
-        send_message_1="Напиши сообщение",
+        send_message_1="✉️ Напиши сообщение",
         send_message_1_1="Выбери группу юзеров, которая получит это сообщение",
-
         send_message_2="Спасибо, почтовый голубь в пути 🕊!",
-        send_message_3="Напиши сообщение юзерам",
+        send_message_3="Напиши сообщение юзерам\n"
+                       "Ты также можешь отправить файлы любого формата, фотографии, голосовое или аудио сообщение",
         send_message_4="Напиши ещё сообщение или нажми '✅ Готово'",
         send_message_5="✅ Спасибо, почтовый голубь в пути 🕊 ",
         send_message_6="😉 Полковнику никто не пишет ",
+        send_message_7="Что ты хочешь ответить этому пользователю?",
+        send_message_8="Ты можешь удалить это сообщение",
+        send_message_9="Сообщение отменено",
         send_message_admin="""
 Сообщения
 """,
@@ -425,7 +436,6 @@ Click "📌 Create a button", to add a content.
         send_donation_request_1="Напиши юзерам куда ты потратишь деньги. ",
         send_donation_request_2="Напиши ещё сообщение или нажми '✅ Готово'",
         send_donation_request_3="💸 Отправлено",
-
         answer_button_str="Ответить",
         cancel_button_survey="🔚 Отменить опрос",
         cancel_button="🛑 Отменить",
@@ -536,6 +546,7 @@ Click "📌 Create a button", to add a content.
         donations_edit_str_12="Введи новый токен твоей платёжной системы",
         donations_edit_str_13="✅ Токен обновлён!",
         donations_edit_str_14="Неверный токен. Проверь его и отправь снова.",
+        thank_donation="Спасибо за подержку!",
         send_donation_request_button="Напомнить юзерам о донатах",
         survey_str_1="Напиши свой заголовок для Опроса. Юзеры ответят на него развёрнуто.",
         survey_str_2="Напиши первый вопрос",

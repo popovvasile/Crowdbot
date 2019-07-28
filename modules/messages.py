@@ -168,11 +168,12 @@ class SendMessageToAdmin(object):
             user_data["content"].append({"video_file": video_note_file})
 
         final_reply_markup = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(text="Done", callback_data="send_message_finish")]]
+            [[InlineKeyboardButton(text="Done", callback_data="answer_to_message_finish")],
+             [InlineKeyboardButton(text="Cancel", callback_data="send_message_cancel")]]
         )
         bot.send_message(update.message.chat_id,
                          string_dict(bot)["send_message_4"],
-                         reply_markup=final_reply_markup)
+                         reply_markup=final_reply_markup)  # TODO add Cancel button
 
         return MESSAGE
 
@@ -193,8 +194,20 @@ class SendMessageToAdmin(object):
         user_data["timestamp"] = datetime.datetime.now()
         user_data["message_id"] = update.callback_query.message.message_id
         user_data["bot_id"] = bot.id
-        print(user_data)
         users_messages_to_admin_table.insert(user_data)
+        return ConversationHandler.END
+
+    def send_message_cancel(self, bot, update, user_data):
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")])
+        final_reply_markup = InlineKeyboardMarkup(
+            buttons)
+        bot.send_message(update.callback_query.message.chat_id,
+                         string_dict(bot)["send_message_9"],
+                         reply_markup=final_reply_markup)  
+        user_data.clear()
         return ConversationHandler.END
 
     def back(self, bot, update):
@@ -248,55 +261,41 @@ class SendMessageToUsers(object):
         return MESSAGE_TO_USERS
 
     def received_message(self, bot, update, user_data):
-        if "user_category" not in user_data:
-            chats = chats_table.find({"bot_id": bot.id})
-        elif user_data["user_category"] == "All":
-            chats = chats_table.find({"bot_id": bot.id})
-        else:
-            chats = chats_table.find({"bot_id": bot.id, "user_category": user_data["user_category"]})
-        for chat in chats:
-            if chat["chat_id"] != update.message.chat_id:
-                if update.message.text:
-                    bot.send_message(chat["chat_id"], update.message.text)
+        if "content" not in user_data:
+            user_data["content"] = []
 
-                elif update.message.photo:
-                    photo_file = update.message.photo[0].get_file().file_id
-                    bot.send_photo(chat_id=chat["chat_id"], photo=photo_file)
+        if "content" not in user_data:
+            user_data["content"] = []
+        if update.message.text:
+            user_data["content"].append({"text": update.message.text})
 
-                elif update.message.audio:
-                    audio_file = update.message.audio.get_file().file_id
-                    bot.send_audio(chat["chat_id"], audio_file)
+        elif update.message.photo:
+            photo_file = update.message.photo[-1].get_file().file_id
+            user_data["content"].append({"photo_file": photo_file})
 
-                elif update.message.voice:
-                    voice_file = update.message.voice.get_file().file_id
-                    bot.send_voice(chat["chat_id"], voice_file)
+        elif update.message.audio:
+            audio_file = update.message.audio.get_file().file_id
+            user_data["content"].append({"audio_file": audio_file})
 
-                elif update.message.document:
-                    document_file = update.message.document.get_file().file_id
-                    bot.send_document(chat["chat_id"], document_file)
+        elif update.message.voice:
+            voice_file = update.message.voice.get_file().file_id
+            user_data["content"].append({"audio_file": voice_file})
 
-                elif update.message.sticker:
-                    sticker_file = update.message.sticker.get_file().file_id
-                    bot.send_sticker(chat["chat_id"], sticker_file)
+        elif update.message.document:
+            document_file = update.message.document.get_file().file_id
+            user_data["content"].append({"document_file": document_file})
 
-                elif update.message.game:
-                    sticker_file = update.message.game.get_file().file_id
-                    bot.send_game(chat["chat_id"], sticker_file)
+        elif update.message.video:
+            video_file = update.message.video.get_file().file_id
+            user_data["content"].append({"video_file": video_file})
 
-                elif update.message.animation:
-                    animation_file = update.message.animation.get_file().file_id
-                    bot.send_animation(chat["chat_id"], animation_file)
-
-                elif update.message.video:
-                    video_file = update.message.video.get_file().file_id
-                    bot.send_video(chat["chat_id"], video_file)
-
-                elif update.message.video_note:
-                    video_note_file = update.message.audio.get_file().file_id
-                    bot.send_video_note(chat["chat_id"], video_note_file)
+        elif update.message.video_note:
+            video_note_file = update.message.audio.get_file().file_id
+            user_data["content"].append({"video_file": video_note_file})
 
         final_reply_markup = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(text="Done", callback_data="send_message_finish")]]
+            [[InlineKeyboardButton(text="Done", callback_data="answer_to_message_finish")],
+             [InlineKeyboardButton(text="Cancel", callback_data="send_message_cancel")]]
         )
         bot.send_message(update.message.chat_id,
                          string_dict(bot)["send_message_4"],
@@ -304,11 +303,36 @@ class SendMessageToUsers(object):
 
         return MESSAGE_TO_USERS
 
-    def send_message_finish(self, bot, update):
+    def send_message_finish(self, bot, update, user_data):
+        if "user_category" not in user_data:
+            chats = chats_table.find({"bot_id": bot.id})
+        elif user_data["user_category"] == "All":
+            chats = chats_table.find({"bot_id": bot.id})
+        else:
+            chats = chats_table.find({"bot_id": bot.id, "user_category": user_data["user_category"]})
+        for chat in chats:
+            if chat["chat_id"] != update.callback_query.message.chat_id:
+                for content_dict in user_data["content"]:
+                    if "text" in content_dict:
+                        bot.send_message(chat["chat_id"],
+                                         content_dict["text"])
+                    if "audio_file" in content_dict:
+                        bot.send_audio(chat["chat_id"], content_dict["audio_file"])
+                    if "video_file" in content_dict:
+                        bot.send_video(chat["chat_id"], content_dict["video_file"])
+                    if "document_file" in content_dict:
+                        if ".png" in content_dict["document_file"] or ".jpg" in content_dict["document_file"]:
+                            bot.send_photo(chat["chat_id"], content_dict["document_file"])
+                        else:
+                            bot.send_document(chat["chat_id"], content_dict["document_file"])
+                    if "photo_file" in content_dict:
+                        bot.send_photo(chat["chat_id"], content_dict["photo_file"])
+
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(messages)")])
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                             callback_data="help_module(messages)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.send_message(update.callback_query.message.chat_id,
@@ -316,6 +340,19 @@ class SendMessageToUsers(object):
                          reply_markup=final_reply_markup)
         logger.info("Admin {} on bot {}:{} sent a message to the users".format(
             update.effective_user.first_name, bot.first_name, bot.id))
+        return ConversationHandler.END
+
+    def send_message_cancel(self, bot, update, user_data):
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")])
+        final_reply_markup = InlineKeyboardMarkup(
+            buttons)
+        bot.send_message(update.callback_query.message.chat_id,
+                         string_dict(bot)["send_message_9"],
+                         reply_markup=final_reply_markup)  
+        user_data.clear()
         return ConversationHandler.END
 
     def back(self, bot, update):
@@ -385,7 +422,8 @@ class AnswerToMessage(object):
             bot.send_video_note(user_data["chat_id"], video_note_file)
 
         final_reply_markup = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(text="Done", callback_data="answer_to_message_finish")]]
+            [[InlineKeyboardButton(text="Done", callback_data="answer_to_message_finish")],
+             [InlineKeyboardButton(text="Cancel", callback_data="send_message_cancel")]]
         )
         bot.send_message(update.message.chat_id,
                          string_dict(bot)["send_message_4"],
@@ -397,7 +435,8 @@ class AnswerToMessage(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(messages)")])
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                             callback_data="help_module(messages)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.send_message(update.callback_query.message.chat_id,
@@ -410,7 +449,7 @@ class AnswerToMessage(object):
               ]]
         )
         bot.send_message(update.callback_query.message.chat_id,
-                         string_dict(bot)["send_message_6"],
+                         string_dict(bot)["send_message_8"],
                          reply_markup=ask_if_markup)
         logger.info("Admin {} on bot {}:{} sent a message to the users".format(
             update.effective_user.first_name, bot.first_name, bot.id))
@@ -427,31 +466,38 @@ class DeleteMessage(object):
 
     def delete_message(self, bot, update):
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(messages)")])
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                             callback_data="help_module(messages)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
 
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        message_id = update.callback_query.data.replace("delete_message_", "")  # message_id
-        if message_id == "all":
-            users_messages_to_admin_table.delete_many({"bot_id": bot.id})  # delete all messages from the users
-        elif message_id == "week":
-            time_past = datetime.datetime.now() - datetime.timedelta(days=7)
-            users_messages_to_admin_table.delete_many({"bot_id": bot.id,
-                                                       "timestamp": {'$gt': time_past}})
-            # delete all messages from the users
-        elif message_id == "month":
-            time_past = datetime.datetime.now() - datetime.timedelta(days=30)
+        messages = users_messages_to_admin_table.find({"bot_id": bot.id})
+        if messages.count() > 0:
+            message_id = update.callback_query.data.replace("delete_message_", "")  # message_id
+            if message_id == "all":
+                users_messages_to_admin_table.delete_many({"bot_id": bot.id})  # delete all messages from the users
+            elif message_id == "week":
+                time_past = datetime.datetime.now() - datetime.timedelta(days=7)
+                users_messages_to_admin_table.delete_many({"bot_id": bot.id,
+                                                           "timestamp": {'$gt': time_past}})
+                # delete all messages from the users
+            elif message_id == "month":
+                time_past = datetime.datetime.now() - datetime.timedelta(days=30)
 
-            users_messages_to_admin_table.delete_many({"bot_id": bot.id,
-                                                       "timestamp": {'$gt': time_past}})
-            # delete all messages from the users
+                users_messages_to_admin_table.delete_many({"bot_id": bot.id,
+                                                           "timestamp": {'$gt': time_past}})
+                # delete all messages from the users
+            else:
+                users_messages_to_admin_table.delete_one({"bot_id": bot.id, "message_id": int(message_id)})
+            bot.send_message(update.callback_query.message.chat_id,
+                             string_dict(bot)["delete_message_str_1"],
+                             reply_markup=reply_markup)
         else:
-            users_messages_to_admin_table.delete_one({"bot_id": bot.id, "message_id": int(message_id)})
-        bot.send_message(update.callback_query.message.chat_id,
-                         string_dict(bot)["delete_message_str_1"],
-                         reply_markup=reply_markup)
+            bot.send_message(update.callback_query.message.chat_id,
+                             string_dict(bot)["send_message_6"],
+                             reply_markup=reply_markup)
         return ConversationHandler.END
 
 
@@ -459,7 +505,8 @@ class SeeMessageToAdmin(object):
 
     def see_messages(self, bot, update):
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(messages)")])
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                             callback_data="help_module(messages)")])
         delete_buttons = buttons
         delete_buttons.append([InlineKeyboardButton(text=string_dict(bot)["delete_button_str_all"],
                                                     callback_data="delete_message_all")
@@ -490,11 +537,14 @@ class SeeMessageToAdmin(object):
                                                                               str(message["message_id"]))]
                                           ]
                                      ))
+                    bot.send_message(update.callback_query.message.chat_id,
+                                     string_dict(bot)["back_text"], reply_markup=delete_markup)
         else:
+            markup = InlineKeyboardMarkup([[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                            callback_data="help_module(messages)")]])
             bot.send_message(update.callback_query.message.chat_id,
-                             string_dict(bot)["send_message_6"])
-        bot.send_message(update.callback_query.message.chat_id,
-                         string_dict(bot)["back_text"], reply_markup=delete_markup)
+                             string_dict(bot)["send_message_6"],reply_markup=markup)
+
         return ConversationHandler.END
 
     def view_message(self, bot, update):
@@ -557,12 +607,15 @@ SEND_MESSAGE_TO_ADMIN_HANDLER = ConversationHandler(
     fallbacks=[
         CallbackQueryHandler(callback=SendMessageToAdmin().send_message_finish,
                              pattern=r"send_message_finish", pass_user_data=True),
+        CallbackQueryHandler(SendMessageToUsers().send_message_cancel,
+                             pattern="send_message_cancel",
+                             pass_user_data=True),
         CallbackQueryHandler(callback=SendMessageToAdmin().back,
                              pattern=r"cancel_send_message"),
         CallbackQueryHandler(callback=AnswerToMessage().back, pattern=r"error_back"),
-
     ]
 )
+
 SEND_MESSAGE_TO_USERS_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(pattern="send_message_to_users",
                                        callback=SendMessageToUsers().send_message)],
@@ -577,7 +630,10 @@ SEND_MESSAGE_TO_USERS_HANDLER = ConversationHandler(
         CallbackQueryHandler(callback=SendMessageToUsers().back,
                              pattern=r"cancel_send_message"),
         CallbackQueryHandler(callback=SendMessageToUsers().send_message_finish,
-                             pattern=r"send_message_finish"),
+                             pattern=r"send_message_finish", pass_user_data=True),
+        CallbackQueryHandler(pattern=r"send_message_cancel",
+                             callback=SendMessageToUsers().send_message_cancel,
+                             pass_user_data=True),
         CallbackQueryHandler(callback=AnswerToMessage().back, pattern=r"error_back"),
 
     ]
@@ -619,6 +675,9 @@ ANSWER_TO_MESSAGE_HANDLER = ConversationHandler(
 
     fallbacks=[CallbackQueryHandler(callback=AnswerToMessage().send_message_finish,
                                     pattern=r"answer_to_message_finish",
+                                    pass_user_data=True),
+               CallbackQueryHandler(callback=SendMessageToUsers().send_message_cancel,
+                                    pattern="send_message_cancel",
                                     pass_user_data=True),
                CallbackQueryHandler(callback=AnswerToMessage().back,
                                     pattern=r"cancel_send_message",

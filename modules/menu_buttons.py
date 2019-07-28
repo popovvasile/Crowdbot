@@ -147,7 +147,7 @@ class AddCommands(object):
         user_data.clear()
         return ConversationHandler.END
 
-    def delete_button(self, bot, update, user_data):
+    def delete_button(self, bot, update):
         finish_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                 callback_data="cancel_delete_button")]]
         finish_markup = InlineKeyboardMarkup(
@@ -191,7 +191,7 @@ class AddCommands(object):
                          reply_markup=InlineKeyboardMarkup(
                              [[InlineKeyboardButton(string_dict(bot)["create_button_button"],
                                                     callback_data="create_button"),
-                               InlineKeyboardButton(string_dict(bot)["menu_button"],
+                               InlineKeyboardButton(string_dict(bot)["back_button"],
                                                     callback_data="help_module(menu_buttons)")]]
                          ))
         logger.info("Admin {} on bot {}:{} deleted the button:{}".format(
@@ -245,7 +245,8 @@ DELETE_BUTTON_HANDLER = ConversationHandler(
 
     states={
         TYPING_TO_DELETE_BUTTON: [MessageHandler(Filters.text,
-                                                 AddCommands().delete_button_finish)],
+                                                 AddCommands().delete_button_finish,
+                                                 pass_user_data=True)],
     },
 
     fallbacks=[CallbackQueryHandler(callback=AddCommands().back,

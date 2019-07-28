@@ -42,7 +42,7 @@ def facts_to_str(user_data):
 
 class AnswerSurveys(object):
 
-    def start_answering(self, bot, update, user_data):  # TODO add the "skip" button
+    def start_answering(self, bot, update, user_data):
         buttons = [[InlineKeyboardButton(text=string_dict(bot)["cancel_button_survey"],
                                          callback_data="cancel_survey_answering")]]
         reply_markup = InlineKeyboardMarkup(

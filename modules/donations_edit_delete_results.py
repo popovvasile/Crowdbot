@@ -201,14 +201,14 @@ class EditPaymentHandler(object):
             chatbot = chatbots_table.find_one({"bot_id": bot.id})
             chatbot["donate"] = {}
             chatbots_table.replace_one({"bot_id": bot.id}, chatbot)
-            update.message.reply_text(string_dict(bot)["donations_edit_str_11"])
             logger.info("Admin {} on bot {}:{} did  the following edit on donation: {}".format(
                 update.effective_user.first_name, bot.first_name, bot.id, user_data["action"]))
             create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                     callback_data="help_module(donation_payment)")]]
             create_markup = InlineKeyboardMarkup(create_buttons)
-            bot.send_message(update.callback_query.message.chat.id, string_dict(bot)["back_text"],
-                             reply_markup=create_markup)
+            update.message.reply_text(string_dict(bot)["donations_edit_str_11"],
+                                      reply_markup=create_markup)
+
             user_data.clear()
             return ConversationHandler.END
         elif txt == string_dict(bot)["donations_edit_str_4"]:
