@@ -110,16 +110,16 @@ def admin_on_post():
     chatbot = requests.get(url="https://api.telegram.org/bot{}/getMe".format(doc["token"])
                            ).json()
     chatbot_id = chatbot["result"]["id"]
-    # users_table.insert_one({"bot_id": chatbot_id,
-    #                         "email": doc["email"],
-    #                         "password": doc["password"],
-    #                         "active": doc["active"]})  # TODO update
 
     for admin in doc['admins']:
         users_table.insert_one({"bot_id": chatbot_id,
                                 "email": admin["email"],
                                 "password": admin["password"],
-                                "active": False})  # TODO update
+                                "active": False,
+                                "registered": False,
+                                "is_admin": True,
+                                "is_superuser": True
+        })
 
     resp = Response({}, status=200, mimetype='application/json')
     return resp
