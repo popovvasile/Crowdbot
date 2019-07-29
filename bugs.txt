@@ -18,7 +18,7 @@ https://github.com/python-telegram-bot/python-telegram-bot/wiki/Code-snippets#si
 
 
 
-
+TO TALK WITH NIKITA ON Privacy Terms and Checkbox
 
 # TODO later- add the option for the user to choose the language adn for admin to edit multiple versions of the bot
 # TODO Kirill add the option "pause the bot"
