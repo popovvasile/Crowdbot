@@ -39,7 +39,7 @@ class AdminAuthentication(object):
         else:
             superuser = False
         if used_password == user["password"]:
-            if user["is_admin"]:
+            if user.get("is_admin", default=False):
                 bot.send_message(chat_id, update.message.chat.first_name + ", you have been registered " +
                                  "as an authorized user of this bot.")
                 users_table.replace_one({"user_id": user_id},

@@ -514,8 +514,6 @@ class PollBot(object):
         poll["options"] = json.dumps(poll["options"])
         if "meta" in poll:
             poll["meta"] = json.dumps(poll["meta"])
-
-        print(poll)
         poll_instance = self.deserialize(poll)
         bot.send_message(update.message.chat.id,
                          string_dict(bot)["polls_str_18_1"],
