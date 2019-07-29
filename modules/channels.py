@@ -298,47 +298,38 @@ class SendPost(object):
         #                                            string_dict(bot)["choose_channel_to_post"], user_data)
 
     def received_message(self, bot, update, user_data):
+        if "content" not in user_data:
+            user_data["content"] = []
         if update.message.text:
-            bot.send_message(user_data['channel'], update.message.text)
+            user_data["content"].append({"text": update.message.text})
 
         elif update.message.photo:
-            photo_file = update.message.photo[0].get_file().file_id
-            bot.send_photo(chat_id=user_data['channel'], photo=photo_file)
+            photo_file = update.message.photo[-1].get_file().file_id
+            user_data["content"].append({"photo_file": photo_file})
 
         elif update.message.audio:
             audio_file = update.message.audio.get_file().file_id
-            bot.send_audio(user_data['channel'], audio_file)
+            user_data["content"].append({"audio_file": audio_file})
 
         elif update.message.voice:
             voice_file = update.message.voice.get_file().file_id
-            bot.send_voice(user_data['channel'], voice_file)
+            user_data["content"].append({"audio_file": voice_file})
 
         elif update.message.document:
             document_file = update.message.document.get_file().file_id
-            bot.send_document(user_data['channel'], document_file)
-
-        elif update.message.sticker:
-            sticker_file = update.message.sticker.get_file().file_id
-            bot.send_sticker(user_data['channel'], sticker_file)
-
-        elif update.message.game:
-            sticker_file = update.message.game.get_file().file_id
-            bot.send_game(user_data['channel'], sticker_file)
-
-        elif update.message.animation:
-            animation_file = update.message.animation.get_file().file_id
-            bot.send_animation(user_data['channel'], animation_file)
+            user_data["content"].append({"document_file": document_file})
 
         elif update.message.video:
             video_file = update.message.video.get_file().file_id
-            bot.send_video(user_data['channel'], video_file)
+            user_data["content"].append({"video_file": video_file})
 
         elif update.message.video_note:
             video_note_file = update.message.audio.get_file().file_id
-            bot.send_video_note(user_data['channel'], video_note_file)
+            user_data["content"].append({"video_file": video_note_file})
 
         final_reply_markup = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(text=string_dict(bot)["done_button"], callback_data="send_post_finish")]]
+            [[InlineKeyboardButton(text=string_dict(bot)["done_button"], callback_data="send_post_finish")],
+             [InlineKeyboardButton(text="Cancel", callback_data="send_post_cancel")]]
         )
         user_data['to_delete'].append(
             bot.send_message(update.message.chat_id,
@@ -347,6 +338,22 @@ class SendPost(object):
         return MESSAGE_TO_USERS
 
     def send_post_finish(self, bot, update, user_data):
+        for content_dict in user_data["content"]:
+            if "text" in content_dict:
+                bot.send_message(user_data['channel'],
+                                 content_dict["text"])
+            if "audio_file" in content_dict:
+                bot.send_audio(user_data['channel'], content_dict["audio_file"])
+            if "video_file" in content_dict:
+                bot.send_video(user_data['channel'], content_dict["video_file"])
+            if "document_file" in content_dict:
+                if ".png" in content_dict["document_file"] or ".jpg" in content_dict["document_file"]:
+                    bot.send_photo(user_data['channel'], content_dict["document_file"])
+                else:
+                    bot.send_document(user_data['channel'], content_dict["document_file"])
+            if "photo_file" in content_dict:
+                bot.send_photo(user_data['channel'], content_dict["photo_file"])
+
         delete_messages(bot, user_data, update)
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
@@ -359,6 +366,20 @@ class SendPost(object):
                              reply_markup=final_reply_markup))
         logger.info("Admin {} on bot {}:{} sent a post to the channel".format(
             update.effective_user.first_name, bot.first_name, bot.id))
+        return ConversationHandler.END
+
+    def send_post_cancel(self, bot, update, user_data):
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                             callback_data="help_module(channels)")])
+        final_reply_markup = InlineKeyboardMarkup(
+            buttons)
+        bot.send_message(update.callback_query.message.chat_id,
+                         string_dict(bot)["send_message_9"],
+                         reply_markup=final_reply_markup)
+        user_data.clear()
         return ConversationHandler.END
 
     def error(self, bot, update, error):
@@ -411,6 +432,8 @@ SEND_POST_HANDLER = ConversationHandler(
     },
     fallbacks=[CallbackQueryHandler(callback=SendPost().send_post_finish,
                                     pattern=r"send_post_finish", pass_user_data=True),
+               CallbackQueryHandler(callback=SendPost.send_post_cancel, pattern=r"send_post_cancel",
+                                    pass_user_data=True),
                CallbackQueryHandler(callback=SendPost().back, pattern=r"error_back"),
                ]
 )

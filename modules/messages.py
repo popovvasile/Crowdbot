@@ -181,7 +181,7 @@ class SendMessageToAdmin(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")])
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(messages)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.send_message(update.callback_query.message.chat_id,
@@ -201,7 +201,7 @@ class SendMessageToAdmin(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")])
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(messages)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.send_message(update.callback_query.message.chat_id,
@@ -261,9 +261,6 @@ class SendMessageToUsers(object):
         return MESSAGE_TO_USERS
 
     def received_message(self, bot, update, user_data):
-        if "content" not in user_data:
-            user_data["content"] = []
-
         if "content" not in user_data:
             user_data["content"] = []
         if update.message.text:
@@ -346,7 +343,7 @@ class SendMessageToUsers(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")])
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(messages)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.send_message(update.callback_query.message.chat_id,

@@ -27,14 +27,24 @@ def check_provider_token(provider_token, bot, update):
     bot_token = chatbots_table.find_one({"bot_id": bot.id})["token"]
     prices = [LabeledPrice(string_dict(bot)["create_donation_str_1"], 10000)]
     data = requests.get("https://api.telegram.org/bot{}/sendInvoice".format(bot_token),
-                        params=dict(title="test",
-                                    description="test",
+                        params=dict(title="TEST",
+                                    description="A testing payment invoice to check the token",
                                     payload="test",
                                     provider_token=provider_token,
                                     currency="USD",
                                     start_parameter="test",
                                     prices=json.dumps([p.to_dict() for p in prices]),
                                     chat_id=update.effective_chat.id))
+    if json.loads(data.content)["description"] == "Bad Request: CURRENCY_INVALID":
+        data = requests.get("https://api.telegram.org/bot{}/sendInvoice".format(bot_token),
+                            params=dict(title="TEST",
+                                        description="A testing payment invoice to check the token",
+                                        payload="test",
+                                        provider_token=provider_token,
+                                        currency="RUB",
+                                        start_parameter="test",
+                                        prices=json.dumps([p.to_dict() for p in prices]),
+                                        chat_id=update.effective_chat.id))
     return json.loads(data.content)["ok"]
 
 

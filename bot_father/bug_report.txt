@@ -1,1 +1,0 @@
-1) When sending the reports: replace the word report with something else, no button "Done", only Cancel and Send

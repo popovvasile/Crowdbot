@@ -509,7 +509,7 @@ class PollBot(object):
 
             new_poll_instances.append(poll_instance)
         poll = new_poll_instances[0]
-        for other_poll in poll_instances:
+        for other_poll in poll_instances:  # TODO it does not summarize the results
             poll.update(other_poll)
         poll["options"] = json.dumps(poll["options"])
         if "meta" in poll:
