@@ -42,9 +42,7 @@ def main(token):
     dispatcher.add_error_handler(error_callback)
     start_handler = CommandHandler("start", WelcomeBot().start)
     help_handler = CommandHandler("help", get_help)
-    rex_help_handler = RegexHandler(r"^help$", get_help)
-    rex_help_handler2 = RegexHandler(r"^Help$", get_help)
-
+    rex_help_handler = RegexHandler(r"^((?!@).)*$", get_help)
     custom_button_callback_handler = CallbackQueryHandler(button_handler, pattern=r"button_", pass_user_data=True)
     custom_button_back_callback_handler = CallbackQueryHandler(back_from_button_handler,
                                                                pattern=r"back_from_button", pass_user_data=True)
@@ -55,7 +53,6 @@ def main(token):
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(help_handler)
     dispatcher.add_handler(rex_help_handler)
-    dispatcher.add_handler(rex_help_handler2)
 
     dispatcher.add_handler(ADMIN_AUTHENTICATION_HANDLER)
 

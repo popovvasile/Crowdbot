@@ -305,6 +305,10 @@ def get_help(bot: Bot, update: Update):
         send_visitor_help(bot, chat.id, HELP_STRINGS.format(welcome_message))
 
 
+def on_stupid_strings(bot: Bot, update: Update):
+    get_help(bot, update)
+
+
 class WelcomeBot(object):
     @staticmethod
     def start(bot, update):
