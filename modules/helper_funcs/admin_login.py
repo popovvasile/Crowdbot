@@ -14,18 +14,32 @@ TYPING_PASS = 1
 class AdminAuthentication(object):
     
     def handle_email(self, bot, update, user_data):
-        print("Message: " + str(update.message))
-        chat_id, txt = initiate_chat_id(update)
-        used_email = txt
-        user = users_table.find_one({'bot_id': bot.id, "email": used_email})
-        if user:
-            bot.send_message(chat_id, "Enter your password or click /cancel")
-            user_data["email"] = used_email
-            return TYPING_PASS
+        if update.callback_query:
+            used_email = update.callback_query.data
+            print(used_email)
+            user = users_table.find_one({'bot_id': bot.id, "email": used_email})
+            chat_id = update.callback_query.message.chat_id
+            if user:
+                bot.send_message(chat_id, "Enter your password or click /cancel")
+                user_data["email"] = used_email
+                return TYPING_PASS
+            else:
+                bot.send_message(chat_id,
+                                 "This email is not listed in the list of users.")
+                return ConversationHandler.END
         else:
-            bot.send_message(chat_id,
-                             "This email is not listed in the list of users.")
-            return ConversationHandler.END
+            print("Message: " + str(update.message))
+            chat_id, txt = initiate_chat_id(update)
+            used_email = txt
+            user = users_table.find_one({'bot_id': bot.id, "email": used_email})
+            if user:
+                bot.send_message(chat_id, "Enter your password or click /cancel")
+                user_data["email"] = used_email
+                return TYPING_PASS
+            else:
+                bot.send_message(chat_id,
+                                 "This email is not listed in the list of users.")
+                return ConversationHandler.END
     
     def handle_password(self, bot, update, user_data):
         print("Message: " + str(update.message))
