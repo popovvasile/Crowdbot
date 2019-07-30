@@ -1,4 +1,4 @@
-Вася
+#TODO delete
 # TODO Markdown for buttons
 # TODO fix error handler - restart the bot
 # TODO think about an example chatbot (TV8) with CommentBot

@@ -93,7 +93,9 @@ class AdminAuthentication(object):
 
 ADMIN_AUTHENTICATION_HANDLER = ConversationHandler(
     entry_points=[RegexHandler(r"^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$",
-                               AdminAuthentication().handle_email, pass_user_data=True)],
+                               AdminAuthentication().handle_email, pass_user_data=True),
+                  CallbackQueryHandler(pattern=r"^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$",
+                               callback=AdminAuthentication().handle_email, pass_user_data=True)],
 
     states={
         TYPING_PASS: [MessageHandler(Filters.text,
