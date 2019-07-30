@@ -12,35 +12,24 @@ TYPING_PASS = 1
 
 
 class AdminAuthentication(object):
-    
+
     def handle_email(self, bot, update, user_data):
-        if update.callback_query:
-            used_email = update.callback_query.data
-            print(used_email)
-            user = users_table.find_one({'bot_id': bot.id, "email": used_email})
-            chat_id = update.callback_query.message.chat_id
-            if user:
-                bot.send_message(chat_id, "Enter your password or click /cancel")
-                user_data["email"] = used_email
-                return TYPING_PASS
-            else:
-                bot.send_message(chat_id,
-                                 "This email is not listed in the list of users.")
-                return ConversationHandler.END
+
+        print("Message: " + str(update.message))
+        chat_id, txt = initiate_chat_id(update)
+        used_email = txt
+
+        user = users_table.find_one({'bot_id': bot.id, "email": used_email})
+        if user:
+            bot.send_message(chat_id, "Enter your password or click /cancel")
+            user_data["email"] = used_email
+            return TYPING_PASS
         else:
-            print("Message: " + str(update.message))
-            chat_id, txt = initiate_chat_id(update)
-            used_email = txt
-            user = users_table.find_one({'bot_id': bot.id, "email": used_email})
-            if user:
-                bot.send_message(chat_id, "Enter your password or click /cancel")
-                user_data["email"] = used_email
-                return TYPING_PASS
-            else:
-                bot.send_message(chat_id,
-                                 "This email is not listed in the list of users.")
-                return ConversationHandler.END
-    
+            bot.send_message(chat_id,
+                             "This email is not listed in the list of users.")
+            return ConversationHandler.END
+
+
     def handle_password(self, bot, update, user_data):
         print("Message: " + str(update.message))
         user_id = update.message.from_user.id
@@ -106,10 +95,10 @@ class AdminAuthentication(object):
 
 
 ADMIN_AUTHENTICATION_HANDLER = ConversationHandler(
-    entry_points=[RegexHandler(r"^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$",
+    entry_points=[
+        RegexHandler(r"^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$",
                                AdminAuthentication().handle_email, pass_user_data=True),
-                  CallbackQueryHandler(pattern=r"^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$",
-                               callback=AdminAuthentication().handle_email, pass_user_data=True)],
+                  ],
 
     states={
         TYPING_PASS: [MessageHandler(Filters.text,

@@ -312,7 +312,9 @@ def on_stupid_strings(bot: Bot, update: Update):
 class WelcomeBot(object):
     @staticmethod
     def start(bot, update):
+
         chat_id, txt = initiate_chat_id(update)
+        print("registration" in txt)
         user_id = update.message.from_user.id
         register_chat(bot, update)
         users_table.update({"user_id": user_id},
@@ -333,6 +335,12 @@ class WelcomeBot(object):
                                                         callback_data="{}".format(
                                                             str(txt.replace("/start ", ""))
                                                         ))]]
+                             ))
+        elif "registration" in txt:
+            bot.send_message(chat_id=chat_id, text=string_dict(bot)["register_str"],
+                             reply_markup=InlineKeyboardMarkup(
+                                 [[InlineKeyboardButton(text=string_dict(bot)["menu_button"],
+                                                        callback_data="help_back")]]
                              ))
         elif "pay_donation" in txt:
             bot.send_message(chat_id=chat_id, text=string_dict(bot)["donate_button"],

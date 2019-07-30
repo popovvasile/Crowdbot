@@ -2,6 +2,7 @@ from database import chatbots_table
 
 string_dict_dict = {
     "ENG": dict(
+        register_str="Please write your email to register yourself as an admin for this bot",
         create_button_str="📌 Create",
         start_help="Welcome! My name is {} and I am ready to use! Add a channel, start polls and get donations ",
         my_channels="🛠 Manage channels",
@@ -335,6 +336,7 @@ Click "📌 Create a button", to add a content.
     ),
 
     "RUS": dict(
+        register_str="Пожалуйста введите свой эмайл чтобы зарегестрироваться в качестве админа",
         start_help="Привет! Меня зовут {}. Управляй мной в этом меню. "
                    "Подключи свой канал, проводи опросы, принимай сообщения и донаты.\n "
                    "Добавь контент в кнопки через «🛠Настройки» \n ",
