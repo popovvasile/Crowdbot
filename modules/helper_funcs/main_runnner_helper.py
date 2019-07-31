@@ -72,9 +72,7 @@ def error_callback(bot, update, error):
     try:
         back_buttons = InlineKeyboardMarkup(
             [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                   callback_data="error_back")],
-             [InlineKeyboardButton(text=string_dict(bot)["back_button"] + "2",
-                                   callback_data="help_back")]
+                                   callback_data="error_back")]
              ])
         print(error)
         if update.effective_message.chat_id > 0:

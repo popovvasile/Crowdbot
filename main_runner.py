@@ -47,16 +47,7 @@ def main(token):
     custom_button_back_callback_handler = CallbackQueryHandler(back_from_button_handler,
                                                                pattern=r"back_from_button", pass_user_data=True)
     help_callback_handler = CallbackQueryHandler(help_button, pattern=r"help_")
-    dispatcher.add_handler(custom_button_back_callback_handler)
-    dispatcher.add_handler(custom_button_callback_handler)
-    dispatcher.add_handler(back_from_edit_button_handler)
-    dispatcher.add_handler(start_handler)
-    dispatcher.add_handler(help_handler)
-    dispatcher.add_handler(rex_help_handler)
 
-    dispatcher.add_handler(ADMIN_AUTHENTICATION_HANDLER)
-
-    dispatcher.add_handler(help_callback_handler)
     dispatcher.add_handler(EDIT_BOT_DESCRIPTION_HANDLER)
     # ADD_BUTTONS
     dispatcher.add_handler(BUTTON_ADD_HANDLER)
@@ -115,6 +106,23 @@ def main(token):
     dispatcher.add_handler(SEND_POLL_TO_CHANNEL_HANDLER)
     dispatcher.add_handler(SEND_SURVEY_TO_CHANNEL_HANDLER)
     dispatcher.add_handler(SEND_DONATION_TO_CHANNEL_HANDLER)
+
+
+
+    dispatcher.add_handler(custom_button_back_callback_handler)
+    dispatcher.add_handler(custom_button_callback_handler)
+    dispatcher.add_handler(back_from_edit_button_handler)
+    dispatcher.add_handler(start_handler)
+    dispatcher.add_handler(help_handler)
+
+    dispatcher.add_handler(ADMIN_AUTHENTICATION_HANDLER)  # TODO priority is very important!!!!!!!!!!!!!!!!!!!!
+    dispatcher.add_handler(rex_help_handler)
+
+    dispatcher.add_handler(help_callback_handler)
+
+    error_help_callback_handler = CallbackQueryHandler(get_help, pattern=r"error_back")
+    dispatcher.add_handler(error_help_callback_handler)
+
     LOGGER.info("Using long polling.")
     # updater.start_webhook(listen='0.0.0.0',
     #                       port=8443,
