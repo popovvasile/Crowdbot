@@ -168,7 +168,7 @@ class SendMessageToAdmin(object):
             user_data["content"].append({"video_file": video_note_file})
 
         final_reply_markup = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(text="Done", callback_data="answer_to_message_finish")],
+            [[InlineKeyboardButton(text="Done", callback_data="send_message_finish")],
              [InlineKeyboardButton(text="Cancel", callback_data="send_message_cancel")]]
         )
         bot.send_message(update.message.chat_id,
@@ -291,7 +291,7 @@ class SendMessageToUsers(object):
             user_data["content"].append({"video_file": video_note_file})
 
         final_reply_markup = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(text="Done", callback_data="answer_to_message_finish")],
+            [[InlineKeyboardButton(text="Done", callback_data="send_message_finish")],
              [InlineKeyboardButton(text="Cancel", callback_data="send_message_cancel")]]
         )
         bot.send_message(update.message.chat_id,
@@ -419,7 +419,7 @@ class AnswerToMessage(object):
             bot.send_video_note(user_data["chat_id"], video_note_file)
 
         final_reply_markup = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(text="Done", callback_data="answer_to_message_finish")],
+            [[InlineKeyboardButton(text="Done", callback_data="send_message_finish")],
              [InlineKeyboardButton(text="Cancel", callback_data="send_message_cancel")]]
         )
         bot.send_message(update.message.chat_id,
@@ -671,7 +671,7 @@ ANSWER_TO_MESSAGE_HANDLER = ConversationHandler(
     },
 
     fallbacks=[CallbackQueryHandler(callback=AnswerToMessage().send_message_finish,
-                                    pattern=r"answer_to_message_finish",
+                                    pattern=r"send_message_finish",
                                     pass_user_data=True),
                CallbackQueryHandler(callback=SendMessageToUsers().send_message_cancel,
                                     pattern="send_message_cancel",
