@@ -68,7 +68,7 @@ class SendDonationToUsers(object):
         final_reply_markup = InlineKeyboardMarkup(
             [[InlineKeyboardButton(text=string_dict(bot)["done_button"],
                                    callback_data="send_donation_finish")],
-             [InlineKeyboardButton(text=string_dict(bot)["send_message_9"],
+             [InlineKeyboardButton(text=string_dict(bot)["cancel_button"],
                                    callback_data="send_donation_cancel")]
              ]
         )
@@ -132,11 +132,12 @@ SEND_DONATION_TO_USERS_HANDLER = ConversationHandler(
                                        callback=SendDonationToUsers().send_donation)],
 
     states={
-        DONATION_TO_USERS: [MessageHandler(Filters.all, SendDonationToUsers().received_donation),],
+        DONATION_TO_USERS: [MessageHandler(Filters.all, SendDonationToUsers().received_donation,
+                                           pass_user_data=True),],
     },
 
     fallbacks=[CallbackQueryHandler(callback=SendDonationToUsers().send_donation_finish,
-                                    pattern=r"send_donation_finish", pass_user_data=True),
+                                    pattern=r"send_donation_finish"),
                CallbackQueryHandler(callback=SendDonationToUsers().back,
                                     pattern=r"cancel_send_donation"),
                CallbackQueryHandler(callback=SendDonationToUsers().send_donation_cancel,

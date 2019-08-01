@@ -291,8 +291,8 @@ class SendMessageToUsers(object):
             user_data["content"].append({"video_file": video_note_file})
 
         final_reply_markup = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(text="Done", callback_data="send_message_finish")],
-             [InlineKeyboardButton(text="Cancel", callback_data="send_message_cancel")]]
+            [[InlineKeyboardButton(text=string_dict(bot)["done_button"], callback_data="send_message_finish")],
+             [InlineKeyboardButton(text=string_dict(bot)["cancel_button"], callback_data="send_message_cancel")]]
         )
         bot.send_message(update.message.chat_id,
                          string_dict(bot)["send_message_4"],
