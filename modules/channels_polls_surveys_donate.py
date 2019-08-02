@@ -213,7 +213,7 @@ class SendDonationToChannel(object):
         else:
             update_data = update
         if channels != 0:
-            channel_username = update_data.callback_query.data.replace("send_donation_to_channel_", "")
+            channel_username = update_data.data.replace("send_donation_to_channel_", "")
 
             if channel_username == "send_donation_to_channel":
                 channels_markup = [channel['channel_username'] for channel in channels]

@@ -145,6 +145,14 @@ def button_handler(bot: Bot, update: Update, user_data):
             if "photo_file" in content_dict:
                 user_data['to_delete'].append(bot.send_photo(chat_id=query.message.chat.id,
                                                              photo=content_dict["photo_file"]))
+            if "video_note_file" in content_dict:
+                user_data['to_delete'].append(query.message.reply_video_note(content_dict["video_note_file"]))
+            if "voice_file" in content_dict:
+                user_data['to_delete'].append(query.message.reply_voice(content_dict["voice_file"]))
+            if "animation_file" in content_dict:
+                user_data['to_delete'].append(query.message.reply_voice(content_dict["animation_file"]))
+            if "sticker_file" in content_dict:
+                user_data['to_delete'].append(query.message.reply_voice(content_dict["sticker_file"]))
 
     except BadRequest as excp:
         if excp.message == "Message is not modified":

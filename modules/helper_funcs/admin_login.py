@@ -29,7 +29,6 @@ class AdminAuthentication(object):
                              "This email is not listed in the list of users.")
             return ConversationHandler.END
 
-
     def handle_password(self, bot, update, user_data):
         print("Message: " + str(update.message))
         user_id = update.message.from_user.id
@@ -42,37 +41,21 @@ class AdminAuthentication(object):
         else:
             superuser = False
         if used_password == user["password"]:
-            if user.get("is_admin", False):
-                bot.send_message(chat_id, update.message.chat.first_name + ", you have been registered " +
-                                 "as an authorized user of this bot.")
-                users_table.replace_one({"user_id": user_id},
-                                        {'bot_id': bot.id,
-                                         "chat_id": chat_id,
-                                         "user_id": user_id,
-                                         "username": update.message.from_user.username,
-                                         "full_name": update.message.from_user.full_name,
-                                         'registered': True,
-                                         "is_admin": True,
-                                         "superuser": superuser,
-                                         "tags": ["#all", "#user", "#admin"]
-                                         })
-                get_help(bot, update)
+            bot.send_message(chat_id, update.message.chat.first_name + ", you have been registered " +
+                             "as an authorized user of this bot.")
+            users_table.replace_one({"user_id": user_id},
+                                    {'bot_id': bot.id,
+                                     "chat_id": chat_id,
+                                     "user_id": user_id,
+                                     "username": update.message.from_user.username,
+                                     "full_name": update.message.from_user.full_name,
+                                     'registered': True,
+                                     "is_admin": True,
+                                     "superuser": superuser,
+                                     "tags": ["#all", "#user", "#admin"]
+                                     })
+            get_help(bot, update)
 
-            else:
-                bot.send_message(chat_id, update.message.chat.first_name + ", you have been registered " +
-                                 "as an authorized user of this bot.")
-                users_table.replace_one({"user_id": user_id},
-                                        {'bot_id': bot.id,
-                                         "chat_id": chat_id,
-                                         "user_id": user_id,
-                                         "username": update.message.from_user.username,
-                                         "full_name": update.message.from_user.full_name,
-                                         'registered': True,
-                                         "is_admin": False,
-                                         "superuser": superuser,
-                                         "tags": ["#all", "#user"]
-                                         })
-                get_help(bot, update)
             return ConversationHandler.END
         elif used_password is None:
             bot.send_message(chat_id, "No password provided. Please send a  valid password or click /cancel")

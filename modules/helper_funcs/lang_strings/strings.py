@@ -136,7 +136,7 @@ Send messages to users and get feedback
 Say Hello to the admin!
 """,
         send_donation_request_1="Tell everyone about the donation and how you will utilize the money\n" \
-                                "The 'Support project' button will be attached to the message'",
+                                "The 'Donate' button will be attached to the message'",
         send_donation_request_2="Write a new message and press '✅ Done",
         send_donation_request_3="💸 The message is sent!",
 

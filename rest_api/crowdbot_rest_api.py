@@ -115,10 +115,8 @@ def admin_on_post():
         users_table.insert_one({"bot_id": chatbot_id,
                                 "email": admin["email"],
                                 "password": admin["password"],
-                                "active": False,
                                 "registered": False,
                                 "is_admin": True,
-                                "is_superuser": True
         })
 
     resp = Response({}, status=200, mimetype='application/json')

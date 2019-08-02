@@ -94,11 +94,12 @@ class AddCommands(object):
 
         if update.message.audio:
             audio_file = update.message.audio.get_file().file_id
+            print(audio_file)
             general_list.append({"audio_file": audio_file})
 
         if update.message.voice:
             voice_file = update.message.voice.get_file().file_id
-            general_list.append({"audio_file": voice_file})
+            general_list.append({"voice_file": voice_file})
 
         if update.message.document:
             document_file = update.message.document.get_file().file_id
@@ -110,7 +111,13 @@ class AddCommands(object):
 
         if update.message.video_note:
             video_note_file = update.message.audio.get_file().file_id
-            general_list.append({"video_file": video_note_file})
+            general_list.append({"video__note_file": video_note_file})
+        if update.message.animation:
+            animation_file = update.message.audio.get_file().file_id
+            general_list.append({"animation_file": animation_file})
+        if update.message.sticker:
+            sticker_file = update.message.audio.get_file().file_id
+            general_list.append({"sticker_file": sticker_file})
         user_data["to_delete"].append(update.message.reply_text(string_dict(bot)["back_text"],
                                                                 reply_markup=reply_markup))
         done_buttons = [[InlineKeyboardButton(text=string_dict(bot)["done_button"], callback_data="DONE")]]

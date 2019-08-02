@@ -42,6 +42,61 @@ class SendDonationToUsers(object):
             return ConversationHandler.END
 
     def received_donation(self, bot, update, user_data):
+        if "content" not in user_data:
+            user_data["content"] = []
+        if update.message.text:
+            user_data["content"].append({"text": update.message.text})
+
+        elif update.message.photo:
+            photo_file = update.message.photo[-1].get_file().file_id
+            user_data["content"].append({"photo_file": photo_file})
+
+        elif update.message.audio:
+            audio_file = update.message.audio.get_file().file_id
+            user_data["content"].append({"audio_file": audio_file})
+
+        elif update.message.voice:
+            voice_file = update.message.voice.get_file().file_id
+            user_data["content"].append({"audio_file": voice_file})
+
+        elif update.message.document:
+            document_file = update.message.document.get_file().file_id
+            user_data["content"].append({"document_file": document_file})
+
+        elif update.message.video:
+            video_file = update.message.video.get_file().file_id
+            user_data["content"].append({"video_file": video_file})
+
+        elif update.message.video_note:
+            video_note_file = update.message.audio.get_file().file_id
+            user_data["content"].append({"video_file": video_note_file})
+
+        final_reply_markup = InlineKeyboardMarkup(
+            [[InlineKeyboardButton(text=string_dict(bot)["done_button"],
+                                   callback_data="send_donation_finish")],
+             [InlineKeyboardButton(text=string_dict(bot)["cancel_button"],
+                                   callback_data="send_donation_cancel")]
+             ]
+        )
+        bot.send_message(update.message.chat_id,
+                         string_dict(bot)["send_donation_request_2"],
+                         reply_markup=final_reply_markup)
+
+        return DONATION_TO_USERS
+
+    def send_donation_finish(self, bot, update, user_data):
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["donate_button"],
+                                             callback_data="pay_donation"),
+                        InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                             callback_data="help_module(donation_payment)")])
+        final_reply_markup = InlineKeyboardMarkup(
+            buttons)
+        bot.send_message(update.callback_query.message.chat_id,
+                         string_dict(bot)["send_donation_request_3"],
+                         reply_markup=final_reply_markup)
         if "user_category" not in user_data:
             chats = chats_table.find({"bot_id": bot.id})
         elif user_data["user_category"] == "All":
@@ -49,7 +104,7 @@ class SendDonationToUsers(object):
         else:
             chats = chats_table.find({"bot_id": bot.id, "user_category": user_data["user_category"]})
         for chat in chats:
-            if chat["chat_id"] != update.message.chat_id:
+            if chat["chat_id"] != update.callback_query.message.chat_id:
                 for content_dict in user_data["content"]:
                     if "text" in content_dict:
                         bot.send_message(chat["chat_id"],
@@ -65,33 +120,7 @@ class SendDonationToUsers(object):
                             bot.send_document(chat["chat_id"], content_dict["document_file"])
                     if "photo_file" in content_dict:
                         bot.send_photo(chat["chat_id"], content_dict["photo_file"])
-        final_reply_markup = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(text=string_dict(bot)["done_button"],
-                                   callback_data="send_donation_finish")],
-             [InlineKeyboardButton(text=string_dict(bot)["cancel_button"],
-                                   callback_data="send_donation_cancel")]
-             ]
-        )
-        bot.send_message(update.message.chat_id,
-                         string_dict(bot)["send_donation_request_2"],
-                         reply_markup=final_reply_markup)
 
-        return DONATION_TO_USERS
-
-    def send_donation_finish(self, bot, update):
-        bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
-        buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["donate_button"],
-                                             callback_data="pay_donation"),
-                        InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                             callback_data="help_module(donation_payment)")])
-        final_reply_markup = InlineKeyboardMarkup(
-            buttons)
-        bot.send_message(update.callback_query.message.chat_id,
-                         string_dict(bot)["send_donation_request_3"],
-                         reply_markup=final_reply_markup)
-        chats = chats_table.find({"bot_id": bot.id})  # TODO it sends to everybody =/
         for chat in chats:
             if chat["chat_id"] != update.callback_query.message.chat_id:
                 bot.send_message(chat["chat_id"],
@@ -137,7 +166,7 @@ SEND_DONATION_TO_USERS_HANDLER = ConversationHandler(
     },
 
     fallbacks=[CallbackQueryHandler(callback=SendDonationToUsers().send_donation_finish,
-                                    pattern=r"send_donation_finish"),
+                                    pattern=r"send_donation_finish", pass_user_data=True),
                CallbackQueryHandler(callback=SendDonationToUsers().back,
                                     pattern=r"cancel_send_donation"),
                CallbackQueryHandler(callback=SendDonationToUsers().send_donation_cancel,

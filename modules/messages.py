@@ -173,7 +173,7 @@ class SendMessageToAdmin(object):
         )
         bot.send_message(update.message.chat_id,
                          string_dict(bot)["send_message_4"],
-                         reply_markup=final_reply_markup)  # TODO add Cancel button
+                         reply_markup=final_reply_markup) 
 
         return MESSAGE
 

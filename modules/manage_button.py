@@ -75,6 +75,18 @@ class ButtonEdit(object):
                                                                                   update.message.text))
                         ]])
                     ))
+                if "voice_file" in content:
+                    user_data["to_delete"].append(update.message.reply_voice(
+                        content["voice_file"],
+                        reply_markup=InlineKeyboardMarkup([[
+                            InlineKeyboardButton(text=string_dict(bot)["edit_button"],
+                                                 callback_data="b_{}___{}".format(
+                                                     content["voice_file"][:10], update.message.text)),
+                            InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
+                                                 callback_data="d_{}___{}".format(content["voice_file"][:10],
+                                                                                  update.message.text))
+                        ]])
+                    ))
                 if "video_file" in content:
                     user_data["to_delete"].append(update.message.reply_video(
                         content["video_file"],
@@ -84,6 +96,18 @@ class ButtonEdit(object):
                                                      content["video_file"][:10], update.message.text)),
                             InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
                                                  callback_data="d_{}___{}".format(content["video_file"][:10],
+                                                                                  update.message.text))
+                        ]])
+                    ))
+                if "video_note_file" in content:
+                    user_data["to_delete"].append(update.message.reply_video_note(
+                        content["video_note_file"],
+                        reply_markup=InlineKeyboardMarkup([[
+                            InlineKeyboardButton(text=string_dict(bot)["edit_button"],
+                                                 callback_data="b_{}___{}".format(
+                                                     content["video_note_file"][:10], update.message.text)),
+                            InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
+                                                 callback_data="d_{}___{}".format(content["video_note_file"][:10],
                                                                                   update.message.text))
                         ]])
                     ))
@@ -108,6 +132,30 @@ class ButtonEdit(object):
                                                      content["photo_file"][:10], update.message.text)),
                             InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
                                                  callback_data="d_{}___{}".format(content["photo_file"][:10],
+                                                                                  update.message.text))
+                        ]])
+                    ))
+                if "animation_file" in content:
+                    user_data["to_delete"].append(update.message.reply_animation(
+                        content["animation_file"],
+                        reply_markup=InlineKeyboardMarkup([[
+                            InlineKeyboardButton(text=string_dict(bot)["edit_button"],
+                                                 callback_data="b_{}___{}".format(
+                                                     content["animation_file"][:10], update.message.text)),
+                            InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
+                                                 callback_data="d_{}___{}".format(content["animation_file"][:10],
+                                                                                  update.message.text))
+                        ]])
+                    ))
+                if "sticker_file" in content:
+                    user_data["to_delete"].append(update.message.reply_sticker(
+                        content["photo_file"],
+                        reply_markup=InlineKeyboardMarkup([[
+                            InlineKeyboardButton(text=string_dict(bot)["edit_button"],
+                                                 callback_data="b_{}___{}".format(
+                                                     content["sticker_file"][:10], update.message.text)),
+                            InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
+                                                 callback_data="d_{}___{}".format(content["sticker_file"][:10],
                                                                                   update.message.text))
                         ]])
                     ))
@@ -177,7 +225,7 @@ class ButtonEdit(object):
 
         elif update.message.voice:
             voice_file = update.message.voice.get_file().file_id
-            button_info["content"].insert(content_index, {"audio_file": voice_file})
+            button_info["content"].insert(content_index, {"voice_file": voice_file})
 
         elif update.message.document:
             document_file = update.message.document.get_file().file_id
@@ -189,8 +237,13 @@ class ButtonEdit(object):
 
         elif update.message.video_note:
             video_note_file = update.message.audio.get_file().file_id
-            button_info["content"].insert(content_index, {"video_file": video_note_file})
-
+            button_info["content"].insert(content_index, {"video_note_file": video_note_file})
+        elif update.message.sticker:
+            sticker_file = update.message.audio.get_file().file_id
+            button_info["content"].insert(content_index, {"sticker_file": sticker_file})
+        elif update.message.animation:
+            animation_file = update.message.audio.get_file().file_id
+            button_info["content"].insert(content_index, {"animation_file": animation_file})
         custom_buttons_table.replace_one(
             {"bot_id": bot.id, "button": user_data["button"]},
             button_info
@@ -265,7 +318,7 @@ class AddButtonContent(object):
 
         elif update.message.voice:
             voice_file = update.message.voice.get_file().file_id
-            button_info["content"].append({"audio_file": voice_file})
+            button_info["content"].append({"voice_file": voice_file})
 
         elif update.message.document:
             document_file = update.message.document.get_file().file_id
@@ -277,7 +330,13 @@ class AddButtonContent(object):
 
         elif update.message.video_note:
             video_note_file = update.message.audio.get_file().file_id
-            button_info["content"].append({"video_file": video_note_file})
+            button_info["content"].append({"video_note_file": video_note_file})
+        elif update.message.animation:
+            animation_file = update.message.audio.get_file().file_id
+            button_info["content"].append({"animation_file": animation_file})
+        elif update.message.sticker:
+            sticker_file = update.message.audio.get_file().file_id
+            button_info["content"].append({"sticker_file": sticker_file})
 
         custom_buttons_table.replace_one(
             {"bot_id": bot.id, "button": user_data["button"]},
