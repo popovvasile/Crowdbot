@@ -40,7 +40,7 @@ class ButtonEdit(object):
                                                                    callback_data="create_button"),
                                                                  InlineKeyboardButton(
                                                                      string_dict(bot)["back_button"],
-                                                                     callback_data="back_from_edit_button")]]
+                                                                     callback_data="help_module(menu_buttons)")]]
                                                            )))
             return ConversationHandler.END
 
@@ -183,12 +183,12 @@ class ButtonEdit(object):
                                                            [[
                                                                InlineKeyboardButton(
                                                                    string_dict(bot)["back_button"],
-                                                                   callback_data="back_from_edit_button")]])))
+                                                                   callback_data="help_module(menu_buttons)")]])))
         return ConversationHandler.END
 
     def edit_button(self, bot, update, user_data):
         reply_buttons = [
-            [InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_edit_button")]]
+            [InlineKeyboardButton(text=string_dict(bot)["cancel_button"], callback_data="cancel_edit_button")]]
         reply_markup = InlineKeyboardMarkup(
             reply_buttons)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -249,7 +249,7 @@ class ButtonEdit(object):
             button_info
         )
         buttons = [
-            [InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="back_from_edit_button")]]
+            [InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(menu_buttons)")]]
         bot.send_message(chat_id=update.message.chat_id,
                          text=string_dict(bot)["manage_button_str_5"],
                          reply_markup=InlineKeyboardMarkup(buttons))
@@ -289,7 +289,7 @@ class ButtonEdit(object):
 class AddButtonContent(object):
     def add_content_button(self, bot, update, user_data):
         reply_buttons = [
-            [InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_edit_button")]]
+            [InlineKeyboardButton(text=string_dict(bot)["cancel_button"], callback_data="cancel_edit_button")]]
         reply_markup = InlineKeyboardMarkup(
             reply_buttons)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
