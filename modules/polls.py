@@ -185,8 +185,6 @@ class PollBot(object):
         send_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                               callback_data="help_module(polls)")],
                         [InlineKeyboardButton(text=string_dict(bot)["send_button"],
-                                              callback_data="send_poll_to_users")],
-                        [InlineKeyboardButton(text=string_dict(bot)["send_poll_to_channel"],
                                               callback_data="send_poll_to_channel"),
                          ]]
         send_markup = InlineKeyboardMarkup(

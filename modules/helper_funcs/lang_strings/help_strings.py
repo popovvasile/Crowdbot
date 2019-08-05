@@ -79,7 +79,7 @@ def help_strings(bot):
     help_dict["polls"] = dict(
         admin_keyboard=[
             InlineKeyboardButton(text=string_dict(bot)["create_button_str"], callback_data="create_poll"),
-            InlineKeyboardButton(text=string_dict(bot)["send_button"], callback_data="send_poll_to_users"),
+            InlineKeyboardButton(text=string_dict(bot)["send_button"], callback_data="send_poll_to_channel"),
             InlineKeyboardButton(text=string_dict(bot)["delete_button_str"], callback_data="delete_poll"),
             InlineKeyboardButton(text=string_dict(bot)["results_button"], callback_data="poll_results")],
         mod_name=string_dict(bot)["polls_module_str"],
