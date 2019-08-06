@@ -366,6 +366,7 @@ class SendPost(object):
                              reply_markup=final_reply_markup))
         logger.info("Admin {} on bot {}:{} sent a post to the channel".format(
             update.effective_user.first_name, bot.first_name, bot.id))
+        user_data.clear()
         return ConversationHandler.END
 
     def send_post_cancel(self, bot, update, user_data):
