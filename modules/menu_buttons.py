@@ -166,11 +166,12 @@ class AddCommands(object):
         if button_list_of_dicts.count() != 0:
             button_list = [button['button'] for button in button_list_of_dicts]
             reply_keyboard = [button_list]
-            bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(bot)["back_text"], reply_markup=finish_markup)
+
             bot.send_message(update.callback_query.message.chat.id,
                              string_dict(bot)["add_menu_buttons_str_6"],
                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+            bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(bot)["back_text"], reply_markup=finish_markup)
             return TYPING_TO_DELETE_BUTTON
         else:
             reply_buttons = [[InlineKeyboardButton(text=string_dict(bot)["create_button"],

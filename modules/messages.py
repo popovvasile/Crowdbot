@@ -164,7 +164,7 @@ class SendMessageToAdmin(object):
             user_data["content"].append({"video_file": video_file})
 
         elif update.message.video_note:
-            video_note_file = update.message.audio.get_file().file_id
+            video_note_file = update.message.video_note.get_file().file_id
             user_data["content"].append({"video_file": video_note_file})
 
         final_reply_markup = InlineKeyboardMarkup(
@@ -195,6 +195,7 @@ class SendMessageToAdmin(object):
         user_data["message_id"] = update.callback_query.message.message_id
         user_data["bot_id"] = bot.id
         users_messages_to_admin_table.insert(user_data)
+        user_data.clear()
         return ConversationHandler.END
 
     def send_message_cancel(self, bot, update, user_data):
@@ -287,8 +288,16 @@ class SendMessageToUsers(object):
             user_data["content"].append({"video_file": video_file})
 
         elif update.message.video_note:
-            video_note_file = update.message.audio.get_file().file_id
-            user_data["content"].append({"video_file": video_note_file})
+            video_note_file = update.message.video_note.get_file().file_id
+            user_data["content"].append({"video_note_file": video_note_file})
+
+        elif update.message.animation:
+            animation_file = update.message.animation.get_file().file_id
+            user_data["content"].append({"animation_file": animation_file})
+
+        elif update.message.sticker:
+            sticker_file = update.message.sticker.get_file().file_id
+            user_data["content"].append({"sticker_file": sticker_file})
 
         final_reply_markup = InlineKeyboardMarkup(
             [[InlineKeyboardButton(text=string_dict(bot)["done_button"], callback_data="send_message_finish")],
@@ -315,8 +324,12 @@ class SendMessageToUsers(object):
                                          content_dict["text"])
                     if "audio_file" in content_dict:
                         bot.send_audio(chat["chat_id"], content_dict["audio_file"])
+                    if "voice_file" in content_dict:
+                        bot.send_voice(chat["chat_id"], content_dict["voice_file"])
                     if "video_file" in content_dict:
                         bot.send_video(chat["chat_id"], content_dict["video_file"])
+                    if "video_note_file" in content_dict:
+                        bot.send_video_note(chat["chat_id"], content_dict["video_note_file"])
                     if "document_file" in content_dict:
                         if ".png" in content_dict["document_file"] or ".jpg" in content_dict["document_file"]:
                             bot.send_photo(chat["chat_id"], content_dict["document_file"])
@@ -324,6 +337,10 @@ class SendMessageToUsers(object):
                             bot.send_document(chat["chat_id"], content_dict["document_file"])
                     if "photo_file" in content_dict:
                         bot.send_photo(chat["chat_id"], content_dict["photo_file"])
+                    if "animation_file" in content_dict:
+                        bot.send_animation(chat["chat_id"], content_dict["animation_file"])
+                    if "sticker_file" in content_dict:
+                        bot.send_sticker(chat["chat_id"], content_dict["sticker_file"])
 
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
@@ -337,6 +354,8 @@ class SendMessageToUsers(object):
                          reply_markup=final_reply_markup)
         logger.info("Admin {} on bot {}:{} sent a message to the users".format(
             update.effective_user.first_name, bot.first_name, bot.id))
+        user_data.clear()
+
         return ConversationHandler.END
 
     def send_message_cancel(self, bot, update, user_data):
@@ -415,7 +434,7 @@ class AnswerToMessage(object):
             bot.send_video(user_data["chat_id"], video_file)
 
         elif update.message.video_note:
-            video_note_file = update.message.audio.get_file().file_id
+            video_note_file = update.message.video_note.get_file().file_id
             bot.send_video_note(user_data["chat_id"], video_note_file)
 
         final_reply_markup = InlineKeyboardMarkup(
@@ -450,6 +469,7 @@ class AnswerToMessage(object):
                          reply_markup=ask_if_markup)
         logger.info("Admin {} on bot {}:{} sent a message to the users".format(
             update.effective_user.first_name, bot.first_name, bot.id))
+        user_data.clear()
         return ConversationHandler.END
 
     def back(self, bot, update, user_data):
@@ -555,8 +575,12 @@ class SeeMessageToAdmin(object):
                 query.message.reply_text(text=content_dict["text"])
             if "audio_file" in content_dict:
                 query.message.reply_audio(content_dict["audio_file"])
+            if "voice_file" in content_dict:
+                query.message.reply_audio(content_dict["voice_file"])
             if "video_file" in content_dict:
                 query.message.reply_video(content_dict["video_file"])
+            if "video_note_file" in content_dict:
+                query.message.reply_video_note(content_dict["video_note_file"])
             if "document_file" in content_dict:
                 if ".png" in content_dict["document_file"] or ".jpg" in content_dict["document_file"]:
                     query.message.reply_photo(photo=content_dict["document_file"])
@@ -564,6 +588,10 @@ class SeeMessageToAdmin(object):
                     query.message.reply_document(document=content_dict["document_file"])
             if "photo_file" in content_dict:
                 query.message.reply_photo(photo=content_dict["photo_file"])
+            if "animation_file" in content_dict:
+                query.message.reply_animation(photo=content_dict["animation_file"])
+            if "sticker_file" in content_dict:
+                query.message.reply_sticker(photo=content_dict["sticker_file"])
         bot.send_message(update.callback_query.message.chat_id,
                          "User's name: {}, \n Timestamp:{}".format(
                              message["user_full_name"],

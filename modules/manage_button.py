@@ -239,10 +239,10 @@ class ButtonEdit(object):
             video_note_file = update.message.audio.get_file().file_id
             button_info["content"].insert(content_index, {"video_note_file": video_note_file})
         elif update.message.sticker:
-            sticker_file = update.message.audio.get_file().file_id
+            sticker_file = update.message.sticker.get_file().file_id
             button_info["content"].insert(content_index, {"sticker_file": sticker_file})
         elif update.message.animation:
-            animation_file = update.message.audio.get_file().file_id
+            animation_file = update.message.animation.get_file().file_id
             button_info["content"].insert(content_index, {"animation_file": animation_file})
         custom_buttons_table.replace_one(
             {"bot_id": bot.id, "button": user_data["button"]},
