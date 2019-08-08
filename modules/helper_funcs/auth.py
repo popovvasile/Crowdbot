@@ -10,15 +10,38 @@ def register_chat(bot, update):
     chat_name = update.effective_user.full_name
     bot_id = bot.id
     user_id = update.effective_user.id
-    chats_table.update({"bot_id": bot.id, "chat_id": chat_id},
-                       {"bot_id": bot_id, "chat_id": chat_id,
-                        "name": chat_name, "user_id": user_id, "tag": "#all"},
-                       upsert=True)
+    if chats_table.find({"chat_id":chat_id}).count() == 0:
+        chats_table.update({"bot_id": bot.id, "chat_id": chat_id},
+                           {"bot_id": bot_id, "chat_id": chat_id,
+                            "name": chat_name, "user_id": user_id, "tag": "#all"},
+                           upsert=True)
+    superuser = chatbots_table.find_one({"bot_id": bot.id})["superuser"]
+    if user_id == superuser:
+        users_table.update({"user_id": user_id},
+                           {'bot_id': bot.id,
+                            "chat_id": chat_id,
+                            "user_id": user_id,
+                            "username": update.message.from_user.username,
+                            "full_name": update.message.from_user.full_name,
+                            'registered': True,
+                            "is_admin": True,
+                            "tags": ["#all", "#user", "#admin"]
+                            }, upsert=True)
+    elif users_table.find({"user_id": user_id}).count() == 0:
+        users_table.insert(
+                           {'bot_id': bot.id,
+                            "chat_id": chat_id,
+                            "user_id": user_id,
+                            "username": update.message.from_user.username,
+                            "full_name": update.message.from_user.full_name,
+                            'registered': False,
+                            "is_admin": False,
+                            "tags": ["#all", "#user"]
+                            })
 
 
 def initiate_chat_id(update):
     chat_id = update.effective_chat.id
-
     txt = ""
     if update.message.text:
         txt = txt + update.message.text

@@ -491,7 +491,7 @@ class PollBot(object):
                            InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                 callback_data="help_module(polls)")],
                           [InlineKeyboardButton(text=string_dict(bot)["send_button"],
-                                                callback_data="send_poll_to_users")]]
+                                                callback_data="send_poll_to_channel")]]
         create_markup = InlineKeyboardMarkup(create_buttons)
         chat_id, txt = initiate_chat_id(update)
         poll_instances = poll_instances_table.find({"title": txt, "bot_id": bot.id})

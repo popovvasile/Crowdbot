@@ -14,7 +14,7 @@ MY_CHANNELS, MANAGE_CHANNEL, ADD_CHANNEL, \
 CHOOSE_TO_REMOVE, REMOVE_CHANNEL, \
 CHOOSE_TO_SEND_POST, POST_TO_CHANNEL, MESSAGE_TO_USERS = range(8)
 
-CHOOSE_TO_SEND_POLL, CHOOSE_POLL_TO_SEND = range(2)
+CHOOSE_CHANNEL_TO_SEND_POLL, CHOOSE_POLL_TO_SEND = range(2)
 CHOOSE_CHANNEL_TO_SEND_SURVEY, CHOOSE_SURVEY_TO_SEND = range(2)
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -37,13 +37,13 @@ class SendPoll(object):
                 channels_markup = [channel['channel_username'] for channel in channels_table.find({'bot_id': bot.id})]
                 bot.send_message(update.callback_query.message.chat.id, "Choose a channel that you want to send",
                                  reply_markup=ReplyKeyboardMarkup([channels_markup]))
-                return CHOOSE_POLL_TO_SEND_DONATION
+                bot.delete_message(chat_id=update_data.message.chat_id,
+                                   message_id=update_data.message.message_id)
+                return CHOOSE_CHANNEL_TO_SEND_POLL
         else:
             channel_username = update.message.text
             update_data = update
 
-        bot.delete_message(chat_id=update_data.message.chat_id,
-                           message_id=update_data.message.message_id)
         create_buttons = [
             [InlineKeyboardButton(text=string_dict(bot)["create_button_str"], callback_data="create_poll"),
              InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]]
@@ -355,7 +355,7 @@ SEND_POLL_TO_CHANNEL_HANDLER = ConversationHandler(
     states={
 
         CHOOSE_POLL_TO_SEND: [MessageHandler(Filters.text, SendPoll().handle_send_title, pass_user_data=True), ],
-        CHOOSE_POLL_TO_SEND_DONATION: [
+        CHOOSE_CHANNEL_TO_SEND_POLL: [
             MessageHandler(Filters.text, SendPoll().handle_send_poll, pass_user_data=True), ],
     },
     fallbacks=[CallbackQueryHandler(callback=SendPoll().back, pattern=r"cancel_send_poll"),

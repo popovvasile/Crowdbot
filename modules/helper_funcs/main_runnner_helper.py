@@ -179,17 +179,6 @@ def back_from_button_handler(bot: Bot, update: Update, user_data):
 #                    "User view": ""}
 
 def help_button(bot: Bot, update: Update):
-    # users_table.update({"user_id": update.message.from_user.id},
-    #                    {'bot_id': bot.id,
-    #                     "chat_id": update.message.chat.id,
-    #                     "user_id": update.message.from_user.id,
-    #                     "username": update.message.from_user.username,
-    #                     "full_name": update.message.from_user.full_name,
-    #                     'registered': False,
-    #                     "pending": False,
-    #                     "is_admin": False,
-    #                     "tags": ["#all", "#user"]
-    #                     }, upsert=True)
     if if_admin(update=update, bot=bot):
         HELPABLE = helpable_dict(bot)["ADMIN_HELPABLE"]
     else:
@@ -323,17 +312,7 @@ class WelcomeBot(object):
         print("registration" in txt)
         user_id = update.message.from_user.id
         register_chat(bot, update)
-        users_table.update({"user_id": user_id},
-                           {'bot_id': bot.id,
-                            "chat_id": chat_id,
-                            "user_id": user_id,
-                            "username": update.message.from_user.username,
-                            "full_name": update.message.from_user.full_name,
-                            'registered': False,
-                            "pending": False,
-                            "is_admin": False,
-                            "tags": ["#all", "#user"]
-                            }, upsert=True)
+
         if "survey_" in txt:
             bot.send_message(chat_id=chat_id, text=string_dict(bot)["survey_str_20"],
                              reply_markup=InlineKeyboardMarkup(
