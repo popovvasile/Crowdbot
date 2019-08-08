@@ -59,12 +59,7 @@ class InstantRunoffPollHandler(BasePoll):
 
         num_votes = len(poll.get('votes', {}))
 
-        body = "This is an instant runoff poll. \n" \
-               "You define an order of preference for the available options " \
-               "by clicking on them in that order. For evaluation, the lowest " \
-               "ranking candidate is eliminated until there is a clear winner. \n" \
-               "Make sure to select all options that would work for you, but " \
-               "don't select any of those that don't work.\n\n{}\n{} people voted so far".format(message, num_votes)
+        body = "{}\n{} people voted so far".format(message, num_votes)
         return body
 
     def run_election(self, candidates, votes, skip_index=0):
@@ -112,9 +107,9 @@ class InstantRunoffPollHandler(BasePoll):
         old_vote = []
         if user in votes:
             old_vote = votes[user]
-
+        print(callback_data['i'])
         if callback_data['i'] == 'C':
-            old_vote = {}
+            old_vote = None
         elif callback_data['i'] in old_vote:
             old_vote.remove(callback_data['i'])
         else:

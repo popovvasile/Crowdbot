@@ -5,14 +5,12 @@ from .custom_description_poll_handler import CustomDescriptionHandler
 class CustomDescriptionInstantRunoffPollHandler(InstantRunoffPollHandler, CustomDescriptionHandler):
     def __init__(self):
         super(CustomDescriptionInstantRunoffPollHandler, self).__init__()
-        self.name = "Order of preference poll with custom description"
-        self.desc = "Order of preference poll, but with a custom description"
+        self.name = "Order of preference poll"
+        self.desc = "Order of preference"
 
     def evaluation(self, poll):
         votes = poll.get('votes', {})
         candidates = [opt['index'] for opt in poll['options']]
-
-        explanation = "Click on only those options that work for you, in the order of your preference."
 
         if votes:
             elected = self.run_election(candidates, list(votes.values()))
@@ -27,6 +25,6 @@ class CustomDescriptionInstantRunoffPollHandler(InstantRunoffPollHandler, Custom
 
         num_votes = len(poll.get('votes', {}))
         body = poll['meta']['text']
-        body += "\n\n{}\n\n*{}*\n{} people voted so far".format(explanation, message, num_votes)
+        body += "\n\n*{}*\n{} people voted so far".format(message, num_votes)
         return body
 

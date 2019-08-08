@@ -293,14 +293,13 @@ class PollBot(object):
 
         query = update.callback_query
         data_dict = json.loads(update.callback_query.data)
-        table = poll_instances_table
         templates = polls_table
         result = {}
         kwargs = {}
         if query.inline_message_id:
             kwargs['inline_message_id'] = query.inline_message_id
             try:
-                result = table.find_one(dict(inline_message_id=query.inline_message_id))
+                result = poll_instances_table.find_one(dict(inline_message_id=query.inline_message_id))
             except TypeError:
                 result = None
             if not result:
@@ -324,8 +323,8 @@ class PollBot(object):
                 kwargs['message_id'] = query.message.message_id
                 kwargs['chat_id'] = query.message.chat.id
                 try:
-                    result = table.find_one(dict(message_id=query.message.message_id,
-                                                 chat_id=query.message.chat.id))
+                    result = poll_instances_table.find_one(dict(message_id=query.message.message_id,
+                                                                chat_id=query.message.chat.id))
                 except TypeError:
                     result = None
                 if not result:
@@ -353,10 +352,10 @@ class PollBot(object):
         query.answer(handler.get_confirmation_message(poll, uid_str))
         if "_id" in poll:
             poll.pop('_id')
-        table.update({'poll_id': poll['poll_id'], "bot_id": bot.id},
-                     self.serialize(poll),
-                     upsert=True)
-        old_instances = table.find({"poll_id": poll["poll_id"], "bot_id": bot.id})
+        poll_instances_table.update({'poll_id': poll['poll_id'], "bot_id": bot.id},
+                                    self.serialize(poll),
+                                    upsert=True)
+        old_instances = poll_instances_table.find({"poll_id": poll["poll_id"], "bot_id": bot.id})
         vote_instances = []
         for instance in old_instances:
             vote_instances.append(instance["votes"])
@@ -368,7 +367,7 @@ class PollBot(object):
 
         poll["bot_id"] = bot.id
         votes_list = []
-        for po in table.find({"bot_id": bot.id, "poll_id": poll["poll_id"]}):
+        for po in poll_instances_table.find({"bot_id": bot.id, "poll_id": poll["poll_id"]}):
             if po["chat_id"] != chat_id:
                 votes_list.append(po["votes"])
         votes_dict = {}
@@ -521,7 +520,6 @@ class PollBot(object):
         bot.send_message(update.message.chat.id, string_dict(bot)["polls_str_18"],
                          reply_markup=create_markup)
 
-
         return ConversationHandler.END
 
     def handle_delete_poll(self, bot, update):
@@ -599,7 +597,7 @@ DELETE_POLLS_HANDLER = ConversationHandler(
         CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_delete_poll"),
         CallbackQueryHandler(callback=PollBot().back, pattern=r"error_back"),
 
-               ]
+    ]
 )
 
 POLL_HANDLER = ConversationHandler(

@@ -12,7 +12,6 @@ class MultipleOptionsHandler(BasicPoll):
             'text': "Clear my votes",
             'callback_data': {'i': "C"}
         }]]
-
         for opt in poll['options']:
             votes = self.num_votes_on_option(poll, opt['index'])
             buttons.append([{
@@ -34,9 +33,7 @@ class MultipleOptionsHandler(BasicPoll):
         old_vote = None
         if user in votes:
             old_vote = votes.pop(user)
-        if callback_data['i'] == 'C':
-            votes[user] = []
-        elif old_vote is not None and callback_data['i'] in old_vote:
+        if old_vote is not None and callback_data['i'] in old_vote:
             old_vote.remove(callback_data['i'])
             if old_vote:
                 votes[user] = old_vote
@@ -45,6 +42,8 @@ class MultipleOptionsHandler(BasicPoll):
             votes[user] = old_vote
         else:
             votes[user] = [callback_data['i']]
+        if callback_data['i'] == 'C':
+            votes.pop(user, None)
 
     def get_confirmation_message(self, poll, user):
         votes = poll['votes']
