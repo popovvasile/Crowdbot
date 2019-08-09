@@ -2,6 +2,8 @@ from database import chatbots_table
 
 string_dict_dict = {
     "ENG": dict(
+        yes="YES",
+        no="NO",
         register_str="Please write your email to register yourself as an admin for this bot",
         create_button_str="📌 Create",
         start_help="Welcome! My name is {} and I am ready to use! Add a channel, start polls and get donations ",
@@ -115,7 +117,9 @@ Write your message. I’ll read it.
         send_message_17="TEST",
 
         send_message_18="TEST",
-
+        send_message_anonim="Would you like to send this message anonymously? "
+                            "If yes, we wan't be able to respond to you",
+        send_message_reply="Reply to your message: \n",
         add_message_category="Add topic",
         send_message_2="Thanks, the homing pigeon's on its way. 🕊!",
         send_message_3="Write a message to users\n"
@@ -336,6 +340,8 @@ Click "📌 Create a button", to add a content.
     ),
 
     "RUS": dict(
+        yes="ДА",
+        no="НЕТ",
         register_str="Пожалуйста введите свой эмайл чтобы зарегестрироваться в качестве админа",
         start_help="Привет! Меня зовут {}. Управляй мной в этом меню. "
                    "Подключи свой канал, проводи опросы, принимай сообщения и донаты.\n "
@@ -429,12 +435,16 @@ Click "📌 Create a button", to add a content.
         send_message_7="Что ты хочешь ответить этому пользователю?",
         send_message_8="Ты можешь удалить это сообщение",
         send_message_9="Сообщение отменено",
+        send_message_anonim="Хочешь отправить это сообщение аннонимно?\n"
+                            "Если ты ответишь да, мы не сможем тебе ответить",
         send_message_admin="""
 Сообщения
 """,
         send_message_user="""
 Напиши сообщение. Я прочту.
 """,
+        send_message_reply="Ответ на ваше сообщение: \n",
+
         send_donation_request_1="Напиши юзерам куда ты потратишь деньги. ",
         send_donation_request_2="Напиши ещё сообщение или нажми '✅ Готово'",
         send_donation_request_3="💸 Отправлено",

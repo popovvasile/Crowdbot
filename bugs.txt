@@ -1,3 +1,6 @@
+# TODO Users can send messages anonymously
+
+
 # TODO think about an example chatbot (TV8) with CommentBot
 https://github.com/python-telegram-bot/python-telegram-bot/wiki/Code-snippets#simple-way-of-restarting-the-bot
 
@@ -17,3 +20,20 @@ TO TALK WITH NIKITA ON Privacy Terms and Checkbox
 
 # TODO later- add the option for the user to choose the language adn for admin to edit multiple versions of the bot
 # TODO Kirill add the option "pause the bot"
+sudo apt-get install python-dev -Y
+sudo apt-get install virtualenvwrapper -Y
+sudo apt-get install postgresql-server-dev-all -Y
+sudo apt-get install libicu-dev -Y
+sudo apt-get install libjpeg-dev -Y
+sudo apt-get install libfreetype6-dev -Y
+sudo apt-get install build-essential -Y
+sudo apt-get install gettext -Y
+sudo apt-get install python-geoip -Y
+sudo apt-get install libxapian-dev -Y
+sudo apt-get install python-xapian -Y
+sudo apt-get install binutils -Y
+sudo apt-get install libproj-dev -Y
+sudo apt-get install gdal-bin -Y
+sudo apt-get install nodejs -Y
+sudo apt-get install nodejs-legacy -Y
+sudo apt-get install npm -Y

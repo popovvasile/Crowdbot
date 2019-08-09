@@ -16,3 +16,4 @@ urllib3==1.25.2
 validate_email
 sendgrid
 aiosmtplib
+haikunator

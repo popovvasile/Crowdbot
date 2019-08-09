@@ -3,7 +3,9 @@
 import datetime
 import logging
 import random
+import uuid
 
+from haikunator import Haikunator
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import (MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
@@ -15,7 +17,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.INFO)
 
 logger = logging.getLogger(__name__)
-TOPIC, MESSAGE = range(2)
+TOPIC,SEND_ANONIM, MESSAGE = range(3)
 CHOOSE_CATEGORY, MESSAGE_TO_USERS = range(2)
 
 
@@ -106,24 +108,32 @@ class SendMessageToAdmin(object):
                            message_id=update.callback_query.message.message_id)
         bot.send_message(update.callback_query.message.chat_id,
                          string_dict(bot)["send_message_12"], reply_markup=reply_markup)
-        # categories = categories_table.find()
-        # if categories.count() > 0:
-        #     bot.send_message(update.callback_query.message.chat_id,
-        #                      string_dict(bot)["send_message_13"],
-        #                      reply_markup=ReplyKeyboardMarkup([[
-        #                          x["category"]] for x in categories
-        #                      ]))
-        #
-        # else:
-        #     bot.send_message(update.callback_query.message.chat_id,
-        #                      string_dict(bot)["send_message_13"])
+        bot.send_message(update.callback_query.message.chat_id,
+                         string_dict(bot)["send_message_anonim"],
+                         reply_markup=ReplyKeyboardMarkup([[string_dict(bot)["no"],
+                                                            string_dict(bot)["yes"]
+                                                            ]]))
 
-        return MESSAGE
+        return SEND_ANONIM
 
-    def send_topic(self, bot, update, user_data):
+    # def send_topic(self, bot, update, user_data):
+    #     bot.send_message(update.message.chat_id,
+    #                      random.choice(string_dict(bot)["polls_affirmations"]), reply_markup=ReplyKeyboardRemove())
+    #     user_data["topic"] = update.message.text
+    #     buttons = list()
+    #     buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
+    #                                          callback_data="help_back")])
+    #     reply_markup = InlineKeyboardMarkup(
+    #         buttons)
+    #     bot.send_message(update.message.chat_id,
+    #                      string_dict(bot)["send_message_1"], reply_markup=reply_markup)
+    #
+    #     return MESSAGE
+
+    def send_anonim(self, bot, update, user_data):
         bot.send_message(update.message.chat_id,
                          random.choice(string_dict(bot)["polls_affirmations"]), reply_markup=ReplyKeyboardRemove())
-        user_data["topic"] = update.message.text
+        user_data["anonim"] = update.message.text
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                              callback_data="help_back")])
@@ -131,13 +141,10 @@ class SendMessageToAdmin(object):
             buttons)
         bot.send_message(update.message.chat_id,
                          string_dict(bot)["send_message_1"], reply_markup=reply_markup)
-
         return MESSAGE
 
     def received_message(self, bot, update, user_data):
-        user_data["user_full_name"] = update.message.from_user.full_name
-        user_data["user_id"] = update.message.from_user.id
-        user_data["chat_id"] = update.message.chat_id
+
         if "content" not in user_data:
             user_data["content"] = []
         if update.message.text:
@@ -184,6 +191,13 @@ class SendMessageToAdmin(object):
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
+        haikunator = Haikunator()
+        if user_data.get("anonim", None) == string_dict(bot)["yes"]:
+            user_data["user_full_name"] = "anonim_" + haikunator.haikunate()
+            user_data["chat_id"] = update.callback_query.message.chat_id
+        else:
+            user_data["user_full_name"] = update.callback_query.from_user.full_name
+            user_data["chat_id"] = update.callback_query.message.chat_id
         bot.send_message(update.callback_query.message.chat_id,
                          string_dict(bot)["send_message_5"],
                          reply_markup=final_reply_markup)
@@ -191,7 +205,7 @@ class SendMessageToAdmin(object):
             update.effective_user.first_name, bot.first_name, bot.id))
         if "_id" in user_data:
             user_data.pop("_id", None)
-        user_data["timestamp"] = datetime.datetime.now()
+        user_data["timestamp"] = datetime.datetime.now().replace(microsecond=0)
         user_data["message_id"] = update.callback_query.message.message_id
         user_data["bot_id"] = bot.id
         users_messages_to_admin_table.insert(user_data)
@@ -399,7 +413,7 @@ class AnswerToMessage(object):
 
     def received_message(self, bot, update, user_data):
         if update.message.text:
-            bot.send_message(user_data["chat_id"], update.message.text)
+            bot.send_message(user_data["chat_id"], string_dict(bot)["send_message_reply"] + update.message.text)
 
         elif update.message.photo:
             photo_file = update.message.photo[0].get_file().file_id
@@ -567,9 +581,25 @@ class SeeMessageToAdmin(object):
     def view_message(self, bot, update):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
+
         query = update.callback_query
         message = users_messages_to_admin_table.find_one({"bot_id": bot.id,
                                                           "message_id": int(query.data.replace("view_message_", ""))})
+        bot.send_message(update.callback_query.message.chat_id,
+                         "User's name: {}, \n Timestamp:{}".format(
+                             message["user_full_name"],
+                             message["timestamp"]
+                         ),
+                         reply_markup=InlineKeyboardMarkup(
+                             [[InlineKeyboardButton(text=string_dict(bot)["answer_button_str"],
+                                                    callback_data="answer_to_message_" +
+                                                                  str(message["message_id"]))],
+                              [InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
+                                                    callback_data="delete_message_" +
+                                                                  str(message["message_id"]))],
+
+                              ]
+                         ))
         for content_dict in message["content"]:
             if "text" in content_dict:
                 query.message.reply_text(text=content_dict["text"])
@@ -592,21 +622,7 @@ class SeeMessageToAdmin(object):
                 query.message.reply_animation(photo=content_dict["animation_file"])
             if "sticker_file" in content_dict:
                 query.message.reply_sticker(photo=content_dict["sticker_file"])
-        bot.send_message(update.callback_query.message.chat_id,
-                         "User's name: {}, \n Timestamp:{}".format(
-                             message["user_full_name"],
-                             message["timestamp"]
-                         ),
-                         reply_markup=InlineKeyboardMarkup(
-                             [[InlineKeyboardButton(text=string_dict(bot)["answer_button_str"],
-                                                    callback_data="answer_to_message_" +
-                                                                  str(message["message_id"]))],
-                              [InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
-                                                    callback_data="delete_message_" +
-                                                                  str(message["message_id"]))],
 
-                              ]
-                         ))
         bot.send_message(update.callback_query.message.chat_id,
                          string_dict(bot)["back_text"],
                          reply_markup=InlineKeyboardMarkup(
@@ -625,7 +641,8 @@ SEND_MESSAGE_TO_ADMIN_HANDLER = ConversationHandler(
 
     states={
         MESSAGE: [MessageHandler(Filters.all, SendMessageToAdmin().received_message, pass_user_data=True), ],
-        TOPIC: [MessageHandler(Filters.all, SendMessageToAdmin().send_topic, pass_user_data=True), ]
+        # TOPIC: [MessageHandler(Filters.all, SendMessageToAdmin().send_topic, pass_user_data=True), ]
+        SEND_ANONIM: [MessageHandler(Filters.all, SendMessageToAdmin().send_anonim, pass_user_data=True), ]
 
     },
 

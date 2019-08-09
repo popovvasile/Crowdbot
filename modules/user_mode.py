@@ -18,7 +18,7 @@ class UserMode(object):
     def turn_user_mode_on(self, bot, update):
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["menu_button"],
-                                             callback_data="help_module(user_mode)")])
+                                             callback_data="help_back")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
 
@@ -46,7 +46,7 @@ class UserMode(object):
     def turn_user_mode_off(self, bot, update):
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["menu_button"],
-                                             callback_data="help_module(user_mode)")])
+                                             callback_data="help_back")])  # must stay so, help_back
         reply_markup = InlineKeyboardMarkup(
             buttons)
 
