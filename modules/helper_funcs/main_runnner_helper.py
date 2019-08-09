@@ -130,7 +130,8 @@ def button_handler(bot: Bot, update: Update, user_data):
         )
         for content_dict in button_info["content"]:
             if "text" in content_dict:
-                user_data['to_delete'].append(query.message.reply_text(text=content_dict["text"]))
+                user_data['to_delete'].append(query.message.reply_text(text=content_dict["text"],
+                                                                       parse_mode='Markdown'))
             if "audio_file" in content_dict:
                 user_data['to_delete'].append(query.message.reply_audio(content_dict["audio_file"]))
             if "video_file" in content_dict:

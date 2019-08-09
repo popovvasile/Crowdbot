@@ -21,14 +21,14 @@ class ChangeBotLanguage(object):
     def send_message(self, bot, update):
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                             callback_data="cancel_edit_description")])
+                                             callback_data="help_module(menu_buttons)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
 
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(bot)["edit_button_str_1"], reply_markup=reply_markup) # TODO
+                         string_dict(bot)["edit_button_str_1"], reply_markup=reply_markup)  # TODO
         return MESSAGE
 
     def received_message(self, bot, update):
@@ -53,7 +53,7 @@ class EditBotDescription(object):
     def send_message(self, bot, update):
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                             callback_data="cancel_edit_description")])
+                                             callback_data="help_module(menu_buttons)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
 
@@ -91,10 +91,7 @@ EDIT_BOT_DESCRIPTION_HANDLER = ConversationHandler(
 
     fallbacks=[
         CallbackQueryHandler(callback=EditBotDescription().back,
-                             pattern=r"cancel_edit_description"),
-        CommandHandler('cancel', EditBotDescription().back),
-        MessageHandler(filters=Filters.command, callback=EditBotDescription().back),
-        CallbackQueryHandler(callback=EditBotDescription().back, pattern=r"error_back"),
+                             pattern=r"help_module"),
     ]
 )
 
@@ -104,14 +101,10 @@ CHANGE_BOT_LANGUAGE_HANDLER = ConversationHandler(
 
     states={
         MESSAGE: [MessageHandler(Filters.all, EditBotDescription().received_message)],
-
     },
 
     fallbacks=[
         CallbackQueryHandler(callback=EditBotDescription().back,
-                             pattern=r"cancel_edit_description"),
-        CommandHandler('cancel', EditBotDescription().back),
-        MessageHandler(filters=Filters.command, callback=EditBotDescription().back),
-        CallbackQueryHandler(callback=EditBotDescription().back, pattern=r"error_back"),
+                             pattern=r"help_module"),
     ]
 )

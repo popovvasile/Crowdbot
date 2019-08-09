@@ -35,7 +35,7 @@ class SurveyHandler(object):
         return "\n".join(facts).join(['\n', '\n'])
 
     def start(self, bot, update, user_data):
-        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_survey")]]
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(surveys)")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
         user_data["question_id"] = 0
@@ -46,7 +46,7 @@ class SurveyHandler(object):
         return CHOOSING_TITLE
 
     def handle_title(self, bot, update, user_data):
-        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_survey")]]
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(surveys)")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
         chat_id, txt = initiate_chat_id(update)
@@ -136,7 +136,7 @@ class SurveyHandler(object):
                              string_dict(bot)["survey_str_8"],
                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
             buttons = list()
-            buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_survey")])
+            buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(surveys)")])
             reply_markup = InlineKeyboardMarkup(
                 buttons)
             bot.send_message(update.callback_query.message.chat.id,
@@ -184,7 +184,7 @@ class SurveyHandler(object):
         return ConversationHandler.END
 
     def delete_surveys(self, bot, update):
-        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_survey")]]
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(surveys)")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
         surveys = surveys_table.find({"bot_id": bot.id})
@@ -233,7 +233,7 @@ class SurveyHandler(object):
         logger.warning('Update "%s" caused error "%s"', update, error)
 
     def handle_send_survey(self, bot, update):
-        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_survey")]]
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(surveys)")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -286,7 +286,7 @@ class SurveyHandler(object):
         logger.info("Admin {} on bot {}:{} sent a survey to the users:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, txt))
         create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                                callback_data="help_back")]]
+                                                callback_data="help_module(surveys)")]]
         create_markup = InlineKeyboardMarkup(create_buttons)
         bot.send_message(chat_id, string_dict(bot)["back_text"], reply_markup=create_markup)
         return ConversationHandler.END
@@ -310,9 +310,7 @@ DELETE_SURVEYS_HANDLER = ConversationHandler(
     },
 
     fallbacks=[
-        CallbackQueryHandler(callback=SurveyHandler().back, pattern=r"cancel_survey"),
-        MessageHandler(filters=Filters.command, callback=SurveyHandler().back),
-        CallbackQueryHandler(callback=SurveyHandler().back, pattern=r"error_back"),
+        CallbackQueryHandler(callback=SurveyHandler().back, pattern=r"help_module"),
     ]
 )
 
@@ -333,11 +331,9 @@ CREATE_SURVEY_HANDLER = ConversationHandler(
     },
 
     fallbacks=[
-        CallbackQueryHandler(callback=SurveyHandler().back, pattern=r"cancel_survey"),
+        CallbackQueryHandler(callback=SurveyHandler().back, pattern=r"help_module"),
 
         CallbackQueryHandler(callback=SurveyHandler().done, pattern=r"done_survey", pass_user_data=True),
-        MessageHandler(filters=Filters.command, callback=SurveyHandler().back),
-        CallbackQueryHandler(callback=SurveyHandler().back, pattern=r"error_back"),
 
     ]
 )
@@ -352,9 +348,7 @@ SEND_SURVEYS_HANDLER = ConversationHandler(
 
     },
     fallbacks=[
-        CallbackQueryHandler(callback=SurveyHandler().back, pattern=r"cancel_survey"),
-        MessageHandler(filters=Filters.command, callback=SurveyHandler().back),
-        CallbackQueryHandler(callback=SurveyHandler().back, pattern=r"error_back"),
+        CallbackQueryHandler(callback=SurveyHandler().back, pattern=r"help_module"),
     ]
 )
 
@@ -370,10 +364,6 @@ SHOW_SURVEYS_HANDLER = ConversationHandler(
     },
 
     fallbacks=[
-        CallbackQueryHandler(callback=SurveyHandler().back, pattern=r"cancel_survey"),
-        CommandHandler('cancel', SurveyHandler().back),
-        MessageHandler(filters=Filters.command, callback=SurveyHandler().back),
-        CallbackQueryHandler(callback=SurveyHandler().back, pattern=r"error_back"),
-
+        CallbackQueryHandler(callback=SurveyHandler().back, pattern=r"help_module"),
     ]
 )

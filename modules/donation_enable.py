@@ -64,7 +64,7 @@ class CreateDonationHandler(object):
         buttons = list()
         buttons.append(
             [InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                  callback_data="cancel_donation_create")])
+                                  callback_data="help_back")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
 
@@ -91,7 +91,7 @@ class CreateDonationHandler(object):
         buttons = list()
         buttons.append(
             [InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                  callback_data="cancel_donation_create")])
+                                  callback_data="help_back")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
         chat_id, txt = initiate_chat_id(update)
@@ -113,7 +113,7 @@ class CreateDonationHandler(object):
         buttons = list()
         buttons.append(
             [InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                  callback_data="cancel_donation_create")])
+                                  callback_data="help_back")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
         chat_id, txt = initiate_chat_id(update)
@@ -211,8 +211,8 @@ CREATE_DONATION_HANDLER = ConversationHandler(
                                          pass_user_data=True)],
     },
 
-    fallbacks=[CallbackQueryHandler(callback=CreateDonationHandler().back, pattern=r"cancel_donation_create"),
+    fallbacks=[CallbackQueryHandler(callback=CreateDonationHandler().back, pattern=r"help_back"),
+               CallbackQueryHandler(callback=CreateDonationHandler().back, pattern=r"help_module"),
                MessageHandler(filters=Filters.command, callback=CreateDonationHandler().back),
-               CallbackQueryHandler(callback=CreateDonationHandler().back, pattern=r"error_back"),
                ]
 )

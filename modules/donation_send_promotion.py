@@ -19,7 +19,7 @@ class SendDonationToUsers(object):
     def send_donation(self, bot, update):
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                             callback_data="cancel_send_donation")])
+                                             callback_data="help_module(donation_payment)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
 
@@ -75,7 +75,7 @@ class SendDonationToUsers(object):
             [[InlineKeyboardButton(text=string_dict(bot)["done_button"],
                                    callback_data="send_donation_finish")],
              [InlineKeyboardButton(text=string_dict(bot)["cancel_button"],
-                                   callback_data="send_donation_cancel")]
+                                   callback_data="help_module(donation_payment)k")]
              ]
         )
         bot.send_message(update.message.chat_id,
@@ -91,7 +91,7 @@ class SendDonationToUsers(object):
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["donate_button"],
                                              callback_data="pay_donation"),
                         InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                             callback_data="help_back")])
+                                             callback_data="help_module(donation_payment)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.send_message(update.callback_query.message.chat_id,
@@ -144,7 +144,8 @@ class SendDonationToUsers(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")])
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                             callback_data="help_module(donation_payment)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.send_message(update.callback_query.message.chat_id,
@@ -179,13 +180,8 @@ SEND_DONATION_TO_USERS_HANDLER = ConversationHandler(
 
     fallbacks=[CallbackQueryHandler(callback=SendDonationToUsers().send_donation_finish,
                                     pattern=r"send_donation_finish", pass_user_data=True),
-               CallbackQueryHandler(callback=SendDonationToUsers().back,
-                                    pattern=r"cancel_send_donation"),
                CallbackQueryHandler(callback=SendDonationToUsers().send_donation_cancel,
-                                    pattern="send_donation_cancel",
+                                    pattern="help_module",
                                     pass_user_data=True),
-               CommandHandler('cancel', SendDonationToUsers().cancel),
-               MessageHandler(filters=Filters.command, callback=SendDonationToUsers().cancel),
-               CallbackQueryHandler(callback=SendDonationToUsers().back, pattern=r"error_back"),
                ]
 )

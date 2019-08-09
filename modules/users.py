@@ -18,7 +18,7 @@ class AddUsersCategory(object):
     def add_category(self, bot, update):
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                             callback_data="cancel_send_user")])
+                                             callback_data="help_module(users)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -29,7 +29,8 @@ class AddUsersCategory(object):
         return TOPIC
 
     def add_category_finish(self, bot, update):
-        # TODO make it continues- add more than one category + ask if he wants to send teh message to teh users about that
+        # TODO make it continues- add more than one category +
+        #  ask if he wants to send teh message to teh users about that
         user_categories_table.update({"category": update.message.text},
                                      {"$set": {"category": update.message.text}},
                                      upsert=True)
@@ -184,9 +185,7 @@ ADD_USER_CATEGORY_HANDLER = ConversationHandler(
 
     fallbacks=[
         CallbackQueryHandler(callback=AddUsersCategory().back,
-                             pattern=r"cancel_send_user"),
-        CallbackQueryHandler(callback=AddUsersCategory().back, pattern=r"error_back"),
-
+                             pattern=r"help_module"),
     ]
 )
 SEND_USER_QUESTION_HANDLER = CallbackQueryHandler(pattern="send_user_category_question",

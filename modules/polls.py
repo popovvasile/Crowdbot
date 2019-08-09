@@ -66,7 +66,7 @@ class PollBot(object):
 
     def start(self, bot, update):
         """Send a message when the command /start is issued."""
-        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_poll")]]
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(polls)")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
 
@@ -85,7 +85,7 @@ class PollBot(object):
         return TYPING_TYPE
 
     def handle_type(self, bot, update, user_data):
-        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_poll")]]
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(polls)")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
         text = update.message.text
@@ -103,7 +103,7 @@ class PollBot(object):
             return TYPING_OPTION
 
     def handle_meta(self, bot, update, user_data):
-        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_poll")]]
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(polls)")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
 
@@ -120,7 +120,7 @@ class PollBot(object):
             return TYPING_OPTION
 
     def handle_option(self, bot, update, user_data):
-        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_poll")]]
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(polls)")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
         done_buttons = [[InlineKeyboardButton(text=string_dict(bot)["done_button"], callback_data="done_poll")]]
@@ -404,7 +404,7 @@ class PollBot(object):
     def handle_send_poll(self, bot, update):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_send_poll")]]
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(polls)")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
 
@@ -457,7 +457,7 @@ class PollBot(object):
 
     def handle_polls_results(self, bot, update):
         buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                         callback_data="cancel_results_poll")]]
+                                         callback_data="help_module(polls)")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
 
@@ -523,7 +523,7 @@ class PollBot(object):
         return ConversationHandler.END
 
     def handle_delete_poll(self, bot, update):
-        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_delete_poll")]]
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(polls)")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
 
@@ -594,9 +594,7 @@ DELETE_POLLS_HANDLER = ConversationHandler(
 
     },
     fallbacks=[
-        CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_delete_poll"),
-        CallbackQueryHandler(callback=PollBot().back, pattern=r"error_back"),
-
+        CallbackQueryHandler(callback=PollBot().back, pattern=r"help_module"),
     ]
 )
 
@@ -624,12 +622,8 @@ POLL_HANDLER = ConversationHandler(
                         ]
     },
     fallbacks=[
-        CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_poll"),
+        CallbackQueryHandler(callback=PollBot().back, pattern=r"help_module"),
         CallbackQueryHandler(callback=PollBot().handle_done, pattern=r"done_poll", pass_user_data=True),
-        CommandHandler('cancel', PollBot().cancel),
-        MessageHandler(filters=Filters.command, callback=PollBot().back),
-        CallbackQueryHandler(callback=PollBot().back, pattern=r"error_back"),
-
     ]
 )
 BUTTON_HANDLER = CallbackQueryHandler(PollBot().button, pattern='{"i":')
@@ -646,11 +640,7 @@ SEND_POLLS_HANDLER = ConversationHandler(
 
     },
     fallbacks=[
-        CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_send_poll"),
-        CommandHandler('cancel', PollBot().cancel),
-        MessageHandler(filters=Filters.command, callback=PollBot().back),
-        CallbackQueryHandler(callback=PollBot().back, pattern=r"error_back"),
-
+        CallbackQueryHandler(callback=PollBot().back, pattern=r"help_module"),
     ]
 )
 POLLS_RESULTS_HANDLER = ConversationHandler(
@@ -663,8 +653,7 @@ POLLS_RESULTS_HANDLER = ConversationHandler(
                                ],
 
     },
-    fallbacks=[CallbackQueryHandler(callback=PollBot().back, pattern=r"cancel_results_poll"),
-               CommandHandler('cancel', PollBot().back, pass_user_data=True),
-               CallbackQueryHandler(callback=PollBot().back, pattern=r"error_back"),
-               ]
+    fallbacks=[
+        CallbackQueryHandler(callback=PollBot().back, pattern=r"help_module"),
+    ]
 )

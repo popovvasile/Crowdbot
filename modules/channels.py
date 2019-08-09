@@ -133,7 +133,7 @@ class Channels(object):
 
     def send_wrong_format_message(self, bot, update, user_data, text: str = None):
         cancel_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(string_dict(bot)["cancel_button"],
-                                                                      callback_data='cancel_add')]])
+                                                                      callback_data='help_back')]])
         delete_messages(bot, user_data, update)
         user_data['to_delete'].append(
             bot.send_message(update.message.chat_id, string_dict(bot)["wrong_channel_link_format"]
@@ -229,7 +229,7 @@ class Channels(object):
     # 'Add Channels' button
     def add_channel(self, bot, update, user_data):
         cancel_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(string_dict(bot)["cancel_button"],
-                                                                      callback_data='cancel_add')]])
+                                                                      callback_data='help_back')]])
         delete_messages(bot, user_data, update)
         user_data['to_delete'].append(
             bot.send_message(update.callback_query.message.chat_id, string_dict(bot)["channels_str_4"],
@@ -260,6 +260,7 @@ class Channels(object):
             return ConversationHandler.END
         else:
             return ADD_CHANNEL
+
     @staticmethod
     def error(bot, update, error):
         """Log Errors caused by Updates."""
@@ -277,7 +278,7 @@ class SendPost(object):
         # bot.delete_message(chat_id=update.callback_query.message.chat_id,
         #                    message_id=update.callback_query.message.message_id)
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_send_post")])
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
         channel_username = update.callback_query.data.replace("channel_write_post", "")
@@ -329,7 +330,7 @@ class SendPost(object):
 
         final_reply_markup = InlineKeyboardMarkup(
             [[InlineKeyboardButton(text=string_dict(bot)["done_button"], callback_data="send_post_finish")],
-             [InlineKeyboardButton(text="Cancel", callback_data="send_post_cancel")]]
+             [InlineKeyboardButton(text="Cancel", callback_data="help_back")]]
         )
         user_data['to_delete'].append(
             bot.send_message(update.message.chat_id,
@@ -369,7 +370,7 @@ class SendPost(object):
         user_data.clear()
         return ConversationHandler.END
 
-    def send_post_cancel(self, bot, update, user_data):
+    def help_back(self, bot, update, user_data):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         buttons = list()
@@ -402,9 +403,9 @@ MY_CHANNELS_HANDLER = ConversationHandler(
     states={
         MY_CHANNELS: [RegexHandler(r"@", Channels().channel)]
     },
-    fallbacks=[CallbackQueryHandler(callback=Channels().back, pattern=r"cancel_my_channels", pass_user_data=True),
+    fallbacks=[CallbackQueryHandler(callback=Channels().back, pattern=r"help_back", pass_user_data=True),
+               CallbackQueryHandler(callback=Channels().back, pattern=r'help_module', pass_user_data=True),
                RegexHandler('^Back$', Channels().back, pass_user_data=True),
-               CallbackQueryHandler(callback=SendPost().back, pattern=r"error_back"),
                ]
 )
 
@@ -413,8 +414,9 @@ ADD_CHANNEL_HANDLER = ConversationHandler(
     states={
         ADD_CHANNEL: [MessageHandler(Filters.text, callback=Channels().confirm_add, pass_user_data=True)]
     },
-    fallbacks=[CallbackQueryHandler(callback=Channels().back, pattern=r'cancel_add', pass_user_data=True),
-               CallbackQueryHandler(callback=SendPost().back, pattern=r"error_back"),
+    fallbacks=[CallbackQueryHandler(callback=Channels().back, pattern=r'help_back', pass_user_data=True),
+               CallbackQueryHandler(callback=Channels().back, pattern=r'help_module', pass_user_data=True),
+
                ]
 )
 
@@ -427,14 +429,11 @@ SEND_POST_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(SendPost().send_message, pattern=r"channel_write_post", pass_user_data=True)],
     states={
 
-        MESSAGE_TO_USERS: [MessageHandler(Filters.all, SendPost().received_message, pass_user_data=True),
-                           CallbackQueryHandler(callback=SendPost().back, pattern=r"cancel_send_post",
-                                                pass_user_data=True)]
+        MESSAGE_TO_USERS: [MessageHandler(Filters.all, SendPost().received_message, pass_user_data=True)]
     },
     fallbacks=[CallbackQueryHandler(callback=SendPost().send_post_finish,
                                     pattern=r"send_post_finish", pass_user_data=True),
-               CallbackQueryHandler(callback=SendPost.send_post_cancel, pattern=r"send_post_cancel",
-                                    pass_user_data=True),
-               CallbackQueryHandler(callback=SendPost().back, pattern=r"error_back"),
+               CallbackQueryHandler(callback=SendPost.help_back, pattern=r'help_back', pass_user_data=True),
+               CallbackQueryHandler(callback=SendPost.help_back, pattern=r'help_module', pass_user_data=True),
                ]
 )

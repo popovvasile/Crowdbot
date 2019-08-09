@@ -42,7 +42,7 @@ class DonationBot(object):
                              text=string_dict(bot)["back_text"],
                              reply_markup=InlineKeyboardMarkup(
                                  [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                                        callback_data="cancel_donation_payment")]]))
+                                                        callback_data="help_back")]]))
             return EXECUTE_DONATION
 
         else:
@@ -57,7 +57,7 @@ class DonationBot(object):
                     admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["allow_donations_button"],
                                                            callback_data="allow_donation"),
                                       InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                                           callback_data="help_module(donation_payment)")]
+                                                           callback_data="help_back")]
                     bot.send_message(update.callback_query.message.chat.id,
                                      string_dict(bot)["allow_donation_text"],
                                      reply_markup=InlineKeyboardMarkup([admin_keyboard]))
@@ -89,7 +89,7 @@ class DonationBot(object):
     def execute_donation(self, bot, update, user_data):
         query = update.callback_query
         if query:
-            if query.data == "help_back" or query.data == "help_module(donation_payment)":
+            if query.data == "help_back" or query.data == "help_back":
                 return ConversationHandler.END
 
         chat_id, txt = initiate_chat_id(update)
@@ -100,7 +100,7 @@ class DonationBot(object):
             update.message.reply_text(text=string_dict(bot)["pay_donation_str_5"],
                                       reply_markup=InlineKeyboardMarkup(
                                           [[InlineKeyboardButton(text=string_dict(bot)["menu_button"],
-                                                                 callback_data="cancel_donation_payment")]]))
+                                                                 callback_data="help_back")]]))
             return EXECUTE_DONATION
         donation_request = chatbots_table.find_one({"bot_id": bot.id})["donate"]
         title = donation_request['title']
@@ -125,7 +125,7 @@ class DonationBot(object):
     def precheckout_callback(self, bot, update):
         # query = update.callback_query
         # if query:
-        #     if query.data == "help_module(donation_payment)":
+        #     if query.data == "help_back":
         #         return ConversationHandler.END
         query = update.pre_checkout_query
 
@@ -173,7 +173,7 @@ DONATE_HANDLER = ConversationHandler(
         # DONATION_MESSAGE: [MessageHandler(callback=DonationBot().donation_message,
         #                                   filters=Filters.text,
         #                                   pass_user_data=True),
-        #                    CallbackQueryHandler(callback=DonationBot().back, pattern=r"cancel_donation_payment"),
+        #                    CallbackQueryHandler(callback=DonationBot().back, pattern=r"help_back"),
         #                    CommandHandler('cancel', DonationBot().cancel)
         #                    ],
         EXECUTE_DONATION: [MessageHandler(callback=DonationBot().execute_donation,
@@ -183,13 +183,13 @@ DONATE_HANDLER = ConversationHandler(
 
     },
     fallbacks=[CallbackQueryHandler(callback=DonationBot().back,
-                                    pattern=r"cancel_donation_payment", pass_user_data=True),
+                                    pattern=r"help_back", pass_user_data=True),
+               CallbackQueryHandler(callback=DonationBot().back,
+                                    pattern=r"help_module", pass_user_data=True),
                MessageHandler(Filters.successful_payment,
                               DonationBot().successful_payment_callback,
                               pass_user_data=True),
                MessageHandler(filters=Filters.command, callback=DonationBot().back, pass_user_data=True),
-               CommandHandler('cancel', DonationBot().cancel),
-               CallbackQueryHandler(callback=DonationBot().back, pattern=r"error_back"),
 
                ])
 

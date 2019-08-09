@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, Filters, RegexHandler, \
     CallbackQueryHandler
 from telegram.ext.dispatcher import run_async
 
 from database import users_table
 from modules.helper_funcs.auth import initiate_chat_id
+from modules.helper_funcs.lang_strings.strings import string_dict
 from modules.helper_funcs.main_runnner_helper import get_help
 
 TYPING_PASS = 1
@@ -36,6 +38,11 @@ class AdminAuthentication(object):
         used_password = txt
         used_email = user_data["email"]
         user = users_table.find_one({'bot_id': bot.id, "email": used_email})
+        buttons = list()
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                             callback_data="help_back")])
+        reply_markup = InlineKeyboardMarkup(
+            buttons)
         if "superuser" in user:
             superuser = user["superuser"]
         else:
@@ -58,11 +65,14 @@ class AdminAuthentication(object):
 
             return ConversationHandler.END
         elif used_password is None:
-            bot.send_message(chat_id, "No password provided. Please send a  valid password or click /cancel")
+
+            bot.send_message(chat_id, "No password provided. Please send a  valid password or click Back",
+                             reply_markup=reply_markup)
             return TYPING_PASS
 
         else:
-            bot.send_message(chat_id, "Wrong password. Please send a  valid password or click /cancel")
+            bot.send_message(chat_id, "Wrong password. Please send a  valid password or click Back",
+                             reply_markup=reply_markup)
             return TYPING_PASS
 
     def cancel(self, bot, update):
@@ -80,8 +90,8 @@ class AdminAuthentication(object):
 ADMIN_AUTHENTICATION_HANDLER = ConversationHandler(
     entry_points=[
         RegexHandler(r"^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$",
-                               AdminAuthentication().handle_email, pass_user_data=True),
-                  ],
+                     AdminAuthentication().handle_email, pass_user_data=True),
+    ],
 
     states={
         TYPING_PASS: [MessageHandler(Filters.text,
@@ -89,8 +99,7 @@ ADMIN_AUTHENTICATION_HANDLER = ConversationHandler(
                                      pass_user_data=True)],
     },
 
-    fallbacks=[CommandHandler('cancel', AdminAuthentication().cancel),
-               MessageHandler(filters=Filters.command, callback=AdminAuthentication().cancel),
-               CallbackQueryHandler(callback=AdminAuthentication().back, pattern=r"error_back"),
-               ]
+    fallbacks=[
+        CallbackQueryHandler(callback=AdminAuthentication().back, pattern=r"help_back"),
+    ]
 )

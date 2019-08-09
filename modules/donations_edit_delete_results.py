@@ -39,7 +39,6 @@ def check_provider_token(provider_token, bot, update):
     return json.loads(data.content)["ok"]
 
 
-
 class EditPaymentHandler(object):
 
     @staticmethod
@@ -61,7 +60,7 @@ class EditPaymentHandler(object):
                              string_dict(bot)["donations_edit_str_2"],
                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
             create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                                    callback_data="cancel_donation_edit")]]
+                                                    callback_data="help_module(donation_payment)")]]
             create_markup = InlineKeyboardMarkup(create_buttons)
             bot.send_message(update.callback_query.message.chat.id, string_dict(bot)["back_text"],
                              reply_markup=create_markup)
@@ -88,7 +87,7 @@ class EditPaymentHandler(object):
                 string_dict(bot)["donations_edit_str_5"],
                 reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
             create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                                    callback_data="cancel_donation_edit")]]
+                                                    callback_data="help_module(donation_payment)")]]
             create_markup = InlineKeyboardMarkup(create_buttons)
             bot.send_message(chat_id, string_dict(bot)["back_text"],
                              reply_markup=create_markup)
@@ -102,7 +101,7 @@ class EditPaymentHandler(object):
             bot.send_message(chat_id, string_dict(bot)["donations_edit_str_6"],
                              reply_markup=ReplyKeyboardMarkup(keyboard_markup))
             create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                                    callback_data="cancel_donation_edit")]]
+                                                    callback_data="help_module(donation_payment)")]]
             create_markup = InlineKeyboardMarkup(create_buttons)
             bot.send_message(chat_id, string_dict(bot)["back_text"],
                              reply_markup=create_markup)
@@ -112,7 +111,7 @@ class EditPaymentHandler(object):
     def handle_edit_action_finish(self, bot, update, user_data):
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                             callback_data="cancel_donation_edit")])
+                                             callback_data="help_module(donation_payment)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
 
@@ -154,10 +153,7 @@ class EditPaymentHandler(object):
                                                     callback_data="help_module(donation_payment)")])
         finish_markup = InlineKeyboardMarkup(
             finish_buttons)
-        buttons = []
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                             callback_data="cancel_donation_edit")])
-        reply_markup = InlineKeyboardMarkup(buttons)
+
         chat_id, txt = initiate_chat_id(update)
         if user_data["action"] == string_dict(bot)["title_button"]:
             user_data['title'] = txt
@@ -172,7 +168,7 @@ class EditPaymentHandler(object):
                 chatbot["donate"]["payment_token"] = txt
                 chatbots_table.update_one({"bot_id": bot.id}, {'$set': chatbot}, upsert=True)
                 update.message.reply_text(string_dict(bot)["donations_edit_str_13"],
-                                          reply_markup=reply_markup)
+                                          reply_markup=finish_markup)
 
                 logger.info("Admin {} on bot {}:{} did  the following edit on donation: {}".format(
                     update.effective_user.first_name, bot.first_name, bot.id, user_data["action"]))
@@ -180,7 +176,7 @@ class EditPaymentHandler(object):
             else:
                 update.message.reply_text(
                     string_dict(bot)["donations_edit_str_14"],
-                    reply_markup=reply_markup)
+                    reply_markup=finish_markup)
 
                 return TYPING_TOKEN
 
@@ -229,7 +225,7 @@ class EditPaymentHandler(object):
     # def change_donation_token(self, bot, update, user_data):
     #     buttons = list()
     #     buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
-    #                                          callback_data="cancel_donation_edit")])
+    #                                          callback_data="help_back")])
     #     reply_markup = InlineKeyboardMarkup(
     #         buttons)
     #     update.message.reply_text(
@@ -240,7 +236,7 @@ class EditPaymentHandler(object):
     def change_donation_token_finish(self, bot, update, user_data):
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                             callback_data="cancel_donation_edit")])
+                                             callback_data="help_module(donation_payment)")])
         reply_markup = InlineKeyboardMarkup(buttons)
         chat_id, txt = initiate_chat_id(update)
         if check_provider_token(provider_token=txt, bot=bot, update=update):
@@ -316,9 +312,8 @@ EDIT_DONATION_HANDLER = ConversationHandler(
     },
 
     fallbacks=[
-        CommandHandler('cancel', EditPaymentHandler().cancel),
-        CallbackQueryHandler(callback=EditPaymentHandler().back, pattern=r"cancel_donation_edit"),
-        MessageHandler(filters=Filters.command, callback=EditPaymentHandler().back),
-        CallbackQueryHandler(callback=EditPaymentHandler().back, pattern=r"error_back"),
+        CallbackQueryHandler(callback=EditPaymentHandler().back, pattern=r"help_back"),
+        CallbackQueryHandler(callback=EditPaymentHandler().back, pattern=r"help_module"),
+
     ]
 )

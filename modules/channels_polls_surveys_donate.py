@@ -51,7 +51,7 @@ class SendPoll(object):
             create_buttons)
         back_keyboard = \
             InlineKeyboardMarkup([[InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                                        callback_data="cancel_send_poll")]])
+                                                        callback_data="help_back")]])
 
         polls_list_of_dicts = polls_table.find({"bot_id": bot.id})
         if polls_list_of_dicts.count() == 0:
@@ -135,7 +135,7 @@ class SendSurvey(object):
         else:
             channel_username = update.message.text
             update_data = update
-        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="cancel_survey")]]
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.delete_message(update_data.message.chat.id, update_data.message.message_id)
@@ -224,7 +224,7 @@ class SendDonationToChannel(object):
             user_data["channel_username"] = channel_username
             buttons = list()
             buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                                 callback_data="cancel_send_donation")])
+                                                 callback_data="help_back")])
             reply_markup = InlineKeyboardMarkup(
                 buttons)
 
@@ -358,9 +358,9 @@ SEND_POLL_TO_CHANNEL_HANDLER = ConversationHandler(
         CHOOSE_CHANNEL_TO_SEND_POLL: [
             MessageHandler(Filters.text, SendPoll().handle_send_poll, pass_user_data=True), ],
     },
-    fallbacks=[CallbackQueryHandler(callback=SendPoll().back, pattern=r"cancel_send_poll"),
+    fallbacks=[CallbackQueryHandler(callback=SendPoll().back, pattern=r"help_back"),
+               CallbackQueryHandler(callback=SendPoll().back, pattern=r"help_module"),
                RegexHandler('^Back$', SendPoll().back),
-               CallbackQueryHandler(callback=SendPoll().back, pattern=r"error_back"),
                ]
 )
 
@@ -374,9 +374,9 @@ SEND_SURVEY_TO_CHANNEL_HANDLER = ConversationHandler(
         CHOOSE_SURVEY_TO_SEND: [MessageHandler(Filters.text, SendSurvey().handle_send_title, pass_user_data=True),
                                 ]
     },
-    fallbacks=[CallbackQueryHandler(callback=SendSurvey().back, pattern=r"cancel_survey"),
+    fallbacks=[CallbackQueryHandler(callback=SendSurvey().back, pattern=r"help_back"),
+               CallbackQueryHandler(callback=SendSurvey().back, pattern=r"help_module"),
                RegexHandler('^Back$', SendSurvey().back),
-               CallbackQueryHandler(callback=SendPoll().back, pattern=r"error_back"),
                ]
 )
 SEND_DONATION_TO_CHANNEL_HANDLER = ConversationHandler(
@@ -397,9 +397,8 @@ SEND_DONATION_TO_CHANNEL_HANDLER = ConversationHandler(
 
     fallbacks=[CallbackQueryHandler(callback=SendDonationToChannel().send_donation_finish,
                                     pattern=r"send_donation_finish", pass_user_data=True),
-               CallbackQueryHandler(callback=SendDonationToChannel().back,
-                                    pattern=r"cancel_send_donation"),
-               MessageHandler(filters=Filters.command, callback=SendDonationToChannel().cancel),
-               CallbackQueryHandler(callback=SendDonationToChannel().back, pattern=r"error_back"),
+               CallbackQueryHandler(callback=SendDonationToChannel().back, pattern=r"help_back"),
+               CallbackQueryHandler(callback=SendDonationToChannel().back, pattern=r"help_module"),
+
                ]
 )

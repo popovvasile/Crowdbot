@@ -120,8 +120,8 @@ def main(token):
 
     dispatcher.add_handler(help_callback_handler)
 
-    error_help_callback_handler = CallbackQueryHandler(get_help, pattern=r"error_back")
-    dispatcher.add_handler(error_help_callback_handler)
+    # error_help_callback_handler = CallbackQueryHandler(get_help, pattern=r"error_back")
+    # dispatcher.add_handler(error_help_callback_handler)
 
     LOGGER.info("Using long polling.")
     # updater.start_webhook(listen='0.0.0.0',

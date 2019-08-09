@@ -28,8 +28,9 @@ class ButtonEdit(object):
             user_data["to_delete"].append(bot.send_message(chat_id=update.callback_query.message.chat_id,
                                                            text=string_dict(bot)["manage_button_str_1"],
                                                            reply_markup=ReplyKeyboardMarkup(
-                                                               [[button_name["button"]] for button_name in all_buttons])
-                                                           ))
+                                                               [[button_name["button"]] for button_name in all_buttons]
+                                                           ),
+                                                           parse_mode='Markdown'))
             return CHOOSE_BUTTON
         else:
             user_data["to_delete"].append(bot.send_message(chat_id=update.callback_query.message.chat_id,
@@ -38,10 +39,10 @@ class ButtonEdit(object):
                                                                [[InlineKeyboardButton(
                                                                    string_dict(bot)["create_button_button"],
                                                                    callback_data="create_button"),
-                                                                 InlineKeyboardButton(
-                                                                     string_dict(bot)["back_button"],
-                                                                     callback_data="help_module(menu_buttons)")]]
-                                                           )))
+                                                                   InlineKeyboardButton(
+                                                                       string_dict(bot)["back_button"],
+                                                                       callback_data="help_module(menu_buttons)")]]
+                                                           ), parse_mode='Markdown'))
             return ConversationHandler.END
 
     def choose_button(self, bot, update, user_data):
@@ -61,8 +62,8 @@ class ButtonEdit(object):
                             InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
                                                  callback_data="d_{}___{}".format(content["text"][:10],
                                                                                   update.message.text))
-                        ]])
-                    ))
+                        ]]),
+                        parse_mode='Markdown'))
                 if "audio_file" in content:
                     user_data["to_delete"].append(update.message.reply_audio(
                         content["audio_file"],
@@ -168,16 +169,17 @@ class ButtonEdit(object):
                 pass
             else:
                 LOGGER.exception("Exception in edit buttons")
-        user_data["to_delete"].append(bot.send_message(chat_id=update.message.chat_id,
+        user_data["to_delete"].append(bot.send_message(parse_mode='Markdown',
+                                                       chat_id=update.message.chat_id,
                                                        text=string_dict(bot)["manage_button_str_3"],
                                                        reply_markup=ReplyKeyboardRemove()))
-        user_data["to_delete"].append(bot.send_message(chat_id=update.message.chat_id,
+        user_data["to_delete"].append(bot.send_message(parse_mode='Markdown', chat_id=update.message.chat_id,
                                                        text=string_dict(bot)["add_button_content"],
                                                        reply_markup=InlineKeyboardMarkup(
                                                            [[InlineKeyboardButton(text=string_dict(bot)["add_button"],
                                                                                   callback_data="add_content{}".format(
                                                                                       update.message.text))]])))
-        user_data["to_delete"].append(bot.send_message(chat_id=update.message.chat_id,
+        user_data["to_delete"].append(bot.send_message(parse_mode='Markdown', chat_id=update.message.chat_id,
                                                        text=string_dict(bot)["back_text"],
                                                        reply_markup=InlineKeyboardMarkup(
                                                            [[
@@ -188,7 +190,7 @@ class ButtonEdit(object):
 
     def edit_button(self, bot, update, user_data):
         reply_buttons = [
-            [InlineKeyboardButton(text=string_dict(bot)["cancel_button"], callback_data="cancel_edit_button")]]
+            [InlineKeyboardButton(text=string_dict(bot)["cancel_button"], callback_data="help_module(menu_buttons)")]]
         reply_markup = InlineKeyboardMarkup(
             reply_buttons)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -196,9 +198,10 @@ class ButtonEdit(object):
         content_data = update.callback_query.data.replace("b_", "").split("___")  # here is the problem
         user_data["content_id"] = content_data[0]
         user_data["button"] = content_data[1]
-        user_data["to_delete"].append(bot.send_message(chat_id=update.callback_query.message.chat_id,
-                         text=string_dict(bot)["manage_button_str_4"],
-                         reply_markup=reply_markup))
+        user_data["to_delete"].append(
+            bot.send_message(parse_mode='Markdown', chat_id=update.callback_query.message.chat_id,
+                             text=string_dict(bot)["manage_button_str_4"],
+                             reply_markup=reply_markup))
         return EDIT_FINISH
 
     def edit_button_finish(self, bot, update, user_data):
@@ -250,7 +253,7 @@ class ButtonEdit(object):
         )
         buttons = [
             [InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(menu_buttons)")]]
-        bot.send_message(chat_id=update.message.chat_id,
+        bot.send_message(parse_mode='Markdown', chat_id=update.message.chat_id,
                          text=string_dict(bot)["manage_button_str_5"],
                          reply_markup=InlineKeyboardMarkup(buttons))
         logger.info("Admin {} on bot {}:{} did  the following edit button: {}".format(
@@ -267,7 +270,8 @@ class ButtonEdit(object):
 
     def back(self, bot, update, user_data):
         bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(bot)["manage_button_str_6"], reply_markup=ReplyKeyboardRemove()
+                         string_dict(bot)["manage_button_str_6"], reply_markup=ReplyKeyboardRemove(),
+                         parse_mode='Markdown'
                          )
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
@@ -279,7 +283,7 @@ class ButtonEdit(object):
         bot.delete_message(chat_id=update.message.chat_id,
                            message_id=update.message.message_id)
         bot.send_message(update.message.chat.id,
-                         "Command is cancelled", reply_markup=ReplyKeyboardRemove()
+                         "Command is cancelled", reply_markup=ReplyKeyboardRemove(), parse_mode='Markdown'
                          )
 
         get_help(bot, update)
@@ -289,14 +293,14 @@ class ButtonEdit(object):
 class AddButtonContent(object):
     def add_content_button(self, bot, update, user_data):
         reply_buttons = [
-            [InlineKeyboardButton(text=string_dict(bot)["cancel_button"], callback_data="cancel_edit_button")]]
+            [InlineKeyboardButton(text=string_dict(bot)["cancel_button"], callback_data="help_module(menu_buttons)")]]
         reply_markup = InlineKeyboardMarkup(
             reply_buttons)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         content_data = update.callback_query.data.replace("add_content", "")  # here is the problem
         user_data["button"] = content_data
-        bot.send_message(chat_id=update.callback_query.message.chat_id,
+        bot.send_message(parse_mode='Markdown', chat_id=update.callback_query.message.chat_id,
                          text=string_dict(bot)["manage_button_str_4"],
                          reply_markup=reply_markup)
         return EDIT_FINISH
@@ -344,7 +348,7 @@ class AddButtonContent(object):
         )
         buttons = [
             [InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(menu_buttons)")]]
-        bot.send_message(chat_id=update.message.chat_id,
+        bot.send_message(parse_mode='Markdown', chat_id=update.message.chat_id,
                          text=string_dict(bot)["manage_button_str_5"],
                          reply_markup=InlineKeyboardMarkup(buttons))
         logger.info("Admin {} on bot {}:{} did  the following edit button: {}".format(
@@ -411,17 +415,12 @@ BUTTON_EDIT_HANDLER = ConversationHandler(
 
     states={
         CHOOSE_BUTTON: [MessageHandler(Filters.text, ButtonEdit().choose_button, pass_user_data=True),
-                        CallbackQueryHandler(callback=ButtonEdit().back,
-                                             pattern=r"cancel_edit_button", pass_user_data=True),
                         ],
     },
 
     fallbacks=[
         CallbackQueryHandler(callback=ButtonEdit().back,
-                             pattern=r"cancel_edit_button", pass_user_data=True),
-        CallbackQueryHandler(callback=ButtonEdit().back, pattern=r"error_back", pass_user_data=True),
-        CommandHandler('cancel', ButtonEdit().cancel),
-        MessageHandler(filters=Filters.command, callback=ButtonEdit().cancel)
+                             pattern=r"help_module", pass_user_data=True),
     ]
 )
 
@@ -433,17 +432,13 @@ BUTTON_EDIT_FINISH_HANDLER = ConversationHandler(
 
         EDIT_FINISH: [MessageHandler(Filters.all, ButtonEdit().edit_button_finish, pass_user_data=True),
                       CallbackQueryHandler(callback=ButtonEdit().back,
-                                           pattern=r"cancel_edit_button", pass_user_data=True),
+                                           pattern=r"help_module", pass_user_data=True),
                       ],
     },
 
     fallbacks=[
         CallbackQueryHandler(callback=ButtonEdit().back,
-                             pattern=r"cancel_edit_button", pass_user_data=True),
-        CallbackQueryHandler(callback=ButtonEdit().back, pattern=r"error_back", pass_user_data=True),
-        CommandHandler('cancel', ButtonEdit().cancel),
-        MessageHandler(filters=Filters.command, callback=ButtonEdit().cancel),
-
+                             pattern=r"help_module", pass_user_data=True)
     ]
 )
 BUTTON_ADD_FINISH_HANDLER = ConversationHandler(
@@ -453,22 +448,15 @@ BUTTON_ADD_FINISH_HANDLER = ConversationHandler(
     states={
 
         EDIT_FINISH: [MessageHandler(Filters.all, AddButtonContent().add_content_button_finish, pass_user_data=True),
-                      CallbackQueryHandler(callback=ButtonEdit().back,
-                                           pattern=r"cancel_edit_button", pass_user_data=True),
                       ],
     },
 
     fallbacks=[
         CallbackQueryHandler(callback=ButtonEdit().back,
-                             pattern=r"cancel_edit_button", pass_user_data=True),
-        CallbackQueryHandler(callback=ButtonEdit().back, pattern=r"error_back", pass_user_data=True),
-        CommandHandler('cancel', ButtonEdit().cancel),
-        MessageHandler(filters=Filters.command, callback=ButtonEdit().cancel),
-
+                             pattern=r"help_module", pass_user_data=True),
     ]
 )
 DELETE_CONTENT_HANDLER = CallbackQueryHandler(pattern="d_",
                                               callback=DeleteButtonContent().delete_message, pass_user_data=True)
 back_from_edit_button_handler = CallbackQueryHandler(callback=ButtonEdit().back_from_edit_button,
                                                      pattern="back_from_edit_button", pass_user_data=True)
-

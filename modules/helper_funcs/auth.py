@@ -21,8 +21,8 @@ def register_chat(bot, update):
                            {'bot_id': bot.id,
                             "chat_id": chat_id,
                             "user_id": user_id,
-                            "username": update.message.from_user.username,
-                            "full_name": update.message.from_user.full_name,
+                            "username": update.effective_user.username,
+                            "full_name": update.effective_user.full_name,
                             'registered': True,
                             "is_admin": True,
                             "tags": ["#all", "#user", "#admin"]

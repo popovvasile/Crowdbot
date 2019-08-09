@@ -44,7 +44,7 @@ class AnswerSurveys(object):
 
     def start_answering(self, bot, update, user_data):
         buttons = [[InlineKeyboardButton(text=string_dict(bot)["cancel_button_survey"],
-                                         callback_data="cancel_survey_answering")]]
+                                         callback_data="help_back")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -73,7 +73,7 @@ class AnswerSurveys(object):
 
     def received_information(self, bot, update, user_data):
         buttons = [[InlineKeyboardButton(text=string_dict(bot)["cancel_button_survey"],
-                                         callback_data="cancel_survey_answering")]]
+                                         callback_data="help_back")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
         user_data["question_id"] += 1
@@ -156,10 +156,6 @@ ANSWER_SURVEY_HANDLER = ConversationHandler(
     },
 
     fallbacks=[
-        CallbackQueryHandler(AnswerSurveys().back, pattern=r"cancel_survey_answering"),
-        CallbackQueryHandler(callback=AnswerSurveys().back, pattern=r"error_back"),
-        CommandHandler('done', AnswerSurveys().back),
-        CommandHandler('cancel', AnswerSurveys().back),
-        MessageHandler(filters=Filters.command, callback=AnswerSurveys().back),
+        CallbackQueryHandler(AnswerSurveys().back, pattern=r"help_back"),
     ]
 )

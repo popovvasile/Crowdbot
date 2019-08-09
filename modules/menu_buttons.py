@@ -25,7 +25,7 @@ class AddCommands(object):
     def start(self, bot, update, user_data):
         user_data["to_delete"] = []
         reply_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                               callback_data="cancel_add_button")]]
+                                               callback_data="help_module(menu_buttons)")]]
         reply_markup = InlineKeyboardMarkup(
             reply_buttons)
 
@@ -51,7 +51,7 @@ class AddCommands(object):
     def button_handler(self, bot, update, user_data):
         user_data["to_delete"].append(update.message)
         reply_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                               callback_data="cancel_add_button")]]
+                                               callback_data="help_module(menu_buttons)")]]
         reply_markup = InlineKeyboardMarkup(
             reply_buttons)
         chat_id, txt = initiate_chat_id(update)
@@ -75,7 +75,7 @@ class AddCommands(object):
     def description_handler(self, bot, update, user_data):
         user_data["to_delete"].append(update.message)
         reply_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                               callback_data="cancel_add_button")]]
+                                               callback_data="help_module(menu_buttons)")]]
         reply_markup = InlineKeyboardMarkup(
             reply_buttons)
         if "content" not in user_data:
@@ -143,7 +143,7 @@ class AddCommands(object):
         user_data.pop('to_delete', None)
         custom_buttons_table.save(user_data)
         reply_buttons = [
-            [InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]]
+            [InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(menu_buttons)")]]
         reply_markup = InlineKeyboardMarkup(
             reply_buttons)
         bot.send_message(update.callback_query.message.chat.id,
@@ -156,7 +156,7 @@ class AddCommands(object):
 
     def delete_button(self, bot, update):
         finish_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                                callback_data="cancel_delete_button")]]
+                                                callback_data="help_module(menu_buttons)")]]
         finish_markup = InlineKeyboardMarkup(
             finish_buttons)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -240,9 +240,7 @@ BUTTON_ADD_HANDLER = ConversationHandler(
         CallbackQueryHandler(callback=AddCommands().description_finish, pattern=r"DONE", pass_user_data=True),
 
         CallbackQueryHandler(callback=AddCommands().back,
-                             pattern=r"cancel_add_button", pass_user_data=True),
-        CommandHandler('cancel', AddCommands().back),
-        MessageHandler(filters=Filters.command, callback=AddCommands().back)
+                             pattern=r"help_module", pass_user_data=True),
     ]
 )
 DELETE_BUTTON_HANDLER = ConversationHandler(
@@ -258,10 +256,7 @@ DELETE_BUTTON_HANDLER = ConversationHandler(
     },
 
     fallbacks=[CallbackQueryHandler(callback=AddCommands().back,
-                                    pattern=r"cancel_delete_button", pass_user_data=True),
-               CommandHandler('cancel', AddCommands().back),
-               MessageHandler(filters=Filters.command, callback=AddCommands().back),
-               CallbackQueryHandler(callback=AddCommands().back, pattern=r"error_back"),
+                                    pattern=r"help_module", pass_user_data=True),
                ]
 )
 
