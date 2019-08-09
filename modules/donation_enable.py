@@ -64,7 +64,8 @@ class CreateDonationHandler(object):
         buttons = list()
         buttons.append(
             [InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                  callback_data="help_back")])
+                                  callback_data=""
+                                                "help_module(donation_payment)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
 
@@ -91,7 +92,7 @@ class CreateDonationHandler(object):
         buttons = list()
         buttons.append(
             [InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                  callback_data="help_back")])
+                                  callback_data="help_module(donation_payment)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
         chat_id, txt = initiate_chat_id(update)
@@ -113,7 +114,7 @@ class CreateDonationHandler(object):
         buttons = list()
         buttons.append(
             [InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                  callback_data="help_back")])
+                                  callback_data="help_module(donation_payment)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
         chat_id, txt = initiate_chat_id(update)
