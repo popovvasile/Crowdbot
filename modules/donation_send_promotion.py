@@ -139,6 +139,7 @@ class SendDonationToUsers(object):
                 bot.send_message(chat["chat_id"],
                                  text=string_dict(bot)["donate_button"],
                                  reply_markup=final_reply_markup)
+        user_data.clear()
         return ConversationHandler.END
 
     def send_donation_cancel(self, bot, update, user_data):
