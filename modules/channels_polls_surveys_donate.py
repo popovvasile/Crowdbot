@@ -208,12 +208,11 @@ CHOOSE_POLL_TO_SEND_DONATION = 34
 class SendDonationToChannel(object):
     def send_donation(self, bot, update, user_data):
         channels = channels_table.find({'bot_id': bot.id})
-        if update.callback_query:
-            update_data = update.callback_query
-        else:
-            update_data = update
+        update_data = update.callback_query
+        channel_username = update.callback_query.data.replace("send_donation_to_channel_", "")
+
         if channels != 0:
-            channel_username = update_data.data.replace("send_donation_to_channel_", "")  # TODO here is a bug, AttributeError: 'Update' object has no attribute 'data'
+              # TODO here is a bug, AttributeError: 'Update' object has no attribute 'data'
 
             if channel_username == "send_donation_to_channel":
                 channels_markup = [channel['channel_username'] for channel in channels]
