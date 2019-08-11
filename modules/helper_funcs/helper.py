@@ -1,9 +1,7 @@
 from math import ceil
 from typing import List, Dict
 from telegram import ParseMode, InlineKeyboardMarkup, Bot, Update, InlineKeyboardButton
-from telegram.ext import run_async
-
-from database import custom_buttons_table, chats_table, chatbots_table, users_table, user_mode_table
+from database import custom_buttons_table, chatbots_table, users_table, user_mode_table
 from modules.helper_funcs.lang_strings.help_strings import helpable_dict
 from modules.helper_funcs.lang_strings.strings import string_dict
 
@@ -30,8 +28,9 @@ def paginate_modules(page_n: int, module_dict: Dict, prefix, bot_id, chat=None) 
 
     if not chat:
         modules = [
-            EqInlineKeyboardButton(x, callback_data="{}_module({})".format(prefix, module_dict[x])) for x in module_dict
-        ] + buttons
+                      EqInlineKeyboardButton(x, callback_data="{}_module({})".format(prefix, module_dict[x])) for x in
+                      module_dict
+                  ] + buttons
     else:
         modules = [
             EqInlineKeyboardButton(x, callback_data="{}_module({},{})".format(prefix, chat, module_dict[x])) for x in
@@ -75,13 +74,31 @@ def if_admin(update, bot):
 
 def register_chat(bot, update):
     chat_id = update.effective_chat.id
-    chat_name = update.effective_user.full_name
-    bot_id = bot.id
     user_id = update.effective_user.id
-    chats_table.update({"bot_id": bot.id, "chat_id": chat_id},
-                       {"bot_id": bot_id, "chat_id": chat_id,
-                        "name": chat_name, "user_id": user_id, "tag": "#all"},
-                       upsert=True)
+
+    superuser = chatbots_table.find_one({"bot_id": bot.id})["superuser"]
+    if user_id == superuser:
+        users_table.update({"user_id": user_id},
+                           {'bot_id': bot.id,
+                            "chat_id": chat_id,
+                            "user_id": user_id,
+                            "username": update.effective_user.username,
+                            "full_name": update.effective_user.full_name,
+                            'registered': True,
+                            "is_admin": True,
+                            "tags": ["#all", "#user", "#admin"]
+                            }, upsert=True)
+    elif users_table.find({"user_id": user_id}).count() == 0:
+        users_table.insert(
+            {'bot_id': bot.id,
+             "chat_id": chat_id,
+             "user_id": user_id,
+             "username": update.message.from_user.username,
+             "full_name": update.message.from_user.full_name,
+             'registered': False,
+             "is_admin": False,
+             "tags": ["#all", "#user"]
+             })
 
 
 def get_help(bot: Bot, update: Update):
@@ -126,8 +143,9 @@ def send_visitor_help(bot, chat_id, text, keyboard=None):
     buttons = [InlineKeyboardButton(string_dict(bot)["send_message_1"], callback_data="send_message_to_admin"),
                InlineKeyboardButton(string_dict(bot)["pay_donation_mode_str"], callback_data='pay_donation')]
     buttons = buttons + [InlineKeyboardButton(button["button"],
-                                     callback_data="button_{}".format(button["button"].replace(" ", "").lower()))
-                for button in custom_buttons_table.find({"bot_id": bot.id})]
+                                              callback_data="button_{}".format(
+                                                  button["button"].replace(" ", "").lower()))
+                         for button in custom_buttons_table.find({"bot_id": bot.id})]
     if len(buttons) % 2 == 0:
         pairs = list(zip(buttons[::2], buttons[1::2]))
     else:

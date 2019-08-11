@@ -7,7 +7,7 @@ import logging
 import datetime
 # Enable logging
 from telegram.ext.dispatcher import run_async
-from database import payments_requests_table, payments_table
+from database import payments_requests_table, payments_table, users_table
 from modules.helper_funcs.auth import initiate_chat_id
 from telegram.ext import ConversationHandler, CommandHandler
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -44,7 +44,7 @@ class PaymentBot(object):
     
     def payments_list(bot, update):  # TODO make this with buttons as well
         chat_id, txt = initiate_chat_id(update)
-        chat = chats_table.find_one({"chat_id": chat_id})
+        chat = users_table.find_one({"chat_id": chat_id})
         payment_requests = payments_table.find({"bot_id": bot.id})
         text_to_send_answer = ''
         for payment_request in payment_requests:
