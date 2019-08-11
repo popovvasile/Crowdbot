@@ -2,8 +2,7 @@
 # # -*- coding: utf-8 -*-
 import logging
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import (CommandHandler, MessageHandler, Filters,
-                          ConversationHandler, run_async, CallbackQueryHandler, RegexHandler)
+from telegram.ext import (MessageHandler, Filters, ConversationHandler, CallbackQueryHandler, )
 from modules.helper_funcs.helper import get_help
 from database import surveys_table
 from modules.helper_funcs.lang_strings.strings import string_dict

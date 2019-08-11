@@ -3,7 +3,7 @@
 import logging
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ConversationHandler, run_async, CallbackQueryHandler
+from telegram.ext import ConversationHandler, CallbackQueryHandler
 from database import user_mode_table
 from modules.helper_funcs.lang_strings.strings import string_dict
 

@@ -1,8 +1,7 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
 from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
-from telegram.ext import (CommandHandler, MessageHandler, Filters, ConversationHandler,
-                          CallbackQueryHandler)
+from telegram.ext import (MessageHandler, Filters, ConversationHandler, CallbackQueryHandler)
 import logging
 import requests
 import json

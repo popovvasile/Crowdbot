@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from telegram import LabeledPrice, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import (MessageHandler, Filters, PreCheckoutQueryHandler, CommandHandler,
-                          ConversationHandler, run_async, CallbackQueryHandler)
+from telegram.ext import (MessageHandler, Filters, PreCheckoutQueryHandler,
+                          ConversationHandler,  CallbackQueryHandler)
 import logging
 import datetime
 # Enable logging

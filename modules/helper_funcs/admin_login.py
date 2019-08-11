@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, Filters, RegexHandler, \
+from telegram.ext import ConversationHandler, MessageHandler, Filters, RegexHandler, \
     CallbackQueryHandler
 from telegram.ext.dispatcher import run_async
 

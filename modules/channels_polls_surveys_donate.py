@@ -213,7 +213,7 @@ class SendDonationToChannel(object):
         else:
             update_data = update
         if channels != 0:
-            channel_username = update_data.data.replace("send_donation_to_channel_", "")
+            channel_username = update_data.data.replace("send_donation_to_channel_", "")  # TODO here is a bug, AttributeError: 'Update' object has no attribute 'data'
 
             if channel_username == "send_donation_to_channel":
                 channels_markup = [channel['channel_username'] for channel in channels]
@@ -255,7 +255,7 @@ class SendDonationToChannel(object):
                              reply_markup=InlineKeyboardMarkup([admin_keyboard]))
             return ConversationHandler.END
 
-    def received_donation(self, bot, update, user_data):
+    def received_donation(self, bot, update, user_data):  # TODO change like in messages
 
         if update.message.text:
             bot.send_message(user_data["channel_username"], update.message.text)

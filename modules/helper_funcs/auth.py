@@ -2,19 +2,13 @@ from typing import Optional
 from functools import wraps
 from telegram import User, Bot, Update
 
-from database import users_table, chatbots_table, chats_table
+from database import users_table, chatbots_table
 
 
 def register_chat(bot, update):
     chat_id = update.effective_chat.id
-    chat_name = update.effective_user.full_name
-    bot_id = bot.id
     user_id = update.effective_user.id
-    if chats_table.find({"chat_id":chat_id}).count() == 0:
-        chats_table.update({"bot_id": bot.id, "chat_id": chat_id},
-                           {"bot_id": bot_id, "chat_id": chat_id,
-                            "name": chat_name, "user_id": user_id, "tag": "#all"},
-                           upsert=True)
+
     superuser = chatbots_table.find_one({"bot_id": bot.id})["superuser"]
     if user_id == superuser:
         users_table.update({"user_id": user_id},

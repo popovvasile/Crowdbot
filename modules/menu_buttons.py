@@ -1,8 +1,7 @@
-from collections import OrderedDict
-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
-from telegram.ext import (CommandHandler, MessageHandler, Filters,
-                          ConversationHandler, CallbackQueryHandler)
+from telegram.ext import (MessageHandler, Filters, ConversationHandler, CallbackQueryHandler)
 import logging
 from database import custom_buttons_table, chatbots_table
 from modules.helper_funcs.auth import initiate_chat_id
@@ -110,13 +109,13 @@ class AddCommands(object):
             general_list.append({"video_file": video_file})
 
         if update.message.video_note:
-            video_note_file = update.message.audio.get_file().file_id
-            general_list.append({"video__note_file": video_note_file})
+            video_note_file = update.message.video_note.get_file().file_id
+            general_list.append({"video_note_file": video_note_file})
         if update.message.animation:
-            animation_file = update.message.audio.get_file().file_id
+            animation_file = update.message.animation.get_file().file_id
             general_list.append({"animation_file": animation_file})
         if update.message.sticker:
-            sticker_file = update.message.audio.get_file().file_id
+            sticker_file = update.message.sticker.get_file().file_id
             general_list.append({"sticker_file": sticker_file})
         user_data["to_delete"].append(update.message.reply_text(string_dict(bot)["back_text"],
                                                                 reply_markup=reply_markup))

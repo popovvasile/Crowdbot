@@ -15,7 +15,7 @@ from telegram.inline.inlinekeyboardmarkup import InlineKeyboardMarkup
 from telegram.inline.inlinequeryresultarticle import InlineQueryResultArticle
 from telegram.inline.inputtextmessagecontent import InputTextMessageContent
 
-from database import polls_table, poll_instances_table, chats_table
+from database import polls_table, poll_instances_table, users_table
 from modules.helper_funcs.auth import initiate_chat_id
 from modules.helper_funcs.helper import get_help
 from modules.helper_funcs.lang_strings.strings import string_dict
@@ -433,7 +433,7 @@ class PollBot(object):
         sent = []
         poll_name = txt
         user_data["poll_name_to_send"] = poll_name
-        chats = chats_table.find({"bot_id": bot.id})
+        chats = users_table.find({"bot_id": bot.id})
         for chat in chats:
             if chat['chat_id'] != chat_id:
                 if not any(sent_d == chat['chat_id'] for sent_d in sent):

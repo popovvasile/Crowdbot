@@ -3,7 +3,7 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
 from telegram.ext import (MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
-from database import chats_table, user_categories_table, users_table
+from database import user_categories_table, users_table
 from modules.helper_funcs.helper import get_help
 from modules.helper_funcs.lang_strings.strings import string_dict
 
@@ -126,7 +126,7 @@ class SendQuestionToUsers(object):
     def send_question(self, bot, update):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        chats = chats_table.find({"bot_id": bot.id})
+        chats = users_table.find({"bot_id": bot.id})
         categories = user_categories_table.find()
         if categories.count() > 0:
             print(categories)

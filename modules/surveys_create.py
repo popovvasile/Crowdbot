@@ -1,11 +1,10 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
 from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
-from telegram.ext import (CommandHandler, MessageHandler, Filters, ConversationHandler,
-                          run_async, CallbackQueryHandler)
+from telegram.ext import (MessageHandler, Filters, ConversationHandler, CallbackQueryHandler)
 import logging
 
-from database import surveys_table, users_table, chats_table
+from database import surveys_table, users_table
 from modules.helper_funcs.auth import initiate_chat_id
 
 # Enable logging
@@ -261,10 +260,8 @@ class SurveyHandler(object):
     def handle_send_title(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
         user_data["title"] = txt
-        survey = surveys_table.find_one({"bot_id": bot.id, 'title': txt})
-
         sent = []
-        chats = chats_table.find({"bot_id": bot.id})
+        chats = users_table.find({"bot_id": bot.id})
         for chat in chats:
             # if chat['chat_id'] != chat_id:
             if not any(sent_d == chat['chat_id'] for sent_d in sent):

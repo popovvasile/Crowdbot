@@ -3,13 +3,11 @@
 import datetime
 import logging
 import random
-import uuid
-
 from haikunator import Haikunator
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import (MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
-from database import users_messages_to_admin_table, chats_table, categories_table, user_categories_table
+from database import users_messages_to_admin_table, categories_table, user_categories_table,users_table
 from modules.helper_funcs.helper import get_help
 from modules.helper_funcs.lang_strings.strings import string_dict
 
@@ -323,38 +321,38 @@ class SendMessageToUsers(object):
 
         return MESSAGE_TO_USERS
 
-    def send_message_finish(self, bot, update, user_data):
+    def send_message_finish(self, bot, update, user_data):  # TODO does not work
         if "user_category" not in user_data:
-            chats = chats_table.find({"bot_id": bot.id})
+            chats = users_table.find({"bot_id": bot.id})
         elif user_data["user_category"] == "All":
-            chats = chats_table.find({"bot_id": bot.id})
+            chats = users_table.find({"bot_id": bot.id})
         else:
-            chats = chats_table.find({"bot_id": bot.id, "user_category": user_data["user_category"]})
+            chats = users_table.find({"bot_id": bot.id, "user_category": user_data["user_category"]})
         for chat in chats:
-            if chat["chat_id"] != update.callback_query.message.chat_id:
-                for content_dict in user_data["content"]:
-                    if "text" in content_dict:
-                        bot.send_message(chat["chat_id"],
-                                         content_dict["text"])
-                    if "audio_file" in content_dict:
-                        bot.send_audio(chat["chat_id"], content_dict["audio_file"])
-                    if "voice_file" in content_dict:
-                        bot.send_voice(chat["chat_id"], content_dict["voice_file"])
-                    if "video_file" in content_dict:
-                        bot.send_video(chat["chat_id"], content_dict["video_file"])
-                    if "video_note_file" in content_dict:
-                        bot.send_video_note(chat["chat_id"], content_dict["video_note_file"])
-                    if "document_file" in content_dict:
-                        if ".png" in content_dict["document_file"] or ".jpg" in content_dict["document_file"]:
-                            bot.send_photo(chat["chat_id"], content_dict["document_file"])
-                        else:
-                            bot.send_document(chat["chat_id"], content_dict["document_file"])
-                    if "photo_file" in content_dict:
-                        bot.send_photo(chat["chat_id"], content_dict["photo_file"])
-                    if "animation_file" in content_dict:
-                        bot.send_animation(chat["chat_id"], content_dict["animation_file"])
-                    if "sticker_file" in content_dict:
-                        bot.send_sticker(chat["chat_id"], content_dict["sticker_file"])
+            # if chat["chat_id"] != update.callback_query.message.chat_id:
+            for content_dict in user_data["content"]:
+                if "text" in content_dict:
+                    bot.send_message(chat["chat_id"],
+                                     content_dict["text"])
+                if "audio_file" in content_dict:
+                    bot.send_audio(chat["chat_id"], content_dict["audio_file"])
+                if "voice_file" in content_dict:
+                    bot.send_voice(chat["chat_id"], content_dict["voice_file"])
+                if "video_file" in content_dict:
+                    bot.send_video(chat["chat_id"], content_dict["video_file"])
+                if "video_note_file" in content_dict:
+                    bot.send_video_note(chat["chat_id"], content_dict["video_note_file"])
+                if "document_file" in content_dict:
+                    if ".png" in content_dict["document_file"] or ".jpg" in content_dict["document_file"]:
+                        bot.send_photo(chat["chat_id"], content_dict["document_file"])
+                    else:
+                        bot.send_document(chat["chat_id"], content_dict["document_file"])
+                if "photo_file" in content_dict:
+                    bot.send_photo(chat["chat_id"], content_dict["photo_file"])
+                if "animation_file" in content_dict:
+                    bot.send_animation(chat["chat_id"], content_dict["animation_file"])
+                if "sticker_file" in content_dict:
+                    bot.send_sticker(chat["chat_id"], content_dict["sticker_file"])
 
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)

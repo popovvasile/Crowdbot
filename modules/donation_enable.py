@@ -5,8 +5,7 @@ import json
 
 from telegram import LabeledPrice
 from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import (CommandHandler, MessageHandler, Filters, ConversationHandler,
-                          run_async, CallbackQueryHandler)
+from telegram.ext import (MessageHandler, Filters, ConversationHandler, CallbackQueryHandler)
 import logging
 from database import chatbots_table
 from modules.helper_funcs.auth import initiate_chat_id

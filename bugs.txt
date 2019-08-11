@@ -1,5 +1,8 @@
-# TODO Users can send messages anonymously
-
+#TODO problems with sending messages and donations
+# TODO remove send survey to users
+# TODO add inline mode for bot in channel
+# TODO Admins don't loose their privileges instantly
+# TODO test with Simion
 
 # TODO think about an example chatbot (TV8) with CommentBot
 https://github.com/python-telegram-bot/python-telegram-bot/wiki/Code-snippets#simple-way-of-restarting-the-bot

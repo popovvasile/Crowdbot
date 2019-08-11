@@ -4,7 +4,7 @@ import logging
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (CommandHandler, MessageHandler, Filters,
                           ConversationHandler, run_async, CallbackQueryHandler)
-from database import chats_table, chatbots_table
+from database import chatbots_table, users_table
 from modules.helper_funcs.helper import get_help
 from modules.helper_funcs.lang_strings.strings import string_dict
 
@@ -98,15 +98,15 @@ class SendDonationToUsers(object):
                          string_dict(bot)["send_donation_request_3"],
                          reply_markup=final_reply_markup)
         if "user_category" not in user_data:
-            chats = chats_table.find({"bot_id": bot.id})
-            chats2 = chats_table.find({"bot_id": bot.id})
+            chats = users_table.find({"bot_id": bot.id})
+            chats2 = users_table.find({"bot_id": bot.id})
 
         elif user_data["user_category"] == "All":
-            chats = chats_table.find({"bot_id": bot.id})
-            chats2 = chats_table.find({"bot_id": bot.id})
+            chats = users_table.find({"bot_id": bot.id})
+            chats2 = users_table.find({"bot_id": bot.id})
         else:
-            chats = chats_table.find({"bot_id": bot.id, "user_category": user_data["user_category"]})
-            chats2 = chats_table.find({"bot_id": bot.id, "user_category": user_data["user_category"]})
+            chats = users_table.find({"bot_id": bot.id, "user_category": user_data["user_category"]})
+            chats2 = users_table.find({"bot_id": bot.id, "user_category": user_data["user_category"]})
         for chat in chats:
             if chat["chat_id"] != update.callback_query.message.chat_id:
                 for content_dict in user_data["content"]:

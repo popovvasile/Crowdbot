@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
 from telegram.error import BadRequest
-from telegram.ext import CommandHandler, MessageHandler, Filters, \
-    ConversationHandler, CallbackQueryHandler
+from telegram.ext import MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
 import logging
 from database import custom_buttons_table
 from modules.helper_funcs.helper import get_help
