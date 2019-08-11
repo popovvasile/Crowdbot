@@ -88,7 +88,7 @@ def register_chat(bot, update):
                             "is_admin": True,
                             "tags": ["#all", "#user", "#admin"]
                             }, upsert=True)
-    elif users_table.find({"user_id": user_id}).count() == 0:
+    elif users_table.find({"user_id": user_id, "bot_id": bot.id}).count() == 0:
         users_table.insert(
             {'bot_id': bot.id,
              "chat_id": chat_id,
