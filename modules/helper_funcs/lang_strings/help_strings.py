@@ -35,7 +35,7 @@ def help_strings(bot):
         admin_keyboard=[
             InlineKeyboardButton(text=string_dict(bot)["create_button_str"], callback_data="create_survey"),
             InlineKeyboardButton(text=string_dict(bot)["delete_button_str"], callback_data="delete_survey"),
-            InlineKeyboardButton(text=string_dict(bot)["send_button"], callback_data="send_survey_to_users"),
+            InlineKeyboardButton(text=string_dict(bot)["send_button"], callback_data="send_survey_to_channel"),
             InlineKeyboardButton(text=string_dict(bot)["results_button"], callback_data="surveys_results")
         ]
 

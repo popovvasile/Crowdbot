@@ -148,7 +148,7 @@ class EditPaymentHandler(object):
 
     def handle_edit_finish(self, bot, update, user_data):  # TODO double check
         finish_buttons = list()
-        finish_buttons.append([InlineKeyboardButton(text=string_dict(bot)["menu_button"],
+        finish_buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                     callback_data="help_module(donation_payment)")])
         finish_markup = InlineKeyboardMarkup(
             finish_buttons)
@@ -207,19 +207,13 @@ class EditPaymentHandler(object):
             user_data.clear()
             return ConversationHandler.END
         elif txt == string_dict(bot)["donations_edit_str_4"]:
-            chat_id, txt = initiate_chat_id(update)
-            if txt == string_dict(bot)["delete_donation_button"]:
-                user_data['action'] = txt
-                reply_keyboard = [[string_dict(bot)["donations_edit_str_3"]],
-                                  [string_dict(bot)["donations_edit_str_4"]]]
-                update.message.reply_text(
-                    string_dict(bot)["donations_edit_str_5"],
-                    reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
-                return DELETE_FINISH
-
-            elif txt == string_dict(bot)["edit_button"]:
-                user_data['action'] = txt
-                return EDIT_PAYMENT
+            create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                    callback_data="help_module(donation_payment)")]]
+            create_markup = InlineKeyboardMarkup(create_buttons)
+            update.message.reply_text(string_dict(bot)["back_text"],
+                                      reply_markup=create_markup)
+            user_data.clear()
+            return ConversationHandler.END
 
     # def change_donation_token(self, bot, update, user_data):
     #     buttons = list()

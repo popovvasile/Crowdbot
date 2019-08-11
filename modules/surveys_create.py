@@ -102,14 +102,13 @@ class SurveyHandler(object):
         user_data["answers"] = []
         texr_to_send = "\nQuestions: \n{}".format(questions)
         admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["send_button"],
-                                               callback_data="send_survey_to_users"),
+                                               callback_data="send_survey_to_channel"),
                           InlineKeyboardButton(text=string_dict(bot)["menu_button"],
                                                callback_data="help_module(surveys)")]
         bot.send_message(update.callback_query.message.chat.id,
                          string_dict(bot)["survey_str_6"].format(user_data['title'], texr_to_send),
                          reply_markup=InlineKeyboardMarkup(
-                             [admin_keyboard , [InlineKeyboardButton(text=string_dict(bot)["send_survey_to_channel"],
-                                                                     callback_data="send_survey_to_channel")]]))
+                             [admin_keyboard]))
         user_data.pop('to_delete', None)
         surveys_table.update_one({
             "bot_id": bot.id,

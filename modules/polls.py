@@ -233,6 +233,24 @@ class PollBot(object):
             buttons.append(current_row)
         return buttons
 
+    def results_assemble_inline_keyboard(self, poll, include_publish_button=False):
+        inline_keyboard_items = self.results_get_inline_keyboard_items(poll)
+
+        return InlineKeyboardMarkup(inline_keyboard_items)
+
+    def results_get_inline_keyboard_items(self, poll):
+        handler = POLL_HANDLERS[poll['type']]
+        button_items = handler.options(poll)
+        buttons = []
+        for row in button_items:
+            current_row = []
+            for item in row:
+                item['callback_data']['id'] = poll['poll_id']
+                current_row.append(InlineKeyboardButton(item['text'],
+                                                        callback_data="0"))
+            buttons.append(current_row)
+        return buttons
+
     def assemble_message_text(self, poll):
         handler = POLL_HANDLERS[poll['type']]
         message = '{}\n{}'.format(handler.title(poll),
@@ -514,7 +532,7 @@ class PollBot(object):
         poll_instance = self.deserialize(poll)
         bot.send_message(update.message.chat.id,
                          string_dict(bot)["polls_str_18_1"],
-                         reply_markup=self.assemble_inline_keyboard(poll_instance, True),
+                         reply_markup=self.results_assemble_inline_keyboard(poll_instance, True),
                          parse_mode='Markdown'
                          )
         bot.send_message(update.message.chat.id, string_dict(bot)["polls_str_18"],
