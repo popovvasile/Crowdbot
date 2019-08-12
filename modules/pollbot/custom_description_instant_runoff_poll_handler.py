@@ -25,6 +25,6 @@ class CustomDescriptionInstantRunoffPollHandler(InstantRunoffPollHandler, Custom
 
         num_votes = len(poll.get('votes', {}))
         # body = poll['meta']['text']
-        body = "*{}*\n{} people voted so far".format(message, num_votes)
+        body = "*{}*\n\n{} people voted so far".format(message, num_votes)
         return body
 
