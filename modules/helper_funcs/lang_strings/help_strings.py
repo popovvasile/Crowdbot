@@ -17,7 +17,9 @@ def help_strings(bot):
     )
     help_dict["menu_buttons"] = dict(
         mod_name=string_dict(bot)["add_menu_module_button"],
-        admin_keyboard=[InlineKeyboardButton(text=string_dict(bot)["create_button"],
+        admin_keyboard=[InlineKeyboardButton(text=string_dict(bot)["user_mode_module"],
+                                             callback_data="turn_user_mode_on"),
+                        InlineKeyboardButton(text=string_dict(bot)["create_button"],
                                              callback_data="create_button"),
                         InlineKeyboardButton(text=string_dict(bot)["edit_button_button"],
                                              callback_data="edit_button"),
@@ -53,8 +55,10 @@ def help_strings(bot):
                                  callback_data="send_message_to_users"),
             InlineKeyboardButton(text=string_dict(bot)["send_message_button_2"],
                                  callback_data="inbox_message"),
-            # InlineKeyboardButton(text=string_dict(bot)["send_message_button_3"],
-            #                      callback_data="show_message_categories"),
+            InlineKeyboardButton(text=string_dict(bot)["send_message_button_4"],
+                                 callback_data="send_message_only_to_admins"),
+            InlineKeyboardButton(text=string_dict(bot)["send_message_button_5"],
+                                 callback_data="send_message_to_donators"),
         ]
     )
     help_dict["donation_payment"] = dict(
@@ -114,7 +118,7 @@ def helpable_dict(bot):
     admin_rus["❓ Опросы"] = "polls"
     admin_rus["💸 Донаты"] = "donation_payment"
     # admin_rus["Пользователи"] = "users"
-    admin_rus["👤 Режим юзера"] = "user_mode"
+    # admin_rus["👤 Режим юзера"] = "user_mode"
     admin_rus["🛠 Настройки"] = "menu_buttons"
 
     admin_eng = OrderedDict()
@@ -124,7 +128,7 @@ def helpable_dict(bot):
     admin_eng["❓ Polls"] = "polls"
     admin_eng["💸 Donations"] = "donation_payment"
     # admin_eng["Users"] = "users"
-    admin_eng["👤 User view"] = "user_mode"
+    # admin_eng["👤 User view"] = "user_mode"
     admin_eng["🛠 Settings"] = "menu_buttons"
 
     lang_dicts = {"ENG": dict(

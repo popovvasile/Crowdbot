@@ -255,7 +255,7 @@ class SendMessageToUsers(object):
             return CHOOSE_CATEGORY
         else:
             bot.send_message(update.callback_query.message.chat_id,
-                             string_dict(bot)["send_message_4"],
+                             string_dict(bot)["send_message_to_users_text"],
                              reply_markup=reply_markup
                              )
             return MESSAGE_TO_USERS

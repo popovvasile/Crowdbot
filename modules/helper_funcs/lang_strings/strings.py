@@ -67,6 +67,7 @@ Press “Back" to return to the normal mode
         user_mode_off_finish="🔚 User mode is off",
 
         user_mode_str="Accept",
+        user_mode_module="👤 User view",
         send_a_post_to_channel='Write a post on the channel',
 
         promotion_send_message_module_str="✉️ Messages ",
@@ -96,10 +97,19 @@ Write your message. I’ll read it.
 
         delete_message_str_1="Chosen messages have been deleted",
         send_message_module_str="✉️ Messages",
-        send_message_button_1="✉️ Send message",
+        send_message_button_1="✉️ Send message to users",
         send_message_button_2="📥 Mailbox",
         send_message_button_3="Message topics",
-        send_message_1="✉️ Send message",
+        send_message_button_4="✉️ Send message to admins",
+        send_message_button_5="✉️ Send message to donators",
+
+        send_message_1="✉️ Send message ",
+        send_message_to_users_text="✉️ Write a message for your users. You can send any kind of files, "
+                                   "voice and video messages, stickers and links",
+        send_message_to_admins_text="✉️ Write a message for all admins of this bot. You can send any kind of files, "
+                                   "voice and video messages, stickers and links",
+        send_message_to_donators_text="✉️ Write a message for all admins of this bot. You can send any kind of files, "
+                                    "voice and video messages, stickers and links",
         send_message_1_1="Choose the category of users to whom you want o send your message",
 
         send_message_12="What do you want to tell us about?",
@@ -410,12 +420,15 @@ Click "📌 Create a button", to add a content.
         user_mode_on_finish="✅ Готово, посмотри на бота глазами юзера",
         user_mode_off_finish="🔚 Режим юзера выключен",
         user_mode_str="Подтвердить",
+        user_mode_module="👤 Режим юзера",
         delete_message_str_1="🗑 Сообщения удалены",
         view_message_str="Прочитать",
         send_message_module_str="✉️ Сообщения",
-        send_message_button_3="Почтовые ящики",
-        send_message_button_1="✉️ Отправить сообщение",
+        send_message_button_1="✉️ Отправить сообщение пользователям",
         send_message_button_2="📥 Входящие",
+        send_message_button_3="Почтовые ящики",
+        send_message_button_4="✉️ Отправить сообщение админам",
+        send_message_button_5="✉️ Отправить сообщение донарам",
         send_message_12="Напиши сообщение. Админ его прочитает",
         send_message_13="Выбери тему сообщения",
         send_message_14="TEST",
@@ -425,6 +438,13 @@ Click "📌 Create a button", to add a content.
         send_message_18="TEST",
         add_message_category="Добавить ящик",
         send_message_1="✉️ Напиши сообщение",
+        send_message_to_users_text ="✉️ Напиши сообщение пользователям. Ты можежшь так же отпралять любые файлы, "
+                       "стикеры, голососовые и видео сообщения",
+        send_message_to_admins_text="✉️ Напиши сообщение админам этого бота. Ты можежшь так же отпралять любые файлы, "
+                                    "стикеры, голососовые и видео сообщения",
+        send_message_to_donators_text="✉️ Напиши сообщение тем кто задонатил тебе. "
+                                      "Ты можежшь так же отпралять любые файлы, "
+                                      "стикеры, голососовые и видео сообщения",
         send_message_1_1="Выбери группу юзеров, которая получит это сообщение",
         send_message_2="Спасибо, почтовый голубь в пути 🕊!",
         send_message_3="Напиши сообщение юзерам\n"

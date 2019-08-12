@@ -9,6 +9,8 @@ from modules.channels_polls_surveys_donate import SEND_SURVEY_TO_CHANNEL_HANDLER
 from modules.menu_description import EDIT_BOT_DESCRIPTION_HANDLER
 from modules.helper_funcs.admin_login import ADMIN_AUTHENTICATION_HANDLER
 from modules.menu_buttons import BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER
+from modules.messages_admin import SEND_MESSAGE_ONLY_TO_ADMINS_HANDLER
+from modules.messages_donators import SEND_MESSAGE_TO_DONATORS_HANDLER
 from modules.surveys_answer import ANSWER_SURVEY_HANDLER
 from modules.donation_enable import CREATE_DONATION_HANDLER
 from modules.surveys_create import DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_HANDLER, SEND_SURVEYS_HANDLER, \
@@ -83,6 +85,8 @@ def main(token):
     dispatcher.add_handler(ADD_MESSAGE_CATEGORY_HANDLER)
     dispatcher.add_handler(DELETE_MESSAGE_CATEGORY_HANDLER)
     dispatcher.add_handler(MESSAGE_CATEGORY_HANDLER)
+    dispatcher.add_handler(SEND_MESSAGE_ONLY_TO_ADMINS_HANDLER)
+    dispatcher.add_handler(SEND_MESSAGE_TO_DONATORS_HANDLER)
 
     # SURVEYS
     dispatcher.add_handler(ANSWER_SURVEY_HANDLER)

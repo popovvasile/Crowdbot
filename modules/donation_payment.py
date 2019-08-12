@@ -143,6 +143,9 @@ class DonationBot(object):
         user_data["status"] = "Paid"
         user_data['timestamp_paid'] = datetime.datetime.now()
         user_data["amount"] = update.message.successful_payment.total_amount
+        user_data["chat_id"] = update.message.chat_id
+        user_data["bot_id"] = bot.id
+
         donations_table.insert_one(user_data)
         update.message.reply_text(string_dict(bot)["thank_donation"], markup=markup)
         user_data.clear()

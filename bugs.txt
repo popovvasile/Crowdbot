@@ -1,8 +1,15 @@
-#TODO problems with sending messages and donations
-# TODO remove send survey to users
-# TODO add inline mode for bot in channel
-# TODO Admins don't loose their privileges instantly
-# TODO test with Simion
+
+# TODO add a link to the shop in buttons ==> create a custom "link button"
+# TODO admins between them can send urgent messages- is written who and what did
+# TODO teams/tags for admins only
+# TODO send message to donators
+# TODO basic shop
+# TODO add support for groups
+[users]  [admins]
+
+Admins: [send message] [send urgent message]
+Users: [send message] [ask for donation] [send survey]
+
 
 # TODO think about an example chatbot (TV8) with CommentBot
 https://github.com/python-telegram-bot/python-telegram-bot/wiki/Code-snippets#simple-way-of-restarting-the-bot
