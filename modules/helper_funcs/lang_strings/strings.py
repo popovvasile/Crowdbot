@@ -2,6 +2,10 @@ from database import chatbots_table
 
 string_dict_dict = {
     "ENG": dict(
+        you_have_been_reg=", you have been registered as an authorized user of this bot.\n\n"
+                          "Enter your password or click /cancel",
+        no_pass_provided="No password provided. Please send a  valid password or click Back",
+        wrong_pass_admin="Wrong password. Please send a  valid password or click Back",
         yes="YES",
         no="NO",
         register_str="Please write your email to register yourself as an admin for this bot",
@@ -15,21 +19,21 @@ string_dict_dict = {
         channels_str_2='Choose a channel',
         channels_menu="What do you wan to do with your channel?",
         no_channels='You have no channel configured yet. Click "➕Add channel" to configure your first channel',
-        wrong_channel_link_format='Send me link or username of your channel. ' \
+        wrong_channel_link_format='Send me link or username of your channel. \n' \
                                   'For Example "https://t.me/name" or "t.me/name" or "@name" or just "name"',
-        bot_is_not_admin_of_channel='Bot is not admin in this({}) channel. ' \
-                                    'Add bot as admin to the channel and then back to this menu ' \
-                                    'and send me link or username of your channel. ' \
+        bot_is_not_admin_of_channel='Bot is not admin in this({}) channel. \n' \
+                                    'Add bot as admin to the channel and then back to this menu \n' \
+                                    'and send me link or username of your channel. \n' \
                                     'For Example "https://t.me/name" or "t.me/name" or "@name" or just "name"',
-        bot_is_not_admin_of_channel_2="Bot is not admin in this({}) channel or can't send message to the channel" \
-                                      "So channel was deleted. Add bot as admin to the channel, " \
-                                      "let it send message to the channel " \
+        bot_is_not_admin_of_channel_2="Bot is not admin in this({}) channel or can't send message to the channel\n" \
+                                      "So channel was deleted. Add bot as admin to the channel, \n" \
+                                      "let it send message to the channel "
                                       "and then try again",
-        channels_str_4="To add channel u need to add this bot as admin to your channel " \
-                       "and then back to this menu and send " \
-                       "link or username of your channel. " \
+        channels_str_4="To add channel u need to add this bot as admin to your channel \n"
+                       "and then back to this menu and send \n"
+                       "link or username of your channel. \n"
                        "Send me link or username of your channel",
-        allow_bot_send_messages='Allow the bot to send messages to the channel. ' \
+        allow_bot_send_messages='Allow the bot to send messages to the channel. \n'
                                 'And than back to this menu and send username of channel',
         no_such_channel='There are no such channel. ',
         choose_channel_to_remove='Choose channel to 🗑 remove',
@@ -54,7 +58,7 @@ string_dict_dict = {
         send_user_category_17="User category has been deleted",
         send_category_question_3="What category do you associate with?",
         send_category_question_4="The category question has been sent to your users",
-        send_category_question_5="You have no user categories created. "
+        send_category_question_5="You have no user categories created. \n"
                                  "Please return to the user menu and create a category to assign your users to",
         users_help_admin="You can ask your users what category they belong to or create a new category",
         user_chooses_category="Thank you for your vote!",
@@ -105,15 +109,15 @@ Write your message. I’ll read it.
         send_message_button_to_admin_anonim="✉️ Send anonymous message",
         send_message_button_to_admin="✉️ Send message",
         send_message_1="✉️ Send message ",
-        send_message_to_users_text="✉️ Write a message for your users. You can send any kind of files, "
+        send_message_to_users_text="✉️ Write a message for your users. You can send any kind of files, \n"
                                    "voice and video messages, stickers and links",
-        send_message_to_admins_text="✉️ Write a message for all admins of this bot. You can send any kind of files, "
+        send_message_to_admins_text="✉️ Write a message for all admins of this bot. You can send any kind of files,\n "
                                     "voice and video messages, stickers and links",
-        send_message_to_donators_text="✉️ Write a message for every who donated money for you."
+        send_message_to_donators_text="✉️ Write a message for every who donated money for you.\n"
                                       "You can send any kind of files, "
                                       "voice and video messages, stickers and links",
         send_message_from_user_to_admin_text="✉️ Write us a message.\n"
-                                             "You can send any kind of files, "
+                                             "You can send any kind of files,\n "
                                              "voice and video messages, stickers and links",
         send_message_from_user_to_admin_anonim_text="✉️ Write us anonymous message.\n"
                                                     "You can send any kind of files, "
@@ -127,16 +131,16 @@ Write your message. I’ll read it.
 
         send_message_131="Write the subject of your message",
 
-        send_message_14="TEST",
-
-        send_message_15="TEST",
-
-        send_message_16="TEST",
-
-        send_message_17="TEST",
-
-        send_message_18="TEST",
-        send_message_anonim="Would you like to send this message anonymously? "
+        # send_message_14="TEST",
+        #
+        # send_message_15="TEST",
+        #
+        # send_message_16="TEST",
+        #
+        # send_message_17="TEST",
+        #
+        # send_message_18="TEST",
+        send_message_anonim="Would you like to send this message anonymously? \n"
                             "If yes, we wan't be able to respond to you",
         send_message_reply="Reply to your message: \n",
         add_message_category="Add topic",
@@ -220,7 +224,7 @@ You can send any kinds of files, video, audio or media messages.
         polls_str_9="List of active polls",
         polls_str_10="Choose a poll to send to users",
         polls_str_11="Damn it, the poll is not sent 🤨 \n You have no users. Share the link of your bot in the social"
-                     " networks and  online resource or invite your friends. Somebody will come along soon",
+                     " networks and  online resource or invite your friends. \nSomebody will come along soon",
         polls_str_12="✅ The poll is sent",
         polls_str_13="Choose a poll to see 📊 the results",
         polls_str_14="🗑 Choose a poll to delete",
@@ -238,6 +242,8 @@ Polls
 
 """,
         polls_module_str="Poll",
+        ask_for_extra_config="Please enter the text to be displayed above your poll",
+        ask_for_extra_config_wrong="Somebody messed up! This poll type is not configured properly.",
 
         pay_donation_str_admin="""
 Payments
@@ -368,6 +374,11 @@ Click "📌 Create a button", to add a content.
     ),
 
     "RUS": dict(
+        you_have_been_reg=", ты зарегистрирован как админ бота. \n\n"
+                          "Введи одноразовый пароль из письма.",
+        no_pass_provided="Ты не ввел пароль. Введи пароль который ты получил в письме или нажми 'Назад'",
+        wrong_pass_admin="Неверный пароль Введи пароль который ты получил в письме или нажми 'Назад'",
+
         yes="ДА",
         no="НЕТ",
         register_str="Пожалуйста введите свой эмайл чтобы зарегестрироваться в качестве админа",
@@ -392,10 +403,10 @@ Click "📌 Create a button", to add a content.
                                       "'Разреши боту отправлять сообщения в канал. "
                                       "Зайди в свой канал и в списке админов нажми на бота." \
                                       "Возвращайся обратно в бот и отправь Cсылку или Юзернейм канала",
-        channels_str_4=" Добавь бота в админы канала, чтобы подключить его." \
-                       "Вернись обратно в бот и отправь" \
-                       "Cсылку или Юзернейм канала " \
-                       "Отправь Ссылку или Юзернейм твоего канала",
+        channels_str_4="Чтобы подключить бота к каналу:\n"
+                       "• Зайди в настройки канала\n"
+                       "• Добавь этого бота в админы каналы\n"
+                       "• Вернись обратно и отправь боту ссылку на Канал или его Юзернейм\n",
         allow_bot_send_messages='Разреши боту отправлять сообщения в канал. '
                                 'Зайди в свой канал и в списке админов нажми на бота' \
                                 'Вернись обратно в бот и отправь Ссылку или Юзернейм канала ',
@@ -452,11 +463,11 @@ Click "📌 Create a button", to add a content.
 
         send_message_12="Напиши сообщение. Админ его прочитает",
         send_message_13="Выбери тему сообщения",
-        send_message_14="TEST",
-        send_message_15="TEST",
-        send_message_16="TEST",
-        send_message_17="TEST",
-        send_message_18="TEST",
+        # send_message_14="TEST",
+        # send_message_15="TEST",
+        # send_message_16="TEST",
+        # send_message_17="TEST",
+        # send_message_18="TEST",
         add_message_category="Добавить ящик",
         send_message_1="✉️ Напиши сообщение",
         send_message_to_users_text="✉️ Напиши сообщение пользователям. Ты можежшь так же отпралять любые файлы, "
@@ -548,6 +559,9 @@ Click "📌 Create a button", to add a content.
             "Йоу",
             "Хорошо",
         ],
+        ask_for_extra_config="Напиши текст который будет появляться над опросом:",
+        ask_for_extra_config_wrong="Кто-то напартачил! Опрос сделан не правильно",
+
         polls_str_1='Напиши свой вопрос',
         polls_str_2="Выбери тип опроса",
         polls_str_3="Введи первый вариант ответа",
@@ -555,7 +569,7 @@ Click "📌 Create a button", to add a content.
         polls_str_5="Введи ещё ответ или нажми '✅ Готово'",
         polls_str_6="Упс, слишком много вариантов. Остался последний",
         polls_str_7="Нажми '📤 Отправить', чтобы юзеры прошли опрос.",
-        polls_str_8="Нажми '❓ Опросить'",
+        polls_str_8="Нажми '❓ Опросить' или '🔙 Назад'",
         polls_str_9="Список опросов",
         polls_str_10="Выбери опрос, чтобы '📤 отправить'",
         polls_str_11="Блин, опрос не отправлен 🤨\n У тебя ещё нет юзеров.\n"
@@ -614,7 +628,7 @@ Click "📌 Create a button", to add a content.
         donations_edit_str_14="Неверный токен. Проверь его и отправь снова.",
         thank_donation="Спасибо за подержку!",
         send_donation_request_button="Напомнить юзерам о донатах",
-        survey_str_1="Напиши свой заголовок для Опроса. Юзеры ответят на него развёрнуто.",
+        survey_str_1="Назови опрос. Юзеры ответят в развёрнутой форме",
         survey_str_2="Напиши первый вопрос",
         survey_str_3="Вопрос с таким названием уже есть.\n" \
                      "Придумай другое название",
@@ -648,12 +662,12 @@ Click "📌 Create a button", to add a content.
 Нажми "Создать", или '🔙 Назад'""",
         survey_str_24="🗑Опрос удален. Создай новый или перейди в главное меню",
         create_donation_str_1="Тестовый платёж. Не обращай внимание",
-        create_donation_str_2="Напиши заголовок для доната",
+        create_donation_str_2="Назови донат",
         create_donation_str_3="""Как получить токен платёжной системы:\n 
 https://telegra.ph/Gajd-Podklyuchit-donaty-07-03
 После прочтения инструкции, вернись к своему боту и вставь платежный токен.
 """,
-        create_donation_str_4="Напиши заголовок для доната",
+        create_donation_str_4="Назови донат",
         create_donation_str_5="Неверный токен. Проверь его и отправь снова.",
         create_donation_str_6="Напиши для юзров. На что ты потратишь их донаты?",
         create_donation_str_7="Выбери основную валюту расчёта",

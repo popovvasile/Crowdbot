@@ -95,7 +95,7 @@ class PollBot(object):
         user_data['meta'] = dict()
 
         if POLL_HANDLERS[polltype].requires_extra_config(user_data['meta']):
-            update.message.reply_text(POLL_HANDLERS[polltype].ask_for_extra_config(user_data.get('meta')),
+            update.message.reply_text(POLL_HANDLERS[polltype].ask_for_extra_config(user_data.get('meta'), bot),
                                       reply_markup=reply_markup)
             return TYPING_META
         else:
@@ -112,7 +112,7 @@ class PollBot(object):
         POLL_HANDLERS[polltype].register_extra_config(text, user_data.get('meta'))
 
         if POLL_HANDLERS[polltype].requires_extra_config(user_data.get('meta')):
-            update.message.reply_text(POLL_HANDLERS[polltype].ask_for_extra_config(user_data.get('meta')),
+            update.message.reply_text(POLL_HANDLERS[polltype].ask_for_extra_config(user_data.get('meta'), bot),
                                       replu_markup=reply_markup)
             return TYPING_META
         else:

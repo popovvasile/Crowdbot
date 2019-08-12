@@ -48,8 +48,7 @@ class AdminAuthentication(object):
         else:
             superuser = False
         if used_password == user["password"]:
-            bot.send_message(chat_id, update.message.chat.first_name + ", you have been registered " +
-                             "as an authorized user of this bot.")
+            bot.send_message(chat_id, update.message.chat.first_name + string_dict(bot)["you_have_been_reg"])
             users_table.replace_one({"user_id": user_id},
                                     {'bot_id': bot.id,
                                      "chat_id": chat_id,
@@ -66,12 +65,12 @@ class AdminAuthentication(object):
             return ConversationHandler.END
         elif used_password is None:
 
-            bot.send_message(chat_id, "No password provided. Please send a  valid password or click Back",
+            bot.send_message(chat_id, string_dict(bot)["no_pass_provided"],
                              reply_markup=reply_markup)
             return TYPING_PASS
 
         else:
-            bot.send_message(chat_id, "Wrong password. Please send a  valid password or click Back",
+            bot.send_message(chat_id, string_dict(bot)["wrong_pass_admin"],
                              reply_markup=reply_markup)
             return TYPING_PASS
 

@@ -1,3 +1,6 @@
+from modules.helper_funcs.lang_strings.strings import string_dict
+
+
 class BasePoll(object):
     def __init__(self):
         self.max_options = 10
@@ -23,8 +26,8 @@ class BasePoll(object):
     def requires_extra_config(self, meta):
         return False
 
-    def ask_for_extra_config(self, meta):
-        return "Somebody messed up! This poll type is not configured properly."
+    def ask_for_extra_config(self, meta, bot):
+        return string_dict(bot)["ask_for_extra_config_wrong"]
 
     def register_extra_config(self, text, meta):
         pass

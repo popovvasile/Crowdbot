@@ -1,3 +1,4 @@
+from modules.helper_funcs.lang_strings.strings import string_dict
 from .basic_poll_handler import BasicPoll
 
 
@@ -14,8 +15,8 @@ class CustomDescriptionHandler(BasicPoll):
             message += "{}: {}".format(option['text'], self.num_votes(poll, i))
         return message
 
-    def ask_for_extra_config(self, meta):
-        return "Please enter the text to be displayed above your poll:"
+    def ask_for_extra_config(self, meta, bot):
+        return string_dict(bot)["ask_for_extra_config"]
 
     def register_extra_config(self, text, meta):
         meta['text'] = text
