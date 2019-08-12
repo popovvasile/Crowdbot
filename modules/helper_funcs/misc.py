@@ -16,6 +16,7 @@ LOGGER = logging.getLogger(__name__)
 LOAD = []
 NO_LOAD = ['translation', 'rss']
 
+
 def delete_messages(bot, update, user_data):
     if 'to_delete' in user_data:
         for msg in user_data['to_delete']:
@@ -28,6 +29,7 @@ def delete_messages(bot, update, user_data):
         user_data['to_delete'] = list()
     else:
         user_data['to_delete'] = list()
+
 
 class EqInlineKeyboardButton(InlineKeyboardButton):
     def __eq__(self, other):
@@ -43,13 +45,16 @@ class EqInlineKeyboardButton(InlineKeyboardButton):
 def paginate_modules(page_n: int, module_dict: Dict, prefix, bot_id, chat=None) -> List:
     buttons = [EqInlineKeyboardButton(button["button"],
                                       callback_data="button_{}".format(button["button"].replace(" ", "").lower()))
-               for button in custom_buttons_table.find({"bot_id": bot_id})]
+               for button in custom_buttons_table.find({"bot_id": bot_id, "link_button": False})]
+    buttons += [InlineKeyboardButton(text=button["button"],
+                url=button["link"])
+                for button in custom_buttons_table.find({"bot_id": bot_id, "link_button": True})]
 
     if not chat:
         modules = [
-            EqInlineKeyboardButton(x, callback_data="{}_module({})".format(prefix, module_dict[x]))
-            for x in module_dict
-        ] + buttons
+                      EqInlineKeyboardButton(x, callback_data="{}_module({})".format(prefix, module_dict[x]))
+                      for x in module_dict
+                  ] + buttons
     else:
         modules = [
             EqInlineKeyboardButton(x, callback_data="{}_module({},{})".format(prefix, chat, module_dict[x]))

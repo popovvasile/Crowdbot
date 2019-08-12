@@ -1,13 +1,12 @@
-# TODO send URGENT message to users/admins/donator, with mention- so that it will be unmuted Simply ask- is this an imporant message?
-# TODO answers to messages must be with mentions- no muted bots
-# TODO see messages: Anonymous messages/Simple messages
 # TODO Delete for a month/week/all - ask if sure
 # TODO create a custom "link button"
-# TODO results in polls change order depending on the winner- to make it more clear
+stats, groups as channels
+messages - show how many new messages - add "unread" messages
+# TODO results in polls change order depending on the winner- to make it more clear, remove descriptions
+
 # TODO think about an example chatbot (TV8) with CommentBot
-# TODO add pypy to the server
-
-
+# TODO remove descriptions in polls
+I installed pypy3-dev
 
 
 # TODO teams/tags for admins only

@@ -34,7 +34,9 @@ def send_visitor_help(bot, chat_id, text, keyboard=None):
                InlineKeyboardButton(string_dict(bot)["pay_donation_mode_str"], callback_data='pay_donation')]
     buttons += [InlineKeyboardButton(button["button"],
                                      callback_data="button_{}".format(button["button"].replace(" ", "").lower()))
-                for button in custom_buttons_table.find({"bot_id": bot.id})]
+                for button in custom_buttons_table.find({"bot_id": bot.id, "link_button": False})]
+    buttons += [InlineKeyboardButton(button["button"],link=button["link"])
+                for button in custom_buttons_table.find({"bot_id": bot.id, "link_button": True})]
     if len(buttons) % 2 == 0:
         pairs = list(zip(buttons[::2], buttons[1::2]))
     else:
@@ -50,10 +52,11 @@ def send_visitor_help(bot, chat_id, text, keyboard=None):
 def send_admin_user_mode(bot, chat_id, text, keyboard=None):
     buttons = [InlineKeyboardButton(string_dict(bot)["send_message_1"], callback_data="help_module(messages)"),
                InlineKeyboardButton(string_dict(bot)["pay_donation_mode_str"], callback_data='pay_donation')]
-    buttons = buttons + [InlineKeyboardButton(button["button"],
-                                              callback_data="button_{}".format(
-                                                  button["button"].replace(" ", "").lower()))
-                         for button in custom_buttons_table.find({"bot_id": bot.id})]
+    buttons += [InlineKeyboardButton(button["button"],
+                                     callback_data="button_{}".format(button["button"].replace(" ", "").lower()))
+                for button in custom_buttons_table.find({"bot_id": bot.id, "link_button": False})]
+    buttons += [InlineKeyboardButton(button["button"],link=button["link"])
+                for button in custom_buttons_table.find({"bot_id": bot.id, "link_button": True})]
     buttons = buttons + [InlineKeyboardButton(text="ADMIN MODE", callback_data="turn_user_mode_off")]
     if len(buttons) % 2 == 0:
         pairs = list(zip(buttons[::2], buttons[1::2]))
