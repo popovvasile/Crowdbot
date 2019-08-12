@@ -24,7 +24,7 @@ class CustomDescriptionInstantRunoffPollHandler(InstantRunoffPollHandler, Custom
             message = "There are currently no votes."
 
         num_votes = len(poll.get('votes', {}))
-        body = poll['meta']['text']
-        body += "\n\n*{}*\n{} people voted so far".format(message, num_votes)
+        # body = poll['meta']['text']
+        body = "*{}*\n{} people voted so far".format(message, num_votes)
         return body
 

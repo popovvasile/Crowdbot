@@ -8,8 +8,7 @@ class CustomDescriptionHandler(BasicPoll):
         self.desc = "Basic poll"
 
     def evaluation(self, poll):
-        message = poll['meta']['text']
-        message += "\n"
+        message = ""
         for i, option in enumerate(poll['options']):
             message += "\n"
             message += "{}: {}".format(option['text'], self.num_votes(poll, i))
@@ -25,4 +24,4 @@ class CustomDescriptionHandler(BasicPoll):
         return list(poll['votes'].values()).count(i) if 'votes' in poll else 0
 
     def requires_extra_config(self, meta):
-        return 'text' not in meta
+        return False

@@ -46,7 +46,7 @@ def paginate_modules(page_n: int, module_dict: Dict, prefix, bot_id, chat=None) 
     buttons = [EqInlineKeyboardButton(button["button"],
                                       callback_data="button_{}".format(button["button"].replace(" ", "").lower()))
                for button in custom_buttons_table.find({"bot_id": bot_id, "link_button": False})]
-    buttons += [InlineKeyboardButton(text=button["button"],
+    buttons += [EqInlineKeyboardButton(text=button["button"],
                 url=button["link"])
                 for button in custom_buttons_table.find({"bot_id": bot_id, "link_button": True})]
 

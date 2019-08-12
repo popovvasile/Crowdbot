@@ -529,9 +529,8 @@ class DeleteMessage(object):
 
     def delete_message(self, bot, update, user_data):
         delete_messages(bot, update, user_data)
-        buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                             callback_data="help_module(messages)")])
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                             callback_data="help_module(messages)")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
 
@@ -540,28 +539,54 @@ class DeleteMessage(object):
         messages = users_messages_to_admin_table.find({"bot_id": bot.id})
         if messages.count() > 0:
             message_id = update.callback_query.data.replace("delete_message_", "")  # message_id
-            if message_id == "all":
-                users_messages_to_admin_table.delete_many({"bot_id": bot.id})  # delete all messages from the users
-            elif message_id == "week":
-                time_past = datetime.datetime.now() - datetime.timedelta(days=7)
-                users_messages_to_admin_table.delete_many({"bot_id": bot.id,
-                                                           "timestamp": {'$gt': time_past}})
-                # delete all messages from the users
-            elif message_id == "month":
-                time_past = datetime.datetime.now() - datetime.timedelta(days=30)
-
-                users_messages_to_admin_table.delete_many({"bot_id": bot.id,
-                                                           "timestamp": {'$gt': time_past}})
-                # delete all messages from the users
+            if any(x in message_id for x in ["all", "week", "month"]) :
+                buttons = [[InlineKeyboardButton(text=string_dict(bot)["yes"],
+                                                 callback_data="trash_messages_" + message_id),
+                            InlineKeyboardButton(text=string_dict(bot)["no"],
+                                                 callback_data="help_module(messages)")]]
+                reply_markup = InlineKeyboardMarkup(
+                    buttons)
+                bot.send_message(update.callback_query.message.chat_id,
+                                 string_dict(bot)["delete_messages_double_check"],
+                                 reply_markup=reply_markup)
+                user_data["message_id"] = message_id
+                return DOUBLE_CHECK  # TODO send a keyboard with callback depending on previous callback data
             else:
                 users_messages_to_admin_table.delete_one({"bot_id": bot.id, "message_id": int(message_id)})
-            bot.send_message(update.callback_query.message.chat_id,
-                             string_dict(bot)["delete_message_str_1"],
-                             reply_markup=reply_markup)
+                bot.send_message(update.callback_query.message.chat_id,
+                                 string_dict(bot)["delete_message_str_1"],
+                                 reply_markup=reply_markup)
+                return ConversationHandler.END
         else:
             bot.send_message(update.callback_query.message.chat_id,
                              string_dict(bot)["send_message_6"],
                              reply_markup=reply_markup)
+            return ConversationHandler.END
+
+    def delete_message_double_check(self, bot, update, user_data):
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                         callback_data="help_module(messages)")]]
+        reply_markup = InlineKeyboardMarkup(
+            buttons)
+
+        if "all" in user_data["message_id"]:
+            users_messages_to_admin_table.delete_many({"bot_id": bot.id})  # delete all messages from the users
+        elif "week" in user_data["message_id"]:
+            time_past = datetime.datetime.now() - datetime.timedelta(days=7)
+            users_messages_to_admin_table.delete_many({"bot_id": bot.id,
+                                                       "timestamp": {'$gt': time_past}})
+            # delete all messages from the users for last week
+
+        elif "month" in user_data["message_id"]:
+            # delete all messages from the users for last month
+            time_past = datetime.datetime.now() - datetime.timedelta(days=30)
+            users_messages_to_admin_table.delete_many({"bot_id": bot.id,
+                                                       "timestamp": {'$gt': time_past}})
+        bot.send_message(update.callback_query.message.chat_id,
+                         string_dict(bot)["delete_message_str_1"],
+                         reply_markup=reply_markup)
         return ConversationHandler.END
 
 
@@ -686,9 +711,21 @@ class SeeMessageToAdmin(object):
         get_help(bot, update)
         return ConversationHandler.END
 
-DELETE_MESSAGES_HANDLER = CallbackQueryHandler(pattern="delete_message",
+
+DOUBLE_CHECK = 1
+DELETE_MESSAGES_HANDLER = ConversationHandler(
+    entry_points=[CallbackQueryHandler(pattern="delete_message",
                                                callback=DeleteMessage().delete_message,
-                                               pass_user_data=True)
+                                               pass_user_data=True)],
+    states={DOUBLE_CHECK: [CallbackQueryHandler(pattern="trash_messages_",
+                                                callback=DeleteMessage().delete_message_double_check,
+                                                pass_user_data=True)]},
+    fallbacks=[
+        CallbackQueryHandler(SendMessageToUsers().send_message_cancel,
+                             pattern="help_back",
+                             pass_user_data=True)
+    ]
+)
 
 SEND_MESSAGE_TO_ADMIN_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(pattern="send_message_to_admin",
@@ -744,7 +781,6 @@ ADD_MESSAGE_CATEGORY_HANDLER = ConversationHandler(
 
     states={
         TOPIC: [MessageHandler(Filters.all, AddMessageCategory().add_category_finish)],
-
     },
 
     fallbacks=[

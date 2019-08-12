@@ -161,6 +161,7 @@ You can send any kinds of files, video, audio or media messages.
 Say Hello to the admin!
 You can send any kinds of files, video, audio or media messages.
 """,
+        delete_messages_double_check="Are you sure?",
         send_donation_request_1="Tell everyone about the donation and how you will utilize the money\n" \
                                 "The 'Donate' button will be attached to the message'",
         send_donation_request_2="Write a new message and press '✅ Done",
@@ -496,6 +497,7 @@ Click "📌 Create a button", to add a content.
 Ты можешь отправлять любые сообщения, файлы, аудио, видео или фотографии.
 """,
         send_message_reply="Ответ на ваше сообщение: \n",
+        delete_messages_double_check="Ты уверен что хочешь удалить эти сообщения?",
 
         send_donation_request_1="Напиши юзерам куда ты потратишь деньги. ",
         send_donation_request_2="Напиши ещё сообщение или нажми '✅ Готово'",

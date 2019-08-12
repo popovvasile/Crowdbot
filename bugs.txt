@@ -1,5 +1,3 @@
-# TODO Delete for a month/week/all - ask if sure
-# TODO create a custom "link button"
 stats, groups as channels
 messages - show how many new messages - add "unread" messages
 # TODO results in polls change order depending on the winner- to make it more clear, remove descriptions
