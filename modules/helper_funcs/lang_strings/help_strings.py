@@ -45,8 +45,12 @@ def help_strings(bot):
     help_dict["messages"] = dict(
         mod_name=string_dict(bot)["send_message_module_str"],
         visitor_help=string_dict(bot)["send_message_user"],
-        visitor_keyboard=[InlineKeyboardButton(text=string_dict(bot)["send_message_button_1"],
-                                               callback_data="send_message_to_admin")],
+        visitor_keyboard=[InlineKeyboardButton(text=string_dict(bot)["send_message_button_to_admin"],
+                                               callback_data="send_message_to_admin"),
+                          InlineKeyboardButton(text=string_dict(bot)["send_message_button_to_admin_anonim"],
+                                               callback_data="send_message_to_admin_anonim")
+                          ],
+
 
         admin_help=string_dict(bot)["send_message_user"],
 

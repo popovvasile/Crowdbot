@@ -1,10 +1,13 @@
-
+# TODO send message to admin by users: two buttons- send anonimously / send message
+# TODO Delete for a month/week/all - ask if sure
 # TODO add a link to the shop in buttons ==> create a custom "link button"
 # TODO admins between them can send urgent messages- is written who and what did
 # TODO teams/tags for admins only
 # TODO send message to donators
 # TODO basic shop
 # TODO add support for groups
+
+p.s. remember the port on mongo and the security- encrypt the messages and all data
 [users]  [admins]
 
 Admins: [send message] [send urgent message]

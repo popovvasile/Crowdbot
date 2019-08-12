@@ -102,14 +102,23 @@ Write your message. I’ll read it.
         send_message_button_3="Message topics",
         send_message_button_4="✉️ Send message to admins",
         send_message_button_5="✉️ Send message to donators",
-
+        send_message_button_to_admin_anonim="✉️ Send anonymous message",
+        send_message_button_to_admin="✉️ Send message",
         send_message_1="✉️ Send message ",
         send_message_to_users_text="✉️ Write a message for your users. You can send any kind of files, "
                                    "voice and video messages, stickers and links",
         send_message_to_admins_text="✉️ Write a message for all admins of this bot. You can send any kind of files, "
-                                   "voice and video messages, stickers and links",
-        send_message_to_donators_text="✉️ Write a message for all admins of this bot. You can send any kind of files, "
                                     "voice and video messages, stickers and links",
+        send_message_to_donators_text="✉️ Write a message for every who donated money for you."
+                                      "You can send any kind of files, "
+                                      "voice and video messages, stickers and links",
+        send_message_from_user_to_admin_text="✉️ Write us a message.\n"
+                                             "You can send any kind of files, "
+                                             "voice and video messages, stickers and links",
+        send_message_from_user_to_admin_anonim_text="✉️ Write us anonymous message.\n"
+                                                    "You can send any kind of files, "
+                                                    "voice and video messages, stickers and links. \n"
+                                                    "No information to you account will be saved to the database",
         send_message_1_1="Choose the category of users to whom you want o send your message",
 
         send_message_12="What do you want to tell us about?",
@@ -429,6 +438,9 @@ Click "📌 Create a button", to add a content.
         send_message_button_3="Почтовые ящики",
         send_message_button_4="✉️ Отправить сообщение админам",
         send_message_button_5="✉️ Отправить сообщение донарам",
+        send_message_button_to_admin_anonim="✉️ Отправить анонимное сообщение",
+        send_message_button_to_admin="✉️ Отправить сообщение",
+
         send_message_12="Напиши сообщение. Админ его прочитает",
         send_message_13="Выбери тему сообщения",
         send_message_14="TEST",
@@ -438,13 +450,21 @@ Click "📌 Create a button", to add a content.
         send_message_18="TEST",
         add_message_category="Добавить ящик",
         send_message_1="✉️ Напиши сообщение",
-        send_message_to_users_text ="✉️ Напиши сообщение пользователям. Ты можежшь так же отпралять любые файлы, "
-                       "стикеры, голососовые и видео сообщения",
+        send_message_to_users_text="✉️ Напиши сообщение пользователям. Ты можежшь так же отпралять любые файлы, "
+                                   "стикеры, голососовые и видео сообщения",
         send_message_to_admins_text="✉️ Напиши сообщение админам этого бота. Ты можежшь так же отпралять любые файлы, "
                                     "стикеры, голососовые и видео сообщения",
         send_message_to_donators_text="✉️ Напиши сообщение тем кто задонатил тебе. "
                                       "Ты можежшь так же отпралять любые файлы, "
                                       "стикеры, голососовые и видео сообщения",
+        send_message_from_user_to_admin_anonim_text="✉️ Напиши нам ананомное сообщение. \n"
+                                                    "Ты можежшь так же отпралять любые файлы, "
+                                                    "стикеры, голососовые и видео сообщения. \n"
+                                                    "Все твой данные будут в полной конфиденциальности."
+                                                    " Никакие данные о твоем телеграмм аккаунте не будут сохранены",
+        send_message_from_user_to_admin_text="✉️ Напиши нам сообщение. \n"
+                                             "Ты можежшь так же отпралять любые файлы, "
+                                             "стикеры, голососовые и видео сообщения. ",
         send_message_1_1="Выбери группу юзеров, которая получит это сообщение",
         send_message_2="Спасибо, почтовый голубь в пути 🕊!",
         send_message_3="Напиши сообщение юзерам\n"

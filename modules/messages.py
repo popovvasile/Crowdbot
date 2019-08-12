@@ -96,23 +96,24 @@ class DeleteMessageCategory(object):
 
 class SendMessageToAdmin(object):
 
-    def send_message(self, bot, update):
-        buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                             callback_data="help_back")])
-        reply_markup = InlineKeyboardMarkup(
-            buttons)
+    def send_message(self, bot, update, user_data):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        bot.send_message(update.callback_query.message.chat_id,
-                         string_dict(bot)["send_message_12"], reply_markup=reply_markup)
-        bot.send_message(update.callback_query.message.chat_id,
-                         string_dict(bot)["send_message_anonim"],
-                         reply_markup=ReplyKeyboardMarkup([[string_dict(bot)["no"],
-                                                            string_dict(bot)["yes"]
-                                                            ]]))
+        buttons=[[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                             callback_data="help_back")]]
+        reply_markup = InlineKeyboardMarkup(
+            buttons)
+        if "admin" in update.callback_query.data:
+            user_data["anonim"] = True
+            bot.send_message(update.callback_query.message.chat_id,
+                             string_dict(bot)["send_message_from_user_to_admin_anonim_text"],
+                             reply_markup=reply_markup)
+        else:
+            user_data["anonim"] = False
+            bot.send_message(update.callback_query.message.chat_id,
+                             string_dict(bot)["send_message_from_user_to_admin_text"], reply_markup=reply_markup)
 
-        return SEND_ANONIM
+        return MESSAGE
 
     # def send_topic(self, bot, update, user_data):
     #     bot.send_message(update.message.chat_id,
@@ -128,18 +129,18 @@ class SendMessageToAdmin(object):
     #
     #     return MESSAGE
 
-    def send_anonim(self, bot, update, user_data):
-        bot.send_message(update.message.chat_id,
-                         random.choice(string_dict(bot)["polls_affirmations"]), reply_markup=ReplyKeyboardRemove())
-        user_data["anonim"] = update.message.text
-        buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                             callback_data="help_back")])
-        reply_markup = InlineKeyboardMarkup(
-            buttons)
-        bot.send_message(update.message.chat_id,
-                         string_dict(bot)["send_message_1"], reply_markup=reply_markup)
-        return MESSAGE
+    # def send_anonim(self, bot, update, user_data):
+    #     bot.send_message(update.message.chat_id,
+    #                      random.choice(string_dict(bot)["polls_affirmations"]), reply_markup=ReplyKeyboardRemove())
+    #     user_data["anonim"] = update.message.text
+    #     buttons = list()
+    #     buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
+    #                                          callback_data="help_back")])
+    #     reply_markup = InlineKeyboardMarkup(
+    #         buttons)
+    #     bot.send_message(update.message.chat_id,
+    #                      string_dict(bot)["send_message_1"], reply_markup=reply_markup)
+    #     return MESSAGE
 
     def received_message(self, bot, update, user_data):
 
@@ -190,7 +191,7 @@ class SendMessageToAdmin(object):
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         haikunator = Haikunator()
-        if user_data.get("anonim", None) == string_dict(bot)["yes"]:
+        if user_data.get("anonim", None) is True:
             user_data["user_full_name"] = "anonim_" + haikunator.haikunate()
             user_data["chat_id"] = update.callback_query.message.chat_id
         else:
@@ -650,13 +651,14 @@ DELETE_MESSAGES_HANDLER = CallbackQueryHandler(pattern="delete_message",
 
 SEND_MESSAGE_TO_ADMIN_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(pattern="send_message_to_admin",
-                                       callback=SendMessageToAdmin().send_message),
+                                       callback=SendMessageToAdmin().send_message,
+                                       pass_user_data=True),
                   ],
 
     states={
         MESSAGE: [MessageHandler(Filters.all, SendMessageToAdmin().received_message, pass_user_data=True), ],
         # TOPIC: [MessageHandler(Filters.all, SendMessageToAdmin().send_topic, pass_user_data=True), ]
-        SEND_ANONIM: [MessageHandler(Filters.all, SendMessageToAdmin().send_anonim, pass_user_data=True), ]
+        # SEND_ANONIM: [MessageHandler(Filters.all, SendMessageToAdmin().send_anonim, pass_user_data=True), ]
 
     },
 
