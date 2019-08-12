@@ -4,12 +4,14 @@ import datetime
 import logging
 import random
 from haikunator import Haikunator
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove, ParseMode
 from telegram.ext import (MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
+
 from database import users_messages_to_admin_table, categories_table, user_categories_table,users_table
 from modules.helper_funcs.helper import get_help
 from modules.helper_funcs.lang_strings.strings import string_dict
+from modules.helper_funcs.misc import delete_messages
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -103,7 +105,7 @@ class SendMessageToAdmin(object):
                                              callback_data="help_back")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
-        if "admin" in update.callback_query.data:
+        if "anonim" in update.callback_query.data:
             user_data["anonim"] = True
             bot.send_message(update.callback_query.message.chat_id,
                              string_dict(bot)["send_message_from_user_to_admin_anonim_text"],
@@ -195,7 +197,7 @@ class SendMessageToAdmin(object):
             user_data["user_full_name"] = "anonim_" + haikunator.haikunate()
             user_data["chat_id"] = update.callback_query.message.chat_id
         else:
-            user_data["user_full_name"] = update.callback_query.from_user.full_name
+            user_data["user_full_name"] = update.callback_query.from_user.mention_markdown()
             user_data["chat_id"] = update.callback_query.message.chat_id
         bot.send_message(update.callback_query.message.chat_id,
                          string_dict(bot)["send_message_5"],
@@ -396,14 +398,17 @@ class SendMessageToUsers(object):
 class AnswerToMessage(object):
 
     def send_message(self, bot, update, user_data):
+        delete_messages(bot, update, user_data)
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                              callback_data="help_module(messages)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
         user_data["message_id"] = update.callback_query.data.replace("answer_to_message_", "")
-        user_data["chat_id"] = users_messages_to_admin_table.find_one(
-            {"message_id": int(user_data["message_id"])})["chat_id"]
+        user = users_messages_to_admin_table.find_one(
+            {"message_id": int(user_data["message_id"])})
+        user_data["chat_id"] = user["chat_id"]
+
 
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
@@ -461,6 +466,10 @@ class AnswerToMessage(object):
         return MESSAGE_TO_USERS
 
     def send_message_finish(self, bot, update, user_data):
+        # user_name = bot.get_chat_member(user_data["chat_id"]).user.mention_markdown()
+
+        bot.send_message(user_data["chat_id"],
+                         text=string_dict(bot)["send_message_answer_user"])
         for content_dict in user_data["content"]:
             if "text" in content_dict:
                 bot.send_message(user_data["chat_id"],
@@ -509,8 +518,17 @@ class AnswerToMessage(object):
 
 
 class DeleteMessage(object):
+    # def delete_message_double_check(self, bot, update):  #TODO
+    #     buttons = list()
+    #     buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
+    #                                          callback_data="help_module(messages)")])
+    #     reply_markup = InlineKeyboardMarkup(
+    #         buttons)
+    #     bot.delete_message(chat_id=update.callback_query.message.chat_id,
+    #                        message_id=update.callback_query.message.message_id)
 
-    def delete_message(self, bot, update):
+    def delete_message(self, bot, update, user_data):
+        delete_messages(bot, update, user_data)
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                              callback_data="help_module(messages)")])
@@ -549,10 +567,11 @@ class DeleteMessage(object):
 
 class SeeMessageToAdmin(object):
 
-    def see_messages(self, bot, update):
+    def see_messages(self, bot, update, user_data):
+        user_data["to_delete"] = []
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                             callback_data="help_module(messages)")])
+                                             callback_data="inbox_back")])
         delete_buttons = buttons
         delete_buttons.append([InlineKeyboardButton(text=string_dict(bot)["delete_button_str_all"],
                                                     callback_data="delete_message_all")
@@ -571,20 +590,35 @@ class SeeMessageToAdmin(object):
         if messages.count() != 0:
             for message in messages:
                 if message["timestamp"] + datetime.timedelta(days=14) > datetime.datetime.now():
-                    bot.send_message(update.callback_query.message.chat_id,
-                                     "User's name: {}, \n\nTime: {}".format(
-                                         message["user_full_name"],
-                                         message["timestamp"].strftime('%d, %b %Y, %H:%M'),
-                                         # message["topic"] \n\nTopic {}
-                                     ),
-                                     reply_markup=InlineKeyboardMarkup(
-                                         [[InlineKeyboardButton(text=string_dict(bot)["view_message_str"],
-                                                                callback_data="view_message_" +
-                                                                              str(message["message_id"]))]
-                                          ]
-                                     ))
-            bot.send_message(update.callback_query.message.chat_id,
-                             string_dict(bot)["back_text"], reply_markup=delete_markup)
+                    if message["anonim"] is False:
+                        user_data["to_delete"].append(bot.send_message(update.callback_query.message.chat_id,
+                                         "User's name: {}, \n\nTime: {}".format(
+                                             message["user_full_name"],
+                                             message["timestamp"].strftime('%d, %b %Y, %H:%M'),
+                                             # message["topic"] \n\nTopic {}
+                                         ),
+                                         reply_markup=InlineKeyboardMarkup(
+                                             [[InlineKeyboardButton(text=string_dict(bot)["view_message_str"],
+                                                                    callback_data="view_message_" +
+                                                                                  str(message["message_id"]))]
+                                              ]
+                                         ),
+                                         parse_mode=ParseMode.MARKDOWN))
+                    else:
+                        user_data["to_delete"].append(bot.send_message(update.callback_query.message.chat_id,
+                                         "User's name: {}, \n\nTime: {}".format(
+                                             message["user_full_name"],
+                                             message["timestamp"].strftime('%d, %b %Y, %H:%M'),
+                                             # message["topic"] \n\nTopic {}
+                                         ),
+                                         reply_markup=InlineKeyboardMarkup(
+                                             [[InlineKeyboardButton(text=string_dict(bot)["view_message_str"],
+                                                                    callback_data="view_message_" +
+                                                                                  str(message["message_id"]))]
+                                              ]
+                                         )))
+            user_data["to_delete"].append(bot.send_message(update.callback_query.message.chat_id,
+                             string_dict(bot)["back_text"], reply_markup=delete_markup))
         else:
             markup = InlineKeyboardMarkup([[InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                             callback_data="help_module(messages)")]])
@@ -593,14 +627,37 @@ class SeeMessageToAdmin(object):
 
         return ConversationHandler.END
 
-    def view_message(self, bot, update):
+    def view_message(self, bot, update, user_data):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-
+        delete_messages(bot, update, user_data)
         query = update.callback_query
         message = users_messages_to_admin_table.find_one({"bot_id": bot.id,
                                                           "message_id": int(query.data.replace("view_message_", ""))})
-        bot.send_message(update.callback_query.message.chat_id,
+
+        for content_dict in message["content"]:
+            if "text" in content_dict:
+                user_data["to_delete"].append(query.message.reply_text(text=content_dict["text"]))
+            if "audio_file" in content_dict:
+                user_data["to_delete"].append(query.message.reply_audio(content_dict["audio_file"]))
+            if "voice_file" in content_dict:
+                user_data["to_delete"].append(query.message.reply_audio(content_dict["voice_file"]))
+            if "video_file" in content_dict:
+                user_data["to_delete"].append(query.message.reply_video(content_dict["video_file"]))
+            if "video_note_file" in content_dict:
+                user_data["to_delete"].append(query.message.reply_video_note(content_dict["video_note_file"]))
+            if "document_file" in content_dict:
+                if ".png" in content_dict["document_file"] or ".jpg" in content_dict["document_file"]:
+                    user_data["to_delete"].append(query.message.reply_photo(photo=content_dict["document_file"]))
+                else:
+                    user_data["to_delete"].append(query.message.reply_document(document=content_dict["document_file"]))
+            if "photo_file" in content_dict:
+                user_data["to_delete"].append(query.message.reply_photo(photo=content_dict["photo_file"]))
+            if "animation_file" in content_dict:
+                user_data["to_delete"].append(query.message.reply_animation(photo=content_dict["animation_file"]))
+            if "sticker_file" in content_dict:
+                user_data["to_delete"].append(query.message.reply_sticker(photo=content_dict["sticker_file"]))
+        user_data["to_delete"].append(bot.send_message(update.callback_query.message.chat_id,
                          "User's name: {}, \n Timestamp:{}".format(
                              message["user_full_name"],
                              message["timestamp"]
@@ -614,40 +671,24 @@ class SeeMessageToAdmin(object):
                                                                   str(message["message_id"]))],
 
                               ]
-                         ))
-        for content_dict in message["content"]:
-            if "text" in content_dict:
-                query.message.reply_text(text=content_dict["text"])
-            if "audio_file" in content_dict:
-                query.message.reply_audio(content_dict["audio_file"])
-            if "voice_file" in content_dict:
-                query.message.reply_audio(content_dict["voice_file"])
-            if "video_file" in content_dict:
-                query.message.reply_video(content_dict["video_file"])
-            if "video_note_file" in content_dict:
-                query.message.reply_video_note(content_dict["video_note_file"])
-            if "document_file" in content_dict:
-                if ".png" in content_dict["document_file"] or ".jpg" in content_dict["document_file"]:
-                    query.message.reply_photo(photo=content_dict["document_file"])
-                else:
-                    query.message.reply_document(document=content_dict["document_file"])
-            if "photo_file" in content_dict:
-                query.message.reply_photo(photo=content_dict["photo_file"])
-            if "animation_file" in content_dict:
-                query.message.reply_animation(photo=content_dict["animation_file"])
-            if "sticker_file" in content_dict:
-                query.message.reply_sticker(photo=content_dict["sticker_file"])
-
+                         ), parse_mode=ParseMode.MARKDOWN))
         bot.send_message(update.callback_query.message.chat_id,
                          string_dict(bot)["back_text"],
                          reply_markup=InlineKeyboardMarkup(
                              [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                                    callback_data="help_module(messages)")]]))
+                                                    callback_data="view_back_message")]]))
         return ConversationHandler.END
 
+    def back(self, bot, update, user_data):
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        delete_messages(bot, update, user_data)
+        get_help(bot, update)
+        return ConversationHandler.END
 
 DELETE_MESSAGES_HANDLER = CallbackQueryHandler(pattern="delete_message",
-                                               callback=DeleteMessage().delete_message)
+                                               callback=DeleteMessage().delete_message,
+                                               pass_user_data=True)
 
 SEND_MESSAGE_TO_ADMIN_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(pattern="send_message_to_admin",
@@ -714,9 +755,14 @@ ADD_MESSAGE_CATEGORY_HANDLER = ConversationHandler(
     ]
 )
 
-SEE_MESSAGES_HANDLER = CallbackQueryHandler(pattern="inbox_message", callback=SeeMessageToAdmin().see_messages)
+SEE_MESSAGES_HANDLER = CallbackQueryHandler(pattern="inbox_message", callback=SeeMessageToAdmin().see_messages,
+                                            pass_user_data=True)
+SEE_MESSAGES_BACK_HANDLER = CallbackQueryHandler(pattern="inbox_back", callback=SeeMessageToAdmin().back,
+                                                 pass_user_data=True)
 SEE_MESSAGES_FINISH_HANDLER = CallbackQueryHandler(pattern="view_message_",
-                                                   callback=SeeMessageToAdmin().view_message)
+                                                   callback=SeeMessageToAdmin().view_message, pass_user_data=True)
+SEE_MESSAGES_FINISH_BACK_HANDLER = CallbackQueryHandler(pattern="view_back_message",
+                                                   callback=SeeMessageToAdmin().back, pass_user_data=True)
 
 ANSWER_TO_MESSAGE_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(pattern=r"answer_to_message",

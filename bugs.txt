@@ -1,11 +1,18 @@
-# TODO send message to admin by users: two buttons- send anonimously / send message
+# TODO send URGENT message to users/admins/donator, with mention- so that it will be unmuted Simply ask- is this an imporant message?
+# TODO answers to messages must be with mentions- no muted bots
+# TODO see messages: Anonymous messages/Simple messages
 # TODO Delete for a month/week/all - ask if sure
-# TODO add a link to the shop in buttons ==> create a custom "link button"
-# TODO admins between them can send urgent messages- is written who and what did
+# TODO create a custom "link button"
+# TODO results in polls change order depending on the winner- to make it more clear
+# TODO think about an example chatbot (TV8) with CommentBot
+# TODO add pypy to the server
+
+
+
+
 # TODO teams/tags for admins only
-# TODO send message to donators
 # TODO basic shop
-# TODO add support for groups
+
 
 p.s. remember the port on mongo and the security- encrypt the messages and all data
 [users]  [admins]
@@ -14,39 +21,11 @@ Admins: [send message] [send urgent message]
 Users: [send message] [ask for donation] [send survey]
 
 
-# TODO think about an example chatbot (TV8) with CommentBot
-https://github.com/python-telegram-bot/python-telegram-bot/wiki/Code-snippets#simple-way-of-restarting-the-bot
 
 
 Юра
 # TODO implement https://github.com/CubexX/confstat-bot  with channels
-# TODO last hour/day/week/month  messages
-# TODO fix back buttons
-# TODO send a message to everyone who donated
 # TODO results for users, donations and surveys - send csv file
-# TODO support bot - answer to the users messages exactly as in messages.py
-# TODO delete and answer buttons in messages to look better. Delete old messages using user_data
+# TODO add the option "pause the bot"
+# TODO add support for groups
 
-
-
-TO TALK WITH NIKITA ON Privacy Terms and Checkbox
-
-# TODO later- add the option for the user to choose the language adn for admin to edit multiple versions of the bot
-# TODO Kirill add the option "pause the bot"
-sudo apt-get install python-dev -Y
-sudo apt-get install virtualenvwrapper -Y
-sudo apt-get install postgresql-server-dev-all -Y
-sudo apt-get install libicu-dev -Y
-sudo apt-get install libjpeg-dev -Y
-sudo apt-get install libfreetype6-dev -Y
-sudo apt-get install build-essential -Y
-sudo apt-get install gettext -Y
-sudo apt-get install python-geoip -Y
-sudo apt-get install libxapian-dev -Y
-sudo apt-get install python-xapian -Y
-sudo apt-get install binutils -Y
-sudo apt-get install libproj-dev -Y
-sudo apt-get install gdal-bin -Y
-sudo apt-get install nodejs -Y
-sudo apt-get install nodejs-legacy -Y
-sudo apt-get install npm -Y

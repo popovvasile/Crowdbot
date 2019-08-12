@@ -149,14 +149,17 @@ Write your message. I’ll read it.
         send_message_7="What do you want to answer to this user?",
         send_message_8="You can delete this message",
         send_message_9="Message has been canceled",
+        send_message_answer_user="Dear user, here is the answer to your message",
 
         send_message_admin="""
 Messages
-Send messages to users and get feedback
+Send messages to users and get feedback. 
+You can send any kinds of files, video, audio or media messages.
 
 """,
         send_message_user="""
 Say Hello to the admin!
+You can send any kinds of files, video, audio or media messages.
 """,
         send_donation_request_1="Tell everyone about the donation and how you will utilize the money\n" \
                                 "The 'Donate' button will be attached to the message'",
@@ -475,13 +478,17 @@ Click "📌 Create a button", to add a content.
         send_message_7="Что ты хочешь ответить этому пользователю?",
         send_message_8="Ты можешь удалить это сообщение",
         send_message_9="Сообщение отменено",
+        send_message_answer_user="Вам пришел ответ на твое прошлое сообщение",
+
         send_message_anonim="Хочешь отправить это сообщение аннонимно?\n"
                             "Если ты ответишь да, мы не сможем тебе ответить",
         send_message_admin="""
-Сообщения
+Сообщения.
+Ты можешь отправлять любые сообщения, файлы, аудио, видео или фотографии.
 """,
         send_message_user="""
 Напиши сообщение. Я прочту.
+Ты можешь отправлять любые сообщения, файлы, аудио, видео или фотографии.
 """,
         send_message_reply="Ответ на ваше сообщение: \n",
 

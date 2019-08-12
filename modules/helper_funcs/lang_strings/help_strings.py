@@ -52,7 +52,7 @@ def help_strings(bot):
                           ],
 
 
-        admin_help=string_dict(bot)["send_message_user"],
+        admin_help=string_dict(bot)["send_message_admin"],
 
         admin_keyboard=[
             InlineKeyboardButton(text=string_dict(bot)["send_message_button_1"],
