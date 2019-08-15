@@ -133,16 +133,16 @@ def main(token):
     # dispatcher.add_handler(error_help_callback_handler)
 
     LOGGER.info("Using long polling.")
-    # updater.start_webhook(listen='0.0.0.0',
-    #                       port=8443,
-    #                       url_path=token,
-    #                       key='private.key',
-    #                       cert='cert.pem',
-    #                       webhook_url='https://142.93.109.14:8443/' + token)
+    updater.start_webhook(listen='0.0.0.0',
+                          port=8443,
+                          url_path=token,
+                          key='private.key',
+                          cert='cert.pem',
+                          webhook_url='https://104.248.82.166:8443/' + token)
     print(token)
-    updater.start_polling(timeout=60, read_latency=60, clean=True, bootstrap_retries=5)
+    # updater.start_polling(timeout=60, read_latency=60, clean=True, bootstrap_retries=5)
 
-    updater.idle()
+    # updater.idle()
 
 #
 # if __name__ == '__main__':
