@@ -1,3 +1,5 @@
+import gc
+
 from database import chatbots_table
 
 string_dict_dict = {
@@ -720,5 +722,7 @@ https://telegra.ph/Gajd-Podklyuchit-donaty-07-03
 
 
 def string_dict(bot):
+
     chatbot = chatbots_table.find_one({"bot_id": bot.id})
+    gc.collect()
     return string_dict_dict[chatbot["lang"]]

@@ -5,6 +5,7 @@ from multiprocessing import Process
 from pymongo import MongoClient
 import time
 from main_runner import main
+import gc
 
 client = MongoClient('localhost', 27017)
 crowdbot_db = client['crowdbot_chatbots']
@@ -38,7 +39,8 @@ def multiple_bot_daemon():
             if process_key not in list_of_tokens:
                 my_process[process_key].terminate()
                 my_process.pop(process_key, None)
-        time.sleep(2)
+
+        time.sleep(10)
 
 
 if __name__ == '__main__':
