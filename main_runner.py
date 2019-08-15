@@ -39,7 +39,7 @@ logging.basicConfig(
 LOGGER = logging.getLogger(__name__)
 
 
-def main(token):
+def main(token, port):
     updater = tg.Updater(token)  # TODO check the docs
     dispatcher = updater.dispatcher
     dispatcher.add_error_handler(error_callback)
@@ -134,16 +134,15 @@ def main(token):
 
     LOGGER.info("Using long polling.")
     updater.start_webhook(listen='0.0.0.0',
-                          port=8443,
+                          port=port,
                           url_path=token,
                           key='private.key',
                           cert='cert.pem',
-                          webhook_url='https://104.248.82.166:8443/' + token)
+                          webhook_url='https://104.248.82.166:{}/'.format(port) + token)
     print(token)
     # updater.start_polling(timeout=60, read_latency=60, clean=True, bootstrap_retries=5)
 
     # updater.idle()
-
 #
 # if __name__ == '__main__':
 #     main("633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg")
