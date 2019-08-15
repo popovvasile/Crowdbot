@@ -140,7 +140,7 @@ def main(token):
     #                       cert='cert.pem',
     #                       webhook_url='https://142.93.109.14:8443/' + token)
     print(token)
-    updater.start_polling(timeout=600, read_latency=4)
+    updater.start_polling(timeout=60, read_latency=60, clean=True, bootstrap_retries=5)
 
     updater.idle()
 
