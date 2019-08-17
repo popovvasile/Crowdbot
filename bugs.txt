@@ -9,15 +9,15 @@ p.s. remember the port on mongo and the security- encrypt the messages and all d
 Admins: [send message] [send urgent message]
 Users: [send message] [ask for donation] [send survey]
 
-# TODO send link instead of donate button
-
-
-Юра
-# TODO fix presentation bot
-# TODO messages - show how many new messages are "unread"
-# TODO results in polls change order depending on the winner- to make it more clear, remove descriptions
-# TODO stats for bot-  users, donates
-# TODO results for users, donations and surveys - send csv file
-# TODO add the option "pause the bot" - botfather
+# TODO send message to TV8
+# TODO pagination for messages
+# TODO add "block user"
+# TODO messages - show how many new messages are "unread" -- take a look at botfather
+# TODO stats for bot-  users, donates  --- DO  IT FIRST
 # TODO add support for groups
+
+
+# TODO fix presentation bot
+# TODO results in polls change order depending on the winner- to make it more clear, remove descriptions
+# TODO add the option "pause the bot" - botfather
 

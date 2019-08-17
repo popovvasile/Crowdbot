@@ -48,7 +48,7 @@ def send_visitor_help(bot, chat_id, text, keyboard=None):
                      reply_markup=InlineKeyboardMarkup(
                          pairs
                      ))
-    gc.collect()
+
 
 
 def send_admin_user_mode(bot, chat_id, text, keyboard=None):
@@ -70,7 +70,7 @@ def send_admin_user_mode(bot, chat_id, text, keyboard=None):
                      reply_markup=InlineKeyboardMarkup(
                          pairs
                      ))
-    gc.collect()
+
 
 
 
@@ -173,7 +173,7 @@ def button_handler(bot: Bot, update: Update, user_data):
             LOGGER.exception("Exception in help buttons. %s", str(query.data))
     bot.send_message(chat_id=update.callback_query.message.chat_id,
                      text=string_dict(bot)["back_button"], reply_markup=InlineKeyboardMarkup(buttons))
-    gc.collect()
+
 
 
 def back_from_button_handler(bot: Bot, update: Update, user_data):
@@ -277,7 +277,7 @@ def help_button(bot: Bot, update: Update):
             pass
         else:
             LOGGER.exception("Exception in help buttons. %s", str(query.data))
-    gc.collect()
+
 
 
 def get_help(bot: Bot, update: Update):
@@ -308,7 +308,7 @@ def get_help(bot: Bot, update: Update):
             send_admin_help(bot, chat.id, HELP_STRINGS.format(welcome_message))
     else:
         send_visitor_help(bot, chat.id, HELP_STRINGS.format(welcome_message))
-    gc.collect()
+
 
 
 def on_stupid_strings(bot: Bot, update: Update):
