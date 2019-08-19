@@ -31,8 +31,12 @@ def send_admin_help(bot, chat_id, text, keyboard=None):
 
 
 def send_visitor_help(bot, chat_id, text, keyboard=None):
-    buttons = [InlineKeyboardButton(string_dict(bot)["send_message_1"], callback_data="help_module(messages)"),
-               InlineKeyboardButton(string_dict(bot)["pay_donation_mode_str"], callback_data='pay_donation')]
+    donation_request = chatbots_table.find_one({"bot_id": bot.id})
+    if donation_request.get("donate") is not None and donation_request.get("donate") != {}:
+        buttons = [InlineKeyboardButton(string_dict(bot)["send_message_1"], callback_data="help_module(messages)"),
+                   InlineKeyboardButton(string_dict(bot)["pay_donation_mode_str"], callback_data='pay_donation')]
+    else:
+        buttons = [InlineKeyboardButton(string_dict(bot)["send_message_1"], callback_data="help_module(messages)")]
     buttons += [InlineKeyboardButton(button["button"],
                                      callback_data="button_{}".format(button["button"].replace(" ", "").lower()))
                 for button in custom_buttons_table.find({"bot_id": bot.id, "link_button": False})]
@@ -52,8 +56,12 @@ def send_visitor_help(bot, chat_id, text, keyboard=None):
 
 
 def send_admin_user_mode(bot, chat_id, text, keyboard=None):
-    buttons = [InlineKeyboardButton(string_dict(bot)["send_message_1"], callback_data="help_module(messages)"),
-               InlineKeyboardButton(string_dict(bot)["pay_donation_mode_str"], callback_data='pay_donation')]
+    donation_request = chatbots_table.find_one({"bot_id": bot.id})
+    if donation_request.get("donate") is not None and donation_request.get("donate") != {}:
+        buttons = [InlineKeyboardButton(string_dict(bot)["send_message_1"], callback_data="help_module(messages)"),
+                   InlineKeyboardButton(string_dict(bot)["pay_donation_mode_str"], callback_data='pay_donation')]
+    else:
+        buttons = [InlineKeyboardButton(string_dict(bot)["send_message_1"], callback_data="help_module(messages)")]
     buttons += [InlineKeyboardButton(button["button"],
                                      callback_data="button_{}".format(button["button"].replace(" ", "").lower()))
                 for button in custom_buttons_table.find({"bot_id": bot.id, "link_button": False})]

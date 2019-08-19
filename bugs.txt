@@ -9,6 +9,9 @@ p.s. remember the port on mongo and the security- encrypt the messages and all d
 Admins: [send message] [send urgent message]
 Users: [send message] [ask for donation] [send survey]
 
+# TODO donate button disappers when there is no donation set
+# TODO Yura is still admin in the bot
+# TODO anonymous messages does not work
 # TODO send message to TV8
 # TODO pagination for messages
 # TODO add "block user"

@@ -116,8 +116,6 @@ def main(token, port):
     dispatcher.add_handler(SEND_SURVEY_TO_CHANNEL_HANDLER)
     dispatcher.add_handler(SEND_DONATION_TO_CHANNEL_HANDLER)
 
-
-
     dispatcher.add_handler(custom_button_back_callback_handler)
     dispatcher.add_handler(custom_button_callback_handler)
     dispatcher.add_handler(back_from_edit_button_handler)

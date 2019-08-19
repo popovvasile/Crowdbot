@@ -17,16 +17,17 @@ def help_strings(bot):
     )
     help_dict["menu_buttons"] = dict(
         mod_name=string_dict(bot)["add_menu_module_button"],
-        admin_keyboard=[InlineKeyboardButton(text=string_dict(bot)["user_mode_module"],
-                                             callback_data="turn_user_mode_on"),
-                        InlineKeyboardButton(text=string_dict(bot)["create_button"],
+        admin_keyboard=[InlineKeyboardButton(text=string_dict(bot)["create_button"],
                                              callback_data="create_button"),
                         InlineKeyboardButton(text=string_dict(bot)["edit_button_button"],
                                              callback_data="edit_button"),
                         InlineKeyboardButton(text=string_dict(bot)["delete_button"],
                                              callback_data="delete_button"),
                         InlineKeyboardButton(text=string_dict(bot)["edit_menu_text"],
-                                             callback_data="edit_bot_description")],
+                                             callback_data="edit_bot_description"),
+                        InlineKeyboardButton(text=string_dict(bot)["user_mode_module"],
+                                             callback_data="turn_user_mode_on"),
+                        ],
 
         admin_help=string_dict(bot)["add_menu_buttons_help"]
     )
@@ -59,8 +60,8 @@ def help_strings(bot):
                                  callback_data="send_message_to_users"),
             InlineKeyboardButton(text=string_dict(bot)["send_message_button_2"],
                                  callback_data="inbox_message"),
-            InlineKeyboardButton(text=string_dict(bot)["send_message_button_4"],
-                                 callback_data="send_message_only_to_admins"),
+            # InlineKeyboardButton(text=string_dict(bot)["send_message_button_4"],
+            #                      callback_data="send_message_only_to_admins"),
             InlineKeyboardButton(text=string_dict(bot)["send_message_button_5"],
                                  callback_data="send_message_to_donators"),
         ]
