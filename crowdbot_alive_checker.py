@@ -5,7 +5,6 @@ from multiprocessing import Process
 from pymongo import MongoClient
 import time
 from main_runner import main
-import gc
 
 client = MongoClient('localhost', 27017)
 crowdbot_db = client['crowdbot_chatbots']
