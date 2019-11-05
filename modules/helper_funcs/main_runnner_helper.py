@@ -18,8 +18,6 @@ HELP_STRINGS = """
 """
 
 
-
-
 # do not async
 def send_admin_help(bot, chat_id, text, keyboard=None):
     if not keyboard:
@@ -52,7 +50,6 @@ def send_visitor_help(bot, chat_id, text, keyboard=None):
                      reply_markup=InlineKeyboardMarkup(
                          pairs
                      ))
-
 
 
 def send_admin_user_mode(bot, chat_id, text, keyboard=None):

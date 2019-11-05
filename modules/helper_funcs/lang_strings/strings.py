@@ -2,8 +2,7 @@ import gc
 
 from database import chatbots_table
 
-string_dict_dict = {
-    "ENG": dict(
+ENG = dict(
         you_have_been_reg=", you have been registered as an authorized user of this bot.\n\n"
                           "Enter your password or click /cancel",
         no_pass_provided="No password provided. Please send a  valid password or click Back",
@@ -272,8 +271,8 @@ Payments
         manage_button_str_6="🛑 You canceled the creation of a button.",
 
         edit_button_str_1="Enter a new 🤝 greeting for users",
-        edit_button_str_2="✅ It's done.!",
-
+        edit_button_str_2="✅ It's done.!")
+ENG .update(
         donations_edit_str_1="Test donation. Ignore it",
         donations_edit_str_2="What to do with the payment? Or press '🔙 Back",
         donations_edit_str_3="Yes, I'm sure.",
@@ -372,10 +371,50 @@ Click "📌 Create a button", to add a content.
         add_menu_buttons_str_9="🛑 You canceled the creation of a button.",
         add_menu_buttons_str_10="You can create a new button or return to menu",
         add_button="Add",
-        add_button_content="Or add content to the button"
-    ),
+        add_button_content="Or add content to the button",
+        start_help="Welcome! My name is {} and I am ready to use! Add a group, start polls and get donations ",
+        my_groups="🛠 Manage groups",
+        add_group='➕ Add a group',
+        remove_group='🗑 Remove',
+        post_on_group='✍️ Write a post',
+        groups_str_1='Channels',
+        groups_str_2='Choose a group',
+        groups_menu="What do you wan to do with your group?",
+        no_groups='You have no group configured yet. Click "➕Add group" to configure your first group',
+        wrong_group_link_format='Send me link or username of your group. \n' \
+                                'For Example "https://t.me/name" or "t.me/name" or "@name" or just "name"',
+        bot_is_not_admin_of_group='Bot is not admin in this({}) group. \n' \
+                                  'Add bot as admin to the group and then back to this menu \n' \
+                                  'and send me link or username of your group. \n' \
+                                  'For Example "https://t.me/name" or "t.me/name" or "@name" or just "name"',
+        bot_is_not_admin_of_group_2="Bot is not admin in this({}) group or can't send message to the group\n" \
+                                    "So group was deleted. Add bot as admin to the group, \n" \
+                                    "let it send message to the group "
+                                    "and then try again",
+        groups_str_4="To add group u need to add this bot as admin to your group \n"
+                     "and then back to this menu and send \n"
+                     "link or username of your group. \n"
+                     "Send me link or username of your group",
+        allow_bot_send_messages='Allow the bot to send messages to the group. \n'
+                                'And than back to this menu and send username of group',
+        no_such_group='There are no such group. ',
+        choose_group_to_remove='Choose group to 🗑 remove',
+        group_has_been_removed='Channel({}) has been deleted.',
+        group_added_success='Now send posts to the group({}) using this commands.',
+        choose_group_to_post='Choose group u want to post',
+        post_message='Choose an action',
+        send_post="What do you want to post on your group({})?\n" \
+                  "We will forward your message to group.",
+        choose_group_to_send_poll='Choose group u want to send poll',
+        choose_group_to_send_survey='Choose group u want to send survey',
+        try_to_add_already_exist_group='This group already exists',
+        send_survey_to_group='Survey to group',
+        send_poll_to_group='Poll to group',
+        send_post_to_group='Write a post',
+        send_donation_to_group="Send a 'Donate' button to group",
+    )
 
-    "RUS": dict(
+RUS=dict(
         you_have_been_reg=", ты зарегистрирован как админ бота. \n\n"
                           "Введи одноразовый пароль из письма.",
         no_pass_provided="Ты не ввел пароль. Введи пароль который ты получил в письме или нажми 'Назад'",
@@ -611,7 +650,9 @@ Click "📌 Create a button", to add a content.
         manage_button_str_5="✅ Супер! Контент обновлён",
         manage_button_str_6="🛑 Ты отменил создание кнопки",
 
-        edit_button_str_1="Напиши новое приветствие для юзеров",
+        edit_button_str_1="Напиши новое приветствие для юзеров")
+RUS.update(
+
         edit_button_str_2="✅ Дело сделано!",
         edit_donation="Редактировать",
 
@@ -659,7 +700,8 @@ Click "📌 Create a button", to add a content.
         survey_str_20="Привет, пройди опрос.\n" \
                       "Нажми '🏁 Старт', чтобы начать ",
         survey_str_21="Упс, опрос не отправлен 🤨 \n"
-                      "У тебя ещё нет юзеров. Вставь ссылку на бота в соц. сетях или пригласи друзей. \n" "Скоро кто-нибудь придёт 🐣",
+                      "У тебя ещё нет юзеров. Вставь ссылку на бота в соц. сетях или пригласи друзей. \n"
+                      "Скоро кто-нибудь придёт 🐣",
         survey_str_22="✅ Опрос отправлен",
         survey_str_23="""Ты ещё не сделал опрос.\n
 Нажми "Создать", или '🔙 Назад'""",
@@ -717,13 +759,55 @@ https://telegra.ph/Gajd-Podklyuchit-donaty-07-03
         add_menu_buttons_str_10="Создай новую кнопку или возвращайся в главное меню",
 
         add_button="Добавить",
-        add_button_content="Или добавить контент в кнопку"
+        add_button_content="Или добавить контент в кнопку",
+        my_groups="🛠 Управлять группуми",
+        add_group="➕ Добавить группу",
+        remove_group="🗑Удалить ",
+        post_on_group=" ✍️Сделать пост",
+        groups_menu="📱 Группы",
+        groups_str_1='Группы',
+        groups_str_2='Выбери группу:',
+        # Нажми "➕ Добавить группу" или "🔙 Назад"
+        no_groups='Нажми "➕ Добавить группу", чтобы подключить группу или "🔙 Назад"',
+        wrong_group_link_format='Отправь Ссылку или Юзернейм твоей групы.' \
+                                'Например "https://t.me/name" или "t.me/name", или "@name", или просто "name"',
+        bot_is_not_admin_of_group=' Сделай этого бота админом группуа ({}) и возвращайся обратно в бот. ' \
+                                  'Отправь Ссылку или Юзернейм группуа. ' \
+                                  'Например "https://t.me/name" или "t.me/name", или "@name", или просто "name"',
+        bot_is_not_admin_of_group_2="Бот не админ группуа ({}) или у него нет прав для отправки сообщений." \
+                                    "'Разреши боту отправлять сообщения в группу. "
+                                    "Зайди в свой группу и в списке админов нажми на бота." \
+                                    "Возвращайся обратно в бот и отправь Cсылку или Юзернейм группуа",
+        groups_str_4="Чтобы подключить бота к группуу:\n"
+                     "• Зайди в настройки группуа\n"
+                     "• Добавь этого бота в админы группуы\n"
+                     "• Вернись обратно и отправь боту ссылку на Групп или его Юзернейм\n",
+        allow_bot_send_messages='Разреши боту отправлять сообщения в группу. '
+                                'Зайди в свой группу и в списке админов нажми на бота' \
+                                'Вернись обратно в бот и отправь Ссылку или Юзернейм группуа ',
+        no_such_group='Такого группуа нет',
+        choose_group_to_remove='Выбери группу, чтобы 🗑 удалить.',
+        group_has_been_removed='Группа({}) удалён.',
+        group_added_success='✅ Группа({}) усешно добавлен.',
+        choose_group_to_post='Выбери группу, чтобы сделать пост',
+        post_message='Выбери действие',
+        send_post="Напиши пост для группуа({})?\n" \
+                  "Мы отправим почтового голубя 🕊 ",
+        choose_group_to_send_poll='Выбери группу, чтобы отправить опрос',
+        choose_group_to_send_survey='Выбери группу, чтобы отправить открытый опрос',
+        try_to_add_already_exist_group='✅ Эта группа уже добавлена',
+        send_survey_to_channel='Отправить от. опрос в группу',
+        send_poll_to_channel='Отправить опрос в группу',
+        send_post_to_channel='Запостить',
+        send_donation_to_channel="Напомнить о донатах в группу",
 
-    )}
+    )
+
+string_dict_dict = {"ENG": ENG,
+                    "RUS": RUS}
 
 
 def string_dict(bot):
-
     chatbot = chatbots_table.find_one({"bot_id": bot.id})
 
     return string_dict_dict[chatbot["lang"]]

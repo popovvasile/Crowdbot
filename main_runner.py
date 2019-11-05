@@ -6,6 +6,11 @@ from telegram.ext import CommandHandler, CallbackQueryHandler,RegexHandler
 
 from modules.channels_polls_surveys_donate import SEND_SURVEY_TO_CHANNEL_HANDLER, SEND_POLL_TO_CHANNEL_HANDLER, \
     SEND_DONATION_TO_CHANNEL_HANDLER
+from modules.eshop import CREATE_PRODUCT_CHOOSE, PRODUCT_ADD_HANDLER, DELETE_PRODUCT_HANDLER, PRODUCT_EDIT_HANDLER, \
+    PRODUCT_EDIT_FINISH_HANDLER, PRODUCT_ADD_FINISH_HANDLER, DELETE_PRODUCT_CONTENT_HANDLER
+from modules.groups.groups import MY_GROUPS_HANDLER, ADD_GROUP_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER
+from modules.groups.groups_polls_surveys_donate import SEND_POLL_TO_GROUP_HANDLER, SEND_SURVEY_TO_GROUP_HANDLER, \
+    SEND_DONATION_TO_GROUP_HANDLER
 from modules.menu_description import EDIT_BOT_DESCRIPTION_HANDLER
 from modules.helper_funcs.admin_login import ADMIN_AUTHENTICATION_HANDLER
 from modules.menu_buttons import BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER, LINK_BUTTON_ADD_HANDLER, \
@@ -107,14 +112,22 @@ def main(token, port):
     dispatcher.add_handler(DELETE_POLLS_HANDLER)
     dispatcher.add_handler(POLLS_RESULTS_HANDLER)
 
-    # CHANNELS
-    dispatcher.add_handler(MY_CHANNELS_HANDLER)
-    dispatcher.add_handler(ADD_CHANNEL_HANDLER)
-    dispatcher.add_handler(REMOVE_CHANNEL_HANDLER)
-    dispatcher.add_handler(SEND_POST_HANDLER)
-    dispatcher.add_handler(SEND_POLL_TO_CHANNEL_HANDLER)
-    dispatcher.add_handler(SEND_SURVEY_TO_CHANNEL_HANDLER)
-    dispatcher.add_handler(SEND_DONATION_TO_CHANNEL_HANDLER)
+    # GROUPS
+    dispatcher.add_handler(MY_GROUPS_HANDLER)
+    dispatcher.add_handler(ADD_GROUP_HANDLER)
+    dispatcher.add_handler(REMOVE_GROUP_HANDLER)
+    dispatcher.add_handler(SEND_POST_TO_GROUP_HANDLER)
+    dispatcher.add_handler(SEND_POLL_TO_GROUP_HANDLER)
+    dispatcher.add_handler(SEND_SURVEY_TO_GROUP_HANDLER)
+    dispatcher.add_handler(SEND_DONATION_TO_GROUP_HANDLER)
+
+    # dispatcher.add_handler(CREATE_PRODUCT_CHOOSE)
+    # dispatcher.add_handler(PRODUCT_ADD_HANDLER)
+    # dispatcher.add_handler(DELETE_PRODUCT_HANDLER)
+    # dispatcher.add_handler(PRODUCT_EDIT_HANDLER)
+    # dispatcher.add_handler(PRODUCT_EDIT_FINISH_HANDLER)
+    # dispatcher.add_handler(PRODUCT_ADD_FINISH_HANDLER)
+    # dispatcher.add_handler(DELETE_PRODUCT_CONTENT_HANDLER)
 
     dispatcher.add_handler(custom_button_back_callback_handler)
     dispatcher.add_handler(custom_button_callback_handler)
