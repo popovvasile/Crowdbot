@@ -7,7 +7,7 @@ from telegram.error import Unauthorized, BadRequest, TimedOut, NetworkError, Tel
 from telegram.ext import run_async, ConversationHandler
 from urllib3.exceptions import HTTPError
 
-from database import custom_buttons_table, users_table, chatbots_table, user_mode_table
+from database import custom_buttons_table, users_table, chatbots_table, user_mode_table, products_table, groups_table
 from modules.helper_funcs.auth import if_admin, initiate_chat_id, register_chat
 from modules.helper_funcs.lang_strings.help_strings import help_strings, helpable_dict
 from modules.helper_funcs.lang_strings.strings import string_dict
@@ -180,6 +180,61 @@ def button_handler(bot: Bot, update: Update, user_data):
                      text=string_dict(bot)["back_button"], reply_markup=InlineKeyboardMarkup(buttons))
 
 
+def product_handler(bot: Bot, update: Update, user_data):
+    user_data['to_delete'] = []
+    query = update.callback_query
+    button_callback_data = query.data
+    buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="products")]]
+
+    bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                       message_id=update.callback_query.message.message_id)
+    try:
+        button_info = products_table.find_one(
+            {"bot_id": bot.id, "title_lower": button_callback_data.replace("product_", "")}
+        )
+        for content_dict in button_info["content"]:
+            if "text" in content_dict:
+                user_data['to_delete'].append(query.message.reply_text(text=content_dict["text"],
+                                                                       parse_mode='Markdown'))
+            if "audio_file" in content_dict:
+                user_data['to_delete'].append(query.message.reply_audio(content_dict["audio_file"]))
+            if "video_file" in content_dict:
+                user_data['to_delete'].append(query.message.reply_video(content_dict["video_file"]))
+            if "document_file" in content_dict:
+                if ".png" in content_dict["document_file"] or ".jpg" in content_dict["document_file"]:
+                    user_data['to_delete'].append(bot.send_photo(chat_id=query.message.chat.id,
+                                                                 photo=content_dict["document_file"]))
+                else:
+                    user_data['to_delete'].append(bot.send_document(chat_id=query.message.chat.id,
+                                                                    document=content_dict["document_file"]))
+            if "photo_file" in content_dict:
+                user_data['to_delete'].append(bot.send_photo(chat_id=query.message.chat.id,
+                                                             photo=content_dict["photo_file"]))
+            if "video_note_file" in content_dict:
+                user_data['to_delete'].append(query.message.reply_video_note(content_dict["video_note_file"]))
+            if "voice_file" in content_dict:
+                user_data['to_delete'].append(query.message.reply_voice(content_dict["voice_file"]))
+            if "animation_file" in content_dict:
+                user_data['to_delete'].append(query.message.reply_animation(content_dict["animation_file"]))
+            if "sticker_file" in content_dict:
+                user_data['to_delete'].append(query.message.reply_sticker(content_dict["sticker_file"]))
+
+    except BadRequest as excp:
+        if excp.message == "Message is not modified":
+            pass
+        elif excp.message == "Query_id_invalid":
+            pass
+        elif excp.message == "Message can't be deleted":
+            pass
+        else:
+            LOGGER.exception("Exception in help buttons. %s", str(query.data))
+    bot.send_message(update.callback_query.message.chat_id, "Buy this product",
+                     reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
+                         text=string_dict(bot)["buy_button"],
+                         callback_data="pay_product_{}".format(button_callback_data.replace("product_", "")))]]))
+    bot.send_message(chat_id=update.callback_query.message.chat_id,
+                     text=string_dict(bot)["back_button"], reply_markup=InlineKeyboardMarkup(buttons))
+
 
 def back_from_button_handler(bot: Bot, update: Update, user_data):
     delete_messages(bot, update, user_data)
@@ -193,6 +248,10 @@ def back_from_button_handler(bot: Bot, update: Update, user_data):
 #                    "User view": ""}
 
 def help_button(bot: Bot, update: Update):
+    if users_table.find_one({"user_id":update.effective_user.id, "bot_id":bot.id}).get("blocked", False):
+        query = update.callback_query
+        query.message.reply_text("You've been blocked from this chatbot")
+        return ConversationHandler.END
     if if_admin(update=update, bot=bot):
         HELPABLE = helpable_dict(bot)["ADMIN_HELPABLE"]
     else:
@@ -325,6 +384,17 @@ class WelcomeBot(object):
     def start(bot, update):
 
         chat_id, txt = initiate_chat_id(update)
+        if chat_id<0:
+            print("Group")
+            bot.send_message(chat_id=chat_id, text=string_dict(bot)["hello_group"],
+                             reply_markup=InlineKeyboardMarkup(
+                                 [[InlineKeyboardButton(text=string_dict(bot)["menu_button"],
+                                                        url="https://telegram.me/CrowdHomeTestBot")]]
+                             ))
+            groups_table.update({"group_id": chat_id, "bot_id": bot.id},
+                                {"group_id": chat_id, "bot_id": bot.id, "group_name": update.message.chat.title},
+                                upsert=True)
+            return ConversationHandler.END
         print("registration" in txt)
         user_id = update.message.from_user.id
         register_chat(bot, update)

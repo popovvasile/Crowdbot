@@ -131,7 +131,7 @@ Write your message. I’ll read it.
         send_message_13="Choose a topic for you message",
 
         send_message_131="Write the subject of your message",
-
+        block_button_str="Block user",
         # send_message_14="TEST",
         #
         # send_message_15="TEST",
@@ -377,7 +377,7 @@ Click "📌 Create a button", to add a content.
         add_group='➕ Add a group',
         remove_group='🗑 Remove',
         post_on_group='✍️ Write a post',
-        groups_str_1='Channels',
+        groups_str_1='Groups',
         groups_str_2='Choose a group',
         groups_menu="What do you wan to do with your group?",
         no_groups='You have no group configured yet. Click "➕Add group" to configure your first group',
@@ -412,7 +412,31 @@ Click "📌 Create a button", to add a content.
         send_poll_to_group='Poll to group',
         send_post_to_group='Write a post',
         send_donation_to_group="Send a 'Donate' button to group",
-    )
+
+
+        add_product_button="Add product",
+        edit_product = "Edit product",
+        delete_product="Delete product",
+        create_product="Create product",
+        add_products_str_1="add_products_str_1",
+        add_products_str_2="add_products_str_2",
+        add_products_str_3="add_products_str_3",
+        add_products_str_4="add_products_str_4",
+        add_products_str_5="add_products_str_5",
+        add_products_str_6="add_products_str_6",
+        add_products_str_7="add_products_str_7",
+        add_products_str_8="add_products_str_8",
+        add_products_str_9="add_products_str_9",
+        add_products_str_10="add_products_str_10",
+        add_products_price="add_products_price",
+        pay_purchase_str_1="pay_purchase_str_1",
+        pay_purchase_str_5="pay_purchase_str_5",
+        payment_configure_button="Configure Payments",
+        products="Products",
+        buy_button="Buy",
+        hello_group="Hello group"
+
+)
 
 RUS=dict(
         you_have_been_reg=", ты зарегистрирован как админ бота. \n\n"
@@ -801,7 +825,19 @@ https://telegra.ph/Gajd-Podklyuchit-donaty-07-03
         send_post_to_channel='Запостить',
         send_donation_to_channel="Напомнить о донатах в группу",
 
-    )
+
+        add_product_button="Add product",
+        edit_product = "Edit product",
+        delete_product="Delete product",
+        create_product="Create product",
+        add_products_str_1="add_products_str_1",
+        add_products_str_2="add_products_str_2",
+        add_products_str_3="add_products_str_3",
+        add_products_str_4="add_products_str_4",
+        add_products_str_5="add_products_str_5",
+        add_products_str_6="add_products_str_6",
+        add_products_str_7="add_products_str_7",
+)
 
 string_dict_dict = {"ENG": ENG,
                     "RUS": RUS}

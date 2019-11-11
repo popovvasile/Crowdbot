@@ -12,6 +12,7 @@ from database import users_messages_to_admin_table, user_categories_table, users
 from modules.helper_funcs.helper import get_help
 from modules.helper_funcs.lang_strings.strings import string_dict
 from modules.helper_funcs.misc import delete_messages
+
 # categories_table,
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -19,6 +20,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 TOPIC, SEND_ANONIM, MESSAGE = range(3)
 CHOOSE_CATEGORY, MESSAGE_TO_USERS = range(2)
+BLOCK_CONFIRMATION = 1
 
 
 #
@@ -208,6 +210,7 @@ class SendMessageToAdmin(object):
         if "_id" in user_data:
             user_data.pop("_id", None)
         user_data["timestamp"] = datetime.datetime.now().replace(microsecond=0)
+        user_data["user_id"] = update.effective_user.id
         user_data["message_id"] = update.callback_query.message.message_id
         user_data["bot_id"] = bot.id
         print(user_data)
@@ -705,6 +708,10 @@ class SeeMessageToAdmin(object):
                                                                    text=string_dict(bot)["delete_button_str"],
                                                                    callback_data="delete_message_" +
                                                                                  str(message["message_id"]))],
+                                                               [InlineKeyboardButton(
+                                                                   text=string_dict(bot)["block_button_str"],
+                                                                   callback_data="block_user_" +
+                                                                                 str(message["user_id"]))],
 
                                                            ]
                                                        ), parse_mode=ParseMode.MARKDOWN))
@@ -713,6 +720,29 @@ class SeeMessageToAdmin(object):
                          reply_markup=InlineKeyboardMarkup(
                              [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                     callback_data="view_back_message")]]))
+        return ConversationHandler.END
+
+    def block_user(self, bot, update, user_data):
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        user_data["user_id"] = int(update.callback_query.data.replace("block_user_", ""))
+        bot.send_message(update.callback_query.message.chat_id, "Are you sure that you want to block this user? \n"
+                                                                "He won't be able to use this chatbot anymore",
+                         reply_markup=ReplyKeyboardMarkup([["YES", "NO"]], one_time_keyboard=True))
+        return BLOCK_CONFIRMATION
+
+    def block_confirmation(self, bot, update, user_data):
+        user = users_table.find_one({"user_id": user_data["user_id"]})
+        user["blocked"] = True
+        users_table.update_one({"user_id": user_data["user_id"]}, user)
+        markup = InlineKeyboardMarkup([[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                             callback_data="inbox_message")]])
+        if update.message.text == "YES":
+            bot.send_message(update.callback_query.message.chat_id, "User {} has been blocked".format(
+                user_data["user_name"], reply_markup=markup
+            ))
+        else:
+            bot.send_message(update.callback_query.message.chat_id, "Blocking has been canceled", reply_markup=markup)
         return ConversationHandler.END
 
     def back(self, bot, update, user_data):
@@ -811,7 +841,25 @@ ANSWER_TO_MESSAGE_HANDLER = ConversationHandler(
                                     pass_user_data=True),
                ]
 )
+BLOCK_USER = ConversationHandler(
+    entry_points=[CallbackQueryHandler(pattern="block_user",
+                                       callback=SeeMessageToAdmin.block_user,
+                                       pass_user_data=True),
+                  ],
 
+    states={
+        BLOCK_CONFIRMATION: [MessageHandler(Filters.all, SeeMessageToAdmin().block_confirmation), ],
+        # TOPIC: [MessageHandler(Filters.all, SendMessageToAdmin().send_topic, pass_user_data=True), ]
+        # SEND_ANONIM: [MessageHandler(Filters.all, SendMessageToAdmin().send_anonim, pass_user_data=True), ]
+
+    },
+
+    fallbacks=[
+        CallbackQueryHandler(SendMessageToUsers().send_message_cancel,
+                             pattern="help_back",
+                             pass_user_data=True),
+    ]
+)
 # MESSAGE_CATEGORY_HANDLER = CallbackQueryHandler(pattern="show_message_categories",
 #                                                 callback=MessageCategory().show_category)
 # DELETE_MESSAGE_CATEGORY_HANDLER = CallbackQueryHandler(pattern="delete_category_",

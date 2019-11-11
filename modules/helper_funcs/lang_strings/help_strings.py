@@ -8,7 +8,6 @@ from modules.helper_funcs.lang_strings.strings import string_dict
 def help_strings(bot):
     help_dict = OrderedDict()
     string_d_str = string_dict(bot)
-    print(string_d_str)
     help_dict["channels"] = dict(
         mod_name='Channels',
         # start 'Channels' message
@@ -22,20 +21,22 @@ def help_strings(bot):
         # start 'Channels' message
         admin_help=string_d_str["groups_str_1"],
         # and keyboard for start message
-        admin_keyboard=[InlineKeyboardButton(string_d_str["my_groups"], callback_data='my_channels'),
+        admin_keyboard=[InlineKeyboardButton(string_d_str["my_groups"], callback_data='my_groups'),
                         InlineKeyboardButton(string_d_str["add_group"], callback_data='add_group')]
     )
-    # help_dict["shop"] = dict(
-    #     mod_name=string_d_str["add_product_button"],
-    #     admin_keyboard=[InlineKeyboardButton(text=string_d_str["add_product_button"],
-    #                                          callback_data="create_product"),
-    #                     InlineKeyboardButton(text=string_d_str["edit_product"],
-    #                                          callback_data="edit_product"),
-    #                     InlineKeyboardButton(text=string_d_str["delete_button_str"],
-    #                                          callback_data="delete_product"),
-    #                     ],
-    #     admin_help=string_d_str["add_menu_buttons_help"]
-    # )
+    help_dict["shop"] = dict(
+        mod_name=string_d_str["add_product_button"],
+        admin_keyboard=[InlineKeyboardButton(text=string_d_str["add_product_button"],
+                                             callback_data="create_product"),
+                        InlineKeyboardButton(text=string_d_str["edit_product"],
+                                             callback_data="edit_product"),
+                        InlineKeyboardButton(text=string_d_str["delete_product"],
+                                             callback_data="delete_product"),
+                        InlineKeyboardButton(text=string_d_str["products"],
+                                             callback_data="products"),
+                        ],
+        admin_help=string_d_str["add_menu_buttons_help"]
+    )
     help_dict["menu_buttons"] = dict(
         mod_name=string_d_str["add_menu_module_button"],
         admin_keyboard=[InlineKeyboardButton(text=string_d_str["create_button"],
@@ -48,6 +49,8 @@ def help_strings(bot):
                                              callback_data="edit_bot_description"),
                         InlineKeyboardButton(text=string_d_str["user_mode_module"],
                                              callback_data="turn_user_mode_on"),
+                        InlineKeyboardButton(text=string_d_str["payment_configure_button"],
+                                             callback_data="configure_donation"),
                         ],
 
         admin_help=string_d_str["add_menu_buttons_help"]
@@ -94,8 +97,6 @@ def help_strings(bot):
         visitor_help=string_d_str["pay_donation_mode_str"],
 
         admin_keyboard=[
-            InlineKeyboardButton(text=string_d_str["configure_button"],
-                                 callback_data="configure_donation"),
             InlineKeyboardButton(text=string_d_str["ask_donation_button"],
                                  callback_data="send_donation_to_users"),
             # InlineKeyboardButton(text=string_d_str["donate_button"], callback_data="pay_donation"),
@@ -145,7 +146,7 @@ def helpable_dict(bot):
     admin_rus["❔ Открытые опросы"] = "surveys"
     admin_rus["❓ Опросы"] = "polls"
     admin_rus["💸 Донаты"] = "donation_payment"
-    # admin_rus[" Магазин"] = "shop"
+    admin_rus[" Магазин"] = "shop"
 
     # admin_rus["Пользователи"] = "users"
     # admin_rus["👤 Режим юзера"] = "user_mode"
@@ -158,7 +159,7 @@ def helpable_dict(bot):
 
     admin_eng['❔ Surveys'] = "surveys"
     admin_eng["❓ Polls"] = "polls"
-    # admin_eng["Shop"] = "shop"
+    admin_eng["Shop"] = "shop"
     admin_eng["💸 Donations"] = "donation_payment"
     # admin_eng["Users"] = "users"
     # admin_eng["👤 User view"] = "user_mode"

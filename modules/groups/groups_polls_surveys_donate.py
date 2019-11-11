@@ -27,21 +27,21 @@ logger = logging.getLogger(__name__)
 
 # for sending polls to groups
 
-class SendPoll(object):
+class SendPoll(object):   # TODO send poll by group id, not name
     def handle_send_poll(self, bot, update, user_data):
 
         if update.callback_query:
-            group_username = update.callback_query.data.replace("send_poll_to_group_", "")
+            group_name = update.callback_query.data.replace("send_poll_to_group_", "")
             update_data = update.callback_query
-            if group_username == "send_poll_to_group":
-                groups_markup = [group['group_username'] for group in groups_table.find({'bot_id': bot.id})]
+            if group_name == "send_poll_to_group":
+                groups_markup = [group['group_name'] for group in groups_table.find({'bot_id': bot.id})]
                 bot.send_message(update.callback_query.message.chat.id, "Choose a group that you want to send",
                                  reply_markup=ReplyKeyboardMarkup([groups_markup]))
                 bot.delete_message(chat_id=update_data.message.chat_id,
                                    message_id=update_data.message.message_id)
                 return CHOOSE_GROUP_TO_SEND_POLL
         else:
-            group_username = update.message.text
+            group_name = update.message.text
             update_data = update
 
         create_buttons = [
@@ -60,7 +60,7 @@ class SendPoll(object):
                              reply_markup=create_markup)
             return ConversationHandler.END
         else:
-            user_data['group'] = group_username
+            user_data['group'] = group_name
             polls_list_of_dicts = polls_table.find({"bot_id": bot.id})
             if polls_list_of_dicts.count() != 0:
                 command_list = [command['title'] for command in polls_list_of_dicts]
@@ -125,21 +125,21 @@ class SendPoll(object):
 class SendSurvey(object):
     def handle_send_survey(self, bot, update, user_data):  # TODO for callback_query and text messages
         if update.callback_query:
-            group_username = update.callback_query.data.replace("send_survey_to_group_", "")
+            group_name = update.callback_query.data.replace("send_survey_to_group_", "")
             update_data = update.callback_query
-            if group_username == "send_survey_to_group":
-                groups_markup = [group['group_username'] for group in groups_table.find({'bot_id': bot.id})]
+            if group_name == "send_survey_to_group":
+                groups_markup = [group['group_name'] for group in groups_table.find({'bot_id': bot.id})]
                 bot.send_message(update.callback_query.message.chat.id, "Choose a group that you want to send",
                                  reply_markup=ReplyKeyboardMarkup([groups_markup]))
                 return CHOOSE_GROUP_TO_SEND_SURVEY
         else:
-            group_username = update.message.text
+            group_name = update.message.text
             update_data = update
         buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.delete_message(update_data.message.chat.id, update_data.message.message_id)
-        user_data['group'] = group_username
+        user_data['group'] = group_name
         surveys_list = surveys_table.find({"bot_id": bot.id})
         if surveys_list.count() != 0:
             bot.send_message(update_data.message.chat.id,
@@ -209,18 +209,18 @@ class SendDonationToChannel(object):
     def send_donation(self, bot, update, user_data):
         groups = groups_table.find({'bot_id': bot.id})
         update_data = update.callback_query
-        group_username = update.callback_query.data.replace("send_donation_to_group_", "")
+        group_name = update.callback_query.data.replace("send_donation_to_group_", "")
 
         if groups != 0:
               # TODO here is a bug, AttributeError: 'Update' object has no attribute 'data'
 
-            if group_username == "send_donation_to_group":
-                groups_markup = [group['group_username'] for group in groups]
+            if group_name == "send_donation_to_group":
+                groups_markup = [group['group_name'] for group in groups]
                 bot.send_message(update_data.message.chat.id, "Choose a group that you want to send",
                                  reply_markup=ReplyKeyboardMarkup([groups_markup]))
                 return CHOOSE_GROUP_TO_SEND_DONATION
 
-            user_data["group_username"] = group_username
+            user_data["group_name"] = group_name
             buttons = list()
             buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                  callback_data="help_back")])
@@ -257,43 +257,43 @@ class SendDonationToChannel(object):
     def received_donation(self, bot, update, user_data):  # TODO change like in messages
 
         if update.message.text:
-            bot.send_message(user_data["group_username"], update.message.text)
+            bot.send_message(user_data["group_name"], update.message.text)
 
         elif update.message.photo:
             photo_file = update.message.photo[0].get_file().file_id
-            bot.send_photo(user_data["group_username"], photo=photo_file)
+            bot.send_photo(user_data["group_name"], photo=photo_file)
 
         elif update.message.audio:
             audio_file = update.message.audio.get_file().file_id
-            bot.send_audio(user_data["group_username"], audio_file)
+            bot.send_audio(user_data["group_name"], audio_file)
 
         elif update.message.voice:
             voice_file = update.message.voice.get_file().file_id
-            bot.send_voice(user_data["group_username"], voice_file)
+            bot.send_voice(user_data["group_name"], voice_file)
 
         elif update.message.document:
             document_file = update.message.document.get_file().file_id
-            bot.send_document(user_data["group_username"], document_file)
+            bot.send_document(user_data["group_name"], document_file)
 
         elif update.message.sticker:
             sticker_file = update.message.sticker.get_file().file_id
-            bot.send_sticker(user_data["group_username"], sticker_file)
+            bot.send_sticker(user_data["group_name"], sticker_file)
 
         elif update.message.game:
             sticker_file = update.message.game.get_file().file_id
-            bot.send_game(user_data["group_username"], sticker_file)
+            bot.send_game(user_data["group_name"], sticker_file)
 
         elif update.message.animation:
             animation_file = update.message.animation.get_file().file_id
-            bot.send_animation(user_data["group_username"], animation_file)
+            bot.send_animation(user_data["group_name"], animation_file)
 
         elif update.message.video:
             video_file = update.message.video.get_file().file_id
-            bot.send_video(user_data["group_username"], video_file)
+            bot.send_video(user_data["group_name"], video_file)
 
         elif update.message.video_note:
             video_note_file = update.message.audio.get_file().file_id
-            bot.send_video_note(user_data["group_username"], video_note_file)
+            bot.send_video_note(user_data["group_name"], video_note_file)
 
         final_reply_markup = InlineKeyboardMarkup(
             [[InlineKeyboardButton(text=string_dict(bot)["done_button"],
@@ -323,7 +323,7 @@ class SendDonationToChannel(object):
                          string_dict(bot)["send_donation_request_3"],
                          reply_markup=create_markup)
 
-        bot.send_message(user_data["group_username"],
+        bot.send_message(user_data["group_name"],
                          string_dict(bot)["donate_button"],
                          reply_markup=donation_reply_markup)
         return ConversationHandler.END

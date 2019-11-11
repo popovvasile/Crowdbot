@@ -14,7 +14,7 @@ Yura
 # TODO pagination for messages
 # TODO messages - show how many new messages are "unread" -- take a look at botfather
 # TODO stats for bot-  users, donates  --- DO  IT FIRST
-
+# TODO donation does not save the currency
 Vasea
 # TODO Fix the deletion of admins
 # TODO anonymous messages does not work

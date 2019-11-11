@@ -6,9 +6,10 @@ from telegram.ext import CommandHandler, CallbackQueryHandler,RegexHandler
 
 from modules.channels_polls_surveys_donate import SEND_SURVEY_TO_CHANNEL_HANDLER, SEND_POLL_TO_CHANNEL_HANDLER, \
     SEND_DONATION_TO_CHANNEL_HANDLER
-from modules.eshop import CREATE_PRODUCT_CHOOSE, PRODUCT_ADD_HANDLER, DELETE_PRODUCT_HANDLER, PRODUCT_EDIT_HANDLER, \
-    PRODUCT_EDIT_FINISH_HANDLER, PRODUCT_ADD_FINISH_HANDLER, DELETE_PRODUCT_CONTENT_HANDLER
-from modules.groups.groups import MY_GROUPS_HANDLER, ADD_GROUP_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER
+from modules.echop_customer import PURCHASE_HANDLER
+from modules.eshop import PRODUCT_ADD_HANDLER, DELETE_PRODUCT_HANDLER, PRODUCT_EDIT_HANDLER, \
+    PRODUCT_EDIT_FINISH_HANDLER, PRODUCT_ADD_FINISH_HANDLER, DELETE_PRODUCT_CONTENT_HANDLER, PRODUCTS_MENU_HANDLER
+from modules.groups.groups import MY_GROUPS_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER
 from modules.groups.groups_polls_surveys_donate import SEND_POLL_TO_GROUP_HANDLER, SEND_SURVEY_TO_GROUP_HANDLER, \
     SEND_DONATION_TO_GROUP_HANDLER
 from modules.menu_description import EDIT_BOT_DESCRIPTION_HANDLER
@@ -23,7 +24,7 @@ from modules.surveys_create import DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_HANDLER,
     CREATE_SURVEY_HANDLER
 from modules.donations_edit_delete_results import EDIT_DONATION_HANDLER
 from modules.helper_funcs.main_runnner_helper import help_button, button_handler, get_help, WelcomeBot, error_callback, \
-    back_from_button_handler
+    back_from_button_handler, product_handler
 from modules.manage_button import BUTTON_EDIT_HANDLER, BUTTON_EDIT_FINISH_HANDLER, DELETE_CONTENT_HANDLER, \
     BUTTON_ADD_FINISH_HANDLER, AddButtonContent, back_from_edit_button_handler
 from modules.donation_payment import DONATE_HANDLER, HANDLE_SUCCES, HANDLE_PRECHECKOUT
@@ -31,11 +32,9 @@ from modules.polls import POLL_HANDLER, SEND_POLLS_HANDLER, BUTTON_HANDLER, DELE
 from modules.donation_send_promotion import SEND_DONATION_TO_USERS_HANDLER
 from modules.messages import SEND_MESSAGE_TO_ADMIN_HANDLER, SEND_MESSAGE_TO_USERS_HANDLER, SEE_MESSAGES_HANDLER, \
     ANSWER_TO_MESSAGE_HANDLER, DELETE_MESSAGES_HANDLER, SEE_MESSAGES_FINISH_HANDLER, SEE_MESSAGES_BACK_HANDLER, \
-    SEE_MESSAGES_FINISH_BACK_HANDLER
+    SEE_MESSAGES_FINISH_BACK_HANDLER, BLOCK_USER
 from modules.user_mode import USER_MODE_OFF, USER_MODE_ON
-from modules.channels import MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER, REMOVE_CHANNEL_HANDLER,  SEND_POST_HANDLER
-from modules.users import USER_CATEGORY_HANDLER, DELETE_USER_CATEGORY_HANDLER, USER_CHOOSES_CATEGORY_HANDLER, \
-    ADD_USER_CATEGORY_HANDLER, SEND_USER_QUESTION_HANDLER
+
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -51,6 +50,8 @@ def main(token, port):
     start_handler = CommandHandler("start", WelcomeBot().start)
     help_handler = CommandHandler("help", get_help)
     rex_help_handler = RegexHandler(r"^((?!@).)*$", get_help)
+    product_handler_han = CallbackQueryHandler(product_handler, pattern=r"product_", pass_user_data=True)
+
     custom_button_callback_handler = CallbackQueryHandler(button_handler, pattern=r"button_", pass_user_data=True)
     custom_button_back_callback_handler = CallbackQueryHandler(back_from_button_handler,
                                                                pattern=r"back_from_button", pass_user_data=True)
@@ -70,12 +71,6 @@ def main(token, port):
     dispatcher.add_handler(USER_MODE_ON)
     dispatcher.add_handler(USER_MODE_OFF)
 
-    # USERS
-    dispatcher.add_handler(USER_CATEGORY_HANDLER)
-    dispatcher.add_handler(DELETE_USER_CATEGORY_HANDLER)
-    dispatcher.add_handler(USER_CHOOSES_CATEGORY_HANDLER)
-    dispatcher.add_handler(ADD_USER_CATEGORY_HANDLER)
-    dispatcher.add_handler(SEND_USER_QUESTION_HANDLER)
     # DONATIONS
     dispatcher.add_handler(CREATE_DONATION_HANDLER)
     dispatcher.add_handler(DONATE_HANDLER)
@@ -94,6 +89,7 @@ def main(token, port):
     dispatcher.add_handler(SEE_MESSAGES_FINISH_HANDLER)
     dispatcher.add_handler(SEND_MESSAGE_ONLY_TO_ADMINS_HANDLER)
     dispatcher.add_handler(SEND_MESSAGE_TO_DONATORS_HANDLER)
+    dispatcher.add_handler(BLOCK_USER)
     # dispatcher.add_handler(ADD_MESSAGE_CATEGORY_HANDLER)
     # dispatcher.add_handler(DELETE_MESSAGE_CATEGORY_HANDLER)
     # dispatcher.add_handler(MESSAGE_CATEGORY_HANDLER)
@@ -114,20 +110,22 @@ def main(token, port):
 
     # GROUPS
     dispatcher.add_handler(MY_GROUPS_HANDLER)
-    dispatcher.add_handler(ADD_GROUP_HANDLER)
     dispatcher.add_handler(REMOVE_GROUP_HANDLER)
     dispatcher.add_handler(SEND_POST_TO_GROUP_HANDLER)
     dispatcher.add_handler(SEND_POLL_TO_GROUP_HANDLER)
     dispatcher.add_handler(SEND_SURVEY_TO_GROUP_HANDLER)
     dispatcher.add_handler(SEND_DONATION_TO_GROUP_HANDLER)
+    # PRODUCTS
+    dispatcher.add_handler(PRODUCT_ADD_HANDLER)
+    dispatcher.add_handler(DELETE_PRODUCT_HANDLER)
+    dispatcher.add_handler(PRODUCT_EDIT_HANDLER)
+    dispatcher.add_handler(PRODUCT_EDIT_FINISH_HANDLER)
+    dispatcher.add_handler(PRODUCT_ADD_FINISH_HANDLER)
+    dispatcher.add_handler(DELETE_PRODUCT_CONTENT_HANDLER)
+    dispatcher.add_handler(PRODUCTS_MENU_HANDLER)
+    dispatcher.add_handler(PURCHASE_HANDLER)
+    dispatcher.add_handler(product_handler_han)
 
-    # dispatcher.add_handler(CREATE_PRODUCT_CHOOSE)
-    # dispatcher.add_handler(PRODUCT_ADD_HANDLER)
-    # dispatcher.add_handler(DELETE_PRODUCT_HANDLER)
-    # dispatcher.add_handler(PRODUCT_EDIT_HANDLER)
-    # dispatcher.add_handler(PRODUCT_EDIT_FINISH_HANDLER)
-    # dispatcher.add_handler(PRODUCT_ADD_FINISH_HANDLER)
-    # dispatcher.add_handler(DELETE_PRODUCT_CONTENT_HANDLER)
 
     dispatcher.add_handler(custom_button_back_callback_handler)
     dispatcher.add_handler(custom_button_callback_handler)
