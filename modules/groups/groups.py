@@ -49,7 +49,6 @@ def delete_messages(bot, user_data, update):
         pass
 
 
-
 # DELETING USING USER_DATA
 class Groups(object):
     # ################################## HELP METHODS ###########################################################
@@ -117,7 +116,7 @@ class Groups(object):
             groups_table.delete_one({'bot_id': bot.id, 'group_id': group_id})
             user_data['to_delete'].append(
                 bot.send_message(update.effective_chat.id, string_dict(bot)["group_has_been_removed"]
-                                 .format(group_id),
+                                 .format(group["group_name"]),
                                  reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
                                      text=string_dict(bot)["back_button"],
                                      callback_data="help_module(groups)")]])

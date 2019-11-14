@@ -35,6 +35,11 @@ def send_visitor_help(bot, chat_id, text, keyboard=None):
                    InlineKeyboardButton(string_dict(bot)["pay_donation_mode_str"], callback_data='pay_donation')]
     else:
         buttons = [InlineKeyboardButton(string_dict(bot)["send_message_1"], callback_data="help_module(messages)")]
+    product_list_of_dicts = products_table.find({
+        "bot_id": bot.id})
+    if product_list_of_dicts.count() != 0:
+        buttons = buttons + [InlineKeyboardButton(text="Shop", callback_data="products")]
+
     buttons += [InlineKeyboardButton(button["button"],
                                      callback_data="button_{}".format(button["button"].replace(" ", "").lower()))
                 for button in custom_buttons_table.find({"bot_id": bot.id, "link_button": False})]
@@ -64,7 +69,13 @@ def send_admin_user_mode(bot, chat_id, text, keyboard=None):
                 for button in custom_buttons_table.find({"bot_id": bot.id, "link_button": False})]
     buttons += [InlineKeyboardButton(button["button"],url=button["link"])
                 for button in custom_buttons_table.find({"bot_id": bot.id, "link_button": True})]
-    buttons = buttons + [InlineKeyboardButton(text="ADMIN MODE", callback_data="turn_user_mode_off")]
+    product_list_of_dicts = products_table.find({
+        "bot_id": bot.id})
+    if product_list_of_dicts.count() != 0:
+        buttons = buttons + [InlineKeyboardButton(text="Shop", callback_data="products"),
+                             InlineKeyboardButton(text="ADMIN MODE", callback_data="turn_user_mode_off")]
+    else:
+        buttons = buttons + [InlineKeyboardButton(text="ADMIN MODE", callback_data="turn_user_mode_off")]
     if len(buttons) % 2 == 0:
         pairs = list(zip(buttons[::2], buttons[1::2]))
     else:
@@ -75,8 +86,6 @@ def send_admin_user_mode(bot, chat_id, text, keyboard=None):
                      reply_markup=InlineKeyboardMarkup(
                          pairs
                      ))
-
-
 
 
 # for test purposes
@@ -184,8 +193,6 @@ def product_handler(bot: Bot, update: Update, user_data):
     user_data['to_delete'] = []
     query = update.callback_query
     button_callback_data = query.data
-    buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="products")]]
-
     bot.delete_message(chat_id=update.callback_query.message.chat_id,
                        message_id=update.callback_query.message.message_id)
     try:
@@ -231,9 +238,9 @@ def product_handler(bot: Bot, update: Update, user_data):
     bot.send_message(update.callback_query.message.chat_id, "Buy this product",
                      reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
                          text=string_dict(bot)["buy_button"],
-                         callback_data="pay_product_{}".format(button_callback_data.replace("product_", "")))]]))
-    bot.send_message(chat_id=update.callback_query.message.chat_id,
-                     text=string_dict(bot)["back_button"], reply_markup=InlineKeyboardMarkup(buttons))
+                         callback_data="pay_product_{}".format(button_callback_data.replace("product_", ""))),
+                                  InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="products")
+                     ]]))
 
 
 def back_from_button_handler(bot: Bot, update: Update, user_data):

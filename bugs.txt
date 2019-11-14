@@ -18,8 +18,6 @@ Yura
 Vasea
 # TODO Fix the deletion of admins
 # TODO anonymous messages does not work
-# TODO add "block user"
-# TODO add support for groups
 
 
 

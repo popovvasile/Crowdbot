@@ -16,17 +16,18 @@ logger = logging.getLogger(__name__)
 LOGGER = logging.getLogger(__name__)
 CHOOSE_PRODUCT = 1
 EDIT_FINISH = 1
-TYPING_PRODUCT, TYPING_PRICE,TYPING_CURRENCY, TYPING_DESCRIPTION, DESCRIPTION_FINISH = range(5)
+TYPING_PRODUCT, TYPING_PRICE, CHOOSE_TYPE, TYPING_CURRENCY, TYPING_DESCRIPTION, DESCRIPTION_FINISH = range(6)
 TYPING_TO_DELETE_PRODUCT = 17
 TYPING_LINK, TYPING_PRODUCT_FINISH = range(2)
 
 
-
 class ProcductMenu(object):
     def send_product_menu(self, bot, update):
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
         buttons = [InlineKeyboardButton(button["title"],
                                         callback_data="product_{}".format(button["title"].replace(" ", "").lower()))
-                    for button in products_table.find({"bot_id": bot.id})]
+                   for button in products_table.find({"bot_id": bot.id})]
 
         if len(buttons) % 2 == 0:
             pairs = list(zip(buttons[::2], buttons[1::2]))
@@ -43,6 +44,8 @@ class ProcductMenu(object):
 class AddProducts(object):
 
     def start(self, bot, update, user_data):
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
         user_data["to_delete"] = []
         reply_products = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                 callback_data="help_module(shop)")]]
@@ -57,7 +60,9 @@ class AddProducts(object):
         user_data["to_delete"].append(bot.send_message(update.callback_query.message.chat.id,
                                                        string_dict(bot)["back_text"], reply_markup=reply_markup))
         return TYPING_PRODUCT
-    def product_handler(self, bot, update, user_data):   # TODO add price and yes or not for delivery- ask address or not?
+
+    def product_handler(self, bot, update,
+                        user_data):  # TODO add price and yes or not for delivery- ask address or not?
         user_data["to_delete"].append(update.message)
         reply_products = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                 callback_data="help_module(shop)")]]
@@ -76,7 +81,7 @@ class AddProducts(object):
                                                                     reply_markup=reply_markup))
             return TYPING_PRICE
         else:
-            user_data["to_delete"].append(update.message.reply_text(string_dict(bot)["add_products_str_3"],
+            user_data["to_delete"].append(update.message.reply_text(string_dict(bot)["add_products_str_title_taken"],
                                                                     reply_markup=reply_markup))
 
             return TYPING_PRODUCT
@@ -90,26 +95,39 @@ class AddProducts(object):
         try:
             amount = int(float(txt) * 100)
             user_data["price"] = amount
-            currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["CHF", "AUD", "RON", "PLN"]]
-            update.message.reply_text(string_dict(bot)["create_donation_str_7"],
+            currency_keyboard = [["RUB", "USD", "EUR", "GBP"],
+                                 ["CHF", "AUD", "RON", "PLN"]]
+            update.message.reply_text(string_dict(bot)["add_products_str_currency"],
                                       reply_markup=ReplyKeyboardMarkup(currency_keyboard, one_time_keyboard=True))
 
             return TYPING_CURRENCY
         except ValueError:
-            update.message.reply_text(text=string_dict(bot)["pay_donation_str_5"],
-                                      reply_markup=InlineKeyboardMarkup(
-                                          [[InlineKeyboardButton(text=string_dict(bot)["menu_button"],
-                                                                 callback_data="help_back")]]))
+            update.message.reply_text(text=string_dict(bot)["add_products_str_correct_format_price"],
+                                      reply_markup=reply_markup)
             return TYPING_PRICE
 
     def handle_currency(self, bot, update, user_data):
+        currency_keyboard = [["With shipping"], ["Without shipping"]]
+        chat_id, txt = initiate_chat_id(update)
+        user_data["currency"] = txt
+        user_data["to_delete"].append(
+            update.message.reply_text(string_dict(bot)
+                                      ["add_products_str_shipment"],
+                                      reply_markup=ReplyKeyboardMarkup(currency_keyboard)))
+        return CHOOSE_TYPE
+
+    def handle_type(self, bot, update, user_data):
+
         reply_products = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                 callback_data="help_module(shop)")]]
         reply_markup = InlineKeyboardMarkup(
             reply_products)
         chat_id, txt = initiate_chat_id(update)
-        user_data["currency"] = txt
-        user_data["to_delete"].append(update.message.reply_text(string_dict(bot)["add_products_str_2"],
+        if txt == "With shipping":
+            user_data["shipping"] = True
+        else:
+            user_data["shipping"] = False
+        user_data["to_delete"].append(update.message.reply_text(string_dict(bot)["add_products_str_description"],
                                                                 reply_markup=reply_markup))
         return TYPING_DESCRIPTION
 
@@ -164,7 +182,7 @@ class AddProducts(object):
         done_products = [[InlineKeyboardButton(text=string_dict(bot)["done_button"], callback_data="DONE")]]
         done_reply_markup = InlineKeyboardMarkup(
             done_products)
-        user_data["to_delete"].append(update.message.reply_text(string_dict(bot)["add_products_str_4"],
+        user_data["to_delete"].append(update.message.reply_text(string_dict(bot)["add_products_str_description_add"],
                                                                 reply_markup=done_reply_markup))
         user_data["content"] = general_list
         return TYPING_DESCRIPTION
@@ -189,9 +207,9 @@ class AddProducts(object):
         reply_markup = InlineKeyboardMarkup(
             reply_products)
         bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(bot)["add_products_str_5"].format(user_data["title"]),
+                         string_dict(bot)["add_products_str_added"].format(user_data["title"]),
                          reply_markup=reply_markup)
-        logger.info("Admin {} on bot {}:{} added a new button:{}".format(
+        logger.info("Admin {} on bot {}:{} added a new product:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, user_data["title"]))
         user_data.clear()
         return ConversationHandler.END
@@ -210,7 +228,7 @@ class AddProducts(object):
             reply_keyboard = [product_list]
 
             bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(bot)["add_products_str_6"],
+                             string_dict(bot)["products_str_choose_the_product_to_del"],
                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
             bot.send_message(update.callback_query.message.chat.id,
                              string_dict(bot)["back_text"], reply_markup=finish_markup)
@@ -224,7 +242,7 @@ class AddProducts(object):
             reply_markup = InlineKeyboardMarkup(
                 reply_products)
             bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(bot)["add_products_str_7"], reply_markup=reply_markup)
+                             string_dict(bot)["no_products"], reply_markup=reply_markup)
 
             return ConversationHandler.END
 
@@ -237,7 +255,7 @@ class AddProducts(object):
         update.message.reply_text(
             string_dict(bot)["add_products_str_8"].format(txt), reply_markup=ReplyKeyboardRemove())
         bot.send_message(chat_id=update.message.chat_id,  # TODO send as in polls
-                         text=string_dict(bot)["add_products_str_10"],
+                         text=string_dict(bot)["add_products_products_deleted_strstr_10"],
                          reply_markup=InlineKeyboardMarkup(
                              [[InlineKeyboardButton(string_dict(bot)["add_product_button"],
                                                     callback_data="create_product"),
@@ -249,9 +267,6 @@ class AddProducts(object):
         return ConversationHandler.END
 
     def back(self, bot, update, user_data):
-        bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(bot)["add_products_str_9"], reply_markup=ReplyKeyboardRemove()
-                         )
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         get_help(bot, update)
@@ -644,6 +659,8 @@ class DeleteProductContent(object):
 
 class SeePurcheses(object):
     def add_content_product(self, bot, update, user_data):
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
         reply_products = [
             [InlineKeyboardButton(text=string_dict(bot)["cancel_button"], callback_data="help_module(shop)")]]
         reply_markup = InlineKeyboardMarkup(
@@ -656,6 +673,7 @@ class SeePurcheses(object):
                          text=string_dict(bot)["manage_button_str_4"],
                          reply_markup=reply_markup)
         return EDIT_FINISH
+
 
 PRODUCTS_MENU_HANDLER = CallbackQueryHandler(ProcductMenu().send_product_menu, pattern="products")
 PRODUCT_ADD_HANDLER = ConversationHandler(

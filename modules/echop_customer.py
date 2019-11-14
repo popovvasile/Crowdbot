@@ -29,6 +29,7 @@ class PurchaseBot(object):
                            message_id=update.callback_query.message.message_id, )
         purchase_request = products_table.find_one({"bot_id": bot.id, "title_lower": button_callback_data.replace(
             "pay_product_", "")})
+
         provider_token = chatbots_table.find_one({"bot_id": bot.id})["donate"][
             "payment_token"]  # TODO when creating products, double check if payment token has been added
         bot.send_message(update.callback_query.message.chat.id, "Pay:{} {}".format(
@@ -40,7 +41,10 @@ class PurchaseBot(object):
         currency = purchase_request['currency']
         prices = [LabeledPrice(title, purchase_request["price"])]
         bot.sendInvoice(update.callback_query.message.chat_id, title, description, payload,
-                        provider_token, start_parameter, currency, prices)
+                        provider_token, start_parameter, currency, prices,
+                        need_name=True, need_phone_number=True,
+                        need_email=True, need_shipping_address=purchase_request["shipping"], is_flexible=True
+                        )
         bot.send_message(update.callback_query.message.chat.id,
                          text=string_dict(bot)["back_text"],
                          reply_markup=InlineKeyboardMarkup(
