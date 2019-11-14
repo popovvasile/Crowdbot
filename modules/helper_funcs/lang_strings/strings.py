@@ -107,6 +107,8 @@ Write your message. I’ll read it.
     send_message_button_3="Message topics",
     send_message_button_4="✉️ Send message to admins",
     send_message_button_5="✉️ Send message to donators",
+    send_message_button_6="Blacklist",
+
     send_message_button_to_admin_anonim="✉️ Send anonymous message",
     send_message_button_to_admin="✉️ Send message",
     send_message_1="✉️ Send message ",
@@ -523,6 +525,7 @@ RUS = dict(
     send_message_button_3="Почтовые ящики",
     send_message_button_4="✉️ Сообщение админам",
     send_message_button_5="✉️ Сообщение донарам",
+send_message_button_6="Черный список",
     send_message_button_to_admin_anonim="✉️ Анонимное сообщение",
     send_message_button_to_admin="✉️ Отправить сообщение",
     you_have_a_message_from="Вам пришло сообщение от {}",

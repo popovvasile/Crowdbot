@@ -32,7 +32,7 @@ from modules.polls import POLL_HANDLER, SEND_POLLS_HANDLER, BUTTON_HANDLER, DELE
 from modules.donation_send_promotion import SEND_DONATION_TO_USERS_HANDLER
 from modules.messages import SEND_MESSAGE_TO_ADMIN_HANDLER, SEND_MESSAGE_TO_USERS_HANDLER, SEE_MESSAGES_HANDLER, \
     ANSWER_TO_MESSAGE_HANDLER, DELETE_MESSAGES_HANDLER, SEE_MESSAGES_FINISH_HANDLER, SEE_MESSAGES_BACK_HANDLER, \
-    SEE_MESSAGES_FINISH_BACK_HANDLER, BLOCK_USER
+    SEE_MESSAGES_FINISH_BACK_HANDLER, BLOCK_USER, BLOCKED_USERS_LIST, UNBLOCK_USER
 from modules.user_mode import USER_MODE_OFF, USER_MODE_ON
 
 
@@ -90,6 +90,8 @@ def main(token, port):
     dispatcher.add_handler(SEND_MESSAGE_ONLY_TO_ADMINS_HANDLER)
     dispatcher.add_handler(SEND_MESSAGE_TO_DONATORS_HANDLER)
     dispatcher.add_handler(BLOCK_USER)
+    dispatcher.add_handler(BLOCKED_USERS_LIST)
+    dispatcher.add_handler(UNBLOCK_USER)
     # dispatcher.add_handler(ADD_MESSAGE_CATEGORY_HANDLER)
     # dispatcher.add_handler(DELETE_MESSAGE_CATEGORY_HANDLER)
     # dispatcher.add_handler(MESSAGE_CATEGORY_HANDLER)

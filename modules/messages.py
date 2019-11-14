@@ -722,6 +722,36 @@ class SeeMessageToAdmin(object):
                                                     callback_data="view_back_message")]]))
         return ConversationHandler.END
 
+    def blocked_users_list(self, bot, update):
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        blocked_users = users_table.find({"bot_id": bot.id, "blocked": True})
+        for user in blocked_users:
+
+            bot.send_message(update.callback_query.message.chat_id, "{}\n".format(user["full_name"]),
+                             InlineKeyboardMarkup([[InlineKeyboardButton(text="UNBLOCK",
+                                                                         callback_data="unblock_{}".format(user["user_id"]))]])
+                             )
+        bot.send_message(update.callback_query.message.chat_id, "This is the list of all blocked users",
+                         reply_markup=InlineKeyboardMarkup([InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                                                 callback_data="help_module(messages)")]))
+    def unblock(self, bot, update):
+        buttons = list()
+        buttons.append(
+            [InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(messages)")])
+        final_reply_markup = InlineKeyboardMarkup(
+            buttons)
+
+        user_id = update.callback_query.data.replace("unblock_", "")
+        user = users_table.find_one({"user_id": user_id})
+        user["blocked"] = False
+        users_table.update_one({"user_id": user_id}, user)
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        bot.send_message(update.callback_query.message.chat_id, "User has been removed from the blacklist",
+                         reply_markup=final_reply_markup)
+        return ConversationHandler.END
+
     def block_user(self, bot, update, user_data):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
@@ -860,6 +890,10 @@ BLOCK_USER = ConversationHandler(
                              pass_user_data=True),
     ]
 )
+BLOCKED_USERS_LIST = CallbackQueryHandler(pattern="blocked_users_list",
+                                          callback=SeeMessageToAdmin.blocked_users_list)
+UNBLOCK_USER = CallbackQueryHandler(pattern="unblock",
+                                    callback=SeeMessageToAdmin.unblock)
 # MESSAGE_CATEGORY_HANDLER = CallbackQueryHandler(pattern="show_message_categories",
 #                                                 callback=MessageCategory().show_category)
 # DELETE_MESSAGE_CATEGORY_HANDLER = CallbackQueryHandler(pattern="delete_category_",
