@@ -256,7 +256,7 @@ def back_from_button_handler(bot: Bot, update: Update, user_data):
 #                    "User view": ""}
 
 def help_button(bot: Bot, update: Update):
-    if users_table.find_one({"user_id": update.effective_user.id, "bot_id":bot.id}).get("blocked", True):
+    if users_table.find_one({"user_id": update.effective_user.id, "bot_id":bot.id}).get("blocked", False):
         update.effective_message.reply_text("You've been blocked from this chatbot")
         return ConversationHandler.END
     if if_admin(update=update, bot=bot):
@@ -352,7 +352,7 @@ def help_button(bot: Bot, update: Update):
 
 
 def get_help(bot: Bot, update: Update):
-    if users_table.find_one({"user_id": update.effective_user.id, "bot_id":bot.id}).get("blocked", True):
+    if users_table.find_one({"user_id": update.effective_user.id, "bot_id":bot.id}).get("blocked", False):
         update.effective_message.reply_text("You've been blocked from this chatbot")
         return ConversationHandler.END
     chatbot = chatbots_table.find_one({"bot_id": bot.id})
