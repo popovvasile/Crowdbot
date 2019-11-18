@@ -79,14 +79,18 @@ class Groups(object):
                 bot.send_message(update.effective_chat.id, "Pick a group",
                                  reply_markup=ReplyKeyboardMarkup(command_list, one_time_keyboard=True)))
             return MY_GROUPS
+
     # when user click on group name in 'My groups' menu
 
     def group(self, bot, update):
+        if update.message.text == "Back":
+            get_help(bot, update)
+            return ConversationHandler.END
         group_id = groups_table.find_one({"group_name": update.message.text})["group_id"]
         one_group_keyboard = \
             InlineKeyboardMarkup([[InlineKeyboardButton(string_dict(bot)["send_donation_to_group"],
                                                         callback_data='send_donation_to_group_{}'.format(group_id
-                                                            ))],
+                                                                                                         ))],
                                   [InlineKeyboardButton(string_dict(bot)["send_survey_to_group"],
                                                         callback_data="send_survey_to_group_{}".format(
                                                             group_id))],
@@ -263,10 +267,29 @@ class SendPost(object):
         return ConversationHandler.END
 
 
+class AddGroup(object):
+    def add_group(self, bot, update):
+        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                           message_id=update.callback_query.message.message_id)
+        buttons = list()
+        buttons.append(
+            [InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(groups)")]
+        )
+        reply_markup = InlineKeyboardMarkup(
+            buttons)
+
+        bot.send_message(update.callback_query.message.chat.id,
+                         string_dict(bot)["add_group_str"],
+                         reply_markup=reply_markup)
+        return ConversationHandler.END
+
+
+ADD_GROUP_HANLDER=CallbackQueryHandler(callback=AddGroup.add_group, pattern="add_group")
+
 MY_GROUPS_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=Groups().my_groups, pattern=r"my_groups", pass_user_data=True)],
     states={
-        MY_GROUPS: [MessageHandler(Filters.all,  Groups().group)]
+        MY_GROUPS: [MessageHandler(Filters.all, Groups().group)]
     },
     fallbacks=[CallbackQueryHandler(callback=Groups().back, pattern=r"help_back", pass_user_data=True),
                CallbackQueryHandler(callback=Groups().back, pattern=r'help_module', pass_user_data=True),

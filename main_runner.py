@@ -9,7 +9,7 @@ from modules.channels_polls_surveys_donate import SEND_SURVEY_TO_CHANNEL_HANDLER
 from modules.echop_customer import PURCHASE_HANDLER
 from modules.eshop import PRODUCT_ADD_HANDLER, DELETE_PRODUCT_HANDLER, PRODUCT_EDIT_HANDLER, \
     PRODUCT_EDIT_FINISH_HANDLER, PRODUCT_ADD_FINISH_HANDLER, DELETE_PRODUCT_CONTENT_HANDLER, PRODUCTS_MENU_HANDLER
-from modules.groups.groups import MY_GROUPS_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER
+from modules.groups.groups import MY_GROUPS_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER, ADD_GROUP_HANLDER
 from modules.groups.groups_polls_surveys_donate import SEND_POLL_TO_GROUP_HANDLER, SEND_SURVEY_TO_GROUP_HANDLER, \
     SEND_DONATION_TO_GROUP_HANDLER
 from modules.menu_description import EDIT_BOT_DESCRIPTION_HANDLER
@@ -46,7 +46,7 @@ LOGGER = logging.getLogger(__name__)
 def main(token, port):
     updater = tg.Updater(token)  # TODO check the docs
     dispatcher = updater.dispatcher
-    dispatcher.add_error_handler(error_callback)
+    # dispatcher.add_error_handler(error_callback)
     start_handler = CommandHandler("start", WelcomeBot().start)
     help_handler = CommandHandler("help", get_help)
     rex_help_handler = RegexHandler(r"^((?!@).)*$", get_help)
@@ -117,6 +117,7 @@ def main(token, port):
     dispatcher.add_handler(SEND_POLL_TO_GROUP_HANDLER)
     dispatcher.add_handler(SEND_SURVEY_TO_GROUP_HANDLER)
     dispatcher.add_handler(SEND_DONATION_TO_GROUP_HANDLER)
+    dispatcher.add_handler(ADD_GROUP_HANLDER)
     # PRODUCTS
     dispatcher.add_handler(PRODUCT_ADD_HANDLER)
     dispatcher.add_handler(DELETE_PRODUCT_HANDLER)

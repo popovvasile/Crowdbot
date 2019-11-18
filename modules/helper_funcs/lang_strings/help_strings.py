@@ -35,7 +35,10 @@ def help_strings(bot):
                         InlineKeyboardButton(text=string_d_str["products"],
                                              callback_data="products"),
                         ],
-        admin_help=string_d_str["add_menu_buttons_help"]
+        admin_help=string_d_str["add_menu_buttons_help"],
+        visitor_keyboard=[InlineKeyboardButton(text=string_d_str["products"],
+                                               callback_data="products")],
+        visitor_help=string_d_str["add_menu_buttons_help_visitor"]
     )
     help_dict["menu_buttons"] = dict(
         mod_name=string_d_str["add_menu_module_button"],

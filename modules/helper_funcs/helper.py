@@ -1,6 +1,8 @@
 from math import ceil
 from typing import List, Dict
 from telegram import ParseMode, InlineKeyboardMarkup, Bot, Update, InlineKeyboardButton
+from telegram.ext import ConversationHandler
+
 from database import custom_buttons_table, chatbots_table, users_table, user_mode_table
 from modules.helper_funcs.lang_strings.help_strings import helpable_dict
 from modules.helper_funcs.lang_strings.strings import string_dict
@@ -102,6 +104,10 @@ def register_chat(bot, update):
 
 
 def get_help(bot: Bot, update: Update):
+    if users_table.find_one({"user_id":update.effective_user.id, "bot_id":bot.id}).get("blocked", True):
+        query = update.callback_query
+        query.message.reply_text("You've been blocked from this chatbot")
+        return ConversationHandler.END
     chatbot = chatbots_table.find_one({"bot_id": bot.id})
     register_chat(bot, update)
     chat = update.effective_chat

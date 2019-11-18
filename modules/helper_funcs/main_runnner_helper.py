@@ -29,6 +29,7 @@ def send_admin_help(bot, chat_id, text, keyboard=None):
 
 
 def send_visitor_help(bot, chat_id, text, keyboard=None):
+
     donation_request = chatbots_table.find_one({"bot_id": bot.id})
     if donation_request.get("donate") is not None and donation_request.get("donate") != {}:
         buttons = [InlineKeyboardButton(string_dict(bot)["send_message_1"], callback_data="help_module(messages)"),
@@ -255,9 +256,8 @@ def back_from_button_handler(bot: Bot, update: Update, user_data):
 #                    "User view": ""}
 
 def help_button(bot: Bot, update: Update):
-    if users_table.find_one({"user_id":update.effective_user.id, "bot_id":bot.id}).get("blocked", False):
-        query = update.callback_query
-        query.message.reply_text("You've been blocked from this chatbot")
+    if users_table.find_one({"user_id": update.effective_user.id, "bot_id":bot.id}).get("blocked", True):
+        update.effective_message.reply_text("You've been blocked from this chatbot")
         return ConversationHandler.END
     if if_admin(update=update, bot=bot):
         HELPABLE = helpable_dict(bot)["ADMIN_HELPABLE"]
@@ -334,7 +334,7 @@ def help_button(bot: Bot, update: Update):
             query.message.reply_text(text=HELP_STRINGS.format(welcome_message),
                                      reply_markup=InlineKeyboardMarkup(paginate_modules(0, HELPABLE, "help", bot.id)))
             return ConversationHandler.END
-        # ensure no spinny white circle
+        # ensure no spiny white circle
         bot.answer_callback_query(query.id)
         query.message.delete()
         return ConversationHandler.END
@@ -352,6 +352,9 @@ def help_button(bot: Bot, update: Update):
 
 
 def get_help(bot: Bot, update: Update):
+    if users_table.find_one({"user_id": update.effective_user.id, "bot_id":bot.id}).get("blocked", True):
+        update.effective_message.reply_text("You've been blocked from this chatbot")
+        return ConversationHandler.END
     chatbot = chatbots_table.find_one({"bot_id": bot.id})
     register_chat(bot, update)
     chat = update.effective_chat
@@ -381,7 +384,6 @@ def get_help(bot: Bot, update: Update):
         send_visitor_help(bot, chat.id, HELP_STRINGS.format(welcome_message))
 
 
-
 def on_stupid_strings(bot: Bot, update: Update):
     get_help(bot, update)
 
@@ -396,7 +398,7 @@ class WelcomeBot(object):
             bot.send_message(chat_id=chat_id, text=string_dict(bot)["hello_group"],
                              reply_markup=InlineKeyboardMarkup(
                                  [[InlineKeyboardButton(text=string_dict(bot)["menu_button"],
-                                                        url="https://telegram.me/CrowdHomeTestBot")]]
+                                                        url="https://telegram.me/{}".format(bot.username))]]
                              ))
             groups_table.update({"group_id": chat_id, "bot_id": bot.id},
                                 {"group_id": chat_id, "bot_id": bot.id, "group_name": update.message.chat.title},

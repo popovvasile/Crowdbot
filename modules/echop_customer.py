@@ -37,7 +37,7 @@ class PurchaseBot(object):
         title = purchase_request['title']
         description = purchase_request['title']
         payload = "Purchase"
-        start_parameter = "test-payment"  # TODO change in production
+        start_parameter = "shop-payment"  # TODO change in production
         currency = purchase_request['currency']
         prices = [LabeledPrice(title, purchase_request["price"])]
         bot.sendInvoice(update.callback_query.message.chat_id, title, description, payload,

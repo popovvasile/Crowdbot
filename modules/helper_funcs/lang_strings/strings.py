@@ -351,8 +351,9 @@ Surveys
     edit_menu_text="🤝 Change the greeting",
     add_menu_buttons_help="""
 Settings
-Click "📌 Create a button", to add a content.
+Click "📌 Create", to add an item to to your shop.
 """,
+    add_menu_buttons_help_visitor="Choose the product that you want to buy",
     add_menu_buttons_str_1="Write the name of the button or choose from the template.",
     add_menu_buttons_str_1_1="Write the name of your new button",
     link_button_str="Button with a link",
@@ -414,6 +415,10 @@ Click "📌 Create a button", to add a content.
     send_poll_to_group='Poll to group',
     send_post_to_group='Write a post',
     send_donation_to_group="Send a 'Donate' button to group",
+    add_group_str= "To add a new group- \n"
+                         "1)Add this bot as admin to your group\n"
+                         "2)Write /start command to add this group to the chatbot",
+
 
     add_product_button="Add product",
     edit_product="Edit product",
@@ -433,7 +438,9 @@ Click "📌 Create a button", to add a content.
     products_str_choose_the_product_to_del="Choose the product to delete",
     no_products="You have no products in your shop",
     products_deleted_str="Chosen products have been deleted",
+    add_products_products_deleted_str="You can add a new item to your shop or return to main menu",
     payment_configure_button="Configure Payments",
+    add_products_str_deleted="Item {} has been deleted from your shop",
     products="Products",
     buy_button="Buy",
     hello_group="Hello group"

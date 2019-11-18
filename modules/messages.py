@@ -714,7 +714,7 @@ class SeeMessageToAdmin(object):
                                                                                  str(message["user_id"]))],
 
                                                            ]
-                                                       ), parse_mode=ParseMode.MARKDOWN))
+                                                       )))
         bot.send_message(update.callback_query.message.chat_id,
                          string_dict(bot)["back_text"],
                          reply_markup=InlineKeyboardMarkup(
@@ -745,7 +745,7 @@ class SeeMessageToAdmin(object):
         user_id = update.callback_query.data.replace("unblock_", "")
         user = users_table.find_one({"user_id": user_id})
         user["blocked"] = False
-        users_table.update_one({"user_id": user_id}, user)
+        users_table.update({"user_id": user_id}, user)
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         bot.send_message(update.callback_query.message.chat_id, "User has been removed from the blacklist",
@@ -764,15 +764,15 @@ class SeeMessageToAdmin(object):
     def block_confirmation(self, bot, update, user_data):
         user = users_table.find_one({"user_id": user_data["user_id"]})
         user["blocked"] = True
-        users_table.update_one({"user_id": user_data["user_id"]}, user)
+        users_table.update({"user_id": user_data["user_id"]}, user)
         markup = InlineKeyboardMarkup([[InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                              callback_data="inbox_message")]])
         if update.message.text == "YES":
-            bot.send_message(update.callback_query.message.chat_id, "User {} has been blocked".format(
+            bot.send_message(update.message.chat_id, "User {} has been blocked".format(
                 user_data["user_name"], reply_markup=markup
             ))
         else:
-            bot.send_message(update.callback_query.message.chat_id, "Blocking has been canceled", reply_markup=markup)
+            bot.send_message(update.message.chat_id, "Blocking has been canceled", reply_markup=markup)
         return ConversationHandler.END
 
     def back(self, bot, update, user_data):
@@ -873,12 +873,12 @@ ANSWER_TO_MESSAGE_HANDLER = ConversationHandler(
 )
 BLOCK_USER = ConversationHandler(
     entry_points=[CallbackQueryHandler(pattern="block_user",
-                                       callback=SeeMessageToAdmin.block_user,
+                                       callback=SeeMessageToAdmin().block_user,
                                        pass_user_data=True),
                   ],
 
     states={
-        BLOCK_CONFIRMATION: [MessageHandler(Filters.all, SeeMessageToAdmin().block_confirmation), ],
+        BLOCK_CONFIRMATION: [MessageHandler(Filters.all, SeeMessageToAdmin().block_confirmation, pass_user_data=True), ],
         # TOPIC: [MessageHandler(Filters.all, SendMessageToAdmin().send_topic, pass_user_data=True), ]
         # SEND_ANONIM: [MessageHandler(Filters.all, SendMessageToAdmin().send_anonim, pass_user_data=True), ]
 

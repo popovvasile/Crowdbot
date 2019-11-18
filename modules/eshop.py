@@ -29,16 +29,30 @@ class ProcductMenu(object):
                                         callback_data="product_{}".format(button["title"].replace(" ", "").lower()))
                    for button in products_table.find({"bot_id": bot.id})]
 
-        if len(buttons) % 2 == 0:
-            pairs = list(zip(buttons[::2], buttons[1::2]))
+        if len(buttons) > 0:
+            if len(buttons) % 2 == 0:
+                pairs = list(zip(buttons[::2], buttons[1::2]))
+            else:
+                pairs = list(zip(buttons[::2], buttons[1::2])) + [(buttons[-1],)] \
+                        + [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                 callback_data="help_module(shop)")]]
+            bot.send_message(chat_id=update.effective_chat.id,
+                             text="Products menu",
+                             parse_mode=ParseMode.MARKDOWN,
+                             reply_markup=InlineKeyboardMarkup(
+                                 pairs
+                             ))
         else:
-            pairs = list(zip(buttons[::2], buttons[1::2])) + [(buttons[-1],)]
-        bot.send_message(chat_id=update.effective_chat.id,
-                         text="Products menu",
-                         parse_mode=ParseMode.MARKDOWN,
-                         reply_markup=InlineKeyboardMarkup(
-                             pairs
-                         ))
+            bot.send_message(chat_id=update.callback_query.message.chat_id,
+                             text=string_dict(bot)["manage_button_str_2"],
+                             reply_markup=InlineKeyboardMarkup(
+                                 [[InlineKeyboardButton(
+                                     string_dict(bot)["add_product_button"],
+                                     callback_data="create_product"),
+                                     InlineKeyboardButton(
+                                         string_dict(bot)["back_button"],
+                                         callback_data="help_module(shop)")]]
+                             ), parse_mode='Markdown')
 
 
 class AddProducts(object):
@@ -51,9 +65,6 @@ class AddProducts(object):
                                                 callback_data="help_module(shop)")]]
         reply_markup = InlineKeyboardMarkup(
             reply_products)
-
-        bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
 
         user_data["to_delete"].append(bot.send_message(update.callback_query.message.chat.id,
                                                        string_dict(bot)["add_products_str_1"]))
@@ -253,9 +264,9 @@ class AddProducts(object):
             "bot_id": bot.id
         })
         update.message.reply_text(
-            string_dict(bot)["add_products_str_8"].format(txt), reply_markup=ReplyKeyboardRemove())
+            string_dict(bot)["add_products_str_deleted"].format(txt), reply_markup=ReplyKeyboardRemove())
         bot.send_message(chat_id=update.message.chat_id,  # TODO send as in polls
-                         text=string_dict(bot)["add_products_products_deleted_strstr_10"],
+                         text=string_dict(bot)["add_products_products_deleted_str"],
                          reply_markup=InlineKeyboardMarkup(
                              [[InlineKeyboardButton(string_dict(bot)["add_product_button"],
                                                     callback_data="create_product"),
@@ -688,9 +699,12 @@ PRODUCT_ADD_HANDLER = ConversationHandler(
         TYPING_PRICE: [
             MessageHandler(Filters.text,
                            AddProducts().type_price, pass_user_data=True)],
+
         TYPING_CURRENCY: [
             MessageHandler(Filters.text,
                            AddProducts().handle_currency, pass_user_data=True)],
+        CHOOSE_TYPE: [MessageHandler(Filters.all,
+                                     AddProducts().handle_type, pass_user_data=True)],
         TYPING_DESCRIPTION: [MessageHandler(Filters.all,
                                             AddProducts().description_handler, pass_user_data=True)],
         DESCRIPTION_FINISH: [MessageHandler(Filters.text,
