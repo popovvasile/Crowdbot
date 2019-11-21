@@ -14,10 +14,7 @@ def help_strings(bot):
         admin_help=string_d_str["channels_str_1"],
         # and keyboard for start message
         admin_keyboard=[InlineKeyboardButton(string_d_str["my_channels"], callback_data='my_channels'),
-                        InlineKeyboardButton(string_d_str["add_channel"], callback_data='add_channel'),
-                        InlineKeyboardButton(string_d_str["my_groups"], callback_data='my_groups'),
-                        InlineKeyboardButton(string_d_str["add_group"], callback_data='add_group')
-                        ]
+                        InlineKeyboardButton(string_d_str["my_groups"], callback_data='my_groups')]
     )
     help_dict["shop"] = dict(
         mod_name=string_d_str["add_product_button"],
