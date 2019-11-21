@@ -4,36 +4,34 @@ import logging
 import telegram.ext as tg
 from telegram.ext import CommandHandler, CallbackQueryHandler,RegexHandler
 
-from modules.channels_polls_surveys_donate import SEND_SURVEY_TO_CHANNEL_HANDLER, SEND_POLL_TO_CHANNEL_HANDLER, \
-    SEND_DONATION_TO_CHANNEL_HANDLER
-from modules.echop_customer import PURCHASE_HANDLER
-from modules.eshop import PRODUCT_ADD_HANDLER, DELETE_PRODUCT_HANDLER, PRODUCT_EDIT_HANDLER, \
+from helper_funcs.admin_login import ADMIN_AUTHENTICATION_HANDLER
+from modules.eshop.echop_customer import PURCHASE_HANDLER
+from modules.eshop.eshop_admin import PRODUCT_ADD_HANDLER, DELETE_PRODUCT_HANDLER, PRODUCT_EDIT_HANDLER, \
     PRODUCT_EDIT_FINISH_HANDLER, PRODUCT_ADD_FINISH_HANDLER, DELETE_PRODUCT_CONTENT_HANDLER, PRODUCTS_MENU_HANDLER
 from modules.groups.groups import MY_GROUPS_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER, ADD_GROUP_HANLDER
 from modules.groups.groups_polls_surveys_donate import SEND_POLL_TO_GROUP_HANDLER, SEND_SURVEY_TO_GROUP_HANDLER, \
     SEND_DONATION_TO_GROUP_HANDLER
-from modules.menu_description import EDIT_BOT_DESCRIPTION_HANDLER
-from modules.helper_funcs.admin_login import ADMIN_AUTHENTICATION_HANDLER
-from modules.menu_buttons import BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER, LINK_BUTTON_ADD_HANDLER, \
+from modules.settings.menu_description import EDIT_BOT_DESCRIPTION_HANDLER
+from modules.settings.menu_buttons import BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER, LINK_BUTTON_ADD_HANDLER, \
     CREATE_BUTTON_CHOOSE
-from modules.messages_admin import SEND_MESSAGE_ONLY_TO_ADMINS_HANDLER
-from modules.messages_donators import SEND_MESSAGE_TO_DONATORS_HANDLER
-from modules.surveys_answer import ANSWER_SURVEY_HANDLER
-from modules.donation_enable import CREATE_DONATION_HANDLER
-from modules.surveys_create import DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_HANDLER, SEND_SURVEYS_HANDLER, \
+from modules.users.messages_admin import SEND_MESSAGE_ONLY_TO_ADMINS_HANDLER
+from modules.users.messages_donators import SEND_MESSAGE_TO_DONATORS_HANDLER
+from modules.surveys.surveys_answer import ANSWER_SURVEY_HANDLER
+from modules.donations.donation_enable import CREATE_DONATION_HANDLER
+from modules.surveys.surveys_create import DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_HANDLER, SEND_SURVEYS_HANDLER, \
     CREATE_SURVEY_HANDLER
-from modules.donations_edit_delete_results import EDIT_DONATION_HANDLER
-from modules.helper_funcs.main_runnner_helper import help_button, button_handler, get_help, WelcomeBot, error_callback, \
+from modules.donations.donations_edit_delete_results import EDIT_DONATION_HANDLER
+from helper_funcs.main_runnner_helper import help_button, button_handler, get_help, WelcomeBot, \
     back_from_button_handler, product_handler
-from modules.manage_button import BUTTON_EDIT_HANDLER, BUTTON_EDIT_FINISH_HANDLER, DELETE_CONTENT_HANDLER, \
-    BUTTON_ADD_FINISH_HANDLER, AddButtonContent, back_from_edit_button_handler
-from modules.donation_payment import DONATE_HANDLER, HANDLE_SUCCES, HANDLE_PRECHECKOUT
-from modules.polls import POLL_HANDLER, SEND_POLLS_HANDLER, BUTTON_HANDLER, DELETE_POLLS_HANDLER, POLLS_RESULTS_HANDLER
-from modules.donation_send_promotion import SEND_DONATION_TO_USERS_HANDLER
-from modules.messages import SEND_MESSAGE_TO_ADMIN_HANDLER, SEND_MESSAGE_TO_USERS_HANDLER, SEE_MESSAGES_HANDLER, \
+from modules.settings.manage_button import BUTTON_EDIT_HANDLER, BUTTON_EDIT_FINISH_HANDLER, DELETE_CONTENT_HANDLER, \
+    BUTTON_ADD_FINISH_HANDLER, back_from_edit_button_handler
+from modules.donations.donation_payment import DONATE_HANDLER, HANDLE_SUCCES, HANDLE_PRECHECKOUT
+from modules.pollbot.polls import POLL_HANDLER, SEND_POLLS_HANDLER, BUTTON_HANDLER, DELETE_POLLS_HANDLER, POLLS_RESULTS_HANDLER
+from modules.donations.donation_send_promotion import SEND_DONATION_TO_USERS_HANDLER
+from modules.users.messages import SEND_MESSAGE_TO_ADMIN_HANDLER, SEND_MESSAGE_TO_USERS_HANDLER, SEE_MESSAGES_HANDLER, \
     ANSWER_TO_MESSAGE_HANDLER, DELETE_MESSAGES_HANDLER, SEE_MESSAGES_FINISH_HANDLER, SEE_MESSAGES_BACK_HANDLER, \
     SEE_MESSAGES_FINISH_BACK_HANDLER, BLOCK_USER, BLOCKED_USERS_LIST, UNBLOCK_USER
-from modules.user_mode import USER_MODE_OFF, USER_MODE_ON
+from modules.settings.user_mode import USER_MODE_OFF, USER_MODE_ON
 
 
 logging.basicConfig(

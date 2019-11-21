@@ -4,8 +4,8 @@ from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMa
 from telegram.ext import ConversationHandler, CallbackQueryHandler, MessageHandler, Filters, RegexHandler
 from database import groups_table
 from telegram.error import TelegramError
-from modules.helper_funcs.helper import get_help
-from modules.helper_funcs.lang_strings.strings import string_dict
+from helper_funcs.main_runnner_helper import get_help
+from helper_funcs.lang_strings.strings import string_dict
 import logging
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -284,7 +284,7 @@ class AddGroup(object):
         return ConversationHandler.END
 
 
-ADD_GROUP_HANLDER=CallbackQueryHandler(callback=AddGroup.add_group, pattern="add_group")
+ADD_GROUP_HANLDER=CallbackQueryHandler(callback=AddGroup().add_group, pattern="add_group")
 
 MY_GROUPS_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=Groups().my_groups, pattern=r"my_groups", pass_user_data=True)],

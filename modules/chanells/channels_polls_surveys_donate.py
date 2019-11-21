@@ -2,7 +2,7 @@ import ast
 
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import ConversationHandler, CallbackQueryHandler, MessageHandler, Filters, RegexHandler
-from database import polls_table, surveys_table, chatbots_table, groups_table
+from database import polls_table, surveys_table, chatbots_table, channels_table
 from helper_funcs.auth import initiate_chat_id
 from helper_funcs.main_runnner_helper import get_help
 from helper_funcs.lang_strings.strings import string_dict
@@ -10,38 +10,38 @@ import logging
 
 from modules.pollbot.polls import PollBot
 
-MY_GROUPS, MANAGE_GROUP, ADD_GROUP, \
-CHOOSE_TO_REMOVE, REMOVE_GROUP, \
-CHOOSE_TO_SEND_POST, POST_TO_GROUP, MESSAGE_TO_USERS = range(8)
+MY_CHANNELS, MANAGE_CHANNEL, ADD_CHANNEL, \
+CHOOSE_TO_REMOVE, REMOVE_CHANNEL, \
+CHOOSE_TO_SEND_POST, POST_TO_CHANNEL, MESSAGE_TO_USERS = range(8)
 
-CHOOSE_GROUP_TO_SEND_POLL, CHOOSE_POLL_TO_SEND = range(2)
-CHOOSE_GROUP_TO_SEND_SURVEY, CHOOSE_SURVEY_TO_SEND = range(2)
+CHOOSE_CHANNEL_TO_SEND_POLL, CHOOSE_POLL_TO_SEND = range(2)
+CHOOSE_CHANNEL_TO_SEND_SURVEY, CHOOSE_SURVEY_TO_SEND = range(2)
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-# Post on group -> Send a Poll -> no polls. wanna create one?(yes, back) ->
-#         -> creating poll -> poll was created(send on group, back) -> are u sure to send? -> send to group
+# Post on channel -> Send a Poll -> no polls. wanna create one?(yes, back) ->
+#         -> creating poll -> poll was created(send on channel, back) -> are u sure to send? -> send to channel
 
 
-# for sending polls to groups
+# for sending polls to channels
 
-class SendPoll(object):   # TODO send poll by group id, not name
+class SendPoll(object):
     def handle_send_poll(self, bot, update, user_data):
 
         if update.callback_query:
-            group_name = update.callback_query.data.replace("send_poll_to_group_", "")
+            channel_username = update.callback_query.data.replace("send_poll_to_channel_", "")
             update_data = update.callback_query
-            if group_name == "send_poll_to_group":
-                groups_markup = [group['group_name'] for group in groups_table.find({'bot_id': bot.id})]
-                bot.send_message(update.callback_query.message.chat.id, "Choose a group that you want to send",
-                                 reply_markup=ReplyKeyboardMarkup([groups_markup]))
+            if channel_username == "send_poll_to_channel":
+                channels_markup = [channel['channel_username'] for channel in channels_table.find({'bot_id': bot.id})]
+                bot.send_message(update.callback_query.message.chat.id, "Choose a channel that you want to send",
+                                 reply_markup=ReplyKeyboardMarkup([channels_markup]))
                 bot.delete_message(chat_id=update_data.message.chat_id,
                                    message_id=update_data.message.message_id)
-                return CHOOSE_GROUP_TO_SEND_POLL
+                return CHOOSE_CHANNEL_TO_SEND_POLL
         else:
-            group_name = update.message.text
+            channel_username = update.message.text
             update_data = update
 
         create_buttons = [
@@ -60,7 +60,7 @@ class SendPoll(object):   # TODO send poll by group id, not name
                              reply_markup=create_markup)
             return ConversationHandler.END
         else:
-            user_data['group'] = group_name
+            user_data['channel'] = channel_username
             polls_list_of_dicts = polls_table.find({"bot_id": bot.id})
             if polls_list_of_dicts.count() != 0:
                 command_list = [command['title'] for command in polls_list_of_dicts]
@@ -85,7 +85,7 @@ class SendPoll(object):   # TODO send poll by group id, not name
         poll['options'] = ast.literal_eval(poll['options'])
         poll['meta'] = ast.literal_eval(poll['meta'])
 
-        bot.send_message(user_data['group'], PollBot().assemble_message_text(poll),
+        bot.send_message(user_data['channel'], PollBot().assemble_message_text(poll),
                          reply_markup=PollBot().assemble_inline_keyboard(poll, True),
                          parse_mode='Markdown'
                          )
@@ -93,7 +93,7 @@ class SendPoll(object):   # TODO send poll by group id, not name
         bot.send_message(chat_id, string_dict(bot)["polls_str_12"], reply_markup=ReplyKeyboardRemove())
 
         create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                                callback_data="help_module(groups)")]]
+                                                callback_data="help_module(channels)")]]
         create_markup = InlineKeyboardMarkup(create_buttons)
         bot.send_message(update.message.chat.id, string_dict(bot)["back_text"],
                          reply_markup=create_markup)
@@ -120,26 +120,26 @@ class SendPoll(object):   # TODO send poll by group id, not name
         return
 
 
-# for sending surveys to groups
+# for sending surveys to channels
 
 class SendSurvey(object):
     def handle_send_survey(self, bot, update, user_data):  # TODO for callback_query and text messages
         if update.callback_query:
-            group_name = update.callback_query.data.replace("send_survey_to_group_", "")
+            channel_username = update.callback_query.data.replace("send_survey_to_channel_", "")
             update_data = update.callback_query
-            if group_name == "send_survey_to_group":
-                groups_markup = [group['group_name'] for group in groups_table.find({'bot_id': bot.id})]
-                bot.send_message(update.callback_query.message.chat.id, "Choose a group that you want to send",
-                                 reply_markup=ReplyKeyboardMarkup([groups_markup]))
-                return CHOOSE_GROUP_TO_SEND_SURVEY
+            if channel_username == "send_survey_to_channel":
+                channels_markup = [channel['channel_username'] for channel in channels_table.find({'bot_id': bot.id})]
+                bot.send_message(update.callback_query.message.chat.id, "Choose a channel that you want to send",
+                                 reply_markup=ReplyKeyboardMarkup([channels_markup]))
+                return CHOOSE_CHANNEL_TO_SEND_SURVEY
         else:
-            group_name = update.message.text
+            channel_username = update.message.text
             update_data = update
         buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_back")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.delete_message(update_data.message.chat.id, update_data.message.message_id)
-        user_data['group'] = group_name
+        user_data['channel'] = channel_username
         surveys_list = surveys_table.find({"bot_id": bot.id})
         if surveys_list.count() != 0:
             bot.send_message(update_data.message.chat.id,
@@ -163,7 +163,7 @@ class SendSurvey(object):
     def handle_send_title(self, bot, update, user_data):
         chat_id, txt = initiate_chat_id(update)
         user_data["title"] = txt
-        bot.send_message(chat_id=user_data['group'], text=string_dict(bot)["survey_str_20"],
+        bot.send_message(chat_id=user_data['channel'], text=string_dict(bot)["survey_str_20"],
                          reply_markup=InlineKeyboardMarkup(
                              [[InlineKeyboardButton(text=string_dict(bot)["start_button"],
                                                     url="https://t.me/{}?start=survey_{}".format(bot.username,
@@ -173,7 +173,7 @@ class SendSurvey(object):
                                                     ))]]
                          ))
         create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                                callback_data="help_module(groups)")]]
+                                                callback_data="help_module(channels)")]]
         create_markup = InlineKeyboardMarkup(create_buttons)
         bot.send_message(update.message.chat.id, string_dict(bot)["back_text"],
                          reply_markup=create_markup)
@@ -201,26 +201,26 @@ class SendSurvey(object):
 
 
 DONATION_TO_USERS = 1
-CHOOSE_GROUP_TO_SEND_DONATION = 23
+CHOOSE_CHANNEL_TO_SEND_DONATION = 23
 CHOOSE_POLL_TO_SEND_DONATION = 34
 
 
 class SendDonationToChannel(object):
     def send_donation(self, bot, update, user_data):
-        groups = groups_table.find({'bot_id': bot.id})
+        channels = channels_table.find({'bot_id': bot.id})
         update_data = update.callback_query
-        group_id = update.callback_query.data.replace("send_donation_to_group_", "")
+        channel_username = update.callback_query.data.replace("send_donation_to_channel_", "")
 
-        if groups != 0:
+        if channels != 0:
               # TODO here is a bug, AttributeError: 'Update' object has no attribute 'data'
 
-            if group_id == "send_donation_to_group":
-                groups_markup = [group['group_name'] for group in groups]
-                bot.send_message(update_data.message.chat.id, "Choose a group that you want to send",
-                                 reply_markup=ReplyKeyboardMarkup([groups_markup]))
-                return CHOOSE_GROUP_TO_SEND_DONATION
+            if channel_username == "send_donation_to_channel":
+                channels_markup = [channel['channel_username'] for channel in channels]
+                bot.send_message(update_data.message.chat.id, "Choose a channel that you want to send",
+                                 reply_markup=ReplyKeyboardMarkup([channels_markup]))
+                return CHOOSE_CHANNEL_TO_SEND_DONATION
 
-            user_data["group_name"] = group_id
+            user_data["channel_username"] = channel_username
             buttons = list()
             buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                  callback_data="help_back")])
@@ -245,51 +245,59 @@ class SendDonationToChannel(object):
                                  reply_markup=InlineKeyboardMarkup([admin_keyboard]))
                 return ConversationHandler.END
         else:
-            admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["add_group"],
-                                                   callback_data="add_group"),
+            admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["add_channel"],
+                                                   callback_data="add_channel"),
                               InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                    callback_data="help_back")]
             bot.send_message(update_data.message.chat.id,
-                             string_dict(bot)["no_groups"],
+                             string_dict(bot)["no_channels"],
                              reply_markup=InlineKeyboardMarkup([admin_keyboard]))
             return ConversationHandler.END
 
-    def received_donation(self, bot, update, user_data):
-        if "content" not in user_data:
-            user_data["content"] = []
+    def received_donation(self, bot, update, user_data):  # TODO change like in messages
+
         if update.message.text:
-            user_data["content"].append({"text": update.message.text})
+            bot.send_message(user_data["channel_username"], update.message.text)
 
         elif update.message.photo:
-            photo_file = update.message.photo[-1].get_file().file_id
-            user_data["content"].append({"photo_file": photo_file})
+            photo_file = update.message.photo[0].get_file().file_id
+            bot.send_photo(user_data["channel_username"], photo=photo_file)
 
         elif update.message.audio:
             audio_file = update.message.audio.get_file().file_id
-            user_data["content"].append({"audio_file": audio_file})
+            bot.send_audio(user_data["channel_username"], audio_file)
 
         elif update.message.voice:
             voice_file = update.message.voice.get_file().file_id
-            user_data["content"].append({"audio_file": voice_file})
+            bot.send_voice(user_data["channel_username"], voice_file)
 
         elif update.message.document:
             document_file = update.message.document.get_file().file_id
-            user_data["content"].append({"document_file": document_file})
+            bot.send_document(user_data["channel_username"], document_file)
+
+        elif update.message.sticker:
+            sticker_file = update.message.sticker.get_file().file_id
+            bot.send_sticker(user_data["channel_username"], sticker_file)
+
+        elif update.message.game:
+            sticker_file = update.message.game.get_file().file_id
+            bot.send_game(user_data["channel_username"], sticker_file)
+
+        elif update.message.animation:
+            animation_file = update.message.animation.get_file().file_id
+            bot.send_animation(user_data["channel_username"], animation_file)
 
         elif update.message.video:
             video_file = update.message.video.get_file().file_id
-            user_data["content"].append({"video_file": video_file})
+            bot.send_video(user_data["channel_username"], video_file)
 
         elif update.message.video_note:
             video_note_file = update.message.audio.get_file().file_id
-            user_data["content"].append({"video_file": video_note_file})
+            bot.send_video_note(user_data["channel_username"], video_note_file)
 
         final_reply_markup = InlineKeyboardMarkup(
             [[InlineKeyboardButton(text=string_dict(bot)["done_button"],
-                                   callback_data="send_donation_finish")],
-             [InlineKeyboardButton(text=string_dict(bot)["cancel_button"],
-                                   callback_data="help_module(donation_payment)k")]
-             ]
+                                   callback_data="send_donation_finish")]]
         )
         bot.send_message(update.message.chat_id,
                          string_dict(bot)["send_donation_request_2"],
@@ -301,42 +309,23 @@ class SendDonationToChannel(object):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                             callback_data="help_module(groups)")])
-        final_reply_markup = InlineKeyboardMarkup(
+        buttons.append([InlineKeyboardButton(text=string_dict(bot)["donate_button"],
+
+                                             url="https://t.me/{}?start=pay_donation".format(bot.username),
+                                             )])
+        donation_reply_markup = InlineKeyboardMarkup(
             buttons)
+        create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                callback_data="help_module(channels)")]]
+        create_markup = InlineKeyboardMarkup(create_buttons)
+
         bot.send_message(update.callback_query.message.chat_id,
                          string_dict(bot)["send_donation_request_3"],
-                         reply_markup=final_reply_markup)
+                         reply_markup=create_markup)
 
-        for content_dict in user_data["content"]:
-            if "text" in content_dict:
-                bot.send_message(user_data["group_name"] ,
-                                 content_dict["text"])
-            if "audio_file" in content_dict:
-                bot.send_audio(user_data["group_name"] , content_dict["audio_file"])
-            if "voice_file" in content_dict:
-                bot.send_voice(user_data["group_name"] , content_dict["voice_file"])
-            if "video_file" in content_dict:
-                bot.send_video(user_data["group_name"] , content_dict["video_file"])
-            if "video_note_file" in content_dict:
-                bot.send_video_note(user_data["group_name"] , content_dict["video_note_file"])
-            if "document_file" in content_dict:
-                if ".png" in content_dict["document_file"] or ".jpg" in content_dict["document_file"]:
-                    bot.send_photo(user_data["group_name"] , content_dict["document_file"])
-                else:
-                    bot.send_document(user_data["group_name"] , content_dict["document_file"])
-            if "photo_file" in content_dict:
-                bot.send_photo(user_data["group_name"] , content_dict["photo_file"])
-            if "animation_file" in content_dict:
-                bot.send_animation(user_data["group_name"] , content_dict["animation_file"])
-            if "sticker_file" in content_dict:
-                bot.send_sticker(user_data["group_name"] , content_dict["sticker_file"])
-
-            bot.send_message(user_data["group_name"] ,
-                             text=string_dict(bot)["donate_button"],
-                             reply_markup=final_reply_markup)
-            user_data.clear()
+        bot.send_message(user_data["channel_username"],
+                         string_dict(bot)["donate_button"],
+                         reply_markup=donation_reply_markup)
         return ConversationHandler.END
 
     def cancel(self, bot, update):
@@ -359,13 +348,13 @@ class SendDonationToChannel(object):
 
 
 # There are already 'send_survey_to_users' pattern handler - mb use it
-SEND_POLL_TO_GROUP_HANDLER = ConversationHandler(
+SEND_POLL_TO_CHANNEL_HANDLER = ConversationHandler(
     entry_points=[
-        CallbackQueryHandler(SendPoll().handle_send_poll, pattern=r"send_poll_to_group", pass_user_data=True), ],
+        CallbackQueryHandler(SendPoll().handle_send_poll, pattern=r"send_poll_to_channel", pass_user_data=True), ],
     states={
 
         CHOOSE_POLL_TO_SEND: [MessageHandler(Filters.text, SendPoll().handle_send_title, pass_user_data=True), ],
-        CHOOSE_GROUP_TO_SEND_POLL: [
+        CHOOSE_CHANNEL_TO_SEND_POLL: [
             MessageHandler(Filters.text, SendPoll().handle_send_poll, pass_user_data=True), ],
     },
     fallbacks=[CallbackQueryHandler(callback=SendPoll().back, pattern=r"help_back"),
@@ -374,11 +363,11 @@ SEND_POLL_TO_GROUP_HANDLER = ConversationHandler(
                ]
 )
 
-SEND_SURVEY_TO_GROUP_HANDLER = ConversationHandler(
+SEND_SURVEY_TO_CHANNEL_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(SendSurvey().handle_send_survey,
-                                       pattern="send_survey_to_group", pass_user_data=True)],
+                                       pattern="send_survey_to_channel", pass_user_data=True)],
     states={
-        CHOOSE_GROUP_TO_SEND_SURVEY: [
+        CHOOSE_CHANNEL_TO_SEND_SURVEY: [
             MessageHandler(Filters.text, SendSurvey().handle_send_survey, pass_user_data=True),
         ],
         CHOOSE_SURVEY_TO_SEND: [MessageHandler(Filters.text, SendSurvey().handle_send_title, pass_user_data=True),
@@ -389,8 +378,8 @@ SEND_SURVEY_TO_GROUP_HANDLER = ConversationHandler(
                RegexHandler('^Back$', SendSurvey().back),
                ]
 )
-SEND_DONATION_TO_GROUP_HANDLER = ConversationHandler(
-    entry_points=[CallbackQueryHandler(pattern=r"send_donation_to_group",
+SEND_DONATION_TO_CHANNEL_HANDLER = ConversationHandler(
+    entry_points=[CallbackQueryHandler(pattern=r"send_donation_to_channel",
                                        callback=SendDonationToChannel().send_donation,
                                        pass_user_data=True)],
 
@@ -399,7 +388,7 @@ SEND_DONATION_TO_GROUP_HANDLER = ConversationHandler(
                                            SendDonationToChannel().received_donation,
                                            pass_user_data=True),
                             ],
-        CHOOSE_GROUP_TO_SEND_DONATION: [MessageHandler(Filters.all,
+        CHOOSE_CHANNEL_TO_SEND_DONATION: [MessageHandler(Filters.all,
                                                          SendDonationToChannel().send_donation,
                                                          pass_user_data=True),
                                           ],

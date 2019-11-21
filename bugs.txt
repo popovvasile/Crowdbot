@@ -10,14 +10,17 @@ Admins: [send message] [send urgent message]
 Users: [send message] [ask for donation] [send survey]
 
 
-Yura
+# TODO GROUPS:  surveys, polls and messages - SEND  button must be sent to the choosen group @ check channels as well
+# TODO create a separate module- payments with statistics on donations, purchases and stuff
+# TODO remove rest, unite it with the database
+# TODO double test refactoring
+# TODO find a way to run run multiple tokens without running so many processes
+# TODO try pypy again, should work now
+# TODO In shop edit there is no back button
+# TODO Фильтрация товаров
+# TODO Подкатегории для шопа.
+# TODO products apper not as buttons, but as messages with pics and description (add pagination)
+# TODO make button content with payment
+# TODO add stats on donations, customers, messages and users overall
 # TODO pagination for messages
-# TODO messages - show how many new messages are "unread" -- take a look at botfather
-# TODO stats for bot-  users, donates  --- DO  IT FIRST
-# TODO donation does not save the currency
-Vasea
-# TODO Fix the deletion of admins
-# TODO anonymous messages does not work
-
-
-
+# TODO messages - show how many new messages are "unread/new" -- take a look at botfather
