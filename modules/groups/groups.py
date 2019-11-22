@@ -49,6 +49,21 @@ def delete_messages(bot, user_data, update):
         pass
 
 
+def groups_menu(bot, update):
+    bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                       message_id=update.callback_query.message.message_id)
+    no_channel_keyboard = InlineKeyboardMarkup(
+        [[InlineKeyboardButton(string_dict(bot)["my_groups"], callback_data='my_groups')],
+         [InlineKeyboardButton(string_dict(bot)["add_group"], callback_data='add_group')],
+         [InlineKeyboardButton(string_dict(bot)["back_button"],
+                               callback_data="help_module(channels)")]
+         ]
+    )
+    bot.send_message(update.callback_query.message.chat.id,
+                     string_dict(bot)["groups"], reply_markup=no_channel_keyboard)
+    return ConversationHandler.END
+
+
 # DELETING USING USER_DATA
 class Groups(object):
     # ################################## HELP METHODS ###########################################################
@@ -61,7 +76,7 @@ class Groups(object):
         no_group_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(string_dict(bot)["add_button"],
                                                                         callback_data='add_group')],
                                                   [InlineKeyboardButton(string_dict(bot)["back_button"],
-                                                                        callback_data="help_module(groups)")]])
+                                                                        callback_data="help_back")]])
 
         # bot.delete_message(update.effective_chat.id, update.effective_message.message_id)
         delete_messages(bot, user_data, update)
@@ -104,7 +119,7 @@ class Groups(object):
                                                         callback_data='remove_group_{}'.format(
                                                             group_id))],
                                   [InlineKeyboardButton(string_dict(bot)["back_button"],
-                                                        callback_data="help_module(groups)")]])
+                                                        callback_data="help_module(channels)")]])
         bot.send_message(update.message.chat_id, string_dict(bot)["groups_menu"],
                          reply_markup=one_group_keyboard)
         return ConversationHandler.END
@@ -123,7 +138,7 @@ class Groups(object):
                                  .format(group["group_name"]),
                                  reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
                                      text=string_dict(bot)["back_button"],
-                                     callback_data="help_module(groups)")]])
+                                     callback_data="help_module(channels)")]])
                                  ))
             return ConversationHandler.END
         else:
@@ -132,7 +147,7 @@ class Groups(object):
                 bot.send_message(update.effective_chat.id, "There is no such group",
                                  reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
                                      text=string_dict(bot)["back_button"],
-                                     callback_data="help_module(groups)")]])
+                                     callback_data="help_module(channels)")]])
                                  ))
 
     @staticmethod
@@ -227,7 +242,7 @@ class SendPost(object):
         delete_messages(bot, user_data, update)
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                             callback_data="help_module(groups)")])
+                                             callback_data="help_module(channels)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         user_data['to_delete'].append(
@@ -244,7 +259,7 @@ class SendPost(object):
                            message_id=update.callback_query.message.message_id)
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                             callback_data="help_module(groups)")])
+                                             callback_data="help_module(channels)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         bot.send_message(update.callback_query.message.chat_id,
@@ -273,7 +288,7 @@ class AddGroup(object):
                            message_id=update.callback_query.message.message_id)
         buttons = list()
         buttons.append(
-            [InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(groups)")]
+            [InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(channels)")]
         )
         reply_markup = InlineKeyboardMarkup(
             buttons)
@@ -284,7 +299,8 @@ class AddGroup(object):
         return ConversationHandler.END
 
 
-ADD_GROUP_HANLDER=CallbackQueryHandler(callback=AddGroup().add_group, pattern="add_group")
+ADD_GROUP_HANLDER = CallbackQueryHandler(callback=AddGroup().add_group, pattern="add_group")
+GROUPS_MENU = CallbackQueryHandler(callback=groups_menu, pattern="groups")
 
 MY_GROUPS_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=Groups().my_groups, pattern=r"my_groups", pass_user_data=True)],

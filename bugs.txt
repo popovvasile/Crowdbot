@@ -9,14 +9,13 @@ p.s. remember the port on mongo and the security- encrypt the messages and all d
 Admins: [send message] [send urgent message]
 Users: [send message] [ask for donation] [send survey]
 
-
+# TODO when ther eis no payment token - shop disappears
+# TODO payments settings shouldn't bee only for donations
 # TODO GROUPS:  surveys, polls and messages - SEND  button must be sent to the choosen group @ check channels as well
-# TODO create a separate module- payments with statistics on donations, purchases and stuff
-# TODO remove rest, unite it with the database
+# TODO statistics on donations and purchases + full list in csv
 # TODO double test refactoring
+
 # TODO find a way to run run multiple tokens without running so many processes
-# TODO try pypy again, should work now
-# TODO In shop edit there is no back button
 # TODO Фильтрация товаров
 # TODO Подкатегории для шопа.
 # TODO products apper not as buttons, but as messages with pics and description (add pagination)

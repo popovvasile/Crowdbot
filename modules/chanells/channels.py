@@ -84,6 +84,20 @@ def check_channel(bot, channel_username):
                 return string_dict(bot)["allow_bot_send_messages"]
 
 
+def channel_menu(bot, update):
+    bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                       message_id=update.callback_query.message.message_id)
+    no_channel_keyboard = InlineKeyboardMarkup(
+    [[InlineKeyboardButton(string_dict(bot)["my_channels"], callback_data='my_channels')],
+         [InlineKeyboardButton(string_dict(bot)["add_channel"], callback_data='add_channel')],
+        [InlineKeyboardButton(string_dict(bot)["back_button"],
+                              callback_data="help_module(channels)")]]
+            )
+    bot.send_message(update.callback_query.message.chat.id,
+                     string_dict(bot)["channels"], reply_markup=no_channel_keyboard)
+    return ConversationHandler.END
+
+
 # DELETING USING USER_DATA
 class Channels(object):
     # ################################## HELP METHODS ###########################################################
@@ -397,6 +411,7 @@ class SendPost(object):
         get_help(bot, update)
         return ConversationHandler.END
 
+CHANELLS_MENU = CallbackQueryHandler(callback=channel_menu, pattern=r"channels")
 
 MY_CHANNELS_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=Channels().my_channels, pattern=r"my_channels", pass_user_data=True)],

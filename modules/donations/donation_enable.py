@@ -20,6 +20,24 @@ logger = logging.getLogger(__name__)
 TYPING_TOKEN, TYPING_TITLE, TYPING_DESCRIPTION, DONATION_FINISH = range(4)
 
 
+def donation_menu(bot, update):
+    string_d_str = string_dict(bot)
+    bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                       message_id=update.callback_query.message.message_id)
+    no_channel_keyboard = InlineKeyboardMarkup(
+        [[InlineKeyboardButton(text=string_d_str["payment_configure_button"],
+                               callback_data="configure_donation")],
+         [InlineKeyboardButton(text=string_dict(bot)["ask_donation_button"],
+                               callback_data="send_donation_to_users")],
+         [InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                               callback_data="help_module(shop)")]
+         ]
+    )
+    bot.send_message(update.callback_query.message.chat.id,
+                     string_dict(bot)["donations"], reply_markup=no_channel_keyboard)
+    return ConversationHandler.END
+
+
 def check_provider_token(provider_token, bot, update):
     bot_token = chatbots_table.find_one({"bot_id": bot.id})["token"]
     prices = [LabeledPrice(string_dict(bot)["create_donation_str_1"], 10000)]
@@ -61,8 +79,7 @@ class CreateDonationHandler(object):
         buttons = list()
         buttons.append(
             [InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                  callback_data=""
-                                                "help_module(shop)")])
+                                  callback_data="help_module(shop)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
 
@@ -186,7 +203,7 @@ class CreateDonationHandler(object):
 
 # Add conversation handler with the states CHOOSING, TYPING_CHOICE and TYPING_REPLY'
 
-
+DONATION_MENU = CallbackQueryHandler(callback=donation_menu, pattern="donations_menu")
 CREATE_DONATION_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=CreateDonationHandler().start_create_donation,
                                        pass_user_data=True,

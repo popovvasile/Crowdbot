@@ -23,7 +23,26 @@ CHOOSE_CATEGORY, MESSAGE_TO_USERS = range(2)
 BLOCK_CONFIRMATION = 1
 
 
-#
+def messages_menu(bot, update):
+    string_d_str = string_dict(bot)
+    bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                       message_id=update.callback_query.message.message_id)
+    no_channel_keyboard = InlineKeyboardMarkup(
+        [[InlineKeyboardButton(text=string_d_str["send_message_button_2"],
+                               callback_data="inbox_message")],
+         [InlineKeyboardButton(text=string_d_str["send_message_button_1"],
+                               callback_data="send_message_to_users")],
+         [InlineKeyboardButton(text=string_d_str["send_message_button_5"],
+                               callback_data="send_message_to_donators")],
+         [InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                               callback_data="help_module(users)")]
+         ]
+    )
+    bot.send_message(update.callback_query.message.chat.id,
+                     string_dict(bot)["polls_str_9"], reply_markup=no_channel_keyboard)
+    return ConversationHandler.END
+
+
 # class AddMessageCategory(object):
 #
 #     def add_category(self, bot, update):
@@ -727,14 +746,15 @@ class SeeMessageToAdmin(object):
                            message_id=update.callback_query.message.message_id)
         blocked_users = users_table.find({"bot_id": bot.id, "blocked": True})
         for user in blocked_users:
-
             bot.send_message(update.callback_query.message.chat_id, "{}\n".format(user["full_name"]),
                              InlineKeyboardMarkup([[InlineKeyboardButton(text="UNBLOCK",
-                                                                         callback_data="unblock_{}".format(user["user_id"]))]])
+                                                                         callback_data="unblock_{}".format(
+                                                                             user["user_id"]))]])
                              )
         bot.send_message(update.callback_query.message.chat_id, "This is the list of all blocked users",
-                         reply_markup=InlineKeyboardMarkup([InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                                                                 callback_data="help_module(messages)")]))
+                         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                                                                 callback_data="help_module(users)")]]))
+
     def unblock(self, bot, update):
         buttons = list()
         buttons.append(
@@ -783,6 +803,7 @@ class SeeMessageToAdmin(object):
         return ConversationHandler.END
 
 
+MESSAGES_MENU = CallbackQueryHandler(callback=messages_menu, pattern="admin_messages")
 DOUBLE_CHECK = 1
 DELETE_MESSAGES_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(pattern="delete_message",
@@ -878,7 +899,8 @@ BLOCK_USER = ConversationHandler(
                   ],
 
     states={
-        BLOCK_CONFIRMATION: [MessageHandler(Filters.all, SeeMessageToAdmin().block_confirmation, pass_user_data=True), ],
+        BLOCK_CONFIRMATION: [
+            MessageHandler(Filters.all, SeeMessageToAdmin().block_confirmation, pass_user_data=True), ],
         # TOPIC: [MessageHandler(Filters.all, SendMessageToAdmin().send_topic, pass_user_data=True), ]
         # SEND_ANONIM: [MessageHandler(Filters.all, SendMessageToAdmin().send_anonim, pass_user_data=True), ]
 
@@ -891,9 +913,9 @@ BLOCK_USER = ConversationHandler(
     ]
 )
 BLOCKED_USERS_LIST = CallbackQueryHandler(pattern="blocked_users_list",
-                                          callback=SeeMessageToAdmin.blocked_users_list)
+                                          callback=SeeMessageToAdmin().blocked_users_list)
 UNBLOCK_USER = CallbackQueryHandler(pattern="unblock",
-                                    callback=SeeMessageToAdmin.unblock)
+                                    callback=SeeMessageToAdmin().unblock)
 # MESSAGE_CATEGORY_HANDLER = CallbackQueryHandler(pattern="show_message_categories",
 #                                                 callback=MessageCategory().show_category)
 # DELETE_MESSAGE_CATEGORY_HANDLER = CallbackQueryHandler(pattern="delete_category_",

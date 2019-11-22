@@ -21,6 +21,28 @@ TYPING_TO_DELETE_PRODUCT = 17
 TYPING_LINK, TYPING_PRODUCT_FINISH = range(2)
 
 
+def eshop_menu(bot, update):
+    string_d_str = string_dict(bot)
+    bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                       message_id=update.callback_query.message.message_id)
+    no_channel_keyboard = InlineKeyboardMarkup(
+        [[InlineKeyboardButton(text=string_d_str["products"],
+                              callback_data="products")],
+         [InlineKeyboardButton(text=string_d_str["add_product_button"],
+                              callback_data="create_product")],
+         [InlineKeyboardButton(text=string_d_str["edit_product"],
+                              callback_data="edit_product")],
+         [InlineKeyboardButton(text=string_d_str["delete_product"],
+                              callback_data="delete_product")],
+         [InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                               callback_data="help_module(shop)")]
+         ]
+    )
+    bot.send_message(update.callback_query.message.chat.id,
+                     string_dict(bot)["shop"], reply_markup=no_channel_keyboard)
+    return ConversationHandler.END
+
+
 class ProcductMenu(object):
     def send_product_menu(self, bot, update):
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -686,6 +708,7 @@ class SeePurcheses(object):
         return EDIT_FINISH
 
 
+ESHOP_MENU=CallbackQueryHandler(callback=eshop_menu, pattern="shop_menu")
 PRODUCTS_MENU_HANDLER = CallbackQueryHandler(ProcductMenu().send_product_menu, pattern="products")
 PRODUCT_ADD_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=AddProducts().start,

@@ -19,6 +19,28 @@ TYPING_TO_DELETE_BUTTON = 17
 TYPING_LINK, TYPING_BUTTON_FINISH = range(2)
 
 
+def buttons_menu(bot, update):
+    string_d_str = string_dict(bot)
+    bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                       message_id=update.callback_query.message.message_id)
+    no_channel_keyboard = InlineKeyboardMarkup(
+        [[InlineKeyboardButton(text=string_d_str["create_button_button"],
+                               callback_data="create_button")],
+         [InlineKeyboardButton(text=string_d_str["edit_button_button"],
+                               callback_data="edit_button")],
+         [InlineKeyboardButton(text=string_d_str["delete_button"],
+                               callback_data="delete_button")],
+         [InlineKeyboardButton(text=string_d_str["user_mode_module"],
+                               callback_data="turn_user_mode_on")],
+         [InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                               callback_data="help_module(menu_buttons)")]
+         ]
+    )
+    bot.send_message(update.callback_query.message.chat.id,
+                     string_dict(bot)["buttons"], reply_markup=no_channel_keyboard)
+    return ConversationHandler.END
+
+
 class AddButtons(object):
 
     def start(self, bot, update):
@@ -304,16 +326,16 @@ class AddLinkButton(object):
 
 
 CREATE_BUTTON_CHOOSE = CallbackQueryHandler(callback=AddButtons().start, pattern="create_button")
-
+BUTTONS_MENU = CallbackQueryHandler(callback=buttons_menu, pattern="buttons")
 LINK_BUTTON_ADD_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=AddLinkButton().start,
                                        pattern=r"create_link_button",
                                        pass_user_data=True)],
 
     states={
-            TYPING_LINK: [MessageHandler(Filters.text,callback=AddLinkButton().link_handler, pass_user_data=True)],
-            TYPING_BUTTON_FINISH: [MessageHandler(Filters.text,
-                                                  callback=AddLinkButton().button_finish, pass_user_data=True)],
+        TYPING_LINK: [MessageHandler(Filters.text, callback=AddLinkButton().link_handler, pass_user_data=True)],
+        TYPING_BUTTON_FINISH: [MessageHandler(Filters.text,
+                                              callback=AddLinkButton().button_finish, pass_user_data=True)],
 
     },
 

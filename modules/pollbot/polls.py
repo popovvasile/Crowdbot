@@ -60,6 +60,22 @@ AFFIRMATIONS = [
 ]
 
 
+def polls_menu(bot, update):
+    string_d_str = string_dict(bot)
+    bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                       message_id=update.callback_query.message.message_id)
+    no_channel_keyboard = InlineKeyboardMarkup(
+        [[InlineKeyboardButton(text=string_d_str["create_button_str"], callback_data="create_poll")],
+            [InlineKeyboardButton(text=string_d_str["send_button"], callback_data="send_poll_to_channel")],
+            [InlineKeyboardButton(text=string_d_str["delete_button_str"], callback_data="delete_poll")],
+            [InlineKeyboardButton(text=string_d_str["results_button"], callback_data="poll_results")],
+         [InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(polls)")]
+         ]
+    )
+    bot.send_message(update.callback_query.message.chat.id,
+                     string_dict(bot)["polls_str_9"], reply_markup=no_channel_keyboard)
+    return ConversationHandler.END
+
 class PollBot(object):
 
     # Conversation handlers:
@@ -601,6 +617,7 @@ Here you can:
  - Send a poll to all users 
 
 """
+POLLS_MENU=CallbackQueryHandler(callback=polls_menu, pattern="polls")
 
 DELETE_POLLS_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=PollBot().handle_delete_poll,

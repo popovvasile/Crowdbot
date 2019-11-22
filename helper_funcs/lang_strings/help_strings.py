@@ -13,42 +13,35 @@ def help_strings(bot):
         # start 'Channels' message
         admin_help=string_d_str["channels_str_1"],
         # and keyboard for start message
-        admin_keyboard=[InlineKeyboardButton(string_d_str["my_channels"], callback_data='my_channels'),
-                        InlineKeyboardButton(string_d_str["my_groups"], callback_data='my_groups')]
+        admin_keyboard=[InlineKeyboardButton(string_d_str["channels"], callback_data='channels'),
+                        InlineKeyboardButton(string_d_str["groups"], callback_data='groups')]
     )
     help_dict["shop"] = dict(
         mod_name=string_d_str["add_product_button"],
-        admin_keyboard=[InlineKeyboardButton(text=string_d_str["products"],
-                                             callback_data="products"),
-                        InlineKeyboardButton(text=string_d_str["add_product_button"],
-                                             callback_data="create_product"),
-                        InlineKeyboardButton(text=string_d_str["edit_product"],
-                                             callback_data="edit_product"),
-                        InlineKeyboardButton(text=string_d_str["delete_product"],
-                                             callback_data="delete_product"),
-                        InlineKeyboardButton(text=string_d_str["payment_configure_button"],
-                                             callback_data="configure_donation"),
-                        InlineKeyboardButton(text=string_dict(bot)["ask_donation_button"],
-                                             callback_data="send_donation_to_users"),
-                        InlineKeyboardButton(text=string_dict(bot)["payments_statistics_str"],
-                                             callback_data="payments_statistics"),
-                        InlineKeyboardButton(text=string_dict(bot)["orders_str"],
-                                             callback_data="orders_and_purchases")
+        # TODO shop, donations, statistics, payment config
+        admin_keyboard=[
+            InlineKeyboardButton(text=string_dict(bot)["shop"],
+                                 callback_data="shop_menu"),
+            InlineKeyboardButton(string_dict(bot)["donations"],
+                                 callback_data="donations_menu"),
+            InlineKeyboardButton(text=string_dict(bot)["payments_statistics_str"],
+                                 callback_data="payments_statistics"),
+            InlineKeyboardButton(text=string_dict(bot)["orders_str"],
+                                 callback_data="orders_and_purchases"),
+            InlineKeyboardButton(text=string_d_str["payment_configure_button"],
+                                 callback_data="configure_donation")
 
-                        ],
+        ],
         admin_help=string_d_str["add_menu_buttons_help"],
         visitor_keyboard=[InlineKeyboardButton(text=string_d_str["products"],
                                                callback_data="products")],
         visitor_help=string_d_str["add_menu_buttons_help_visitor"]
     )
     help_dict["menu_buttons"] = dict(  # TODO "add admins" functionality
+        # TODO Menu settings ==> Create button, edit a button, delete a button, user mode, add admins
         mod_name=string_d_str["add_menu_module_button"],
-        admin_keyboard=[InlineKeyboardButton(text=string_d_str["create_button"],
-                                             callback_data="create_button"),
-                        InlineKeyboardButton(text=string_d_str["edit_button_button"],
-                                             callback_data="edit_button"),
-                        InlineKeyboardButton(text=string_d_str["delete_button"],
-                                             callback_data="delete_button"),
+        admin_keyboard=[InlineKeyboardButton(text=string_d_str["buttons_button"],
+                                             callback_data="buttons"),
                         InlineKeyboardButton(text=string_d_str["edit_menu_text"],
                                              callback_data="edit_bot_description"),
                         InlineKeyboardButton(text=string_d_str["user_mode_module"],
@@ -64,16 +57,6 @@ def help_strings(bot):
         admin_keyboard=[
             InlineKeyboardButton(text=string_d_str["polls_mode_str"], callback_data="polls"),
             InlineKeyboardButton(text=string_d_str["survey_mode_str"], callback_data="surveys"),
-
-            # InlineKeyboardButton(text=string_d_str["create_button_str"], callback_data="create_poll"),
-            # InlineKeyboardButton(text=string_d_str["send_button"], callback_data="send_poll_to_channel"),
-            # InlineKeyboardButton(text=string_d_str["delete_button_str"], callback_data="delete_poll"),
-            # InlineKeyboardButton(text=string_d_str["results_button"], callback_data="poll_results"),
-            #
-            # InlineKeyboardButton(text=string_d_str["create_button_str"], callback_data="create_survey"),
-            # InlineKeyboardButton(text=string_d_str["delete_button_str"], callback_data="delete_survey"),
-            # InlineKeyboardButton(text=string_d_str["send_button"], callback_data="send_survey_to_channel"),
-            # InlineKeyboardButton(text=string_d_str["results_button"], callback_data="surveys_results")
         ],
         mod_name=string_d_str["polls_module_str"],
         admin_help=string_d_str["polls_help_admin"]
@@ -83,19 +66,16 @@ def help_strings(bot):
         mod_name=string_d_str["users_module"],
         admin_help=string_d_str["users_help_admin"],
         admin_keyboard=[
-            InlineKeyboardButton(text=string_d_str["send_message_button_1"],
-                                 callback_data="send_message_to_users"),
-            InlineKeyboardButton(text=string_d_str["send_message_button_2"],
-                                 callback_data="inbox_message"),
-            InlineKeyboardButton(text=string_d_str["send_message_button_5"],
-                                 callback_data="send_message_to_donators"),
+            InlineKeyboardButton(text=string_d_str["messages"],
+                                 callback_data="admin_messages"),
             InlineKeyboardButton(text=string_d_str["users_module"],
-                                 callback_data="users_list"),
+                                 callback_data="users_list"),  # TODO User statistics
+            # TODO Send messages ==> to users, to donators, to customers
             InlineKeyboardButton(text=string_d_str["user_mode_module"],
                                  callback_data="turn_user_mode_on"),
             InlineKeyboardButton(text=string_d_str["send_message_button_6"],
                                  callback_data="blocked_users_list"),
- ]
+        ]
     )
 
     help_dict["messages"] = dict(  # TODO visitors only
