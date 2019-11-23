@@ -5,7 +5,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMa
 from telegram.ext import (MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
 from database import user_categories_table, users_table
-from helper_funcs.main_runnner_helper import get_help
+from helper_funcs.helper import get_help
 from helper_funcs.lang_strings.strings import string_dict
 
 TOPIC,SEND_ANONIM, MESSAGE = range(3)

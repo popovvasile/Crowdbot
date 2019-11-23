@@ -27,7 +27,7 @@ from modules.donations.donation_enable import CREATE_DONATION_HANDLER, DONATION_
 from modules.surveys.surveys_create import DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_HANDLER, SEND_SURVEYS_HANDLER, \
     CREATE_SURVEY_HANDLER, SURVEYS_MENU
 from modules.donations.donations_edit_delete_results import EDIT_DONATION_HANDLER
-from helper_funcs.main_runnner_helper import help_button, button_handler, get_help, WelcomeBot, \
+from helper_funcs.helper import help_button, button_handler, get_help, WelcomeBot, \
     back_from_button_handler, product_handler
 from modules.settings.manage_button import BUTTON_EDIT_HANDLER, BUTTON_EDIT_FINISH_HANDLER, DELETE_CONTENT_HANDLER, \
     BUTTON_ADD_FINISH_HANDLER, back_from_edit_button_handler

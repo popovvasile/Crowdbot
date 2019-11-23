@@ -5,7 +5,7 @@ from telegram.error import BadRequest
 from telegram.ext import MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
 import logging
 from database import products_table
-from helper_funcs.main_runnner_helper import get_help
+from helper_funcs.helper import get_help
 from helper_funcs.auth import initiate_chat_id
 from helper_funcs.lang_strings.strings import string_dict
 from helper_funcs.misc import delete_messages

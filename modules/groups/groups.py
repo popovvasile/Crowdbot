@@ -4,7 +4,7 @@ from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMa
 from telegram.ext import ConversationHandler, CallbackQueryHandler, MessageHandler, Filters, RegexHandler
 from database import groups_table
 from telegram.error import TelegramError
-from helper_funcs.main_runnner_helper import get_help
+from helper_funcs.helper import get_help
 from helper_funcs.lang_strings.strings import string_dict
 import logging
 

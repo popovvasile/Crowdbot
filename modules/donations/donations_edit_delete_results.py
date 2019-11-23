@@ -10,7 +10,7 @@ from telegram import LabeledPrice
 # Enable logging
 from database import chatbots_table
 from helper_funcs.auth import initiate_chat_id
-from helper_funcs.main_runnner_helper import get_help
+from helper_funcs.helper import get_help
 from helper_funcs.lang_strings.strings import string_dict
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -277,8 +277,9 @@ class EditPaymentHandler(object):
 EDIT_DONATION_HANDLER = ConversationHandler(
     entry_points=[
         CallbackQueryHandler(callback=EditPaymentHandler().start_donation,
+                             # TODO change this to allow enabling/disabling shop and donations- both
                              pass_user_data=True,
-                             pattern=r'configure_donation')
+                             pattern=r'configure_payments')
     ],
 
     states={
