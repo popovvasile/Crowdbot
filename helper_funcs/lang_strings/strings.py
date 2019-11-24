@@ -204,7 +204,26 @@ You can send any kinds of files, video, audio or media messages.
     send_survey_button="📤 Send survey",
     results_button="📊 Results",
     menu_button="ℹ️ Menu",
-    allow_donations_button=" 💰 Create a payment",
+
+    allow_donations_button=" 💰 Enable donations",
+    disable_donations_button=" 💰 Disable donations",
+    allow_shop_button=" 💰 Enable shop",
+    disable_shop_button=" 💰 Disable shop",
+    payment_configs="Configurations",
+
+    payments_config_text_donations_enabled="Donations have been enabled for your users. "
+                                           "Enter the configurations to set up a greeting message "
+                                           "for those who want to donate for you",
+    payments_config_text_donations_disabled="Donations have been disabled on this bot",
+    payments_config_text_shop_enabled="A shop has been enabled for your users. "
+                                           "Enter the configurations to  add your first product",
+    payments_config_text_shop_disabled="The shop has been disabled on this bot",
+    payments_config_text="Here you can configure your payments settings",
+    change_payment_token="Edit payment token",
+    change_donation_greeting="Edit description",
+    change_donation_currency="Change currency",
+    change_shop_greeting="Edit description",
+    change_shop_currency="Change currency",
     configure_button="🛠 Settings",
     ask_donation_button="Ask users for donation",
     title_button="Name",
@@ -300,8 +319,7 @@ ENG.update(
     donations_edit_str_5="🗑 Are you sure you want to delete this payment?",
     donations_edit_str_6="What exactly do you want to change? Or press '🔙 Back'",
     donations_edit_str_7="Write a new title for the payment. Or press '🔙 Back'",
-    donations_edit_str_8="Do description of payment for users or write "
-                         "how you will utilize the money? Or press '🔙 Back'",
+    donations_edit_str_8="Write a small description. It will be shown to your users when they enter payments",
     donations_edit_str_9=" Choose the main currency. Or press '🔙 Back'",
     donations_edit_str_10="✅ It’s in the bag!",
     donations_edit_str_11="🗑 The payment is deleted",

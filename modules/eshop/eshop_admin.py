@@ -4,7 +4,7 @@ from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMa
 from telegram.error import BadRequest
 from telegram.ext import MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
 import logging
-from database import products_table
+from database import products_table, chatbots_table
 from helper_funcs.helper import get_help
 from helper_funcs.auth import initiate_chat_id
 from helper_funcs.lang_strings.strings import string_dict
@@ -25,21 +25,30 @@ def eshop_menu(bot, update):
     string_d_str = string_dict(bot)
     bot.delete_message(chat_id=update.callback_query.message.chat_id,
                        message_id=update.callback_query.message.message_id)
-    no_channel_keyboard = InlineKeyboardMarkup(
-        [[InlineKeyboardButton(text=string_d_str["products"],
-                              callback_data="products")],
-         [InlineKeyboardButton(text=string_d_str["add_product_button"],
-                              callback_data="create_product")],
-         [InlineKeyboardButton(text=string_d_str["edit_product"],
-                              callback_data="edit_product")],
-         [InlineKeyboardButton(text=string_d_str["delete_product"],
-                              callback_data="delete_product")],
-         [InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                               callback_data="help_module(shop)")]
-         ]
-    )
+    chatbot = chatbots_table.find_one({"bot_id": bot.id})
+    admin_keyboard = []
+    if chatbot["shop_enabled"] is True:
+        admin_keyboard += [[InlineKeyboardButton(text=string_d_str["products"],
+                                  callback_data="products")],
+             [InlineKeyboardButton(text=string_d_str["add_product_button"],
+                                  callback_data="create_product")],
+             [InlineKeyboardButton(text=string_d_str["edit_product"],
+                                  callback_data="edit_product")],
+             [InlineKeyboardButton(text=string_d_str["delete_product"],
+                                  callback_data="delete_product")],
+             [InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                   callback_data="help_module(shop)")]]
+    else:
+        admin_keyboard.append([InlineKeyboardButton(text=string_dict(bot)["allow_donations_button"],
+                                                    # TODO enforce to configure the tokens and everything first time
+                                                    callback_data="change_donations_config")]),
+
+
+    admin_keyboard.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                            callback_data="help_module(settings)")])
+
     bot.send_message(update.callback_query.message.chat.id,
-                     string_dict(bot)["shop"], reply_markup=no_channel_keyboard)
+                     string_dict(bot)["shop"], reply_markup=admin_keyboard)
     return ConversationHandler.END
 
 

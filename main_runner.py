@@ -13,20 +13,22 @@ from modules.eshop.echop_customer import PURCHASE_HANDLER
 from modules.eshop.eshop_admin import PRODUCT_ADD_HANDLER, DELETE_PRODUCT_HANDLER, PRODUCT_EDIT_HANDLER, \
     PRODUCT_EDIT_FINISH_HANDLER, PRODUCT_ADD_FINISH_HANDLER, DELETE_PRODUCT_CONTENT_HANDLER, PRODUCTS_MENU_HANDLER, \
     ESHOP_MENU
+from modules.eshop.eshop_enable_disable import CREATE_SHOP_HANDLER
 from modules.groups.groups import MY_GROUPS_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER, \
     ADD_GROUP_HANLDER, GROUPS_MENU
 from modules.groups.groups_polls_surveys_donate import SEND_POLL_TO_GROUP_HANDLER, SEND_SURVEY_TO_GROUP_HANDLER, \
     SEND_DONATION_TO_GROUP_HANDLER
 from modules.settings.menu_description import EDIT_BOT_DESCRIPTION_HANDLER
-from modules.settings.menu_buttons import BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER, LINK_BUTTON_ADD_HANDLER, \
+from modules.settings.settings import BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER, LINK_BUTTON_ADD_HANDLER, \
     CREATE_BUTTON_CHOOSE, BUTTONS_MENU
 from modules.users.messages_admin import SEND_MESSAGE_ONLY_TO_ADMINS_HANDLER
 from modules.users.messages_donators import SEND_MESSAGE_TO_DONATORS_HANDLER
 from modules.surveys.surveys_answer import ANSWER_SURVEY_HANDLER
-from modules.donations.donation_enable import CREATE_DONATION_HANDLER, DONATION_MENU
+from modules.donations.donation_enable import CREATE_DONATION_HANDLER
 from modules.surveys.surveys_create import DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_HANDLER, SEND_SURVEYS_HANDLER, \
     CREATE_SURVEY_HANDLER, SURVEYS_MENU
-from modules.donations.donations_edit_delete_results import EDIT_DONATION_HANDLER
+from modules.payments.payments_config import EDIT_DONATION_HANDLER, PAYMENTS_CONFIG_KEYBOARD, CHNAGE_DONATIONS_CONFIG, \
+    CHNAGE_SHOP_CONFIG, CONFIGS_DONATIONS_GENERAL, CONFIGS_SHOP_GENERAL
 from helper_funcs.helper import help_button, button_handler, get_help, WelcomeBot, \
     back_from_button_handler, product_handler
 from modules.settings.manage_button import BUTTON_EDIT_HANDLER, BUTTON_EDIT_FINISH_HANDLER, DELETE_CONTENT_HANDLER, \
@@ -78,13 +80,30 @@ def main(token, port):
     dispatcher.add_handler(USER_MODE_OFF)
 
     # DONATIONS
-    dispatcher.add_handler(DONATION_MENU)
     dispatcher.add_handler(CREATE_DONATION_HANDLER)
     dispatcher.add_handler(DONATE_HANDLER)
     dispatcher.add_handler(HANDLE_SUCCES)
     dispatcher.add_handler(HANDLE_PRECHECKOUT)
     dispatcher.add_handler(EDIT_DONATION_HANDLER)
     dispatcher.add_handler(SEND_DONATION_TO_USERS_HANDLER)
+    dispatcher.add_handler(CHNAGE_DONATIONS_CONFIG)
+    dispatcher.add_handler(PAYMENTS_CONFIG_KEYBOARD)
+    dispatcher.add_handler(CONFIGS_DONATIONS_GENERAL)
+
+    # PRODUCTS
+    dispatcher.add_handler(ESHOP_MENU)
+    dispatcher.add_handler(PRODUCT_ADD_HANDLER)
+    dispatcher.add_handler(DELETE_PRODUCT_HANDLER)
+    dispatcher.add_handler(PRODUCT_EDIT_HANDLER)
+    dispatcher.add_handler(PRODUCT_EDIT_FINISH_HANDLER)
+    dispatcher.add_handler(PRODUCT_ADD_FINISH_HANDLER)
+    dispatcher.add_handler(DELETE_PRODUCT_CONTENT_HANDLER)
+    dispatcher.add_handler(PRODUCTS_MENU_HANDLER)
+    dispatcher.add_handler(PURCHASE_HANDLER)
+    dispatcher.add_handler(product_handler_han)
+    dispatcher.add_handler(CHNAGE_SHOP_CONFIG)
+    dispatcher.add_handler(CONFIGS_SHOP_GENERAL)
+    dispatcher.add_handler(CREATE_SHOP_HANDLER)
     # MESSAGES
     dispatcher.add_handler(MESSAGES_MENU)
     dispatcher.add_handler(SEE_MESSAGES_FINISH_BACK_HANDLER)
@@ -138,20 +157,6 @@ def main(token, port):
     dispatcher.add_handler(SEND_POLL_TO_CHANNEL_HANDLER)
     dispatcher.add_handler(SEND_SURVEY_TO_CHANNEL_HANDLER)
     dispatcher.add_handler(SEND_DONATION_TO_CHANNEL_HANDLER)
-
-    # PRODUCTS
-    dispatcher.add_handler(ESHOP_MENU)
-    dispatcher.add_handler(PRODUCT_ADD_HANDLER)
-    dispatcher.add_handler(DELETE_PRODUCT_HANDLER)
-    dispatcher.add_handler(PRODUCT_EDIT_HANDLER)
-    dispatcher.add_handler(PRODUCT_EDIT_FINISH_HANDLER)
-    dispatcher.add_handler(PRODUCT_ADD_FINISH_HANDLER)
-    dispatcher.add_handler(DELETE_PRODUCT_CONTENT_HANDLER)
-    dispatcher.add_handler(PRODUCTS_MENU_HANDLER)
-    dispatcher.add_handler(PURCHASE_HANDLER)
-    dispatcher.add_handler(product_handler_han)
-
-
 
     dispatcher.add_handler(custom_button_back_callback_handler)
     dispatcher.add_handler(custom_button_callback_handler)

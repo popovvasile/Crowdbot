@@ -51,6 +51,8 @@ def crowdbot_on_post():
     crowdbot_token = doc["token"]
     chatbot = requests.get(url="https://api.telegram.org/bot{}/getMe".format(crowdbot_token))
     doc["bot_id"] = chatbot.json()['result']['id']
+    doc["shop_enabled"] = False
+    doc["donations_enabled"] = False
     crowdbot_bots_table.save(doc)  # TODO replace with update
 
     if chatbot.ok:

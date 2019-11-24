@@ -8,24 +8,24 @@ from helper_funcs.lang_strings.strings import string_dict
 def help_strings(bot):
     help_dict = OrderedDict()
     string_d_str = string_dict(bot)
-    payment_token = chatbots_table.find_one(chatbot = chatbots_table.find_one({"bot_id": bot.id}))
-    if "payment_token" in payment_token:
+    payment_token = chatbots_table.find_one({"bot_id": bot.id})
+    admins_keyboard = [
+        InlineKeyboardButton(text=string_d_str["payment_configure_button"],
+                             callback_data="payments_config")
+    ]
+    if "shop" in payment_token:
+        admins_keyboard += [InlineKeyboardButton(text=string_dict(bot)["shop"],
+                                                 callback_data="shop_menu"),
+                            InlineKeyboardButton(string_dict(bot)["donations"],
+                                                 callback_data="donations_config"),
+                            InlineKeyboardButton(text=string_dict(bot)["payments_statistics_str"],
+                                                 callback_data="payments_statistics"),
+                            InlineKeyboardButton(text=string_dict(bot)["orders_str"],
+                                                 callback_data="orders_and_purchases"), ]
+
         help_dict["shop"] = dict(
             mod_name=string_d_str["add_product_button"],
-            # TODO shop, donations, statistics, payment config
-            admin_keyboard=[
-                InlineKeyboardButton(text=string_dict(bot)["shop"],
-                                     callback_data="shop_menu"),
-                InlineKeyboardButton(string_dict(bot)["donations"],
-                                     callback_data="donations_menu"),
-                InlineKeyboardButton(text=string_dict(bot)["payments_statistics_str"],
-                                     callback_data="payments_statistics"),
-                InlineKeyboardButton(text=string_dict(bot)["orders_str"],
-                                     callback_data="orders_and_purchases"),
-                InlineKeyboardButton(text=string_d_str["payment_configure_button"],
-                                     callback_data="configure_payments")
-
-            ],
+            admin_keyboard=admins_keyboard,
             admin_help=string_d_str["add_menu_buttons_help"],
             visitor_keyboard=[InlineKeyboardButton(text=string_d_str["shop"],
                                                    callback_data="products")],
@@ -34,23 +34,10 @@ def help_strings(bot):
     else:
         help_dict["shop"] = dict(
             mod_name=string_d_str["add_product_button"],
-            # TODO shop, donations, statistics, payment config
-            admin_keyboard=[
-                InlineKeyboardButton(text=string_dict(bot)["shop"],
-                                     callback_data="shop_menu"),
-                InlineKeyboardButton(string_dict(bot)["donations"],
-                                     callback_data="donations_menu"),
-                InlineKeyboardButton(text=string_dict(bot)["payments_statistics_str"],
-                                     callback_data="payments_statistics"),
-                InlineKeyboardButton(text=string_dict(bot)["orders_str"],
-                                     callback_data="orders_and_purchases"),
-                InlineKeyboardButton(text=string_d_str["payment_configure_button"],
-                                     callback_data="configure_payments")
-
-            ],
+            admin_keyboard=admins_keyboard,
             admin_help=string_d_str["add_menu_buttons_help"],
         )
-    help_dict["channels"] = dict(  # TODO change to Groups and Channels
+    help_dict["channels"] = dict(
         mod_name='Channels',
         # start 'Channels' message
         admin_help=string_d_str["channels_str_1"],
@@ -59,8 +46,8 @@ def help_strings(bot):
                         InlineKeyboardButton(string_d_str["groups"], callback_data='groups')]
     )
 
-    help_dict["menu_buttons"] = dict(  # TODO "add admins" functionality
-        # TODO Menu settings ==> Create button, edit a button, delete a button, user mode, add admins
+    help_dict["settings"] = dict(
+        # TODO "add admins" functionality
         mod_name=string_d_str["add_menu_module_button"],
         admin_keyboard=[InlineKeyboardButton(text=string_d_str["buttons_button"],
                                              callback_data="buttons"),
@@ -69,7 +56,7 @@ def help_strings(bot):
                         InlineKeyboardButton(text=string_d_str["user_mode_module"],
                                              callback_data="turn_user_mode_on"),
                         InlineKeyboardButton(text=string_d_str["payment_configure_button"],
-                                             callback_data="configure_donation"),
+                                             callback_data="payments_config"),
                         ],
 
         admin_help=string_d_str["add_menu_buttons_help"]
@@ -116,7 +103,7 @@ def help_strings(bot):
 def helpable_dict(bot):
     admin_rus = OrderedDict()
     admin_rus["❓ Опросы"] = "polls"
-    admin_rus["🛠 Настройки бота"] = "menu_buttons"
+    admin_rus["🛠 Настройки бота"] = "settings"
     admin_rus["📱 Группы и каналы"] = "channels"
     admin_rus["Магазин и платежи"] = "shop"
     admin_rus["✉️ Пользователи и Сообщения"] = "users"
@@ -125,7 +112,7 @@ def helpable_dict(bot):
     admin_eng["📱 Groups and Channels"] = "channels"
     admin_eng["❓ Polls and Surveys"] = "polls"
     admin_eng["✉️ Users & Messages"] = "users"
-    admin_eng["🛠 Bot and Menu Settings"] = "menu_buttons"
+    admin_eng["🛠 Bot and Menu Settings"] = "settings"
     admin_eng["💰 Shop and Payments"] = "shop"
 
     lang_dicts = {"ENG": dict(
@@ -151,7 +138,7 @@ def helpable_dict(bot):
         ),
     }
     # "channels", "donation_enable", "donation_payment", "donations_send_promotion",
-    # "donations_edit_delete_results", "manage_button", "menu_buttons", "menu_description",
+    # "donations_edit_delete_results", "manage_button", "settings", "menu_description",
     # "messages", "polls", "surveys_answer", "surveys_create", "user_mode"
     chatbot = chatbots_table.find_one({"bot_id": bot.id})
 

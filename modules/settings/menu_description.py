@@ -20,7 +20,7 @@ class ChangeBotLanguage(object):
     def send_message(self, bot, update):
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                             callback_data="help_module(menu_buttons)")])
+                                             callback_data="help_module(settings)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
 
@@ -52,7 +52,7 @@ class EditBotDescription(object):
     def send_message(self, bot, update):
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                                             callback_data="help_module(menu_buttons)")])
+                                             callback_data="help_module(settings)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
 

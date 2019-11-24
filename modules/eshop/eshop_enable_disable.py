@@ -17,30 +17,14 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-TYPING_TOKEN, TYPING_TITLE, TYPING_DESCRIPTION, DONATION_FINISH = range(4)
+TYPING_TOKEN, TYPING_TITLE, TYPING_DESCRIPTION, SHOP_FINISH = range(4)
 
 
-def donation_menu(bot, update):
-    string_d_str = string_dict(bot)
-    bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                       message_id=update.callback_query.message.message_id)
-    no_channel_keyboard = InlineKeyboardMarkup(
-        [[InlineKeyboardButton(text=string_d_str["payment_configure_button"],
-                               callback_data="configure_donation")],
-         [InlineKeyboardButton(text=string_dict(bot)["ask_donation_button"],
-                               callback_data="send_donation_to_users")],
-         [InlineKeyboardButton(text=string_dict(bot)["back_button"],
-                               callback_data="help_module(shop)")]
-         ]
-    )
-    bot.send_message(update.callback_query.message.chat.id,
-                     string_dict(bot)["donations"], reply_markup=no_channel_keyboard)
-    return ConversationHandler.END
 
 
 def check_provider_token(provider_token, bot, update):
     bot_token = chatbots_table.find_one({"bot_id": bot.id})["token"]
-    prices = [LabeledPrice(string_dict(bot)["create_donation_str_1"], 10000)]
+    prices = [LabeledPrice(string_dict(bot)["create_shop_str_1"], 10000)]
     data = requests.get("https://api.telegram.org/bot{}/sendInvoice".format(bot_token),
                         params=dict(title="TEST",
                                     description="A testing payment invoice to check the token",
@@ -65,7 +49,7 @@ def check_provider_token(provider_token, bot, update):
     return json.loads(data.content)["ok"]
 
 
-class CreateDonationHandler(object):
+class CreateShopHandler(object):
     @staticmethod
     def facts_to_str(user_data):
         facts = list()
@@ -75,7 +59,7 @@ class CreateDonationHandler(object):
 
         return "\n".join(facts).join(['\n', '\n'])
 
-    def start_create_donation(self, bot, update, user_data):
+    def start_create_shop(self, bot, update, user_data):
         buttons = list()
         buttons.append(
             [InlineKeyboardButton(text=string_dict(bot)["back_button"],
@@ -89,16 +73,16 @@ class CreateDonationHandler(object):
         if "donate" in chatbot:
             if "payment_token" in chatbot["donate"]:
                 bot.send_message(update.callback_query.message.chat.id,
-                                 string_dict(bot)["create_donation_str_2"], reply_markup=reply_markup)
+                                 string_dict(bot)["create_shop_str_2"], reply_markup=reply_markup)
                 return TYPING_TITLE
             else:
                 bot.send_message(update.callback_query.message.chat.id,
-                                 string_dict(bot)["create_donation_str_3"],
+                                 string_dict(bot)["create_shop_str_3"],
                                  parse_mode='Markdown', reply_markup=reply_markup)
                 return TYPING_TOKEN
         else:
             bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(bot)["create_donation_str_3"], parse_mode='Markdown',
+                             string_dict(bot)["create_shop_str_3"], parse_mode='Markdown',
                              reply_markup=reply_markup)
             return TYPING_TOKEN
 
@@ -114,12 +98,12 @@ class CreateDonationHandler(object):
 
             user_data['payment_token'] = txt
 
-            update.message.reply_text(string_dict(bot)["create_donation_str_4"], reply_markup=reply_markup)
+            update.message.reply_text(string_dict(bot)["create_shop_str_4"], reply_markup=reply_markup)
 
             return TYPING_TITLE
         else:
             update.message.reply_text(
-                string_dict(bot)["create_donation_str_5"],
+                string_dict(bot)["create_shop_str_5"],
                 reply_markup=reply_markup)
 
         return TYPING_TOKEN
@@ -134,7 +118,7 @@ class CreateDonationHandler(object):
         chat_id, txt = initiate_chat_id(update)
         user_data['title'] = txt
 
-        update.message.reply_text(string_dict(bot)["create_donation_str_6"],
+        update.message.reply_text(string_dict(bot)["create_shop_str_6"],
                                   reply_markup=reply_markup)
 
         return TYPING_DESCRIPTION
@@ -143,17 +127,17 @@ class CreateDonationHandler(object):
         chat_id, txt = initiate_chat_id(update)
         user_data["description"] = txt
         currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["CHF", "AUD", "RON", "PLN"]]
-        update.message.reply_text(string_dict(bot)["create_donation_str_7"],
+        update.message.reply_text(string_dict(bot)["create_shop_str_7"],
                                   reply_markup=ReplyKeyboardMarkup(currency_keyboard, one_time_keyboard=True))
 
-        return DONATION_FINISH
+        return SHOP_FINISH
 
-    def handle_donation_finish(self, bot, update, user_data):
+    def handle_shop_finish(self, bot, update, user_data):
 
-        create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["send_donation_request_button"],
-                                                callback_data="send_donation_to_users")],
-                          [InlineKeyboardButton(text=string_dict(bot)["send_donation_to_channel"],
-                                                callback_data="send_donation_to_channel")],
+        create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["send_shop_request_button"],
+                                                callback_data="send_shop_to_users")],
+                          [InlineKeyboardButton(text=string_dict(bot)["send_shop_to_channel"],
+                                                callback_data="send_shop_to_channel")],
                           [InlineKeyboardButton(text=string_dict(bot)["back_button"],
                                                 callback_data="help_module(shop)")]]
         create_markup = InlineKeyboardMarkup(
@@ -164,7 +148,7 @@ class CreateDonationHandler(object):
         user_data["currency"] = currency
 
         bot.send_message(chat_id,
-                         string_dict(bot)["create_donation_str_8"],
+                         string_dict(bot)["create_shop_str_8"],
                          reply_markup=create_markup)
         chatbot = chatbots_table.find_one({"bot_id": bot.id}) or {}
 
@@ -175,7 +159,7 @@ class CreateDonationHandler(object):
         chatbot["donate"] = user_data
         chatbots_table.update_one({"bot_id": bot.id}, {'$set': chatbot}, upsert=True)
 
-        logger.info("Admin {} on bot {}:{} added a donation config:{}".format(
+        logger.info("Admin {} on bot {}:{} added a shop config:{}".format(
             update.effective_user.first_name, bot.first_name, bot.id, user_data["title"]))
         user_data.clear()
         return ConversationHandler.END
@@ -203,30 +187,30 @@ class CreateDonationHandler(object):
 
 # Add conversation handler with the states CHOOSING, TYPING_CHOICE and TYPING_REPLY'
 
-CREATE_DONATION_HANDLER = ConversationHandler(
-    entry_points=[CallbackQueryHandler(callback=CreateDonationHandler().start_create_donation,
+CREATE_SHOP_HANDLER = ConversationHandler(
+    entry_points=[CallbackQueryHandler(callback=CreateShopHandler().start_create_shop,
                                        pass_user_data=True,
-                                       pattern=r'allow_donation'),
+                                       pattern=r'allow_shop'),
                   ],
     # TYPING_TOKEN, TYPING_TITLE,  TYPING_DESCRIPTION, TYPING_AMOUNT, TYPING_CURRENCY,\
     # TYPING_TAGS, TYPING_TAGS_FINISH, TYPING_TYPE, TYPING_DEADLINE, TYPING_REPEAT
     states={
         TYPING_TOKEN: [MessageHandler(Filters.text,
-                                      CreateDonationHandler().handle_token,
+                                      CreateShopHandler().handle_token,
                                       pass_user_data=True)],
         TYPING_TITLE: [MessageHandler(Filters.text,
-                                      CreateDonationHandler().handle_title,
+                                      CreateShopHandler().handle_title,
                                       pass_user_data=True)],
         TYPING_DESCRIPTION: [MessageHandler(Filters.text,
-                                            CreateDonationHandler().handle_description,
+                                            CreateShopHandler().handle_description,
                                             pass_user_data=True)],
-        DONATION_FINISH: [MessageHandler(Filters.text,
-                                         CreateDonationHandler().handle_donation_finish,
+        SHOP_FINISH: [MessageHandler(Filters.text,
+                                         CreateShopHandler().handle_shop_finish,
                                          pass_user_data=True)],
     },
 
-    fallbacks=[CallbackQueryHandler(callback=CreateDonationHandler().back, pattern=r"help_back"),
-               CallbackQueryHandler(callback=CreateDonationHandler().back, pattern=r"help_module"),
-               MessageHandler(filters=Filters.command, callback=CreateDonationHandler().back),
+    fallbacks=[CallbackQueryHandler(callback=CreateShopHandler().back, pattern=r"help_back"),
+               CallbackQueryHandler(callback=CreateShopHandler().back, pattern=r"help_module"),
+               MessageHandler(filters=Filters.command, callback=CreateShopHandler().back),
                ]
 )

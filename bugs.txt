@@ -9,17 +9,16 @@ p.s. remember the port on mongo and the security- encrypt the messages and all d
 Admins: [send message] [send urgent message]
 Users: [send message] [ask for donation] [send survey]
 
-# TODO when ther eis no payment token - shop disappears
-# TODO payments settings shouldn't bee only for donations
 # TODO GROUPS:  surveys, polls and messages - SEND  button must be sent to the choosen group @ check channels as well
-# TODO statistics on donations and purchases + full list in csv
+# TODO choose to enable or disable the shop from botfather
+# TODO statistics on donations, purchases and payments + full list in csv
 # TODO double test refactoring
 
-# TODO find a way to run run multiple tokens without running so many processes
 # TODO Фильтрация товаров
 # TODO Подкатегории для шопа.
 # TODO products apper not as buttons, but as messages with pics and description (add pagination)
-# TODO make button content with payment
+# TODO make content with payment
 # TODO add stats on donations, customers, messages and users overall
 # TODO pagination for messages
 # TODO messages - show how many new messages are "unread/new" -- take a look at botfather
+# TODO notify admin about new messages and purchases
