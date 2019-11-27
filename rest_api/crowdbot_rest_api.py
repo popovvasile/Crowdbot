@@ -46,7 +46,6 @@ def crowdbot_on_put():  # TODO
 def crowdbot_on_post():
 
     doc = request.get_json()["params"]
-    print(doc)
     # Crowdbot token
     crowdbot_token = doc["token"]
     chatbot = requests.get(url="https://api.telegram.org/bot{}/getMe".format(crowdbot_token))
@@ -64,8 +63,6 @@ def crowdbot_on_post():
         superadmin["user_id"] = doc["superuser"]
         doc["admins"].append(superadmin)
         for admin in doc["admins"]:
-            print(admin)
-            print(doc["admins"])
             admin["bot_id"] = doc["bot_id"]
             admin["registered"] = False
             admin["is_admin"] = True
@@ -82,7 +79,6 @@ def crowdbot_on_post():
 @app.route('/crowdbot', methods=['DELETE'])
 def on_delete():
     doc = request.args
-    print(doc)
     chatbot_id = requests.get(url="https://api.telegram.org/bot{}/getMe".format(doc["token"])).json()
     chatbot_id = chatbot_id["result"]["id"]
     crowdbot_db["users"].delete_many({"bot_id": chatbot_id})

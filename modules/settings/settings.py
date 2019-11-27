@@ -134,7 +134,6 @@ class AddCommands(object):
 
         if update.message.audio:
             audio_file = update.message.audio.get_file().file_id
-            print(audio_file)
             general_list.append({"audio_file": audio_file})
 
         if update.message.voice:
@@ -169,7 +168,6 @@ class AddCommands(object):
         return TYPING_DESCRIPTION
 
     def description_finish(self, bot, update, user_data):
-        print(user_data)
         delete_messages(bot, update, user_data)
 
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -299,7 +297,6 @@ class AddLinkButton(object):
             return TYPING_LINK
 
     def button_finish(self, bot, update, user_data):
-        print(user_data)
         delete_messages(bot, update, user_data)
         chat_id, txt = initiate_chat_id(update)
         user_id = update.effective_user.id

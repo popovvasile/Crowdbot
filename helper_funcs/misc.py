@@ -60,7 +60,6 @@ def paginate_modules(page_n: int, module_dict: Dict, prefix, bot_id, chat=None) 
             [EqInlineKeyboardButton(x, callback_data="{}_module({},{})".format(prefix, chat, module_dict[x]))]
             for x in module_dict
         ]
-    print(modules)
     # pairs = list(zip(modules[::2], modules[1::2]))
     #
     # if len(modules) % 2 == 1:

@@ -232,7 +232,6 @@ class SendMessageToAdmin(object):
         user_data["user_id"] = update.effective_user.id
         user_data["message_id"] = update.callback_query.message.message_id
         user_data["bot_id"] = bot.id
-        print(user_data)
         users_messages_to_admin_table.insert(user_data)
         user_data.clear()
         return ConversationHandler.END

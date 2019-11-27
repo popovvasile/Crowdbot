@@ -10,7 +10,6 @@ Admins: [send message] [send urgent message]
 Users: [send message] [ask for donation] [send survey]
 
 # TODO GROUPS:  surveys, polls and messages - SEND  button must be sent to the choosen group @ check channels as well
-# TODO choose to enable or disable the shop from botfather
 # TODO statistics on donations, purchases and payments + full list in csv
 # TODO double test refactoring
 

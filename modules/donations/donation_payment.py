@@ -109,7 +109,6 @@ class DonationBot(object):
         provider_token = donation_request['payment_token']
         start_parameter = "test-payment"  # TODO change in production
         currency = donation_request['currency']
-        print(amount)
         prices = [LabeledPrice(title, amount)]
         bot.sendInvoice(chat_id, title, description, payload,
                         provider_token, start_parameter, currency, prices)

@@ -262,7 +262,6 @@ def help_button(bot: Bot, update: Update):
     else:
         HELPABLE = helpable_dict(bot)["VISITOR_HELPABLE"]
     query = update.callback_query
-    print(query.data)
     mod_match = re.match(r"help_module\((.+?)\)", query.data)
     prev_match = re.match(r"help_prev\((.+?)\)", query.data)
     next_match = re.match(r"help_next\((.+?)\)", query.data)

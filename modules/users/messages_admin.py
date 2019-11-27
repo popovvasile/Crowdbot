@@ -128,7 +128,6 @@ class SendMessageToAdminsOnly(object):
                                        "user_category": user_data["user_category"]})
         for chat in chats2:
             if chat["chat_id"] != update.callback_query.message.chat_id:
-                print(chat)
                 bot.send_message(chat["chat_id"],
                                  text=string_dict(bot)["you_have_a_message_from"].format(update.effective_user.name))
         for chat in chats:

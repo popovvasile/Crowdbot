@@ -30,7 +30,7 @@ from modules.surveys.surveys_create import DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_
 from modules.payments.payments_config import EDIT_DONATION_HANDLER, PAYMENTS_CONFIG_KEYBOARD, CHNAGE_DONATIONS_CONFIG, \
     CHNAGE_SHOP_CONFIG, CONFIGS_DONATIONS_GENERAL, CONFIGS_SHOP_GENERAL
 from helper_funcs.helper import help_button, button_handler, get_help, WelcomeBot, \
-    back_from_button_handler, product_handler
+    back_from_button_handler, product_handler, error_callback
 from modules.settings.manage_button import BUTTON_EDIT_HANDLER, BUTTON_EDIT_FINISH_HANDLER, DELETE_CONTENT_HANDLER, \
     BUTTON_ADD_FINISH_HANDLER, back_from_edit_button_handler
 from modules.donations.donation_payment import DONATE_HANDLER, HANDLE_SUCCES, HANDLE_PRECHECKOUT
@@ -50,10 +50,10 @@ logging.basicConfig(
 LOGGER = logging.getLogger(__name__)
 
 
-def main(token, port):
+def main(token):
     updater = tg.Updater(token)  # TODO check the docs
     dispatcher = updater.dispatcher
-    # dispatcher.add_error_handler(error_callback)
+    dispatcher.add_error_handler(error_callback)
     start_handler = CommandHandler("start", WelcomeBot().start)
     help_handler = CommandHandler("help", get_help)
     rex_help_handler = RegexHandler(r"^((?!@).)*$", get_help)
@@ -182,7 +182,7 @@ def main(token, port):
     print(token)
     updater.start_polling(timeout=60, read_latency=60, clean=True, bootstrap_retries=5)
 
-    updater.idle()
+    # updater.idle()
 #
 # if __name__ == '__main__':
 #     main("633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg")

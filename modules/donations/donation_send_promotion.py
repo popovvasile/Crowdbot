@@ -133,7 +133,6 @@ class SendDonationToUsers(object):
                             bot.send_sticker(chat["chat_id"], content_dict["sticker_file"])
         for chat in chats2:
             if chat["chat_id"] != update.callback_query.message.chat_id:
-                print(chat)
                 bot.send_message(chat["chat_id"],
                                  text=string_dict(bot)["donate_button"],
                                  reply_markup=final_reply_markup)

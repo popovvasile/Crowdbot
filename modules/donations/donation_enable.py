@@ -50,7 +50,6 @@ def check_provider_token(provider_token, bot, update):
                                     start_parameter="test",
                                     prices=json.dumps([p.to_dict() for p in prices]),
                                     chat_id=update.effective_chat.id))
-    print(json.loads(data.content))
     if "description" in json.loads(data.content):
         if json.loads(data.content)["description"] == "Bad Request: CURRENCY_INVALID":
             data = requests.get("https://api.telegram.org/bot{}/sendInvoice".format(bot_token),

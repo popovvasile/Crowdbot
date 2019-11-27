@@ -195,7 +195,6 @@ class AddProducts(object):
 
         if update.message.audio:
             audio_file = update.message.audio.get_file().file_id
-            print(audio_file)
             general_list.append({"audio_file": audio_file})
 
         if update.message.voice:

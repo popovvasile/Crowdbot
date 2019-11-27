@@ -94,7 +94,6 @@ class AnswerSurveys(object):
 
         if user_data["question_id"] > len(survey["questions"]) - 1:
             survey["answers"] = user_data["answers"]
-            print(user_data)
             surveys_table.replace_one({"title": survey["title"]}, survey)
 
             to_send_text = ""

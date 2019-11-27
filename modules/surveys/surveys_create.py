@@ -138,7 +138,6 @@ class SurveyHandler(object):
         survey_list = surveys_table.find({"bot_id": bot.id})
         bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        print(survey_list.count())
         if survey_list.count() != 0:
 
             bot.send_message(update.callback_query.message.chat.id,
