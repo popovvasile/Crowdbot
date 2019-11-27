@@ -21,8 +21,8 @@ def multiple_bot_daemon():
     # print(crowdbot_bots_table.find().count())
     # while True:
     #     # Crowdbot
-    for doc in crowdbot_bots_table.find():  # run all tokens when the script is running
-        main_runner.main(doc["token"])
+    # for doc in crowdbot_bots_table.find():  # run all tokens when the script is running
+    main_runner.main()
     # time.sleep(5)
     reload(main_runner)
     #         if doc["token"] not in list(my_process.keys()):
