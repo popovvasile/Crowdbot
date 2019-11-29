@@ -17,65 +17,65 @@ MESSAGE_TO_USERS = 1
 
 class ChangeBotLanguage(object):
 
-    def send_message(self, bot, update):
+    def send_message(self, update, context):
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
+        buttons.append([InlineKeyboardButton(text=string_dict(context)["back_button"],
                                              callback_data="help_module(settings)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
 
-        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(bot)["edit_button_str_1"], reply_markup=reply_markup)  # TODO
+        context.bot.send_message(update.callback_query.message.chat.id,
+                         string_dict(context)["edit_button_str_1"], reply_markup=reply_markup)  # TODO
         return MESSAGE
 
-    def received_message(self, bot, update):
-        bot.send_message(update.message.chat_id,
-                         string_dict(bot)["edit_button_str_2"])
+    def received_message(self, update, context):
+        context.bot.send_message(update.message.chat_id,
+                         string_dict(context)["edit_button_str_2"])
 
-        old_bot = chatbots_table.find_one({"bot_id": bot.id})
+        old_bot = chatbots_table.find_one({"bot_id": context.bot.id})
         old_bot['lang'] = update.message.text
-        chatbots_table.update_one({"bot_id": bot.id}, {"$set": old_bot})
-        get_help(bot, update)
+        chatbots_table.update_one({"bot_id": context.bot.id}, {"$set": old_bot})
+        get_help(update, context)
         return ConversationHandler.END
 
-    def back(self, bot, update):
-        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+    def back(self, update, context):
+        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        get_help(bot, update)
+        get_help(update, context)
         return ConversationHandler.END
 
 
 class EditBotDescription(object):
 
-    def send_message(self, bot, update):
+    def send_message(self, update, context):
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(bot)["back_button"],
+        buttons.append([InlineKeyboardButton(text=string_dict(context)["back_button"],
                                              callback_data="help_module(settings)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
 
-        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(bot)["edit_button_str_1"], reply_markup=reply_markup)
+        context.bot.send_message(update.callback_query.message.chat.id,
+                         string_dict(context)["edit_button_str_1"], reply_markup=reply_markup)
         return MESSAGE
 
-    def received_message(self, bot, update):
-        bot.send_message(update.message.chat_id,
-                         string_dict(bot)["edit_button_str_2"])
+    def received_message(self, update, context):
+        context.bot.send_message(update.message.chat_id,
+                         string_dict(context)["edit_button_str_2"])
 
-        old_bot = chatbots_table.find_one({"bot_id": bot.id})
+        old_bot = chatbots_table.find_one({"bot_id": context.bot.id})
         old_bot['welcomeMessage'] = update.message.text
-        chatbots_table.update_one({"bot_id": bot.id}, {"$set": old_bot})
-        get_help(bot, update)
+        chatbots_table.update_one({"bot_id": context.bot.id}, {"$set": old_bot})
+        get_help(update, context)
         return ConversationHandler.END
 
-    def back(self, bot, update):
-        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+    def back(self, update, context):
+        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        get_help(bot, update)
+        get_help(update, context)
         return ConversationHandler.END
 
 

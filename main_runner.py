@@ -2,18 +2,18 @@
 # -*- coding: utf-8 -*-
 import logging
 import telegram.ext as tg
-from telegram.ext import CommandHandler, CallbackQueryHandler,RegexHandler
+from telegram.ext import CommandHandler, CallbackQueryHandler, RegexHandler, MessageHandler, Filters
 
 from helper_funcs.admin_login import ADMIN_AUTHENTICATION_HANDLER
 from modules.chanells.channels import MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER, REMOVE_CHANNEL_HANDLER, \
     SEND_POST_HANDLER, CHANELLS_MENU
 from modules.chanells.channels_polls_surveys_donate import SEND_POLL_TO_CHANNEL_HANDLER, SEND_SURVEY_TO_CHANNEL_HANDLER, \
     SEND_DONATION_TO_CHANNEL_HANDLER
-from modules.eshop.echop_customer import PURCHASE_HANDLER
-from modules.eshop.eshop_admin import PRODUCT_ADD_HANDLER, DELETE_PRODUCT_HANDLER, PRODUCT_EDIT_HANDLER, \
-    PRODUCT_EDIT_FINISH_HANDLER, PRODUCT_ADD_FINISH_HANDLER, DELETE_PRODUCT_CONTENT_HANDLER, PRODUCTS_MENU_HANDLER, \
-    ESHOP_MENU
-from modules.eshop.eshop_enable_disable import CREATE_SHOP_HANDLER
+# from modules.eshop_old.echop_customer import PURCHASE_HANDLER
+# from modules.eshop_old.eshop_admin import PRODUCT_ADD_HANDLER, DELETE_PRODUCT_HANDLER, PRODUCT_EDIT_HANDLER, \
+#     PRODUCT_EDIT_FINISH_HANDLER, PRODUCT_ADD_FINISH_HANDLER, DELETE_PRODUCT_CONTENT_HANDLER, PRODUCTS_MENU_HANDLER, \
+#     ESHOP_MENU
+# from modules.eshop_old.eshop_enable_disable import CREATE_SHOP_HANDLER
 from modules.groups.groups import MY_GROUPS_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER, \
     ADD_GROUP_HANLDER, GROUPS_MENU
 from modules.groups.groups_polls_surveys_donate import SEND_POLL_TO_GROUP_HANDLER, SEND_SURVEY_TO_GROUP_HANDLER, \
@@ -42,6 +42,15 @@ from modules.users.messages import SEND_MESSAGE_TO_ADMIN_HANDLER, SEND_MESSAGE_T
     SEE_MESSAGES_FINISH_BACK_HANDLER, BLOCK_USER, BLOCKED_USERS_LIST, UNBLOCK_USER, MESSAGES_MENU
 from modules.settings.user_mode import USER_MODE_OFF, USER_MODE_ON
 
+# SHOP
+from modules.shop.modules.adding_product import ADD_PRODUCT_HANDLER
+from modules.shop.modules.welcome import START_SHOP_HANDLER, BACK_TO_MAIN_MENU_HANDLER
+from modules.shop.modules.orders import ORDERS_HANDLER
+from modules.shop.modules.wholesale_orders import WHOLESALE_ORDERS_HANDLER
+from modules.shop.modules.products import PRODUCTS_HANDLER
+from modules.shop.modules.trash import (TRASH_START, ORDERS_TRASH,
+                                WHOLESALE_TRASH, PRODUCTS_TRASH)
+from modules.shop.modules.brands import BRANDS_HANDLER
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -51,13 +60,13 @@ LOGGER = logging.getLogger(__name__)
 
 
 def main(token, port):
-    updater = tg.Updater(token)  # TODO check the docs
+    updater = tg.Updater(token, use_context=True)  # TODO check the docs
     dispatcher = updater.dispatcher
     # dispatcher.add_error_handler(error_callback)
     start_handler = CommandHandler("start", WelcomeBot().start)
     help_handler = CommandHandler("help", get_help)
-    rex_help_handler = RegexHandler(r"^((?!@).)*$", get_help)
-    product_handler_han = CallbackQueryHandler(product_handler, pattern=r"product_", pass_user_data=True)
+    rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), get_help)
+    # product_handler_han = CallbackQueryHandler(product_handler, pattern=r"product_", pass_user_data=True)
 
     custom_button_callback_handler = CallbackQueryHandler(button_handler, pattern=r"button_", pass_user_data=True)
     custom_button_back_callback_handler = CallbackQueryHandler(back_from_button_handler,
@@ -65,6 +74,21 @@ def main(token, port):
     help_callback_handler = CallbackQueryHandler(help_button, pattern=r"help_")
 
     dispatcher.add_handler(EDIT_BOT_DESCRIPTION_HANDLER)
+
+
+    #  NEW SHOP
+    dispatcher.add_handler(START_SHOP_HANDLER)
+    dispatcher.add_handler(ORDERS_TRASH)
+    dispatcher.add_handler(WHOLESALE_TRASH)
+    dispatcher.add_handler(PRODUCTS_TRASH)
+    dispatcher.add_handler(ADD_PRODUCT_HANDLER)
+    dispatcher.add_handler(ORDERS_HANDLER)
+    dispatcher.add_handler(WHOLESALE_ORDERS_HANDLER)
+    dispatcher.add_handler(PRODUCTS_HANDLER)
+    dispatcher.add_handler(TRASH_START)
+    dispatcher.add_handler(BRANDS_HANDLER)
+    dispatcher.add_handler(BACK_TO_MAIN_MENU_HANDLER)
+
     # ADD_BUTTONS
     dispatcher.add_handler(BUTTONS_MENU)
     dispatcher.add_handler(CREATE_BUTTON_CHOOSE)
@@ -90,20 +114,20 @@ def main(token, port):
     dispatcher.add_handler(PAYMENTS_CONFIG_KEYBOARD)
     dispatcher.add_handler(CONFIGS_DONATIONS_GENERAL)
 
-    # PRODUCTS
-    dispatcher.add_handler(ESHOP_MENU)
-    dispatcher.add_handler(PRODUCT_ADD_HANDLER)
-    dispatcher.add_handler(DELETE_PRODUCT_HANDLER)
-    dispatcher.add_handler(PRODUCT_EDIT_HANDLER)
-    dispatcher.add_handler(PRODUCT_EDIT_FINISH_HANDLER)
-    dispatcher.add_handler(PRODUCT_ADD_FINISH_HANDLER)
-    dispatcher.add_handler(DELETE_PRODUCT_CONTENT_HANDLER)
-    dispatcher.add_handler(PRODUCTS_MENU_HANDLER)
-    dispatcher.add_handler(PURCHASE_HANDLER)
-    dispatcher.add_handler(product_handler_han)
-    dispatcher.add_handler(CHNAGE_SHOP_CONFIG)
-    dispatcher.add_handler(CONFIGS_SHOP_GENERAL)
-    dispatcher.add_handler(CREATE_SHOP_HANDLER)
+    # # PRODUCTS
+    # dispatcher.add_handler(ESHOP_MENU)
+    # dispatcher.add_handler(PRODUCT_ADD_HANDLER)
+    # dispatcher.add_handler(DELETE_PRODUCT_HANDLER)
+    # dispatcher.add_handler(PRODUCT_EDIT_HANDLER)
+    # dispatcher.add_handler(PRODUCT_EDIT_FINISH_HANDLER)
+    # dispatcher.add_handler(PRODUCT_ADD_FINISH_HANDLER)
+    # dispatcher.add_handler(DELETE_PRODUCT_CONTENT_HANDLER)
+    # dispatcher.add_handler(PRODUCTS_MENU_HANDLER)
+    # dispatcher.add_handler(PURCHASE_HANDLER)
+    # dispatcher.add_handler(product_handler_han)
+    # dispatcher.add_handler(CHNAGE_SHOP_CONFIG)
+    # dispatcher.add_handler(CONFIGS_SHOP_GENERAL)
+    # dispatcher.add_handler(CREATE_SHOP_HANDLER)
     # MESSAGES
     dispatcher.add_handler(MESSAGES_MENU)
     dispatcher.add_handler(SEE_MESSAGES_FINISH_BACK_HANDLER)
@@ -169,6 +193,9 @@ def main(token, port):
 
     dispatcher.add_handler(help_callback_handler)
 
+
+
+
     # error_help_callback_handler = CallbackQueryHandler(get_help, pattern=r"error_back")
     # dispatcher.add_handler(error_help_callback_handler)
 
@@ -185,4 +212,4 @@ def main(token, port):
     updater.idle()
 #
 # if __name__ == '__main__':
-#     main("633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg")
+#     shop("633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg")

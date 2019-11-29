@@ -1,7 +1,26 @@
 import gc
 
 from database import chatbots_table
-
+# Telegram emoji. Original names
+emoji = dict(
+    trash="🗑",
+    recycle="♻️",
+    white_check_mark="✅",
+    hammer_and_wrench="🛠",
+    x="❌",
+    black_square_button="🔲",
+    confused="😕",
+    arrow_down="⬇️",
+    arrow_right="➡️",
+    money_with_wings="💸",
+    gift_heart="💝",
+    page_with_curl="📃",
+    ticket="🎫",
+    shirt="👔",
+    ballot_box="🗳",
+    plus="➕",
+    gear="⚙️"
+)
 ENG = dict(
     polls_str="Polls",
     surveys_str="Surveys",
@@ -236,7 +255,7 @@ You can send any kinds of files, video, audio or media messages.
     buttons_button="Buttons",
     edit_button="✏️ Edit the button",
     start_button="🏁 Start",
-    main_survey_button="The main survey",
+    main_survey_button="The shop survey",
     back_text="Press '🔙 Back ' to return to the menu ",
     polls_affirmations=[
         "OK",
@@ -296,7 +315,7 @@ Payments
                        "Enter the amount of money that you want to donate.\n"
                        "❗️ Cents and pennies separated by floating points, like this'10.50'.",
 
-    pay_donation_str_2="The main currency of the administrator ❗️ {}",
+    pay_donation_str_2="The shop currency of the administrator ❗️ {}",
     allow_donation_text="Press '💰 Create a donation or press '🔙 Back'",
     pay_donation_str_4="Admin has not set up payments yet 🤷‍",
     pay_donation_str_5="Oops, you entered the wrong number. Try again.",
@@ -320,7 +339,7 @@ ENG.update(
     donations_edit_str_6="What exactly do you want to change? Or press '🔙 Back'",
     donations_edit_str_7="Write a new title for the payment. Or press '🔙 Back'",
     donations_edit_str_8="Write a small description. It will be shown to your users when they enter payments",
-    donations_edit_str_9=" Choose the main currency. Or press '🔙 Back'",
+    donations_edit_str_9=" Choose the shop currency. Or press '🔙 Back'",
     donations_edit_str_10="✅ It’s in the bag!",
     donations_edit_str_11="🗑 The payment is deleted",
     donations_edit_str_12="Enter a new token of your payment system",
@@ -370,7 +389,7 @@ Insert the token: \n""",
     create_donation_str_4="✏️ Write the title of the donation",
     create_donation_str_5="Wrong token. Check it and send again.",
     create_donation_str_6="Tell everyone about the donation and how you will utilize the money",
-    create_donation_str_7="Choose the main currency",
+    create_donation_str_7="Choose the shop currency",
     create_donation_str_8="✅Great! Now you can accept payments from bot users. ❗ ️Users only need a Bank card.\n" \
                           "Don't forget to tell about it.",
 
@@ -474,7 +493,7 @@ Here you can configure your payments settings and your shop
     products_str_choose_the_product_to_del="Choose the product to delete",
     no_products="You have no products in your shop",
     products_deleted_str="Chosen products have been deleted",
-    add_products_products_deleted_str="You can add a new item to your shop or return to main menu",
+    add_products_products_deleted_str="You can add a new item to your shop or return to shop menu",
     payment_configure_button="Configure Payments",
     add_products_str_deleted="Item {} has been deleted from your shop",
     products="Products",
@@ -884,13 +903,229 @@ https://telegra.ph/Gajd-Podklyuchit-donaty-07-03
     add_products_str_5="add_products_str_5",
     add_products_str_6="add_products_str_6",
     add_products_str_7="add_products_str_7",
+
+
+    #SHOP
+    # MAIN MENU
+    shop_admin_start_message="👋 Добро пожаловать в админку",
+    shop_admin_add_product_btn=f"{emoji['plus']} Добавить товар",
+    # delete_product_btn="➖ Удалить товар",
+    shop_admin_orders_btn="📩 Заказы",
+    shop_admin_wholesale_orders_btn="🛍 Опт заказы",
+    # add_brand_btn="👚 Добавить бренд",
+    shop_admin_brands_btn=f"{emoji['shirt']} Бренды",
+    # add_category_btn="👜 Добавить категорию",
+    shop_admin_products_btn="🗳 Товары",
+    shop_admin_trash_btn="🗑 Корзина",
+    shop_admin_manage_admins_btn=f"{emoji['gear']} Управлять админам",
+    shop_admin_size_quantity="\n\n _Выбери количество_ *{}* _размера_",
+    # ADDING PRODUCT
+    shop_admin_adding_product_start="Отправьте изображение товара",
+    shop_admin_send_more_photo="Отправь ещe изображение или продолжай"
+                               "\nДобавлено {} файлов",
+    shop_admin_continue_btn=f"Продолжить {emoji['arrow_right']}",
+    shop_admin_set_brand="Выберите бренд товара",
+    shop_admin_set_category="Выберете категерию товара",
+    shop_admin_set_sizes="Укажите размеры товара",
+    shop_admin_set_price=f"{emoji['money_with_wings']} *Укажите цену товара*",
+    shop_admin_price_is_not_int="Цена должна быть целым числом."
+                                "\nПришлите цену товара",
+    shop_admin_set_description="\n_Напишите описание товара_",
+    shop_admin_confirm_add_product="Добавить товар в магазин?",
+    shop_admin_adding_product_finished="🤘 Товар успешно добавлен",
+
+    # ORDERS HANDLER
+    shop_admin_no_orders="Ещё нет ни одного заказа",
+    shop_admin_orders_title="*Список заказов*"
+                            "\n_Количество заказов:_ `{}`"
+    f"\n{emoji['white_check_mark']} - "
+    f"_Отметить заказ как выполненный. "
+                            "Товар с заказа будет убран с "
+                            "магазина и отмечен как проданый_"
+    f"\n{emoji['trash']} - _Удалить заказ_"
+    f"\n{emoji['x']} - _Отменить выполненный заказ."
+    f"Товар с заказа будет возвращён на полки магазина_",
+    shop_admin_order_temp="*Id Заказа:* `{}`"
+                          "\n*Время:* `{}`"
+                          "\n*Статус заказа:* `{}`"
+                          "\n\n*Имя:* `{}`"
+                          "\n*Номер:* `{}`"
+                          "\n*Цена:* `{}`"
+                          "\n\n*Товар:\n*"
+                          "{}",
+    shop_admin_order_status_new="🔴 Новый",
+    # order_status_false="♻️️ В процессе",
+    shop_admin_order_status_true=f"{emoji['white_check_mark']} Выполненный",
+    shop_admin_all_products_exist="👌🏿 Все продукты в наличии",
+    shop_admin_some_product_not_exist="📛 Некоторых товаров уже нет в наличии",
+    shop_admin_empty_order="⚠️ Пустой заказ",
+    # product_status_true="В наличии ✅",
+    # product_status_false="Нет в наличии ⛔",
+    # to_process_btn="♻",
+    shop_admin_to_done_btn=emoji["white_check_mark"],
+    shop_admin_to_trash_btn=emoji['trash'],
+    shop_admin_cancel_btn=emoji["x"],
+    shop_admin_edit_btn=emoji["hammer_and_wrench"],
+    # confirm_to_process="*Уверены что хотите поместить данный заказ "
+    #                    "в обработку??*"
+    #                    "\n_Весь товар с заказа будет убран с магазина и
+    #                    будет ожидать своего покупателя."
+    #                    "\nВы сможете в дальнейшем отменить данный
+    #                    заказ и товар вернёться на полки"
+    #                    " интернет магазина_",
+    # to_process_yes="♻ В Обратобку",
+    shop_admin_confirm_to_done="*Уверены что хотите отметить данный заказ "
+                               "как выполненный??*"
+                               "\n_Товар с заказа будет убран с магазина "
+                               "и отмечен как проданный."
+                               "\nВы сможете в дальнейшем отменить данный заказ "
+                               "и товар вернёться на полки"
+                               " интернет магазина_",
+    shop_admin_to_done_yes=f"{emoji['white_check_mark']} В Выполненные",
+    shop_admin_confirm_to_trash_new="*Уверены что хотите удалить данный заказ??*"
+                                    "\n_Данный заказ является новым и не обработаным."
+                                    "\nУдаление данного заказа "
+                                    "не влечёт никаких изменений."
+                                    "\nУбедитесь что клиент точно отказался от покупки_",
+    # confirm_to_trash_process="*Уверены что хотите отменить данный заказ??*"
+    #                      "\n_Данный заказ находится в обработке."
+    #                      "\nВесь товар будет возвращён
+    #                      на полки интернет магазина."
+    #                      "\nУбедитесь что клиент точно
+    #                      отказался от покупки_",
+    # confirm_to_trash_done="*Уверены что хотите отменить данный заказ??*"
+    #                       "\n_Данный заказ находится в выполненых."
+    #                       "\nВесь товар будет возвращён
+    #                       на полки интернет магазина.",
+    shop_admin_to_trash_yes="🗑 В Корзину",
+    shop_admin_confirm_cancel="*Уверены что хотите отменить данный заказ??*"
+                              "\n_Данный заказ является выполненным."
+                              "\nОтмена данного заказа вернёт товар на "
+                              "полки магазина и переместит заказ в Новые."
+                              "\nУбедитесь что клиент точно отказался от покупки_",
+    shop_admin_cancel_yes=f"{emoji['x']} Отменить",
+    shop_admin_edit_menu="*Заказ не может быть завершён пока в "
+                         "нём присутствуют проданные товары.*"
+    f"\n{emoji['x']} - _Убрать товар из заказа_",
+    # EDIT ORDER
+    shop_admin_choose_products_title="*Выбирите товар для добавления в заказ*"
+                                     "\n_Количество товаров:_ `{}`",
+
+    # WHOLESALE ORDERS HANDLER
+    # wholesale_orders_title="*Список заказов*"
+    #                        "\n_Количество заказов:_ `{}`",
+    shop_admin_wholesale_order_temp="\n\n*Id Заказа:* `{}`" \
+                                    "\n*Время:* `{}`" \
+                                    "\n\n*Имя:* `{}`" \
+                                    "\n*Номер:* `{}`" \
+                                    "\n*Общая цена:* `{}`" \
+                                    "\n*Интересующие Категории:* \n`{}`" \
+                                    "\n\n*Заказ:* {}",
+
+    # PRODUCTS HANDLER
+    shop_admin_no_products="В магазине ещё нет товаров",
+    shop_admin_products_title="*Список товаров*"
+                              "\n_Количество товаров:_ `{}`",
+    shop_admin_product_template="*Артикул Товара:* `{}`"
+                                "\n*Наличие:* `{}`"
+                                "\n*Бренд:* `{}`"
+                                "\n*Категория:* `{}`"
+                                "\n*Цена:* `{}`"
+                                "\n*Размеры*: \n{}",
+    shop_admin_full_product_template="*Артикул Товара:* `{}`"
+                                     "\n*Наличие:* `{}`"
+                                     "\n*Имя*: `{}`"
+                                     "\n*Бренд:* `{}`"
+                                     "\n*Категория:* `{}`"
+                                     "\n*Описание*: `{}`"
+                                     "\n*Цена:* `{}`"
+                                     "\n*Скидочная цена:* `{}`"
+                                     "\n*Размеры*: \n{}",
+    shop_admin_product_temp_for_order_item="*Артикул Товара:* `{}`"
+                                           "\n*На складе:*\n `{}`"
+                                           "\n*Бренд:* `{}`"
+                                           "\n*Категория:* `{}`"
+                                           "\n*Цена:* `{}`"
+                                           "\n*Размер*: \n{}",
+    shop_admin_confirm_to_trash_product="*Уверены что хотите удалить данный товар??*"
+                                        "\n_С данным товаром отсутсвуют заказы._",
+    # EDIT PRODUCT
+    shop_admin_edit_product_menu="\n_Тут можно редактировать товар_",
+    shop_admin_set_discount_btn=f"{emoji['gift_heart']} Скидка",
+    shop_admin_set_price_btn=f"{emoji['money_with_wings']} Цена",
+    shop_admin_set_description_btn=f"{emoji['page_with_curl']} Описание",
+    shop_admin_set_name_btn=f"{emoji['ticket']} Имя",
+
+    shop_admin_change_name="*Введите новое имя для товара*",
+    shop_admin_name_length_error="*В имени должно быть не больше 1000 символов в длину*",
+    shop_admin_description_below=f"Описание ниже {emoji['arrow_down']}",
+    shop_admin_set_discount_price=f"{emoji['gift_heart']} "
+    f"*Укажите скидочную цену для товара*",
+    shop_admin_sizes_menu_title="\n*Здесь вы можете управлять размерами*",
+    shop_admin_product_size_temp="*Размер:* `{}` | *Количество*: `{}`",
+    shop_admin_sizes_menu_btn=f"{emoji['ballot_box']} Размеры",
+    shop_admin_add_size_btn=f"{emoji['plus']} Добавить размер",
+    shop_admin_set_new_sizes="\n*Укажите новые размеры*",
+    # BRANDS
+    shop_admin_brands_title="*Список брендов*"
+                            "\n_Количество брендов:_ `{}`",
+    shop_admin_no_brands="_Пакажи мнэ брэнд, ааааа хачу_",
+    shop_admin_edit_brand_menu="\n_Тут можно редактировать бренд_",
+    shop_admin_brand_template="*Имя:* `{}`"
+                              "\n*Цена:* `{}`",
+    shop_admin_set_brand_price=f"{emoji['money_with_wings']} "
+    f"*Укажите цену за кг бренда*",
+
+    # TRASH
+    shop_admin_trash_start=f"{emoji['trash']} *Тут хранятся удалённые вещи*",
+    shop_admin_trash_orders_title=f"{emoji['trash']} *Список удалённых заказов*"
+    "\n_Количество заказов:_ `{}`",
+    shop_admin_restore_btn=f"{emoji['recycle']} Восстановить",
+
+    # BLINKS
+    # moved_to_process_blink="♻ Заказ успешно помещён в обработку",
+    shop_admin_moved_to_done_blink=f"{emoji['white_check_mark']} "
+    f"Заказ успешно помещён в выполненные",
+    shop_admin_moved_to_trash_blink="🗑 Заказ успешно помещён в корзину",
+    shop_admin_order_canceled_blink=f"{emoji['x']} Заказ успешно отменён",
+    shop_admin_item_removed_blink="Товар успешно удалён из заказа",
+    shop_admin_item_added_blink=f"{emoji['white_check_mark']} "
+    f"Товар успешно добавлен в заказ",
+    shop_admin_order_restored_blink=f"{emoji['recycle']} Заказ восстановлён",
+    shop_admin_product_restored_blink=f"{emoji['white_check_mark']} "
+    f"Товар снова в продаже",
+    shop_admin_size_removed_blink="Размер удалён",
+    shop_admin_sizes_added_blink=f"{emoji['white_check_mark']} "
+    f"Размеры успешно добавлены",
+    # description_changed_blink=f"{emoji['white_check_mark']} "
+    #                            "Описание успешно изменено",
+    # EXCEPTIONS
+    shop_admin_api_off=f"{emoji['confused']} Апи сейчас не работает - "
+    f"обратитесь в поддержку",
+    shop_admin_exception_in_adding_product=f"{emoji['confused']} "
+    f"Обнаружен сбой при обработке изображения. "
+    f"Обратитесь к Юре",
+    shop_admin_image_exception=f"{emoji['confused']} "
+    f"Не удалось отправить изображение товара."
+    "\n_Проверьте товар в магазине по артикулу_",
+    shop_admin_image_brand_exception=f"{emoji['confused']} "
+    f"Не удалось отправить лого бренда."
+    "\n_Проверьте лого бренда в магазине_",
+    shop_admin_something_gone_wrong=f"{emoji['confused']} Видимо что-то пошло не так."
+    "\nОбратитесь в поддержку",
+    shop_admin_timed_out=f"{emoji['confused']} Превышено время ожидания",
+    shop_admin_try_later="\nПопробуйте начать позже -> /start",
+    # PAGINATION
+    shop_admin_current_page="*Текущая траница:* `{}`",
+    # BACK BUTTON
+    shop_admin_back_btn="🔙 Назад",
 )
 
 string_dict_dict = {"ENG": ENG,
                     "RUS": RUS}
 
 
-def string_dict(bot):
-    chatbot = chatbots_table.find_one({"bot_id": bot.id})
+def string_dict(context):
+    chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
 
     return string_dict_dict[chatbot["lang"]]

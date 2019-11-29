@@ -26,8 +26,8 @@ class BasePoll(object):
     def requires_extra_config(self, meta):
         return False
 
-    def ask_for_extra_config(self, meta, bot):
-        return string_dict(bot)["ask_for_extra_config_wrong"]
+    def ask_for_extra_config(self, meta, update):
+        return string_dict(context)["ask_for_extra_config_wrong"]
 
     def register_extra_config(self, text, meta):
         pass

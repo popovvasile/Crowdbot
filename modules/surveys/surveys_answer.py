@@ -15,10 +15,10 @@ logger = logging.getLogger(__name__)
 CHOOSING_SURVEY, ANSWERING = range(2)
 
 
-def facts_to_str(user_data):
+def facts_to_str(context):
     facts = list()
 
-    for key, value in user_data.items():
+    for key, value in context.user_data.items():
         facts.append('{} - {}'.format(key, value))
 
     return "\n".join(facts).join(['\n', '\n'])
@@ -41,18 +41,18 @@ def facts_to_str(user_data):
 
 class AnswerSurveys(object):
 
-    def start_answering(self, bot, update, user_data):
-        buttons = [[InlineKeyboardButton(text=string_dict(bot)["cancel_button_survey"],
+    def start_answering(self, update, context):
+        buttons = [[InlineKeyboardButton(text=string_dict(context)["cancel_button_survey"],
                                          callback_data="help_back")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
-        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        user_data['title'] = update.callback_query.data.replace("survey_", "")
-        user_data["question_id"] = 0
+        context.user_data['title'] = update.callback_query.data.replace("survey_", "")
+        context.user_data["question_id"] = 0
         survey = surveys_table.find_one({
-            "bot_id": bot.id,
-            "title": user_data["title"]
+            "bot_id": context.bot.id,
+            "title": context.user_data["title"]
         })
         if "answers" not in survey:
             survey["answers"] = []
@@ -61,86 +61,86 @@ class AnswerSurveys(object):
             if answer.get('user_id', "") == update.callback_query.message.from_user.id:
                 survey["answers"][index] = []
                 surveys_table.update({"title": survey["title"]}, survey)
-        bot.send_message(update.callback_query.message.chat_id,
-                         string_dict(bot)["answer_survey_str_1"]
+        context.bot.send_message(update.callback_query.message.chat_id,
+                         string_dict(context)["answer_survey_str_1"]
                          )
-        bot.send_message(update.callback_query.message.chat_id,
-                         survey["questions"][int(user_data["question_id"])]["text"],
+        context.bot.send_message(update.callback_query.message.chat_id,
+                         survey["questions"][int(context.user_data["question_id"])]["text"],
                          reply_markup=reply_markup)
 
         return ANSWERING
 
-    def received_information(self, bot, update, user_data):
-        buttons = [[InlineKeyboardButton(text=string_dict(bot)["cancel_button_survey"],
+    def received_information(self, update, context):
+        buttons = [[InlineKeyboardButton(text=string_dict(context)["cancel_button_survey"],
                                          callback_data="help_back")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
-        user_data["question_id"] += 1
+        context.user_data["question_id"] += 1
         survey = surveys_table.find_one({
-            "bot_id": bot.id,
-            "title": user_data["title"]
+            "bot_id": context.bot.id,
+            "title": context.user_data["title"]
         })
         answer = update.message.text
         user_id = update.message.from_user.id
 
         survey["answers"] = list(filter(lambda i: i['user_id'] != update.effective_user.id, survey["answers"]))
 
-        if "answers" not in user_data:
-            user_data["answers"] = survey["answers"]
-        user_data["answers"].append({"user_id": user_id,
-                                     "question_id": int(user_data["question_id"]),
+        if "answers" not in context.user_data:
+            context.user_data["answers"] = survey["answers"]
+        context.user_data["answers"].append({"user_id": user_id,
+                                     "question_id": int(context.user_data["question_id"]),
                                      "title": survey["title"],
                                      "answer": answer})
 
-        if user_data["question_id"] > len(survey["questions"]) - 1:
-            survey["answers"] = user_data["answers"]
+        if context.user_data["question_id"] > len(survey["questions"]) - 1:
+            survey["answers"] = context.user_data["answers"]
             surveys_table.replace_one({"title": survey["title"]}, survey)
 
             to_send_text = ""
             users_answers = []
             for answer in survey["answers"]:
-                if answer["user_id"] == user_id and answer["title"] == user_data["title"]:
+                if answer["user_id"] == user_id and answer["title"] == context.user_data["title"]:
                     users_answers.append(answer)
                     question = survey["questions"][int(answer["question_id"]) - 1]["text"]
-                    to_send_text += string_dict(bot)["answer_survey_str_2"].format(question, answer['answer'])
-            user_data.clear()
-            create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                    to_send_text += string_dict(context)["answer_survey_str_2"].format(question, answer['answer'])
+            context.user_data.clear()
+            create_buttons = [[InlineKeyboardButton(text=string_dict(context)["back_button"],
                                                     callback_data="help_back")]]
             create_markup = InlineKeyboardMarkup(create_buttons)
-            bot.send_message(update.message.chat_id,
-                             string_dict(bot)["answer_survey_str_3"] + "\n" +
-                             string_dict(bot)["answer_survey_str_4"] + "\n" + to_send_text, reply_markup=create_markup)
-            del user_data
+            context.bot.send_message(update.message.chat_id,
+                             string_dict(context)["answer_survey_str_3"] + "\n" +
+                             string_dict(context)["answer_survey_str_4"] + "\n" + to_send_text, reply_markup=create_markup)
+            del context.user_data
             del answer
             return ConversationHandler.END
 
         else:
 
-            question = survey["questions"][int(user_data["question_id"])]["text"]
-            bot.send_message(update.message.chat_id, question,
+            question = survey["questions"][int(context.user_data["question_id"])]["text"]
+            context.bot.send_message(update.message.chat_id, question,
                              reply_markup=reply_markup)
-            user_data["last_question"] = question
+            context.user_data["last_question"] = question
 
             return ANSWERING
 
-    def done(self, bot, update, user_data):
-        create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+    def done(self, update, context):
+        create_buttons = [[InlineKeyboardButton(text=string_dict(context)["back_button"],
                                                 callback_data="help_back")]]
         create_markup = InlineKeyboardMarkup(create_buttons)
-        update.message.reply_text(string_dict(bot)["answer_survey_str_3"] + "{}" +
-                                  string_dict(bot)["answer_survey_str_4"].format(facts_to_str(user_data)),
+        update.message.reply_text(string_dict(context)["answer_survey_str_3"] + "{}" +
+                                  string_dict(context)["answer_survey_str_4"].format(facts_to_str(context.user_data)),
                                   reply_markup=create_markup)
         logger.info("User {} on bot {}:{} answered to survey:{}".format(
-            update.effective_user.first_name, bot.first_name, bot.id, user_data["title"]))
+            update.effective_user.first_name, context.bot.first_name, context.bot.id, context.user_data["title"]))
 
-        user_data.clear()
+        context.user_data.clear()
         return ConversationHandler.END
 
-    def back(self, bot, update):
+    def back(self, update, context):
 
-        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        get_help(bot, update)
+        get_help(update, context)
         return ConversationHandler.END
 
 

@@ -629,8 +629,8 @@ def boolmoji(boolean: bool):
     return emoji_yes if boolean else emoji_no
 
 
-def get_str(user_data, update, string, *args):
-    if not user_data.get("lang"):
-        user_data["lang"] = bot_father_users_table.find_one(
+def get_str(context.user_data, update, string, *args):
+    if not context.user_data.get("lang"):
+        context.user_data["lang"] = bot_father_users_table.find_one(
             {'user_id': update.effective_user.id})["lang"]
-    return strings_dict.get(user_data["lang"])[string].format(*args)
+    return strings_dict.get(context.user_data["lang"])[string].format(*args)

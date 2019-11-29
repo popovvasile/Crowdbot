@@ -1,5 +1,5 @@
 pymongo==3.8.0
-python-telegram-bot==11.1.0
+python-telegram-bot
 requests==2.22.0
 urllib3==1.25.2
 haikunator

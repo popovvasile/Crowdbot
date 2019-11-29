@@ -17,18 +17,18 @@ LOAD = []
 NO_LOAD = ['translation', 'rss']
 
 
-def delete_messages(bot, update, user_data):
-    if 'to_delete' in user_data:
-        for msg in user_data['to_delete']:
+def delete_messages(update, context):
+    if 'to_delete' in context.user_data:
+        for msg in context.user_data['to_delete']:
             try:
                 if msg.message_id != update.effective_message.message_id:
-                    bot.delete_message(update.effective_chat.id, msg.message_id)
+                    context.bot.delete_message(update.effective_chat.id, msg.message_id)
             except TelegramError as e:
                 print('except in delete_message---> {}, {}'.format(e, msg.message_id))
                 continue
-        user_data['to_delete'] = list()
+        context.user_data['to_delete'] = list()
     else:
-        user_data['to_delete'] = list()
+        context.user_data['to_delete'] = list()
 
 
 class EqInlineKeyboardButton(InlineKeyboardButton):
@@ -78,17 +78,17 @@ def paginate_modules(page_n: int, module_dict: Dict, prefix, bot_id, chat=None) 
     return pairs
 
 
-def send_to_list(bot: Bot, send_to: list, message: str, markdown=False, html=False) -> None:
+def send_to_list(update, send_to: list, message: str, markdown=False, html=False) -> None:
     if html and markdown:
         raise Exception("Can only send with either markdown or HTML!")
     for user_id in set(send_to):
         try:
             if markdown:
-                bot.send_message(user_id, message, parse_mode=ParseMode.MARKDOWN)
+                context.bot.send_message(user_id, message, parse_mode=ParseMode.MARKDOWN)
             elif html:
-                bot.send_message(user_id, message, parse_mode=ParseMode.HTML)
+                context.bot.send_message(user_id, message, parse_mode=ParseMode.HTML)
             else:
-                bot.send_message(user_id, message)
+                context.bot.send_message(user_id, message)
         except TelegramError:
             pass  # ignore users who fail
 

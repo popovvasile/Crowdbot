@@ -20,65 +20,65 @@ EXECUTE_DONATION = 1
 
 
 class DonationBot(object):
-    def error(self, bot, update, error):
+    def error(self, update, context, error):
         """Log Errors caused by Updates."""
         logger.warning('Update "%s" caused error "%s"', update, error)
 
-    def start_donation(self, bot, update):
-        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+    def start_donation(self, update, context):
+        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id, )
-        donation_request = chatbots_table.find_one({"bot_id": bot.id})
-        current_user_mode = user_mode_table.find_one({"bot_id": bot.id,
+        donation_request = chatbots_table.find_one({"bot_id": context.bot.id})
+        current_user_mode = user_mode_table.find_one({"bot_id": context.bot.id,
                                                       "user_id": update.effective_user.id}) or {"user_mode": False}
         if donation_request.get("donate") is not None and donation_request.get("donate") != {}:
-            bot.send_message(update.callback_query.message.chat.id,
+            context.bot.send_message(update.callback_query.message.chat.id,
                              donation_request["donate"]["description"])
-            bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(bot)["pay_donation_str_1"])
-            bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(bot)["pay_donation_str_2"].format(
+            context.bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(context)["pay_donation_str_1"])
+            context.bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(context)["pay_donation_str_2"].format(
                                  donation_request["donate"]['currency']))
-            bot.send_message(update.callback_query.message.chat.id,
-                             text=string_dict(bot)["back_text"],
+            context.bot.send_message(update.callback_query.message.chat.id,
+                             text=string_dict(context)["back_text"],
                              reply_markup=InlineKeyboardMarkup(
-                                 [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                 [[InlineKeyboardButton(text=string_dict(context)["back_button"],
                                                         callback_data="help_back")]]))
             return EXECUTE_DONATION
 
         else:
             try:
                 if current_user_mode["user_mode"] is True:
-                    admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                    admin_keyboard = [InlineKeyboardButton(text=string_dict(context)["back_button"],
                                                            callback_data="help_back")]
-                    bot.send_message(update.callback_query.message.chat.id,
-                                     string_dict(bot)["pay_donation_str_4"],
+                    context.bot.send_message(update.callback_query.message.chat.id,
+                                     string_dict(context)["pay_donation_str_4"],
                                      reply_markup=InlineKeyboardMarkup([admin_keyboard]))
-                elif if_admin(update, bot):
-                    admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["allow_donations_button"],
+                elif if_admin(update, context):
+                    admin_keyboard = [InlineKeyboardButton(text=string_dict(context)["allow_donations_button"],
                                                            callback_data="allow_donation"),
-                                      InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                      InlineKeyboardButton(text=string_dict(context)["back_button"],
                                                            callback_data="help_back")]
-                    bot.send_message(update.callback_query.message.chat.id,
-                                     string_dict(bot)["allow_donation_text"],
+                    context.bot.send_message(update.callback_query.message.chat.id,
+                                     string_dict(context)["allow_donation_text"],
                                      reply_markup=InlineKeyboardMarkup([admin_keyboard]))
                 else:
-                    admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                    admin_keyboard = [InlineKeyboardButton(text=string_dict(context)["back_button"],
                                                            callback_data="help_back")]
-                    bot.send_message(update.callback_query.message.chat.id,
-                                     string_dict(bot)["pay_donation_str_4"],
+                    context.bot.send_message(update.callback_query.message.chat.id,
+                                     string_dict(context)["pay_donation_str_4"],
                                      reply_markup=InlineKeyboardMarkup([admin_keyboard]))
             except KeyError:
-                admin_keyboard = [InlineKeyboardButton(text=string_dict(bot)["allow_donations_button"],
+                admin_keyboard = [InlineKeyboardButton(text=string_dict(context)["allow_donations_button"],
                                                        callback_data="allow_donation"),
-                                  InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                  InlineKeyboardButton(text=string_dict(context)["back_button"],
                                                        callback_data="help_back")]
-                bot.send_message(update.callback_query.message.chat.id,
-                                 string_dict(bot)["allow_donation_text"],
+                context.bot.send_message(update.callback_query.message.chat.id,
+                                 string_dict(context)["allow_donation_text"],
                                  reply_markup=InlineKeyboardMarkup([admin_keyboard]))
             return ConversationHandler.END
 
     # 
-    # def donation_message(self, bot, update, user_data):
+    # def donation_message(self, update, context):
     #     chat_id, txt = initiate_chat_id(update)
     #     user_data["amount"] = txt
     #     update.message.reply_text("You can write a message about your crowdfunding campaign, "
@@ -86,7 +86,7 @@ class DonationBot(object):
     #                               reply_markup=ReplyKeyboardMarkup([["SKIP"]], one_time_keyboard=True))
     #     return EXECUTE_DONATION
 
-    def execute_donation(self, bot, update, user_data):
+    def execute_donation(self, update, context):
         query = update.callback_query
         if query:
             if query.data == "help_back" or query.data == "help_back":
@@ -97,12 +97,12 @@ class DonationBot(object):
         try:
             amount = int(float(txt) * 100)  # TODO add an exception if not int
         except ValueError:
-            update.message.reply_text(text=string_dict(bot)["pay_donation_str_5"],
+            update.message.reply_text(text=string_dict(context)["pay_donation_str_5"],
                                       reply_markup=InlineKeyboardMarkup(
-                                          [[InlineKeyboardButton(text=string_dict(bot)["menu_button"],
+                                          [[InlineKeyboardButton(text=string_dict(context)["menu_button"],
                                                                  callback_data="help_back")]]))
             return EXECUTE_DONATION
-        donation_request = chatbots_table.find_one({"bot_id": bot.id})["donate"]
+        donation_request = chatbots_table.find_one({"bot_id": context.bot.id})["donate"]
         title = donation_request['title']
         description = donation_request['description']
         payload = "Donation"
@@ -110,60 +110,60 @@ class DonationBot(object):
         start_parameter = "test-payment"  # TODO change in production
         currency = donation_request['currency']
         prices = [LabeledPrice(title, amount)]
-        bot.sendInvoice(chat_id, title, description, payload,
+        context.bot.sendInvoice(chat_id, title, description, payload,
                         provider_token, start_parameter, currency, prices)
-        update.message.reply_text(text=string_dict(bot)["back_text"],
+        update.message.reply_text(text=string_dict(context)["back_text"],
                                   reply_markup=InlineKeyboardMarkup(
-                                      [[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                                      [[InlineKeyboardButton(text=string_dict(context)["back_button"],
                                                              callback_data="help_back")]]))
         logger.info("User {} on bot {} requested a donation".format(
-            update.effective_user.first_name, bot.first_name))
+            update.effective_user.first_name, context.bot.first_name))
 
         return ConversationHandler.END
 
-    def precheckout_callback(self, bot, update):
+    def precheckout_callback(self, update, context):
         # query = update.callback_query
         # if query:
         #     if query.data == "help_back":
         #         return ConversationHandler.END
         query = update.pre_checkout_query
 
-        bot.answer_pre_checkout_query(pre_checkout_query_id=query.id, ok=True)
+        context.bot.answer_pre_checkout_query(pre_checkout_query_id=query.id, ok=True)
         return ConversationHandler.END
 
     # finally, after contacting to the donation provider...
-    def successful_payment_callback(self, bot, update):
+    def successful_payment_callback(self, update, context):
         # TODO add counting of donations and prepare for callback_query
         # do something after successful receive of donation?
-        buttons=[[InlineKeyboardButton(text=string_dict(bot)["back_button"],
+        buttons=[[InlineKeyboardButton(text=string_dict(context)["back_button"],
                                        callback_data="help_back")]]
         markup = InlineKeyboardMarkup(buttons)
-        user_data = dict()
-        user_data["status"] = "Paid"
-        user_data['timestamp_paid'] = datetime.datetime.now()
-        user_data["amount"] = update.message.successful_payment.total_amount
-        user_data["currency"] = update.message.successful_payment.currency
-        user_data["chat_id"] = update.message.chat_id
-        user_data["bot_id"] = bot.id
+        context.user_data = dict()
+        context.user_data["status"] = "Paid"
+        context.user_data['timestamp_paid'] = datetime.datetime.now()
+        context.user_data["amount"] = update.message.successful_payment.total_amount
+        context.user_data["currency"] = update.message.successful_payment.currency
+        context.user_data["chat_id"] = update.message.chat_id
+        context.user_data["bot_id"] = context.bot.id
 
-        donations_table.insert_one(user_data)
-        update.message.reply_text(string_dict(bot)["thank_donation"], markup=markup)
-        user_data.clear()
+        donations_table.insert_one(context.user_data)
+        update.message.reply_text(string_dict(context)["thank_donation"], markup=markup)
+        context.user_data.clear()
         return ConversationHandler.END
 
-    def cancel(self, bot, update):
+    def cancel(self, update, context):
         update.message.reply_text(
             "Command is cancelled =("
         )
-        get_help(bot, update)
+        get_help(update, context)
 
         return ConversationHandler.END
 
-    def back(self, bot, update, user_data):
-        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+    def back(self, update, context):
+        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        get_help(bot, update)
-        user_data.clear()
+        get_help(update, context)
+        context.user_data.clear()
         return ConversationHandler.END
 
 

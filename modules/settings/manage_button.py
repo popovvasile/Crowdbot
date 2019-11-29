@@ -18,143 +18,143 @@ EDIT_FINISH = 1
 
 
 class ButtonEdit(object):
-    def start(self, bot, update, user_data):
-        user_data["to_delete"] = []
-        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+    def start(self, update, context):
+        context.user_data["to_delete"] = []
+        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        all_buttons = custom_buttons_table.find({"bot_id": bot.id})
+        all_buttons = custom_buttons_table.find({"bot_id": context.bot.id})
         if all_buttons.count() > 0:
-            user_data["to_delete"].append(bot.send_message(chat_id=update.callback_query.message.chat_id,
-                                                           text=string_dict(bot)["manage_button_str_1"],
+            context.user_data["to_delete"].append(context.bot.send_message(chat_id=update.callback_query.message.chat_id,
+                                                           text=string_dict(context)["manage_button_str_1"],
                                                            reply_markup=ReplyKeyboardMarkup(
                                                                [[button_name["button"]] for button_name in all_buttons]
                                                            ),
                                                            parse_mode='Markdown'))
             return CHOOSE_BUTTON
         else:
-            user_data["to_delete"].append(bot.send_message(chat_id=update.callback_query.message.chat_id,
-                                                           text=string_dict(bot)["manage_button_str_2"],
+            context.user_data["to_delete"].append(context.bot.send_message(chat_id=update.callback_query.message.chat_id,
+                                                           text=string_dict(context)["manage_button_str_2"],
                                                            reply_markup=InlineKeyboardMarkup(
                                                                [[InlineKeyboardButton(
-                                                                   string_dict(bot)["create_button_button"],
+                                                                   string_dict(context)["create_button_button"],
                                                                    callback_data="create_button"),
                                                                    InlineKeyboardButton(
-                                                                       string_dict(bot)["back_button"],
+                                                                       string_dict(context)["back_button"],
                                                                        callback_data="help_module(settings)")]]
                                                            ), parse_mode='Markdown'))
             return ConversationHandler.END
 
-    def choose_button(self, bot, update, user_data):
+    def choose_button(self, update, context):
 
         try:
             button_info = custom_buttons_table.find_one(
-                {"bot_id": bot.id, "button": update.message.text}
+                {"bot_id": context.bot.id, "button": update.message.text}
             )
             for content in button_info["content"]:
                 if "text" in content:
-                    user_data["to_delete"].append(update.message.reply_text(
+                    context.user_data["to_delete"].append(update.message.reply_text(
                         text=content["text"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(bot)["edit_button"],
+                            InlineKeyboardButton(text=string_dict(context)["edit_button"],
                                                  callback_data="b_{}___{}".format(content["text"][:10],
                                                                                   update.message.text)),
-                            InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
+                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
                                                  callback_data="d_{}___{}".format(content["text"][:10],
                                                                                   update.message.text))
                         ]]),
                         parse_mode='Markdown'))
                 if "audio_file" in content:
-                    user_data["to_delete"].append(update.message.reply_audio(
+                    context.user_data["to_delete"].append(update.message.reply_audio(
                         content["audio_file"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(bot)["edit_button"],
+                            InlineKeyboardButton(text=string_dict(context)["edit_button"],
                                                  callback_data="b_{}___{}".format(
                                                      content["audio_file"][:10], update.message.text)),
-                            InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
+                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
                                                  callback_data="d_{}___{}".format(content["audio_file"][:10],
                                                                                   update.message.text))
                         ]])
                     ))
                 if "voice_file" in content:
-                    user_data["to_delete"].append(update.message.reply_voice(
+                    context.user_data["to_delete"].append(update.message.reply_voice(
                         content["voice_file"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(bot)["edit_button"],
+                            InlineKeyboardButton(text=string_dict(context)["edit_button"],
                                                  callback_data="b_{}___{}".format(
                                                      content["voice_file"][:10], update.message.text)),
-                            InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
+                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
                                                  callback_data="d_{}___{}".format(content["voice_file"][:10],
                                                                                   update.message.text))
                         ]])
                     ))
                 if "video_file" in content:
-                    user_data["to_delete"].append(update.message.reply_video(
+                    context.user_data["to_delete"].append(update.message.reply_video(
                         content["video_file"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(bot)["edit_button"],
+                            InlineKeyboardButton(text=string_dict(context)["edit_button"],
                                                  callback_data="b_{}___{}".format(
                                                      content["video_file"][:10], update.message.text)),
-                            InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
+                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
                                                  callback_data="d_{}___{}".format(content["video_file"][:10],
                                                                                   update.message.text))
                         ]])
                     ))
                 if "video_note_file" in content:
-                    user_data["to_delete"].append(update.message.reply_video_note(
+                    context.user_data["to_delete"].append(update.message.reply_video_note(
                         content["video_note_file"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(bot)["edit_button"],
+                            InlineKeyboardButton(text=string_dict(context)["edit_button"],
                                                  callback_data="b_{}___{}".format(
                                                      content["video_note_file"][:10], update.message.text)),
-                            InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
+                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
                                                  callback_data="d_{}___{}".format(content["video_note_file"][:10],
                                                                                   update.message.text))
                         ]])
                     ))
                 if "document_file" in content:
-                    user_data["to_delete"].append(update.message.reply_document(
+                    context.user_data["to_delete"].append(update.message.reply_document(
                         content["document_file"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(bot)["edit_button"],
+                            InlineKeyboardButton(text=string_dict(context)["edit_button"],
                                                  callback_data="b_{}___{}".format(
                                                      content["document_file"][:10], update.message.text)),
-                            InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
+                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
                                                  callback_data="d_{}___{}".format(content["document_file"][:10],
                                                                                   update.message.text))
                         ]])
                     ))
                 if "photo_file" in content:
-                    user_data["to_delete"].append(update.message.reply_photo(
+                    context.user_data["to_delete"].append(update.message.reply_photo(
                         content["photo_file"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(bot)["edit_button"],
+                            InlineKeyboardButton(text=string_dict(context)["edit_button"],
                                                  callback_data="b_{}___{}".format(
                                                      content["photo_file"][:10], update.message.text)),
-                            InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
+                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
                                                  callback_data="d_{}___{}".format(content["photo_file"][:10],
                                                                                   update.message.text))
                         ]])
                     ))
                 if "animation_file" in content:
-                    user_data["to_delete"].append(update.message.reply_animation(
+                    context.user_data["to_delete"].append(update.message.reply_animation(
                         content["animation_file"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(bot)["edit_button"],
+                            InlineKeyboardButton(text=string_dict(context)["edit_button"],
                                                  callback_data="b_{}___{}".format(
                                                      content["animation_file"][:10], update.message.text)),
-                            InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
+                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
                                                  callback_data="d_{}___{}".format(content["animation_file"][:10],
                                                                                   update.message.text))
                         ]])
                     ))
                 if "sticker_file" in content:
-                    user_data["to_delete"].append(update.message.reply_sticker(
+                    context.user_data["to_delete"].append(update.message.reply_sticker(
                         content["photo_file"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(bot)["edit_button"],
+                            InlineKeyboardButton(text=string_dict(context)["edit_button"],
                                                  callback_data="b_{}___{}".format(
                                                      content["sticker_file"][:10], update.message.text)),
-                            InlineKeyboardButton(text=string_dict(bot)["delete_button_str"],
+                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
                                                  callback_data="d_{}___{}".format(content["sticker_file"][:10],
                                                                                   update.message.text))
                         ]])
@@ -168,49 +168,49 @@ class ButtonEdit(object):
                 pass
             else:
                 LOGGER.exception("Exception in edit buttons")
-        user_data["to_delete"].append(bot.send_message(parse_mode='Markdown',
+        context.user_data["to_delete"].append(context.bot.send_message(parse_mode='Markdown',
                                                        chat_id=update.message.chat_id,
-                                                       text=string_dict(bot)["manage_button_str_3"],
+                                                       text=string_dict(context)["manage_button_str_3"],
                                                        reply_markup=ReplyKeyboardRemove()))
-        user_data["to_delete"].append(bot.send_message(parse_mode='Markdown', chat_id=update.message.chat_id,
-                                                       text=string_dict(bot)["add_button_content"],
+        context.user_data["to_delete"].append(context.bot.send_message(parse_mode='Markdown', chat_id=update.message.chat_id,
+                                                       text=string_dict(context)["add_button_content"],
                                                        reply_markup=InlineKeyboardMarkup(
-                                                           [[InlineKeyboardButton(text=string_dict(bot)["add_button"],
+                                                           [[InlineKeyboardButton(text=string_dict(context)["add_button"],
                                                                                   callback_data="add_content{}".format(
                                                                                       update.message.text))]])))
-        user_data["to_delete"].append(bot.send_message(parse_mode='Markdown', chat_id=update.message.chat_id,
-                                                       text=string_dict(bot)["back_text"],
+        context.user_data["to_delete"].append(context.bot.send_message(parse_mode='Markdown', chat_id=update.message.chat_id,
+                                                       text=string_dict(context)["back_text"],
                                                        reply_markup=InlineKeyboardMarkup(
                                                            [[
                                                                InlineKeyboardButton(
-                                                                   string_dict(bot)["back_button"],
+                                                                   string_dict(context)["back_button"],
                                                                    callback_data="help_module(settings)")]])))
         return ConversationHandler.END
 
-    def edit_button(self, bot, update, user_data):
+    def edit_button(self, update, context):
         reply_buttons = [
-            [InlineKeyboardButton(text=string_dict(bot)["cancel_button"], callback_data="help_module(settings)")]]
+            [InlineKeyboardButton(text=string_dict(context)["cancel_button"], callback_data="help_module(settings)")]]
         reply_markup = InlineKeyboardMarkup(
             reply_buttons)
-        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         content_data = update.callback_query.data.replace("b_", "").split("___")  # here is the problem
-        user_data["content_id"] = content_data[0]
-        user_data["button"] = content_data[1]
-        user_data["to_delete"].append(
-            bot.send_message(parse_mode='Markdown', chat_id=update.callback_query.message.chat_id,
-                             text=string_dict(bot)["manage_button_str_4"],
+        context.user_data["content_id"] = content_data[0]
+        context.user_data["button"] = content_data[1]
+        context.user_data["to_delete"].append(
+            context.bot.send_message(parse_mode='Markdown', chat_id=update.callback_query.message.chat_id,
+                             text=string_dict(context)["manage_button_str_4"],
                              reply_markup=reply_markup))
         return EDIT_FINISH
 
-    def edit_button_finish(self, bot, update, user_data):
+    def edit_button_finish(self, update, context):
         # Remove the old file or text
         button_info = custom_buttons_table.find_one(
-            {"bot_id": bot.id, "button": user_data["button"]}
+            {"bot_id": context.bot.id, "button": context.user_data["button"]}
         )
         content_index = len(button_info["content"])
         for index, content_dict in enumerate(button_info["content"]):
-            if any(user_data["content_id"] in ext for ext in content_dict.values()):
+            if any(context.user_data["content_id"] in ext for ext in content_dict.values()):
                 content_index = index
                 button_info["content"].remove(content_dict)
 
@@ -247,66 +247,66 @@ class ButtonEdit(object):
             animation_file = update.message.animation.get_file().file_id
             button_info["content"].insert(content_index, {"animation_file": animation_file})
         custom_buttons_table.replace_one(
-            {"bot_id": bot.id, "button": user_data["button"]},
+            {"bot_id": context.bot.id, "button": context.user_data["button"]},
             button_info
         )
         buttons = [
-            [InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(settings)")]]
-        bot.send_message(parse_mode='Markdown', chat_id=update.message.chat_id,
-                         text=string_dict(bot)["manage_button_str_5"],
+            [InlineKeyboardButton(text=string_dict(context)["back_button"], callback_data="help_module(settings)")]]
+        context.bot.send_message(parse_mode='Markdown', chat_id=update.message.chat_id,
+                         text=string_dict(context)["manage_button_str_5"],
                          reply_markup=InlineKeyboardMarkup(buttons))
         logger.info("Admin {} on bot {}:{} did  the following edit button: {}".format(
-            update.effective_user.first_name, bot.first_name, bot.id, user_data["button"]))
-        user_data.clear()
+            update.effective_user.first_name, context.bot.first_name, context.bot.id, context.user_data["button"]))
+        context.user_data.clear()
         return ConversationHandler.END
 
     # help_module(settings)
-    def back_from_edit_button(self, bot, update, user_data):
-        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+    def back_from_edit_button(self, update, context):
+        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        delete_messages(bot, update, user_data)
-        get_help(bot, update)
+        delete_messages(update, context)
+        get_help(update, context)
 
-    def back(self, bot, update, user_data):
-        bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(bot)["manage_button_str_6"], reply_markup=ReplyKeyboardRemove(),
+    def back(self, update, context):
+        context.bot.send_message(update.callback_query.message.chat.id,
+                         string_dict(context)["manage_button_str_6"], reply_markup=ReplyKeyboardRemove(),
                          parse_mode='Markdown'
                          )
-        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        get_help(bot, update)
-        user_data.clear()
+        get_help(update, context)
+        context.user_data.clear()
         return ConversationHandler.END
 
-    def cancel(self, bot, update):
-        bot.delete_message(chat_id=update.message.chat_id,
+    def cancel(self, update, context):
+        context.bot.delete_message(chat_id=update.message.chat_id,
                            message_id=update.message.message_id)
-        bot.send_message(update.message.chat.id,
+        context.bot.send_message(update.message.chat.id,
                          "Command is cancelled", reply_markup=ReplyKeyboardRemove(), parse_mode='Markdown'
                          )
 
-        get_help(bot, update)
+        get_help(update, context)
         return ConversationHandler.END
 
 
 class AddButtonContent(object):
-    def add_content_button(self, bot, update, user_data):
+    def add_content_button(self, update, context):
         reply_buttons = [
-            [InlineKeyboardButton(text=string_dict(bot)["cancel_button"], callback_data="help_module(settings)")]]
+            [InlineKeyboardButton(text=string_dict(context)["cancel_button"], callback_data="help_module(settings)")]]
         reply_markup = InlineKeyboardMarkup(
             reply_buttons)
-        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         content_data = update.callback_query.data.replace("add_content", "")  # here is the problem
-        user_data["button"] = content_data
-        bot.send_message(parse_mode='Markdown', chat_id=update.callback_query.message.chat_id,
-                         text=string_dict(bot)["manage_button_str_4"],
+        context.user_data["button"] = content_data
+        context.bot.send_message(parse_mode='Markdown', chat_id=update.callback_query.message.chat_id,
+                         text=string_dict(context)["manage_button_str_4"],
                          reply_markup=reply_markup)
         return EDIT_FINISH
 
-    def add_content_button_finish(self, bot, update, user_data):
+    def add_content_button_finish(self, update, context):
         button_info = custom_buttons_table.find_one(
-            {"bot_id": bot.id, "button": user_data["button"]}
+            {"bot_id": context.bot.id, "button": context.user_data["button"]}
         )
         if update.message.text:
             button_info["content"].append({"text": update.message.text})
@@ -342,65 +342,65 @@ class AddButtonContent(object):
             button_info["content"].append({"sticker_file": sticker_file})
 
         custom_buttons_table.replace_one(
-            {"bot_id": bot.id, "button": user_data["button"]},
+            {"bot_id": context.bot.id, "button": context.user_data["button"]},
             button_info
         )
         buttons = [
-            [InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(settings)")]]
-        bot.send_message(parse_mode='Markdown', chat_id=update.message.chat_id,
-                         text=string_dict(bot)["manage_button_str_5"],
+            [InlineKeyboardButton(text=string_dict(context)["back_button"], callback_data="help_module(settings)")]]
+        context.bot.send_message(parse_mode='Markdown', chat_id=update.message.chat_id,
+                         text=string_dict(context)["manage_button_str_5"],
                          reply_markup=InlineKeyboardMarkup(buttons))
         logger.info("Admin {} on bot {}:{} did  the following edit button: {}".format(
-            update.effective_user.first_name, bot.first_name, bot.id, user_data["button"]))
-        user_data.clear()
+            update.effective_user.first_name, context.bot.first_name, context.bot.id, context.user_data["button"]))
+        context.user_data.clear()
         return ConversationHandler.END
 
-    def back(self, bot, update, user_data):
-        bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(bot)["manage_button_str_6"], reply_markup=ReplyKeyboardRemove()
+    def back(self, update, context):
+        context.bot.send_message(update.callback_query.message.chat.id,
+                         string_dict(context)["manage_button_str_6"], reply_markup=ReplyKeyboardRemove()
                          )
-        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        get_help(bot, update)
-        user_data.clear()
+        get_help(update, context)
+        context.user_data.clear()
         return ConversationHandler.END
 
-    def cancel(self, bot, update):
-        bot.delete_message(chat_id=update.message.chat_id,
+    def cancel(self, update, context):
+        context.bot.delete_message(chat_id=update.message.chat_id,
                            message_id=update.message.message_id)
-        bot.send_message(update.message.chat.id,
+        context.bot.send_message(update.message.chat.id,
                          "Command is cancelled", reply_markup=ReplyKeyboardRemove()
                          )
 
-        get_help(bot, update)
+        get_help(update, context)
         return ConversationHandler.END
 
 
 class DeleteButtonContent(object):
 
-    def delete_message(self, bot, update, user_data):
+    def delete_message(self, update, context):
         buttons = list()
         buttons.append(
-            [InlineKeyboardButton(text=string_dict(bot)["back_button"], callback_data="help_module(settings)")])
+            [InlineKeyboardButton(text=string_dict(context)["back_button"], callback_data="help_module(settings)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
 
-        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         content_data = update.callback_query.data.replace("d_", "").split("___")  # here is the problem
-        user_data["content_id"] = content_data[0]
-        user_data["button"] = content_data[1]
+        context.user_data["content_id"] = content_data[0]
+        context.user_data["button"] = content_data[1]
         button_info = custom_buttons_table.find_one(
-            {"bot_id": bot.id, "button": user_data["button"]}
+            {"bot_id": context.bot.id, "button": context.user_data["button"]}
         )
         for content_dict in button_info["content"]:
-            if any(user_data["content_id"] in ext for ext in content_dict.values()):
+            if any(context.user_data["content_id"] in ext for ext in content_dict.values()):
                 button_info["content"].remove(content_dict)
-        bot.send_message(chat_id=update.callback_query.message.chat_id,
-                         text=string_dict(bot)["delete_content"],
+        context.bot.send_message(chat_id=update.callback_query.message.chat_id,
+                         text=string_dict(context)["delete_content"],
                          reply_markup=reply_markup)
         custom_buttons_table.replace_one(
-            {"bot_id": bot.id, "button": user_data["button"]},
+            {"bot_id": context.bot.id, "button": context.user_data["button"]},
             button_info
         )
         return ConversationHandler.END

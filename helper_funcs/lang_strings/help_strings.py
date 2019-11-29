@@ -5,22 +5,22 @@ from database import chatbots_table
 from helper_funcs.lang_strings.strings import string_dict
 
 
-def help_strings(bot):
+def help_strings(context):
     help_dict = OrderedDict()
-    string_d_str = string_dict(bot)
-    payment_token = chatbots_table.find_one({"bot_id": bot.id})
+    string_d_str = string_dict(context)
+    payment_token = chatbots_table.find_one({"bot_id": context.bot.id})
     admins_keyboard = [
         InlineKeyboardButton(text=string_d_str["payment_configure_button"],
                              callback_data="payments_config")
     ]
     if "shop" in payment_token:
-        admins_keyboard += [InlineKeyboardButton(text=string_dict(bot)["shop"],
+        admins_keyboard += [InlineKeyboardButton(text=string_dict(context)["shop"],
                                                  callback_data="shop_menu"),
-                            InlineKeyboardButton(string_dict(bot)["donations"],
+                            InlineKeyboardButton(string_dict(context)["donations"],
                                                  callback_data="donations_config"),
-                            InlineKeyboardButton(text=string_dict(bot)["payments_statistics_str"],
+                            InlineKeyboardButton(text=string_dict(context)["payments_statistics_str"],
                                                  callback_data="payments_statistics"),
-                            InlineKeyboardButton(text=string_dict(bot)["orders_str"],
+                            InlineKeyboardButton(text=string_dict(context)["orders_str"],
                                                  callback_data="orders_and_purchases"), ]
 
         help_dict["shop"] = dict(

@@ -20,27 +20,27 @@ logger = logging.getLogger(__name__)
 TYPING_TOKEN, TYPING_TITLE, TYPING_DESCRIPTION, DONATION_FINISH = range(4)
 
 
-def donation_menu(bot, update):
-    string_d_str = string_dict(bot)
-    bot.delete_message(chat_id=update.callback_query.message.chat_id,
+def donation_menu(update, context):
+    string_d_str = string_dict(context)
+    context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                        message_id=update.callback_query.message.message_id)
     no_channel_keyboard = InlineKeyboardMarkup(
         [[InlineKeyboardButton(text=string_d_str["payment_configure_button"],
                                callback_data="configure_donation")],
-         [InlineKeyboardButton(text=string_dict(bot)["ask_donation_button"],
+         [InlineKeyboardButton(text=string_dict(context)["ask_donation_button"],
                                callback_data="send_donation_to_users")],
-         [InlineKeyboardButton(text=string_dict(bot)["back_button"],
+         [InlineKeyboardButton(text=string_dict(context)["back_button"],
                                callback_data="help_module(shop)")]
          ]
     )
-    bot.send_message(update.callback_query.message.chat.id,
-                     string_dict(bot)["donations"], reply_markup=no_channel_keyboard)
+    context.bot.send_message(update.callback_query.message.chat.id,
+                     string_dict(context)["donations"], reply_markup=no_channel_keyboard)
     return ConversationHandler.END
 
 
-def check_provider_token(provider_token, bot, update):
-    bot_token = chatbots_table.find_one({"bot_id": bot.id})["token"]
-    prices = [LabeledPrice(string_dict(bot)["create_donation_str_1"], 10000)]
+def check_provider_token(provider_token, update, context):
+    bot_token = chatbots_table.find_one({"bot_id": context.bot.id})["token"]
+    prices = [LabeledPrice(string_dict(context)["create_donation_str_1"], 10000)]
     data = requests.get("https://api.telegram.org/bot{}/sendInvoice".format(bot_token),
                         params=dict(title="TEST",
                                     description="A testing payment invoice to check the token",
@@ -67,137 +67,137 @@ def check_provider_token(provider_token, bot, update):
 
 class CreateDonationHandler(object):
     @staticmethod
-    def facts_to_str(user_data):
+    def facts_to_str(context):
         facts = list()
 
-        for key, value in user_data.items():
+        for key, value in context.user_data.items():
             facts.append('{} - {}'.format(key, value))
 
         return "\n".join(facts).join(['\n', '\n'])
 
-    def start_create_donation(self, bot, update, user_data):
+    def start_create_donation(self, update, context):
         buttons = list()
         buttons.append(
-            [InlineKeyboardButton(text=string_dict(bot)["back_button"],
+            [InlineKeyboardButton(text=string_dict(context)["back_button"],
                                   callback_data="help_module(shop)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
 
-        chatbot = chatbots_table.find_one({"bot_id": bot.id}) or {}
-        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+        chatbot = chatbots_table.find_one({"bot_id": context.bot.id}) or {}
+        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         if "donate" in chatbot:
             if "payment_token" in chatbot["donate"]:
-                bot.send_message(update.callback_query.message.chat.id,
-                                 string_dict(bot)["create_donation_str_2"], reply_markup=reply_markup)
+                context.bot.send_message(update.callback_query.message.chat.id,
+                                 string_dict(context)["create_donation_str_2"], reply_markup=reply_markup)
                 return TYPING_TITLE
             else:
-                bot.send_message(update.callback_query.message.chat.id,
-                                 string_dict(bot)["create_donation_str_3"],
+                context.bot.send_message(update.callback_query.message.chat.id,
+                                 string_dict(context)["create_donation_str_3"],
                                  parse_mode='Markdown', reply_markup=reply_markup)
                 return TYPING_TOKEN
         else:
-            bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(bot)["create_donation_str_3"], parse_mode='Markdown',
+            context.bot.send_message(update.callback_query.message.chat.id,
+                             string_dict(context)["create_donation_str_3"], parse_mode='Markdown',
                              reply_markup=reply_markup)
             return TYPING_TOKEN
 
-    def handle_token(self, bot, update, user_data):
+    def handle_token(self, update, context):
         buttons = list()
         buttons.append(
-            [InlineKeyboardButton(text=string_dict(bot)["back_button"],
+            [InlineKeyboardButton(text=string_dict(context)["back_button"],
                                   callback_data="help_module(shop)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
         chat_id, txt = initiate_chat_id(update)
-        if check_provider_token(provider_token=txt, bot=bot, update=update):
+        if check_provider_token(provider_token=txt, update=update, context=update):
 
-            user_data['payment_token'] = txt
+            context.user_data['payment_token'] = txt
 
-            update.message.reply_text(string_dict(bot)["create_donation_str_4"], reply_markup=reply_markup)
+            update.message.reply_text(string_dict(context)["create_donation_str_4"], reply_markup=reply_markup)
 
             return TYPING_TITLE
         else:
             update.message.reply_text(
-                string_dict(bot)["create_donation_str_5"],
+                string_dict(context)["create_donation_str_5"],
                 reply_markup=reply_markup)
 
         return TYPING_TOKEN
 
-    def handle_title(self, bot, update, user_data):
+    def handle_title(self, update, context):
         buttons = list()
         buttons.append(
-            [InlineKeyboardButton(text=string_dict(bot)["back_button"],
+            [InlineKeyboardButton(text=string_dict(context)["back_button"],
                                   callback_data="help_module(shop)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
         chat_id, txt = initiate_chat_id(update)
-        user_data['title'] = txt
+        context.user_data['title'] = txt
 
-        update.message.reply_text(string_dict(bot)["create_donation_str_6"],
+        update.message.reply_text(string_dict(context)["create_donation_str_6"],
                                   reply_markup=reply_markup)
 
         return TYPING_DESCRIPTION
 
-    def handle_description(self, bot, update, user_data):
+    def handle_description(self, update, context):
         chat_id, txt = initiate_chat_id(update)
-        user_data["description"] = txt
+        context.user_data["description"] = txt
         currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["CHF", "AUD", "RON", "PLN"]]
-        update.message.reply_text(string_dict(bot)["create_donation_str_7"],
+        update.message.reply_text(string_dict(context)["create_donation_str_7"],
                                   reply_markup=ReplyKeyboardMarkup(currency_keyboard, one_time_keyboard=True))
 
         return DONATION_FINISH
 
-    def handle_donation_finish(self, bot, update, user_data):
+    def handle_donation_finish(self, update, context):
 
-        create_buttons = [[InlineKeyboardButton(text=string_dict(bot)["send_donation_request_button"],
+        create_buttons = [[InlineKeyboardButton(text=string_dict(context)["send_donation_request_button"],
                                                 callback_data="send_donation_to_users")],
-                          [InlineKeyboardButton(text=string_dict(bot)["send_donation_to_channel"],
+                          [InlineKeyboardButton(text=string_dict(context)["send_donation_to_channel"],
                                                 callback_data="send_donation_to_channel")],
-                          [InlineKeyboardButton(text=string_dict(bot)["back_button"],
+                          [InlineKeyboardButton(text=string_dict(context)["back_button"],
                                                 callback_data="help_module(shop)")]]
         create_markup = InlineKeyboardMarkup(
             create_buttons)
 
         chat_id, txt = initiate_chat_id(update)
         currency = txt
-        user_data["currency"] = currency
+        context.user_data["currency"] = currency
 
-        bot.send_message(chat_id,
-                         string_dict(bot)["create_donation_str_8"],
+        context.bot.send_message(chat_id,
+                         string_dict(context)["create_donation_str_8"],
                          reply_markup=create_markup)
-        chatbot = chatbots_table.find_one({"bot_id": bot.id}) or {}
+        chatbot = chatbots_table.find_one({"bot_id": context.bot.id}) or {}
 
-        user_data.pop("to_delete", None)
-        if 'payment_token' not in user_data:
+        context.user_data.pop("to_delete", None)
+        if 'payment_token' not in context.user_data:
             # chatbot["donate"]["payment_token"] = user_data['payment_token']
-            user_data["payment_token"] = chatbot["donate"]["payment_token"]
-        chatbot["donate"] = user_data
-        chatbots_table.update_one({"bot_id": bot.id}, {'$set': chatbot}, upsert=True)
+            context.user_data["payment_token"] = chatbot["donate"]["payment_token"]
+        chatbot["donate"] = context.user_data
+        chatbots_table.update_one({"bot_id": context.bot.id}, {'$set': chatbot}, upsert=True)
 
         logger.info("Admin {} on bot {}:{} added a donation config:{}".format(
-            update.effective_user.first_name, bot.first_name, bot.id, user_data["title"]))
-        user_data.clear()
+            update.effective_user.first_name, context.bot.first_name, context.bot.id, context.user_data["title"]))
+        context.user_data.clear()
         return ConversationHandler.END
 
     @staticmethod
-    def error(bot, update, error):
+    def error(update, context, error):
         """Log Errors caused by Updates."""
         logger.warning('Update "%s" caused error "%s"', update, error)
 
-    def cancel(self, bot, update):
+    def cancel(self, update, context):
 
         update.message.reply_text(
             "Command is cancelled =("
         )
-        get_help(bot, update)
+        get_help(update, context)
         return ConversationHandler.END
 
-    def back(self, bot, update):
+    def back(self, update, context):
 
-        bot.delete_message(chat_id=update.callback_query.message.chat_id,
+        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id, )
-        get_help(bot, update)
+        get_help(update, context)
         return ConversationHandler.END
 
 

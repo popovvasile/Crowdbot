@@ -15,8 +15,8 @@ class CustomDescriptionHandler(BasicPoll):
             message += "{}: {}".format(option['text'], self.num_votes(poll, i))
         return message
 
-    def ask_for_extra_config(self, meta, bot):
-        return string_dict(bot)["ask_for_extra_config"]
+    def ask_for_extra_config(self, meta, update):
+        return string_dict(context)["ask_for_extra_config"]
 
     def register_extra_config(self, text, meta):
         meta['text'] = text
