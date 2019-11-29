@@ -19,7 +19,7 @@ class BrandsHandler(object):
     def brands(self, update: Update, context: CallbackContext):
         set_page_key(update, context)
         resp = requests.get(f"{conf['API_URL']}/brands",
-                            params={"page": context.context.user_data["page"],
+                            params={"page": context.user_data["page"],
                                     "per_page": 3})
         pagin = APIPaginatedPage(resp)
         pagin.start(update, context,
@@ -36,8 +36,8 @@ class BrandsHandler(object):
         if update.callback_query \
                 and update.callback_query.data.startswith("edit_brand"):
             brand_id = int(update.callback_query.data.split("/")[1])
-            context.context.user_data["brand"] = Brand(brand_id)
-        context.context.user_data["brand"].send_template(
+            context.user_data["brand"] = Brand(brand_id)
+        context.user_data["brand"].send_template(
             update, context,
             strings["edit_brand_menu"],
             keyboards["edit_brand"])
@@ -45,7 +45,7 @@ class BrandsHandler(object):
 
     def price(self, update: Update, context: CallbackContext):
         delete_messages(update, context)
-        context.context.user_data["brand"].send_template(
+        context.user_data["brand"].send_template(
             update, context,
             strings["set_brand_price"],
             keyboards["back_to_brands"])
@@ -54,13 +54,13 @@ class BrandsHandler(object):
     @catch_request_exception
     def finish_price(self, update: Update, context: CallbackContext):
         delete_messages(update, context)
-        context.context.user_data["brand"].edit({"price": update.message.text})
+        context.user_data["brand"].edit({"price": update.message.text})
         return self.edit(update, context)
 
     def back_to_brands(self, update: Update, context: CallbackContext):
-        page = context.context.user_data.get("page")
+        page = context.user_data.get("page")
         clear_user_data(context)
-        context.context.user_data["page"] = page
+        context.user_data["page"] = page
         return self.brands(update, context)
 
 

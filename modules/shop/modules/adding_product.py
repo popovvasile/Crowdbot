@@ -23,8 +23,8 @@ logger = logging.getLogger(__name__)
 class AddingProductHandler(object):
     def start(self, update: Update, context: CallbackContext):
         delete_messages(update, context)
-        context.context.user_data["to_delete"].append(
-            context.context.bot.send_message(
+        context.user_data["to_delete"].append(
+            context.bot.send_message(
                 update.effective_chat.id,
                 strings["adding_product_start"],
                 reply_markup=keyboards["back_to_main_menu_keyboard"]))
@@ -32,13 +32,13 @@ class AddingProductHandler(object):
 
     def received_image(self, update: Update, context: CallbackContext):
         delete_messages(update, context)
-        if "product_images" not in context.context.user_data:
-            context.context.user_data["product_images"] = list()
-        context.context.user_data["product_images"].append(update.message.photo[-1])
+        if "product_images" not in context.user_data:
+            context.user_data["product_images"] = list()
+        context.user_data["product_images"].append(update.message.photo[-1])
         Product.send_adding_product_template(
             update, context,
             strings["send_more_photo"].format(
-                len(context.context.user_data["product_images"])),
+                len(context.user_data["product_images"])),
             keyboards["continue_back_kb"])
         return START_ADD_PRODUCT
 
@@ -48,10 +48,10 @@ class AddingProductHandler(object):
         resp = requests.get(f"{conf['API_URL']}/categories_data")
         if resp.status_code != 200:
             raise RequestException
-        context.context.user_data["categories_data"] = resp.json()
+        context.user_data["categories_data"] = resp.json()
         keyboard = create_keyboard(
             [InlineKeyboardButton(i["name"], callback_data=i["id"])
-             for i in context.context.user_data["categories_data"]["brands"]],
+             for i in context.user_data["categories_data"]["brands"]],
             [back_btn("back_to_main_menu_btn")])
         Product.send_adding_product_template(
             update, context, strings["set_brand"], keyboard)
@@ -59,12 +59,12 @@ class AddingProductHandler(object):
 
     def set_category(self, update: Update, context: CallbackContext):
         delete_messages(update, context)
-        context.context.user_data["selected_brand"] = next(
-            (b for b in context.context.user_data["categories_data"]["brands"]
+        context.user_data["selected_brand"] = next(
+            (b for b in context.user_data["categories_data"]["brands"]
              if str(b["id"]) == update.callback_query.data))
         keyboard = create_keyboard(
             [InlineKeyboardButton(i["name"], callback_data=i["id"])
-             for i in context.context.user_data["categories_data"]["categories"]],
+             for i in context.user_data["categories_data"]["categories"]],
             [back_btn("back_to_main_menu_btn")])
         Product.send_adding_product_template(
             update, context, strings["set_category"], keyboard)
@@ -75,25 +75,25 @@ class AddingProductHandler(object):
         delete_messages(update, context)
         if update.callback_query.data in sizes_list:
             if update.callback_query.data \
-                    in context.context.user_data["selected_sizes"]:
-                context.context.user_data["selected_sizes"].remove(
+                    in context.user_data["selected_sizes"]:
+                context.user_data["selected_sizes"].remove(
                     update.callback_query.data)
             else:
-                context.context.user_data["selected_sizes"].append(
+                context.user_data["selected_sizes"].append(
                     update.callback_query.data)
         else:
-            context.context.user_data["selected_category"] = next(
-                (i for i in context.context.user_data.get("categories_data")["categories"]
+            context.user_data["selected_category"] = next(
+                (i for i in context.user_data.get("categories_data")["categories"]
                  if str(i["id"]) == update.callback_query.data), None)
-            context.context.user_data["selected_sizes"] = list()
+            context.user_data["selected_sizes"] = list()
         Product.send_adding_product_template(
             update, context,
             f"\n*Бренд:* "
-            f"`{context.context.user_data['selected_brand']['name']}`"
+            f"`{context.user_data['selected_brand']['name']}`"
             f"\n*Категория:* "
-            f"`{context.context.user_data['selected_category']['name']}`"
+            f"`{context.user_data['selected_category']['name']}`"
             f"\n\n{strings['set_sizes']}",
-            sizes_checkboxes(context.context.user_data["selected_sizes"]))
+            sizes_checkboxes(context.user_data["selected_sizes"]))
         return SET_SIZE
 
     # Sizes Single choice
@@ -115,24 +115,24 @@ class AddingProductHandler(object):
 
     def set_count(self, update: Update, context: CallbackContext):
         delete_messages(update, context)
-        if not context.context.user_data.get("sizes"):
-            context.context.user_data["sizes"] = list()
+        if not context.user_data.get("sizes"):
+            context.user_data["sizes"] = list()
         if update.message:
-            context.context.user_data["sizes"][-1]["count"] = int(update.message.text)
-        if len(context.context.user_data["sizes"]) == \
-                len(context.context.user_data["selected_sizes"]):
+            context.user_data["sizes"][-1]["count"] = int(update.message.text)
+        if len(context.user_data["sizes"]) == \
+                len(context.user_data["selected_sizes"]):
             return self.set_price(update, context)
-        for size in context.context.user_data["selected_sizes"]:
-            if not any(i["size"] == size for i in context.context.user_data["sizes"]):
-                context.context.user_data["sizes"].append({"size": size})
+        for size in context.user_data["selected_sizes"]:
+            if not any(i["size"] == size for i in context.user_data["sizes"]):
+                context.user_data["sizes"].append({"size": size})
                 Product.send_adding_product_template(
                     update, context,
                     f"\n*Бренд:* "
-                    f"`{context.context.user_data['selected_brand']['name']}`"
+                    f"`{context.user_data['selected_brand']['name']}`"
                     f"\n*Категория:* "
-                    f"`{context.context.user_data['selected_category']['name']}`"
+                    f"`{context.user_data['selected_category']['name']}`"
                     f"\n*Размеры*: "
-                    f"{context.context.user_data['selected_sizes']}"
+                    f"{context.user_data['selected_sizes']}"
                     f"{strings['size_quantity'].format(size)}",
                     # f"\n\n Выбери количество *{size}* размера",
                     keyboards["back_to_main_menu_keyboard"])
@@ -143,9 +143,9 @@ class AddingProductHandler(object):
         delete_messages(update, context)
         Product.send_adding_product_template(
             update, context,
-            f"\n*Бренд:* `{context.context.user_data['selected_brand']['name']}`"
+            f"\n*Бренд:* `{context.user_data['selected_brand']['name']}`"
             f"\n*Категория:* "
-            f"`{context.context.user_data['selected_category']['name']}`"
+            f"`{context.user_data['selected_category']['name']}`"
             f"\n*Размеры*: \n{show_sizes(context)}"
             f"\n\n{strings['set_price']}",
             keyboards["back_to_main_menu_keyboard"])
@@ -153,47 +153,47 @@ class AddingProductHandler(object):
 
     def set_description(self, update: Update, context: CallbackContext):
         delete_messages(update, context)
-        context.context.user_data["price"] = int(update.message.text)
+        context.user_data["price"] = int(update.message.text)
         Product.send_adding_product_template(
             update, context,
-            f"*Бренд:* `{context.context.user_data['selected_brand']['name']}`"
+            f"*Бренд:* `{context.user_data['selected_brand']['name']}`"
             f"\n*Категория:* "
-            f"`{context.context.user_data['selected_category']['name']}`"
+            f"`{context.user_data['selected_category']['name']}`"
             f"\n*Размеры*: \n{show_sizes(context)}"
-            f"\n*Цена:* `{context.context.user_data['price']}`"
+            f"\n*Цена:* `{context.user_data['price']}`"
             f"\n\n{strings['set_description']}",
             keyboards["back_to_main_menu_keyboard"])
         return SET_DESCRIPTION
 
     def confirm_adding(self, update: Update, context: CallbackContext):
-        context.context.user_data["description"] = update.message.text
+        context.user_data["description"] = update.message.text
         delete_messages(update, context)
         # pprint(context.user_data)
         Product.send_adding_product_template(
             update, context,
-            f"*Бренд:* `{context.context.user_data['selected_brand']['name']}`"
+            f"*Бренд:* `{context.user_data['selected_brand']['name']}`"
             f"\n*Категория:* "
-            f"`{context.context.user_data['selected_category']['name']}`"
+            f"`{context.user_data['selected_category']['name']}`"
             f"\n*Размеры*: \n{show_sizes(context)}"
-            f"\n*Цена:* `{context.context.user_data['price']}`"
-            f"\n*Описание*: `{context.context.user_data['description']}`"
+            f"\n*Цена:* `{context.user_data['price']}`"
+            f"\n*Описание*: `{context.user_data['description']}`"
             f"\n\n{strings['confirm_add_product']}",
             keyboards["confirm_add_product"])
         return CONFIRM_ADDING
 
     @catch_request_exception
     def finish_adding(self, update: Update, context: CallbackContext):
-        context.context.bot.send_chat_action(update.effective_chat.id, "upload_photo")
+        context.bot.send_chat_action(update.effective_chat.id, "upload_photo")
         files = [("images", (i.file_id,
                              i.get_file().download_as_bytearray(),
                              "image/jpg"))
-                 for i in context.context.user_data["product_images"]]
+                 for i in context.user_data["product_images"]]
         data = {
-            "price": context.context.user_data["price"],
-            "brand_id": context.context.user_data["selected_brand"]["id"],
-            "category_id": context.context.user_data["selected_category"]["id"],
-            "sizes": context.context.user_data["sizes"],
-            "description": context.context.user_data["description"]
+            "price": context.user_data["price"],
+            "brand_id": context.user_data["selected_brand"]["id"],
+            "category_id": context.user_data["selected_category"]["id"],
+            "sizes": context.user_data["sizes"],
+            "description": context.user_data["description"]
         }
         resp = requests.post(f"{conf['API_URL']}/product",
                              files=files, data=data)

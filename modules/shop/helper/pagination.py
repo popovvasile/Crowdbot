@@ -10,9 +10,9 @@ from math import ceil
 
 def set_page_key(update, context, name: str = "page"):
     try:
-        context.context.user_data[name] = int(update.callback_query.data)
+        context.user_data[name] = int(update.callback_query.data)
     except ValueError:
-        context.context.user_data[name] = 1
+        context.user_data[name] = 1
 
 
 class APIPaginatedPage(object):
@@ -23,17 +23,17 @@ class APIPaginatedPage(object):
             self.data = resp.json()
 
     def start(self, update, context, title: str, no_item_str: str):
-        context.context.bot.send_chat_action(update.effective_chat.id, "typing")
+        context.bot.send_chat_action(update.effective_chat.id, "typing")
         delete_messages(update, context)
         # Title of paginated page
-        context.context.user_data['to_delete'].append(
-            context.context.bot.send_message(update.effective_chat.id,
+        context.user_data['to_delete'].append(
+            context.bot.send_message(update.effective_chat.id,
                                      title.format(self.data["items_total"]),
                                      ParseMode.MARKDOWN))
 
         if self.data["items_total"] == 0:
-            context.context.user_data['to_delete'].append(
-                context.context.bot.send_message(update.effective_chat.id,
+            context.user_data['to_delete'].append(
+                context.bot.send_message(update.effective_chat.id,
                                          no_item_str))
 
     def send_pagin(self, update, context,
@@ -43,7 +43,7 @@ class APIPaginatedPage(object):
             kb = InlineKeyboardMarkup(
                 [[InlineKeyboardButton(
                     f"|{num['page']}|"
-                    if num["page"] == context.context.user_data["page"]
+                    if num["page"] == context.user_data["page"]
                     else "..." if num["page"] is None else num["page"],
                     callback_data=str(num["page"]))
                   for num in self.data["iter_pages"]]] +
@@ -51,10 +51,10 @@ class APIPaginatedPage(object):
         else:
             # kb = keyboards["back_to_main_menu_keyboard"]
             kb = InlineKeyboardMarkup([[back_btn(back_button_data)]])
-        context.context.user_data["to_delete"].append(
-            context.context.bot.send_message(update.effective_chat.id,
+        context.user_data["to_delete"].append(
+            context.bot.send_message(update.effective_chat.id,
                                      strings["current_page"].format(
-                                         context.context.user_data["page"]),
+                                         context.user_data["page"]),
                                      reply_markup=kb,
                                      parse_mode=ParseMode.MARKDOWN))
 
@@ -116,8 +116,8 @@ class Pagination(object):
 
     def send_pagin(self, update, context, btns=None, text=None):
         if self.total_pages > 1:
-            context.context.user_data['to_delete'].append(
-                context.context.bot.send_message(
+            context.user_data['to_delete'].append(
+                context.bot.send_message(
                     update.effective_chat.id,
                     f"{text}\n\n*Current page:* `{self.page}`"
                     if text else f"*Current page:* `{self.page}`",

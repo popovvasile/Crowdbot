@@ -89,28 +89,28 @@ class Order(object):
         return " 📛" if not item["product_exist"] else ""
 
     def send_short_template(self, update, context, kb=None):
-        context.context.user_data["to_delete"].append(
-            context.context.bot.send_message(update.effective_chat.id,
+        context.user_data["to_delete"].append(
+            context.bot.send_message(update.effective_chat.id,
                                      self.template,
                                      reply_markup=kb if kb
                                      else self.single_keyboard,
                                      parse_mode=ParseMode.MARKDOWN))
 
     def send_full_template(self, update, context, text, kb, delete_kb=None):
-        context.context.user_data["to_delete"].append(
-            context.context.bot.send_message(update.effective_chat.id,
+        context.user_data["to_delete"].append(
+            context.bot.send_message(update.effective_chat.id,
                                      self.template,
                                      parse_mode=ParseMode.MARKDOWN))
 
         # PAGINATION OF ORDER ITEMS
         # all_data = [item for item in self.items]
-        pagination = Pagination(context.context.user_data["item_page"], 3, self.items)
+        pagination = Pagination(context.user_data["item_page"], 3, self.items)
         for item in pagination.page_content():
             OrderProductItem(item).send_template(update, context,
                                                  delete_kb=delete_kb)
         pagination.send_pagin(update, context)
-        context.context.user_data["to_delete"].append(
-            context.context.bot.send_message(update.effective_chat.id,
+        context.user_data["to_delete"].append(
+            context.bot.send_message(update.effective_chat.id,
                                      text, reply_markup=kb,
                                      parse_mode=ParseMode.MARKDOWN))
 

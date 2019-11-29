@@ -25,8 +25,8 @@ logger = logging.getLogger(__name__)
 class TrashHandler(Welcome):
     def start_trash(self, update: Update, context: CallbackContext):
         delete_messages(update, context)
-        context.context.user_data["to_delete"].append(
-            context.context.bot.send_message(
+        context.user_data["to_delete"].append(
+            context.bot.send_message(
                 update.effective_chat.id,
                 strings["trash_start"],
                 parse_mode=ParseMode.MARKDOWN,
@@ -37,7 +37,7 @@ class TrashHandler(Welcome):
     def orders(self, update: Update, context: CallbackContext):
         set_page_key(update, context)
         resp = requests.get(f"{conf['API_URL']}/orders",
-                            params={"page": context.context.user_data["page"],
+                            params={"page": context.user_data["page"],
                                     "per_page": 3,
                                     "show_trash": 1})
         pagin = APIPaginatedPage(resp)
@@ -51,7 +51,7 @@ class TrashHandler(Welcome):
 
     @catch_request_exception
     def restore_order(self, update: Update, context: CallbackContext):
-        context.context.bot.send_chat_action(update.effective_chat.id, "typing")
+        context.bot.send_chat_action(update.effective_chat.id, "typing")
         order_id = int(update.callback_query.data.split("/")[1])
         Order(order_id).change_status({"new_trash_status": False})
         update.callback_query.answer(strings["order_restored_blink"])
@@ -61,7 +61,7 @@ class TrashHandler(Welcome):
     def wholesale_orders(self, update: Update, context: CallbackContext):
         set_page_key(update, context)
         resp = requests.get(f"{conf['API_URL']}/wholesale_orders",
-                            params={"page": context.context.user_data["page"],
+                            params={"page": context.user_data["page"],
                                     "per_page": 3,
                                     "trash": True})
         pagin = APIPaginatedPage(resp)
@@ -75,7 +75,7 @@ class TrashHandler(Welcome):
 
     @catch_request_exception
     def restore_wholesale(self, update: Update, context: CallbackContext):
-        context.context.bot.send_chat_action(update.effective_chat.id, "typing")
+        context.bot.send_chat_action(update.effective_chat.id, "typing")
         order_id = int(update.callback_query.data.split("/")[1])
         WholesaleOrder(order_id).change_status({"new_trash_status": False})
         update.callback_query.answer(strings["order_restored_blink"])
@@ -84,7 +84,7 @@ class TrashHandler(Welcome):
     def products(self, update: Update, context: CallbackContext):
         set_page_key(update, context)
         resp = requests.get(f"{conf['API_URL']}/admin_products",
-                            params={"page": context.context.user_data["page"],
+                            params={"page": context.user_data["page"],
                                     "per_page": 3,
                                     "trash": True
                                     })
@@ -98,7 +98,7 @@ class TrashHandler(Welcome):
         return PRODUCTS
 
     def restore_product(self, update: Update, context: CallbackContext):
-        context.context.bot.send_chat_action(
+        context.bot.send_chat_action(
             update.effective_chat.id, "typing")
         order_id = int(update.callback_query.data.split("/")[1])
         Product(order_id).edit({"new_trash_status": False})
@@ -106,27 +106,27 @@ class TrashHandler(Welcome):
         return self.back_to_products(update, context)
 
     def back_to_orders(self, update, context):
-        page = context.context.user_data.get("page")
+        page = context.user_data.get("page")
         clear_user_data(context)
-        context.context.user_data["page"] = page
+        context.user_data["page"] = page
         return self.orders(update, context)
 
     def back_to_wholesale_orders(self, update, context):
-        page = context.context.user_data.get("page")
+        page = context.user_data.get("page")
         clear_user_data(context)
-        context.context.user_data["page"] = page
+        context.user_data["page"] = page
         return self.wholesale_orders(update, context)
 
     def back_to_products(self, update, context):
-        page = context.context.user_data.get("page")
+        page = context.user_data.get("page")
         clear_user_data(context)
-        context.context.user_data["page"] = page
+        context.user_data["page"] = page
         return self.products(update, context)
 
     def back_to_trash(self, update, context):
-        page = context.context.user_data.get("page")
+        page = context.user_data.get("page")
         clear_user_data(context)
-        context.context.user_data["page"] = page
+        context.user_data["page"] = page
         return self.start_trash(update, context)
 
 

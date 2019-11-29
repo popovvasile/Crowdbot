@@ -63,8 +63,8 @@ class WholesaleOrder(object):
         return InlineKeyboardMarkup(kb)
 
     def send_template(self, update, context, kb=None):
-        context.context.user_data["to_delete"].append(
-            context.context.bot.send_message(update.effective_chat.id,
+        context.user_data["to_delete"].append(
+            context.bot.send_message(update.effective_chat.id,
                                      self.template,
                                      parse_mode=ParseMode.MARKDOWN,
                                      reply_markup=kb or self.single_keyboard))

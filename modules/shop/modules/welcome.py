@@ -21,29 +21,29 @@ class Welcome(object):
     def start(update: Update, context: CallbackContext):
         delete_messages(update, context)
         print(update.effective_user.id)
-        if context.context.user_data.get("msg_to_send"):
-            context.context.user_data["to_delete"].append(
-                context.context.bot.send_message(
+        if context.user_data.get("msg_to_send"):
+            context.user_data["to_delete"].append(
+                context.bot.send_message(
                     update.effective_chat.id,
-                    context.context.user_data["msg_to_send"]))
+                    context.user_data["msg_to_send"]))
         try:
             orders_quantity = requests.get(
                 f"{conf['API_URL']}/orders_quantity")
         except ConnectionError:
-            context.context.user_data["to_delete"].append(
-                context.context.bot.send_message(
+            context.user_data["to_delete"].append(
+                context.bot.send_message(
                     update.effective_chat.id,
                     strings["api_off"] + strings["try_later"]))
             return ConversationHandler.END
         if orders_quantity.status_code == 200:
-            context.context.user_data["to_delete"].append(
-                context.context.bot.send_message(
+            context.user_data["to_delete"].append(
+                context.bot.send_message(
                     update.effective_chat.id,
                     strings["start_message"],
                     reply_markup=start_keyboard(orders_quantity.json())))
         else:
-            context.context.user_data["to_delete"].append(
-                context.context.bot.send_message(
+            context.user_data["to_delete"].append(
+                context.bot.send_message(
                     update.effective_chat.id,
                     strings["something_gone_wrong"] + strings["try_later"]))
         return ConversationHandler.END
@@ -52,7 +52,7 @@ class Welcome(object):
     def back_to_main_menu(update, context, msg_to_send=None):
         clear_user_data(context)
         if msg_to_send:
-            context.context.user_data["msg_to_send"] = msg_to_send
+            context.user_data["msg_to_send"] = msg_to_send
         return Welcome.start(update, context)
 
 

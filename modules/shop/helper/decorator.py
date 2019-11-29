@@ -11,14 +11,14 @@ def catch_request_exception(func):
             return func(self, update, context)
         except ConnectionError:
             clear_user_data(context)
-            context.context.user_data["msg_to_send"] = strings["api_off"]
+            context.user_data["msg_to_send"] = strings["api_off"]
             return Welcome().start(update, context)
         except RequestException:
             clear_user_data(context)
-            context.context.user_data["msg_to_send"] = strings["something_gone_wrong"]
+            context.user_data["msg_to_send"] = strings["something_gone_wrong"]
         except TimedOut:
             clear_user_data(context)
-            context.context.user_data["msg_to_send"] = strings["timed_out"]
+            context.user_data["msg_to_send"] = strings["timed_out"]
             return Welcome().start(update, context)
     return wrapper
 

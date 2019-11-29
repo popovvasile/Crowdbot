@@ -24,7 +24,7 @@ class ProductsHandler:
     def products(self, update: Update, context: CallbackContext):
         set_page_key(update, context)
         resp = requests.get(f"{conf['API_URL']}/admin_products",
-                            params={"page": context.context.user_data["page"],
+                            params={"page": context.user_data["page"],
                                     "per_page": 3,
                                     # "status": "all"
                                     "trash": False})
@@ -43,15 +43,15 @@ class ProductsHandler:
         if update.callback_query \
                 and update.callback_query.data.startswith("edit_product"):
             product_id = int(update.callback_query.data.split("/")[1])
-            context.context.user_data["product"] = Product(product_id)
-        context.context.user_data["product"].send_full_template(
+            context.user_data["product"] = Product(product_id)
+        context.user_data["product"].send_full_template(
             update, context, strings["edit_product_menu"],
             keyboards["edit_product"])
         return EDIT
 
     def description(self, update: Update, context: CallbackContext):
         delete_messages(update, context)
-        context.context.user_data["product"].send_full_template(
+        context.user_data["product"].send_full_template(
             update, context, strings["set_description"],
             keyboards["back_to_products"])
         return DESCRIPTION
@@ -59,17 +59,17 @@ class ProductsHandler:
     @catch_request_exception
     def finish_description(self, update: Update, context: CallbackContext):
         delete_messages(update, context)
-        context.context.user_data["product"].edit(
+        context.user_data["product"].edit(
             {"description": update.message.text})
         return self.edit(update, context)
 
     def name(self, update: Update, context: CallbackContext, msg=None):
         delete_messages(update, context)
-        context.context.user_data["product"].send_full_template(
+        context.user_data["product"].send_full_template(
             update, context, strings["change_name"],
             keyboards["back_to_products"])
         if msg:
-            context.context.bot.send_message(update.effective_chat.id,
+            context.bot.send_message(update.effective_chat.id,
                                      strings["name_length_error"])
         return NAME
 
@@ -78,12 +78,12 @@ class ProductsHandler:
         delete_messages(update, context)
         if len(update.message.text) > 1000:
             return self.name(update, context, msg=True)
-        context.context.user_data["product"].edit({"name": update.message.text})
+        context.user_data["product"].edit({"name": update.message.text})
         return self.edit(update, context)
 
     def price(self, update: Update, context: CallbackContext):
         delete_messages(update, context)
-        context.context.user_data["product"].send_full_template(
+        context.user_data["product"].send_full_template(
             update, context, strings["set_price"],
             keyboards["back_to_products"])
         return PRICE
@@ -91,12 +91,12 @@ class ProductsHandler:
     @catch_request_exception
     def finish_price(self, update: Update, context: CallbackContext):
         delete_messages(update, context)
-        context.context.user_data["product"].edit({"price": update.message.text})
+        context.user_data["product"].edit({"price": update.message.text})
         return self.edit(update, context)
 
     def discount_price(self, update: Update, context: CallbackContext):
         delete_messages(update, context)
-        context.context.user_data["product"].send_full_template(
+        context.user_data["product"].send_full_template(
             update, context, strings["set_discount_price"],
             keyboards["back_to_products"])
         return DISCOUNT_PRICE
@@ -105,14 +105,14 @@ class ProductsHandler:
     def finish_discount_price(self, update: Update, context: CallbackContext):
         delete_messages(update, context)
         json = {"discount_price": update.message.text}
-        context.context.user_data["product"].edit(json)
+        context.user_data["product"].edit(json)
         return self.edit(update, context)
 
     def confirm_to_trash(self, update: Update, context: CallbackContext):
         delete_messages(update, context)
         product_id = int(update.callback_query.data.split("/")[1])
-        context.context.user_data["product"] = Product(product_id)
-        context.context.user_data["product"].send_full_template(
+        context.user_data["product"] = Product(product_id)
+        context.user_data["product"].send_full_template(
             update, context,
             strings["confirm_to_trash_product"],
             keyboards["confirm_to_trash_product"])
@@ -120,21 +120,21 @@ class ProductsHandler:
 
     @catch_request_exception
     def finish_to_trash(self, update: Update, context: CallbackContext):
-        context.context.bot.send_chat_action(update.effective_chat.id, "typing")
+        context.bot.send_chat_action(update.effective_chat.id, "typing")
         delete_messages(update, context)
-        context.context.user_data["product"].edit({"new_trash_status": True})
+        context.user_data["product"].edit({"new_trash_status": True})
         update.callback_query.answer(strings["moved_to_trash_blink"])
         return self.back_to_products(update, context)
 
     def sizes_menu(self, update: Update, context: CallbackContext):
         delete_messages(update, context)
-        context.context.user_data["product"].send_sizes_menu(update, context)
+        context.user_data["product"].send_sizes_menu(update, context)
         return SIZES_MENU
 
     @catch_request_exception
     def remove_size(self, update: Update, context: CallbackContext):
         delete_messages(update, context)
-        context.context.user_data["product"].edit(
+        context.user_data["product"].edit(
             {"sizes_to_remove": [update.callback_query.data.split("/")[1]]})
         update.callback_query.answer(strings["size_removed_blink"])
         return self.sizes_menu(update, context)
@@ -143,20 +143,20 @@ class ProductsHandler:
     def set_new_sizes(self, update: Update, context: CallbackContext):
         delete_messages(update, context)
         to_remove = [i["size"]
-                     for i in context.context.user_data["product"].sizes]
+                     for i in context.user_data["product"].sizes]
         if update.callback_query.data in sizes_list:
             if update.callback_query.data \
-                    in context.context.user_data["selected_sizes"]:
-                context.context.user_data["selected_sizes"].remove(
+                    in context.user_data["selected_sizes"]:
+                context.user_data["selected_sizes"].remove(
                     update.callback_query.data)
             else:
-                context.context.user_data["selected_sizes"].append(
+                context.user_data["selected_sizes"].append(
                     update.callback_query.data)
         else:
-            context.context.user_data["selected_sizes"] = list()
-        context.context.user_data["product"].send_full_template(
+            context.user_data["selected_sizes"] = list()
+        context.user_data["product"].send_full_template(
             update, context, text=strings["set_new_sizes"],
-            kb=sizes_checkboxes(context.context.user_data["selected_sizes"],
+            kb=sizes_checkboxes(context.user_data["selected_sizes"],
                                 to_remove=to_remove,
                                 continue_data="set_quantity",
                                 back_data="back_to_products"))
@@ -164,17 +164,17 @@ class ProductsHandler:
 
     def set_new_quantity(self, update: Update, context: CallbackContext):
         delete_messages(update, context)
-        if not context.context.user_data.get("sizes"):
-            context.context.user_data["sizes"] = list()
+        if not context.user_data.get("sizes"):
+            context.user_data["sizes"] = list()
         if update.message:
-            context.context.user_data["sizes"][-1]["count"] = int(update.message.text)
-        if len(context.context.user_data["sizes"]) == \
-                len(context.context.user_data["selected_sizes"]):
+            context.user_data["sizes"][-1]["count"] = int(update.message.text)
+        if len(context.user_data["sizes"]) == \
+                len(context.user_data["selected_sizes"]):
             return self.confirm_adding_sizes(update, context)
-        for size in context.context.user_data["selected_sizes"]:
-            if not any(i["size"] == size for i in context.context.user_data["sizes"]):
-                context.context.user_data["sizes"].append({"size": size})
-                context.context.user_data["product"].send_full_template(
+        for size in context.user_data["selected_sizes"]:
+            if not any(i["size"] == size for i in context.user_data["sizes"]):
+                context.user_data["sizes"].append({"size": size})
+                context.user_data["product"].send_full_template(
                     update, context, kb=back_kb("back_to_products"),
                     text=f"{strings['size_quantity'].format(size)}")
                 break
@@ -182,7 +182,7 @@ class ProductsHandler:
 
     def confirm_adding_sizes(self, update: Update, context: CallbackContext):
         delete_messages(update, context)
-        context.context.user_data["product"].send_full_template(
+        context.user_data["product"].send_full_template(
             update, context, text="\n*Добавить данные размеры?*\n" +
                                   show_sizes(context),
             kb=keyboards["confirm_adding_sizes"])
@@ -191,33 +191,33 @@ class ProductsHandler:
     @catch_request_exception
     def finish_add_sizes(self, update: Update, context: CallbackContext):
         delete_messages(update, context)
-        context.context.user_data["product"].edit(
-            {"sizes_to_add": context.context.user_data["sizes"]})
+        context.user_data["product"].edit(
+            {"sizes_to_add": context.user_data["sizes"]})
         update.callback_query.answer(strings["sizes_added_blink"])
         return self.edit(update, context)
 
     def size_quantity(self, update: Update, context: CallbackContext):
         delete_messages(update, context)
-        context.context.user_data["edited_size"] = \
+        context.user_data["edited_size"] = \
             update.callback_query.data.split("/")[1]
-        context.context.user_data["product"].send_full_template(
+        context.user_data["product"].send_full_template(
             update, context, kb=back_kb("back_to_edit"),
             text=strings['size_quantity'].format(
-                context.context.user_data["edited_size"]))
+                context.user_data["edited_size"]))
         return SIZE_QUANTITY
 
     @catch_request_exception
     def finish_quantity_edit(self, update: Update, context: CallbackContext):
         delete_messages(update, context)
-        context.context.user_data["product"].edit(
-            {"edit_sizes": [{"size": context.context.user_data["edited_size"],
+        context.user_data["product"].edit(
+            {"edit_sizes": [{"size": context.user_data["edited_size"],
                              "quantity": int(update.message.text)}]})
         return self.sizes_menu(update, context)
 
     def back_to_products(self, update: Update, context: CallbackContext):
-        page = context.context.user_data.get("page")
+        page = context.user_data.get("page")
         clear_user_data(context)
-        context.context.user_data["page"] = page
+        context.user_data["page"] = page
         return self.products(update, context)
 
 

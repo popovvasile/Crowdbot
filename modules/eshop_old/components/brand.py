@@ -34,16 +34,16 @@ class Brand(object):
     def send_template(self, update, context, text="", kb=None):
         kb = self.single_keyboard if not kb else kb
         try:
-            context.context.user_data["to_delete"].append(
-                context.context.bot.send_photo(update.effective_chat.id,
+            context.user_data["to_delete"].append(
+                context.bot.send_photo(update.effective_chat.id,
                                        self.logo_url,
                                        f"{self.template}"
                                        f"\n{text}",
                                        parse_mode=ParseMode.MARKDOWN,
                                        reply_markup=kb))
         except BadRequest:
-            context.context.user_data["to_delete"].append(
-                context.context.bot.send_message(update.effective_chat.id,
+            context.user_data["to_delete"].append(
+                context.bot.send_message(update.effective_chat.id,
                                          f"{strings['image_brand_exception']}"
                                          f"\n\n{self.template}"
                                          f"\n{text}",

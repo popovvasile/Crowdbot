@@ -65,7 +65,7 @@ def sizes_checkboxes(selected_sizes, to_remove=None,
 def show_sizes(context):
     return "\n".join(
         [f"{i['size']} - {i['count']}"
-         for i in context.context.user_data["sizes"]])
+         for i in context.user_data["sizes"]])
 
 
 def create_keyboard(buttons, extra_buttons):

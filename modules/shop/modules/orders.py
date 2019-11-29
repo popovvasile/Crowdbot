@@ -26,7 +26,7 @@ class OrdersHandler(object):
     def orders(self, update: Update, context: CallbackContext):
         set_page_key(update, context)
         resp = requests.get(f"{conf['API_URL']}/orders",
-                            params={"page": context.context.user_data["page"],
+                            params={"page": context.user_data["page"],
                                     "per_page": 3})
         pagin = APIPaginatedPage(resp)
         pagin.start(update, context,
@@ -43,8 +43,8 @@ class OrdersHandler(object):
         set_page_key(update, context, "item_page")
         if update.callback_query.data.startswith("to_done"):
             order_id = int(update.callback_query.data.split("/")[1])
-            context.context.user_data["order"] = Order(order_id)
-        context.context.user_data["order"].send_full_template(
+            context.user_data["order"] = Order(order_id)
+        context.user_data["order"].send_full_template(
             update, context,
             strings["confirm_to_done"],
             keyboards["confirm_to_done"])
@@ -52,9 +52,9 @@ class OrdersHandler(object):
 
     @catch_request_exception
     def finish_to_done(self, update: Update, context: CallbackContext):
-        context.context.bot.send_chat_action(update.effective_chat.id, "typing")
+        context.bot.send_chat_action(update.effective_chat.id, "typing")
         delete_messages(update, context)
-        context.context.user_data["order"].change_status({"new_status": True})
+        context.user_data["order"].change_status({"new_status": True})
         update.callback_query.answer(strings["moved_to_done_blink"])
         return self.back_to_orders(update, context)
 
@@ -64,8 +64,8 @@ class OrdersHandler(object):
         set_page_key(update, context, "item_page")
         if update.callback_query.data.startswith("cancel_order"):
             order_id = int(update.callback_query.data.split("/")[1])
-            context.context.user_data["order"] = Order(order_id)
-        context.context.user_data["order"].send_full_template(
+            context.user_data["order"] = Order(order_id)
+        context.user_data["order"].send_full_template(
             update, context,
             strings["confirm_cancel"],
             keyboards["confirm_cancel"])
@@ -73,9 +73,9 @@ class OrdersHandler(object):
 
     @catch_request_exception
     def finish_cancel(self, update: Update, context: CallbackContext):
-        context.context.bot.send_chat_action(update.effective_chat.id, "typing")
+        context.bot.send_chat_action(update.effective_chat.id, "typing")
         delete_messages(update, context)
-        context.context.user_data["order"].change_status({"new_status": False})
+        context.user_data["order"].change_status({"new_status": False})
         update.callback_query.answer(strings["order_canceled_blink"])
         return self.back_to_orders(update, context)
 
@@ -84,8 +84,8 @@ class OrdersHandler(object):
         delete_messages(update, context)
         set_page_key(update, context, "item_page")
         order_id = int(update.callback_query.data.split("/")[1])
-        context.context.user_data["order"] = Order(order_id)
-        context.context.user_data["order"].send_full_template(
+        context.user_data["order"] = Order(order_id)
+        context.user_data["order"].send_full_template(
             update, context,
             strings["confirm_to_trash_new"],
             keyboards["confirm_to_trash"])
@@ -93,9 +93,9 @@ class OrdersHandler(object):
 
     @catch_request_exception
     def finish_to_trash(self, update: Update, context: CallbackContext):
-        context.context.bot.send_chat_action(update.effective_chat.id, "typing")
+        context.bot.send_chat_action(update.effective_chat.id, "typing")
         delete_messages(update, context)
-        context.context.user_data["order"].change_status({"new_trash_status": True})
+        context.user_data["order"].change_status({"new_trash_status": True})
         update.callback_query.answer(strings["moved_to_trash_blink"])
         return self.back_to_orders(update, context)
 
@@ -106,10 +106,10 @@ class OrdersHandler(object):
         if update.callback_query.data.startswith("edit"):
             try:
                 order_id = update.callback_query.data.split("/")[1]
-                context.context.user_data["order"] = Order(order_id)
+                context.user_data["order"] = Order(order_id)
             except IndexError:
-                context.context.user_data["order"].refresh()
-        context.context.user_data["order"].send_full_template(
+                context.user_data["order"].refresh()
+        context.user_data["order"].send_full_template(
             update, context,
             strings["edit_menu"],
             keyboards["edit_keyboard"],
@@ -120,7 +120,7 @@ class OrdersHandler(object):
     def remove_item(self, update: Update, context: CallbackContext):
         delete_messages(update, context)
         item_id = update.callback_query.data.split("/")[1]
-        context.context.user_data["order"].remove_item(item_id)
+        context.user_data["order"].remove_item(item_id)
         update.callback_query.answer(strings["item_removed_blink"])
         return self.edit(update, context)
 
@@ -130,17 +130,17 @@ class OrdersHandler(object):
         set_page_key(update, context, "choose_product_page")
         resp = requests.get(
             f"{conf['API_URL']}/admin_products",
-            params={"page": context.context.user_data["choose_product_page"],
+            params={"page": context.user_data["choose_product_page"],
                     "per_page": 3,
                     "status": "not_sold"})
         pagin = APIPaginatedPage(resp)
         pagin.start(update, context,
                     f'{strings["choose_products_title"]}'
-                    f'\n{context.context.user_data["order"].template}',
+                    f'\n{context.user_data["order"].template}',
                     strings["no_products"])
         for product in pagin.data["products_data"]:
             product = Product(product)
-            add_kb = product.add_keyboard(context.context.user_data["order"])
+            add_kb = product.add_keyboard(context.user_data["order"])
             product.send_short_template(update, context, kb=add_kb)
         pagin.send_pagin(update, context)
         return CHOOSE_PRODUCT
@@ -153,13 +153,13 @@ class OrdersHandler(object):
             article=item_data[1],
             size=item_data[2]
         )
-        context.context.user_data["order"].add_item(item)
+        context.user_data["order"].add_item(item)
         return self.edit(update, context)
 
     def back_to_orders(self, update, context):
-        page = context.context.user_data.get("page")
+        page = context.user_data.get("page")
         clear_user_data(context)
-        context.context.user_data["page"] = page
+        context.user_data["page"] = page
         return self.orders(update, context)
 
 

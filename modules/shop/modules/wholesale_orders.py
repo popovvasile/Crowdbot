@@ -23,7 +23,7 @@ class WholesaleOrdersHandler(object):
     def wholesale_orders(self, update: Update, context: CallbackContext):
         set_page_key(update, context)
         resp = requests.get(f"{conf['API_URL']}/wholesale_orders",
-                            params={"page": context.context.user_data["page"],
+                            params={"page": context.user_data["page"],
                                     "per_page": 3})
         pagin = APIPaginatedPage(resp)
         pagin.start(update, context,
@@ -36,7 +36,7 @@ class WholesaleOrdersHandler(object):
 
     @catch_request_exception
     def change_status(self, update: Update, context: CallbackContext):
-        context.context.bot.send_chat_action(update.effective_chat.id, "typing")
+        context.bot.send_chat_action(update.effective_chat.id, "typing")
         delete_messages(update, context)
         order_id = int(update.callback_query.data.split("/")[1])
         if update.callback_query.data.startswith("to_done"):
@@ -86,9 +86,9 @@ class WholesaleOrdersHandler(object):
         return self.wholesale_orders(update, context)"""
 
     def back_to_wholesale_orders(self, update: Update, context: CallbackContext):
-        page = context.context.user_data.get("page")
+        page = context.user_data.get("page")
         clear_user_data(context)
-        context.context.user_data["page"] = page
+        context.user_data["page"] = page
         return self.wholesale_orders(update, context)
 
 

@@ -73,28 +73,28 @@ class Product(object):
 
     @staticmethod
     def send_adding_product_template(update, context, text, kb=None):
-        if len(context.context.user_data["product_images"]) < 2:
-            context.context.user_data["to_delete"].append(
-                context.context.bot.send_photo(
+        if len(context.user_data["product_images"]) < 2:
+            context.user_data["to_delete"].append(
+                context.bot.send_photo(
                     update.effective_chat.id,
-                    context.context.user_data["product_images"][0].file_id,
+                    context.user_data["product_images"][0].file_id,
                     text, parse_mode=ParseMode.MARKDOWN, reply_markup=kb))
         else:
             # todo mb don't delete media group until product adding finish
-            context.context.user_data["to_delete"].extend([
-                i for i in context.context.bot.send_media_group(
+            context.user_data["to_delete"].extend([
+                i for i in context.bot.send_media_group(
                     update.effective_chat.id,
                     [InputMediaPhoto(i)
-                     for i in context.context.user_data["product_images"]])
+                     for i in context.user_data["product_images"]])
             ])
 
-            context.context.user_data["to_delete"].append(
-                context.context.bot.send_message(
+            context.user_data["to_delete"].append(
+                context.bot.send_message(
                     update.effective_chat.id, text,
                     reply_markup=kb,
                     parse_mode=ParseMode.MARKDOWN,
-                    reply_to_message_id=context.context.user_data
-                    ["to_delete"][-len(context.context.user_data["product_images"]
+                    reply_to_message_id=context.user_data
+                    ["to_delete"][-len(context.user_data["product_images"]
                                        )].message_id))
 
     def send_short_template(self, update, context, text=None, kb=None):
@@ -102,8 +102,8 @@ class Product(object):
         kb = self.single_keyboard if kb is True \
             else None if kb is None else kb
         try:
-            context.context.user_data["to_delete"].append(
-                context.context.bot.send_photo(
+            context.user_data["to_delete"].append(
+                context.bot.send_photo(
                     update.effective_chat.id,
                     self.images[0]["telegram_id"]
                     if self.images[0]["telegram_id"]
@@ -111,8 +111,8 @@ class Product(object):
                     text, parse_mode=ParseMode.MARKDOWN,
                     reply_markup=kb, timeout=10))
         except (BadRequest, IndexError):
-            context.context.user_data["to_delete"].append(
-                context.context.bot.send_message(
+            context.user_data["to_delete"].append(
+                context.bot.send_message(
                     update.effective_chat.id,
                     strings["image_exception"] +
                     "\n\n" + text,
@@ -126,21 +126,21 @@ class Product(object):
             for i in self.images]
         send_media_arr(full_media_group, update, context)
         if len(self.description) > 2500:
-            context.context.user_data["to_delete"].append(
-                context.context.bot.send_message(update.effective_chat.id,
+            context.user_data["to_delete"].append(
+                context.bot.send_message(update.effective_chat.id,
                                          self.full_template(
                                              long_description=True),
                                          parse_mode=ParseMode.MARKDOWN))
-            context.context.user_data["to_delete"].append(
-                context.context.bot.send_message(update.effective_chat.id,
+            context.user_data["to_delete"].append(
+                context.bot.send_message(update.effective_chat.id,
                                          self.description))
-            context.context.user_data["to_delete"].append(
-                context.context.bot.send_message(update.effective_chat.id,
+            context.user_data["to_delete"].append(
+                context.bot.send_message(update.effective_chat.id,
                                          text, reply_markup=kb,
                                          parse_mode=ParseMode.MARKDOWN))
         else:
-            context.context.user_data["to_delete"].append(
-                context.context.bot.send_message(update.effective_chat.id,
+            context.user_data["to_delete"].append(
+                context.bot.send_message(update.effective_chat.id,
                                          f"{self.full_template()}"
                                          f"\n{text}",
                                          reply_markup=kb,
@@ -157,8 +157,8 @@ class Product(object):
                                       callback_data=f"change_size_quantity/"
                                                     f"{item['size']}")]
             ])
-            context.context.user_data["to_delete"].append(
-                context.context.bot.send_message(
+            context.user_data["to_delete"].append(
+                context.bot.send_message(
                     update.effective_chat.id,
                     strings["product_size_temp"].format(
                         item["size"], item["quantity"]),
@@ -169,8 +169,8 @@ class Product(object):
             kb[0].append(InlineKeyboardButton(strings["add_size_btn"],
                                               callback_data="add_size"))
         kb[0].append(back_btn("back_to_edit"))
-        context.context.user_data["to_delete"].append(
-            context.context.bot.send_message(update.effective_chat.id,
+        context.user_data["to_delete"].append(
+            context.bot.send_message(update.effective_chat.id,
                                      "Nice bro 😎",
                                      reply_markup=InlineKeyboardMarkup(kb)))
 
