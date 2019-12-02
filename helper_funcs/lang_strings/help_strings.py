@@ -11,7 +11,9 @@ def help_strings(context):
     payment_token = chatbots_table.find_one({"bot_id": context.bot.id})
     admins_keyboard = [
         InlineKeyboardButton(text=string_d_str["payment_configure_button"],
-                             callback_data="payments_config")
+                             callback_data="payments_config"),
+        InlineKeyboardButton(text=string_d_str["donation_statistic_btn_str"],
+                             callback_data="donation_statistic")
     ]
     if "shop" in payment_token:
         admins_keyboard += [InlineKeyboardButton(text=string_dict(context)["shop"],

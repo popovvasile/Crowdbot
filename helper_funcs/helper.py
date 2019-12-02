@@ -395,7 +395,7 @@ class WelcomeBot(object):
     def start(update, context):
 
         chat_id, txt = initiate_chat_id(update)
-        if chat_id<0:
+        if chat_id < 0:
             print("Group")
             context.bot.send_message(chat_id=chat_id, text=string_dict(context)["hello_group"],
                              reply_markup=InlineKeyboardMarkup(

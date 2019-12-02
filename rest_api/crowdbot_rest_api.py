@@ -42,14 +42,16 @@ def crowdbot_on_put():  # TODO
     return resp
 
 
-@app.route('/crowdbot', methods=['POST'])
+""""@app.route('/crowdbot', methods=['POST'])
 def crowdbot_on_post():
 
     doc = request.get_json()["params"]
     # Crowdbot token
     crowdbot_token = doc["token"]
     chatbot = requests.get(url="https://api.telegram.org/bot{}/getMe".format(crowdbot_token))
-    doc["bot_id"] = chatbot.json()['result']['id']
+    chatbot_json = chatbot.json()
+    doc["bot_id"] = chatbot_json["result"]["id"]
+    doc["username"] = chatbot_json["result"]["username"]
     doc["shop_enabled"] = False
     doc["donations_enabled"] = False
     crowdbot_bots_table.save(doc)  # TODO replace with update
@@ -68,8 +70,50 @@ def crowdbot_on_post():
             admin["is_admin"] = True
             if "user_id" in admin:
                 users_table.update({"user_id": admin["user_id"]}, admin, upsert=True)
+            # что если один юзер с одним email но админ в > 2 разных ботах
             elif "email" in admin:
                 users_table.update({"email": admin["email"]}, admin, upsert=True)
+            else:
+                users_table.save(admin)
+    resp = Response({"ok": True}, status=200, mimetype='application/json')
+    return resp"""
+
+
+@app.route('/crowdbot', methods=['POST'])
+def crowdbot_on_post():
+    doc = request.get_json()["params"]
+    # Crowdbot token
+    crowdbot_token = doc["token"]
+    chatbot = requests.get(url="https://api.telegram.org/bot{}/getMe".format(crowdbot_token))
+    chatbot_json = chatbot.json()
+    doc["bot_id"] = chatbot_json["result"]["id"]
+    doc["username"] = chatbot_json["result"]["username"]
+    doc["shop_enabled"] = False
+    doc["donations_enabled"] = False
+    crowdbot_bots_table.save(doc)  # TODO replace with update
+
+    if chatbot.ok:
+        superadmin = dict()
+        # superadmin["bot_id"] = doc["bot_id"]
+        # superadmin["registered"] = False
+        # superadmin["is_admin"] = True
+        # superadmin["superuser"] = True
+        superadmin["user_id"] = doc["superuser"]
+        doc["admins"].append(superadmin)
+        for admin in doc["admins"]:
+            admin["bot_id"] = doc["bot_id"]
+            admin["registered"] = False
+            admin["is_admin"] = True
+            admin["superuser"] = False
+            if admin.get("user_id") == doc["superuser"]:
+                admin["superuser"] = True
+
+            if "user_id" in admin:
+                users_table.update({"user_id": admin["user_id"],
+                                    "bot_id": doc["bot_id"]}, admin, upsert=True)
+            elif "email" in admin:
+                users_table.update({"email": admin["email"],
+                                    "bot_id": doc["bot_id"]}, admin, upsert=True)
             else:
                 users_table.save(admin)
     resp = Response({"ok": True}, status=200, mimetype='application/json')

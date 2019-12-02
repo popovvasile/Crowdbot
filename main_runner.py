@@ -42,6 +42,10 @@ from modules.users.messages import SEND_MESSAGE_TO_ADMIN_HANDLER, SEND_MESSAGE_T
     SEE_MESSAGES_FINISH_BACK_HANDLER, BLOCK_USER, BLOCKED_USERS_LIST, UNBLOCK_USER, MESSAGES_MENU
 from modules.settings.user_mode import USER_MODE_OFF, USER_MODE_ON
 
+from modules.users.users import USERS_MENU, USERS_LIST_HANDLER, USERS_STATISTIC_HANDLER
+from modules.users.admins import ADMINS_LIST_HANDLER, ADD_ADMIN_HANDLER
+from modules.donations.donation_statistic import DONATION_STATISTIC_HANDLER
+
 # SHOP
 from modules.shop.modules.adding_product import ADD_PRODUCT_HANDLER
 from modules.shop.modules.welcome import START_SHOP_HANDLER, BACK_TO_MAIN_MENU_HANDLER
@@ -51,6 +55,7 @@ from modules.shop.modules.products import PRODUCTS_HANDLER
 from modules.shop.modules.trash import (TRASH_START, ORDERS_TRASH,
                                 WHOLESALE_TRASH, PRODUCTS_TRASH)
 from modules.shop.modules.brands import BRANDS_HANDLER
+
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -74,7 +79,6 @@ def main(token, port):
     help_callback_handler = CallbackQueryHandler(help_button, pattern=r"help_")
 
     dispatcher.add_handler(EDIT_BOT_DESCRIPTION_HANDLER)
-
 
     #  NEW SHOP
     dispatcher.add_handler(START_SHOP_HANDLER)
@@ -103,6 +107,14 @@ def main(token, port):
     dispatcher.add_handler(USER_MODE_ON)
     dispatcher.add_handler(USER_MODE_OFF)
 
+    # USERS
+    dispatcher.add_handler(USERS_LIST_HANDLER)
+    dispatcher.add_handler(USERS_MENU)
+    dispatcher.add_handler(USERS_STATISTIC_HANDLER)
+    # ADMINS
+    dispatcher.add_handler(ADMINS_LIST_HANDLER)
+    dispatcher.add_handler(ADD_ADMIN_HANDLER)
+
     # DONATIONS
     dispatcher.add_handler(CREATE_DONATION_HANDLER)
     dispatcher.add_handler(DONATE_HANDLER)
@@ -113,6 +125,8 @@ def main(token, port):
     dispatcher.add_handler(CHNAGE_DONATIONS_CONFIG)
     dispatcher.add_handler(PAYMENTS_CONFIG_KEYBOARD)
     dispatcher.add_handler(CONFIGS_DONATIONS_GENERAL)
+
+    dispatcher.add_handler(DONATION_STATISTIC_HANDLER)
 
     # # PRODUCTS
     # dispatcher.add_handler(ESHOP_MENU)
@@ -192,9 +206,6 @@ def main(token, port):
     dispatcher.add_handler(rex_help_handler)
 
     dispatcher.add_handler(help_callback_handler)
-
-
-
 
     # error_help_callback_handler = CallbackQueryHandler(get_help, pattern=r"error_back")
     # dispatcher.add_handler(error_help_callback_handler)

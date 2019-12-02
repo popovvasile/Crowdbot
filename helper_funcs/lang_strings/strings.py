@@ -1,6 +1,8 @@
 import gc
-
 from database import chatbots_table
+
+
+
 # Telegram emoji. Original names
 emoji = dict(
     trash="🗑",
@@ -19,8 +21,13 @@ emoji = dict(
     shirt="👔",
     ballot_box="🗳",
     plus="➕",
-    gear="⚙️"
-)
+    gear="⚙️",
+    bar_chart="📊",
+    book="📖",
+    bust_in_silhouette="👤",
+    disappointed_relieved="😥",
+    ok_hand="👌")
+
 ENG = dict(
     polls_str="Polls",
     surveys_str="Surveys",
@@ -155,7 +162,7 @@ Write your message. I’ll read it.
     send_message_from_user_to_admin_anonim_text="✉️ Write us anonymous message.\n"
                                                 "You can send any kind of files, "
                                                 "voice and video messages, stickers and links. \n"
-                                                "No information to you account will be saved to the database",
+                                                "No inforpromotion_send_message_button_1mation to you account will be saved to the database",
     send_message_1_1="Choose the category of users to whom you want o send your message",
 
     send_message_12="What do you want to tell us about?",
@@ -498,7 +505,16 @@ Here you can configure your payments settings and your shop
     add_products_str_deleted="Item {} has been deleted from your shop",
     products="Products",
     buy_button="Buy",
-    hello_group="Hello group"
+    hello_group="Hello group",
+
+    enter_new_admin_email="Enter E-Mail addresses of the admins. "
+                          "They'll get a one-time password that they have to send to your bot."
+                          "If you are ready — press 'Add' ",
+    next_email_request="Enter E-Mail addresses of the other admins. "
+                       "They'll get a one-time password that they have to send to your bot."
+                       "If you are ready — press 'continue' ",
+    add_already_exist_admin='Admin => {} already exist. ',
+    wrong_email="Oops. Wrong E-mail. Try again.",
 
 )
 
@@ -1119,6 +1135,84 @@ https://telegra.ph/Gajd-Podklyuchit-donaty-07-03
     shop_admin_current_page="*Текущая траница:* `{}`",
     # BACK BUTTON
     shop_admin_back_btn="🔙 Назад",
+
+    channels="Channels",
+    groups="Groups",
+    payment_configure_button="Configure Payments",
+    buttons_button="Buttons",
+    polls_mode_str="❓ Polls",
+    messages="✉️ Messages ",
+    donations="Donations",
+    shop="Shop",
+    payments_config_text="Here you can configure your payments settings",
+
+    users_menu_str="Здесь вы можете увидеть своих юзеров",
+    statistic_btn_str=f"{emoji['bar_chart']} Статистика",
+    users_list_btn_str=f"{emoji['book']} Список юзеров",
+    admins_btn_str=f"{emoji['bust_in_silhouette']} Администраторы",
+    user_temp="{}"
+              "\n*Время старта:* `{}`",
+    registered_admin_temp="{}"
+                          "\n*Email:* {}"
+                          "\n*Время старта:* `{}`",
+    not_registered_admin_temp="*Email:* {}"
+                              "\n_Ещё не зарегестрирован_",
+    no_users_str=f"{emoji['disappointed_relieved']} У вас ещё нет юзеров",
+    no_admins_str="Вы единственный администратор",
+    users_layout_title="*Список ваших юзеров.*"
+                       "\n*Всего юзеров:* `{}`",
+    admins_layout_title="*Список администраторов.*"
+                        "\n*Всего админов:* `{}`",
+    current_page="\n\n*Current page:* `{}`",
+    # delete_admin_button_str=f"{emoji['x']} Удалить"
+    admin_deleted_blink=f"{emoji['white_check_mark']} Админ Успешно Удалён",
+    confirm_delete_admin_str="_Вы уверены что хотите удалть админа?_",
+    # resend_password_btn_str="Переотправить пароль"
+    add_admin_btn_str=f"{emoji['plus']} Добавить администратора",
+    next_email_request="Раздельными сообщениями отправь почту других админов. "
+                       "\nОни получат одноразовый пароль для авторизации. "
+                       "\nНажми `Добавить`, когда всех укажешь.\n",
+    add_already_exist_admin=f"{emoji['ok_hand']} "
+                            "Админ {} уже добавлен. ",
+    wrong_email="Упс. Неверный E-mail. Попробуй ввести снова.",
+    admins_added_blink=f"{emoji['white_check_mark']} Админы успешно добавлены",
+    enter_new_admin_email="Раздельными сообщениями напиши почту новых админов."
+                          "\nОни получат одноразовый пароль для авторизации.",
+    donation_statistic_btn_str=f"{emoji['bar_chart']} Donation Statistic",
+    donations_history_button="Show History",
+    donation_history_title="*Donations history*\n\n",
+    donation_statistic_template="*Donates statistic*"
+                                "\n\n*For today* `{}`"
+                                "\n_Donates Count:_ `{}`"
+                                "\n_Collected:_ `{}`"
+                                
+                                "\n\n*For week:* `{}`"
+                                "\n_Donates Count:_ `{}`"
+                                "\n_Collected:_ `{}`"
+                                
+                                "\n\n*For month* `{}`"
+                                "\n_Donates Count:_ `{}`"
+                                "\n_Collected:_ `{}`"
+                                
+                                "\n\n*All time:*"
+                                "\n_Donates Count:_ `{}`"
+                                "\n_Collected:_ `{}`",
+    donation_history_item_temp="[User](tg://user?id={})"
+                               "\n*Amount:* `{} {}`"
+                               "\n*Date:* `{}`",
+    no_donations=f"{emoji['disappointed_relieved']} No donations",
+    users_statistic_template="*Users statistic*"
+                             "\n\n*For today* `{}`"
+                             "\n_New Users:_ `{}`"
+    
+                             "\n\n*For week:* `{}`"
+                             "\n_New Users:_ `{}`"
+    
+                             "\n\n*For month* `{}`"
+                             "\n_New Users:_ `{}`"
+    
+                             "\n\n*All time:*"
+                             "\n_New Users:_ `{}`"
 )
 
 string_dict_dict = {"ENG": ENG,

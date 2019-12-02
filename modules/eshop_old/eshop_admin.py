@@ -104,7 +104,7 @@ class AddProducts(object):
         return TYPING_PRODUCT
 
     def product_handler(self, update, context,
-                        context.user_data):  # TODO add price and yes or not for delivery- ask address or not?
+                        ):  # TODO add price and yes or not for delivery- ask address or not?
         context.user_data["to_delete"].append(update.message)
         reply_products = [[InlineKeyboardButton(text=string_dict(context)["back_button"],
                                                 callback_data="help_module(shop)")]]

@@ -1,10 +1,11 @@
 from math import ceil
 from typing import List, Dict
 
-from telegram import InlineKeyboardButton, Bot, ParseMode
+from telegram import (InlineKeyboardButton, Bot, ParseMode,
+                      InlineKeyboardMarkup)
 from telegram.error import TelegramError
 import logging
-
+from helper_funcs.lang_strings.strings import string_dict
 # from settings import LOAD, NO_LOAD, LOGGER
 from database import custom_buttons_table
 
@@ -18,6 +19,34 @@ NO_LOAD = ['translation', 'rss']
 
 
 def delete_messages(update, context):
+    try:
+        context.bot.delete_message(update.effective_chat.id,
+                                   update.effective_message.message_id)
+    except TelegramError:
+        pass
+    if 'to_delete' in context.user_data:
+        for msg in context.user_data['to_delete']:
+            try:
+                if msg.message_id != update.effective_message.message_id:
+                    context.bot.delete_message(
+                        update.effective_chat.id, msg.message_id)
+            except TelegramError:
+                continue
+        context.user_data['to_delete'] = list()
+    else:
+        context.user_data['to_delete'] = list()
+
+
+def back_button(context, callback_data: str):
+    return InlineKeyboardButton(
+        string_dict(context.bot)["back_button"], callback_data=callback_data)
+
+
+def back_reply(context, callback_data: str):
+    return InlineKeyboardMarkup([[back_button(context, callback_data)]])
+
+
+"""def delete_messages(update, context):
     if 'to_delete' in context.user_data:
         for msg in context.user_data['to_delete']:
             try:
@@ -28,7 +57,7 @@ def delete_messages(update, context):
                 continue
         context.user_data['to_delete'] = list()
     else:
-        context.user_data['to_delete'] = list()
+        context.user_data['to_delete'] = list()"""
 
 
 class EqInlineKeyboardButton(InlineKeyboardButton):

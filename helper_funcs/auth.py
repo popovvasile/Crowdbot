@@ -1,7 +1,7 @@
 from typing import Optional
 from functools import wraps
 from telegram import User, Bot, Update
-
+from datetime import datetime
 from database import users_table, chatbots_table
 
 
@@ -11,27 +11,33 @@ def register_chat(update, context):
 
     superuser = chatbots_table.find_one({"bot_id": context.bot.id})["superuser"]
     if user_id == superuser:
-        users_table.update({"user_id": user_id},
+        users_table.update({"user_id": user_id,
+                            "bot_id": context.bot.id},
                            {'bot_id': context.bot.id,
                             "chat_id": chat_id,
                             "user_id": user_id,
                             "username": update.effective_user.username,
                             "full_name": update.effective_user.full_name,
+                            "mention_markdown": update.effective_user.mention_markdown(),
+                            "mention_html": update.effective_user.mention_html(),
                             'registered': True,
                             "is_admin": True,
+                            "superuser": True,
+                            "timestamp": datetime.now(),
                             "tags": ["#all", "#user", "#admin"]
                             }, upsert=True)
     elif users_table.find({"user_id": user_id, "bot_id": context.bot.id}).count() == 0:
-        users_table.insert(
-                           {'bot_id': context.bot.id,
+        users_table.insert({'bot_id': context.bot.id,
                             "chat_id": chat_id,
                             "user_id": user_id,
                             "username": update.effective_user.username,
                             "full_name": update.effective_user.full_name,
+                            "mention_markdown": update.effective_user.mention_markdown(),
+                            "mention_html": update.effective_user.mention_html(),
+                            "timestamp": datetime.now(),
                             'registered': False,
                             "is_admin": False,
-                            "tags": ["#all", "#user"]
-                            })
+                            "tags": ["#all", "#user"]})
 
 
 def initiate_chat_id(update):
