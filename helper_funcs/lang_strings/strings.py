@@ -2,7 +2,6 @@ import gc
 from database import chatbots_table
 
 
-
 # Telegram emoji. Original names
 emoji = dict(
     trash="🗑",

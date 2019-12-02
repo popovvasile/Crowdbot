@@ -9,7 +9,7 @@ from telegram import (InlineKeyboardButton, InlineKeyboardMarkup,
 from telegram.ext import (MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
 
-from database import users_table
+from database import users_table, donations_table
 from helper_funcs.helper import get_help
 from helper_funcs.pagination import Pagination, set_page_key
 from helper_funcs.lang_strings.strings import string_dict
@@ -79,7 +79,7 @@ class User(object):
                                      parse_mode=ParseMode.MARKDOWN))
 
     def donates(self):
-        return ""
+        return
 
     def donates_to_string(self):
         pass
