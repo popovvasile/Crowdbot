@@ -507,14 +507,76 @@ Here you can configure your payments settings and your shop
     buy_button="Buy",
     hello_group="Hello group",
 
-    enter_new_admin_email="Enter E-Mail addresses of the admins. "
-                          "They'll get a one-time password that they have to send to your bot."
-                          "If you are ready — press 'Add' ",
+
+    users_menu_str="Здесь вы можете увидеть своих юзеров",
+    statistic_btn_str=f"{emoji['bar_chart']} Статистика",
+    users_list_btn_str=f"{emoji['book']} Список юзеров",
+    admins_btn_str=f"{emoji['bust_in_silhouette']} Администраторы",
+    user_temp="{}"
+              "\n*Время старта:* `{}`",
+    registered_admin_temp="{}"
+                          "\n*Email:* {}"
+                          "\n*Время старта:* `{}`",
+    not_registered_admin_temp="*Email:* {}"
+                              "\n_Ещё не зарегестрирован_",
+    no_users_str=f"{emoji['disappointed_relieved']} У вас ещё нет юзеров",
+    no_admins_str="Вы единственный администратор",
+    users_layout_title="*Список ваших юзеров.*"
+                       "\n*Всего юзеров:* `{}`",
+    admins_layout_title="*Список администраторов.*"
+                        "\n*Всего админов:* `{}`",
+    current_page="\n\n*Current page:* `{}`",
+    # delete_admin_button_str=f"{emoji['x']} Удалить"
+    admin_deleted_blink=f"{emoji['white_check_mark']} Админ Успешно Удалён",
+    confirm_delete_admin_str="_Вы уверены что хотите удалть админа?_",
+    # resend_password_btn_str="Переотправить пароль"
+    add_admin_btn_str=f"{emoji['plus']} Добавить администратора",
     next_email_request="Enter E-Mail addresses of the other admins. "
                        "They'll get a one-time password that they have to send to your bot."
                        "If you are ready — press 'continue' ",
-    add_already_exist_admin='Admin => {} already exist. ',
+    add_already_exist_admin=f"{emoji['ok_hand']} "
+                            "Admin => {} already exist. ",
+
     wrong_email="Oops. Wrong E-mail. Try again.",
+    admins_added_blink=f"{emoji['white_check_mark']} Админы успешно добавлены",
+    enter_new_admin_email="Enter E-Mail addresses of the admins. "
+                          "They'll get a one-time password that they have to send to your bot."
+                          "If you are ready — press 'Add' ",
+    donation_statistic_btn_str=f"{emoji['bar_chart']} Donation Statistic",
+    donations_history_button="Show History",
+    donation_history_title="*Donations history*\n\n",
+    donation_statistic_template="*Donates statistic*"
+                                "\n\n*For today* `{}`"
+                                "\n_Donates Count:_ `{}`"
+                                "\n_Collected:_ `{}`"
+
+                                "\n\n*For week:* `{}`"
+                                "\n_Donates Count:_ `{}`"
+                                "\n_Collected:_ `{}`"
+
+                                "\n\n*For month* `{}`"
+                                "\n_Donates Count:_ `{}`"
+                                "\n_Collected:_ `{}`"
+
+                                "\n\n*All time:*"
+                                "\n_Donates Count:_ `{}`"
+                                "\n_Collected:_ `{}`",
+    donation_history_item_temp="[User](tg://user?id={})"
+                               "\n*Amount:* `{} {}`"
+                               "\n*Date:* `{}`",
+    no_donations=f"{emoji['disappointed_relieved']} No donations",
+    users_statistic_template="*Users statistic*"
+                             "\n\n*For today* `{}`"
+                             "\n_New Users:_ `{}`"
+
+                             "\n\n*For week:* `{}`"
+                             "\n_New Users:_ `{}`"
+
+                             "\n\n*For month* `{}`"
+                             "\n_New Users:_ `{}`"
+
+                             "\n\n*All time:*"
+                             "\n_New Users:_ `{}`"
 
 )
 
