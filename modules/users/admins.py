@@ -13,7 +13,7 @@ from database import donations_table, users_table
 from helper_funcs.helper import get_help
 from helper_funcs.pagination import Pagination, set_page_key
 from helper_funcs.lang_strings.strings import string_dict
-from helper_funcs.misc import delete_messages, back_button, back_reply
+from helper_funcs.misc import delete_messages, back_button, back_reply, lang_timestamp
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
 from validate_email import validate_email
@@ -25,46 +25,45 @@ from helper_funcs.mailer import SMTPMailer
 
 # Make string for adding admins emails menu
 def emails_layout(context, text) -> str:
-    # result = text + '\n'
     if len(context.user_data['new_admins']) > 0:
         return f"{text} \nAdmins:\n" + \
                '\n'.join([i['email']
                           for i in context.user_data['new_admins']])
-        # result += 'Admins:'
-        # for i in context.user_data['new_admins']:
-        #     result += f"\n{i['email']}"
     return text
 
 
 class Admin:
-    def __init__(self, obj: (ObjectId, dict, str)):
+    def __init__(self, context, obj: (ObjectId, dict, str)):
+        self.context = context
         obj = get_obj(users_table, obj)
         self._id = obj["_id"]
         self.name = obj.get("mention_markdown")
         self.email = obj.get("email")
         self.registered = obj["registered"]
-        self.timestamp = obj.get("timestamp")
+        self.timestamp = lang_timestamp(self.context, obj.get("timestamp"))
 
-    def template(self, context):
-        return string_dict(context.bot)["registered_admin_temp"].format(
-            self.name, self.email, self.timestamp.strftime("%d, %b %Y, %H:%M")) \
+    def send_template(self, update, text="", reply_markup=None):
+        self.context.user_data["to_delete"].append(
+            self.context.bot.send_message(update.effective_chat.id,
+                                          f"{self.template}"
+                                          f"\n\n{text}",
+                                          parse_mode=ParseMode.MARKDOWN,
+                                          reply_markup=reply_markup
+                                          if reply_markup else
+                                          self.reply_markup))
+
+    @property
+    def template(self):
+        return string_dict(self.context)["registered_admin_temp"].format(
+            self.name, self.email, self.timestamp) \
             if self.registered else \
-            string_dict(context.bot)["not_registered_admin_temp"].format(
+            string_dict(self.context)["not_registered_admin_temp"].format(
                 self.email)
 
-    def send_template(self, update, context, text="", reply_markup=None):
-        context.user_data["to_delete"].append(
-            context.bot.send_message(update.effective_chat.id,
-                                     f"{self.template(context)}"
-                                     f"\n\n{text}",
-                                     parse_mode=ParseMode.MARKDOWN,
-                                     reply_markup=reply_markup
-                                     if reply_markup else
-                                     self.reply_markup(context)))
-
-    def reply_markup(self, context):
+    @property
+    def reply_markup(self):
         reply_markup = [
-            [InlineKeyboardButton(string_dict(context)["delete_button_str"],
+            [InlineKeyboardButton(string_dict(self.context)["delete_button_str"],
                                   callback_data=f"delete_admin/{self._id}")]]
         # if not self.registered:
         #     reply_markup[0].append(
@@ -127,21 +126,21 @@ class AdminHandler(object):
         else:
             pagination = Pagination(context, per_page, all_admins)
             for admin in pagination.page_content():
-                Admin(admin).send_template(update, context)
+                Admin(context, admin).send_template(update)
             pagination.send_keyboard(
                 update, [[back_button(context, "back_to_users_menu")]])
 
     def confirm_delete_admin(self, update, context):
         delete_messages(update, context)
         context.user_data["admin"] = Admin(
-            update.callback_query.data.split("/")[1])
+            context, update.callback_query.data.split("/")[1])
         reply_markup = InlineKeyboardMarkup([
             [InlineKeyboardButton(string_dict(context)["delete_button_str"],
                                   callback_data="finish_delete_admin")],
             [back_button(context, "back_to_admin_list")]
         ])
         context.user_data["admin"].send_template(
-            update, context, reply_markup=reply_markup,
+            update, reply_markup=reply_markup,
             text=string_dict(context)["confirm_delete_admin_str"])
         return CONFIRM_DELETE_ADMIN
 

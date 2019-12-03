@@ -60,7 +60,7 @@ def delete_messages(update, context):
 
 
 # check that bot is admin and can send messages to the channel
-def check_channel(update, channel_username):
+def check_channel(context, channel_username):
     try:
         admins = context.bot.get_chat_administrators(channel_username)
     except TelegramError as e:
@@ -103,11 +103,11 @@ class Channels(object):
     # ################################## HELP METHODS ###########################################################
     # update channels usernames if channel username has benn changed.
     # call this only when at least one channel exists in db
-    def update_channels_usernames(self, update, context, chat_id):
+    def update_channels_usernames(self, context, chat_id):
         for channel in channels_table.find({'bot_id': context.bot.id}):
             # check that boy is admin
             # and check that bot can send messages to channel
-            check = check_channel(context.bot, channel['channel_username'])
+            check = check_channel(context, channel['channel_username'])
             if check is not True:
                 context.user_data['to_delete'].append(
                     context.bot.send_message(chat_id,
@@ -133,26 +133,31 @@ class Channels(object):
         delete_messages(update, context)
         if channels_table.find({'bot_id': context.bot.id}).count() == 0:
             context.user_data['to_delete'].append(
-                context.bot.send_message(update.effective_chat.id, string_dict(context)["no_channels"],
-                                 reply_markup=no_channel_keyboard))
+                context.bot.send_message(
+                    update.effective_chat.id, string_dict(context)["no_channels"],
+                    reply_markup=no_channel_keyboard))
             return ConversationHandler.END
         else:
-            channels = self.update_channels_usernames(context.bot, context.user_data, update.effective_chat.id)
+            channels = self.update_channels_usernames(context, update.effective_chat.id)
             command_list = [[x['channel_username']] for x in channels] + [['Back']]
             # need to delete this message
             context.user_data['to_delete'].append(
-                context.bot.send_message(update.effective_chat.id, text,
-                                 reply_markup=ReplyKeyboardMarkup(command_list, one_time_keyboard=True)))
+                context.bot.send_message(
+                    update.effective_chat.id, text,
+                    reply_markup=ReplyKeyboardMarkup(
+                        command_list, one_time_keyboard=True)))
             return state
 
     def send_wrong_format_message(self, update, context, text: str = None):
-        cancel_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(string_dict(context)["cancel_button"],
-                                                                      callback_data='help_back')]])
+        cancel_keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton(string_dict(context)["cancel_button"],
+                                  callback_data='help_back')]])
         delete_messages(update, context)
         context.user_data['to_delete'].append(
-            context.bot.send_message(update.message.chat_id, string_dict(context)["wrong_channel_link_format"]
-            if text is None else text,
-                             reply_markup=cancel_keyboard))
+            context.bot.send_message(update.message.chat_id,
+                                     string_dict(context)["wrong_channel_link_format"]
+                                     if text is None else text,
+                                     reply_markup=cancel_keyboard))
         return ADD_CHANNEL
 
     # check that channel username is correct
@@ -175,17 +180,19 @@ class Channels(object):
         else:
             channel_username = "@{}".format(link)
 
-        check = check_channel(context.bot, channel_username)
+        check = check_channel(context, channel_username)
         if check is True:
-            if not channels_table.find_one({'bot_id': context.bot.id, 'channel_username': channel_username}):
+            if not channels_table.find_one({'bot_id': context.bot.id,
+                                            'channel_username': channel_username}):
                 channel_chat_id = context.bot.get_chat(channel_username).id
                 channels_table.insert_one({'bot_id': context.bot.id,
                                            'channel_username': channel_username,
                                            'chat_id': channel_chat_id})
                 return channel_username
             else:
-                return self.send_wrong_format_message(update, context,
-                                                      string_dict(context)["try_to_add_already_exist_channel"])
+                return self.send_wrong_format_message(
+                    update, context,
+                    string_dict(context)["try_to_add_already_exist_channel"])
         else:
             return self.send_wrong_format_message(update, context, check)
 
@@ -216,7 +223,7 @@ class Channels(object):
                                   [InlineKeyboardButton(string_dict(context)["back_button"],
                                                         callback_data="help_module(channels)")]])
         context.bot.send_message(update.message.chat_id, string_dict(context)["channels_menu"],
-                         reply_markup=one_channel_keyboard)
+                                 reply_markup=one_channel_keyboard)
         return ConversationHandler.END
 
     # call this when user have choose channel for remove

@@ -25,7 +25,8 @@ emoji = dict(
     book="📖",
     bust_in_silhouette="👤",
     disappointed_relieved="😥",
-    ok_hand="👌")
+    ok_hand="👌",
+    family_mwgb="👨‍👩‍👧‍👦")
 
 ENG = dict(
     polls_str="Polls",
@@ -544,39 +545,58 @@ Here you can configure your payments settings and your shop
     donation_statistic_btn_str=f"{emoji['bar_chart']} Donation Statistic",
     donations_history_button="Show History",
     donation_history_title="*Donations history*\n\n",
-    donation_statistic_template="*Donates statistic*"
-                                "\n\n*For today* `{}`"
-                                "\n_Donates Count:_ `{}`"
-                                "\n_Collected:_ `{}`"
+    donation_statistic_template=f"{emoji['money_with_wings']} *Donates statistic*"
+                                "\n\n*For today* "
+                                "\n`{today_str}`"
+                                "\n_Donates Quantity:_ `{today_count}`"
+                                "\n_Collected:_ `{today_amount}`"
 
-                                "\n\n*For week:* `{}`"
-                                "\n_Donates Count:_ `{}`"
-                                "\n_Collected:_ `{}`"
+                                "\n\n*For week*"
+                                "\n*From:* `{week_from}`"
+                                "\n*To:* `{today_str}`"
+                                "\n_Donates Quantity:_ `{week_count}`"
+                                "\n_Collected:_ `{week_amount}`"
 
-                                "\n\n*For month* `{}`"
-                                "\n_Donates Count:_ `{}`"
-                                "\n_Collected:_ `{}`"
+                                "\n\n*For month*"
+                                "\n*From:* `{month_from}`"
+                                "\n*To:* `{today_str}`"
+                                "\n_Donates Quantity:_ `{month_count}`"
+                                "\n_Collected:_ `{month_amount}`"
 
                                 "\n\n*All time:*"
-                                "\n_Donates Count:_ `{}`"
-                                "\n_Collected:_ `{}`",
-    donation_history_item_temp="[User](tg://user?id={})"
+                                "\n*First donate:*"
+                                "\n`{first_donate}`"
+                                "\n*Last donate:* "
+                                "\n`{last_donate}`"
+                                "\n_Donates Quantity:_ `{all_count}`"
+                                "\n_Collected:_ `{all_amount}`",
+    donation_history_item_temp="{}"
                                "\n*Amount:* `{} {}`"
                                "\n*Date:* `{}`",
     no_donations=f"{emoji['disappointed_relieved']} No donations",
-    users_statistic_template="*Users statistic*"
-                             "\n\n*For today* `{}`"
-                             "\n_New Users:_ `{}`"
+    users_statistic_template=f"{emoji['family_mwgb']} *New Users*"
+                             "\n\n*For today* "
+                             "\n`{}`"
+                             "\n_New subscribers:_ `{}`"
 
-                             "\n\n*For week:* `{}`"
-                             "\n_New Users:_ `{}`"
+                             "\n\n*For week* "
+                             "\n*From:* `{}`"
+                             "\n*To:* `{}`"
+                             "\n_New subscribers:_ `{}`"
 
-                             "\n\n*For month* `{}`"
-                             "\n_New Users:_ `{}`"
+                             "\n\n*For month* "
+                             "\n*From:* `{}`"
+                             "\n*To:* `{}`"
+                             "\n_New subscribers:_ `{}`"
 
-                             "\n\n*All time:*"
-                             "\n_New Users:_ `{}`"
-
+                             "\n\n*For all time*"
+                             "\n*First subscriber:*"
+                             "\n`{}`"
+                             "\n*Last subscriber:* "
+                             "\n`{}`"
+                             "\n_Total subscribers:_ `{}`",
+    donations_count_str=f"{emoji['money_with_wings']} *Донаты Юзера:* "
+                            "{}"
 )
 
 RUS = dict(
@@ -1242,38 +1262,58 @@ https://telegra.ph/Gajd-Podklyuchit-donaty-07-03
     donation_statistic_btn_str=f"{emoji['bar_chart']} Donation Statistic",
     donations_history_button="Show History",
     donation_history_title="*Donations history*\n\n",
-    donation_statistic_template="*Donates statistic*"
-                                "\n\n*For today* `{}`"
-                                "\n_Donates Count:_ `{}`"
-                                "\n_Collected:_ `{}`"
+    donation_statistic_template=f"{emoji['money_with_wings']} *Donates statistic*"
+                                "\n\n*For today* "
+                                "\n`{today_str}`"
+                                "\n_Donates Quantity:_ `{today_count}`"
+                                "\n_Collected:_ `{today_amount}`"
                                 
-                                "\n\n*For week:* `{}`"
-                                "\n_Donates Count:_ `{}`"
-                                "\n_Collected:_ `{}`"
+                                "\n\n*For week*"
+                                "\n*From:* `{week_from}`"
+                                "\n*To:* `{today_str}`"
+                                "\n_Donates Quantity:_ `{week_count}`"
+                                "\n_Collected:_ `{week_amount}`"
                                 
-                                "\n\n*For month* `{}`"
-                                "\n_Donates Count:_ `{}`"
-                                "\n_Collected:_ `{}`"
+                                "\n\n*For month*"
+                                "\n*From:* `{month_from}`"
+                                "\n*To:* `{today_str}`"
+                                "\n_Donates Quantity:_ `{month_count}`"
+                                "\n_Collected:_ `{month_amount}`"
                                 
                                 "\n\n*All time:*"
-                                "\n_Donates Count:_ `{}`"
-                                "\n_Collected:_ `{}`",
-    donation_history_item_temp="[User](tg://user?id={})"
+                                "\n*First donate:*"
+                                "\n`{first_donate}`"
+                                "\n*Last donate:* "
+                                "\n`{last_donate}`"
+                                "\n_Donates Quantity:_ `{all_count}`"
+                                "\n_Collected:_ `{all_amount}`",
+    donation_history_item_temp="{}"
                                "\n*Amount:* `{} {}`"
                                "\n*Date:* `{}`",
     no_donations=f"{emoji['disappointed_relieved']} No donations",
-    users_statistic_template="*Users statistic*"
-                             "\n\n*For today* `{}`"
-                             "\n_New Users:_ `{}`"
-    
-                             "\n\n*For week:* `{}`"
-                             "\n_New Users:_ `{}`"
-    
-                             "\n\n*For month* `{}`"
-                             "\n_New Users:_ `{}`"
-    
-                             "\n\n*All time:*"
-                             "\n_New Users:_ `{}`"
+    users_statistic_template=f"{emoji['family_mwgb']} *New Users*"
+                             "\n\n*For today* "
+                             "\n`{}`"
+                             "\n_New subscribers:_ `{}`"
+
+                             "\n\n*For week* "
+                             "\n*From:* `{}`"
+                             "\n*To:* `{}`"
+                             "\n_New subscribers:_ `{}`"
+
+                             "\n\n*For month* "
+                             "\n*From:* `{}`"
+                             "\n*To:* `{}`"
+                             "\n_New subscribers:_ `{}`"
+
+                             "\n\n*For all time*"
+                             "\n*First subscriber:*"
+                             "\n`{}`"
+                             "\n*Last subscriber:* "
+                             "\n`{}`"
+                             "\n_Total subscribers:_ `{}`",
+    donations_count_str=f"{emoji['money_with_wings']} *Донаты Юзера:* "
+                        "{}"
 )
 
 string_dict_dict = {"ENG": ENG,

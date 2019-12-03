@@ -9,14 +9,15 @@ from telegram import (InlineKeyboardButton, InlineKeyboardMarkup,
 from telegram.ext import (MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
 
-from database import users_table, donations_table
+from database import users_table, donations_table, chatbots_table, channels_table
 from helper_funcs.helper import get_help
 from helper_funcs.pagination import Pagination, set_page_key
 from helper_funcs.lang_strings.strings import string_dict
-from helper_funcs.misc import delete_messages, back_button, back_reply
+from helper_funcs.misc import delete_messages, back_button, back_reply, lang_timestamp
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
 from datetime import datetime, timedelta, time
+from modules.donations.donation_statistic import DonationStatistic
 
 
 # May raise Exception and bson.errors.InvalidId
@@ -33,8 +34,6 @@ def get_obj(table, obj: (ObjectId, dict, str)):
 
 def users_menu(update, context):
     string_d_str = string_dict(context.bot)
-    # bot.delete_message(chat_id=update.callback_query.message.chat_id,
-    #                    message_id=update.callback_query.message.message_id)
     delete_messages(update, context)
     users_menu_keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton(text=string_d_str["statistic_btn_str"],
@@ -59,30 +58,85 @@ def back_to_users_menu(update, context):
     return users_menu(update, context)
 
 
-# список донатов
+def time_statistic():
+    pass
+
+
 # todo last seen for users
 class User(object):
-    def __init__(self, obj: (ObjectId, dict, str)):
-        obj = get_obj(users_table, obj)
-        self.mention_markdown = obj["mention_markdown"]
-        # https://dateparser.readthedocs.io/en/latest/
-        self.timestamp = obj["timestamp"].strftime("%d, %b %Y, %H:%M")
+    def __init__(self, context, obj: (ObjectId, dict, str)):
+        self.context = context
+        user_obj = get_obj(users_table, obj)
+        self.user_id = user_obj["user_id"]
+        self.mention_markdown = user_obj["mention_markdown"]
+        self.timestamp = lang_timestamp(context, user_obj["timestamp"])
 
-    def template(self, bot):
-        return string_dict(bot)["user_temp"].format(
+    def send_template(self, update):
+        self.context.user_data["to_delete"].append(
+            self.context.bot.send_message(update.effective_chat.id,
+                                          f"{self.template}"
+                                          f"\n{self.donates_to_string}",
+                                          parse_mode=ParseMode.MARKDOWN))
+
+    @property
+    def template(self):
+        return string_dict(self.context)["user_temp"].format(
             self.mention_markdown, self.timestamp)
 
-    def send_template(self, update, context):
-        context.user_data["to_delete"].append(
-            context.bot.send_message(update.effective_chat.id,
-                                     self.template(context.bot),
-                                     parse_mode=ParseMode.MARKDOWN))
-
+    @property
     def donates(self):
-        return
+        return donations_table.find({"bot_id": self.context.bot.id,
+                                     "user_id": self.user_id})
 
+    @property
     def donates_to_string(self):
-        pass
+        donates = self.donates
+        # return string_dict(self.context)["donations_count_str"] + \
+        #     DonationStatistic().create_amount(donates) if donates.count() else ""
+        return string_dict(self.context)["donations_count_str"].format(
+            DonationStatistic().create_amount(donates)) if donates.count() else ""
+
+    @staticmethod
+    def statistic(context):
+        bot_lang = chatbots_table.find_one({"bot_id": context.bot.id})["lang"]
+        today_date = datetime.combine(datetime.today(), time.min)
+        week_ago_date = today_date - timedelta(days=7)
+        month_ago_date = today_date - timedelta(days=30)
+
+        # https://www.w3resource.com/python-exercises/date-time-exercise/python-date-time-exercise-8.php
+        all_users = users_table.find({"bot_id": context.bot.id,
+                                      "is_admin": False}).sort([["_id", -1]])
+        all_users_count = all_users.count()
+        daily_users = users_table.find({"bot_id": context.bot.id,
+                                        "is_admin": False,
+                                        "timestamp": {"$gt": today_date}})
+        week_users = users_table.find({"bot_id": context.bot.id,
+                                       "is_admin": False,
+                                       "timestamp": {"$gt": week_ago_date}})
+        month_users = users_table.find({"bot_id": context.bot.id,
+                                        "is_admin": False,
+                                        "timestamp": {"$gt": month_ago_date}})
+
+        today_str = lang_timestamp(bot_lang, today_date, "d MMM yyyy")
+        return {
+            "quantity": {
+                "day": {"time_strings": today_str,
+                        "count": daily_users.count()},
+
+                "week": {"time_strings":
+                         (lang_timestamp(bot_lang, week_ago_date, "d MMM yyyy"),
+                          today_str),
+                         "count": week_users.count()},
+
+                "month": {"time_strings":
+                          (lang_timestamp(bot_lang, month_ago_date, "d MMM yyyy"),
+                           today_str),
+                          "count": month_users.count()},
+
+                "all": {"time_strings":
+                        (lang_timestamp(bot_lang, all_users[all_users_count-1]['timestamp']),
+                         lang_timestamp(bot_lang, all_users[0]['timestamp'])),
+                        "count": all_users_count}}}
 
 
 class UsersHandler(object):
@@ -111,7 +165,7 @@ class UsersHandler(object):
         else:
             pagination = Pagination(context, per_page, all_users)
             for user in pagination.page_content():
-                User(user).send_template(update, context)
+                User(context, user).send_template(update)
             pagination.send_keyboard(
                 update, [[back_button(context, "back_to_users_menu")]])
 
@@ -120,7 +174,7 @@ class UsersStatistic(object):
     def show_statistic(self, update, context):
         context.bot.delete_message(update.callback_query.message.chat_id,
                                    update.callback_query.message.message_id)
-        today = datetime.combine(datetime.today(), time.min)
+        """today = datetime.combine(datetime.today(), time.min)
         today_str = str(today).split(' ')[0]
         week_ago_date = today - timedelta(days=7)
         month_ago_date = today - timedelta(days=30)
@@ -136,21 +190,29 @@ class UsersStatistic(object):
                                        "timestamp": {"$gt": week_ago_date}})
         month_users = users_table.find({"bot_id": context.bot.id,
                                         "is_admin": False,
-                                        "timestamp": {"$gt": month_ago_date}})
-
+                                        "timestamp": {"$gt": month_ago_date}})"""
+        user_statistic = User.statistic(context)
         context.bot.send_message(
             update.effective_chat.id,
             string_dict(context)["users_statistic_template"].format(
-                today_str,
-                daily_users.count(),
-                f"`{str(week_ago_date).split(' ')[0]}:{today_str}`",
-                week_users.count(),
-                f"`{str(month_ago_date).split(' ')[0]}:{today_str}`",
-                month_users.count(),
-                all_users.count()),
+                user_statistic["quantity"]["day"]["time_strings"],
+                user_statistic["quantity"]["day"]["count"],
+
+                user_statistic["quantity"]["week"]["time_strings"][0],
+                user_statistic["quantity"]["week"]["time_strings"][1],
+                user_statistic["quantity"]["week"]["count"],
+
+                user_statistic["quantity"]["month"]["time_strings"][0],
+                user_statistic["quantity"]["month"]["time_strings"][1],
+                user_statistic["quantity"]["month"]["count"],
+
+                user_statistic["quantity"]["all"]["time_strings"][0],
+                user_statistic["quantity"]["all"]["time_strings"][1],
+                user_statistic["quantity"]["all"]["count"]),
             reply_markup=back_reply(context, "help_module(users)"),
-            parse_mode=ParseMode.MARKDOWN)
-        # return USERS_STATISTIC
+            parse_mode=ParseMode.MARKDOWN),
+        # if channels_table.find({"bot_id": context.bot.id}):
+        #     pass
         return ConversationHandler.END
 
 

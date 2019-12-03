@@ -138,13 +138,16 @@ class DonationBot(object):
         buttons=[[InlineKeyboardButton(text=string_dict(context)["back_button"],
                                        callback_data="help_back")]]
         markup = InlineKeyboardMarkup(buttons)
-        context.user_data = dict()
+        # context.user_data = dict()
+        context.user_data.clear()
         context.user_data["status"] = "Paid"
         context.user_data['timestamp_paid'] = datetime.datetime.now()
         context.user_data["amount"] = update.message.successful_payment.total_amount
         context.user_data["currency"] = update.message.successful_payment.currency
         context.user_data["chat_id"] = update.message.chat_id
         context.user_data["bot_id"] = context.bot.id
+        context.user_data["user_id"] = update.effective_user.id
+        context.user_data["mention_markdown"] = update.effective_user.mention_markdown()
 
         donations_table.insert_one(context.user_data)
         update.message.reply_text(string_dict(context)["thank_donation"], markup=markup)

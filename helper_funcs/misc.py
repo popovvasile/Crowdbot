@@ -3,11 +3,15 @@ from typing import List, Dict
 
 from telegram import (InlineKeyboardButton, Bot, ParseMode,
                       InlineKeyboardMarkup)
+from telegram.ext import CallbackContext
 from telegram.error import TelegramError
 import logging
-from helper_funcs.lang_strings.strings import string_dict
+from helper_funcs.lang_strings.strings import string_dict, string_dict_dict
 # from settings import LOAD, NO_LOAD, LOGGER
 from database import custom_buttons_table
+from babel.dates import format_datetime
+from database import chatbots_table
+
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -44,6 +48,17 @@ def back_button(context, callback_data: str):
 
 def back_reply(context, callback_data: str):
     return InlineKeyboardMarkup([[back_button(context, callback_data)]])
+
+
+# http://babel.pocoo.org/en/latest/dates.html
+def lang_timestamp(bot_lang: (CallbackContext, str), timestamp,
+                   pattern="d, MMM yyyy, hh:mm"):
+    if timestamp is None:
+        return ""
+    lang_keys = {"ENG": "en", "RUS": "ru"}
+    if isinstance(bot_lang, CallbackContext):
+        bot_lang = chatbots_table.find_one({"bot_id": bot_lang.bot.id})["lang"]
+    return format_datetime(timestamp, pattern, locale=lang_keys[bot_lang])
 
 
 """def delete_messages(update, context):

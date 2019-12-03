@@ -16,7 +16,7 @@ from helper_funcs.helper import get_help
 from helper_funcs.lang_strings.strings import string_dict
 from telegram.error import TelegramError
 from math import ceil
-from helper_funcs.misc import delete_messages
+from helper_funcs.misc import delete_messages, lang_timestamp
 from helper_funcs.pagination import Pagination, set_page_key
 
 
@@ -34,7 +34,7 @@ class DonationStatistic(object):
             else:
                 collected[donate["currency"]] = donate["amount"]
         if len(collected) == 0:
-            return "0"
+            return 0
         string = "\n" + "\n".join([f"{amount / 100} {currency}"
                                    for currency, amount in collected.items()])
         return string
@@ -57,38 +57,50 @@ class DonationStatistic(object):
                InlineKeyboardButton(
                 text=string_dict(context)["back_button"],
                 callback_data="help_module(donation_payment)")]]
+        bot_lang = chatbots_table.find_one({"bot_id": context.bot.id})["lang"]
 
-        today = datetime.combine(datetime.today(), time.min)
-        today_str = str(today).split(' ')[0]
-        week_ago_date = today - timedelta(days=7)
-        month_ago_date = today - timedelta(days=30)
+        today_date = datetime.combine(datetime.today(), time.min)
+        week_ago_date = today_date - timedelta(days=7)
+        month_ago_date = today_date - timedelta(days=30)
 
         # https://www.w3resource.com/python-exercises/date-time-exercise/python-date-time-exercise-8.php
-        all_donations = donations_table.find()
+        all_donations = donations_table.find(
+            {"bot_id": context.bot.id,
+             "status": "Paid"}).sort([["_id", -1]])
+        all_donations_count = all_donations.count()
         daily_donations = donations_table.find(
-            {"bot_id": context.bot.id, "timestamp_paid": {"$gt": today}})
+            {"bot_id": context.bot.id,
+             "status": "Paid",
+             "timestamp_paid": {"$gt": today_date}})
         week_donations = donations_table.find(
-            {"bot_id": context.bot.id, "timestamp_paid": {"$gt": week_ago_date}})
+            {"bot_id": context.bot.id,
+             "status": "Paid",
+             "timestamp_paid": {"$gt": week_ago_date}})
         month_donations = donations_table.find(
-            {"bot_id": context.bot.id, "timestamp_paid": {"$gt": month_ago_date}})
+            {"bot_id": context.bot.id,
+             "status": "Paid",
+             "timestamp_paid": {"$gt": month_ago_date}})
 
         context.bot.send_message(
             update.effective_chat.id,
             string_dict(context)["donation_statistic_template"].format(
-                today_str,
-                daily_donations.count(),
-                self.create_amount(daily_donations),
+                today_str=lang_timestamp(bot_lang, today_date, "d MMM yyyy"),
+                today_count=daily_donations.count(),
+                today_amount=self.create_amount(daily_donations),
 
-                f"{str(week_ago_date).split(' ')[0]}:{today_str}",
-                week_donations.count(),
-                self.create_amount(week_donations),
+                week_from=lang_timestamp(bot_lang, week_ago_date, "d MMM yyyy"),
+                week_count=week_donations.count(),
+                week_amount=self.create_amount(week_donations),
 
-                f"{str(month_ago_date).split(' ')[0]}:{today_str}",
-                month_donations.count(),
-                self.create_amount(month_donations),
+                month_from=lang_timestamp(bot_lang, month_ago_date, "d MMM yyyy"),
+                month_count=month_donations.count(),
+                month_amount=self.create_amount(month_donations),
 
-                all_donations.count(),
-                self.create_amount(all_donations)),
+                first_donate=lang_timestamp(
+                    bot_lang, all_donations[all_donations_count - 1]['timestamp_paid']),
+                last_donate=lang_timestamp(bot_lang, all_donations[0]['timestamp_paid']),
+                all_count=all_donations_count,
+                all_amount=self.create_amount(all_donations)),
             reply_markup=InlineKeyboardMarkup(kb),
             parse_mode=ParseMode.MARKDOWN)
         return DONATION_STATISTIC
@@ -113,7 +125,7 @@ class DonationStatistic(object):
             page_content = \
                 string_dict(context)["donation_history_title"] + \
                 "\n\n".join([string_dict(context)["donation_history_item_temp"].format(
-                                 donation['chat_id'], donation['amount']/100, donation['currency'],
+                                 donation['mention_markdown'], donation['amount']/100, donation['currency'],
                                  str(donation['timestamp_paid']).split('.')[0])
                              for donation in pagination.page_content()])
             pagination.send_keyboard(update, back_button, page_content)
