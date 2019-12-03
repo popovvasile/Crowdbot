@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import telegram.ext as tg
-from telegram.ext import CommandHandler, CallbackQueryHandler, RegexHandler, MessageHandler, Filters
+from telegram.ext import CommandHandler, CallbackQueryHandler, MessageHandler, Filters
 
 from helper_funcs.admin_login import ADMIN_AUTHENTICATION_HANDLER
 from modules.chanells.channels import MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER, REMOVE_CHANNEL_HANDLER, \
@@ -28,9 +28,9 @@ from modules.donations.donation_enable import CREATE_DONATION_HANDLER
 from modules.surveys.surveys_create import DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_HANDLER, SEND_SURVEYS_HANDLER, \
     CREATE_SURVEY_HANDLER, SURVEYS_MENU
 from modules.payments.payments_config import EDIT_DONATION_HANDLER, PAYMENTS_CONFIG_KEYBOARD, CHNAGE_DONATIONS_CONFIG, \
-    CHNAGE_SHOP_CONFIG, CONFIGS_DONATIONS_GENERAL, CONFIGS_SHOP_GENERAL
+    CONFIGS_DONATIONS_GENERAL
 from helper_funcs.helper import help_button, button_handler, get_help, WelcomeBot, \
-    back_from_button_handler, product_handler
+    back_from_button_handler
 from modules.settings.manage_button import BUTTON_EDIT_HANDLER, BUTTON_EDIT_FINISH_HANDLER, DELETE_CONTENT_HANDLER, \
     BUTTON_ADD_FINISH_HANDLER, back_from_edit_button_handler
 from modules.donations.donation_payment import DONATE_HANDLER, HANDLE_SUCCES, HANDLE_PRECHECKOUT
@@ -39,11 +39,12 @@ from modules.pollbot.polls import POLL_HANDLER, SEND_POLLS_HANDLER, BUTTON_HANDL
 from modules.donations.donation_send_promotion import SEND_DONATION_TO_USERS_HANDLER
 from modules.users.messages import SEND_MESSAGE_TO_ADMIN_HANDLER, SEND_MESSAGE_TO_USERS_HANDLER, SEE_MESSAGES_HANDLER, \
     ANSWER_TO_MESSAGE_HANDLER, DELETE_MESSAGES_HANDLER, SEE_MESSAGES_FINISH_HANDLER, SEE_MESSAGES_BACK_HANDLER, \
-    SEE_MESSAGES_FINISH_BACK_HANDLER, BLOCK_USER, BLOCKED_USERS_LIST, UNBLOCK_USER, MESSAGES_MENU
+    SEE_MESSAGES_FINISH_BACK_HANDLER, BLOCK_USER, BLOCKED_USERS_LIST, UNBLOCK_USER, MESSAGES_MENU, \
+    SEE_MESSAGES_PAGINATION_HANDLER
 from modules.settings.user_mode import USER_MODE_OFF, USER_MODE_ON
 
 from modules.users.users import USERS_MENU, USERS_LIST_HANDLER, USERS_STATISTIC_HANDLER
-from modules.users.admins import ADMINS_LIST_HANDLER, ADD_ADMIN_HANDLER
+from modules.settings.admins import ADMINS_LIST_HANDLER, ADD_ADMIN_HANDLER
 from modules.donations.donation_statistic import DONATION_STATISTIC_HANDLER
 
 # SHOP
@@ -157,6 +158,7 @@ def main(token, port):
     dispatcher.add_handler(BLOCK_USER)
     dispatcher.add_handler(BLOCKED_USERS_LIST)
     dispatcher.add_handler(UNBLOCK_USER)
+    dispatcher.add_handler(SEE_MESSAGES_PAGINATION_HANDLER)
     # dispatcher.add_handler(ADD_MESSAGE_CATEGORY_HANDLER)
     # dispatcher.add_handler(DELETE_MESSAGE_CATEGORY_HANDLER)
     # dispatcher.add_handler(MESSAGE_CATEGORY_HANDLER)

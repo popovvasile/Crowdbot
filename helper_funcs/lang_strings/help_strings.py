@@ -59,8 +59,10 @@ def help_strings(context):
                                              callback_data="turn_user_mode_on"),
                         InlineKeyboardButton(text=string_d_str["payment_configure_button"],
                                              callback_data="payments_config"),
-                        ],
-
+                        InlineKeyboardButton(text=string_d_str["admins_btn_str"],
+                                             callback_data="admins"),
+                        InlineKeyboardButton(text=string_d_str["add_admin_btn_str"],
+                                             callback_data="start_add_admins")],
         admin_help=string_d_str["add_menu_buttons_help"]
     )
 
@@ -91,6 +93,7 @@ def help_strings(context):
 
     help_dict["messages"] = dict(  # TODO visitors only
         mod_name=string_d_str["send_message_module_str"],
+        # admin_help=string_d_str["users_help_admin"],
         visitor_help=string_d_str["send_message_user"],
         visitor_keyboard=[InlineKeyboardButton(text=string_d_str["send_message_button_to_admin"],
                                                callback_data="send_message_to_admin"),

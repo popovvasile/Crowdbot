@@ -2,48 +2,40 @@
 # # -*- coding: utf-8 -*-
 import datetime
 import logging
-# import random
-from haikunator import Haikunator
 from telegram import (InlineKeyboardButton, InlineKeyboardMarkup,
                       ReplyKeyboardMarkup, ReplyKeyboardRemove, ParseMode)
 from telegram.ext import (MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
-
-from database import users_table, donations_table, chatbots_table, channels_table
+from database import (users_table, donations_table, chatbots_table,
+                      channels_table)
 from helper_funcs.helper import get_help
 from helper_funcs.pagination import Pagination, set_page_key
 from helper_funcs.lang_strings.strings import string_dict
-from helper_funcs.misc import delete_messages, back_button, back_reply, lang_timestamp
+from helper_funcs.misc import (delete_messages, back_button, back_reply,
+                               lang_timestamp, get_obj)
 from bson.objectid import ObjectId
-from bson.errors import InvalidId
 from datetime import datetime, timedelta, time
 from modules.donations.donation_statistic import DonationStatistic
 
 
-# May raise Exception and bson.errors.InvalidId
-def get_obj(table, obj: (ObjectId, dict, str)):
-    if type(obj) is dict:
-        return obj
-    elif type(obj) is ObjectId:
-        return table.find_one({"_id": obj})
-    elif type(obj) is str:
-        return table.find_one({"_id": ObjectId(obj)})
-    else:
-        raise Exception
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
+
+logger = logging.getLogger(__name__)
 
 
 def users_menu(update, context):
     string_d_str = string_dict(context.bot)
-    delete_messages(update, context)
+    delete_messages(update, context, True)
     users_menu_keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton(text=string_d_str["statistic_btn_str"],
                               callback_data="users_statistic"),
          InlineKeyboardButton(text=string_d_str["users_list_btn_str"],
                               callback_data="users_layout")],
-        [InlineKeyboardButton(text=string_d_str["admins_btn_str"],
-                              callback_data="admins"),
-         InlineKeyboardButton(text=string_d_str["add_admin_btn_str"],
-                              callback_data="start_add_admins")],
+        # [InlineKeyboardButton(text=string_d_str["admins_btn_str"],
+        #                       callback_data="admins"),
+        #  InlineKeyboardButton(text=string_d_str["add_admin_btn_str"],
+        #                       callback_data="start_add_admins")],
         [back_button(context, "help_module(users)")]
     ])
     context.bot.send_message(update.callback_query.message.chat.id,
@@ -53,7 +45,7 @@ def users_menu(update, context):
 
 
 def back_to_users_menu(update, context):
-    delete_messages(update, context)
+    delete_messages(update, context, True)
     context.user_data.clear()
     return users_menu(update, context)
 
@@ -141,7 +133,7 @@ class User(object):
 
 class UsersHandler(object):
     def users(self, update, context):
-        delete_messages(update, context)
+        delete_messages(update, context, True)
         set_page_key(update, context, "users_layout")
         self.send_users_layout(update, context)
         return USERS

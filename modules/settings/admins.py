@@ -14,10 +14,11 @@ from helper_funcs.helper import get_help
 from helper_funcs.pagination import Pagination, set_page_key
 from helper_funcs.lang_strings.strings import string_dict
 from helper_funcs.misc import delete_messages, back_button, back_reply, lang_timestamp
+from helper_funcs.helper import back_from_button_handler
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
 from validate_email import validate_email
-from modules.users.users import get_obj, back_to_users_menu
+from modules.users.users import get_obj  # , back_to_users_menu
 from uuid import uuid4
 from threading import Thread
 from helper_funcs.mailer import SMTPMailer
@@ -104,7 +105,7 @@ class Admin:
 class AdminHandler(object):
     # todo maybe add new admins right in telegram
     def admins(self, update, context):
-        delete_messages(update, context)
+        delete_messages(update, context, True)
         set_page_key(update, context, "admins")
         self.send_admins_layout(update, context)
         return ADMINS
@@ -122,16 +123,16 @@ class AdminHandler(object):
                 context.bot.send_message(
                     update.effective_chat.id,
                     string_dict(context)["no_admins_str"],
-                    reply_markup=back_reply(context, "back_to_users_menu")))
+                    reply_markup=back_reply(context, "help_module(settings)")))
         else:
             pagination = Pagination(context, per_page, all_admins)
             for admin in pagination.page_content():
                 Admin(context, admin).send_template(update)
             pagination.send_keyboard(
-                update, [[back_button(context, "back_to_users_menu")]])
+                update, [[back_button(context, "help_module(settings)")]])
 
     def confirm_delete_admin(self, update, context):
-        delete_messages(update, context)
+        delete_messages(update, context, True)
         context.user_data["admin"] = Admin(
             context, update.callback_query.data.split("/")[1])
         reply_markup = InlineKeyboardMarkup([
@@ -145,30 +146,30 @@ class AdminHandler(object):
         return CONFIRM_DELETE_ADMIN
 
     def finish_delete_admin(self, update, context):
-        delete_messages(update, context)
+        delete_messages(update, context, True)
         context.user_data["admin"].delete()
         update.callback_query.answer(
             string_dict(context)["admin_deleted_blink"])
         return self.back_to_admins_list(update, context)
 
     def start_add_admins(self, update, context):
-        delete_messages(update, context)
+        delete_messages(update, context, True)
         context.user_data["new_admins"] = list()
         context.user_data['to_delete'].append(
             context.bot.send_message(
                 update.effective_chat.id,
                 string_dict(context)["enter_new_admin_email"],
-                reply_markup=back_reply(context, "back_to_users_menu")))
+                reply_markup=back_reply(context, "help_module(settings)")))
         return ADD_ADMINS
 
     def continue_add_admins(self, update, context):
-        delete_messages(update, context)
+        delete_messages(update, context, True)
         reply_markup = InlineKeyboardMarkup([
             [InlineKeyboardButton(string_dict(context)["add_button"],
                                   callback_data="finish_add_admins"),
-             back_button(context, "back_to_users_menu")]
+             back_button(context, "help_module(settings)")]
             if context.user_data["new_admins"]
-            else [back_button(context, "back_to_users_menu")]])
+            else [back_button(context, "help_module(settings)")]])
 
         # https://pypi.org/project/validate_email/
         is_valid = validate_email(update.message.text)
@@ -183,7 +184,7 @@ class AdminHandler(object):
                 kb = InlineKeyboardMarkup([
                     [InlineKeyboardButton(string_dict(context)["add_button"],
                                           callback_data="finish_add_admins"),
-                     back_button(context, "back_to_users_menu")]])
+                     back_button(context, "help_module(settings)")]])
                 text = emails_layout(
                     context, string_dict(context)["next_email_request"])
                 context.user_data["to_delete"].append(
@@ -210,17 +211,24 @@ class AdminHandler(object):
         return ADD_ADMINS
 
     def finish_add_admins(self, update, context):
-        delete_messages(update, context)
+        # delete_messages(update, context, True)
         Admin.add_new_admins(context)
         update.callback_query.answer(string_dict(context)["admins_added_blink"])
-        return back_to_users_menu(update, context)
+        update.callback_query.data = "help_module(settings)"
+        return self.back(update, context)
 
     def back_to_admins_list(self, update, context):
-        delete_messages(update, context)
+        # delete_messages(update, context, True)
         page = context.user_data.get("page")
         context.user_data.clear()
         context.user_data["page"] = page
         return self.admins(update, context)
+
+    def back(self, update, context):
+        # delete_messages(update, context)
+        back_from_button_handler(update, context)
+        context.user_data.clear()
+        return ConversationHandler.END
 
 
 ADMINS, CONFIRM_DELETE_ADMIN, ADD_ADMINS = range(3)
@@ -249,8 +257,8 @@ ADMINS_LIST_HANDLER = ConversationHandler(
     },
 
     fallbacks=[
-        CallbackQueryHandler(pattern=r"back_to_users_menu",
-                             callback=back_to_users_menu),
+        CallbackQueryHandler(pattern=r"help_module",
+                             callback=AdminHandler().back),
         CallbackQueryHandler(pattern=r"back_to_admin_list",
                              callback=AdminHandler().back_to_admins_list)
         # CallbackQueryHandler(pattern=r"help_back",
@@ -272,8 +280,8 @@ ADD_ADMIN_HANDLER = ConversationHandler(
     },
 
     fallbacks=[
-        CallbackQueryHandler(pattern=r"back_to_users_menu",
-                             callback=back_to_users_menu),
+        CallbackQueryHandler(pattern=r"help_module",
+                             callback=AdminHandler().back),
         CallbackQueryHandler(pattern=r"back_to_admin_list",
                              callback=AdminHandler().back_to_admins_list)
         # CallbackQueryHandler(pattern=r"help_back",

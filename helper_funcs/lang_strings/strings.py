@@ -596,7 +596,8 @@ Here you can configure your payments settings and your shop
                              "\n`{}`"
                              "\n_Total subscribers:_ `{}`",
     donations_count_str=f"{emoji['money_with_wings']} *Донаты Юзера:* "
-                            "{}"
+                            "{}",
+    message_temp="<b>User's name:</b> {}, \n\n<b>Time:</b> {}"
 )
 
 RUS = dict(
@@ -1313,7 +1314,9 @@ https://telegra.ph/Gajd-Podklyuchit-donaty-07-03
                              "\n`{}`"
                              "\n_Total subscribers:_ `{}`",
     donations_count_str=f"{emoji['money_with_wings']} *Донаты Юзера:* "
-                        "{}"
+                        "{}",
+    message_temp="<b>User's name:</b> {}, \n\n<b>Time:</b> {}"
+
 )
 
 string_dict_dict = {"ENG": ENG,

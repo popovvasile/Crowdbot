@@ -11,6 +11,7 @@ from helper_funcs.lang_strings.strings import string_dict, string_dict_dict
 from database import custom_buttons_table
 from babel.dates import format_datetime
 from database import chatbots_table
+from bson.objectid import ObjectId
 
 
 logging.basicConfig(
@@ -22,12 +23,13 @@ LOAD = []
 NO_LOAD = ['translation', 'rss']
 
 
-def delete_messages(update, context):
-    try:
-        context.bot.delete_message(update.effective_chat.id,
-                                   update.effective_message.message_id)
-    except TelegramError:
-        pass
+def delete_messages(update, context, message_from_update=False):
+    if message_from_update:
+        try:
+            context.bot.delete_message(update.effective_chat.id,
+                                       update.effective_message.message_id)
+        except TelegramError:
+            pass
     if 'to_delete' in context.user_data:
         for msg in context.user_data['to_delete']:
             try:
@@ -61,18 +63,16 @@ def lang_timestamp(bot_lang: (CallbackContext, str), timestamp,
     return format_datetime(timestamp, pattern, locale=lang_keys[bot_lang])
 
 
-"""def delete_messages(update, context):
-    if 'to_delete' in context.user_data:
-        for msg in context.user_data['to_delete']:
-            try:
-                if msg.message_id != update.effective_message.message_id:
-                    context.bot.delete_message(update.effective_chat.id, msg.message_id)
-            except TelegramError as e:
-                print('except in delete_message---> {}, {}'.format(e, msg.message_id))
-                continue
-        context.user_data['to_delete'] = list()
+# May raise Exception and bson.errors.InvalidId
+def get_obj(table, obj: (ObjectId, dict, str)):
+    if type(obj) is dict:
+        return obj
+    elif type(obj) is ObjectId:
+        return table.find_one({"_id": obj})
+    elif type(obj) is str:
+        return table.find_one({"_id": ObjectId(obj)})
     else:
-        context.user_data['to_delete'] = list()"""
+        raise Exception
 
 
 class EqInlineKeyboardButton(InlineKeyboardButton):
