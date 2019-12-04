@@ -18,8 +18,9 @@ from datetime import datetime, timedelta, time
 from modules.donations.donation_statistic import DonationStatistic
 
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
@@ -32,10 +33,6 @@ def users_menu(update, context):
                               callback_data="users_statistic"),
          InlineKeyboardButton(text=string_d_str["users_list_btn_str"],
                               callback_data="users_layout")],
-        # [InlineKeyboardButton(text=string_d_str["admins_btn_str"],
-        #                       callback_data="admins"),
-        #  InlineKeyboardButton(text=string_d_str["add_admin_btn_str"],
-        #                       callback_data="start_add_admins")],
         [back_button(context, "help_module(users)")]
     ])
     context.bot.send_message(update.callback_query.message.chat.id,
@@ -83,8 +80,6 @@ class User(object):
     @property
     def donates_to_string(self):
         donates = self.donates
-        # return string_dict(self.context)["donations_count_str"] + \
-        #     DonationStatistic().create_amount(donates) if donates.count() else ""
         return string_dict(self.context)["donations_count_str"].format(
             DonationStatistic().create_amount(donates)) if donates.count() else ""
 
@@ -166,23 +161,6 @@ class UsersStatistic(object):
     def show_statistic(self, update, context):
         context.bot.delete_message(update.callback_query.message.chat_id,
                                    update.callback_query.message.message_id)
-        """today = datetime.combine(datetime.today(), time.min)
-        today_str = str(today).split(' ')[0]
-        week_ago_date = today - timedelta(days=7)
-        month_ago_date = today - timedelta(days=30)
-
-        # https://www.w3resource.com/python-exercises/date-time-exercise/python-date-time-exercise-8.php
-        all_users = users_table.find({"bot_id": context.bot.id,
-                                      "is_admin": False})
-        daily_users = users_table.find({"bot_id": context.bot.id,
-                                        "is_admin": False,
-                                        "timestamp": {"$gt": today}})
-        week_users = users_table.find({"bot_id": context.bot.id,
-                                       "is_admin": False,
-                                       "timestamp": {"$gt": week_ago_date}})
-        month_users = users_table.find({"bot_id": context.bot.id,
-                                        "is_admin": False,
-                                        "timestamp": {"$gt": month_ago_date}})"""
         user_statistic = User.statistic(context)
         context.bot.send_message(
             update.effective_chat.id,
@@ -203,8 +181,9 @@ class UsersStatistic(object):
                 user_statistic["quantity"]["all"]["count"]),
             reply_markup=back_reply(context, "help_module(users)"),
             parse_mode=ParseMode.MARKDOWN),
-        # if channels_table.find({"bot_id": context.bot.id}):
-        #     pass
+        # CHANNELS STATISTIC
+        if channels_table.find({"bot_id": context.bot.id}):
+            pass
         return ConversationHandler.END
 
 

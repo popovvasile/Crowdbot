@@ -93,7 +93,6 @@ def help_strings(context):
 
     help_dict["messages"] = dict(  # TODO visitors only
         mod_name=string_d_str["send_message_module_str"],
-        # admin_help=string_d_str["users_help_admin"],
         visitor_help=string_d_str["send_message_user"],
         visitor_keyboard=[InlineKeyboardButton(text=string_d_str["send_message_button_to_admin"],
                                                callback_data="send_message_to_admin"),

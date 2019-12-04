@@ -124,7 +124,7 @@ class SendMessageToAdmin(object):
 
     def send_message(self, update, context):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
         buttons = [[InlineKeyboardButton(text=string_dict(context)["back_button"],
                                          callback_data="help_back")]]
         reply_markup = InlineKeyboardMarkup(
@@ -132,12 +132,13 @@ class SendMessageToAdmin(object):
         if "anonim" in update.callback_query.data:
             context.user_data["anonim"] = True
             context.bot.send_message(update.callback_query.message.chat_id,
-                             string_dict(context)["send_message_from_user_to_admin_anonim_text"],
-                             reply_markup=reply_markup)
+                                     string_dict(context)["send_message_from_user_to_admin_anonim_text"],
+                                     reply_markup=reply_markup)
         else:
             context.user_data["anonim"] = False
             context.bot.send_message(update.callback_query.message.chat_id,
-                             string_dict(context)["send_message_from_user_to_admin_text"], reply_markup=reply_markup)
+                                     string_dict(context)["send_message_from_user_to_admin_text"],
+                                     reply_markup=reply_markup)
 
         return MESSAGE
 
@@ -204,14 +205,14 @@ class SendMessageToAdmin(object):
              [InlineKeyboardButton(text="Cancel", callback_data="help_back")]]
         )
         context.bot.send_message(update.message.chat_id,
-                         string_dict(context)["send_message_4"],
-                         reply_markup=final_reply_markup)
+                                 string_dict(context)["send_message_4"],
+                                 reply_markup=final_reply_markup)
 
         return MESSAGE
 
     def send_message_finish(self, update, context):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(context)["back_button"], callback_data="help_back")])
         final_reply_markup = InlineKeyboardMarkup(
@@ -242,20 +243,20 @@ class SendMessageToAdmin(object):
 
     def send_message_cancel(self, update, context):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(context)["back_button"], callback_data="help_back")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         context.bot.send_message(update.callback_query.message.chat_id,
-                         string_dict(context)["send_message_9"],
-                         reply_markup=final_reply_markup)
+                                 string_dict(context)["send_message_9"],
+                                 reply_markup=final_reply_markup)
         context.user_data.clear()
         return ConversationHandler.END
 
     def back(self, update, context):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
         get_help(update, context)
         return ConversationHandler.END
 
@@ -268,25 +269,24 @@ class SendMessageToUsers(object):
                                              callback_data="help_module(messages)")])
         reply_markup = InlineKeyboardMarkup(buttons)
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
 
         categories = user_categories_table.find()
         if categories.count() > 0:
             context.bot.send_message(update.callback_query.message.chat_id,
-                             string_dict(context)["back_text"],
-                             reply_markup=reply_markup)
+                                     string_dict(context)["back_text"],
+                                     reply_markup=reply_markup)
             categories_list = ["All"] + [x["category"] for x in categories]
             category_markup = ReplyKeyboardMarkup([categories_list])
 
             context.bot.send_message(update.callback_query.message.chat_id,
-                             string_dict(context)["send_message_1_1"],
-                             reply_markup=category_markup)
+                                     string_dict(context)["send_message_1_1"],
+                                     reply_markup=category_markup)
             return CHOOSE_CATEGORY
         else:
             context.bot.send_message(update.callback_query.message.chat_id,
-                             string_dict(context)["send_message_to_users_text"],
-                             reply_markup=reply_markup
-                             )
+                                     string_dict(context)["send_message_to_users_text"],
+                                     reply_markup=reply_markup)
             return MESSAGE_TO_USERS
 
     def choose_question(self, update, context):
@@ -296,11 +296,10 @@ class SendMessageToUsers(object):
                                              callback_data="help_module(messages)")])
         reply_markup = InlineKeyboardMarkup(buttons)
         context.bot.send_message(update.message.chat_id,
-                         "Cool",
-                         reply_markup=ReplyKeyboardRemove())
+                                 "Cool", reply_markup=ReplyKeyboardRemove())
         context.bot.send_message(update.message.chat_id,
-                         string_dict(context)["send_message_1"],
-                         reply_markup=reply_markup)
+                                 string_dict(context)["send_message_1"],
+                                 reply_markup=reply_markup)
         return MESSAGE_TO_USERS
 
     def received_message(self, update, context):
@@ -346,8 +345,8 @@ class SendMessageToUsers(object):
              [InlineKeyboardButton(text=string_dict(context)["cancel_button"], callback_data="help_module(messages)")]]
         )
         context.bot.send_message(update.message.chat_id,
-                         string_dict(context)["send_message_4"],
-                         reply_markup=final_reply_markup)
+                                 string_dict(context)["send_message_4"],
+                                 reply_markup=final_reply_markup)
 
         return MESSAGE_TO_USERS
 
@@ -386,15 +385,15 @@ class SendMessageToUsers(object):
                             context.bot.send_sticker(chat["chat_id"], content_dict["sticker_file"])
 
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(context)["back_button"],
                                              callback_data="help_module(messages)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         context.bot.send_message(update.callback_query.message.chat_id,
-                         string_dict(context)["send_message_5"],
-                         reply_markup=final_reply_markup)
+                                 string_dict(context)["send_message_5"],
+                                 reply_markup=final_reply_markup)
         logger.info("Admin {} on bot {}:{} sent a message to the users".format(
             update.effective_user.first_name, context.bot.first_name, context.bot.id))
         context.user_data.clear()
@@ -403,21 +402,21 @@ class SendMessageToUsers(object):
 
     def send_message_cancel(self, update, context):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
         buttons = list()
         buttons.append(
             [InlineKeyboardButton(text=string_dict(context)["back_button"], callback_data="help_module(messages)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         context.bot.send_message(update.callback_query.message.chat_id,
-                         string_dict(context)["send_message_9"],
-                         reply_markup=final_reply_markup)
+                                 string_dict(context)["send_message_9"],
+                                 reply_markup=final_reply_markup)
         context.user_data.clear()
         return ConversationHandler.END
 
     def back(self, update, context):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
         get_help(update, context)
         return ConversationHandler.END
 
@@ -437,10 +436,10 @@ class AnswerToMessage(object):
         context.user_data["chat_id"] = user["chat_id"]
 
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
         context.bot.send_message(update.callback_query.message.chat_id,
-                         string_dict(context)["send_message_3"],
-                         reply_markup=reply_markup)
+                                 string_dict(context)["send_message_3"],
+                                 reply_markup=reply_markup)
         return MESSAGE_TO_USERS
 
     def received_message(self, update, context):
@@ -486,8 +485,8 @@ class AnswerToMessage(object):
              [InlineKeyboardButton(text=string_dict(context)["cancel_button"], callback_data="help_module(messages)")]]
         )
         context.bot.send_message(update.message.chat_id,
-                         string_dict(context)["send_message_4"],
-                         reply_markup=final_reply_markup)
+                                 string_dict(context)["send_message_4"],
+                                 reply_markup=final_reply_markup)
 
         return MESSAGE_TO_USERS
 
@@ -495,11 +494,11 @@ class AnswerToMessage(object):
         # user_name = bot.get_chat_member(user_data["chat_id"]).user.mention_markdown()
 
         context.bot.send_message(context.user_data["chat_id"],
-                         text=string_dict(context)["send_message_answer_user"])
+                                 text=string_dict(context)["send_message_answer_user"])
         for content_dict in context.user_data["content"]:
             if "text" in content_dict:
                 context.bot.send_message(context.user_data["chat_id"],
-                                 content_dict["text"])
+                                         content_dict["text"])
             if "audio_file" in content_dict:
                 context.bot.send_audio(context.user_data["chat_id"], content_dict["audio_file"])
             if "voice_file" in content_dict:
@@ -521,15 +520,15 @@ class AnswerToMessage(object):
                 context.bot.send_sticker(context.user_data["chat_id"], content_dict["sticker_file"])
 
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(context)["back_button"],
                                              callback_data="help_module(messages)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         context.bot.send_message(update.callback_query.message.chat_id,
-                         string_dict(context)["send_message_5"],
-                         reply_markup=final_reply_markup)
+                                 string_dict(context)["send_message_5"],
+                                 reply_markup=final_reply_markup)
         logger.info("Admin {} on bot {}:{} sent a message to the users".format(
             update.effective_user.first_name, context.bot.first_name, context.bot.id))
         context.user_data.clear()
@@ -538,7 +537,7 @@ class AnswerToMessage(object):
 
     def back(self, update, context):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
         get_help(update, context)
         return ConversationHandler.END
 
@@ -561,7 +560,7 @@ class DeleteMessage(object):
             buttons)
 
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
         messages = users_messages_to_admin_table.find({"bot_id": context.bot.id})
         if messages.count() > 0:
             message_id = update.callback_query.data.replace("delete_message_", "")  # message_id
@@ -573,25 +572,25 @@ class DeleteMessage(object):
                 reply_markup = InlineKeyboardMarkup(
                     buttons)
                 context.bot.send_message(update.callback_query.message.chat_id,
-                                 string_dict(context)["delete_messages_double_check"],
-                                 reply_markup=reply_markup)
+                                         string_dict(context)["delete_messages_double_check"],
+                                         reply_markup=reply_markup)
                 context.user_data["message_id"] = message_id
                 return DOUBLE_CHECK  # TODO send a keyboard with callback depending on previous callback data
             else:
                 users_messages_to_admin_table.delete_one({"bot_id": context.bot.id, "message_id": int(message_id)})
                 context.bot.send_message(update.callback_query.message.chat_id,
-                                 string_dict(context)["delete_message_str_1"],
-                                 reply_markup=reply_markup)
+                                         string_dict(context)["delete_message_str_1"],
+                                         reply_markup=reply_markup)
                 return ConversationHandler.END
         else:
             context.bot.send_message(update.callback_query.message.chat_id,
-                             string_dict(context)["send_message_6"],
-                             reply_markup=reply_markup)
+                                     string_dict(context)["send_message_6"],
+                                     reply_markup=reply_markup)
             return ConversationHandler.END
 
     def delete_message_double_check(self, update, context):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
         buttons = [[InlineKeyboardButton(text=string_dict(context)["back_button"],
                                          callback_data="help_module(messages)")]]
         reply_markup = InlineKeyboardMarkup(
@@ -611,8 +610,8 @@ class DeleteMessage(object):
             users_messages_to_admin_table.delete_many({"bot_id": context.bot.id,
                                                        "timestamp": {'$gt': time_past}})
         context.bot.send_message(update.callback_query.message.chat_id,
-                         string_dict(context)["delete_message_str_1"],
-                         reply_markup=reply_markup)
+                                 string_dict(context)["delete_message_str_1"],
+                                 reply_markup=reply_markup)
         return ConversationHandler.END
 
 
@@ -638,6 +637,11 @@ class SeeMessageToAdmin(object):
         if messages.count() != 0:
             pagination = Pagination(context, per_page, messages)
             for message in pagination.page_content():
+                message_buttons = InlineKeyboardMarkup([
+                    [InlineKeyboardButton(
+                        text=string_dict(context)["view_message_str"],
+                        callback_data=f"view_message_{message['message_id']}")]
+                ])
                 context.user_data["to_delete"].append(
                     context.bot.send_message(
                         update.callback_query.message.chat_id,
@@ -645,15 +649,12 @@ class SeeMessageToAdmin(object):
                             f"<code>{message['user_full_name']}</code>"
                             if message["anonim"] else message["mention_html"],
                             lang_timestamp(context, message["timestamp"])),
-                        reply_markup=InlineKeyboardMarkup([
-                            [InlineKeyboardButton(
-                                text=string_dict(context)["view_message_str"],
-                                callback_data=f"view_message_{message['message_id']}")]
-                        ]),
-                        parse_mode=ParseMode.HTML
-                    ))
+                        reply_markup=message_buttons,
+                        parse_mode=ParseMode.HTML))
             pagination.send_keyboard(
-                update, delete_buttons, string_dict(context)["back_text"])
+                update, delete_buttons,
+                string_dict(context)["back_text"] +
+                string_dict(context)["message_count_str"].format(messages.count()))
         else:
             markup = InlineKeyboardMarkup([
                 [InlineKeyboardButton(text=string_dict(context)["back_button"],
@@ -685,41 +686,40 @@ class SeeMessageToAdmin(object):
                 context.user_data["to_delete"].append(query.message.reply_video_note(content_dict["video_note_file"]))
             if "document_file" in content_dict:
                 if ".png" in content_dict["document_file"] or ".jpg" in content_dict["document_file"]:
-                    context.user_data["to_delete"].append(query.message.reply_photo(photo=content_dict["document_file"]))
+                    context.user_data["to_delete"].append(
+                        query.message.reply_photo(photo=content_dict["document_file"]))
                 else:
-                    context.user_data["to_delete"].append(query.message.reply_document(document=content_dict["document_file"]))
+                    context.user_data["to_delete"].append(
+                        query.message.reply_document(document=content_dict["document_file"]))
             if "photo_file" in content_dict:
                 context.user_data["to_delete"].append(query.message.reply_photo(photo=content_dict["photo_file"]))
             if "animation_file" in content_dict:
-                context.user_data["to_delete"].append(query.message.reply_animation(photo=content_dict["animation_file"]))
+                context.user_data["to_delete"].append(
+                    query.message.reply_animation(photo=content_dict["animation_file"]))
             if "sticker_file" in content_dict:
                 context.user_data["to_delete"].append(query.message.reply_sticker(photo=content_dict["sticker_file"]))
-        context.user_data["to_delete"].append(context.bot.send_message(update.callback_query.message.chat_id,
-                                                       "User's name: {}, \n Timestamp:{}".format(
-                                                           message["user_full_name"],
-                                                           message["timestamp"]
-                                                       ),
-                                                       reply_markup=InlineKeyboardMarkup(
-                                                           [[InlineKeyboardButton(
-                                                               text=string_dict(context)["answer_button_str"],
+        context.user_data["to_delete"].append(
+            context.bot.send_message(update.callback_query.message.chat_id,
+                                     string_dict(context)["message_temp"].format(
+                                         f"<code>{message['user_full_name']}</code>"
+                                         if message["anonim"] else message["mention_html"],
+                                         lang_timestamp(context, message["timestamp"])),
+                                     reply_markup=InlineKeyboardMarkup([
+                                         [InlineKeyboardButton(text=string_dict(context)["answer_button_str"],
                                                                callback_data="answer_to_message_" +
                                                                              str(message["message_id"]))],
-                                                               [InlineKeyboardButton(
-                                                                   text=string_dict(context)["delete_button_str"],
-                                                                   callback_data="delete_message_" +
-                                                                                 str(message["message_id"]))],
-                                                               [InlineKeyboardButton(
-                                                                   text=string_dict(context)["block_button_str"],
-                                                                   callback_data="block_user_" +
-                                                                                 str(message["user_id"]))],
-
-                                                           ]
-                                                       )))
+                                         [InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
+                                                               callback_data="delete_message_" +
+                                                                             str(message["message_id"]))],
+                                          [InlineKeyboardButton(text=string_dict(context)["block_button_str"],
+                                                                callback_data="block_user_" +
+                                                                              str(message["user_id"]))]]),
+                                     parse_mode=ParseMode.HTML))
         context.bot.send_message(update.callback_query.message.chat_id,
-                         string_dict(context)["back_text"],
-                         reply_markup=InlineKeyboardMarkup(
-                             [[InlineKeyboardButton(text=string_dict(context)["back_button"],
-                                                    callback_data="view_back_message")]]))
+                                 string_dict(context)["back_text"],
+                                 reply_markup=InlineKeyboardMarkup([
+                                     [InlineKeyboardButton(text=string_dict(context)["back_button"],
+                                                           callback_data="view_back_message")]]))
         return ConversationHandler.END
 
     def blocked_users_list(self, update, context):
@@ -728,13 +728,14 @@ class SeeMessageToAdmin(object):
         blocked_users = users_table.find({"bot_id": context.bot.id, "blocked": True})
         for user in blocked_users:
             context.bot.send_message(update.callback_query.message.chat_id, "{}\n".format(user["full_name"]),
-                             InlineKeyboardMarkup([[InlineKeyboardButton(text="UNBLOCK",
-                                                                         callback_data="unblock_{}".format(
-                                                                             user["user_id"]))]])
+                                     InlineKeyboardMarkup([[InlineKeyboardButton(text="UNBLOCK",
+                                                                                 callback_data="unblock_{}".format(
+                                                                                     user["user_id"]))]])
                              )
         context.bot.send_message(update.callback_query.message.chat_id, "This is the list of all blocked users",
-                         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(text=string_dict(context)["back_button"],
-                                                                                 callback_data="help_module(users)")]]))
+                                 reply_markup=InlineKeyboardMarkup([
+                                     [InlineKeyboardButton(text=string_dict(context)["back_button"],
+                                                           callback_data="help_module(users)")]]))
 
     def unblock(self, update, context):
         buttons = list()
@@ -755,15 +756,17 @@ class SeeMessageToAdmin(object):
 
     def block_user(self, update, context):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
         context.user_data["user_id"] = int(update.callback_query.data.replace("block_user_", ""))
-        context.bot.send_message(update.callback_query.message.chat_id, "Are you sure that you want to block this user? \n"
-                                                                "He won't be able to use this chatbot anymore",
-                         reply_markup=ReplyKeyboardMarkup([["YES", "NO"]], one_time_keyboard=True))
+        context.bot.send_message(update.callback_query.message.chat_id,
+                                 "Are you sure that you want to block this user? \n"
+                                 "He won't be able to use this chatbot anymore",
+                                 reply_markup=ReplyKeyboardMarkup([["YES", "NO"]], one_time_keyboard=True))
         return BLOCK_CONFIRMATION
 
     def block_confirmation(self, update, context):
-        user = users_table.find_one({"user_id": context.user_data["user_id"]})
+        user = users_table.find_one({"user_id": context.user_data["user_id"],
+                                     "bot_id": context.bot.id})
         user["blocked"] = True
         users_table.update({"user_id": context.user_data["user_id"]}, user)
         markup = InlineKeyboardMarkup([[InlineKeyboardButton(text=string_dict(context)["back_button"],
