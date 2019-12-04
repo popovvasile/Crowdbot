@@ -598,7 +598,7 @@ Here you can configure your payments settings and your shop
     donations_count_str=f"{emoji['money_with_wings']} *Донаты Юзера:* "
                             "{}",
     message_temp="<b>User's name:</b> {}, \n\n<b>Time:</b> {}",
-    message_count_str="*Total messages:* `{}`",
+    message_count_str="\n_Total messages:_ `{}`",
     channels_statistic_template="<b>Channel:<b>"
 )
 
