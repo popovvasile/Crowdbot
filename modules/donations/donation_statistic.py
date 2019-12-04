@@ -49,8 +49,7 @@ class DonationStatistic(object):
     #     return
 
     def show_statistic(self, update, context):
-        context.bot.delete_message(update.callback_query.message.chat_id,
-                                   update.callback_query.message.message_id)
+        delete_messages(update, context, True)
         kb = [[InlineKeyboardButton(
                 text=string_dict(context)["donations_history_button"],
                 callback_data="show_history"),
@@ -81,32 +80,39 @@ class DonationStatistic(object):
              "status": "Paid",
              "timestamp_paid": {"$gt": month_ago_date}})
 
-        context.bot.send_message(
-            update.effective_chat.id,
-            string_dict(context)["donation_statistic_template"].format(
-                today_str=lang_timestamp(bot_lang, today_date, "d MMM yyyy"),
-                today_count=daily_donations.count(),
-                today_amount=self.create_amount(daily_donations),
+        first_donate_time, last_donate_time = \
+            (lang_timestamp(
+                bot_lang,
+                all_donations[all_donations_count - 1]['timestamp_paid']),
+             lang_timestamp(bot_lang, all_donations[0]['timestamp_paid'])) \
+            if all_donations_count else (0, 0)
 
-                week_from=lang_timestamp(bot_lang, week_ago_date, "d MMM yyyy"),
-                week_count=week_donations.count(),
-                week_amount=self.create_amount(week_donations),
+        context.user_data["to_delete"].append(
+            context.bot.send_message(
+                update.effective_chat.id,
+                string_dict(context)["donation_statistic_template"].format(
+                    today_str=lang_timestamp(bot_lang, today_date, "d MMM yyyy"),
+                    today_count=daily_donations.count(),
+                    today_amount=self.create_amount(daily_donations),
 
-                month_from=lang_timestamp(bot_lang, month_ago_date, "d MMM yyyy"),
-                month_count=month_donations.count(),
-                month_amount=self.create_amount(month_donations),
+                    week_from=lang_timestamp(bot_lang, week_ago_date, "d MMM yyyy"),
+                    week_count=week_donations.count(),
+                    week_amount=self.create_amount(week_donations),
 
-                first_donate=lang_timestamp(
-                    bot_lang, all_donations[all_donations_count - 1]['timestamp_paid']),
-                last_donate=lang_timestamp(bot_lang, all_donations[0]['timestamp_paid']),
-                all_count=all_donations_count,
-                all_amount=self.create_amount(all_donations)),
-            reply_markup=InlineKeyboardMarkup(kb),
-            parse_mode=ParseMode.MARKDOWN)
+                    month_from=lang_timestamp(bot_lang, month_ago_date, "d MMM yyyy"),
+                    month_count=month_donations.count(),
+                    month_amount=self.create_amount(month_donations),
+
+                    first_donate=first_donate_time,
+                    last_donate=last_donate_time,
+                    all_count=all_donations_count,
+                    all_amount=self.create_amount(all_donations)),
+                reply_markup=InlineKeyboardMarkup(kb),
+                parse_mode=ParseMode.MARKDOWN))
         return DONATION_STATISTIC
 
     def send_donation_history(self, update, context):
-        delete_messages(update, context)
+        delete_messages(update, context, True)
         set_page_key(update, context, "show_history")
         all_donations = donations_table.find(
             {"bot_id": context.bot.id}).sort([["_id", -1]])

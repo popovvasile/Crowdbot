@@ -10,7 +10,7 @@ from telegram.ext import (MessageHandler, Filters,
 
 from database import users_messages_to_admin_table, user_categories_table, users_table
 from helper_funcs.helper import get_help
-from helper_funcs.lang_strings.strings import string_dict
+from helper_funcs.lang_strings.strings import string_dict, emoji
 from helper_funcs.misc import delete_messages, lang_timestamp
 from helper_funcs.pagination import Pagination, set_page_key
 
@@ -28,8 +28,11 @@ def messages_menu(update, context):
     string_d_str = string_dict(context)
     context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                message_id=update.callback_query.message.message_id)
+    not_read_messages_count = users_messages_to_admin_table.find(
+        {"bot_id": context.bot.id, "is_new": True}).count() or ""
     no_channel_keyboard = InlineKeyboardMarkup(
-        [[InlineKeyboardButton(text=string_d_str["send_message_button_2"],
+        [[InlineKeyboardButton(text=string_d_str["send_message_button_2"] +
+                               f" {not_read_messages_count}",
                                callback_data="inbox_message")],
          [InlineKeyboardButton(text=string_d_str["send_message_button_1"],
                                callback_data="send_message_to_users")],
@@ -237,6 +240,7 @@ class SendMessageToAdmin(object):
         context.user_data["bot_id"] = context.bot.id
         context.user_data["mention_markdown"] = update.effective_user.mention_markdown()
         context.user_data["mention_html"] = update.effective_user.mention_html()
+        context.user_data["is_new"] = True
         users_messages_to_admin_table.insert(context.user_data)
         context.user_data.clear()
         return ConversationHandler.END
@@ -632,7 +636,7 @@ class SeeMessageToAdmin(object):
                                                     callback_data="delete_message_month")
                                ])
         messages = users_messages_to_admin_table.find(
-            {"bot_id": context.bot.id})
+            {"bot_id": context.bot.id}).sort([["_id", -1]])
         per_page = 5
         if messages.count() != 0:
             pagination = Pagination(context, per_page, messages)
@@ -645,6 +649,7 @@ class SeeMessageToAdmin(object):
                 context.user_data["to_delete"].append(
                     context.bot.send_message(
                         update.callback_query.message.chat_id,
+                        (f"{emoji['email']}\n" if message["is_new"] else "") +
                         string_dict(context)["message_temp"].format(
                             f"<code>{message['user_full_name']}</code>"
                             if message["anonim"] else message["mention_html"],
@@ -670,9 +675,12 @@ class SeeMessageToAdmin(object):
                                    message_id=update.callback_query.message.message_id)
         delete_messages(update, context)
         query = update.callback_query
-        message = users_messages_to_admin_table.find_one({"bot_id": context.bot.id,
-                                                          "message_id": int(query.data.replace("view_message_", ""))})
-
+        message = users_messages_to_admin_table.find_one(
+            {"bot_id": context.bot.id,
+             "message_id": int(query.data.replace("view_message_", ""))})
+        if message["is_new"]:
+            users_messages_to_admin_table.update_one({"_id": message["_id"]},
+                                                     {"$set": {"is_new": False}})
         for content_dict in message["content"]:
             if "text" in content_dict:
                 context.user_data["to_delete"].append(query.message.reply_text(text=content_dict["text"]))

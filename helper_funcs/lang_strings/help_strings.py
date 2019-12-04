@@ -1,7 +1,7 @@
 from collections import OrderedDict
 
 from telegram import InlineKeyboardButton
-from database import chatbots_table
+from database import chatbots_table, users_messages_to_admin_table
 from helper_funcs.lang_strings.strings import string_dict
 
 
@@ -74,12 +74,15 @@ def help_strings(context):
         mod_name=string_d_str["polls_module_str"],
         admin_help=string_d_str["polls_help_admin"]
     )
-
+    not_read_messages_count = users_messages_to_admin_table.find(
+        {"bot_id": context.bot.id, "is_new": True}).count() or ""
     help_dict["users"] = dict(  # TODO add stats and everything related tom messages
         mod_name=string_d_str["users_module"],
         admin_help=string_d_str["users_help_admin"],
+
         admin_keyboard=[
-            InlineKeyboardButton(text=string_d_str["messages"],
+            InlineKeyboardButton(text=string_d_str["messages"] +
+                                 f" {not_read_messages_count}",
                                  callback_data="admin_messages"),
             InlineKeyboardButton(text=string_d_str["users_module"],
                                  callback_data="users_list"),  # TODO User statistics

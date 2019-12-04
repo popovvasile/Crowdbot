@@ -122,7 +122,8 @@ class User(object):
 
                 "all": {"time_strings":
                         (lang_timestamp(bot_lang, all_users[all_users_count-1]['timestamp']),
-                         lang_timestamp(bot_lang, all_users[0]['timestamp'])),
+                         lang_timestamp(bot_lang, all_users[0]['timestamp']))
+                        if all_users_count else (0, 0),
                         "count": all_users_count}}}
 
 

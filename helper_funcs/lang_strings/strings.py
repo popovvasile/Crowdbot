@@ -26,7 +26,8 @@ emoji = dict(
     bust_in_silhouette="👤",
     disappointed_relieved="😥",
     ok_hand="👌",
-    family_mwgb="👨‍👩‍👧‍👦")
+    family_mwgb="👨‍👩‍👧‍👦",
+    email="📧")
 
 ENG = dict(
     polls_str="Polls",
@@ -525,7 +526,7 @@ Here you can configure your payments settings and your shop
                        "\n*Всего юзеров:* `{}`",
     admins_layout_title="*Список администраторов.*"
                         "\n*Всего админов:* `{}`",
-    current_page="\n\n*Current page:* `{}`",
+    current_page="\n*Текущая траница:* `{}`",
     # delete_admin_button_str=f"{emoji['x']} Удалить"
     admin_deleted_blink=f"{emoji['white_check_mark']} Админ Успешно Удалён",
     confirm_delete_admin_str="_Вы уверены что хотите удалть админа?_",
@@ -1229,6 +1230,7 @@ https://telegra.ph/Gajd-Podklyuchit-donaty-07-03
     donations="Donations",
     shop="Shop",
     payments_config_text="Here you can configure your payments settings",
+    block_button_str="Block user",
 
     users_menu_str="Здесь вы можете увидеть своих юзеров",
     statistic_btn_str=f"{emoji['bar_chart']} Статистика",
@@ -1247,7 +1249,7 @@ https://telegra.ph/Gajd-Podklyuchit-donaty-07-03
                        "\n*Всего юзеров:* `{}`",
     admins_layout_title="*Список администраторов.*"
                         "\n*Всего админов:* `{}`",
-    current_page="\n\n*Current page:* `{}`",
+    current_page="\n*Current page:* `{}`",
     # delete_admin_button_str=f"{emoji['x']} Удалить"
     admin_deleted_blink=f"{emoji['white_check_mark']} Админ Успешно Удалён",
     confirm_delete_admin_str="_Вы уверены что хотите удалть админа?_",
@@ -1318,7 +1320,7 @@ https://telegra.ph/Gajd-Podklyuchit-donaty-07-03
     donations_count_str=f"{emoji['money_with_wings']} *Донаты Юзера:* "
                         "{}",
     message_temp="<b>User's name:</b> {}, \n\n<b>Time:</b> {}",
-    message_count_str="*Всего сообщений:* `{}`"
+    message_count_str="\n*Всего сообщений:* `{}`"
 )
 
 string_dict_dict = {"ENG": ENG,
