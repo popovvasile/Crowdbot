@@ -1,37 +1,39 @@
-from telegram import ParseMode, InputMediaPhoto, InlineKeyboardMarkup, InlineKeyboardButton
-from modules.shop.helper.strings import strings, emoji
-from modules.shop.helper.keyboards import back_btn, sizes_list
-
-from config import conf
-import requests
+from telegram import (ParseMode, InputMediaPhoto, InlineKeyboardMarkup,
+                      InlineKeyboardButton)
 from telegram.error import BadRequest
-from modules.shop.helper.helper import send_media_arr
-from requests.exceptions import RequestException
+from helper_funcs.misc import get_obj
+from database import products_table
+from bson.objectid import ObjectId
+from helper_funcs.lang_strings.strings import string_dict
 
 
 class Product(object):
-    def __init__(self, product: (int, dict)):
-        if type(product) is int:
-            resp = requests.get(f"{conf['API_URL']}/product/{product}")
-            if resp.status_code == 200:
-                product = resp.json()
-            else:
-                raise RequestException
+    def __init__(self, obj: (ObjectId, dict, str)):
+        # self.context = context
+        product_obj = get_obj(products_table, obj)
 
-        self.article = product["article"]
-        self.sold = product["sold"]
-        self.brand = product["brand"]
-        self.category = product["category"]
-        self.price = product["price"]
-        self.description = product["description"]
-        self.name = product["name"]
-        self.discount_price = product["discount_price"]
-        self.sizes = product["sizes"]
-        self.order_ids = product["order_ids"]
-        self.images = product["images"]
-        self.in_trash = product["in_trash"]
+        self._id = product_obj.get("_id")
+        self.title = product_obj["title"]
+        self.price = product_obj["price"]
+        self.currency = product_obj["currency"]
+        self.shipping = product_obj["shipping"]
+        self.content = product_obj["content"]
+        self.title_lower = product_obj["title_lower"]
+        self.admin_id = product_obj["admin_id"]
+        self.bot_id = product_obj["bot_id"]
+        self.link_button = product_obj["link_button"]
 
     @property
+    def template(self):
+        return
+
+    def full_template(self):
+        return
+
+    def reply_markup(self):
+        return
+
+    """"@property
     def template(self):
         return strings["product_template"].format(
             self.article, True if not self.sold else False,
@@ -194,4 +196,4 @@ class Product(object):
         if resp.status_code == 200:
             self.__init__(resp.json())
         else:
-            raise RequestException
+            raise RequestException"""
