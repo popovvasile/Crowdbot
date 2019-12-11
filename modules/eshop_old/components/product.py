@@ -4,7 +4,7 @@ from telegram.error import BadRequest
 from helper_funcs.misc import get_obj
 from database import products_table
 from bson.objectid import ObjectId
-from helper_funcs.lang_strings.strings import string_dict
+
 
 
 class Product(object):

@@ -6,7 +6,6 @@ from telegram import (InlineKeyboardButton, Bot, ParseMode,
 from telegram.ext import CallbackContext
 from telegram.error import TelegramError
 import logging
-from helper_funcs.lang_strings.strings import string_dict, string_dict_dict
 # from settings import LOAD, NO_LOAD, LOGGER
 from database import custom_buttons_table
 from babel.dates import format_datetime

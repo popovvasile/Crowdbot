@@ -5,7 +5,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (MessageHandler, Filters, ConversationHandler, CallbackQueryHandler)
 from database import chatbots_table
 from helper_funcs.helper import get_help
-from helper_funcs.lang_strings.strings import string_dict
+
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -19,7 +19,7 @@ class ChangeBotLanguage(object):
 
     def send_message(self, update, context):
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(context)["back_button"],
+        buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                              callback_data="help_module(settings)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
@@ -27,12 +27,12 @@ class ChangeBotLanguage(object):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         context.bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(context)["edit_button_str_1"], reply_markup=reply_markup)  # TODO
+                         context.bot.lang_dict["edit_button_str_1"], reply_markup=reply_markup)  # TODO
         return MESSAGE
 
     def received_message(self, update, context):
         context.bot.send_message(update.message.chat_id,
-                         string_dict(context)["edit_button_str_2"])
+                         context.bot.lang_dict["edit_button_str_2"])
 
         old_bot = chatbots_table.find_one({"bot_id": context.bot.id})
         old_bot['lang'] = update.message.text
@@ -51,7 +51,7 @@ class EditBotDescription(object):
 
     def send_message(self, update, context):
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(context)["back_button"],
+        buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                              callback_data="help_module(settings)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
@@ -59,12 +59,12 @@ class EditBotDescription(object):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         context.bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(context)["edit_button_str_1"], reply_markup=reply_markup)
+                         context.bot.lang_dict["edit_button_str_1"], reply_markup=reply_markup)
         return MESSAGE
 
     def received_message(self, update, context):
         context.bot.send_message(update.message.chat_id,
-                         string_dict(context)["edit_button_str_2"])
+                         context.bot.lang_dict["edit_button_str_2"])
 
         old_bot = chatbots_table.find_one({"bot_id": context.bot.id})
         old_bot['welcomeMessage'] = update.message.text

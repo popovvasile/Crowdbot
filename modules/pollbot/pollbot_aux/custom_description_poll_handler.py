@@ -1,4 +1,4 @@
-from helper_funcs.lang_strings.strings import string_dict
+
 from .basic_poll_handler import BasicPoll
 
 
@@ -16,7 +16,7 @@ class CustomDescriptionHandler(BasicPoll):
         return message
 
     def ask_for_extra_config(self, meta, update):
-        return string_dict(context)["ask_for_extra_config"]
+        return context.bot.lang_dict["ask_for_extra_config"]
 
     def register_extra_config(self, text, meta):
         meta['text'] = text

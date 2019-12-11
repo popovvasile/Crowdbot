@@ -5,7 +5,7 @@ from telegram.ext import ConversationHandler, CallbackQueryHandler, MessageHandl
 from database import polls_table, surveys_table, chatbots_table, channels_table
 from helper_funcs.auth import initiate_chat_id
 from helper_funcs.helper import get_help
-from helper_funcs.lang_strings.strings import string_dict
+
 import logging
 
 from modules.pollbot.polls import PollBot
@@ -45,18 +45,18 @@ class SendPoll(object):
             update_data = update
 
         create_buttons = [
-            [InlineKeyboardButton(text=string_dict(context)["create_button_str"], callback_data="create_poll"),
-             InlineKeyboardButton(text=string_dict(context)["back_button"], callback_data="help_back")]]
+            [InlineKeyboardButton(text=context.bot.lang_dict["create_button_str"], callback_data="create_poll"),
+             InlineKeyboardButton(text=context.bot.lang_dict["back_button"], callback_data="help_back")]]
         create_markup = InlineKeyboardMarkup(
             create_buttons)
         back_keyboard = \
-            InlineKeyboardMarkup([[InlineKeyboardButton(text=string_dict(context)["back_button"],
+            InlineKeyboardMarkup([[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                         callback_data="help_back")]])
 
         polls_list_of_dicts = polls_table.find({"bot_id": context.bot.id})
         if polls_list_of_dicts.count() == 0:
             context.bot.send_message(update_data.message.chat.id,
-                             string_dict(context)["polls_str_8"],
+                             context.bot.lang_dict["polls_str_8"],
                              reply_markup=create_markup)
             return ConversationHandler.END
         else:
@@ -65,15 +65,15 @@ class SendPoll(object):
             if polls_list_of_dicts.count() != 0:
                 command_list = [command['title'] for command in polls_list_of_dicts]
                 context.bot.send_message(update_data.message.chat.id,
-                                 string_dict(context)["polls_str_9"], reply_markup=back_keyboard)
+                                 context.bot.lang_dict["polls_str_9"], reply_markup=back_keyboard)
                 reply_keyboard = [command_list]
                 context.bot.send_message(update_data.message.chat.id,
-                                 string_dict(context)["polls_str_10"],
+                                 context.bot.lang_dict["polls_str_10"],
                                  reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
                 return CHOOSE_POLL_TO_SEND
             else:
                 context.bot.send_message(update_data.message.chat.id,
-                                 string_dict(context)["polls_str_8"],
+                                 context.bot.lang_dict["polls_str_8"],
                                  reply_markup=create_markup)
                 return ConversationHandler.END
 
@@ -90,12 +90,12 @@ class SendPoll(object):
                          parse_mode='Markdown'
                          )
 
-        context.bot.send_message(chat_id, string_dict(context)["polls_str_12"], reply_markup=ReplyKeyboardRemove())
+        context.bot.send_message(chat_id, context.bot.lang_dict["polls_str_12"], reply_markup=ReplyKeyboardRemove())
 
-        create_buttons = [[InlineKeyboardButton(text=string_dict(context)["back_button"],
+        create_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                 callback_data="help_module(channels)")]]
         create_markup = InlineKeyboardMarkup(create_buttons)
-        context.bot.send_message(update.message.chat.id, string_dict(context)["back_text"],
+        context.bot.send_message(update.message.chat.id, context.bot.lang_dict["back_text"],
                          reply_markup=create_markup)
         return ConversationHandler.END
 
@@ -135,7 +135,7 @@ class SendSurvey(object):
         else:
             channel_username = update.message.text
             update_data = update
-        buttons = [[InlineKeyboardButton(text=string_dict(context)["back_button"], callback_data="help_back")]]
+        buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"], callback_data="help_back")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
         context.bot.delete_message(update_data.message.chat.id, update_data.message.message_id)
@@ -143,39 +143,39 @@ class SendSurvey(object):
         surveys_list = surveys_table.find({"bot_id": context.bot.id})
         if surveys_list.count() != 0:
             context.bot.send_message(update_data.message.chat.id,
-                             string_dict(context)["survey_str_18"], reply_markup=reply_markup)
+                             context.bot.lang_dict["survey_str_18"], reply_markup=reply_markup)
             command_list = [survey['title'] for survey in surveys_list]
             reply_keyboard = [command_list]
             context.bot.send_message(update_data.message.chat.id,
-                             string_dict(context)["survey_str_19"],
+                             context.bot.lang_dict["survey_str_19"],
                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
             return CHOOSE_SURVEY_TO_SEND
         else:
-            admin_keyboard = [InlineKeyboardButton(text=string_dict(context)["create_button_str"],
+            admin_keyboard = [InlineKeyboardButton(text=context.bot.lang_dict["create_button_str"],
                                                    callback_data="create_survey"),
-                              InlineKeyboardButton(text=string_dict(context)["back_button"],
+                              InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                    callback_data="help_back")]
             context.bot.send_message(update_data.message.chat.id,
-                             string_dict(context)["survey_str_23"],
+                             context.bot.lang_dict["survey_str_23"],
                              reply_markup=InlineKeyboardMarkup([admin_keyboard]))
             return ConversationHandler.END
 
     def handle_send_title(self, update, context):
         chat_id, txt = initiate_chat_id(update)
         context.user_data["title"] = txt
-        context.bot.send_message(chat_id=context.user_data['channel'], text=string_dict(context)["survey_str_20"],
+        context.bot.send_message(chat_id=context.user_data['channel'], text=context.bot.lang_dict["survey_str_20"],
                          reply_markup=InlineKeyboardMarkup(
-                             [[InlineKeyboardButton(text=string_dict(context)["start_button"],
+                             [[InlineKeyboardButton(text=context.bot.lang_dict["start_button"],
                                                     url="https://t.me/{}?start=survey_{}".format(context.bot.username,
                                                                                                  context.user_data["title"]),
                                                     callback_data="survey_{}".format(
                                                         str(txt)
                                                     ))]]
                          ))
-        create_buttons = [[InlineKeyboardButton(text=string_dict(context)["back_button"],
+        create_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                 callback_data="help_module(channels)")]]
         create_markup = InlineKeyboardMarkup(create_buttons)
-        context.bot.send_message(update.message.chat.id, string_dict(context)["back_text"],
+        context.bot.send_message(update.message.chat.id, context.bot.lang_dict["back_text"],
                          reply_markup=create_markup)
         logger.info("Admin {} on bot {}:{} sent a survey to the users:{}".format(
             update.effective_user.first_name, context.bot.first_name, context.bot.id, txt))
@@ -222,7 +222,7 @@ class SendDonationToChannel(object):
 
             context.user_data["channel_username"] = channel_username
             buttons = list()
-            buttons.append([InlineKeyboardButton(text=string_dict(context)["back_button"],
+            buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                  callback_data="help_back")])
             reply_markup = InlineKeyboardMarkup(
                 buttons)
@@ -232,25 +232,25 @@ class SendDonationToChannel(object):
             chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
             if chatbot.get("donate") != {} and "donate" in chatbot:
                 context.bot.send_message(update_data.message.chat.id,
-                                 string_dict(context)["send_donation_request_1"],
+                                 context.bot.lang_dict["send_donation_request_1"],
                                  reply_markup=reply_markup)
                 return DONATION_TO_USERS
             else:
-                admin_keyboard = [InlineKeyboardButton(text=string_dict(context)["allow_donations_button"],
+                admin_keyboard = [InlineKeyboardButton(text=context.bot.lang_dict["allow_donations_button"],
                                                        callback_data="allow_donation"),
-                                  InlineKeyboardButton(text=string_dict(context)["back_button"],
+                                  InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                        callback_data="help_back")]
                 context.bot.send_message(update_data.message.chat.id,
-                                 string_dict(context)["allow_donation_text"],
+                                 context.bot.lang_dict["allow_donation_text"],
                                  reply_markup=InlineKeyboardMarkup([admin_keyboard]))
                 return ConversationHandler.END
         else:
-            admin_keyboard = [InlineKeyboardButton(text=string_dict(context)["add_channel"],
+            admin_keyboard = [InlineKeyboardButton(text=context.bot.lang_dict["add_channel"],
                                                    callback_data="add_channel"),
-                              InlineKeyboardButton(text=string_dict(context)["back_button"],
+                              InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                    callback_data="help_back")]
             context.bot.send_message(update_data.message.chat.id,
-                             string_dict(context)["no_channels"],
+                             context.bot.lang_dict["no_channels"],
                              reply_markup=InlineKeyboardMarkup([admin_keyboard]))
             return ConversationHandler.END
 
@@ -296,11 +296,11 @@ class SendDonationToChannel(object):
             context.bot.send_video_note(context.user_data["channel_username"], video_note_file)
 
         final_reply_markup = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(text=string_dict(context)["done_button"],
+            [[InlineKeyboardButton(text=context.bot.lang_dict["done_button"],
                                    callback_data="send_donation_finish")]]
         )
         context.bot.send_message(update.message.chat_id,
-                         string_dict(context)["send_donation_request_2"],
+                         context.bot.lang_dict["send_donation_request_2"],
                          reply_markup=final_reply_markup)
 
         return DONATION_TO_USERS
@@ -309,22 +309,22 @@ class SendDonationToChannel(object):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(context)["donate_button"],
+        buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["donate_button"],
 
                                              url="https://t.me/{}?start=pay_donation".format(context.bot.username),
                                              )])
         donation_reply_markup = InlineKeyboardMarkup(
             buttons)
-        create_buttons = [[InlineKeyboardButton(text=string_dict(context)["back_button"],
+        create_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                 callback_data="help_module(channels)")]]
         create_markup = InlineKeyboardMarkup(create_buttons)
 
         context.bot.send_message(update.callback_query.message.chat_id,
-                         string_dict(context)["send_donation_request_3"],
+                         context.bot.lang_dict["send_donation_request_3"],
                          reply_markup=create_markup)
 
         context.bot.send_message(context.user_data["channel_username"],
-                         string_dict(context)["donate_button"],
+                         context.bot.lang_dict["donate_button"],
                          reply_markup=donation_reply_markup)
         return ConversationHandler.END
 

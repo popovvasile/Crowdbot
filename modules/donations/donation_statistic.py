@@ -13,7 +13,7 @@ from telegram import LabeledPrice
 from database import chatbots_table
 from helper_funcs.auth import initiate_chat_id
 from helper_funcs.helper import get_help
-from helper_funcs.lang_strings.strings import string_dict
+
 from telegram.error import TelegramError
 from math import ceil
 from helper_funcs.misc import delete_messages, lang_timestamp
@@ -51,10 +51,10 @@ class DonationStatistic(object):
     def show_statistic(self, update, context):
         delete_messages(update, context, True)
         kb = [[InlineKeyboardButton(
-                text=string_dict(context)["donations_history_button"],
+                text=context.bot.lang_dict["donations_history_button"],
                 callback_data="show_history"),
                InlineKeyboardButton(
-                text=string_dict(context)["back_button"],
+                text=context.bot.lang_dict["back_button"],
                 callback_data="help_module(donation_payment)")]]
         bot_lang = chatbots_table.find_one({"bot_id": context.bot.id})["lang"]
 
@@ -90,7 +90,7 @@ class DonationStatistic(object):
         context.user_data["to_delete"].append(
             context.bot.send_message(
                 update.effective_chat.id,
-                string_dict(context)["donation_statistic_template"].format(
+                context.bot.lang_dict["donation_statistic_template"].format(
                     today_str=lang_timestamp(bot_lang, today_date, "d MMM yyyy"),
                     today_count=daily_donations.count(),
                     today_amount=self.create_amount(daily_donations),
@@ -117,20 +117,20 @@ class DonationStatistic(object):
         all_donations = donations_table.find(
             {"bot_id": context.bot.id}).sort([["_id", -1]])
         per_page = 5
-        back_button = [[InlineKeyboardButton(text=string_dict(context)["donation_statistic_btn_str"],
+        back_button = [[InlineKeyboardButton(text=context.bot.lang_dict["donation_statistic_btn_str"],
                                              callback_data="donation_statistic"),
-                        InlineKeyboardButton(text=string_dict(context)["back_button"],
+                        InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                              callback_data="help_module(donation_payment)")]]
         if all_donations.count() == 0:
             context.user_data["to_delete"].append(
                 context.bot.send_message(update.effective_chat.id,
-                                         string_dict(context)["no_donations"],
+                                         context.bot.lang_dict["no_donations"],
                                          reply_markup=InlineKeyboardMarkup(back_button)))
         else:
             pagination = Pagination(context, per_page, all_donations)
             page_content = \
-                string_dict(context)["donation_history_title"] + \
-                "\n\n".join([string_dict(context)["donation_history_item_temp"].format(
+                context.bot.lang_dict["donation_history_title"] + \
+                "\n\n".join([context.bot.lang_dict["donation_history_item_temp"].format(
                                  donation['mention_markdown'], donation['amount']/100, donation['currency'],
                                  str(donation['timestamp_paid']).split('.')[0])
                              for donation in pagination.page_content()])

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import json
 import logging
 import telegram.ext as tg
 from telegram import Bot
@@ -71,14 +70,12 @@ LOGGER = logging.getLogger(__name__)
 
 
 def main(token, lang):
-    # my_persistence = DictPersistence(store_user_data=True, user_data_json=json.dumps({1: 0},
-    #                                                                                  sort_keys=True))
     BotObj = Bot(token=token)
     if lang == "ENG":
         Bot.lang_dict = ENG
     else:
         Bot.lang_dict = RUS
-    updater = tg.Updater(use_context=True, bot=BotObj)  # TODO check the docs
+    updater = tg.Updater(use_context=True, bot=BotObj)
     dispatcher = updater.dispatcher
     dispatcher.add_error_handler(error_callback)
     start_handler = CommandHandler("start", WelcomeBot().start)

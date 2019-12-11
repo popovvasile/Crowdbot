@@ -5,7 +5,7 @@ from telegram.ext import ConversationHandler, CallbackQueryHandler, MessageHandl
 from database import groups_table
 from telegram.error import TelegramError
 from helper_funcs.helper import get_help
-from helper_funcs.lang_strings.strings import string_dict
+
 import logging
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -53,14 +53,14 @@ def groups_menu(update, context):
     context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                        message_id=update.callback_query.message.message_id)
     no_channel_keyboard = InlineKeyboardMarkup(
-        [[InlineKeyboardButton(string_dict(context)["my_groups"], callback_data='my_groups')],
-         [InlineKeyboardButton(string_dict(context)["add_group"], callback_data='add_group')],
-         [InlineKeyboardButton(string_dict(context)["back_button"],
+        [[InlineKeyboardButton(context.bot.lang_dict["my_groups"], callback_data='my_groups')],
+         [InlineKeyboardButton(context.bot.lang_dict["add_group"], callback_data='add_group')],
+         [InlineKeyboardButton(context.bot.lang_dict["back_button"],
                                callback_data="help_module(channels)")]
          ]
     )
     context.bot.send_message(update.callback_query.message.chat.id,
-                     string_dict(context)["groups"], reply_markup=no_channel_keyboard)
+                     context.bot.lang_dict["groups"], reply_markup=no_channel_keyboard)
     return ConversationHandler.END
 
 
@@ -73,16 +73,16 @@ class Groups(object):
 
     # 'My Groups' button
     def my_groups(self, update, context):
-        no_group_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(string_dict(context)["add_button"],
+        no_group_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(context.bot.lang_dict["add_button"],
                                                                         callback_data='add_group')],
-                                                  [InlineKeyboardButton(string_dict(context)["back_button"],
+                                                  [InlineKeyboardButton(context.bot.lang_dict["back_button"],
                                                                         callback_data="help_back")]])
 
         # bot.delete_message(update.effective_chat.id, update.effective_message.message_id)
         delete_messages(update, context)
         if groups_table.find({'bot_id': context.bot.id}).count() == 0:
             context.user_data['to_delete'].append(
-                context.bot.send_message(update.effective_chat.id, string_dict(context)["no_groups"],
+                context.bot.send_message(update.effective_chat.id, context.bot.lang_dict["no_groups"],
                                  reply_markup=no_group_keyboard))
             return ConversationHandler.END
 
@@ -103,24 +103,24 @@ class Groups(object):
             return ConversationHandler.END
         group_id = groups_table.find_one({"group_name": update.message.text})["group_id"]
         one_group_keyboard = \
-            InlineKeyboardMarkup([[InlineKeyboardButton(string_dict(context)["send_donation_to_group"],
+            InlineKeyboardMarkup([[InlineKeyboardButton(context.bot.lang_dict["send_donation_to_group"],
                                                         callback_data='send_donation_to_group_{}'.format(group_id
                                                                                                          ))],
-                                  [InlineKeyboardButton(string_dict(context)["send_survey_to_group"],
+                                  [InlineKeyboardButton(context.bot.lang_dict["send_survey_to_group"],
                                                         callback_data="send_survey_to_group_{}".format(
                                                             group_id))],
-                                  [InlineKeyboardButton(string_dict(context)["send_poll_to_group"],
+                                  [InlineKeyboardButton(context.bot.lang_dict["send_poll_to_group"],
                                                         callback_data="send_poll_to_group_{}".format(
                                                             group_id))],
-                                  [InlineKeyboardButton(string_dict(context)["send_post_to_group"],
+                                  [InlineKeyboardButton(context.bot.lang_dict["send_post_to_group"],
                                                         callback_data='group_write_post_{}'.format(
                                                             group_id))],
-                                  [InlineKeyboardButton(string_dict(context)["remove_button"],
+                                  [InlineKeyboardButton(context.bot.lang_dict["remove_button"],
                                                         callback_data='remove_group_{}'.format(
                                                             group_id))],
-                                  [InlineKeyboardButton(string_dict(context)["back_button"],
+                                  [InlineKeyboardButton(context.bot.lang_dict["back_button"],
                                                         callback_data="help_module(channels)")]])
-        context.bot.send_message(update.message.chat_id, string_dict(context)["groups_menu"],
+        context.bot.send_message(update.message.chat_id, context.bot.lang_dict["groups_menu"],
                          reply_markup=one_group_keyboard)
         return ConversationHandler.END
 
@@ -134,10 +134,10 @@ class Groups(object):
             delete_messages(update, context)
             groups_table.delete_one({'bot_id': context.bot.id, 'group_id': group_id})
             context.user_data['to_delete'].append(
-                context.bot.send_message(update.effective_chat.id, string_dict(context)["group_has_been_removed"]
+                context.bot.send_message(update.effective_chat.id, context.bot.lang_dict["group_has_been_removed"]
                                  .format(group["group_name"]),
                                  reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
-                                     text=string_dict(context)["back_button"],
+                                     text=context.bot.lang_dict["back_button"],
                                      callback_data="help_module(channels)")]])
                                  ))
             return ConversationHandler.END
@@ -146,7 +146,7 @@ class Groups(object):
             context.user_data['to_delete'].append(
                 context.bot.send_message(update.effective_chat.id, "There is no such group",
                                  reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
-                                     text=string_dict(context)["back_button"],
+                                     text=context.bot.lang_dict["back_button"],
                                      callback_data="help_module(channels)")]])
                                  ))
 
@@ -167,7 +167,7 @@ class SendPost(object):
         # bot.delete_message(chat_id=update.callback_query.message.chat_id,
         #                    message_id=update.callback_query.message.message_id)
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(context)["back_button"], callback_data="help_back")])
+        buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"], callback_data="help_back")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
         group_id = update.callback_query.data.replace("group_write_post", "")
@@ -175,7 +175,7 @@ class SendPost(object):
         context.user_data['group'] = update.callback_query.data.replace("group_write_post_", "")
         context.user_data['to_delete'].append(
             context.bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(context)["send_post"].format(group_id),
+                             context.bot.lang_dict["send_post"].format(group_id),
                              reply_markup=reply_markup))
         return MESSAGE_TO_USERS
         # else:
@@ -213,12 +213,12 @@ class SendPost(object):
             context.user_data["content"].append({"video_file": video_note_file})
 
         final_reply_markup = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(text=string_dict(context)["done_button"], callback_data="send_post_finish")],
+            [[InlineKeyboardButton(text=context.bot.lang_dict["done_button"], callback_data="send_post_finish")],
              [InlineKeyboardButton(text="Cancel", callback_data="help_back")]]
         )
         context.user_data['to_delete'].append(
             context.bot.send_message(update.message.chat_id,
-                             string_dict(context)["send_message_4"],
+                             context.bot.lang_dict["send_message_4"],
                              reply_markup=final_reply_markup))
         return MESSAGE_TO_USERS
 
@@ -241,13 +241,13 @@ class SendPost(object):
 
         delete_messages(update, context)
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(context)["back_button"],
+        buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                              callback_data="help_module(channels)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         context.user_data['to_delete'].append(
             context.bot.send_message(update.callback_query.message.chat_id,
-                             string_dict(context)["send_message_5"],
+                             context.bot.lang_dict["send_message_5"],
                              reply_markup=final_reply_markup))
         logger.info("Admin {} on bot {}:{} sent a post to the group".format(
             update.effective_user.first_name, context.bot.first_name, context.bot.id))
@@ -258,12 +258,12 @@ class SendPost(object):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(context)["back_button"],
+        buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                              callback_data="help_module(channels)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         context.bot.send_message(update.callback_query.message.chat_id,
-                         string_dict(context)["send_message_9"],
+                         context.bot.lang_dict["send_message_9"],
                          reply_markup=final_reply_markup)
         context.user_data.clear()
         return ConversationHandler.END
@@ -288,13 +288,13 @@ class AddGroup(object):
                            message_id=update.callback_query.message.message_id)
         buttons = list()
         buttons.append(
-            [InlineKeyboardButton(text=string_dict(context)["back_button"], callback_data="help_module(channels)")]
+            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"], callback_data="help_module(channels)")]
         )
         reply_markup = InlineKeyboardMarkup(
             buttons)
 
         context.bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(context)["add_group_str"],
+                         context.bot.lang_dict["add_group_str"],
                          reply_markup=reply_markup)
         return ConversationHandler.END
 

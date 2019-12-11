@@ -1,6 +1,5 @@
 from math import ceil
 from telegram import InlineKeyboardButton, ParseMode, InlineKeyboardMarkup
-from helper_funcs.lang_strings.help_strings import string_dict
 
 
 # todo remember the page

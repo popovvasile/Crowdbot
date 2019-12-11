@@ -10,7 +10,7 @@ import logging
 from database import chatbots_table
 from helper_funcs.auth import initiate_chat_id
 from helper_funcs.helper import get_help
-from helper_funcs.lang_strings.strings import string_dict
+
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)

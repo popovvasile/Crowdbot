@@ -6,7 +6,7 @@ from telegram.ext import (MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
 from database import user_categories_table, donations_table
 from helper_funcs.helper import get_help
-from helper_funcs.lang_strings.strings import string_dict
+
 
 TOPIC,SEND_ANONIM, MESSAGE = range(3)
 CHOOSE_CATEGORY, MESSAGE_TO_USERS = range(2)
@@ -20,7 +20,7 @@ class SendMessageToDonators(object):
 
     def send_message(self, update, context):
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(context)["back_button"],
+        buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                              callback_data="help_module(messages)")])
         reply_markup = InlineKeyboardMarkup(buttons)
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -29,18 +29,18 @@ class SendMessageToDonators(object):
         categories = user_categories_table.find()
         if categories.count() > 0:
             context.bot.send_message(update.callback_query.message.chat_id,
-                             string_dict(context)["back_text"],
+                             context.bot.lang_dict["back_text"],
                              reply_markup=reply_markup)
             categories_list = ["All"] + [x["category"] for x in categories]
             category_markup = ReplyKeyboardMarkup([categories_list])
 
             context.bot.send_message(update.callback_query.message.chat_id,
-                             string_dict(context)["send_message_1_1"],
+                             context.bot.lang_dict["send_message_1_1"],
                              reply_markup=category_markup)
             return CHOOSE_CATEGORY
         else:
             context.bot.send_message(update.callback_query.message.chat_id,
-                             string_dict(context)["send_message_to_admins_text"],
+                             context.bot.lang_dict["send_message_to_admins_text"],
                              reply_markup=reply_markup
                              )
             return MESSAGE_TO_USERS
@@ -48,14 +48,14 @@ class SendMessageToDonators(object):
     def choose_question(self, update, context):
         context.user_data["user_category"] = update.message.text
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(context)["back_button"],
+        buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                              callback_data="help_module(messages)")])
         reply_markup = InlineKeyboardMarkup(buttons)
         context.bot.send_message(update.message.chat_id,
                          "Cool",
                          reply_markup=ReplyKeyboardRemove())
         context.bot.send_message(update.message.chat_id,
-                         string_dict(context)["send_message_1"],
+                         context.bot.lang_dict["send_message_1"],
                          reply_markup=reply_markup)
         return MESSAGE_TO_USERS
 
@@ -98,11 +98,11 @@ class SendMessageToDonators(object):
             context.user_data["content"].append({"sticker_file": sticker_file})
 
         final_reply_markup = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(text=string_dict(context)["done_button"], callback_data="send_message_finish")],
-             [InlineKeyboardButton(text=string_dict(context)["cancel_button"], callback_data="help_module(messages)")]]
+            [[InlineKeyboardButton(text=context.bot.lang_dict["done_button"], callback_data="send_message_finish")],
+             [InlineKeyboardButton(text=context.bot.lang_dict["cancel_button"], callback_data="help_module(messages)")]]
         )
         context.bot.send_message(update.message.chat_id,
-                         string_dict(context)["send_message_4"],
+                         context.bot.lang_dict["send_message_4"],
                          reply_markup=final_reply_markup)
 
         return MESSAGE_TO_USERS
@@ -147,12 +147,12 @@ class SendMessageToDonators(object):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(context)["back_button"],
+        buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                              callback_data="help_module(messages)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         context.bot.send_message(update.callback_query.message.chat_id,
-                         string_dict(context)["send_message_5"],
+                         context.bot.lang_dict["send_message_5"],
                          reply_markup=final_reply_markup)
         logger.info("Admin {} on bot {}:{} sent a message to the users".format(
             update.effective_user.first_name, context.bot.first_name, context.bot.id))
@@ -164,12 +164,12 @@ class SendMessageToDonators(object):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(context)["back_button"],
+        buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                              callback_data="help_module(messages)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         context.bot.send_message(update.callback_query.message.chat_id,
-                         string_dict(context)["send_message_9"],
+                         context.bot.lang_dict["send_message_9"],
                          reply_markup=final_reply_markup)
         context.user_data.clear()
         return ConversationHandler.END

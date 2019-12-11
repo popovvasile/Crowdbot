@@ -1,4 +1,4 @@
-from helper_funcs.lang_strings.strings import string_dict
+
 
 
 class BasePoll(object):
@@ -27,7 +27,7 @@ class BasePoll(object):
         return False
 
     def ask_for_extra_config(self, meta, update):
-        return string_dict(context)["ask_for_extra_config_wrong"]
+        return context.bot.lang_dict["ask_for_extra_config_wrong"]
 
     def register_extra_config(self, text, meta):
         pass

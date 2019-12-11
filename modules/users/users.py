@@ -10,7 +10,7 @@ from database import (users_table, donations_table, chatbots_table,
                       channels_table)
 from helper_funcs.helper import get_help
 from helper_funcs.pagination import Pagination, set_page_key
-from helper_funcs.lang_strings.strings import string_dict
+
 from helper_funcs.misc import (delete_messages, back_button, back_reply,
                                lang_timestamp, get_obj)
 from bson.objectid import ObjectId
@@ -165,7 +165,7 @@ class UsersStatistic(object):
         user_statistic = User.statistic(context)
         context.bot.send_message(
             update.effective_chat.id,
-            string_dict(context)["users_statistic_template"].format(
+            context.bot.lang_dict["users_statistic_template"].format(
                 user_statistic["quantity"]["day"]["time_strings"],
                 user_statistic["quantity"]["day"]["count"],
 

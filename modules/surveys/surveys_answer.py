@@ -5,7 +5,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (MessageHandler, Filters, ConversationHandler, CallbackQueryHandler, )
 from helper_funcs.helper import get_help
 from database import surveys_table
-from helper_funcs.lang_strings.strings import string_dict
+
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -42,7 +42,7 @@ def facts_to_str(context):
 class AnswerSurveys(object):
 
     def start_answering(self, update, context):
-        buttons = [[InlineKeyboardButton(text=string_dict(context)["cancel_button_survey"],
+        buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["cancel_button_survey"],
                                          callback_data="help_back")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
@@ -62,7 +62,7 @@ class AnswerSurveys(object):
                 survey["answers"][index] = []
                 surveys_table.update({"title": survey["title"]}, survey)
         context.bot.send_message(update.callback_query.message.chat_id,
-                         string_dict(context)["answer_survey_str_1"]
+                         context.bot.lang_dict["answer_survey_str_1"]
                          )
         context.bot.send_message(update.callback_query.message.chat_id,
                          survey["questions"][int(context.user_data["question_id"])]["text"],
@@ -71,7 +71,7 @@ class AnswerSurveys(object):
         return ANSWERING
 
     def received_information(self, update, context):
-        buttons = [[InlineKeyboardButton(text=string_dict(context)["cancel_button_survey"],
+        buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["cancel_button_survey"],
                                          callback_data="help_back")]]
         reply_markup = InlineKeyboardMarkup(
             buttons)
@@ -102,14 +102,14 @@ class AnswerSurveys(object):
                 if answer["user_id"] == user_id and answer["title"] == context.user_data["title"]:
                     users_answers.append(answer)
                     question = survey["questions"][int(answer["question_id"]) - 1]["text"]
-                    to_send_text += string_dict(context)["answer_survey_str_2"].format(question, answer['answer'])
+                    to_send_text += context.bot.lang_dict["answer_survey_str_2"].format(question, answer['answer'])
             context.user_data.clear()
-            create_buttons = [[InlineKeyboardButton(text=string_dict(context)["back_button"],
+            create_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                     callback_data="help_back")]]
             create_markup = InlineKeyboardMarkup(create_buttons)
             context.bot.send_message(update.message.chat_id,
-                             string_dict(context)["answer_survey_str_3"] + "\n" +
-                             string_dict(context)["answer_survey_str_4"] + "\n" + to_send_text, reply_markup=create_markup)
+                             context.bot.lang_dict["answer_survey_str_3"] + "\n" +
+                             context.bot.lang_dict["answer_survey_str_4"] + "\n" + to_send_text, reply_markup=create_markup)
             del context.user_data
             del answer
             return ConversationHandler.END
@@ -124,11 +124,11 @@ class AnswerSurveys(object):
             return ANSWERING
 
     def done(self, update, context):
-        create_buttons = [[InlineKeyboardButton(text=string_dict(context)["back_button"],
+        create_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                 callback_data="help_back")]]
         create_markup = InlineKeyboardMarkup(create_buttons)
-        update.message.reply_text(string_dict(context)["answer_survey_str_3"] + "{}" +
-                                  string_dict(context)["answer_survey_str_4"].format(facts_to_str(context.user_data)),
+        update.message.reply_text(context.bot.lang_dict["answer_survey_str_3"] + "{}" +
+                                  context.bot.lang_dict["answer_survey_str_4"].format(facts_to_str(context.user_data)),
                                   reply_markup=create_markup)
         logger.info("User {} on bot {}:{} answered to survey:{}".format(
             update.effective_user.first_name, context.bot.first_name, context.bot.id, context.user_data["title"]))

@@ -11,7 +11,7 @@ from telegram import LabeledPrice
 from database import chatbots_table
 from helper_funcs.auth import initiate_chat_id
 from helper_funcs.helper import get_help
-from helper_funcs.lang_strings.strings import string_dict
+
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -25,7 +25,7 @@ TYPING_TOKEN, TYPING_TOKEN_FINISH, EDIT_FINISH, DOUBLE_CHECK_DELETE, DELETE_FINI
 
 def check_provider_token(provider_token, update, context):
     bot_token = chatbots_table.find_one({"bot_id": context.bot.id})["token"]
-    prices = [LabeledPrice(string_dict(context)["create_donation_str_1"], 10000)]
+    prices = [LabeledPrice(context.bot.lang_dict["create_donation_str_1"], 10000)]
     data = requests.get("https://api.telegram.org/bot{}/sendInvoice".format(bot_token),
                         params=dict(title="test",
                                     description="test",
@@ -45,14 +45,14 @@ class EnableDisableShopDonations(object):
     def payments_configs(self, update, context):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
-        admin_keyboard = [[InlineKeyboardButton(text=string_dict(context)["donations"],
+        admin_keyboard = [[InlineKeyboardButton(text=context.bot.lang_dict["donations"],
                                                 callback_data="donations_config")],
-                          [InlineKeyboardButton(text=string_dict(context)["shop"],
+                          [InlineKeyboardButton(text=context.bot.lang_dict["shop"],
                                                 callback_data="shop_config")],
-                          [InlineKeyboardButton(text=string_dict(context)["back_button"],
+                          [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                 callback_data="help_module(settings)")]]
         context.bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(context)["payments_config_text"],
+                         context.bot.lang_dict["payments_config_text"],
                          reply_markup=InlineKeyboardMarkup(admin_keyboard))
 
     def config_donations(self, update, context):
@@ -61,25 +61,25 @@ class EnableDisableShopDonations(object):
         chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
         admin_keyboard = []
         if chatbot["donations_enabled"] is True:
-            admin_keyboard.append([InlineKeyboardButton(text=string_dict(context)["disable_donations_button"],
+            admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["disable_donations_button"],
                                                         callback_data="change_donations_config")]),
-            admin_keyboard.append([InlineKeyboardButton(text=string_dict(context)["change_payment_token"],
+            admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["change_payment_token"],
                                                         callback_data="edit_change_donation_payment_token")]),
-            admin_keyboard.append([InlineKeyboardButton(text=string_dict(context)["change_donation_greeting"],
+            admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["change_donation_greeting"],
                                                         callback_data="edit_change_donation_description")]),
-            admin_keyboard.append([InlineKeyboardButton(text=string_dict(context)["change_donation_currency"],
+            admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["change_donation_currency"],
                                                         callback_data="edit_change_donation_currency")]),
         elif "donations" in chatbot:
-            admin_keyboard.append([InlineKeyboardButton(text=string_dict(context)["allow_donations_button"],
+            admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["allow_donations_button"],
                                                         callback_data="change_donations_config")]),
         else:
-            admin_keyboard.append([InlineKeyboardButton(text=string_dict(context)["allow_donations_button"],
+            admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["allow_donations_button"],
                                                         callback_data='allow_donations')])
 
-        admin_keyboard.append([InlineKeyboardButton(text=string_dict(context)["back_button"],
+        admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                     callback_data="help_module(settings)")])
         context.bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(context)["payments_config_text"],
+                         context.bot.lang_dict["payments_config_text"],
                          reply_markup=InlineKeyboardMarkup(admin_keyboard))
         return ConversationHandler.END
 
@@ -89,24 +89,24 @@ class EnableDisableShopDonations(object):
         chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
         admin_keyboard = []
         if chatbot["shop_enabled"] is True and "shop" in chatbot:
-            admin_keyboard.append([InlineKeyboardButton(text=string_dict(context)["disable_shop_button"],
+            admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["disable_shop_button"],
                                                         callback_data="change_shop_config")]),
-            admin_keyboard.append([InlineKeyboardButton(text=string_dict(context)["change_payment_token"],
+            admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["change_payment_token"],
                                                         callback_data="edit_change_shop_payment_token")]),
-            admin_keyboard.append([InlineKeyboardButton(text=string_dict(context)["change_donation_greeting"],
+            admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["change_donation_greeting"],
                                                         callback_data="edit_change_shop_description")]),
-            admin_keyboard.append([InlineKeyboardButton(text=string_dict(context)["change_donation_currency"],
+            admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["change_donation_currency"],
                                                         callback_data="edit_change_shop_currency")]),
         elif "shop" in chatbot:
-            admin_keyboard.append([InlineKeyboardButton(text=string_dict(context)["allow_shop_button"],
+            admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["allow_shop_button"],
                                                         callback_data="change_shop_config")]),
         else:
-            admin_keyboard.append([InlineKeyboardButton(text=string_dict(context)["allow_shop_button"],
+            admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["allow_shop_button"],
                                                         callback_data='allow_shop')])
-        admin_keyboard.append([InlineKeyboardButton(text=string_dict(context)["back_button"],
+        admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                     callback_data="help_module(settings)")])
         context.bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(context)["payments_config_text"],
+                         context.bot.lang_dict["payments_config_text"],
                          reply_markup=InlineKeyboardMarkup(admin_keyboard))
         return ConversationHandler.END
 
@@ -114,17 +114,17 @@ class EnableDisableShopDonations(object):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
-        admin_keyboard = [InlineKeyboardButton(text=string_dict(context)["back_button"],
+        admin_keyboard = [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                callback_data="help_module(settings)")]
         chatbot["shop_enabled"] = not (chatbot["shop_enabled"])
         chatbots_table.update({"bot_id": context.bot.id}, chatbot)
         if chatbot["shop_enabled"]:
             context.bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(context)["payments_config_text_shop_enabled"],
+                             context.bot.lang_dict["payments_config_text_shop_enabled"],
                              reply_markup=InlineKeyboardMarkup([admin_keyboard]))
         else:
             context.bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(context)["payments_config_text_shop_disabled"],
+                             context.bot.lang_dict["payments_config_text_shop_disabled"],
                              reply_markup=InlineKeyboardMarkup([admin_keyboard]))
         return
 
@@ -132,17 +132,17 @@ class EnableDisableShopDonations(object):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
         chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
-        admin_keyboard = [InlineKeyboardButton(text=string_dict(context)["back_button"],
+        admin_keyboard = [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                callback_data="help_module(settings)")]
         chatbot["donations_enabled"] = not (chatbot["donations_enabled"])
         chatbots_table.update({"bot_id": context.bot.id}, chatbot)
         if chatbot["donations_enabled"]:
             context.bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(context)["payments_config_text_donations_enabled"],
+                             context.bot.lang_dict["payments_config_text_donations_enabled"],
                              reply_markup=InlineKeyboardMarkup([admin_keyboard]))
         else:
             context.bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(context)["payments_config_text_donations_disabled"],
+                             context.bot.lang_dict["payments_config_text_donations_disabled"],
                              reply_markup=InlineKeyboardMarkup([admin_keyboard]))
         return
 
@@ -163,7 +163,7 @@ class EditPaymentHandler(object):  # TODO change as a payment config, not donati
 
     def handle_edit_action_finish(self, update, context):
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(context)["back_button"],
+        buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                              callback_data="help_module(settings)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
@@ -174,25 +174,25 @@ class EditPaymentHandler(object):  # TODO change as a payment config, not donati
             context.user_data["target"] = "donations"
             if "description" in data:
                 context.user_data["action"] = "description"
-                context.bot.send_message(chat_id, string_dict(context)["great_text"], reply_markup=ReplyKeyboardRemove())
+                context.bot.send_message(chat_id, context.bot.lang_dict["great_text"], reply_markup=ReplyKeyboardRemove())
 
                 update.message.reply_text(
-                    string_dict(context)["donations_edit_str_8"],
+                    context.bot.lang_dict["donations_edit_str_8"],
                     reply_markup=reply_markup)
             elif "currency" in data:
                 context.user_data["action"] = "currency"
-                context.bot.send_message(chat_id, string_dict(context)["great_text"], reply_markup=ReplyKeyboardRemove())
+                context.bot.send_message(chat_id, context.bot.lang_dict["great_text"], reply_markup=ReplyKeyboardRemove())
 
                 currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["CHF", "AUD", "RON", "PLN"]]
-                update.message.reply_text(string_dict(context)["donations_edit_str_9"],
+                update.message.reply_text(context.bot.lang_dict["donations_edit_str_9"],
                                           reply_markup=ReplyKeyboardMarkup(currency_keyboard,
                                                                            one_time_keyboard=True))
                 # payment_token_button
             elif "payment_token" in data:
                 context.user_data["action"] = "payment_token"
-                context.bot.send_message(chat_id, string_dict(context)["great_text"], reply_markup=ReplyKeyboardRemove())
+                context.bot.send_message(chat_id, context.bot.lang_dict["great_text"], reply_markup=ReplyKeyboardRemove())
                 update.message.reply_text(
-                    string_dict(context)["donations_edit_str_12"],
+                    context.bot.lang_dict["donations_edit_str_12"],
                     reply_markup=reply_markup)
 
             return EDIT_FINISH
@@ -201,32 +201,32 @@ class EditPaymentHandler(object):  # TODO change as a payment config, not donati
             context.user_data["target"] = "shop"
             if "description" in data:
                 context.user_data["action"] = "description"
-                context.bot.send_message(chat_id, string_dict(context)["great_text"], reply_markup=ReplyKeyboardRemove())
+                context.bot.send_message(chat_id, context.bot.lang_dict["great_text"], reply_markup=ReplyKeyboardRemove())
 
                 update.message.reply_text(
-                    string_dict(context)["donations_edit_str_8"],
+                    context.bot.lang_dict["donations_edit_str_8"],
                     reply_markup=reply_markup)
             elif "currency" in data:
                 context.user_data["action"] = "currency"
-                context.bot.send_message(chat_id, string_dict(context)["great_text"], reply_markup=ReplyKeyboardRemove())
+                context.bot.send_message(chat_id, context.bot.lang_dict["great_text"], reply_markup=ReplyKeyboardRemove())
 
                 currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["CHF", "AUD", "RON", "PLN"]]
-                update.message.reply_text(string_dict(context)["donations_edit_str_9"],
+                update.message.reply_text(context.bot.lang_dict["donations_edit_str_9"],
                                           reply_markup=ReplyKeyboardMarkup(currency_keyboard,
                                                                            one_time_keyboard=True))
                 # payment_token_button
             elif "payment_token" in data:
                 context.user_data["action"] = "payment_token"
-                context.bot.send_message(chat_id, string_dict(context)["great_text"], reply_markup=ReplyKeyboardRemove())
+                context.bot.send_message(chat_id, context.bot.lang_dict["great_text"], reply_markup=ReplyKeyboardRemove())
                 update.message.reply_text(
-                    string_dict(context)["donations_edit_str_12"],
+                    context.bot.lang_dict["donations_edit_str_12"],
                     reply_markup=reply_markup)
 
             return EDIT_FINISH
 
     def handle_edit_finish(self, update, context):  # TODO double check
         finish_buttons = list()
-        finish_buttons.append([InlineKeyboardButton(text=string_dict(context)["back_button"],
+        finish_buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                     callback_data="help_module(settings)")])
         finish_markup = InlineKeyboardMarkup(
             finish_buttons)
@@ -243,35 +243,35 @@ class EditPaymentHandler(object):  # TODO change as a payment config, not donati
                 if context.user_data["target"] == "donations":
                     chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
                     chatbot["donate"].update(update_dict)
-                    update.message.reply_text(string_dict(context)["donations_edit_str_10"], reply_markup=finish_markup)
+                    update.message.reply_text(context.bot.lang_dict["donations_edit_str_10"], reply_markup=finish_markup)
                     chatbots_table.update_one({"bot_id": context.bot.id}, {'$set': chatbot}, upsert=True)
 
                 elif context.user_data["target"] == "shop":
                     chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
                     chatbot["shop"].update(update_dict)
                     chatbots_table.update_one({"bot_id": context.bot.id}, {'$set': chatbot}, upsert=True)
-                    update.message.reply_text(string_dict(context)["donations_edit_str_10"], reply_markup=finish_markup)
+                    update.message.reply_text(context.bot.lang_dict["donations_edit_str_10"], reply_markup=finish_markup)
 
                 logger.info("Admin {} on bot {}:{} did  the following edit on donation: {}".format(
                     update.effective_user.first_name, context.bot.first_name, context.bot.id, context.user_data["action"]))
                 return ConversationHandler.END
             else:
                 update.message.reply_text(
-                    string_dict(context)["donations_edit_str_14"],
+                    context.bot.lang_dict["donations_edit_str_14"],
                     reply_markup=finish_markup)
 
                 return EDIT_FINISH
         if context.user_data["target"] == "donations":
             chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
             chatbot["donate"].update(update_dict)
-            update.message.reply_text(string_dict(context)["donations_edit_str_10"], reply_markup=finish_markup)
+            update.message.reply_text(context.bot.lang_dict["donations_edit_str_10"], reply_markup=finish_markup)
             chatbots_table.update_one({"bot_id": context.bot.id}, {'$set': chatbot}, upsert=True)
 
         elif context.user_data["target"] == "shop":
             chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
             chatbot["shop"].update(update_dict)
             chatbots_table.update_one({"bot_id": context.bot.id}, {'$set': chatbot}, upsert=True)
-            update.message.reply_text(string_dict(context)["donations_edit_str_10"], reply_markup=finish_markup)
+            update.message.reply_text(context.bot.lang_dict["donations_edit_str_10"], reply_markup=finish_markup)
 
         logger.info("Admin {} on bot {}:{} did  the following edit on donation: {}".format(
             update.effective_user.first_name, context.bot.first_name, context.bot.id, context.user_data["action"]))

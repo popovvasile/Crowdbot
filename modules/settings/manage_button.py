@@ -6,7 +6,7 @@ from telegram.ext import MessageHandler, Filters, ConversationHandler, CallbackQ
 import logging
 from database import custom_buttons_table
 from helper_funcs.helper import get_help
-from helper_funcs.lang_strings.strings import string_dict
+
 from helper_funcs.misc import delete_messages
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -25,7 +25,7 @@ class ButtonEdit(object):
         all_buttons = custom_buttons_table.find({"bot_id": context.bot.id})
         if all_buttons.count() > 0:
             context.user_data["to_delete"].append(context.bot.send_message(chat_id=update.callback_query.message.chat_id,
-                                                           text=string_dict(context)["manage_button_str_1"],
+                                                           text=context.bot.lang_dict["manage_button_str_1"],
                                                            reply_markup=ReplyKeyboardMarkup(
                                                                [[button_name["button"]] for button_name in all_buttons]
                                                            ),
@@ -33,13 +33,13 @@ class ButtonEdit(object):
             return CHOOSE_BUTTON
         else:
             context.user_data["to_delete"].append(context.bot.send_message(chat_id=update.callback_query.message.chat_id,
-                                                           text=string_dict(context)["manage_button_str_2"],
+                                                           text=context.bot.lang_dict["manage_button_str_2"],
                                                            reply_markup=InlineKeyboardMarkup(
                                                                [[InlineKeyboardButton(
-                                                                   string_dict(context)["create_button_button"],
+                                                                   context.bot.lang_dict["create_button_button"],
                                                                    callback_data="create_button"),
                                                                    InlineKeyboardButton(
-                                                                       string_dict(context)["back_button"],
+                                                                       context.bot.lang_dict["back_button"],
                                                                        callback_data="help_module(settings)")]]
                                                            ), parse_mode='Markdown'))
             return ConversationHandler.END
@@ -55,10 +55,10 @@ class ButtonEdit(object):
                     context.user_data["to_delete"].append(update.message.reply_text(
                         text=content["text"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(context)["edit_button"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["edit_button"],
                                                  callback_data="b_{}___{}".format(content["text"][:10],
                                                                                   update.message.text)),
-                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["delete_button_str"],
                                                  callback_data="d_{}___{}".format(content["text"][:10],
                                                                                   update.message.text))
                         ]]),
@@ -67,10 +67,10 @@ class ButtonEdit(object):
                     context.user_data["to_delete"].append(update.message.reply_audio(
                         content["audio_file"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(context)["edit_button"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["edit_button"],
                                                  callback_data="b_{}___{}".format(
                                                      content["audio_file"][:10], update.message.text)),
-                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["delete_button_str"],
                                                  callback_data="d_{}___{}".format(content["audio_file"][:10],
                                                                                   update.message.text))
                         ]])
@@ -79,10 +79,10 @@ class ButtonEdit(object):
                     context.user_data["to_delete"].append(update.message.reply_voice(
                         content["voice_file"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(context)["edit_button"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["edit_button"],
                                                  callback_data="b_{}___{}".format(
                                                      content["voice_file"][:10], update.message.text)),
-                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["delete_button_str"],
                                                  callback_data="d_{}___{}".format(content["voice_file"][:10],
                                                                                   update.message.text))
                         ]])
@@ -91,10 +91,10 @@ class ButtonEdit(object):
                     context.user_data["to_delete"].append(update.message.reply_video(
                         content["video_file"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(context)["edit_button"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["edit_button"],
                                                  callback_data="b_{}___{}".format(
                                                      content["video_file"][:10], update.message.text)),
-                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["delete_button_str"],
                                                  callback_data="d_{}___{}".format(content["video_file"][:10],
                                                                                   update.message.text))
                         ]])
@@ -103,10 +103,10 @@ class ButtonEdit(object):
                     context.user_data["to_delete"].append(update.message.reply_video_note(
                         content["video_note_file"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(context)["edit_button"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["edit_button"],
                                                  callback_data="b_{}___{}".format(
                                                      content["video_note_file"][:10], update.message.text)),
-                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["delete_button_str"],
                                                  callback_data="d_{}___{}".format(content["video_note_file"][:10],
                                                                                   update.message.text))
                         ]])
@@ -115,10 +115,10 @@ class ButtonEdit(object):
                     context.user_data["to_delete"].append(update.message.reply_document(
                         content["document_file"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(context)["edit_button"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["edit_button"],
                                                  callback_data="b_{}___{}".format(
                                                      content["document_file"][:10], update.message.text)),
-                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["delete_button_str"],
                                                  callback_data="d_{}___{}".format(content["document_file"][:10],
                                                                                   update.message.text))
                         ]])
@@ -127,10 +127,10 @@ class ButtonEdit(object):
                     context.user_data["to_delete"].append(update.message.reply_photo(
                         content["photo_file"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(context)["edit_button"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["edit_button"],
                                                  callback_data="b_{}___{}".format(
                                                      content["photo_file"][:10], update.message.text)),
-                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["delete_button_str"],
                                                  callback_data="d_{}___{}".format(content["photo_file"][:10],
                                                                                   update.message.text))
                         ]])
@@ -139,10 +139,10 @@ class ButtonEdit(object):
                     context.user_data["to_delete"].append(update.message.reply_animation(
                         content["animation_file"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(context)["edit_button"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["edit_button"],
                                                  callback_data="b_{}___{}".format(
                                                      content["animation_file"][:10], update.message.text)),
-                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["delete_button_str"],
                                                  callback_data="d_{}___{}".format(content["animation_file"][:10],
                                                                                   update.message.text))
                         ]])
@@ -151,10 +151,10 @@ class ButtonEdit(object):
                     context.user_data["to_delete"].append(update.message.reply_sticker(
                         content["photo_file"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(context)["edit_button"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["edit_button"],
                                                  callback_data="b_{}___{}".format(
                                                      content["sticker_file"][:10], update.message.text)),
-                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["delete_button_str"],
                                                  callback_data="d_{}___{}".format(content["sticker_file"][:10],
                                                                                   update.message.text))
                         ]])
@@ -170,26 +170,26 @@ class ButtonEdit(object):
                 LOGGER.exception("Exception in edit buttons")
         context.user_data["to_delete"].append(context.bot.send_message(
                                                        chat_id=update.message.chat_id,
-                                                       text=string_dict(context)["manage_button_str_3"],
+                                                       text=context.bot.lang_dict["manage_button_str_3"],
                                                        reply_markup=ReplyKeyboardRemove()))
         context.user_data["to_delete"].append(context.bot.send_message( chat_id=update.message.chat_id,
-                                                       text=string_dict(context)["add_button_content"],
+                                                       text=context.bot.lang_dict["add_button_content"],
                                                        reply_markup=InlineKeyboardMarkup(
-                                                           [[InlineKeyboardButton(text=string_dict(context)["add_button"],
+                                                           [[InlineKeyboardButton(text=context.bot.lang_dict["add_button"],
                                                                                   callback_data="add_content{}".format(
                                                                                       update.message.text))]])))
         context.user_data["to_delete"].append(context.bot.send_message( chat_id=update.message.chat_id,
-                                                       text=string_dict(context)["back_text"],
+                                                       text=context.bot.lang_dict["back_text"],
                                                        reply_markup=InlineKeyboardMarkup(
                                                            [[
                                                                InlineKeyboardButton(
-                                                                   string_dict(context)["back_button"],
+                                                                   context.bot.lang_dict["back_button"],
                                                                    callback_data="help_module(settings)")]])))
         return ConversationHandler.END
 
     def edit_button(self, update, context):
         reply_buttons = [
-            [InlineKeyboardButton(text=string_dict(context)["cancel_button"], callback_data="help_module(settings)")]]
+            [InlineKeyboardButton(text=context.bot.lang_dict["cancel_button"], callback_data="help_module(settings)")]]
         reply_markup = InlineKeyboardMarkup(
             reply_buttons)
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -199,7 +199,7 @@ class ButtonEdit(object):
         context.user_data["button"] = content_data[1]
         context.user_data["to_delete"].append(
             context.bot.send_message( chat_id=update.callback_query.message.chat_id,
-                             text=string_dict(context)["manage_button_str_4"],
+                             text=context.bot.lang_dict["manage_button_str_4"],
                              reply_markup=reply_markup))
         return EDIT_FINISH
 
@@ -251,9 +251,9 @@ class ButtonEdit(object):
             button_info
         )
         buttons = [
-            [InlineKeyboardButton(text=string_dict(context)["back_button"], callback_data="help_module(settings)")]]
+            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"], callback_data="help_module(settings)")]]
         context.bot.send_message( chat_id=update.message.chat_id,
-                         text=string_dict(context)["manage_button_str_5"],
+                         text=context.bot.lang_dict["manage_button_str_5"],
                          reply_markup=InlineKeyboardMarkup(buttons))
         logger.info("Admin {} on bot {}:{} did  the following edit button: {}".format(
             update.effective_user.first_name, context.bot.first_name, context.bot.id, context.user_data["button"]))
@@ -269,7 +269,7 @@ class ButtonEdit(object):
 
     def back(self, update, context):
         context.bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(context)["manage_button_str_6"], reply_markup=ReplyKeyboardRemove(),
+                         context.bot.lang_dict["manage_button_str_6"], reply_markup=ReplyKeyboardRemove(),
                          parse_mode='Markdown'
                          )
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -292,7 +292,7 @@ class ButtonEdit(object):
 class AddButtonContent(object):
     def add_content_button(self, update, context):
         reply_buttons = [
-            [InlineKeyboardButton(text=string_dict(context)["cancel_button"], callback_data="help_module(settings)")]]
+            [InlineKeyboardButton(text=context.bot.lang_dict["cancel_button"], callback_data="help_module(settings)")]]
         reply_markup = InlineKeyboardMarkup(
             reply_buttons)
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -300,7 +300,7 @@ class AddButtonContent(object):
         content_data = update.callback_query.data.replace("add_content", "")  # here is the problem
         context.user_data["button"] = content_data
         context.bot.send_message( chat_id=update.callback_query.message.chat_id,
-                         text=string_dict(context)["manage_button_str_4"],
+                         text=context.bot.lang_dict["manage_button_str_4"],
                          reply_markup=reply_markup)
         return EDIT_FINISH
 
@@ -346,9 +346,9 @@ class AddButtonContent(object):
             button_info
         )
         buttons = [
-            [InlineKeyboardButton(text=string_dict(context)["back_button"], callback_data="help_module(settings)")]]
+            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"], callback_data="help_module(settings)")]]
         context.bot.send_message( chat_id=update.message.chat_id,
-                         text=string_dict(context)["manage_button_str_5"],
+                         text=context.bot.lang_dict["manage_button_str_5"],
                          reply_markup=InlineKeyboardMarkup(buttons))
         logger.info("Admin {} on bot {}:{} did  the following edit button: {}".format(
             update.effective_user.first_name, context.bot.first_name, context.bot.id, context.user_data["button"]))
@@ -357,7 +357,7 @@ class AddButtonContent(object):
 
     def back(self, update, context):
         context.bot.send_message(update.callback_query.message.chat.id,
-                         string_dict(context)["manage_button_str_6"], reply_markup=ReplyKeyboardRemove()
+                         context.bot.lang_dict["manage_button_str_6"], reply_markup=ReplyKeyboardRemove()
                          )
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
@@ -381,7 +381,7 @@ class DeleteButtonContent(object):
     def delete_message(self, update, context):
         buttons = list()
         buttons.append(
-            [InlineKeyboardButton(text=string_dict(context)["back_button"], callback_data="help_module(settings)")])
+            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"], callback_data="help_module(settings)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
 
@@ -397,7 +397,7 @@ class DeleteButtonContent(object):
             if any(context.user_data["content_id"] in ext for ext in content_dict.values()):
                 button_info["content"].remove(content_dict)
         context.bot.send_message(chat_id=update.callback_query.message.chat_id,
-                         text=string_dict(context)["delete_content"],
+                         text=context.bot.lang_dict["delete_content"],
                          reply_markup=reply_markup)
         custom_buttons_table.replace_one(
             {"bot_id": context.bot.id, "button": context.user_data["button"]},

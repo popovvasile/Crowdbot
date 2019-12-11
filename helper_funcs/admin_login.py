@@ -6,7 +6,7 @@ from telegram.ext import ConversationHandler, MessageHandler, Filters, RegexHand
 
 from database import users_table
 from helper_funcs.auth import initiate_chat_id
-from helper_funcs.lang_strings.strings import string_dict
+
 from helper_funcs.helper import get_help
 from datetime import datetime
 
@@ -37,7 +37,7 @@ class AdminAuthentication(object):
         used_email = context.user_data["email"]
         user = users_table.find_one({'bot_id': context.bot.id, "email": used_email})
         buttons = list()
-        buttons.append([InlineKeyboardButton(text=string_dict(context)["back_button"],
+        buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                              callback_data="help_back")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
@@ -48,7 +48,7 @@ class AdminAuthentication(object):
         # else:
         #     superuser = False
         if used_password == user["password"]:
-            context.bot.send_message(chat_id, update.message.chat.first_name + string_dict(context)["you_have_been_reg"])
+            context.bot.send_message(chat_id, update.message.chat.first_name + context.bot.lang_dict["you_have_been_reg"])
             users_table.replace_one({"user_id": user_id,
                                      "bot_id": context.bot.id},
                                     {'bot_id': context.bot.id,
@@ -68,12 +68,12 @@ class AdminAuthentication(object):
             return ConversationHandler.END
 
         elif used_password is None:
-            context.bot.send_message(chat_id, string_dict(context)["no_pass_provided"],
+            context.bot.send_message(chat_id, context.bot.lang_dict["no_pass_provided"],
                                      reply_markup=reply_markup)
             return TYPING_PASS
 
         else:
-            context.bot.send_message(chat_id, string_dict(context)["wrong_pass_admin"],
+            context.bot.send_message(chat_id, context.bot.lang_dict["wrong_pass_admin"],
                                      reply_markup=reply_markup)
             return TYPING_PASS
 

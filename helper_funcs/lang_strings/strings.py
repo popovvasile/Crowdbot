@@ -1340,7 +1340,3 @@ string_dict_dict = {"ENG": ENG,
                     "RUS": RUS}
 
 
-def string_dict(context):
-    chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
-
-    return string_dict_dict[chatbot["lang"]]

@@ -2,12 +2,12 @@ from collections import OrderedDict
 
 from telegram import InlineKeyboardButton
 from database import chatbots_table, users_messages_to_admin_table
-from helper_funcs.lang_strings.strings import string_dict
+
 
 
 def help_strings(context):
     help_dict = OrderedDict()
-    string_d_str = string_dict(context)
+    string_d_str = context.bot.lang_dict
     payment_token = chatbots_table.find_one({"bot_id": context.bot.id})
     admins_keyboard = [
         InlineKeyboardButton(text=string_d_str["payment_configure_button"],
@@ -16,11 +16,11 @@ def help_strings(context):
                              callback_data="donation_statistic")
     ]
     if "shop" in payment_token:
-        admins_keyboard += [InlineKeyboardButton(text=string_dict(context)["shop"],
+        admins_keyboard += [InlineKeyboardButton(text=context.bot.lang_dict["shop"],
                                                  callback_data="shop_start"),
-                            InlineKeyboardButton(string_dict(context)["donations"],
+                            InlineKeyboardButton(context.bot.lang_dict["donations"],
                                                  callback_data="donations_config"),
-                            InlineKeyboardButton(text=string_dict(context)["payments_statistics_str"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["payments_statistics_str"],
                                                  callback_data="payments_statistics"),
  ]
 
