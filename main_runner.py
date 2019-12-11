@@ -3,11 +3,12 @@
 import json
 import logging
 import telegram.ext as tg
+from telegram import Bot
 
 from telegram.ext import CommandHandler, CallbackQueryHandler, MessageHandler, Filters
 
 from helper_funcs.admin_login import ADMIN_AUTHENTICATION_HANDLER
-from helper_funcs.lang_strings.strings import string_dict_dict, ENG
+from helper_funcs.lang_strings.strings import ENG, RUS
 from modules.chanells.channels import MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER, REMOVE_CHANNEL_HANDLER, \
     SEND_POST_HANDLER, CHANELLS_MENU
 from modules.chanells.channels_polls_surveys_donate import SEND_POLL_TO_CHANNEL_HANDLER, SEND_SURVEY_TO_CHANNEL_HANDLER, \
@@ -69,12 +70,17 @@ logging.basicConfig(
 LOGGER = logging.getLogger(__name__)
 
 
-def main(token):
+def main(token, lang):
     # my_persistence = DictPersistence(store_user_data=True, user_data_json=json.dumps({1: 0},
     #                                                                                  sort_keys=True))
-    updater = tg.Updater(token, use_context=True)  # TODO check the docs
+    BotObj = Bot(token=token)
+    if lang == "ENG":
+        Bot.lang_dict = ENG
+    else:
+        Bot.lang_dict = RUS
+    updater = tg.Updater(use_context=True, bot=BotObj)  # TODO check the docs
     dispatcher = updater.dispatcher
-    # dispatcher.add_error_handler(error_callback)
+    dispatcher.add_error_handler(error_callback)
     start_handler = CommandHandler("start", WelcomeBot().start)
     help_handler = CommandHandler("help", get_help)
     rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), get_help)

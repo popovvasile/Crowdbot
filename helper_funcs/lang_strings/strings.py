@@ -1,4 +1,5 @@
-import gc
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from database import chatbots_table
 
 

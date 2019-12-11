@@ -22,16 +22,12 @@ def multiple_bot_daemon():
             if doc["token"] not in list(my_process.keys()):
                 if doc["lang"] == "ENG":
                     print(doc["token"])
-                    new_env = os.environ
-                    new_env["LANG"] = "ENG"
-                    new_process = Process(target=main, args=(doc["token"],), name=doc["token"])
+                    new_process = Process(target=main, args=(doc["token"], doc["lang"]), name=doc["token"])
                     new_process.start()
                     my_process[doc["token"]] = new_process
                 elif doc["lang"] == "RUS":
-                    print("TEST")
-                    new_env = os.environ
-                    new_env["LANG"] = "RUS"
-                    new_process = Process(target=main, args=(doc["token"],), name=doc["token"])
+                    print(doc["token"])
+                    new_process = Process(target=main, args=(doc["token"], doc["lang"]), name=doc["token"])
                     new_process.start()
                     my_process[doc["token"]] = new_process
 

@@ -354,7 +354,6 @@ def help_button(update, context):
 
 
 def get_help(update, context):
-    print(context.user_data)
     if users_table.find_one({"user_id": update.effective_user.id, "bot_id": context.bot.id}).get("blocked", False):
         update.effective_message.reply_text("You've been blocked from this chatbot")
         return ConversationHandler.END
