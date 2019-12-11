@@ -60,7 +60,7 @@ def delete_messages(update, context):
 
 
 # check that bot is admin and can send messages to the channel
-def check_channel(update, channel_username):
+def check_channel(context, channel_username):
     try:
         admins = context.bot.get_chat_administrators(channel_username)
     except TelegramError as e:
@@ -86,7 +86,7 @@ def check_channel(update, channel_username):
 
 def channel_menu(update, context):
     context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                       message_id=update.callback_query.message.message_id)
+                               message_id=update.callback_query.message.message_id)
     no_channel_keyboard = InlineKeyboardMarkup(
     [[InlineKeyboardButton(string_dict(context)["my_channels"], callback_data='my_channels')],
          [InlineKeyboardButton(string_dict(context)["add_channel"], callback_data='add_channel')],
@@ -94,7 +94,8 @@ def channel_menu(update, context):
                               callback_data="help_module(channels)")]]
             )
     context.bot.send_message(update.callback_query.message.chat.id,
-                     string_dict(context)["channels"], reply_markup=no_channel_keyboard)
+                             string_dict(context)["channels"],
+                             reply_markup=no_channel_keyboard)
     return ConversationHandler.END
 
 
@@ -103,11 +104,11 @@ class Channels(object):
     # ################################## HELP METHODS ###########################################################
     # update channels usernames if channel username has benn changed.
     # call this only when at least one channel exists in db
-    def update_channels_usernames(self, update, context, chat_id):
+    def update_channels_usernames(self, context, chat_id):
         for channel in channels_table.find({'bot_id': context.bot.id}):
             # check that boy is admin
             # and check that bot can send messages to channel
-            check = check_channel(context.bot, channel['channel_username'])
+            check = check_channel(context, channel['channel_username'])
             if check is not True:
                 context.user_data['to_delete'].append(
                     context.bot.send_message(chat_id,
@@ -133,26 +134,31 @@ class Channels(object):
         delete_messages(update, context)
         if channels_table.find({'bot_id': context.bot.id}).count() == 0:
             context.user_data['to_delete'].append(
-                context.bot.send_message(update.effective_chat.id, string_dict(context)["no_channels"],
-                                 reply_markup=no_channel_keyboard))
+                context.bot.send_message(
+                    update.effective_chat.id, string_dict(context)["no_channels"],
+                    reply_markup=no_channel_keyboard))
             return ConversationHandler.END
         else:
-            channels = self.update_channels_usernames(context.bot, context.user_data, update.effective_chat.id)
+            channels = self.update_channels_usernames(context, update.effective_chat.id)
             command_list = [[x['channel_username']] for x in channels] + [['Back']]
             # need to delete this message
             context.user_data['to_delete'].append(
-                context.bot.send_message(update.effective_chat.id, text,
-                                 reply_markup=ReplyKeyboardMarkup(command_list, one_time_keyboard=True)))
+                context.bot.send_message(
+                    update.effective_chat.id, text,
+                    reply_markup=ReplyKeyboardMarkup(
+                        command_list, one_time_keyboard=True)))
             return state
 
     def send_wrong_format_message(self, update, context, text: str = None):
-        cancel_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(string_dict(context)["cancel_button"],
-                                                                      callback_data='help_back')]])
+        cancel_keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton(string_dict(context)["cancel_button"],
+                                  callback_data='help_back')]])
         delete_messages(update, context)
         context.user_data['to_delete'].append(
-            context.bot.send_message(update.message.chat_id, string_dict(context)["wrong_channel_link_format"]
-            if text is None else text,
-                             reply_markup=cancel_keyboard))
+            context.bot.send_message(update.message.chat_id,
+                                     string_dict(context)["wrong_channel_link_format"]
+                                     if text is None else text,
+                                     reply_markup=cancel_keyboard))
         return ADD_CHANNEL
 
     # check that channel username is correct
@@ -175,17 +181,19 @@ class Channels(object):
         else:
             channel_username = "@{}".format(link)
 
-        check = check_channel(context.bot, channel_username)
+        check = check_channel(context, channel_username)
         if check is True:
-            if not channels_table.find_one({'bot_id': context.bot.id, 'channel_username': channel_username}):
+            if not channels_table.find_one({'bot_id': context.bot.id,
+                                            'channel_username': channel_username}):
                 channel_chat_id = context.bot.get_chat(channel_username).id
                 channels_table.insert_one({'bot_id': context.bot.id,
                                            'channel_username': channel_username,
                                            'chat_id': channel_chat_id})
                 return channel_username
             else:
-                return self.send_wrong_format_message(update, context,
-                                                      string_dict(context)["try_to_add_already_exist_channel"])
+                return self.send_wrong_format_message(
+                    update, context,
+                    string_dict(context)["try_to_add_already_exist_channel"])
         else:
             return self.send_wrong_format_message(update, context, check)
 
@@ -216,7 +224,7 @@ class Channels(object):
                                   [InlineKeyboardButton(string_dict(context)["back_button"],
                                                         callback_data="help_module(channels)")]])
         context.bot.send_message(update.message.chat_id, string_dict(context)["channels_menu"],
-                         reply_markup=one_channel_keyboard)
+                                 reply_markup=one_channel_keyboard)
         return ConversationHandler.END
 
     # call this when user have choose channel for remove
@@ -227,12 +235,12 @@ class Channels(object):
             delete_messages(update, context)
             channels_table.delete_one({'bot_id': context.bot.id, 'channel_username': channel_username})
             context.user_data['to_delete'].append(
-                context.bot.send_message(update.effective_chat.id, string_dict(context)["channel_has_been_removed"]
-                                 .format(channel_username),
-                                 reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
-                                     text=string_dict(context)["back_button"],
-                                     callback_data="help_module(channels)")]])
-                                 ))
+                context.bot.send_message(update.effective_chat.id,
+                                         string_dict(context)["channel_has_been_removed"].format(channel_username),
+                                         reply_markup=InlineKeyboardMarkup([
+                                             [InlineKeyboardButton(
+                                                 text=string_dict(context)["back_button"],
+                                                 callback_data="help_module(channels)")]])))
             return ConversationHandler.END
         else:
             return self.make_channels_layout(update, context, CHOOSE_TO_REMOVE,
@@ -246,7 +254,7 @@ class Channels(object):
         delete_messages(update, context)
         context.user_data['to_delete'].append(
             context.bot.send_message(update.callback_query.message.chat_id, string_dict(context)["channels_str_4"],
-                             reply_markup=cancel_keyboard))
+                                     reply_markup=cancel_keyboard))
         return ADD_CHANNEL
 
     # call this when message with channel link arrive
@@ -267,9 +275,9 @@ class Channels(object):
                                                                         callback_data="help_module(channels)")]])
             delete_messages(update, context)
             context.user_data['to_delete'].append(
-                context.bot.send_message(update.message.chat_id, string_dict(context)["channel_added_success"]
-                                 .format(update.message.text),
-                                 reply_markup=post_keyboard))
+                context.bot.send_message(update.message.chat_id,
+                                         string_dict(context)["channel_added_success"].format(update.message.text),
+                                         reply_markup=post_keyboard))
             return ConversationHandler.END
         else:
             return ADD_CHANNEL
@@ -304,8 +312,8 @@ class SendPost(object):
         context.user_data['channel'] = update.callback_query.data.replace("channel_write_post_", "")
         context.user_data['to_delete'].append(
             context.bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(context)["send_post"].format(channel_username),
-                             reply_markup=reply_markup))
+                                     string_dict(context)["send_post"].format(channel_username),
+                                     reply_markup=reply_markup))
         return MESSAGE_TO_USERS
         # else:
         #     return Channels().make_channels_layout(update, context, CHOOSE_TO_SEND_POST,
@@ -347,15 +355,14 @@ class SendPost(object):
         )
         context.user_data['to_delete'].append(
             context.bot.send_message(update.message.chat_id,
-                             string_dict(context)["send_message_4"],
-                             reply_markup=final_reply_markup))
+                                     string_dict(context)["send_message_4"],
+                                     reply_markup=final_reply_markup))
         return MESSAGE_TO_USERS
 
     def send_post_finish(self, update, context):
         for content_dict in context.user_data["content"]:
             if "text" in content_dict:
-                context.bot.send_message(context.user_data['channel'],
-                                 content_dict["text"])
+                context.bot.send_message(context.user_data['channel'], content_dict["text"])
             if "audio_file" in content_dict:
                 context.bot.send_audio(context.user_data['channel'], content_dict["audio_file"])
             if "video_file" in content_dict:
@@ -376,8 +383,8 @@ class SendPost(object):
             buttons)
         context.user_data['to_delete'].append(
             context.bot.send_message(update.callback_query.message.chat_id,
-                             string_dict(context)["send_message_5"],
-                             reply_markup=final_reply_markup))
+                                     string_dict(context)["send_message_5"],
+                                     reply_markup=final_reply_markup))
         logger.info("Admin {} on bot {}:{} sent a post to the channel".format(
             update.effective_user.first_name, context.bot.first_name, context.bot.id))
         context.user_data.clear()
@@ -385,22 +392,22 @@ class SendPost(object):
 
     def help_back(self, update, context):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
         buttons = list()
         buttons.append([InlineKeyboardButton(text=string_dict(context)["back_button"],
                                              callback_data="help_module(channels)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         context.bot.send_message(update.callback_query.message.chat_id,
-                         string_dict(context)["send_message_9"],
-                         reply_markup=final_reply_markup)
+                                 string_dict(context)["send_message_9"],
+                                 reply_markup=final_reply_markup)
         context.user_data.clear()
         return ConversationHandler.END
 
     def error(self, update, context, error):
         """Log Errors caused by Updates."""
         context.bot.send_message(update.message.chat_id,
-                         "Command canceled")
+                                 "Command canceled")
 
         logger.warning('Update "%s" caused error "%s"', update, error)
         return ConversationHandler.END
@@ -409,6 +416,7 @@ class SendPost(object):
         delete_messages(update, context)
         get_help(update, context)
         return ConversationHandler.END
+
 
 CHANELLS_MENU = CallbackQueryHandler(callback=channel_menu, pattern=r"channels")
 

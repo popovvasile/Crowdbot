@@ -38,6 +38,7 @@ def eshop_menu(update, context):
                                                  callback_data="delete_product")],
                            [InlineKeyboardButton(text=string_dict(context)["back_button"],
                                                  callback_data="help_module(shop)")]]
+
     else:
         admin_keyboard.append([InlineKeyboardButton(text=string_dict(context)["allow_donations_button"],
                                                     # TODO enforce to configure the tokens and everything first time
@@ -86,7 +87,6 @@ class ProcductMenu(object):
 
 
 class AddProducts(object):
-
     def start(self, update, context):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                    message_id=update.callback_query.message.message_id)
@@ -103,7 +103,9 @@ class AddProducts(object):
                                                                        reply_markup=reply_markup))
         return TYPING_PRODUCT
 
-    def product_handler(self, update, context):  # TODO add price and yes or not for delivery- ask address or not?
+
+    def product_handler(self, update, context,
+                        ):  # TODO add price and yes or not for delivery- ask address or not?
         context.user_data["to_delete"].append(update.message)
         reply_products = [[InlineKeyboardButton(text=string_dict(context)["back_button"],
                                                 callback_data="help_module(shop)")]]
@@ -249,9 +251,12 @@ class AddProducts(object):
             [InlineKeyboardButton(text=string_dict(context)["back_button"], callback_data="help_module(shop)")]]
         reply_markup = InlineKeyboardMarkup(
             reply_products)
-        context.bot.send_message(update.callback_query.message.chat.id,
-                                 string_dict(context)["add_products_str_added"].format(context.user_data["title"]),
-                                 reply_markup=reply_markup)
+
+        context.bot.send_message(
+            update.callback_query.message.chat.id,
+            string_dict(context)["add_products_str_added"].format(context.user_data["title"]),
+            reply_markup=reply_markup)
+
         logger.info("Admin {} on bot {}:{} added a new product:{}".format(
             update.effective_user.first_name, context.bot.first_name, context.bot.id, context.user_data["title"]))
         context.user_data.clear()
@@ -285,7 +290,9 @@ class AddProducts(object):
             reply_markup = InlineKeyboardMarkup(
                 reply_products)
             context.bot.send_message(update.callback_query.message.chat.id,
-                                     string_dict(context)["no_products"], reply_markup=reply_markup)
+
+                                     string_dict(context)["no_products"],
+                                     reply_markup=reply_markup)
 
             return ConversationHandler.END
 
@@ -471,10 +478,12 @@ class ProductEdit(object):
                 pass
             else:
                 LOGGER.exception("Exception in edit buttons")
-        context.user_data["to_delete"].append(context.bot.send_message(parse_mode='Markdown',
-                                                                       chat_id=update.message.chat_id,
-                                                                       text=string_dict(context)["manage_button_str_3"],
-                                                                       reply_markup=ReplyKeyboardRemove()))
+
+        context.user_data["to_delete"].append(
+            context.bot.send_message(parse_mode='Markdown',
+                                     chat_id=update.message.chat_id,
+                                     text=string_dict(context)["manage_button_str_3"],
+                                     reply_markup=ReplyKeyboardRemove()))
         context.user_data["to_delete"].append(
             context.bot.send_message(parse_mode='Markdown', chat_id=update.message.chat_id,
                                      text=string_dict(context)["add_button_content"],

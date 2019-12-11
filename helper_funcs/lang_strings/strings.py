@@ -1,6 +1,7 @@
 import gc
-
 from database import chatbots_table
+
+
 # Telegram emoji. Original names
 emoji = dict(
     trash="🗑",
@@ -19,8 +20,15 @@ emoji = dict(
     shirt="👔",
     ballot_box="🗳",
     plus="➕",
-    gear="⚙️"
-)
+    gear="⚙️",
+    bar_chart="📊",
+    book="📖",
+    bust_in_silhouette="👤",
+    disappointed_relieved="😥",
+    ok_hand="👌",
+    family_mwgb="👨‍👩‍👧‍👦",
+    email="📧")
+
 ENG = dict(
     you_have_been_reg=", you have been registered as an authorized user of this bot.\n\n"
                       "Enter your password or click /cancel",
@@ -151,7 +159,7 @@ Write your message. I’ll read it.
     send_message_from_user_to_admin_anonim_text="✉️ Write us anonymous message.\n"
                                                 "You can send any kind of files, "
                                                 "voice and video messages, stickers and links. \n"
-                                                "No information to you account will be saved to the database",
+                                                "No inforpromotion_send_message_button_1mation to you account will be saved to the database",
     send_message_1_1="Choose the category of users to whom you want o send your message",
 
     send_message_12="What do you want to tell us about?",
@@ -503,8 +511,101 @@ Here you can configure your payments settings and your shop
     add_products_str_deleted="Item {} has been deleted from your shop",
     products="Products",
     buy_button="Buy",
-    hello_group="Hello group"
+    hello_group="Hello group",
 
+
+    users_menu_str="Здесь вы можете увидеть своих юзеров",
+    statistic_btn_str=f"{emoji['bar_chart']} Статистика",
+    users_list_btn_str=f"{emoji['book']} Список юзеров",
+    admins_btn_str=f"{emoji['bust_in_silhouette']} Администраторы",
+    user_temp="{}"
+              "\n*Время старта:* `{}`",
+    registered_admin_temp="{}"
+                          "\n*Email:* {}"
+                          "\n*Время старта:* `{}`",
+    not_registered_admin_temp="*Email:* {}"
+                              "\n_Ещё не зарегестрирован_",
+    no_users_str=f"{emoji['disappointed_relieved']} У вас ещё нет юзеров",
+    no_admins_str="Вы единственный администратор",
+    users_layout_title="*Список ваших юзеров.*"
+                       "\n*Всего юзеров:* `{}`",
+    admins_layout_title="*Список администраторов.*"
+                        "\n*Всего админов:* `{}`",
+    current_page="\n*Текущая траница:* `{}`",
+    # delete_admin_button_str=f"{emoji['x']} Удалить"
+    admin_deleted_blink=f"{emoji['white_check_mark']} Админ Успешно Удалён",
+    confirm_delete_admin_str="_Вы уверены что хотите удалть админа?_",
+    # resend_password_btn_str="Переотправить пароль"
+    add_admin_btn_str=f"{emoji['plus']} Добавить администратора",
+    next_email_request="Enter E-Mail addresses of the other admins. "
+                       "They'll get a one-time password that they have to send to your bot."
+                       "If you are ready — press 'continue' ",
+    add_already_exist_admin=f"{emoji['ok_hand']} "
+                            "Admin => {} already exist. ",
+
+    wrong_email="Oops. Wrong E-mail. Try again.",
+    admins_added_blink=f"{emoji['white_check_mark']} Админы успешно добавлены",
+    enter_new_admin_email="Enter E-Mail addresses of the admins. "
+                          "They'll get a one-time password that they have to send to your bot."
+                          "If you are ready — press 'Add' ",
+    donation_statistic_btn_str=f"{emoji['bar_chart']} Donation Statistic",
+    donations_history_button="Show History",
+    donation_history_title="*Donations history*\n\n",
+    donation_statistic_template=f"{emoji['money_with_wings']} *Donates statistic*"
+                                "\n\n*For today* "
+                                "\n`{today_str}`"
+                                "\n_Donates Quantity:_ `{today_count}`"
+                                "\n_Collected:_ `{today_amount}`"
+
+                                "\n\n*For week*"
+                                "\n*From:* `{week_from}`"
+                                "\n*To:* `{today_str}`"
+                                "\n_Donates Quantity:_ `{week_count}`"
+                                "\n_Collected:_ `{week_amount}`"
+
+                                "\n\n*For month*"
+                                "\n*From:* `{month_from}`"
+                                "\n*To:* `{today_str}`"
+                                "\n_Donates Quantity:_ `{month_count}`"
+                                "\n_Collected:_ `{month_amount}`"
+
+                                "\n\n*All time:*"
+                                "\n*First donate:*"
+                                "\n`{first_donate}`"
+                                "\n*Last donate:* "
+                                "\n`{last_donate}`"
+                                "\n_Donates Quantity:_ `{all_count}`"
+                                "\n_Collected:_ `{all_amount}`",
+    donation_history_item_temp="{}"
+                               "\n*Amount:* `{} {}`"
+                               "\n*Date:* `{}`",
+    no_donations=f"{emoji['disappointed_relieved']} No donations",
+    users_statistic_template=f"{emoji['family_mwgb']} *New Users*"
+                             "\n\n*For today* "
+                             "\n`{}`"
+                             "\n_New subscribers:_ `{}`"
+
+                             "\n\n*For week* "
+                             "\n*From:* `{}`"
+                             "\n*To:* `{}`"
+                             "\n_New subscribers:_ `{}`"
+
+                             "\n\n*For month* "
+                             "\n*From:* `{}`"
+                             "\n*To:* `{}`"
+                             "\n_New subscribers:_ `{}`"
+
+                             "\n\n*For all time*"
+                             "\n*First subscriber:*"
+                             "\n`{}`"
+                             "\n*Last subscriber:* "
+                             "\n`{}`"
+                             "\n_Total subscribers:_ `{}`",
+    donations_count_str=f"{emoji['money_with_wings']} *Донаты Юзера:* "
+                            "{}",
+    message_temp="<b>User's name:</b> {}, \n\n<b>Time:</b> {}",
+    message_count_str="\n_Total messages:_ `{}`",
+    channels_statistic_template="<b>Channel:<b>"
 )
 
 RUS = dict(
@@ -1130,7 +1231,108 @@ https://telegra.ph/Gajd-Podklyuchit-donaty-07-03
     create_shop_str_5="This token is wrong. Please send a valid payment token",
     create_shop_str_6="Now, send a description of you new shop. You can add any information you want about it.",
     create_shop_str_7="Choose the primary currency of your shop",
-    create_shop_str_8="Your new shop has been created. Now your users can see it in their menu"
+    create_shop_str_8="Your new shop has been created. Now your users can see it in their menu",
+
+    channels="Channels",
+    groups="Groups",
+    payment_configure_button="Configure Payments",
+    buttons_button="Buttons",
+    polls_mode_str="❓ Polls",
+    messages="✉️ Messages ",
+    donations="Donations",
+    shop="Shop",
+    payments_config_text="Here you can configure your payments settings",
+    block_button_str="Block user",
+
+    users_menu_str="Здесь вы можете увидеть своих юзеров",
+    statistic_btn_str=f"{emoji['bar_chart']} Статистика",
+    users_list_btn_str=f"{emoji['book']} Список юзеров",
+    admins_btn_str=f"{emoji['bust_in_silhouette']} Администраторы",
+    user_temp="{}"
+              "\n*Время старта:* `{}`",
+    registered_admin_temp="{}"
+                          "\n*Email:* {}"
+                          "\n*Время старта:* `{}`",
+    not_registered_admin_temp="*Email:* {}"
+                              "\n_Ещё не зарегестрирован_",
+    no_users_str=f"{emoji['disappointed_relieved']} У вас ещё нет юзеров",
+    no_admins_str="Вы единственный администратор",
+    users_layout_title="*Список ваших юзеров.*"
+                       "\n*Всего юзеров:* `{}`",
+    admins_layout_title="*Список администраторов.*"
+                        "\n*Всего админов:* `{}`",
+    current_page="\n*Current page:* `{}`",
+    # delete_admin_button_str=f"{emoji['x']} Удалить"
+    admin_deleted_blink=f"{emoji['white_check_mark']} Админ Успешно Удалён",
+    confirm_delete_admin_str="_Вы уверены что хотите удалть админа?_",
+    # resend_password_btn_str="Переотправить пароль"
+    add_admin_btn_str=f"{emoji['plus']} Добавить администратора",
+    next_email_request="Раздельными сообщениями отправь почту других админов. "
+                       "\nОни получат одноразовый пароль для авторизации. "
+                       "\nНажми `Добавить`, когда всех укажешь.\n",
+    add_already_exist_admin=f"{emoji['ok_hand']} "
+                            "Админ {} уже добавлен. ",
+    wrong_email="Упс. Неверный E-mail. Попробуй ввести снова.",
+    admins_added_blink=f"{emoji['white_check_mark']} Админы успешно добавлены",
+    enter_new_admin_email="Раздельными сообщениями напиши почту новых админов."
+                          "\nОни получат одноразовый пароль для авторизации.",
+    donation_statistic_btn_str=f"{emoji['bar_chart']} Donation Statistic",
+    donations_history_button="Show History",
+    donation_history_title="*Donations history*\n\n",
+    donation_statistic_template=f"{emoji['money_with_wings']} *Donates statistic*"
+                                "\n\n*For today* "
+                                "\n`{today_str}`"
+                                "\n_Donates Quantity:_ `{today_count}`"
+                                "\n_Collected:_ `{today_amount}`"
+                                
+                                "\n\n*For week*"
+                                "\n*From:* `{week_from}`"
+                                "\n*To:* `{today_str}`"
+                                "\n_Donates Quantity:_ `{week_count}`"
+                                "\n_Collected:_ `{week_amount}`"
+                                
+                                "\n\n*For month*"
+                                "\n*From:* `{month_from}`"
+                                "\n*To:* `{today_str}`"
+                                "\n_Donates Quantity:_ `{month_count}`"
+                                "\n_Collected:_ `{month_amount}`"
+                                
+                                "\n\n*All time:*"
+                                "\n*First donate:*"
+                                "\n`{first_donate}`"
+                                "\n*Last donate:* "
+                                "\n`{last_donate}`"
+                                "\n_Donates Quantity:_ `{all_count}`"
+                                "\n_Collected:_ `{all_amount}`",
+    donation_history_item_temp="{}"
+                               "\n*Amount:* `{} {}`"
+                               "\n*Date:* `{}`",
+    no_donations=f"{emoji['disappointed_relieved']} No donations",
+    users_statistic_template=f"{emoji['family_mwgb']} *New Users*"
+                             "\n\n*For today* "
+                             "\n`{}`"
+                             "\n_New subscribers:_ `{}`"
+
+                             "\n\n*For week* "
+                             "\n*From:* `{}`"
+                             "\n*To:* `{}`"
+                             "\n_New subscribers:_ `{}`"
+
+                             "\n\n*For month* "
+                             "\n*From:* `{}`"
+                             "\n*To:* `{}`"
+                             "\n_New subscribers:_ `{}`"
+
+                             "\n\n*For all time*"
+                             "\n*First subscriber:*"
+                             "\n`{}`"
+                             "\n*Last subscriber:* "
+                             "\n`{}`"
+                             "\n_Total subscribers:_ `{}`",
+    donations_count_str=f"{emoji['money_with_wings']} *Донаты Юзера:* "
+                        "{}",
+    message_temp="<b>User's name:</b> {}, \n\n<b>Time:</b> {}",
+    message_count_str="\n*Всего сообщений:* `{}`"
 )
 
 string_dict_dict = {"ENG": ENG,

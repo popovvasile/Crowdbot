@@ -3,8 +3,8 @@
 import json
 import logging
 import telegram.ext as tg
-from telegram.ext import CommandHandler, CallbackQueryHandler, RegexHandler, MessageHandler, Filters, DictPersistence, \
-    PicklePersistence, CallbackContext
+
+from telegram.ext import CommandHandler, CallbackQueryHandler, MessageHandler, Filters
 
 from helper_funcs.admin_login import ADMIN_AUTHENTICATION_HANDLER
 from helper_funcs.lang_strings.strings import string_dict_dict, ENG
@@ -31,9 +31,10 @@ from modules.donations.donation_enable import CREATE_DONATION_HANDLER
 from modules.surveys.surveys_create import DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_HANDLER, SEND_SURVEYS_HANDLER, \
     CREATE_SURVEY_HANDLER, SURVEYS_MENU
 from modules.payments.payments_config import EDIT_DONATION_HANDLER, PAYMENTS_CONFIG_KEYBOARD, CHNAGE_DONATIONS_CONFIG, \
-    CHNAGE_SHOP_CONFIG, CONFIGS_DONATIONS_GENERAL, CONFIGS_SHOP_GENERAL
+    CONFIGS_DONATIONS_GENERAL, CONFIGS_SHOP_GENERAL, CHNAGE_SHOP_CONFIG
 from helper_funcs.helper import help_button, button_handler, get_help, WelcomeBot, \
     back_from_button_handler, product_handler, error_callback
+
 from modules.settings.manage_button import BUTTON_EDIT_HANDLER, BUTTON_EDIT_FINISH_HANDLER, DELETE_CONTENT_HANDLER, \
     BUTTON_ADD_FINISH_HANDLER, back_from_edit_button_handler
 from modules.donations.donation_payment import DONATE_HANDLER, HANDLE_SUCCES, HANDLE_PRECHECKOUT
@@ -42,8 +43,13 @@ from modules.pollbot.polls import POLL_HANDLER, SEND_POLLS_HANDLER, BUTTON_HANDL
 from modules.donations.donation_send_promotion import SEND_DONATION_TO_USERS_HANDLER
 from modules.users.messages import SEND_MESSAGE_TO_ADMIN_HANDLER, SEND_MESSAGE_TO_USERS_HANDLER, SEE_MESSAGES_HANDLER, \
     ANSWER_TO_MESSAGE_HANDLER, DELETE_MESSAGES_HANDLER, SEE_MESSAGES_FINISH_HANDLER, SEE_MESSAGES_BACK_HANDLER, \
-    SEE_MESSAGES_FINISH_BACK_HANDLER, BLOCK_USER, BLOCKED_USERS_LIST, UNBLOCK_USER, MESSAGES_MENU
+    SEE_MESSAGES_FINISH_BACK_HANDLER, BLOCK_USER, BLOCKED_USERS_LIST, UNBLOCK_USER, MESSAGES_MENU, \
+    SEE_MESSAGES_PAGINATION_HANDLER
 from modules.settings.user_mode import USER_MODE_OFF, USER_MODE_ON
+
+from modules.users.users import USERS_MENU, USERS_LIST_HANDLER, USERS_STATISTIC_HANDLER
+from modules.settings.admins import ADMINS_LIST_HANDLER, ADD_ADMIN_HANDLER
+from modules.donations.donation_statistic import DONATION_STATISTIC_HANDLER
 
 # SHOP
 from modules.shop.modules.adding_product import ADD_PRODUCT_HANDLER
@@ -54,6 +60,7 @@ from modules.shop.modules.products import PRODUCTS_HANDLER
 from modules.shop.modules.trash import (TRASH_START, ORDERS_TRASH,
                                 WHOLESALE_TRASH, PRODUCTS_TRASH)
 from modules.shop.modules.brands import BRANDS_HANDLER
+
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -79,7 +86,6 @@ def main(token):
     help_callback_handler = CallbackQueryHandler(help_button, pattern=r"help_")
 
     dispatcher.add_handler(EDIT_BOT_DESCRIPTION_HANDLER)
-
 
     #  NEW SHOP
     dispatcher.add_handler(START_SHOP_HANDLER)
@@ -108,6 +114,14 @@ def main(token):
     dispatcher.add_handler(USER_MODE_ON)
     dispatcher.add_handler(USER_MODE_OFF)
 
+    # USERS
+    dispatcher.add_handler(USERS_LIST_HANDLER)
+    dispatcher.add_handler(USERS_MENU)
+    dispatcher.add_handler(USERS_STATISTIC_HANDLER)
+    # ADMINS
+    dispatcher.add_handler(ADMINS_LIST_HANDLER)
+    dispatcher.add_handler(ADD_ADMIN_HANDLER)
+
     # DONATIONS
     dispatcher.add_handler(CREATE_DONATION_HANDLER)
     dispatcher.add_handler(DONATE_HANDLER)
@@ -118,6 +132,8 @@ def main(token):
     dispatcher.add_handler(CHNAGE_DONATIONS_CONFIG)
     dispatcher.add_handler(PAYMENTS_CONFIG_KEYBOARD)
     dispatcher.add_handler(CONFIGS_DONATIONS_GENERAL)
+
+    dispatcher.add_handler(DONATION_STATISTIC_HANDLER)
 
     # # PRODUCTS
     dispatcher.add_handler(ESHOP_MENU)
@@ -148,6 +164,7 @@ def main(token):
     dispatcher.add_handler(BLOCK_USER)
     dispatcher.add_handler(BLOCKED_USERS_LIST)
     dispatcher.add_handler(UNBLOCK_USER)
+    dispatcher.add_handler(SEE_MESSAGES_PAGINATION_HANDLER)
     # dispatcher.add_handler(ADD_MESSAGE_CATEGORY_HANDLER)
     # dispatcher.add_handler(DELETE_MESSAGE_CATEGORY_HANDLER)
     # dispatcher.add_handler(MESSAGE_CATEGORY_HANDLER)
@@ -197,9 +214,6 @@ def main(token):
     dispatcher.add_handler(rex_help_handler)
 
     dispatcher.add_handler(help_callback_handler)
-
-
-
 
     # error_help_callback_handler = CallbackQueryHandler(get_help, pattern=r"error_back")
     # dispatcher.add_handler(error_help_callback_handler)
