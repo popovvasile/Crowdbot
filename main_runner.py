@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import json
 import logging
 import telegram.ext as tg
 from telegram import Bot
@@ -71,10 +72,13 @@ LOGGER = logging.getLogger(__name__)
 
 def main(token, lang):
     BotObj = Bot(token=token)
+    with open('languages.json') as f:
+        lang_dicts = json.load(f)
+
     if lang == "ENG":
-        Bot.lang_dict = ENG
+        Bot.lang_dict = lang_dicts["ENG"]
     else:
-        Bot.lang_dict = RUS
+        Bot.lang_dict = lang_dicts["RUS"]
     updater = tg.Updater(use_context=True, bot=BotObj)
     dispatcher = updater.dispatcher
     dispatcher.add_error_handler(error_callback)
