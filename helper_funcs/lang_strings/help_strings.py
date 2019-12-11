@@ -15,13 +15,12 @@ def help_strings(context):
     ]
     if "shop" in payment_token:
         admins_keyboard += [InlineKeyboardButton(text=string_dict(context)["shop"],
-                                                 callback_data="shop_menu"),
+                                                 callback_data="shop_start"),
                             InlineKeyboardButton(string_dict(context)["donations"],
                                                  callback_data="donations_config"),
                             InlineKeyboardButton(text=string_dict(context)["payments_statistics_str"],
                                                  callback_data="payments_statistics"),
-                            InlineKeyboardButton(text=string_dict(context)["orders_str"],
-                                                 callback_data="orders_and_purchases"), ]
+ ]
 
         help_dict["shop"] = dict(
             mod_name=string_d_str["add_product_button"],

@@ -370,7 +370,7 @@ SEND_POLL_TO_GROUP_HANDLER = ConversationHandler(
     },
     fallbacks=[CallbackQueryHandler(callback=SendPoll().back, pattern=r"help_back"),
                CallbackQueryHandler(callback=SendPoll().back, pattern=r"help_module"),
-               RegexHandler('^Back$', SendPoll().back),
+               MessageHandler(Filters.regex('^Back$'), SendPoll().back),
                ]
 )
 
@@ -386,7 +386,7 @@ SEND_SURVEY_TO_GROUP_HANDLER = ConversationHandler(
     },
     fallbacks=[CallbackQueryHandler(callback=SendSurvey().back, pattern=r"help_back"),
                CallbackQueryHandler(callback=SendSurvey().back, pattern=r"help_module"),
-               RegexHandler('^Back$', SendSurvey().back),
+               MessageHandler(Filters.regex('^Back$'), SendSurvey().back),
                ]
 )
 SEND_DONATION_TO_GROUP_HANDLER = ConversationHandler(

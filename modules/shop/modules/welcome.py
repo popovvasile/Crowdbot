@@ -20,7 +20,6 @@ class Welcome(object):
     @staticmethod
     def start(update: Update, context: CallbackContext):
         delete_messages(update, context)
-        print(update.effective_user.id)
         if context.user_data.get("msg_to_send"):
             context.user_data["to_delete"].append(
                 context.bot.send_message(

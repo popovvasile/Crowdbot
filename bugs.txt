@@ -9,6 +9,7 @@ p.s. remember the port on mongo and the security- encrypt the messages and all d
 Admins: [send message] [send urgent message]
 Users: [send message] [ask for donation] [send survey]
 
+# TODO install ujson
 # TODO GROUPS:  surveys, polls and messages - SEND  button must be sent to the choosen group @ check channels as well
 # TODO statistics on donations, purchases and payments + full list in csv
 # TODO double test refactoring
@@ -21,3 +22,8 @@ Users: [send message] [ask for donation] [send survey]
 # TODO pagination for messages
 # TODO messages - show how many new messages are "unread/new" -- take a look at botfather
 # TODO notify admin about new messages and purchases
+
+
+
+# todo create a proper master branch
+#todo fix the language rahat

@@ -31,7 +31,10 @@ def start_keyboard(orders_quantity):
         # [InlineKeyboardButton(strings["manage_admins_btn"],
         #                       callback_data="manage_admins")],
         [InlineKeyboardButton(strings["trash_btn"],
-                              callback_data="trash")]])
+                              callback_data="trash")],
+                           [InlineKeyboardButton(text="Back",
+                                                 callback_data="help_module(shop)")]],
+    )
 
 
 sizes_list = ['XS', 'S', 'M', 'L', 'XL', 'XXL',

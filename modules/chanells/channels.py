@@ -415,11 +415,11 @@ CHANELLS_MENU = CallbackQueryHandler(callback=channel_menu, pattern=r"channels")
 MY_CHANNELS_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=Channels().my_channels, pattern=r"my_channels", pass_user_data=True)],
     states={
-        MY_CHANNELS: [RegexHandler(r"@", Channels().channel)]
+        MY_CHANNELS: [MessageHandler(Filters.regex(r"@"), Channels().channel)]
     },
     fallbacks=[CallbackQueryHandler(callback=Channels().back, pattern=r"help_back", pass_user_data=True),
                CallbackQueryHandler(callback=Channels().back, pattern=r'help_module', pass_user_data=True),
-               RegexHandler('^Back$', Channels().back, pass_user_data=True),
+               MessageHandler(Filters.regex('^Back$'), Channels().back, pass_user_data=True),
                ]
 )
 

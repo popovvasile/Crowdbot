@@ -93,11 +93,11 @@ class CreateDonationHandler(object):
             else:
                 context.bot.send_message(update.callback_query.message.chat.id,
                                  string_dict(context)["create_donation_str_3"],
-                                 parse_mode='Markdown', reply_markup=reply_markup)
+                                  reply_markup=reply_markup)
                 return TYPING_TOKEN
         else:
             context.bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(context)["create_donation_str_3"], parse_mode='Markdown',
+                             string_dict(context)["create_donation_str_3"],
                              reply_markup=reply_markup)
             return TYPING_TOKEN
 

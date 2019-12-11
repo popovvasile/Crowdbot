@@ -22,8 +22,6 @@ emoji = dict(
     gear="⚙️"
 )
 ENG = dict(
-    polls_str="Polls",
-    surveys_str="Surveys",
     you_have_been_reg=", you have been registered as an authorized user of this bot.\n\n"
                       "Enter your password or click /cancel",
     no_pass_provided="No password provided. Please send a  valid password or click Back",
@@ -32,9 +30,7 @@ ENG = dict(
     no="NO",
     register_str="Please write your email to register yourself as an admin for this bot",
     create_button_str="📌 Create",
-    create_poll_button_str="📌 Create a new poll",
-    create_survey_button_str="📌 Create a survey",
-    start_help="Welcome! My name is {} and I am ready to use! Add a channel, start polls and get donations ",
+    start_help="Welcome! My name is {} and I am ready to use!",
     my_channels="🛠My Channels",
     channels="Channels",
     buttons=" Buttons",
@@ -430,7 +426,6 @@ Here you can configure your payments settings and your shop
     add_menu_buttons_str_10="You can create a new button or return to menu",
     add_button="Add",
     add_button_content="Or add content to the button",
-    start_help="Welcome! My name is {} and I am ready to use! Add a group, start polls and get donations ",
     my_groups="🛠My Groups",
     groups="Groups",
     add_group='➕ Add a group',
@@ -489,6 +484,16 @@ Here you can configure your payments settings and your shop
     add_products_str_correct_format_price="Please type the price in a correct format",
     add_products_str_shipment="Great! Now, choose the type of this product- with shipment or without",
     add_products_str_added="Product with the name {} has been added",
+
+    create_shop_str_1="TEST payment",
+    create_shop_str_2="Send me the title of your new shop",
+    create_shop_str_3="Send me the payment token from BotFather settings",
+    create_shop_str_4="Send me the title of your new shop",
+    create_shop_str_5="This token is wrong. Please send a valid payment token",
+    create_shop_str_6="Now, send a description of you new shop. You can add any information you want about it.",
+    create_shop_str_7="Choose the primary currency of your shop",
+    create_shop_str_8="Your new shop has been created. Now your users can see it in their menu",
+
     thank_purchase="Thank you for your purchase!",
     products_str_choose_the_product_to_del="Choose the product to delete",
     no_products="You have no products in your shop",
@@ -816,8 +821,6 @@ https://telegra.ph/Gajd-Podklyuchit-donaty-07-03
 Опрос с открытым ответом
 """,
     create_button_str="📌 Создать",
-    create_poll_button_str="📌 Создать опрос",
-    create_survey_button_str="📌 Создать открытый опрос",
     survey_mode_str="❔ Открытые опросы",
     add_menu_module_button="🛠 Настройки",
     edit_button_button="✏️ Редактировать кнопку",
@@ -1119,6 +1122,15 @@ https://telegra.ph/Gajd-Podklyuchit-donaty-07-03
     shop_admin_current_page="*Текущая траница:* `{}`",
     # BACK BUTTON
     shop_admin_back_btn="🔙 Назад",
+    create_shop_str_3="Пришлите токен оплаты из настроек бота в BotFather",
+
+    create_shop_str_1="TEST payment",
+    create_shop_str_2="Send me the title of your new shop",
+    create_shop_str_4="Send me the title of your new shop",
+    create_shop_str_5="This token is wrong. Please send a valid payment token",
+    create_shop_str_6="Now, send a description of you new shop. You can add any information you want about it.",
+    create_shop_str_7="Choose the primary currency of your shop",
+    create_shop_str_8="Your new shop has been created. Now your users can see it in their menu"
 )
 
 string_dict_dict = {"ENG": ENG,

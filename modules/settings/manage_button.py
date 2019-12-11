@@ -168,17 +168,17 @@ class ButtonEdit(object):
                 pass
             else:
                 LOGGER.exception("Exception in edit buttons")
-        context.user_data["to_delete"].append(context.bot.send_message(parse_mode='Markdown',
+        context.user_data["to_delete"].append(context.bot.send_message(
                                                        chat_id=update.message.chat_id,
                                                        text=string_dict(context)["manage_button_str_3"],
                                                        reply_markup=ReplyKeyboardRemove()))
-        context.user_data["to_delete"].append(context.bot.send_message(parse_mode='Markdown', chat_id=update.message.chat_id,
+        context.user_data["to_delete"].append(context.bot.send_message( chat_id=update.message.chat_id,
                                                        text=string_dict(context)["add_button_content"],
                                                        reply_markup=InlineKeyboardMarkup(
                                                            [[InlineKeyboardButton(text=string_dict(context)["add_button"],
                                                                                   callback_data="add_content{}".format(
                                                                                       update.message.text))]])))
-        context.user_data["to_delete"].append(context.bot.send_message(parse_mode='Markdown', chat_id=update.message.chat_id,
+        context.user_data["to_delete"].append(context.bot.send_message( chat_id=update.message.chat_id,
                                                        text=string_dict(context)["back_text"],
                                                        reply_markup=InlineKeyboardMarkup(
                                                            [[
@@ -198,7 +198,7 @@ class ButtonEdit(object):
         context.user_data["content_id"] = content_data[0]
         context.user_data["button"] = content_data[1]
         context.user_data["to_delete"].append(
-            context.bot.send_message(parse_mode='Markdown', chat_id=update.callback_query.message.chat_id,
+            context.bot.send_message( chat_id=update.callback_query.message.chat_id,
                              text=string_dict(context)["manage_button_str_4"],
                              reply_markup=reply_markup))
         return EDIT_FINISH
@@ -252,7 +252,7 @@ class ButtonEdit(object):
         )
         buttons = [
             [InlineKeyboardButton(text=string_dict(context)["back_button"], callback_data="help_module(settings)")]]
-        context.bot.send_message(parse_mode='Markdown', chat_id=update.message.chat_id,
+        context.bot.send_message( chat_id=update.message.chat_id,
                          text=string_dict(context)["manage_button_str_5"],
                          reply_markup=InlineKeyboardMarkup(buttons))
         logger.info("Admin {} on bot {}:{} did  the following edit button: {}".format(
@@ -299,7 +299,7 @@ class AddButtonContent(object):
                            message_id=update.callback_query.message.message_id)
         content_data = update.callback_query.data.replace("add_content", "")  # here is the problem
         context.user_data["button"] = content_data
-        context.bot.send_message(parse_mode='Markdown', chat_id=update.callback_query.message.chat_id,
+        context.bot.send_message( chat_id=update.callback_query.message.chat_id,
                          text=string_dict(context)["manage_button_str_4"],
                          reply_markup=reply_markup)
         return EDIT_FINISH
@@ -347,7 +347,7 @@ class AddButtonContent(object):
         )
         buttons = [
             [InlineKeyboardButton(text=string_dict(context)["back_button"], callback_data="help_module(settings)")]]
-        context.bot.send_message(parse_mode='Markdown', chat_id=update.message.chat_id,
+        context.bot.send_message( chat_id=update.message.chat_id,
                          text=string_dict(context)["manage_button_str_5"],
                          reply_markup=InlineKeyboardMarkup(buttons))
         logger.info("Admin {} on bot {}:{} did  the following edit button: {}".format(

@@ -27,7 +27,6 @@ def send_admin_help(bot, chat_id, text, keyboard=None):
 
 
 def send_visitor_help(bot, chat_id, text, keyboard=None):
-
     donation_request = chatbots_table.find_one({"bot_id": bot.id})
     if donation_request.get("donate") is not None and donation_request.get("donate") != {}:
         buttons = [InlineKeyboardButton(string_dict(bot)["send_message_1"], callback_data="help_module(messages)"),
@@ -42,7 +41,7 @@ def send_visitor_help(bot, chat_id, text, keyboard=None):
     buttons += [InlineKeyboardButton(button["button"],
                                      callback_data="button_{}".format(button["button"].replace(" ", "").lower()))
                 for button in custom_buttons_table.find({"bot_id": bot.id, "link_button": False})]
-    buttons += [InlineKeyboardButton(text=button["button"],url=button["link"])
+    buttons += [InlineKeyboardButton(text=button["button"], url=button["link"])
                 for button in custom_buttons_table.find({"bot_id": bot.id, "link_button": True})]
     if len(buttons) % 2 == 0:
         pairs = list(zip(buttons[::2], buttons[1::2]))
@@ -66,7 +65,7 @@ def send_admin_user_mode(bot, chat_id, text, keyboard=None):
     buttons += [InlineKeyboardButton(button["button"],
                                      callback_data="button_{}".format(button["button"].replace(" ", "").lower()))
                 for button in custom_buttons_table.find({"bot_id": bot.id, "link_button": False})]
-    buttons += [InlineKeyboardButton(button["button"],url=button["link"])
+    buttons += [InlineKeyboardButton(button["button"], url=button["link"])
                 for button in custom_buttons_table.find({"bot_id": bot.id, "link_button": True})]
     product_list_of_dicts = products_table.find({
         "bot_id": bot.id})
@@ -88,32 +87,32 @@ def send_admin_user_mode(bot, chat_id, text, keyboard=None):
 
 
 # for test purposes
-def error_callback(update, context, error):
+def error_callback(update, context):
     try:
         back_buttons = InlineKeyboardMarkup(
             [[InlineKeyboardButton(text=string_dict(context)["back_button"],
                                    callback_data="help_back")]
              ])
-        print(error)
+        # print(error)
         if update.effective_message.chat_id > 0:
             if hasattr(update, 'callback_query'):
                 context.bot.send_message(update.effective_message.chat_id,
-                                 "An error accured =( Please proceed to the shop menu",
-                                 reply_markup=back_buttons)
+                                         "An error accured =( Please proceed to the shop menu",
+                                         reply_markup=back_buttons)
             elif hasattr(update, 'message'):
                 context.bot.send_message(update.effective_message.chat.id,
-                                 "An error happened =( Please proceed to the shop menu",
-                                 reply_markup=back_buttons)
+                                         "An error happened =( Please proceed to the shop menu",
+                                         reply_markup=back_buttons)
 
             return
         else:
             return
     except BadRequest:  # TODO
         context.bot.send_message(update.effective_message.chat.id,
-                         "An error happened =( Please proceed to the shop menu",
-                         reply_markup=InlineKeyboardMarkup(
-                             [[InlineKeyboardButton(text=string_dict(context)["back_button"],
-                                                    callback_data="help_back")]]))
+                                 "An error happened =( Please proceed to the shop menu",
+                                 reply_markup=InlineKeyboardMarkup(
+                                     [[InlineKeyboardButton(text=string_dict(context)["back_button"],
+                                                            callback_data="help_back")]]))
     except ConnectionError as err:
         print("ConnectionError")
         print(err)
@@ -143,7 +142,7 @@ def button_handler(update, context):
     button_callback_data = query.data
     buttons = [[InlineKeyboardButton(text=string_dict(context)["back_button"], callback_data="back_from_button")]]
     context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                       message_id=update.callback_query.message.message_id)
+                               message_id=update.callback_query.message.message_id)
     try:
         button_info = custom_buttons_table.find_one(
             {"bot_id": context.bot.id, "button_lower": button_callback_data.replace("button_", "")}
@@ -151,7 +150,7 @@ def button_handler(update, context):
         for content_dict in button_info["content"]:
             if "text" in content_dict:
                 context.user_data['to_delete'].append(query.message.reply_text(text=content_dict["text"],
-                                                                       parse_mode='Markdown'))
+                                                                               parse_mode='Markdown'))
             if "audio_file" in content_dict:
                 context.user_data['to_delete'].append(query.message.reply_audio(content_dict["audio_file"]))
             if "video_file" in content_dict:
@@ -159,13 +158,14 @@ def button_handler(update, context):
             if "document_file" in content_dict:
                 if ".png" in content_dict["document_file"] or ".jpg" in content_dict["document_file"]:
                     context.user_data['to_delete'].append(context.bot.send_photo(chat_id=query.message.chat.id,
-                                                                 photo=content_dict["document_file"]))
+                                                                                 photo=content_dict["document_file"]))
                 else:
                     context.user_data['to_delete'].append(context.bot.send_document(chat_id=query.message.chat.id,
-                                                                    document=content_dict["document_file"]))
+                                                                                    document=content_dict[
+                                                                                        "document_file"]))
             if "photo_file" in content_dict:
                 context.user_data['to_delete'].append(context.bot.send_photo(chat_id=query.message.chat.id,
-                                                             photo=content_dict["photo_file"]))
+                                                                             photo=content_dict["photo_file"]))
             if "video_note_file" in content_dict:
                 context.user_data['to_delete'].append(query.message.reply_video_note(content_dict["video_note_file"]))
             if "voice_file" in content_dict:
@@ -185,7 +185,7 @@ def button_handler(update, context):
         else:
             LOGGER.exception("Exception in help buttons. %s", str(query.data))
     context.bot.send_message(chat_id=update.callback_query.message.chat_id,
-                     text=string_dict(context)["back_button"], reply_markup=InlineKeyboardMarkup(buttons))
+                             text=string_dict(context)["back_button"], reply_markup=InlineKeyboardMarkup(buttons))
 
 
 def product_handler(update, context):
@@ -193,7 +193,7 @@ def product_handler(update, context):
     query = update.callback_query
     button_callback_data = query.data
     context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                       message_id=update.callback_query.message.message_id)
+                               message_id=update.callback_query.message.message_id)
     try:
         button_info = products_table.find_one(
             {"bot_id": context.bot.id, "title_lower": button_callback_data.replace("product_", "")}
@@ -201,7 +201,7 @@ def product_handler(update, context):
         for content_dict in button_info["content"]:
             if "text" in content_dict:
                 context.user_data['to_delete'].append(query.message.reply_text(text=content_dict["text"],
-                                                                       parse_mode='Markdown'))
+                                                                               parse_mode='Markdown'))
             if "audio_file" in content_dict:
                 context.user_data['to_delete'].append(query.message.reply_audio(content_dict["audio_file"]))
             if "video_file" in content_dict:
@@ -209,13 +209,14 @@ def product_handler(update, context):
             if "document_file" in content_dict:
                 if ".png" in content_dict["document_file"] or ".jpg" in content_dict["document_file"]:
                     context.user_data['to_delete'].append(context.bot.send_photo(chat_id=query.message.chat.id,
-                                                                 photo=content_dict["document_file"]))
+                                                                                 photo=content_dict["document_file"]))
                 else:
                     context.user_data['to_delete'].append(context.bot.send_document(chat_id=query.message.chat.id,
-                                                                    document=content_dict["document_file"]))
+                                                                                    document=content_dict[
+                                                                                        "document_file"]))
             if "photo_file" in content_dict:
                 context.user_data['to_delete'].append(context.bot.send_photo(chat_id=query.message.chat.id,
-                                                             photo=content_dict["photo_file"]))
+                                                                             photo=content_dict["photo_file"]))
             if "video_note_file" in content_dict:
                 context.user_data['to_delete'].append(query.message.reply_video_note(content_dict["video_note_file"]))
             if "voice_file" in content_dict:
@@ -235,11 +236,12 @@ def product_handler(update, context):
         else:
             LOGGER.exception("Exception in help buttons. %s", str(query.data))
     context.bot.send_message(update.callback_query.message.chat_id, "Buy this product",
-                     reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
-                         text=string_dict(context)["buy_button"],
-                         callback_data="pay_product_{}".format(button_callback_data.replace("product_", ""))),
-                                  InlineKeyboardButton(text=string_dict(context)["back_button"], callback_data="products")
-                     ]]))
+                             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
+                                 text=string_dict(context)["buy_button"],
+                                 callback_data="pay_product_{}".format(button_callback_data.replace("product_", ""))),
+                                 InlineKeyboardButton(text=string_dict(context)["back_button"],
+                                                      callback_data="products")
+                             ]]))
 
 
 def back_from_button_handler(update, context):
@@ -254,7 +256,7 @@ def back_from_button_handler(update, context):
 #                    "User view": ""}
 
 def help_button(update, context):
-    if users_table.find_one({"user_id": update.effective_user.id, "bot_id":context.bot.id}).get("blocked", False):
+    if users_table.find_one({"user_id": update.effective_user.id, "bot_id": context.bot.id}).get("blocked", False):
         update.effective_message.reply_text("You've been blocked from this chatbot")
         return ConversationHandler.END
     if if_admin(update=update, context=context.bot):
@@ -327,12 +329,13 @@ def help_button(update, context):
 
         elif back_match or back_button_match:
             context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                               message_id=update.callback_query.message.message_id)
+                                       message_id=update.callback_query.message.message_id)
             get_help(update, context)
             return ConversationHandler.END
         else:
             query.message.reply_text(text=HELP_STRINGS.format(welcome_message),
-                                     reply_markup=InlineKeyboardMarkup(paginate_modules(0, HELPABLE, "help", context.bot.id)))
+                                     reply_markup=InlineKeyboardMarkup(
+                                         paginate_modules(0, HELPABLE, "help", context.bot.id)))
             return ConversationHandler.END
         # ensure no spiny white circle
         context.bot.answer_callback_query(query.id)
@@ -351,6 +354,7 @@ def help_button(update, context):
 
 
 def get_help(update, context):
+    print(context.user_data)
     if users_table.find_one({"user_id": update.effective_user.id, "bot_id": context.bot.id}).get("blocked", False):
         update.effective_message.reply_text("You've been blocked from this chatbot")
         return ConversationHandler.END
@@ -363,7 +367,8 @@ def get_help(update, context):
     if chatbot:
         if 'welcomeMessage' in chatbot:
             if if_admin(update=update, context=context.bot):
-                welcome_message = "Hi! Here is your bot menu. You can configure your bot as you wish"  # TODO change to multlilingual
+                welcome_message = "Hi! Here is your bot menu. You can configure your bot as you wish"
+                # TODO change to multlilingual
             else:
                 welcome_message = chatbot['welcomeMessage']
         else:
@@ -395,15 +400,17 @@ class WelcomeBot(object):
     def start(update, context):
 
         chat_id, txt = initiate_chat_id(update)
-        if chat_id<0:
+        if chat_id < 0:
             print("Group")
             context.bot.send_message(chat_id=chat_id, text=string_dict(context)["hello_group"],
-                             reply_markup=InlineKeyboardMarkup(
-                                 [[InlineKeyboardButton(text=string_dict(context)["menu_button"],
-                                                        url="https://telegram.me/{}".format(context.bot.username))]]
-                             ))
+                                     reply_markup=InlineKeyboardMarkup(
+                                         [[InlineKeyboardButton(text=string_dict(context)["menu_button"],
+                                                                url="https://telegram.me/{}".format(
+                                                                    context.bot.username))]]
+                                     ))
             groups_table.update({"group_id": chat_id, "bot_id": context.bot.id},
-                                {"group_id": chat_id, "bot_id": context.bot.id, "group_name": update.message.chat.title},
+                                {"group_id": chat_id, "bot_id": context.bot.id,
+                                 "group_name": update.message.chat.title},
                                 upsert=True)
             return ConversationHandler.END
         print("registration" in txt)
@@ -412,28 +419,28 @@ class WelcomeBot(object):
 
         if "survey_" in txt:
             context.bot.send_message(chat_id=chat_id, text=string_dict(context)["survey_str_20"],
-                             reply_markup=InlineKeyboardMarkup(
-                                 [[InlineKeyboardButton(text=string_dict(context)["start_button"],
-                                                        callback_data="{}".format(
-                                                            str(txt.replace("/start ", ""))
-                                                        ))]]
-                             ))
+                                     reply_markup=InlineKeyboardMarkup(
+                                         [[InlineKeyboardButton(text=string_dict(context)["start_button"],
+                                                                callback_data="{}".format(
+                                                                    str(txt.replace("/start ", ""))
+                                                                ))]]
+                                     ))
         elif "registration" in txt:
             context.bot.send_message(chat_id=chat_id, text=string_dict(context)["register_str"],
-                             reply_markup=InlineKeyboardMarkup(
-                                 [[InlineKeyboardButton(text=string_dict(context)["menu_button"],
-                                                        callback_data="help_back")]]
-                             ))
+                                     reply_markup=InlineKeyboardMarkup(
+                                         [[InlineKeyboardButton(text=string_dict(context)["menu_button"],
+                                                                callback_data="help_back")]]
+                                     ))
         elif "pay_donation" in txt:
             context.bot.send_message(chat_id=chat_id, text=string_dict(context)["donate_button"],
-                             reply_markup=InlineKeyboardMarkup(
-                                 [[InlineKeyboardButton(text=string_dict(context)["donate_button"],
-                                                        callback_data="pay_donation")]]
-                             ))
+                                     reply_markup=InlineKeyboardMarkup(
+                                         [[InlineKeyboardButton(text=string_dict(context)["donate_button"],
+                                                                callback_data="pay_donation")]]
+                                     ))
         else:
             if if_admin(update=update, context=context.bot):
                 context.bot.send_message(chat_id,
-                                 string_dict(context)["start_help"].format(context.bot.first_name))
+                                         string_dict(context)["start_help"].format(context.bot.first_name))
             get_help(update, context)
         # initial_survey = surveys_table.find_one({
         #     "bot_id": bot.id,

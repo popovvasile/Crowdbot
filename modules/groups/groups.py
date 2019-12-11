@@ -309,7 +309,7 @@ MY_GROUPS_HANDLER = ConversationHandler(
     },
     fallbacks=[CallbackQueryHandler(callback=Groups().back, pattern=r"help_back", pass_user_data=True),
                CallbackQueryHandler(callback=Groups().back, pattern=r'help_module', pass_user_data=True),
-               RegexHandler('^Back$', Groups().back, pass_user_data=True),
+               MessageHandler(Filters.regex('^Back$'), Groups().back, pass_user_data=True),
                ]
 )
 

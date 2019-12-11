@@ -1,19 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import json
 import logging
 import telegram.ext as tg
-from telegram.ext import CommandHandler, CallbackQueryHandler, RegexHandler, MessageHandler, Filters
+from telegram.ext import CommandHandler, CallbackQueryHandler, RegexHandler, MessageHandler, Filters, DictPersistence, \
+    PicklePersistence, CallbackContext
 
 from helper_funcs.admin_login import ADMIN_AUTHENTICATION_HANDLER
+from helper_funcs.lang_strings.strings import string_dict_dict, ENG
 from modules.chanells.channels import MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER, REMOVE_CHANNEL_HANDLER, \
     SEND_POST_HANDLER, CHANELLS_MENU
 from modules.chanells.channels_polls_surveys_donate import SEND_POLL_TO_CHANNEL_HANDLER, SEND_SURVEY_TO_CHANNEL_HANDLER, \
     SEND_DONATION_TO_CHANNEL_HANDLER
-# from modules.eshop_old.echop_customer import PURCHASE_HANDLER
-# from modules.eshop_old.eshop_admin import PRODUCT_ADD_HANDLER, DELETE_PRODUCT_HANDLER, PRODUCT_EDIT_HANDLER, \
-#     PRODUCT_EDIT_FINISH_HANDLER, PRODUCT_ADD_FINISH_HANDLER, DELETE_PRODUCT_CONTENT_HANDLER, PRODUCTS_MENU_HANDLER, \
-#     ESHOP_MENU
-# from modules.eshop_old.eshop_enable_disable import CREATE_SHOP_HANDLER
+from modules.eshop_old.echop_customer import PURCHASE_HANDLER
+from modules.eshop_old.eshop_admin import PRODUCT_ADD_HANDLER, DELETE_PRODUCT_HANDLER, PRODUCT_EDIT_HANDLER, \
+    PRODUCT_EDIT_FINISH_HANDLER, PRODUCT_ADD_FINISH_HANDLER, DELETE_PRODUCT_CONTENT_HANDLER, PRODUCTS_MENU_HANDLER, \
+    ESHOP_MENU
+from modules.eshop_old.eshop_enable_disable import CREATE_SHOP_HANDLER
 from modules.groups.groups import MY_GROUPS_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER, \
     ADD_GROUP_HANLDER, GROUPS_MENU
 from modules.groups.groups_polls_surveys_donate import SEND_POLL_TO_GROUP_HANDLER, SEND_SURVEY_TO_GROUP_HANDLER, \
@@ -30,7 +33,7 @@ from modules.surveys.surveys_create import DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_
 from modules.payments.payments_config import EDIT_DONATION_HANDLER, PAYMENTS_CONFIG_KEYBOARD, CHNAGE_DONATIONS_CONFIG, \
     CHNAGE_SHOP_CONFIG, CONFIGS_DONATIONS_GENERAL, CONFIGS_SHOP_GENERAL
 from helper_funcs.helper import help_button, button_handler, get_help, WelcomeBot, \
-    back_from_button_handler, product_handler
+    back_from_button_handler, product_handler, error_callback
 from modules.settings.manage_button import BUTTON_EDIT_HANDLER, BUTTON_EDIT_FINISH_HANDLER, DELETE_CONTENT_HANDLER, \
     BUTTON_ADD_FINISH_HANDLER, back_from_edit_button_handler
 from modules.donations.donation_payment import DONATE_HANDLER, HANDLE_SUCCES, HANDLE_PRECHECKOUT
@@ -59,14 +62,16 @@ logging.basicConfig(
 LOGGER = logging.getLogger(__name__)
 
 
-def main(token, port):
+def main(token):
+    # my_persistence = DictPersistence(store_user_data=True, user_data_json=json.dumps({1: 0},
+    #                                                                                  sort_keys=True))
     updater = tg.Updater(token, use_context=True)  # TODO check the docs
     dispatcher = updater.dispatcher
     # dispatcher.add_error_handler(error_callback)
     start_handler = CommandHandler("start", WelcomeBot().start)
     help_handler = CommandHandler("help", get_help)
     rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), get_help)
-    # product_handler_han = CallbackQueryHandler(product_handler, pattern=r"product_", pass_user_data=True)
+    product_handler_han = CallbackQueryHandler(product_handler, pattern=r"product_", pass_user_data=True)
 
     custom_button_callback_handler = CallbackQueryHandler(button_handler, pattern=r"button_", pass_user_data=True)
     custom_button_back_callback_handler = CallbackQueryHandler(back_from_button_handler,
@@ -115,19 +120,19 @@ def main(token, port):
     dispatcher.add_handler(CONFIGS_DONATIONS_GENERAL)
 
     # # PRODUCTS
-    # dispatcher.add_handler(ESHOP_MENU)
-    # dispatcher.add_handler(PRODUCT_ADD_HANDLER)
-    # dispatcher.add_handler(DELETE_PRODUCT_HANDLER)
-    # dispatcher.add_handler(PRODUCT_EDIT_HANDLER)
-    # dispatcher.add_handler(PRODUCT_EDIT_FINISH_HANDLER)
-    # dispatcher.add_handler(PRODUCT_ADD_FINISH_HANDLER)
-    # dispatcher.add_handler(DELETE_PRODUCT_CONTENT_HANDLER)
-    # dispatcher.add_handler(PRODUCTS_MENU_HANDLER)
-    # dispatcher.add_handler(PURCHASE_HANDLER)
-    # dispatcher.add_handler(product_handler_han)
-    # dispatcher.add_handler(CHNAGE_SHOP_CONFIG)
-    # dispatcher.add_handler(CONFIGS_SHOP_GENERAL)
-    # dispatcher.add_handler(CREATE_SHOP_HANDLER)
+    dispatcher.add_handler(ESHOP_MENU)
+    dispatcher.add_handler(PRODUCT_ADD_HANDLER)
+    dispatcher.add_handler(DELETE_PRODUCT_HANDLER)
+    dispatcher.add_handler(PRODUCT_EDIT_HANDLER)
+    dispatcher.add_handler(PRODUCT_EDIT_FINISH_HANDLER)
+    dispatcher.add_handler(PRODUCT_ADD_FINISH_HANDLER)
+    dispatcher.add_handler(DELETE_PRODUCT_CONTENT_HANDLER)
+    dispatcher.add_handler(PRODUCTS_MENU_HANDLER)
+    dispatcher.add_handler(PURCHASE_HANDLER)
+    dispatcher.add_handler(product_handler_han)
+    dispatcher.add_handler(CHNAGE_SHOP_CONFIG)
+    dispatcher.add_handler(CONFIGS_SHOP_GENERAL)
+    dispatcher.add_handler(CREATE_SHOP_HANDLER)
     # MESSAGES
     dispatcher.add_handler(MESSAGES_MENU)
     dispatcher.add_handler(SEE_MESSAGES_FINISH_BACK_HANDLER)

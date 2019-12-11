@@ -97,7 +97,7 @@ class Product(object):
                     ["to_delete"][-len(context.user_data["product_images"]
                                        )].message_id))
 
-    def send_short_template(self, update, context, text=None, kb=None):
+    def send_short_template(self, update, context, text=None, kb=None):   # TODO add the "pay" button and more images/files/etc.
         text = text if text else self.template
         kb = self.single_keyboard if kb is True \
             else None if kb is None else kb

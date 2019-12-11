@@ -410,7 +410,7 @@ class PollBot(object):
         if votes_dict:
             poll["votes"] = votes_dict
         context.bot.edit_message_text(text=self.assemble_message_text(poll),
-                              parse_mode='Markdown',
+                              
                               reply_markup=self.assemble_inline_keyboard(poll),
                               **kwargs)
         return ConversationHandler.END
@@ -643,7 +643,7 @@ POLL_HANDLER = ConversationHandler(
                                       PollBot().handle_title,
                                       pass_user_data=True),
                        ],
-        TYPING_TYPE: [RegexHandler(PollBot().assemble_type_regex(),
+        TYPING_TYPE: [MessageHandler(Filters.regex(PollBot().assemble_type_regex()),
                                    PollBot().handle_type,
                                    pass_user_data=True),
                       ],
