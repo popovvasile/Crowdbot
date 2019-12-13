@@ -186,19 +186,17 @@ SEND_MESSAGE_TO_DONATORS_HANDLER = ConversationHandler(
                                        callback=SendMessageToDonators().send_message)],
 
     states={
-        CHOOSE_CATEGORY: [MessageHandler(Filters.all, SendMessageToDonators().choose_question, pass_user_data=True)],
-        MESSAGE_TO_USERS: [MessageHandler(Filters.all, SendMessageToDonators().received_message, pass_user_data=True)],
+        CHOOSE_CATEGORY: [MessageHandler(Filters.all, SendMessageToDonators().choose_question)],
+        MESSAGE_TO_USERS: [MessageHandler(Filters.all, SendMessageToDonators().received_message)],
 
     },
 
     fallbacks=[
         CallbackQueryHandler(callback=SendMessageToDonators().send_message_finish,
-                             pattern=r"send_message_finish", pass_user_data=True),
+                             pattern=r"send_message_finish"),
         CallbackQueryHandler(pattern=r"help_module",
-                             callback=SendMessageToDonators().send_message_cancel,
-                             pass_user_data=True),
+                             callback=SendMessageToDonators().send_message_cancel),
         CallbackQueryHandler(pattern=r"help_back",
-                             callback=SendMessageToDonators().send_message_cancel,
-                             pass_user_data=True),
+                             callback=SendMessageToDonators().send_message_cancel),
     ]
 )

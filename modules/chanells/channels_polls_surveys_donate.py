@@ -31,14 +31,19 @@ class SendPoll(object):
     def handle_send_poll(self, update, context):
 
         if update.callback_query:
+            context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                                       message_id=update.callback_query.message.message_id)
             channel_username = update.callback_query.data.replace("send_poll_to_channel_", "")
+            print(channel_username)
             update_data = update.callback_query
             if channel_username == "send_poll_to_channel":
-                channels_markup = [channel['channel_username'] for channel in channels_table.find({'bot_id': context.bot.id})]
-                context.bot.send_message(update.callback_query.message.chat.id, "Choose a channel that you want to send",
-                                 reply_markup=ReplyKeyboardMarkup([channels_markup]))
+                channels_markup = [channel['channel_username'] for
+                                   channel in channels_table.find({'bot_id': context.bot.id})]
+                context.bot.send_message(update.callback_query.message.chat.id,
+                                         "Choose a channel that you want to send",
+                                         reply_markup=ReplyKeyboardMarkup([channels_markup]))
                 context.bot.delete_message(chat_id=update_data.message.chat_id,
-                                   message_id=update_data.message.message_id)
+                                           message_id=update_data.message.message_id)
                 return CHOOSE_CHANNEL_TO_SEND_POLL
         else:
             channel_username = update.message.text
@@ -56,8 +61,8 @@ class SendPoll(object):
         polls_list_of_dicts = polls_table.find({"bot_id": context.bot.id})
         if polls_list_of_dicts.count() == 0:
             context.bot.send_message(update_data.message.chat.id,
-                             context.bot.lang_dict["polls_str_8"],
-                             reply_markup=create_markup)
+                                     context.bot.lang_dict["polls_str_8"],
+                                     reply_markup=create_markup)
             return ConversationHandler.END
         else:
             context.user_data['channel'] = channel_username
@@ -65,16 +70,16 @@ class SendPoll(object):
             if polls_list_of_dicts.count() != 0:
                 command_list = [command['title'] for command in polls_list_of_dicts]
                 context.bot.send_message(update_data.message.chat.id,
-                                 context.bot.lang_dict["polls_str_9"], reply_markup=back_keyboard)
+                                         context.bot.lang_dict["polls_str_9"], reply_markup=back_keyboard)
                 reply_keyboard = [command_list]
                 context.bot.send_message(update_data.message.chat.id,
-                                 context.bot.lang_dict["polls_str_10"],
-                                 reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+                                         context.bot.lang_dict["polls_str_10"],
+                                         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
                 return CHOOSE_POLL_TO_SEND
             else:
                 context.bot.send_message(update_data.message.chat.id,
-                                 context.bot.lang_dict["polls_str_8"],
-                                 reply_markup=create_markup)
+                                         context.bot.lang_dict["polls_str_8"],
+                                         reply_markup=create_markup)
                 return ConversationHandler.END
 
     def handle_send_title(self, update, context):  # TODO save more poll instances
@@ -86,9 +91,9 @@ class SendPoll(object):
         poll['meta'] = ast.literal_eval(poll['meta'])
 
         context.bot.send_message(context.user_data['channel'], PollBot().assemble_message_text(poll),
-                         reply_markup=PollBot().assemble_inline_keyboard(poll, True),
-                         parse_mode='Markdown'
-                         )
+                                 reply_markup=PollBot().assemble_inline_keyboard(poll, True),
+                                 parse_mode='Markdown'
+                                 )
 
         context.bot.send_message(chat_id, context.bot.lang_dict["polls_str_12"], reply_markup=ReplyKeyboardRemove())
 
@@ -96,7 +101,7 @@ class SendPoll(object):
                                                 callback_data="help_module(channels)")]]
         create_markup = InlineKeyboardMarkup(create_buttons)
         context.bot.send_message(update.message.chat.id, context.bot.lang_dict["back_text"],
-                         reply_markup=create_markup)
+                                 reply_markup=create_markup)
         return ConversationHandler.END
 
     def cancel(self, update, context):
@@ -109,7 +114,7 @@ class SendPoll(object):
 
     def back(self, update, context):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
         get_help(update, context)
         return ConversationHandler.END
 
@@ -128,9 +133,11 @@ class SendSurvey(object):
             channel_username = update.callback_query.data.replace("send_survey_to_channel_", "")
             update_data = update.callback_query
             if channel_username == "send_survey_to_channel":
-                channels_markup = [channel['channel_username'] for channel in channels_table.find({'bot_id': context.bot.id})]
-                context.bot.send_message(update.callback_query.message.chat.id, "Choose a channel that you want to send",
-                                 reply_markup=ReplyKeyboardMarkup([channels_markup]))
+                channels_markup = [channel['channel_username'] for channel in
+                                   channels_table.find({'bot_id': context.bot.id})]
+                context.bot.send_message(update.callback_query.message.chat.id,
+                                         "Choose a channel that you want to send",
+                                         reply_markup=ReplyKeyboardMarkup([channels_markup]))
                 return CHOOSE_CHANNEL_TO_SEND_SURVEY
         else:
             channel_username = update.message.text
@@ -143,12 +150,12 @@ class SendSurvey(object):
         surveys_list = surveys_table.find({"bot_id": context.bot.id})
         if surveys_list.count() != 0:
             context.bot.send_message(update_data.message.chat.id,
-                             context.bot.lang_dict["survey_str_18"], reply_markup=reply_markup)
+                                     context.bot.lang_dict["survey_str_18"], reply_markup=reply_markup)
             command_list = [survey['title'] for survey in surveys_list]
             reply_keyboard = [command_list]
             context.bot.send_message(update_data.message.chat.id,
-                             context.bot.lang_dict["survey_str_19"],
-                             reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+                                     context.bot.lang_dict["survey_str_19"],
+                                     reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
             return CHOOSE_SURVEY_TO_SEND
         else:
             admin_keyboard = [InlineKeyboardButton(text=context.bot.lang_dict["create_button_str"],
@@ -156,27 +163,28 @@ class SendSurvey(object):
                               InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                    callback_data="help_back")]
             context.bot.send_message(update_data.message.chat.id,
-                             context.bot.lang_dict["survey_str_23"],
-                             reply_markup=InlineKeyboardMarkup([admin_keyboard]))
+                                     context.bot.lang_dict["survey_str_23"],
+                                     reply_markup=InlineKeyboardMarkup([admin_keyboard]))
             return ConversationHandler.END
 
     def handle_send_title(self, update, context):
         chat_id, txt = initiate_chat_id(update)
         context.user_data["title"] = txt
         context.bot.send_message(chat_id=context.user_data['channel'], text=context.bot.lang_dict["survey_str_20"],
-                         reply_markup=InlineKeyboardMarkup(
-                             [[InlineKeyboardButton(text=context.bot.lang_dict["start_button"],
-                                                    url="https://t.me/{}?start=survey_{}".format(context.bot.username,
-                                                                                                 context.user_data["title"]),
-                                                    callback_data="survey_{}".format(
-                                                        str(txt)
-                                                    ))]]
-                         ))
+                                 reply_markup=InlineKeyboardMarkup(
+                                     [[InlineKeyboardButton(text=context.bot.lang_dict["start_button"],
+                                                            url="https://t.me/{}?start=survey_{}".format(
+                                                                context.bot.username,
+                                                                context.user_data["title"]),
+                                                            callback_data="survey_{}".format(
+                                                                str(txt)
+                                                            ))]]
+                                 ))
         create_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                 callback_data="help_module(channels)")]]
         create_markup = InlineKeyboardMarkup(create_buttons)
         context.bot.send_message(update.message.chat.id, context.bot.lang_dict["back_text"],
-                         reply_markup=create_markup)
+                                 reply_markup=create_markup)
         logger.info("Admin {} on bot {}:{} sent a survey to the users:{}".format(
             update.effective_user.first_name, context.bot.first_name, context.bot.id, txt))
         return ConversationHandler.END
@@ -190,7 +198,7 @@ class SendSurvey(object):
 
     def back(self, update, context):
         context.bot.delete_message(update.effective_chat.id,
-                           update.effective_message.message_id)
+                                   update.effective_message.message_id)
         get_help(update, context)
         return ConversationHandler.END
 
@@ -212,12 +220,12 @@ class SendDonationToChannel(object):
         channel_username = update.callback_query.data.replace("send_donation_to_channel_", "")
 
         if channels != 0:
-              # TODO here is a bug, AttributeError: 'Update' object has no attribute 'data'
+            # TODO here is a bug, AttributeError: 'Update' object has no attribute 'data'
 
             if channel_username == "send_donation_to_channel":
                 channels_markup = [channel['channel_username'] for channel in channels]
                 context.bot.send_message(update_data.message.chat.id, "Choose a channel that you want to send",
-                                 reply_markup=ReplyKeyboardMarkup([channels_markup]))
+                                         reply_markup=ReplyKeyboardMarkup([channels_markup]))
                 return CHOOSE_CHANNEL_TO_SEND_DONATION
 
             context.user_data["channel_username"] = channel_username
@@ -228,12 +236,12 @@ class SendDonationToChannel(object):
                 buttons)
 
             context.bot.delete_message(chat_id=update_data.message.chat_id,
-                               message_id=update_data.message.message_id)
+                                       message_id=update_data.message.message_id)
             chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
             if chatbot.get("donate") != {} and "donate" in chatbot:
                 context.bot.send_message(update_data.message.chat.id,
-                                 context.bot.lang_dict["send_donation_request_1"],
-                                 reply_markup=reply_markup)
+                                         context.bot.lang_dict["send_donation_request_1"],
+                                         reply_markup=reply_markup)
                 return DONATION_TO_USERS
             else:
                 admin_keyboard = [InlineKeyboardButton(text=context.bot.lang_dict["allow_donations_button"],
@@ -241,8 +249,8 @@ class SendDonationToChannel(object):
                                   InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                        callback_data="help_back")]
                 context.bot.send_message(update_data.message.chat.id,
-                                 context.bot.lang_dict["allow_donation_text"],
-                                 reply_markup=InlineKeyboardMarkup([admin_keyboard]))
+                                         context.bot.lang_dict["allow_donation_text"],
+                                         reply_markup=InlineKeyboardMarkup([admin_keyboard]))
                 return ConversationHandler.END
         else:
             admin_keyboard = [InlineKeyboardButton(text=context.bot.lang_dict["add_channel"],
@@ -250,82 +258,97 @@ class SendDonationToChannel(object):
                               InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                    callback_data="help_back")]
             context.bot.send_message(update_data.message.chat.id,
-                             context.bot.lang_dict["no_channels"],
-                             reply_markup=InlineKeyboardMarkup([admin_keyboard]))
+                                     context.bot.lang_dict["no_channels"],
+                                     reply_markup=InlineKeyboardMarkup([admin_keyboard]))
             return ConversationHandler.END
 
-    def received_donation(self, update, context):  # TODO change like in messages
-
+    def received_donation(self, update, context):
+        if "content" not in context.user_data:
+            context.user_data["content"] = []
         if update.message.text:
-            context.bot.send_message(context.user_data["channel_username"], update.message.text)
+            context.user_data["content"].append({"text": update.message.text})
 
         elif update.message.photo:
-            photo_file = update.message.photo[0].get_file().file_id
-            context.bot.send_photo(context.user_data["channel_username"], photo=photo_file)
+            photo_file = update.message.photo[-1].get_file().file_id
+            context.user_data["content"].append({"photo_file": photo_file})
 
         elif update.message.audio:
             audio_file = update.message.audio.get_file().file_id
-            context.bot.send_audio(context.user_data["channel_username"], audio_file)
+            context.user_data["content"].append({"audio_file": audio_file})
 
         elif update.message.voice:
             voice_file = update.message.voice.get_file().file_id
-            context.bot.send_voice(context.user_data["channel_username"], voice_file)
+            context.user_data["content"].append({"audio_file": voice_file})
 
         elif update.message.document:
             document_file = update.message.document.get_file().file_id
-            context.bot.send_document(context.user_data["channel_username"], document_file)
-
-        elif update.message.sticker:
-            sticker_file = update.message.sticker.get_file().file_id
-            context.bot.send_sticker(context.user_data["channel_username"], sticker_file)
-
-        elif update.message.game:
-            sticker_file = update.message.game.get_file().file_id
-            context.bot.send_game(context.user_data["channel_username"], sticker_file)
-
-        elif update.message.animation:
-            animation_file = update.message.animation.get_file().file_id
-            context.bot.send_animation(context.user_data["channel_username"], animation_file)
+            context.user_data["content"].append({"document_file": document_file})
 
         elif update.message.video:
             video_file = update.message.video.get_file().file_id
-            context.bot.send_video(context.user_data["channel_username"], video_file)
+            context.user_data["content"].append({"video_file": video_file})
 
         elif update.message.video_note:
             video_note_file = update.message.audio.get_file().file_id
-            context.bot.send_video_note(context.user_data["channel_username"], video_note_file)
+            context.user_data["content"].append({"video_file": video_note_file})
 
         final_reply_markup = InlineKeyboardMarkup(
             [[InlineKeyboardButton(text=context.bot.lang_dict["done_button"],
-                                   callback_data="send_donation_finish")]]
+                                   callback_data="send_donation_finish")],
+             [InlineKeyboardButton(text=context.bot.lang_dict["cancel_button"],
+                                   callback_data="help_module(donation_payment)k")]
+             ]
         )
         context.bot.send_message(update.message.chat_id,
-                         context.bot.lang_dict["send_donation_request_2"],
-                         reply_markup=final_reply_markup)
+                                 context.bot.lang_dict["send_donation_request_2"],
+                                 reply_markup=final_reply_markup)
 
         return DONATION_TO_USERS
 
     def send_donation_finish(self, update, context):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
-        buttons = list()
-        buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["donate_button"],
-
-                                             url="https://t.me/{}?start=pay_donation".format(context.bot.username),
-                                             )])
-        donation_reply_markup = InlineKeyboardMarkup(
+                                   message_id=update.callback_query.message.message_id)
+        buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                         callback_data="help_module(channels)")]]
+        final_reply_markup = InlineKeyboardMarkup(
             buttons)
-        create_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                                callback_data="help_module(channels)")]]
-        create_markup = InlineKeyboardMarkup(create_buttons)
-
         context.bot.send_message(update.callback_query.message.chat_id,
-                         context.bot.lang_dict["send_donation_request_3"],
-                         reply_markup=create_markup)
+                                 context.bot.lang_dict["send_donation_request_3"],
+                                 reply_markup=final_reply_markup)
 
-        context.bot.send_message(context.user_data["channel_username"],
-                         context.bot.lang_dict["donate_button"],
-                         reply_markup=donation_reply_markup)
+        donation_reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton(
+            text=context.bot.lang_dict["donate_button"],
+            url="https://t.me/{}?start=pay_donation".format(
+                context.bot.username),
+        )]])
+        for content_dict in context.user_data["content"]:
+            if "text" in content_dict:
+                context.bot.send_message(context.user_data["channel_username"],
+                                         content_dict["text"])
+            if "audio_file" in content_dict:
+                context.bot.send_audio(context.user_data["channel_username"], content_dict["audio_file"])
+            if "voice_file" in content_dict:
+                context.bot.send_voice(context.user_data["channel_username"], content_dict["voice_file"])
+            if "video_file" in content_dict:
+                context.bot.send_video(context.user_data["channel_username"], content_dict["video_file"])
+            if "video_note_file" in content_dict:
+                context.bot.send_video_note(context.user_data["channel_username"], content_dict["video_note_file"])
+            if "document_file" in content_dict:
+                if ".png" in content_dict["document_file"] or ".jpg" in content_dict["document_file"]:
+                    context.bot.send_photo(context.user_data["channel_username"], content_dict["document_file"])
+                else:
+                    context.bot.send_document(context.user_data["channel_username"], content_dict["document_file"])
+            if "photo_file" in content_dict:
+                context.bot.send_photo(context.user_data["channel_username"], content_dict["photo_file"])
+            if "animation_file" in content_dict:
+                context.bot.send_animation(context.user_data["channel_username"], content_dict["animation_file"])
+            if "sticker_file" in content_dict:
+                context.bot.send_sticker(context.user_data["channel_username"], content_dict["sticker_file"])
+
+            context.bot.send_message(context.user_data["channel_username"],
+                                     text=context.bot.lang_dict["donate_button"],
+                                     reply_markup=donation_reply_markup)
+            context.user_data.clear()
         return ConversationHandler.END
 
     def cancel(self, update, context):
@@ -337,7 +360,7 @@ class SendDonationToChannel(object):
 
     def back(self, update, context):
         context.bot.delete_message(update.effective_chat.id,
-                           update.effective_message.message_id)
+                                   update.effective_message.message_id)
         get_help(update, context)
         return ConversationHandler.END
 
@@ -350,12 +373,12 @@ class SendDonationToChannel(object):
 # There are already 'send_survey_to_users' pattern handler - mb use it
 SEND_POLL_TO_CHANNEL_HANDLER = ConversationHandler(
     entry_points=[
-        CallbackQueryHandler(SendPoll().handle_send_poll, pattern=r"send_poll_to_channel", pass_user_data=True), ],
+        CallbackQueryHandler(SendPoll().handle_send_poll, pattern=r"send_poll_to_channel"), ],
     states={
 
-        CHOOSE_POLL_TO_SEND: [MessageHandler(Filters.text, SendPoll().handle_send_title, pass_user_data=True), ],
+        CHOOSE_POLL_TO_SEND: [MessageHandler(Filters.text, SendPoll().handle_send_title), ],
         CHOOSE_CHANNEL_TO_SEND_POLL: [
-            MessageHandler(Filters.text, SendPoll().handle_send_poll, pass_user_data=True), ],
+            MessageHandler(Filters.text, SendPoll().handle_send_poll), ],
     },
     fallbacks=[CallbackQueryHandler(callback=SendPoll().back, pattern=r"help_back"),
                CallbackQueryHandler(callback=SendPoll().back, pattern=r"help_module"),
@@ -365,12 +388,12 @@ SEND_POLL_TO_CHANNEL_HANDLER = ConversationHandler(
 
 SEND_SURVEY_TO_CHANNEL_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(SendSurvey().handle_send_survey,
-                                       pattern="send_survey_to_channel", pass_user_data=True)],
+                                       pattern="send_survey_to_channel")],
     states={
         CHOOSE_CHANNEL_TO_SEND_SURVEY: [
-            MessageHandler(Filters.text, SendSurvey().handle_send_survey, pass_user_data=True),
+            MessageHandler(Filters.text, SendSurvey().handle_send_survey),
         ],
-        CHOOSE_SURVEY_TO_SEND: [MessageHandler(Filters.text, SendSurvey().handle_send_title, pass_user_data=True),
+        CHOOSE_SURVEY_TO_SEND: [MessageHandler(Filters.text, SendSurvey().handle_send_title),
                                 ]
     },
     fallbacks=[CallbackQueryHandler(callback=SendSurvey().back, pattern=r"help_back"),
@@ -380,22 +403,19 @@ SEND_SURVEY_TO_CHANNEL_HANDLER = ConversationHandler(
 )
 SEND_DONATION_TO_CHANNEL_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(pattern=r"send_donation_to_channel",
-                                       callback=SendDonationToChannel().send_donation,
-                                       pass_user_data=True)],
+                                       callback=SendDonationToChannel().send_donation)],
 
     states={
         DONATION_TO_USERS: [MessageHandler(Filters.all,
-                                           SendDonationToChannel().received_donation,
-                                           pass_user_data=True),
+                                           SendDonationToChannel().received_donation),
                             ],
         CHOOSE_CHANNEL_TO_SEND_DONATION: [MessageHandler(Filters.all,
-                                                         SendDonationToChannel().send_donation,
-                                                         pass_user_data=True),
+                                                         SendDonationToChannel().send_donation),
                                           ],
     },
 
     fallbacks=[CallbackQueryHandler(callback=SendDonationToChannel().send_donation_finish,
-                                    pattern=r"send_donation_finish", pass_user_data=True),
+                                    pattern=r"send_donation_finish"),
                CallbackQueryHandler(callback=SendDonationToChannel().back, pattern=r"help_back"),
                CallbackQueryHandler(callback=SendDonationToChannel().back, pattern=r"help_module"),
 

@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 def users_menu(update, context):
-    string_d_str = string_dict(context.bot)
+    string_d_str = context.bot.lang_dict
     delete_messages(update, context, True)
     users_menu_keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton(text=string_d_str["statistic_btn_str"],
@@ -36,7 +36,7 @@ def users_menu(update, context):
         [back_button(context, "help_module(users)")]
     ])
     context.bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(context.bot)["users_menu_str"],
+                             context.bot.lang_dict["users_menu_str"],
                              reply_markup=users_menu_keyboard)
     return ConversationHandler.END
 
@@ -69,7 +69,7 @@ class User(object):
 
     @property
     def template(self):
-        return string_dict(self.context)["user_temp"].format(
+        return self.context.bot.lang_dict["user_temp"].format(
             self.mention_markdown, self.timestamp)
 
     @property
@@ -80,7 +80,7 @@ class User(object):
     @property
     def donates_to_string(self):
         donates = self.donates
-        return string_dict(self.context)["donations_count_str"].format(
+        return self.context.bot.lang_dict["donations_count_str"].format(
             DonationStatistic().create_amount(donates)) if donates.count() else ""
 
     @staticmethod
@@ -141,14 +141,14 @@ class UsersHandler(object):
         context.user_data['to_delete'].append(
             context.bot.send_message(
                 update.callback_query.message.chat_id,
-                string_dict(context.bot)["users_layout_title"].format(
+                context.bot.lang_dict["users_layout_title"].format(
                     all_users.count()),
                 ParseMode.MARKDOWN))
         if all_users.count() == 0:
             context.user_data["to_delete"].append(
                 context.bot.send_message(
                     update.effective_chat.id,
-                    string_dict(context.bot)["no_users_str"],
+                    context.bot.lang_dict["no_users_str"],
                     reply_markup=back_reply(context, "back_to_users_menu")))
         else:
             pagination = Pagination(context, per_page, all_users)
@@ -208,9 +208,6 @@ USERS_LIST_HANDLER = ConversationHandler(
     fallbacks=[
         CallbackQueryHandler(pattern=r"back_to_users_menu",
                              callback=back_to_users_menu),
-        # CallbackQueryHandler(pattern=r"help_back",
-        #                      callback=UsersHandler(),
-        #                      pass_user_data=True),
     ]
 )
 

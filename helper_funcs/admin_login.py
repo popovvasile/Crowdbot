@@ -92,13 +92,12 @@ class AdminAuthentication(object):
 ADMIN_AUTHENTICATION_HANDLER = ConversationHandler(
     entry_points=[
         MessageHandler(Filters.regex(r"^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$"),
-                     AdminAuthentication().handle_email, pass_user_data=True),
+                     AdminAuthentication().handle_email),
     ],
 
     states={
         TYPING_PASS: [MessageHandler(Filters.text,
-                                     AdminAuthentication().handle_password,
-                                     pass_user_data=True)],
+                                     AdminAuthentication().handle_password)],
     },
 
     fallbacks=[

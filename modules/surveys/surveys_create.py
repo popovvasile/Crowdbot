@@ -328,24 +328,22 @@ DELETE_SURVEYS_HANDLER = ConversationHandler(
 
 CREATE_SURVEY_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=SurveyHandler().start,
-                                       pattern=r"create_survey", pass_user_data=True)],
+                                       pattern=r"create_survey")],
 
     states={
         CHOOSING_TITLE: [MessageHandler(Filters.text,
-                                        SurveyHandler().handle_title,
-                                        pass_user_data=True),
+                                        SurveyHandler().handle_title),
                          ],
 
         CHOOSING_QUESTIONS: [MessageHandler(Filters.text,
-                                            SurveyHandler().receive_questions,
-                                            pass_user_data=True),
+                                            SurveyHandler().receive_questions),
                              ],
     },
 
     fallbacks=[
         CallbackQueryHandler(callback=SurveyHandler().back, pattern=r"help_module"),
 
-        CallbackQueryHandler(callback=SurveyHandler().done, pattern=r"done_survey", pass_user_data=True),
+        CallbackQueryHandler(callback=SurveyHandler().done, pattern=r"done_survey"),
 
     ]
 )
@@ -355,7 +353,7 @@ SEND_SURVEYS_HANDLER = ConversationHandler(
 
                   ],
     states={
-        TYPING_SEND_TITLE: [MessageHandler(Filters.text, SurveyHandler().handle_send_title, pass_user_data=True),
+        TYPING_SEND_TITLE: [MessageHandler(Filters.text, SurveyHandler().handle_send_title),
                             ],
 
     },

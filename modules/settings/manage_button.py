@@ -409,53 +409,52 @@ class DeleteButtonContent(object):
 # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
 BUTTON_EDIT_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=ButtonEdit().start,
-                                       pattern=r"edit_button",
-                                       pass_user_data=True)],
+                                       pattern=r"edit_button")],
 
     states={
-        CHOOSE_BUTTON: [MessageHandler(Filters.text, ButtonEdit().choose_button, pass_user_data=True),
+        CHOOSE_BUTTON: [MessageHandler(Filters.text, ButtonEdit().choose_button),
                         ],
     },
 
     fallbacks=[
         CallbackQueryHandler(callback=ButtonEdit().back,
-                             pattern=r"help_module", pass_user_data=True),
+                             pattern=r"help_module"),
     ]
 )
 
 BUTTON_EDIT_FINISH_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=ButtonEdit().edit_button,
-                                       pattern=r"b_", pass_user_data=True)],
+                                       pattern=r"b_")],
 
     states={
 
-        EDIT_FINISH: [MessageHandler(Filters.all, ButtonEdit().edit_button_finish, pass_user_data=True),
+        EDIT_FINISH: [MessageHandler(Filters.all, ButtonEdit().edit_button_finish),
                       CallbackQueryHandler(callback=ButtonEdit().back,
-                                           pattern=r"help_module", pass_user_data=True),
+                                           pattern=r"help_module"),
                       ],
     },
 
     fallbacks=[
         CallbackQueryHandler(callback=ButtonEdit().back,
-                             pattern=r"help_module", pass_user_data=True)
+                             pattern=r"help_module")
     ]
 )
 BUTTON_ADD_FINISH_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=AddButtonContent().add_content_button,
-                                       pattern=r"add_content", pass_user_data=True)],
+                                       pattern=r"add_content")],
 
     states={
 
-        EDIT_FINISH: [MessageHandler(Filters.all, AddButtonContent().add_content_button_finish, pass_user_data=True),
+        EDIT_FINISH: [MessageHandler(Filters.all, AddButtonContent().add_content_button_finish),
                       ],
     },
 
     fallbacks=[
         CallbackQueryHandler(callback=ButtonEdit().back,
-                             pattern=r"help_module", pass_user_data=True),
+                             pattern=r"help_module"),
     ]
 )
 DELETE_CONTENT_HANDLER = CallbackQueryHandler(pattern="d_",
-                                              callback=DeleteButtonContent().delete_message, pass_user_data=True)
+                                              callback=DeleteButtonContent().delete_message)
 back_from_edit_button_handler = CallbackQueryHandler(callback=ButtonEdit().back_from_edit_button,
-                                                     pattern="back_from_edit_button", pass_user_data=True)
+                                                     pattern="back_from_edit_button")

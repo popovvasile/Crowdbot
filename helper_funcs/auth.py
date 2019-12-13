@@ -37,6 +37,7 @@ def register_chat(update, context):
                             "timestamp": datetime.now(),
                             'registered': False,
                             "is_admin": False,
+                            "superuser": False,
                             "tags": ["#all", "#user"]})
 
 

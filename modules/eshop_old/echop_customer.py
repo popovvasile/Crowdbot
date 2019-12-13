@@ -16,18 +16,16 @@ logger = logging.getLogger(__name__)
 
 
 class PurchaseBot(object):
-    def error(self, update, context, error):
-        """Log Errors caused by Updates."""
-        logger.warning('Update "%s" caused error "%s"', update, error)
 
     def start_purchase(self, update, context):
         query = update.callback_query
         button_callback_data = query.data
 
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id, )
-        purchase_request = products_table.find_one({"bot_id": context.bot.id, "title_lower": button_callback_data.replace(
-            "pay_product_", "")})
+                                   message_id=update.callback_query.message.message_id, )
+        purchase_request = products_table.find_one({"bot_id": context.bot.id,
+                                                    "title_lower": button_callback_data.replace(
+                                                        "pay_product_", "")})
 
         provider_token = chatbots_table.find_one({"bot_id": context.bot.id})["donate"][
             "payment_token"]  # TODO when creating products, double check if payment token has been added
@@ -40,15 +38,15 @@ class PurchaseBot(object):
         currency = purchase_request['currency']
         prices = [LabeledPrice(title, purchase_request["price"])]
         context.bot.sendInvoice(update.callback_query.message.chat_id, title, description, payload,
-                        provider_token, start_parameter, currency, prices,
-                        need_name=True, need_phone_number=True,
-                        need_email=True, need_shipping_address=purchase_request["shipping"], is_flexible=True
-                        )
+                                provider_token, start_parameter, currency, prices,
+                                need_name=True, need_phone_number=True,
+                                need_email=True, need_shipping_address=purchase_request["shipping"], is_flexible=True
+                                )
         context.bot.send_message(update.callback_query.message.chat.id,
-                         text=string_dict(context)["back_text"],
-                         reply_markup=InlineKeyboardMarkup(
-                             [[InlineKeyboardButton(text=string_dict(context)["back_button"],
-                                                    callback_data="help_back")]]))
+                                 text=context.bot.lang_dict["back_text"],
+                                 reply_markup=InlineKeyboardMarkup(
+                                     [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                                            callback_data="help_back")]]))
         logger.info("User {} on bot {} requested a purchase".format(
             update.effective_user.first_name, context.bot.first_name))
 
@@ -68,7 +66,7 @@ class PurchaseBot(object):
     def successful_payment_callback(self, update, context):
         # TODO add counting of purchases and prepare for callback_query
         # do something after successful receive of purchase?
-        buttons = [[InlineKeyboardButton(text=string_dict(context)["back_button"],
+        buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                          callback_data="help_back")]]
         markup = InlineKeyboardMarkup(buttons)
         context.user_data = dict()
@@ -79,22 +77,7 @@ class PurchaseBot(object):
         context.user_data["bot_id"] = context.bot.id
 
         purchases_table.insert_one(context.user_data)
-        update.message.reply_text(string_dict(context)["thank_purchase"], markup=markup)
-        context.user_data.clear()
-        return ConversationHandler.END
-
-    def cancel(self, update, context):
-        update.message.reply_text(
-            "Command is cancelled =("
-        )
-        get_help(update, context)
-
-        return ConversationHandler.END
-
-    def back(self, update, context):
-        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
-        get_help(update, context)
+        update.message.reply_text(context.bot.lang_dict["thank_purchase"], markup=markup)
         context.user_data.clear()
         return ConversationHandler.END
 

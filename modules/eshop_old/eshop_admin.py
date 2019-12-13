@@ -22,7 +22,7 @@ TYPING_LINK, TYPING_PRODUCT_FINISH = range(2)
 
 
 def eshop_menu(update, context):
-    string_d_str = string_dict(context)
+    string_d_str = context.bot.lang_dict
     context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                message_id=update.callback_query.message.message_id)
     chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
@@ -35,20 +35,17 @@ def eshop_menu(update, context):
                            [InlineKeyboardButton(text=string_d_str["edit_product"],
                                                  callback_data="edit_product")],
                            [InlineKeyboardButton(text=string_d_str["delete_product"],
-                                                 callback_data="delete_product")],
-                           [InlineKeyboardButton(text=string_dict(context)["back_button"],
-                                                 callback_data="help_module(shop)")]]
+                                                 callback_data="delete_product")]]
 
     else:
-        admin_keyboard.append([InlineKeyboardButton(text=string_dict(context)["allow_donations_button"],
+        admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["allow_donations_button"],
                                                     # TODO enforce to configure the tokens and everything first time
                                                     callback_data="change_donations_config")]),
 
-    admin_keyboard.append([InlineKeyboardButton(text=string_dict(context)["back_button"],
+    admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                 callback_data="help_module(settings)")])
-
     context.bot.send_message(update.callback_query.message.chat.id,
-                             string_dict(context)["shop"], reply_markup=admin_keyboard)
+                             context.bot.lang_dict["shop"], reply_markup=InlineKeyboardMarkup(admin_keyboard))
     return ConversationHandler.END
 
 
@@ -65,7 +62,7 @@ class ProcductMenu(object):
                 pairs = list(zip(buttons[::2], buttons[1::2]))
             else:
                 pairs = list(zip(buttons[::2], buttons[1::2])) + [(buttons[-1],)] \
-                        + [[InlineKeyboardButton(text=string_dict(context)["back_button"],
+                        + [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                  callback_data="help_module(shop)")]]
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text="Products menu",
@@ -75,13 +72,13 @@ class ProcductMenu(object):
                                      ))
         else:
             context.bot.send_message(chat_id=update.callback_query.message.chat_id,
-                                     text=string_dict(context)["manage_button_str_2"],
+                                     text=context.bot.lang_dict["manage_button_str_2"],
                                      reply_markup=InlineKeyboardMarkup(
                                          [[InlineKeyboardButton(
-                                             string_dict(context)["add_product_button"],
+                                             context.bot.lang_dict["add_product_button"],
                                              callback_data="create_product"),
                                              InlineKeyboardButton(
-                                                 string_dict(context)["back_button"],
+                                                 context.bot.lang_dict["back_button"],
                                                  callback_data="help_module(shop)")]]
                                      ), parse_mode='Markdown')
 
@@ -91,15 +88,15 @@ class AddProducts(object):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                    message_id=update.callback_query.message.message_id)
         context.user_data["to_delete"] = []
-        reply_products = [[InlineKeyboardButton(text=string_dict(context)["back_button"],
+        reply_products = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                 callback_data="help_module(shop)")]]
         reply_markup = InlineKeyboardMarkup(
             reply_products)
 
         context.user_data["to_delete"].append(context.bot.send_message(update.callback_query.message.chat.id,
-                                                                       string_dict(context)["add_products_str_1"]))
+                                                                       context.bot.lang_dict["add_products_str_1"]))
         context.user_data["to_delete"].append(context.bot.send_message(update.callback_query.message.chat.id,
-                                                                       string_dict(context)["back_text"],
+                                                                       context.bot.lang_dict["back_text"],
                                                                        reply_markup=reply_markup))
         return TYPING_PRODUCT
 
@@ -107,7 +104,7 @@ class AddProducts(object):
     def product_handler(self, update, context,
                         ):  # TODO add price and yes or not for delivery- ask address or not?
         context.user_data["to_delete"].append(update.message)
-        reply_products = [[InlineKeyboardButton(text=string_dict(context)["back_button"],
+        reply_products = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                 callback_data="help_module(shop)")]]
         reply_markup = InlineKeyboardMarkup(
             reply_products)
@@ -118,20 +115,20 @@ class AddProducts(object):
         if product_list_of_dicts.count() == 0:
 
             context.user_data['title'] = txt
-            context.user_data["to_delete"].append(update.message.reply_text(string_dict(context)["great_text"],
+            context.user_data["to_delete"].append(update.message.reply_text(context.bot.lang_dict["great_text"],
                                                                             reply_markup=ReplyKeyboardRemove()))
-            context.user_data["to_delete"].append(update.message.reply_text(string_dict(context)["add_products_price"],
+            context.user_data["to_delete"].append(update.message.reply_text(context.bot.lang_dict["add_products_price"],
                                                                             reply_markup=reply_markup))
             return TYPING_PRICE
         else:
             context.user_data["to_delete"].append(
-                update.message.reply_text(string_dict(context)["add_products_str_title_taken"],
+                update.message.reply_text(context.bot.lang_dict["add_products_str_title_taken"],
                                           reply_markup=reply_markup))
 
             return TYPING_PRODUCT
 
     def type_price(self, update, context):
-        reply_products = [[InlineKeyboardButton(text=string_dict(context)["back_button"],
+        reply_products = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                 callback_data="help_module(shop)")]]
         reply_markup = InlineKeyboardMarkup(
             reply_products)
@@ -141,12 +138,12 @@ class AddProducts(object):
             context.user_data["price"] = amount
             currency_keyboard = [["RUB", "USD", "EUR", "GBP"],
                                  ["CHF", "AUD", "RON", "PLN"]]
-            update.message.reply_text(string_dict(context)["add_products_str_currency"],
+            update.message.reply_text(context.bot.lang_dict["add_products_str_currency"],
                                       reply_markup=ReplyKeyboardMarkup(currency_keyboard, one_time_keyboard=True))
 
             return TYPING_CURRENCY
         except ValueError:
-            update.message.reply_text(text=string_dict(context)["add_products_str_correct_format_price"],
+            update.message.reply_text(text=context.bot.lang_dict["add_products_str_correct_format_price"],
                                       reply_markup=reply_markup)
             return TYPING_PRICE
 
@@ -155,14 +152,14 @@ class AddProducts(object):
         chat_id, txt = initiate_chat_id(update)
         context.user_data["currency"] = txt
         context.user_data["to_delete"].append(
-            update.message.reply_text(string_dict(context)
+            update.message.reply_text(context.bot.lang_dict
                                       ["add_products_str_shipment"],
                                       reply_markup=ReplyKeyboardMarkup(currency_keyboard)))
         return CHOOSE_TYPE
 
     def handle_type(self, update, context):
 
-        reply_products = [[InlineKeyboardButton(text=string_dict(context)["back_button"],
+        reply_products = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                 callback_data="help_module(shop)")]]
         reply_markup = InlineKeyboardMarkup(
             reply_products)
@@ -172,13 +169,13 @@ class AddProducts(object):
         else:
             context.user_data["shipping"] = False
         context.user_data["to_delete"].append(
-            update.message.reply_text(string_dict(context)["add_products_str_description"],
+            update.message.reply_text(context.bot.lang_dict["add_products_str_description"],
                                       reply_markup=reply_markup))
         return TYPING_DESCRIPTION
 
     def description_handler(self, update, context):
         context.user_data["to_delete"].append(update.message)
-        reply_products = [[InlineKeyboardButton(text=string_dict(context)["back_button"],
+        reply_products = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                 callback_data="help_module(shop)")]]
         reply_markup = InlineKeyboardMarkup(
             reply_products)
@@ -186,7 +183,7 @@ class AddProducts(object):
             context.user_data["content"] = []
         general_list = context.user_data["content"]
         if update.callback_query:
-            if update.message.callback_query.data == string_dict(context)["done_button"]:
+            if update.message.callback_query.data == context.bot.lang_dict["done_button"]:
                 self.description_finish(update, context)
                 return ConversationHandler.END
         if update.message.text:
@@ -221,13 +218,13 @@ class AddProducts(object):
         if update.message.sticker:
             sticker_file = update.message.sticker.get_file().file_id
             general_list.append({"sticker_file": sticker_file})
-        context.user_data["to_delete"].append(update.message.reply_text(string_dict(context)["back_text"],
+        context.user_data["to_delete"].append(update.message.reply_text(context.bot.lang_dict["back_text"],
                                                                         reply_markup=reply_markup))
-        done_products = [[InlineKeyboardButton(text=string_dict(context)["done_button"], callback_data="DONE")]]
+        done_products = [[InlineKeyboardButton(text=context.bot.lang_dict["done_button"], callback_data="DONE")]]
         done_reply_markup = InlineKeyboardMarkup(
             done_products)
         context.user_data["to_delete"].append(
-            update.message.reply_text(string_dict(context)["add_products_str_description_add"],
+            update.message.reply_text(context.bot.lang_dict["add_products_str_description_add"],
                                       reply_markup=done_reply_markup))
         context.user_data["content"] = general_list
         return TYPING_DESCRIPTION
@@ -248,13 +245,13 @@ class AddProducts(object):
         context.user_data.pop('to_delete', None)
         products_table.save(context.user_data)
         reply_products = [
-            [InlineKeyboardButton(text=string_dict(context)["back_button"], callback_data="help_module(shop)")]]
+            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"], callback_data="help_module(shop)")]]
         reply_markup = InlineKeyboardMarkup(
             reply_products)
 
         context.bot.send_message(
             update.callback_query.message.chat.id,
-            string_dict(context)["add_products_str_added"].format(context.user_data["title"]),
+            context.bot.lang_dict["add_products_str_added"].format(context.user_data["title"]),
             reply_markup=reply_markup)
 
         logger.info("Admin {} on bot {}:{} added a new product:{}".format(
@@ -263,7 +260,7 @@ class AddProducts(object):
         return ConversationHandler.END
 
     def delete_product(self, update, context):
-        finish_products = [[InlineKeyboardButton(text=string_dict(context)["back_button"],
+        finish_products = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                  callback_data="help_module(shop)")]]
         finish_markup = InlineKeyboardMarkup(
             finish_products)
@@ -276,22 +273,22 @@ class AddProducts(object):
             reply_keyboard = [product_list]
 
             context.bot.send_message(update.callback_query.message.chat.id,
-                                     string_dict(context)["products_str_choose_the_product_to_del"],
+                                     context.bot.lang_dict["products_str_choose_the_product_to_del"],
                                      reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
             context.bot.send_message(update.callback_query.message.chat.id,
-                                     string_dict(context)["back_text"], reply_markup=finish_markup)
+                                     context.bot.lang_dict["back_text"], reply_markup=finish_markup)
             return TYPING_TO_DELETE_PRODUCT
         else:
-            reply_products = [[InlineKeyboardButton(text=string_dict(context)["create_product"],
+            reply_products = [[InlineKeyboardButton(text=context.bot.lang_dict["create_product"],
                                                     callback_data="create_product"),
-                               InlineKeyboardButton(text=string_dict(context)["back_button"],
+                               InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                     callback_data="help_module(shop)")
                                ]]
             reply_markup = InlineKeyboardMarkup(
                 reply_products)
             context.bot.send_message(update.callback_query.message.chat.id,
 
-                                     string_dict(context)["no_products"],
+                                     context.bot.lang_dict["no_products"],
                                      reply_markup=reply_markup)
 
             return ConversationHandler.END
@@ -303,13 +300,13 @@ class AddProducts(object):
             "bot_id": context.bot.id
         })
         update.message.reply_text(
-            string_dict(context)["add_products_str_deleted"].format(txt), reply_markup=ReplyKeyboardRemove())
+            context.bot.lang_dict["add_products_str_deleted"].format(txt), reply_markup=ReplyKeyboardRemove())
         context.bot.send_message(chat_id=update.message.chat_id,  # TODO send as in polls
-                                 text=string_dict(context)["add_products_products_deleted_str"],
+                                 text=context.bot.lang_dict["add_products_products_deleted_str"],
                                  reply_markup=InlineKeyboardMarkup(
-                                     [[InlineKeyboardButton(string_dict(context)["add_product_button"],
+                                     [[InlineKeyboardButton(context.bot.lang_dict["add_product_button"],
                                                             callback_data="create_product"),
-                                       InlineKeyboardButton(string_dict(context)["back_button"],
+                                       InlineKeyboardButton(context.bot.lang_dict["back_button"],
                                                             callback_data="help_module(shop)")]]
                                  ))
         logger.info("Admin {} on bot {}:{} deleted the button:{}".format(
@@ -333,7 +330,7 @@ class ProductEdit(object):
         if all_products.count() > 0:
             context.user_data["to_delete"].append(
                 context.bot.send_message(chat_id=update.callback_query.message.chat_id,
-                                         text=string_dict(context)["manage_button_str_1"],
+                                         text=context.bot.lang_dict["manage_button_str_1"],
                                          reply_markup=ReplyKeyboardMarkup(
                                              [[product_name["title"]] for product_name in
                                               all_products]
@@ -343,13 +340,13 @@ class ProductEdit(object):
         else:
             context.user_data["to_delete"].append(
                 context.bot.send_message(chat_id=update.callback_query.message.chat_id,
-                                         text=string_dict(context)["manage_button_str_2"],
+                                         text=context.bot.lang_dict["manage_button_str_2"],
                                          reply_markup=InlineKeyboardMarkup(
                                              [[InlineKeyboardButton(
-                                                 string_dict(context)["add_product_button"],
+                                                 context.bot.lang_dict["add_product_button"],
                                                  callback_data="create_product"),
                                                  InlineKeyboardButton(
-                                                     string_dict(context)["back_button"],
+                                                     context.bot.lang_dict["back_button"],
                                                      callback_data="help_module(shop)")]]
                                          ), parse_mode='Markdown'))
             return ConversationHandler.END
@@ -365,10 +362,10 @@ class ProductEdit(object):
                     context.user_data["to_delete"].append(update.message.reply_text(
                         text=content["text"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(context)["edit_product"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["edit_product"],
                                                  callback_data="bp_{}___{}".format(content["text"][:10],
                                                                                    update.message.text)),
-                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["delete_button_str"],
                                                  callback_data="dp_{}___{}".format(content["text"][:10],
                                                                                    update.message.text))
                         ]]),
@@ -377,10 +374,10 @@ class ProductEdit(object):
                     context.user_data["to_delete"].append(update.message.reply_audio(
                         content["audio_file"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(context)["edit_product"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["edit_product"],
                                                  callback_data="bp_{}___{}".format(
                                                      content["audio_file"][:10], update.message.text)),
-                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["delete_button_str"],
                                                  callback_data="dp_{}___{}".format(content["audio_file"][:10],
                                                                                    update.message.text))
                         ]])
@@ -389,10 +386,10 @@ class ProductEdit(object):
                     context.user_data["to_delete"].append(update.message.reply_voice(
                         content["voice_file"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(context)["edit_product"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["edit_product"],
                                                  callback_data="bp_{}___{}".format(
                                                      content["voice_file"][:10], update.message.text)),
-                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["delete_button_str"],
                                                  callback_data="dp_{}___{}".format(content["voice_file"][:10],
                                                                                    update.message.text))
                         ]])
@@ -401,10 +398,10 @@ class ProductEdit(object):
                     context.user_data["to_delete"].append(update.message.reply_video(
                         content["video_file"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(context)["edit_product"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["edit_product"],
                                                  callback_data="bp_{}___{}".format(
                                                      content["video_file"][:10], update.message.text)),
-                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["delete_button_str"],
                                                  callback_data="dp_{}___{}".format(content["video_file"][:10],
                                                                                    update.message.text))
                         ]])
@@ -413,10 +410,10 @@ class ProductEdit(object):
                     context.user_data["to_delete"].append(update.message.reply_video_note(
                         content["video_note_file"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(context)["edit_product"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["edit_product"],
                                                  callback_data="bp_{}___{}".format(
                                                      content["video_note_file"][:10], update.message.text)),
-                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["delete_button_str"],
                                                  callback_data="dp_{}___{}".format(content["video_note_file"][:10],
                                                                                    update.message.text))
                         ]])
@@ -425,10 +422,10 @@ class ProductEdit(object):
                     context.user_data["to_delete"].append(update.message.reply_document(
                         content["document_file"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(context)["edit_product"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["edit_product"],
                                                  callback_data="bp_{}___{}".format(
                                                      content["document_file"][:10], update.message.text)),
-                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["delete_button_str"],
                                                  callback_data="dp_{}___{}".format(content["document_file"][:10],
                                                                                    update.message.text))
                         ]])
@@ -437,10 +434,10 @@ class ProductEdit(object):
                     context.user_data["to_delete"].append(update.message.reply_photo(
                         content["photo_file"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(context)["edit_product"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["edit_product"],
                                                  callback_data="bp_{}___{}".format(
                                                      content["photo_file"][:10], update.message.text)),
-                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["delete_button_str"],
                                                  callback_data="dp_{}___{}".format(content["photo_file"][:10],
                                                                                    update.message.text))
                         ]])
@@ -449,10 +446,10 @@ class ProductEdit(object):
                     context.user_data["to_delete"].append(update.message.reply_animation(
                         content["animation_file"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(context)["edit_product"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["edit_product"],
                                                  callback_data="bp_{}___{}".format(
                                                      content["animation_file"][:10], update.message.text)),
-                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["delete_button_str"],
                                                  callback_data="dp_{}___{}".format(content["animation_file"][:10],
                                                                                    update.message.text))
                         ]])
@@ -461,10 +458,10 @@ class ProductEdit(object):
                     context.user_data["to_delete"].append(update.message.reply_sticker(
                         content["photo_file"],
                         reply_markup=InlineKeyboardMarkup([[
-                            InlineKeyboardButton(text=string_dict(context)["edit_product"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["edit_product"],
                                                  callback_data="bp_{}___{}".format(
                                                      content["sticker_file"][:10], update.message.text)),
-                            InlineKeyboardButton(text=string_dict(context)["delete_button_str"],
+                            InlineKeyboardButton(text=context.bot.lang_dict["delete_button_str"],
                                                  callback_data="dp_{}___{}".format(content["sticker_file"][:10],
                                                                                    update.message.text))
                         ]])
@@ -482,28 +479,28 @@ class ProductEdit(object):
         context.user_data["to_delete"].append(
             context.bot.send_message(parse_mode='Markdown',
                                      chat_id=update.message.chat_id,
-                                     text=string_dict(context)["manage_button_str_3"],
+                                     text=context.bot.lang_dict["manage_button_str_3"],
                                      reply_markup=ReplyKeyboardRemove()))
         context.user_data["to_delete"].append(
             context.bot.send_message(parse_mode='Markdown', chat_id=update.message.chat_id,
-                                     text=string_dict(context)["add_button_content"],
+                                     text=context.bot.lang_dict["add_button_content"],
                                      reply_markup=InlineKeyboardMarkup(
-                                         [[InlineKeyboardButton(text=string_dict(context)["add_button"],
+                                         [[InlineKeyboardButton(text=context.bot.lang_dict["add_button"],
                                                                 callback_data="add_content{}".format(
                                                                     update.message.text))]])))
         context.user_data["to_delete"].append(
             context.bot.send_message(parse_mode='Markdown', chat_id=update.message.chat_id,
-                                     text=string_dict(context)["back_text"],
+                                     text=context.bot.lang_dict["back_text"],
                                      reply_markup=InlineKeyboardMarkup(
                                          [[
                                              InlineKeyboardButton(
-                                                 string_dict(context)["back_button"],
+                                                 context.bot.lang_dict["back_button"],
                                                  callback_data="help_module(shop)")]])))
         return ConversationHandler.END
 
     def edit_product(self, update, context):
         reply_products = [
-            [InlineKeyboardButton(text=string_dict(context)["cancel_button"], callback_data="help_module(shop)")]]
+            [InlineKeyboardButton(text=context.bot.lang_dict["cancel_button"], callback_data="help_module(shop)")]]
         reply_markup = InlineKeyboardMarkup(
             reply_products)
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -513,7 +510,7 @@ class ProductEdit(object):
         context.user_data["title"] = content_data[1]
         context.user_data["to_delete"].append(
             context.bot.send_message(parse_mode='Markdown', chat_id=update.callback_query.message.chat_id,
-                                     text=string_dict(context)["manage_button_str_4"],
+                                     text=context.bot.lang_dict["manage_button_str_4"],
                                      reply_markup=reply_markup))
         return EDIT_FINISH
 
@@ -565,9 +562,9 @@ class ProductEdit(object):
             product_info
         )
         products = [
-            [InlineKeyboardButton(text=string_dict(context)["back_button"], callback_data="help_module(shop)")]]
+            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"], callback_data="help_module(shop)")]]
         context.bot.send_message(parse_mode='Markdown', chat_id=update.message.chat_id,
-                                 text=string_dict(context)["manage_button_str_5"],
+                                 text=context.bot.lang_dict["manage_button_str_5"],
                                  reply_markup=InlineKeyboardMarkup(products))
         logger.info("Admin {} on bot {}:{} did  the following edit button: {}".format(
             update.effective_use.first_name, context.bot.first_name, context.bot.id, context.user_data["title"]))
@@ -576,7 +573,7 @@ class ProductEdit(object):
 
     def back(self, update, context):
         context.bot.send_message(update.callback_query.message.chat.id,
-                                 string_dict(context)["manage_button_str_6"], reply_markup=ReplyKeyboardRemove(),
+                                 context.bot.lang_dict["manage_button_str_6"], reply_markup=ReplyKeyboardRemove(),
                                  parse_mode='Markdown'
                                  )
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -599,7 +596,7 @@ class ProductEdit(object):
 class AddProductContent(object):
     def add_content_product(self, update, context):
         reply_products = [
-            [InlineKeyboardButton(text=string_dict(context)["cancel_button"], callback_data="help_module(shop)")]]
+            [InlineKeyboardButton(text=context.bot.lang_dict["cancel_button"], callback_data="help_module(shop)")]]
         reply_markup = InlineKeyboardMarkup(
             reply_products)
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -607,7 +604,7 @@ class AddProductContent(object):
         content_data = update.callback_query.data.replace("add_content", "")  # here is the problem
         context.user_data["title"] = content_data
         context.bot.send_message(parse_mode='Markdown', chat_id=update.callback_query.message.chat_id,
-                                 text=string_dict(context)["manage_button_str_4"],
+                                 text=context.bot.lang_dict["manage_button_str_4"],
                                  reply_markup=reply_markup)
         return EDIT_FINISH
 
@@ -653,9 +650,9 @@ class AddProductContent(object):
             product_info
         )
         products = [
-            [InlineKeyboardButton(text=string_dict(context)["back_button"], callback_data="help_module(shop)")]]
+            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"], callback_data="help_module(shop)")]]
         context.bot.send_message(parse_mode='Markdown', chat_id=update.message.chat_id,
-                                 text=string_dict(context)["manage_button_str_5"],
+                                 text=context.bot.lang_dict["manage_button_str_5"],
                                  reply_markup=InlineKeyboardMarkup(products))
         logger.info("Admin {} on bot {}:{} did  the following edit button: {}".format(
             update.effective_user.first_name, context.bot.first_name, context.bot.id, context.user_data["title"]))
@@ -664,7 +661,7 @@ class AddProductContent(object):
 
     def back(self, update, context):
         context.bot.send_message(update.callback_query.message.chat.id,
-                                 string_dict(context)["manage_button_str_6"], reply_markup=ReplyKeyboardRemove()
+                                 context.bot.lang_dict["manage_button_str_6"], reply_markup=ReplyKeyboardRemove()
                                  )
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                    message_id=update.callback_query.message.message_id)
@@ -688,7 +685,7 @@ class DeleteProductContent(object):
     def delete_message(self, update, context):
         products = list()
         products.append(
-            [InlineKeyboardButton(text=string_dict(context)["back_button"], callback_data="help_module(shop)")])
+            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"], callback_data="help_module(shop)")])
         reply_markup = InlineKeyboardMarkup(
             products)
 
@@ -704,7 +701,7 @@ class DeleteProductContent(object):
             if any(context.user_data["content_id"] in ext for ext in content_dict.values()):
                 product_info["content"].remove(content_dict)
         context.bot.send_message(chat_id=update.callback_query.message.chat_id,
-                                 text=string_dict(context)["delete_content"],
+                                 text=context.bot.lang_dict["delete_content"],
                                  reply_markup=reply_markup)
         products_table.replace_one(
             {"bot_id": context.bot.id, "title": context.user_data["title"]},
@@ -718,7 +715,7 @@ class SeePurcheses(object):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                    message_id=update.callback_query.message.message_id)
         reply_products = [
-            [InlineKeyboardButton(text=string_dict(context)["cancel_button"], callback_data="help_module(shop)")]]
+            [InlineKeyboardButton(text=context.bot.lang_dict["cancel_button"], callback_data="help_module(shop)")]]
         reply_markup = InlineKeyboardMarkup(
             reply_products)
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -726,7 +723,7 @@ class SeePurcheses(object):
         content_data = update.callback_query.data.replace("add_content", "")  # here is the problem
         context.user_data["title"] = content_data
         context.bot.send_message(parse_mode='Markdown', chat_id=update.callback_query.message.chat_id,
-                                 text=string_dict(context)["manage_button_str_4"],
+                                 text=context.bot.lang_dict["manage_button_str_4"],
                                  reply_markup=reply_markup)
         return EDIT_FINISH
 
@@ -735,34 +732,33 @@ ESHOP_MENU = CallbackQueryHandler(callback=eshop_menu, pattern="shop_menu")
 PRODUCTS_MENU_HANDLER = CallbackQueryHandler(ProcductMenu().send_product_menu, pattern="products")
 PRODUCT_ADD_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=AddProducts().start,
-                                       pattern=r"create_product",
-                                       pass_user_data=True)],
+                                       pattern=r"create_product")],
 
     states={
         TYPING_PRODUCT: [
             MessageHandler(Filters.text,
-                           AddProducts().product_handler, pass_user_data=True)],
+                           AddProducts().product_handler)],
         TYPING_PRICE: [
             MessageHandler(Filters.text,
-                           AddProducts().type_price, pass_user_data=True)],
+                           AddProducts().type_price)],
 
         TYPING_CURRENCY: [
             MessageHandler(Filters.text,
-                           AddProducts().handle_currency, pass_user_data=True)],
+                           AddProducts().handle_currency)],
         CHOOSE_TYPE: [MessageHandler(Filters.all,
-                                     AddProducts().handle_type, pass_user_data=True)],
+                                     AddProducts().handle_type)],
         TYPING_DESCRIPTION: [MessageHandler(Filters.all,
-                                            AddProducts().description_handler, pass_user_data=True)],
+                                            AddProducts().description_handler)],
         DESCRIPTION_FINISH: [MessageHandler(Filters.text,
-                                            AddProducts().description_finish, pass_user_data=True)],
+                                            AddProducts().description_finish)],
 
     },
 
     fallbacks=[
-        CallbackQueryHandler(callback=AddProducts().description_finish, pattern=r"DONE", pass_user_data=True),
+        CallbackQueryHandler(callback=AddProducts().description_finish, pattern=r"DONE"),
 
         CallbackQueryHandler(callback=AddProducts().back,
-                             pattern=r"help_back", pass_user_data=True),
+                             pattern=r"help_back"),
     ]
 )
 DELETE_PRODUCT_HANDLER = ConversationHandler(
@@ -773,63 +769,60 @@ DELETE_PRODUCT_HANDLER = ConversationHandler(
 
     states={
         TYPING_TO_DELETE_PRODUCT: [MessageHandler(Filters.text,
-                                                  AddProducts().delete_product_finish,
-                                                  pass_user_data=True)],
+                                                  AddProducts().delete_product_finish)],
     },
 
     fallbacks=[CallbackQueryHandler(callback=AddProducts().back,
-                                    pattern=r"help_back", pass_user_data=True),
+                                    pattern=r"help_back"),
                ]
 )
 # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
 PRODUCT_EDIT_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=ProductEdit().start,
-                                       pattern=r"edit_product",
-                                       pass_user_data=True)],
+                                       pattern=r"edit_product")],
 
     states={
-        CHOOSE_PRODUCT: [MessageHandler(Filters.text, ProductEdit().choose_product, pass_user_data=True),
+        CHOOSE_PRODUCT: [MessageHandler(Filters.text, ProductEdit().choose_product),
                          ],
     },
 
     fallbacks=[
         CallbackQueryHandler(callback=ProductEdit().back,
-                             pattern=r"help_back", pass_user_data=True),
+                             pattern=r"help_back"),
     ]
 )
 
 PRODUCT_EDIT_FINISH_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=ProductEdit().edit_product,
-                                       pattern=r"bp_", pass_user_data=True)],
+                                       pattern=r"bp_")],
 
     states={
 
-        EDIT_FINISH: [MessageHandler(Filters.all, ProductEdit().edit_product_finish, pass_user_data=True),
+        EDIT_FINISH: [MessageHandler(Filters.all, ProductEdit().edit_product_finish),
                       CallbackQueryHandler(callback=ProductEdit().back,
-                                           pattern=r"help_back", pass_user_data=True),
+                                           pattern=r"help_back"),
                       ],
     },
 
     fallbacks=[
         CallbackQueryHandler(callback=ProductEdit().back,
-                             pattern=r"help_back", pass_user_data=True)
+                             pattern=r"help_back")
     ]
 )
 PRODUCT_ADD_FINISH_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=AddProductContent().add_content_product,
-                                       pattern=r"add_content", pass_user_data=True)],
+                                       pattern=r"add_content")],
 
     states={
 
-        EDIT_FINISH: [MessageHandler(Filters.all, AddProductContent().add_content_product_finish, pass_user_data=True),
+        EDIT_FINISH: [MessageHandler(Filters.all, AddProductContent().add_content_product_finish),
                       ],
     },
 
     fallbacks=[
         CallbackQueryHandler(callback=ProductEdit().back,
-                             pattern=r"help_back", pass_user_data=True),
+                             pattern=r"help_back"),
     ]
 )
 DELETE_PRODUCT_CONTENT_HANDLER = CallbackQueryHandler(pattern="dp_",
-                                                      callback=DeleteProductContent().delete_message,
-                                                      pass_user_data=True)
+                                                      callback=DeleteProductContent().delete_message)

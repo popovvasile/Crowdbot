@@ -640,25 +640,21 @@ POLL_HANDLER = ConversationHandler(
     states={
         NOT_ENGAGED: [CommandHandler('poll', PollBot().start)],
         TYPING_TITLE: [MessageHandler(Filters.text,
-                                      PollBot().handle_title,
-                                      pass_user_data=True),
+                                      PollBot().handle_title),
                        ],
         TYPING_TYPE: [MessageHandler(Filters.regex(PollBot().assemble_type_regex()),
-                                   PollBot().handle_type,
-                                   pass_user_data=True),
+                                   PollBot().handle_type),
                       ],
         TYPING_META: [MessageHandler(Filters.text,
-                                     PollBot().handle_meta,
-                                     pass_user_data=True),
+                                     PollBot().handle_meta),
                       ],
         TYPING_OPTION: [MessageHandler(Filters.text,
-                                       PollBot().handle_option,
-                                       pass_user_data=True),
+                                       PollBot().handle_option),
                         ]
     },
     fallbacks=[
         CallbackQueryHandler(callback=PollBot().back, pattern=r"help_module"),
-        CallbackQueryHandler(callback=PollBot().handle_done, pattern=r"done_poll", pass_user_data=True),
+        CallbackQueryHandler(callback=PollBot().handle_done, pattern=r"done_poll"),
     ]
 )
 BUTTON_HANDLER = CallbackQueryHandler(PollBot().button, pattern='{"i":')
@@ -671,7 +667,7 @@ SEND_POLLS_HANDLER = ConversationHandler(
                   ],
     states={
         NOT_ENGAGED_SEND: [CommandHandler('send_poll_to_users', PollBot().handle_send_poll)],
-        TYPING_SEND_TITLE: [MessageHandler(Filters.text, PollBot().handle_send_title, pass_user_data=True)],
+        TYPING_SEND_TITLE: [MessageHandler(Filters.text, PollBot().handle_send_title)],
 
     },
     fallbacks=[

@@ -19,7 +19,7 @@ HELP_STRINGS = """
 # do not async
 def send_admin_help(bot, chat_id, text, keyboard=None):
     if not keyboard:
-        keyboard = InlineKeyboardMarkup(paginate_modules(0, helpable_dict(bot)["ADMIN_HELPABLE"], "help", bot.id))
+        keyboard = InlineKeyboardMarkup(paginate_modules(helpable_dict(bot)["ADMIN_HELPABLE"], "help", bot.id))
     bot.send_message(chat_id=chat_id,
                      text=text,
                      parse_mode=ParseMode.MARKDOWN,
@@ -29,10 +29,10 @@ def send_admin_help(bot, chat_id, text, keyboard=None):
 def send_visitor_help(bot, chat_id, text, keyboard=None):
     donation_request = chatbots_table.find_one({"bot_id": bot.id})
     if donation_request.get("donate") is not None and donation_request.get("donate") != {}:
-        buttons = [InlineKeyboardButton(string_dict(bot)["send_message_1"], callback_data="help_module(messages)"),
-                   InlineKeyboardButton(string_dict(bot)["pay_donation_mode_str"], callback_data='pay_donation')]
+        buttons = [InlineKeyboardButton(bot.lang_dict["send_message_1"], callback_data="help_module(messages)"),
+                   InlineKeyboardButton(bot.lang_dict["pay_donation_mode_str"], callback_data='pay_donation')]
     else:
-        buttons = [InlineKeyboardButton(string_dict(bot)["send_message_1"], callback_data="help_module(messages)")]
+        buttons = [InlineKeyboardButton(bot.lang_dict["send_message_1"], callback_data="help_module(messages)")]
     product_list_of_dicts = products_table.find({
         "bot_id": bot.id})
     if product_list_of_dicts.count() != 0:
@@ -58,10 +58,10 @@ def send_visitor_help(bot, chat_id, text, keyboard=None):
 def send_admin_user_mode(bot, chat_id, text, keyboard=None):
     donation_request = chatbots_table.find_one({"bot_id": bot.id})
     if donation_request.get("donate") is not None and donation_request.get("donate") != {}:
-        buttons = [InlineKeyboardButton(string_dict(bot)["send_message_1"], callback_data="help_module(messages)"),
-                   InlineKeyboardButton(string_dict(bot)["pay_donation_mode_str"], callback_data='pay_donation')]
+        buttons = [InlineKeyboardButton(bot.lang_dict["send_message_1"], callback_data="help_module(messages)"),
+                   InlineKeyboardButton(bot.lang_dict["pay_donation_mode_str"], callback_data='pay_donation')]
     else:
-        buttons = [InlineKeyboardButton(string_dict(bot)["send_message_1"], callback_data="help_module(messages)")]
+        buttons = [InlineKeyboardButton(bot.lang_dict["send_message_1"], callback_data="help_module(messages)")]
     buttons += [InlineKeyboardButton(button["button"],
                                      callback_data="button_{}".format(button["button"].replace(" ", "").lower()))
                 for button in custom_buttons_table.find({"bot_id": bot.id, "link_button": False})]
@@ -317,15 +317,13 @@ def help_button(update, context):
                                      reply_markup=InlineKeyboardMarkup(pairs))
 
         elif prev_match:
-            curr_page = int(prev_match.group(1))
             query.message.reply_text(HELP_STRINGS.format(welcome_message),
                                      reply_markup=InlineKeyboardMarkup(
-                                         paginate_modules(curr_page - 1, HELPABLE, "help", context.bot.id)))
+                                         paginate_modules(HELPABLE, "help", context.bot.id)))
         elif next_match:
-            next_page = int(next_match.group(1))
             query.message.reply_text(HELP_STRINGS.format(welcome_message),
                                      reply_markup=InlineKeyboardMarkup(
-                                         paginate_modules(next_page + 1, HELPABLE, "help", context.bot.id)))
+                                         paginate_modules(HELPABLE, "help", context.bot.id)))
 
         elif back_match or back_button_match:
             context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -335,7 +333,7 @@ def help_button(update, context):
         else:
             query.message.reply_text(text=HELP_STRINGS.format(welcome_message),
                                      reply_markup=InlineKeyboardMarkup(
-                                         paginate_modules(0, HELPABLE, "help", context.bot.id)))
+                                         paginate_modules(HELPABLE, "help", context.bot.id)))
             return ConversationHandler.END
         # ensure no spiny white circle
         context.bot.answer_callback_query(query.id)

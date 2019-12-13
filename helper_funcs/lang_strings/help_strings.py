@@ -4,7 +4,6 @@ from telegram import InlineKeyboardButton
 from database import chatbots_table, users_messages_to_admin_table
 
 
-
 def help_strings(context):
     help_dict = OrderedDict()
     string_d_str = context.bot.lang_dict

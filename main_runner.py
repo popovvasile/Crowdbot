@@ -8,7 +8,6 @@ from telegram import Bot
 from telegram.ext import CommandHandler, CallbackQueryHandler, MessageHandler, Filters
 
 from helper_funcs.admin_login import ADMIN_AUTHENTICATION_HANDLER
-from helper_funcs.lang_strings.strings import ENG, RUS
 from modules.chanells.channels import MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER, REMOVE_CHANNEL_HANDLER, \
     SEND_POST_HANDLER, CHANELLS_MENU
 from modules.chanells.channels_polls_surveys_donate import SEND_POLL_TO_CHANNEL_HANDLER, SEND_SURVEY_TO_CHANNEL_HANDLER, \
@@ -81,15 +80,14 @@ def main(token, lang):
         Bot.lang_dict = lang_dicts["RUS"]
     updater = tg.Updater(use_context=True, bot=BotObj)
     dispatcher = updater.dispatcher
-    dispatcher.add_error_handler(error_callback)
+    # dispatcher.add_error_handler(error_callback)
     start_handler = CommandHandler("start", WelcomeBot().start)
     help_handler = CommandHandler("help", get_help)
-    rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), get_help)
-    product_handler_han = CallbackQueryHandler(product_handler, pattern=r"product_", pass_user_data=True)
+    product_handler_han = CallbackQueryHandler(product_handler, pattern=r"product_")
 
-    custom_button_callback_handler = CallbackQueryHandler(button_handler, pattern=r"button_", pass_user_data=True)
+    custom_button_callback_handler = CallbackQueryHandler(button_handler, pattern=r"button_")
     custom_button_back_callback_handler = CallbackQueryHandler(back_from_button_handler,
-                                                               pattern=r"back_from_button", pass_user_data=True)
+                                                               pattern=r"back_from_button")
     help_callback_handler = CallbackQueryHandler(help_button, pattern=r"help_")
 
     dispatcher.add_handler(EDIT_BOT_DESCRIPTION_HANDLER)
@@ -218,6 +216,8 @@ def main(token, lang):
     dispatcher.add_handler(help_handler)
 
     dispatcher.add_handler(ADMIN_AUTHENTICATION_HANDLER)  # TODO priority is very important!!!!!!!!!!!!!!!!!!!!
+
+    rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), get_help)
     dispatcher.add_handler(rex_help_handler)
 
     dispatcher.add_handler(help_callback_handler)

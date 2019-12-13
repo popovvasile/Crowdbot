@@ -326,45 +326,43 @@ CREATE_BUTTON_CHOOSE = CallbackQueryHandler(callback=AddButtons().start, pattern
 BUTTONS_MENU = CallbackQueryHandler(callback=buttons_menu, pattern="buttons")
 LINK_BUTTON_ADD_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=AddLinkButton().start,
-                                       pattern=r"create_link_button",
-                                       pass_user_data=True)],
+                                       pattern=r"create_link_button")],
 
     states={
-        TYPING_LINK: [MessageHandler(Filters.text, callback=AddLinkButton().link_handler, pass_user_data=True)],
+        TYPING_LINK: [MessageHandler(Filters.text, callback=AddLinkButton().link_handler)],
         TYPING_BUTTON_FINISH: [MessageHandler(Filters.text,
-                                              callback=AddLinkButton().button_finish, pass_user_data=True)],
+                                              callback=AddLinkButton().button_finish)],
 
     },
 
     fallbacks=[
         CallbackQueryHandler(callback=AddCommands().back,
-                             pattern=r"help_module", pass_user_data=True),
+                             pattern=r"help_module"),
         CallbackQueryHandler(callback=AddCommands().back,
-                             pattern=r"help_back", pass_user_data=True),
+                             pattern=r"help_back"),
     ]
 )
 
 BUTTON_ADD_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=AddCommands().start,
-                                       pattern=r"create_simple_button",
-                                       pass_user_data=True)],
+                                       pattern=r"create_simple_button")],
 
     states={
         TYPING_BUTTON: [
             MessageHandler(Filters.text,
-                           AddCommands().button_handler, pass_user_data=True)],
+                           AddCommands().button_handler)],
         TYPING_DESCRIPTION: [MessageHandler(Filters.all,
-                                            AddCommands().description_handler, pass_user_data=True)],
+                                            AddCommands().description_handler)],
         DESCRIPTION_FINISH: [MessageHandler(Filters.text,
-                                            AddCommands().description_finish, pass_user_data=True)],
+                                            AddCommands().description_finish)],
 
     },
 
     fallbacks=[
-        CallbackQueryHandler(callback=AddCommands().description_finish, pattern=r"DONE", pass_user_data=True),
+        CallbackQueryHandler(callback=AddCommands().description_finish, pattern=r"DONE"),
 
         CallbackQueryHandler(callback=AddCommands().back,
-                             pattern=r"help_module", pass_user_data=True),
+                             pattern=r"help_module"),
     ]
 )
 DELETE_BUTTON_HANDLER = ConversationHandler(
@@ -375,11 +373,10 @@ DELETE_BUTTON_HANDLER = ConversationHandler(
 
     states={
         TYPING_TO_DELETE_BUTTON: [MessageHandler(Filters.text,
-                                                 AddCommands().delete_button_finish,
-                                                 pass_user_data=True)],
+                                                 AddCommands().delete_button_finish)],
     },
 
     fallbacks=[CallbackQueryHandler(callback=AddCommands().back,
-                                    pattern=r"help_module", pass_user_data=True),
+                                    pattern=r"help_module"),
                ]
 )

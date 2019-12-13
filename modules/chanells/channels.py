@@ -87,12 +87,16 @@ def check_channel(context, channel_username):
 def channel_menu(update, context):
     context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                message_id=update.callback_query.message.message_id)
-    no_channel_keyboard = InlineKeyboardMarkup(
-    [[InlineKeyboardButton(context.bot.lang_dict["my_channels"], callback_data='my_channels')],
-         [InlineKeyboardButton(context.bot.lang_dict["add_channel"], callback_data='add_channel')],
-        [InlineKeyboardButton(context.bot.lang_dict["back_button"],
-                              callback_data="help_module(channels)")]]
-            )
+    channels = Channels().update_channels_usernames(context, update.effective_chat.id)
+    command_list = [[InlineKeyboardButton(x['channel_username'],
+                                          callback_data="channel_{}".format(x['channel_username']))]
+                    for x in channels] + \
+                                            \
+                   [[InlineKeyboardButton(context.bot.lang_dict["add_channel"], callback_data='add_channel')],
+                    [InlineKeyboardButton(context.bot.lang_dict["back_button"],
+                                          callback_data="help_module(channels)")]]
+
+    no_channel_keyboard = InlineKeyboardMarkup(command_list)
     context.bot.send_message(update.callback_query.message.chat.id,
                              context.bot.lang_dict["channels"],
                              reply_markup=no_channel_keyboard)
@@ -112,8 +116,8 @@ class Channels(object):
             if check is not True:
                 context.user_data['to_delete'].append(
                     context.bot.send_message(chat_id,
-                                     context.bot.lang_dict["bot_is_not_admin_of_channel_2"]
-                                     .format(channel['channel_username'])))
+                                             context.bot.lang_dict["bot_is_not_admin_of_channel_2"]
+                                             .format(channel['channel_username'])))
                 channels_table.delete_one({'bot_id': context.bot.id, 'chat_id': channel['chat_id']})
                 continue
             # bot.get_chat() works with delay ?
@@ -199,31 +203,29 @@ class Channels(object):
 
     ################################################################
 
-    # 'My Channels' button
-    def my_channels(self, update, context):
-        return self.make_channels_layout(update, context, MY_CHANNELS, context.bot.lang_dict["channels_str_2"])
-
-    # when user click on channel name in 'My channels' menu
     def channel(self, update, context):
+        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                                   message_id=update.callback_query.message.message_id)
+        channel_username = update.callback_query.data.replace("channel_", "")
         one_channel_keyboard = \
             InlineKeyboardMarkup([[InlineKeyboardButton(context.bot.lang_dict["send_donation_to_channel"],
                                                         callback_data='send_donation_to_channel_{}'.format(
-                                                            update.message.text))],
+                                                            channel_username))],
                                   [InlineKeyboardButton(context.bot.lang_dict["send_survey_to_channel"],
                                                         callback_data="send_survey_to_channel_{}".format(
-                                                            update.message.text))],
+                                                            channel_username))],
                                   [InlineKeyboardButton(context.bot.lang_dict["send_poll_to_channel"],
                                                         callback_data="send_poll_to_channel_{}".format(
-                                                            update.message.text))],
+                                                            channel_username))],
                                   [InlineKeyboardButton(context.bot.lang_dict["send_post_to_channel"],
-                                                        callback_data='channel_write_post_{}'.format(
-                                                            update.message.text))],
+                                                        callback_data='write_post_channel_{}'.format(
+                                                            channel_username))],
                                   [InlineKeyboardButton(context.bot.lang_dict["remove_button"],
                                                         callback_data='remove_channel_{}'.format(
-                                                            update.message.text))],
+                                                            channel_username))],
                                   [InlineKeyboardButton(context.bot.lang_dict["back_button"],
                                                         callback_data="help_module(channels)")]])
-        context.bot.send_message(update.message.chat_id, context.bot.lang_dict["channels_menu"],
+        context.bot.send_message(update.callback_query.message.chat_id, context.bot.lang_dict["channels_menu"],
                                  reply_markup=one_channel_keyboard)
         return ConversationHandler.END
 
@@ -263,14 +265,14 @@ class Channels(object):
         channel_username = self.register_channel(update, context)
         if type(channel_username) is str:
             post_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(context.bot.lang_dict["send_post_to_channel"],
-                                                                        callback_data="channel_write_post_{}".format(
+                                                                        callback_data="write_post_channel_{}".format(
                                                                             channel_username))],
                                                   [InlineKeyboardButton(context.bot.lang_dict["send_poll_to_channel"],
                                                                         callback_data="send_poll_to_channel_{}".format(
                                                                             channel_username))],
                                                   [InlineKeyboardButton(context.bot.lang_dict["send_survey_to_channel"],
-                                                                        callback_data="send_survey_to_channel_{}".format(
-                                                                            channel_username))],
+                                                                        callback_data="send_survey_to_channel_{}"
+                                                                        .format(channel_username))],
                                                   [InlineKeyboardButton(context.bot.lang_dict["back_button"],
                                                                         callback_data="help_module(channels)")]])
             delete_messages(update, context)
@@ -296,28 +298,18 @@ class Channels(object):
 
 class SendPost(object):
     def send_message(self, update, context):
-        # bot.delete_message(chat_id=update.callback_query.message.chat_id,
-        #                    message_id=update.callback_query.message.message_id)
         buttons = list()
         buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"], callback_data="help_back")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
-        channel_username = update.callback_query.data.replace("channel_write_post", "")
-        channel = channels_table.find_one({'bot_id': context.bot.id,
-                                           'channel_username': channel_username})
-        print(update.callback_query.data)
-        # if channel:
+        channel_username = update.callback_query.data.replace("write_post_channel_", "")
         delete_messages(update, context)
-        print()
-        context.user_data['channel'] = update.callback_query.data.replace("channel_write_post_", "")
+        context.user_data['channel'] = channel_username
         context.user_data['to_delete'].append(
             context.bot.send_message(update.callback_query.message.chat.id,
-                                     context.bot.lang_dict["send_post"].format(channel_username),
+                                     context.bot.lang_dict["send_post_channel"].format(channel_username),
                                      reply_markup=reply_markup))
         return MESSAGE_TO_USERS
-        # else:
-        #     return Channels().make_channels_layout(update, context, CHOOSE_TO_SEND_POST,
-        #                                            string_dict(bot)["choose_channel_to_post"], user_data)
 
     def received_message(self, update, context):
         if "content" not in context.user_data:
@@ -419,43 +411,45 @@ class SendPost(object):
 
 
 CHANELLS_MENU = CallbackQueryHandler(callback=channel_menu, pattern=r"channels")
+MY_CHANNELS_HANDLER = CallbackQueryHandler(callback=Channels().channel, pattern=r"channel")
 
-MY_CHANNELS_HANDLER = ConversationHandler(
-    entry_points=[CallbackQueryHandler(callback=Channels().my_channels, pattern=r"my_channels", pass_user_data=True)],
-    states={
-        MY_CHANNELS: [MessageHandler(Filters.regex(r"@"), Channels().channel)]
-    },
-    fallbacks=[CallbackQueryHandler(callback=Channels().back, pattern=r"help_back", pass_user_data=True),
-               CallbackQueryHandler(callback=Channels().back, pattern=r'help_module', pass_user_data=True),
-               MessageHandler(Filters.regex('^Back$'), Channels().back, pass_user_data=True),
-               ]
-)
+# MY_CHANNELS_HANDLER = ConversationHandler(
+#     entry_points=[CallbackQueryHandler(callback=Channels().my_channels, pattern=r"my_channels")],
+#     states={
+#         MY_CHANNELS: [MessageHandler(Filters.regex(r"@"), Channels().channel)]
+#     },
+#     fallbacks=[CallbackQueryHandler(callback=Channels().back, pattern=r"help_back"),
+#                CallbackQueryHandler(callback=Channels().back, pattern=r'help_module'),
+#                MessageHandler(Filters.regex('^Back$'), Channels().back),
+#                ]
+# )
+
 
 ADD_CHANNEL_HANDLER = ConversationHandler(
-    entry_points=[CallbackQueryHandler(callback=Channels().add_channel, pattern=r"add_channel", pass_user_data=True)],
+    entry_points=[CallbackQueryHandler(callback=Channels().add_channel, pattern=r"add_channel")],
     states={
-        ADD_CHANNEL: [MessageHandler(Filters.text, callback=Channels().confirm_add, pass_user_data=True)]
+        ADD_CHANNEL: [MessageHandler(Filters.text, callback=Channels().confirm_add)]
     },
-    fallbacks=[CallbackQueryHandler(callback=Channels().back, pattern=r'help_back', pass_user_data=True),
-               CallbackQueryHandler(callback=Channels().back, pattern=r'help_module', pass_user_data=True),
+    fallbacks=[CallbackQueryHandler(callback=Channels().back, pattern=r'help_back'),
+               CallbackQueryHandler(callback=Channels().back, pattern=r'help_module'),
 
                ]
 )
 
 REMOVE_CHANNEL_HANDLER = CallbackQueryHandler(Channels().finish_remove,
-                                              pattern=r"remove_channel", pass_user_data=True)
+                                              pattern=r"remove_channel")
 # POST_ON_CHANNEL_HANDLER = CallbackQueryHandler(Channels().post_on_channel,
-#                                                pattern=r"post_on_channel", pass_user_data=True)
+#                                                pattern=r"post_on_channel")
 
 SEND_POST_HANDLER = ConversationHandler(
-    entry_points=[CallbackQueryHandler(SendPost().send_message, pattern=r"channel_write_post", pass_user_data=True)],
+    entry_points=[CallbackQueryHandler(SendPost().send_message, pattern=r"write_post_channel_")],
     states={
 
-        MESSAGE_TO_USERS: [MessageHandler(Filters.all, SendPost().received_message, pass_user_data=True)]
+        MESSAGE_TO_USERS: [MessageHandler(Filters.all, SendPost().received_message)]
     },
     fallbacks=[CallbackQueryHandler(callback=SendPost().send_post_finish,
-                                    pattern=r"send_post_finish", pass_user_data=True),
-               CallbackQueryHandler(callback=SendPost.help_back, pattern=r'help_back', pass_user_data=True),
-               CallbackQueryHandler(callback=SendPost.help_back, pattern=r'help_module', pass_user_data=True),
+                                    pattern=r"send_post_finish"),
+               CallbackQueryHandler(callback=SendPost.help_back, pattern=r'help_back'),
+               CallbackQueryHandler(callback=SendPost.help_back, pattern=r'help_module'),
                ]
 )

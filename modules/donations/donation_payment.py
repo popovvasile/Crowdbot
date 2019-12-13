@@ -177,25 +177,22 @@ DONATE_HANDLER = ConversationHandler(
     ],
     states={
         # DONATION_MESSAGE: [MessageHandler(callback=DonationBot().donation_message,
-        #                                   filters=Filters.text,
-        #                                   pass_user_data=True),
+        #                                   filters=Filters.text),
         #                    CallbackQueryHandler(callback=DonationBot().back, pattern=r"help_back"),
         #                    CommandHandler('cancel', DonationBot().cancel)
         #                    ],
         EXECUTE_DONATION: [MessageHandler(callback=DonationBot().execute_donation,
-                                          filters=Filters.text,
-                                          pass_user_data=True)
+                                          filters=Filters.text)
                            ],
 
     },
     fallbacks=[CallbackQueryHandler(callback=DonationBot().back,
-                                    pattern=r"help_back", pass_user_data=True),
+                                    pattern=r"help_back"),
                CallbackQueryHandler(callback=DonationBot().back,
-                                    pattern=r"help_module", pass_user_data=True),
+                                    pattern=r"help_module"),
                MessageHandler(Filters.successful_payment,
-                              DonationBot().successful_payment_callback,
-                              pass_user_data=True),
-               MessageHandler(filters=Filters.command, callback=DonationBot().back, pass_user_data=True),
+                              DonationBot().successful_payment_callback),
+               MessageHandler(filters=Filters.command, callback=DonationBot().back),
 
                ])
 

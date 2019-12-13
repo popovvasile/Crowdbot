@@ -22,7 +22,7 @@ TYPING_TOKEN, TYPING_TITLE, TYPING_DESCRIPTION, SHOP_FINISH = range(4)
 
 def check_provider_token(provider_token, update, context):
     bot_token = chatbots_table.find_one({"bot_id": context.bot.id})["token"]
-    prices = [LabeledPrice(string_dict(context)["create_shop_str_1"], 10000)]
+    prices = [LabeledPrice(context.bot.lang_dict["create_shop_str_1"], 10000)]
     data = requests.get("https://api.telegram.org/bot{}/sendInvoice".format(bot_token),
                         params=dict(title="TEST",
                                     description="A testing payment invoice to check the token",
@@ -59,7 +59,7 @@ class CreateShopHandler(object):
     def start_create_shop(self, update, context):
         buttons = list()
         buttons.append(
-            [InlineKeyboardButton(text=string_dict(context)["back_button"],
+            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                   callback_data="help_module(shop)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
@@ -70,23 +70,23 @@ class CreateShopHandler(object):
         if "shop" in chatbot:
             if "payment_token" in chatbot["shop"]:
                 context.bot.send_message(update.callback_query.message.chat.id,
-                                         string_dict(context)["create_shop_str_2"], reply_markup=reply_markup)
+                                         context.bot.lang_dict["create_shop_str_2"], reply_markup=reply_markup)
                 return TYPING_TITLE
             else:
                 context.bot.send_message(update.callback_query.message.chat.id,
-                                         string_dict(context)["create_shop_str_3"],
+                                         context.bot.lang_dict["create_shop_str_3"],
                                          reply_markup=reply_markup)
                 return TYPING_TOKEN
         else:
             context.bot.send_message(update.callback_query.message.chat.id,
-                                     string_dict(context)["create_shop_str_3"],
+                                     context.bot.lang_dict["create_shop_str_3"],
                                      reply_markup=reply_markup)
             return TYPING_TOKEN
 
     def handle_token(self, update, context):
         buttons = list()
         buttons.append(
-            [InlineKeyboardButton(text=string_dict(context)["back_button"],
+            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                   callback_data="help_module(shop)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
@@ -95,12 +95,12 @@ class CreateShopHandler(object):
 
             context.user_data['payment_token'] = txt
 
-            update.message.reply_text(string_dict(context)["create_shop_str_4"], reply_markup=reply_markup)
+            update.message.reply_text(context.bot.lang_dict["create_shop_str_4"], reply_markup=reply_markup)
 
             return TYPING_TITLE
         else:
             update.message.reply_text(
-                string_dict(context)["create_shop_str_5"],
+                context.bot.lang_dict["create_shop_str_5"],
                 reply_markup=reply_markup)
 
         return TYPING_TOKEN
@@ -108,14 +108,14 @@ class CreateShopHandler(object):
     def handle_title(self, update, context):
         buttons = list()
         buttons.append(
-            [InlineKeyboardButton(text=string_dict(context)["back_button"],
+            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                   callback_data="help_module(shop)")])
         reply_markup = InlineKeyboardMarkup(
             buttons)
         chat_id, txt = initiate_chat_id(update)
         context.user_data['title'] = txt
 
-        update.message.reply_text(string_dict(context)["create_shop_str_6"],
+        update.message.reply_text(context.bot.lang_dict["create_shop_str_6"],
                                   reply_markup=reply_markup)
 
         return TYPING_DESCRIPTION
@@ -124,7 +124,7 @@ class CreateShopHandler(object):
         chat_id, txt = initiate_chat_id(update)
         context.user_data["description"] = txt
         currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["CHF", "AUD", "RON", "PLN"]]
-        update.message.reply_text(string_dict(context)["create_shop_str_7"],
+        update.message.reply_text(context.bot.lang_dict["create_shop_str_7"],
                                   reply_markup=ReplyKeyboardMarkup(currency_keyboard, one_time_keyboard=True))
 
         return SHOP_FINISH
@@ -132,7 +132,7 @@ class CreateShopHandler(object):
     def handle_shop_finish(self, update, context):
 
         create_buttons = [
-            [InlineKeyboardButton(text=string_dict(context)["back_button"],
+            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                   callback_data="help_module(shop)")]]
         create_markup = InlineKeyboardMarkup(
             create_buttons)
@@ -142,7 +142,7 @@ class CreateShopHandler(object):
         context.user_data["currency"] = currency
 
         context.bot.send_message(chat_id,
-                                 string_dict(context)["create_shop_str_8"],
+                                 context.bot.lang_dict["create_shop_str_8"],
                                  reply_markup=create_markup)
         chatbot = chatbots_table.find_one({"bot_id": context.bot.id}) or {}
 
@@ -183,24 +183,19 @@ class CreateShopHandler(object):
 
 CREATE_SHOP_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=CreateShopHandler().start_create_shop,
-                                       pass_user_data=True,
                                        pattern=r'allow_shop'),
                   ],
     # TYPING_TOKEN, TYPING_TITLE,  TYPING_DESCRIPTION, TYPING_AMOUNT, TYPING_CURRENCY,\
     # TYPING_TAGS, TYPING_TAGS_FINISH, TYPING_TYPE, TYPING_DEADLINE, TYPING_REPEAT
     states={
         TYPING_TOKEN: [MessageHandler(Filters.text,
-                                      CreateShopHandler().handle_token,
-                                      pass_user_data=True)],
+                                      CreateShopHandler().handle_token)],
         TYPING_TITLE: [MessageHandler(Filters.text,
-                                      CreateShopHandler().handle_title,
-                                      pass_user_data=True)],
+                                      CreateShopHandler().handle_title)],
         TYPING_DESCRIPTION: [MessageHandler(Filters.text,
-                                            CreateShopHandler().handle_description,
-                                            pass_user_data=True)],
+                                            CreateShopHandler().handle_description)],
         SHOP_FINISH: [MessageHandler(Filters.text,
-                                     CreateShopHandler().handle_shop_finish,
-                                     pass_user_data=True)],
+                                     CreateShopHandler().handle_shop_finish)],
     },
 
     fallbacks=[CallbackQueryHandler(callback=CreateShopHandler().back, pattern=r"help_back"),

@@ -173,14 +173,12 @@ SEND_DONATION_TO_USERS_HANDLER = ConversationHandler(
                                        callback=SendDonationToUsers().send_donation)],
 
     states={
-        DONATION_TO_USERS: [MessageHandler(Filters.all, SendDonationToUsers().received_donation,
-                                           pass_user_data=True),],
+        DONATION_TO_USERS: [MessageHandler(Filters.all, SendDonationToUsers().received_donation),],
     },
 
     fallbacks=[CallbackQueryHandler(callback=SendDonationToUsers().send_donation_finish,
-                                    pattern=r"send_donation_finish", pass_user_data=True),
+                                    pattern=r"send_donation_finish"),
                CallbackQueryHandler(callback=SendDonationToUsers().send_donation_cancel,
-                                    pattern="help_module",
-                                    pass_user_data=True),
+                                    pattern="help_module"),
                ]
 )

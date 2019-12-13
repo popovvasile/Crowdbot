@@ -145,12 +145,11 @@ class AnswerSurveys(object):
 
 
 ANSWER_SURVEY_HANDLER = ConversationHandler(
-    entry_points=[CallbackQueryHandler(AnswerSurveys().start_answering, pattern=r"survey_", pass_user_data=True)],
+    entry_points=[CallbackQueryHandler(AnswerSurveys().start_answering, pattern=r"survey_")],
 
     states={
         ANSWERING: [MessageHandler(Filters.all,
-                                   AnswerSurveys().received_information,
-                                   pass_user_data=True)],
+                                   AnswerSurveys().received_information)],
     },
 
     fallbacks=[

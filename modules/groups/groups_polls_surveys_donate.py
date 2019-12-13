@@ -205,7 +205,7 @@ CHOOSE_GROUP_TO_SEND_DONATION = 23
 CHOOSE_POLL_TO_SEND_DONATION = 34
 
 
-class SendDonationToChannel(object):
+class SendDonationToGroup(object):
     def send_donation(self, update, context):
         groups = groups_table.find({'bot_id': context.bot.id})
         update_data = update.callback_query
@@ -309,6 +309,10 @@ class SendDonationToChannel(object):
                          context.bot.lang_dict["send_donation_request_3"],
                          reply_markup=final_reply_markup)
 
+        donation_reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton(text=context.bot.lang_dict["donate_button"],
+
+                                             url="https://t.me/{}?start=pay_donation".format(context.bot.username),
+                                             )]])
         for content_dict in context.user_data["content"]:
             if "text" in content_dict:
                 context.bot.send_message(context.user_data["group_name"] ,
@@ -335,7 +339,7 @@ class SendDonationToChannel(object):
 
             context.bot.send_message(context.user_data["group_name"] ,
                              text=context.bot.lang_dict["donate_button"],
-                             reply_markup=final_reply_markup)
+                             reply_markup=donation_reply_markup)
             context.user_data.clear()
         return ConversationHandler.END
 
@@ -361,12 +365,12 @@ class SendDonationToChannel(object):
 # There are already 'send_survey_to_users' pattern handler - mb use it
 SEND_POLL_TO_GROUP_HANDLER = ConversationHandler(
     entry_points=[
-        CallbackQueryHandler(SendPoll().handle_send_poll, pattern=r"send_poll_to_group", pass_user_data=True), ],
+        CallbackQueryHandler(SendPoll().handle_send_poll, pattern=r"send_poll_to_group"), ],
     states={
 
-        CHOOSE_POLL_TO_SEND: [MessageHandler(Filters.text, SendPoll().handle_send_title, pass_user_data=True), ],
+        CHOOSE_POLL_TO_SEND: [MessageHandler(Filters.text, SendPoll().handle_send_title), ],
         CHOOSE_GROUP_TO_SEND_POLL: [
-            MessageHandler(Filters.text, SendPoll().handle_send_poll, pass_user_data=True), ],
+            MessageHandler(Filters.text, SendPoll().handle_send_poll), ],
     },
     fallbacks=[CallbackQueryHandler(callback=SendPoll().back, pattern=r"help_back"),
                CallbackQueryHandler(callback=SendPoll().back, pattern=r"help_module"),
@@ -376,12 +380,12 @@ SEND_POLL_TO_GROUP_HANDLER = ConversationHandler(
 
 SEND_SURVEY_TO_GROUP_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(SendSurvey().handle_send_survey,
-                                       pattern="send_survey_to_group", pass_user_data=True)],
+                                       pattern="send_survey_to_group")],
     states={
         CHOOSE_GROUP_TO_SEND_SURVEY: [
-            MessageHandler(Filters.text, SendSurvey().handle_send_survey, pass_user_data=True),
+            MessageHandler(Filters.text, SendSurvey().handle_send_survey),
         ],
-        CHOOSE_SURVEY_TO_SEND: [MessageHandler(Filters.text, SendSurvey().handle_send_title, pass_user_data=True),
+        CHOOSE_SURVEY_TO_SEND: [MessageHandler(Filters.text, SendSurvey().handle_send_title),
                                 ]
     },
     fallbacks=[CallbackQueryHandler(callback=SendSurvey().back, pattern=r"help_back"),
@@ -391,24 +395,21 @@ SEND_SURVEY_TO_GROUP_HANDLER = ConversationHandler(
 )
 SEND_DONATION_TO_GROUP_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(pattern=r"send_donation_to_group",
-                                       callback=SendDonationToChannel().send_donation,
-                                       pass_user_data=True)],
+                                       callback=SendDonationToGroup().send_donation)],
 
     states={
         DONATION_TO_USERS: [MessageHandler(Filters.all,
-                                           SendDonationToChannel().received_donation,
-                                           pass_user_data=True),
+                                           SendDonationToGroup().received_donation),
                             ],
         CHOOSE_GROUP_TO_SEND_DONATION: [MessageHandler(Filters.all,
-                                                         SendDonationToChannel().send_donation,
-                                                         pass_user_data=True),
+                                                         SendDonationToGroup().send_donation),
                                           ],
     },
 
-    fallbacks=[CallbackQueryHandler(callback=SendDonationToChannel().send_donation_finish,
-                                    pattern=r"send_donation_finish", pass_user_data=True),
-               CallbackQueryHandler(callback=SendDonationToChannel().back, pattern=r"help_back"),
-               CallbackQueryHandler(callback=SendDonationToChannel().back, pattern=r"help_module"),
+    fallbacks=[CallbackQueryHandler(callback=SendDonationToGroup().send_donation_finish,
+                                    pattern=r"send_donation_finish"),
+               CallbackQueryHandler(callback=SendDonationToGroup().back, pattern=r"help_back"),
+               CallbackQueryHandler(callback=SendDonationToGroup().back, pattern=r"help_module"),
 
                ]
 )

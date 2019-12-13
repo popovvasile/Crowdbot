@@ -199,19 +199,17 @@ SEND_MESSAGE_ONLY_TO_ADMINS_HANDLER = ConversationHandler(
                                        callback=SendMessageToAdminsOnly().send_message)],
 
     states={
-        CHOOSE_CATEGORY: [MessageHandler(Filters.all, SendMessageToAdminsOnly().choose_question, pass_user_data=True)],
-        MESSAGE_TO_USERS: [MessageHandler(Filters.all, SendMessageToAdminsOnly().received_message, pass_user_data=True)],
+        CHOOSE_CATEGORY: [MessageHandler(Filters.all, SendMessageToAdminsOnly().choose_question)],
+        MESSAGE_TO_USERS: [MessageHandler(Filters.all, SendMessageToAdminsOnly().received_message)],
 
     },
 
     fallbacks=[
         CallbackQueryHandler(callback=SendMessageToAdminsOnly().send_message_finish,
-                             pattern=r"send_message_finish", pass_user_data=True),
+                             pattern=r"send_message_finish"),
         CallbackQueryHandler(pattern=r"help_module",
-                             callback=SendMessageToAdminsOnly().send_message_cancel,
-                             pass_user_data=True),
+                             callback=SendMessageToAdminsOnly().send_message_cancel),
         CallbackQueryHandler(pattern=r"help_back",
-                             callback=SendMessageToAdminsOnly().send_message_cancel,
-                             pass_user_data=True),
+                             callback=SendMessageToAdminsOnly().send_message_cancel),
     ]
 )

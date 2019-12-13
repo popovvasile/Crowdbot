@@ -301,15 +301,13 @@ class EditPaymentHandler(object):  # TODO change as a payment config, not donati
 EDIT_DONATION_HANDLER = ConversationHandler(
     entry_points=[
         CallbackQueryHandler(callback=EditPaymentHandler().handle_edit_action_finish,
-                             pass_user_data=True,
                              pattern=r'edit_change_')
     ],
 
     states={
 
         EDIT_FINISH: [MessageHandler(Filters.text,
-                                     EditPaymentHandler().handle_edit_finish,
-                                     pass_user_data=True)],
+                                     EditPaymentHandler().handle_edit_finish)],
 
     },
 
