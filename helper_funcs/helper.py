@@ -187,61 +187,61 @@ def button_handler(update, context):
     context.bot.send_message(chat_id=update.callback_query.message.chat_id,
                              text=context.bot.lang_dict["back_button"], reply_markup=InlineKeyboardMarkup(buttons))
 
-
-def product_handler(update, context):
-    context.user_data['to_delete'] = []
-    query = update.callback_query
-    button_callback_data = query.data
-    context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                               message_id=update.callback_query.message.message_id)
-    try:
-        button_info = products_table.find_one(
-            {"bot_id": context.bot.id, "title_lower": button_callback_data.replace("product_", "")}
-        )
-        for content_dict in button_info["content"]:
-            if "text" in content_dict:
-                context.user_data['to_delete'].append(query.message.reply_text(text=content_dict["text"],
-                                                                               parse_mode='Markdown'))
-            if "audio_file" in content_dict:
-                context.user_data['to_delete'].append(query.message.reply_audio(content_dict["audio_file"]))
-            if "video_file" in content_dict:
-                context.user_data['to_delete'].append(query.message.reply_video(content_dict["video_file"]))
-            if "document_file" in content_dict:
-                if ".png" in content_dict["document_file"] or ".jpg" in content_dict["document_file"]:
-                    context.user_data['to_delete'].append(context.bot.send_photo(chat_id=query.message.chat.id,
-                                                                                 photo=content_dict["document_file"]))
-                else:
-                    context.user_data['to_delete'].append(context.bot.send_document(chat_id=query.message.chat.id,
-                                                                                    document=content_dict[
-                                                                                        "document_file"]))
-            if "photo_file" in content_dict:
-                context.user_data['to_delete'].append(context.bot.send_photo(chat_id=query.message.chat.id,
-                                                                             photo=content_dict["photo_file"]))
-            if "video_note_file" in content_dict:
-                context.user_data['to_delete'].append(query.message.reply_video_note(content_dict["video_note_file"]))
-            if "voice_file" in content_dict:
-                context.user_data['to_delete'].append(query.message.reply_voice(content_dict["voice_file"]))
-            if "animation_file" in content_dict:
-                context.user_data['to_delete'].append(query.message.reply_animation(content_dict["animation_file"]))
-            if "sticker_file" in content_dict:
-                context.user_data['to_delete'].append(query.message.reply_sticker(content_dict["sticker_file"]))
-
-    except BadRequest as excp:
-        if excp.message == "Message is not modified":
-            pass
-        elif excp.message == "Query_id_invalid":
-            pass
-        elif excp.message == "Message can't be deleted":
-            pass
-        else:
-            LOGGER.exception("Exception in help buttons. %s", str(query.data))
-    context.bot.send_message(update.callback_query.message.chat_id, "Buy this product",
-                             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
-                                 text=context.bot.lang_dict["buy_button"],
-                                 callback_data="pay_product_{}".format(button_callback_data.replace("product_", ""))),
-                                 InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                                      callback_data="products")
-                             ]]))
+#
+# def product_handler(update, context):
+#     context.user_data['to_delete'] = []
+#     query = update.callback_query
+#     button_callback_data = query.data
+#     context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
+#                                message_id=update.callback_query.message.message_id)
+#     try:
+#         button_info = products_table.find_one(
+#             {"bot_id": context.bot.id, "title_lower": button_callback_data.replace("product_", "")}
+#         )
+#         for content_dict in button_info["content"]:
+#             if "text" in content_dict:
+#                 context.user_data['to_delete'].append(query.message.reply_text(text=content_dict["text"],
+#                                                                                parse_mode='Markdown'))
+#             if "audio_file" in content_dict:
+#                 context.user_data['to_delete'].append(query.message.reply_audio(content_dict["audio_file"]))
+#             if "video_file" in content_dict:
+#                 context.user_data['to_delete'].append(query.message.reply_video(content_dict["video_file"]))
+#             if "document_file" in content_dict:
+#                 if ".png" in content_dict["document_file"] or ".jpg" in content_dict["document_file"]:
+#                     context.user_data['to_delete'].append(context.bot.send_photo(chat_id=query.message.chat.id,
+#                                                                                  photo=content_dict["document_file"]))
+#                 else:
+#                     context.user_data['to_delete'].append(context.bot.send_document(chat_id=query.message.chat.id,
+#                                                                                     document=content_dict[
+#                                                                                         "document_file"]))
+#             if "photo_file" in content_dict:
+#                 context.user_data['to_delete'].append(context.bot.send_photo(chat_id=query.message.chat.id,
+#                                                                              photo=content_dict["photo_file"]))
+#             if "video_note_file" in content_dict:
+#                 context.user_data['to_delete'].append(query.message.reply_video_note(content_dict["video_note_file"]))
+#             if "voice_file" in content_dict:
+#                 context.user_data['to_delete'].append(query.message.reply_voice(content_dict["voice_file"]))
+#             if "animation_file" in content_dict:
+#                 context.user_data['to_delete'].append(query.message.reply_animation(content_dict["animation_file"]))
+#             if "sticker_file" in content_dict:
+#                 context.user_data['to_delete'].append(query.message.reply_sticker(content_dict["sticker_file"]))
+#
+#     except BadRequest as excp:
+#         if excp.message == "Message is not modified":
+#             pass
+#         elif excp.message == "Query_id_invalid":
+#             pass
+#         elif excp.message == "Message can't be deleted":
+#             pass
+#         else:
+#             LOGGER.exception("Exception in help buttons. %s", str(query.data))
+#     context.bot.send_message(update.callback_query.message.chat_id, "Buy this product",
+#                              reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
+#                                  text=context.bot.lang_dict["buy_button"],
+#                                  callback_data="pay_product_{}".format(button_callback_data.replace("product_", ""))),
+#                                  InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+#                                                       callback_data="products")
+#                              ]]))
 
 
 def back_from_button_handler(update, context):

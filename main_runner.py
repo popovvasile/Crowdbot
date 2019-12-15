@@ -12,11 +12,7 @@ from modules.chanells.channels import MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER, 
     SEND_POST_HANDLER, CHANELLS_MENU
 from modules.chanells.channels_polls_surveys_donate import SEND_POLL_TO_CHANNEL_HANDLER, SEND_SURVEY_TO_CHANNEL_HANDLER, \
     SEND_DONATION_TO_CHANNEL_HANDLER
-from modules.eshop_old.echop_customer import PURCHASE_HANDLER
-from modules.eshop_old.eshop_admin import PRODUCT_ADD_HANDLER, DELETE_PRODUCT_HANDLER, PRODUCT_EDIT_HANDLER, \
-    PRODUCT_EDIT_FINISH_HANDLER, PRODUCT_ADD_FINISH_HANDLER, DELETE_PRODUCT_CONTENT_HANDLER, PRODUCTS_MENU_HANDLER, \
-    ESHOP_MENU
-from modules.eshop_old.eshop_enable_disable import CREATE_SHOP_HANDLER
+from modules.shop.modules.user_side.echop_payment import PURCHASE_HANDLER
 from modules.groups.groups import MY_GROUPS_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER, \
     ADD_GROUP_HANLDER, GROUPS_MENU
 from modules.groups.groups_polls_surveys_donate import SEND_POLL_TO_GROUP_HANDLER, SEND_SURVEY_TO_GROUP_HANDLER, \
@@ -33,7 +29,7 @@ from modules.surveys.surveys_create import DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_
 from modules.payments.payments_config import EDIT_DONATION_HANDLER, PAYMENTS_CONFIG_KEYBOARD, CHNAGE_DONATIONS_CONFIG, \
     CONFIGS_DONATIONS_GENERAL, CONFIGS_SHOP_GENERAL, CHNAGE_SHOP_CONFIG
 from helper_funcs.helper import help_button, button_handler, get_help, WelcomeBot, \
-    back_from_button_handler, product_handler, error_callback
+    back_from_button_handler
 
 from modules.settings.manage_button import BUTTON_EDIT_HANDLER, BUTTON_EDIT_FINISH_HANDLER, DELETE_CONTENT_HANDLER, \
     BUTTON_ADD_FINISH_HANDLER, back_from_edit_button_handler
@@ -83,7 +79,7 @@ def main(token, lang):
     # dispatcher.add_error_handler(error_callback)
     start_handler = CommandHandler("start", WelcomeBot().start)
     help_handler = CommandHandler("help", get_help)
-    product_handler_han = CallbackQueryHandler(product_handler, pattern=r"product_")
+    # product_handler_han = CallbackQueryHandler(product_handler, pattern=r"product_")  # TODO think if to use this one
 
     custom_button_callback_handler = CallbackQueryHandler(button_handler, pattern=r"button_")
     custom_button_back_callback_handler = CallbackQueryHandler(back_from_button_handler,
@@ -93,6 +89,12 @@ def main(token, lang):
     dispatcher.add_handler(EDIT_BOT_DESCRIPTION_HANDLER)
 
     #  NEW SHOP
+
+    dispatcher.add_handler(PURCHASE_HANDLER)
+    # dispatcher.add_handler(product_handler_han)
+    dispatcher.add_handler(CHNAGE_SHOP_CONFIG)
+    dispatcher.add_handler(CONFIGS_SHOP_GENERAL)
+
     dispatcher.add_handler(START_SHOP_HANDLER)
     dispatcher.add_handler(ORDERS_TRASH)
     dispatcher.add_handler(PRODUCTS_TRASH)
@@ -139,20 +141,7 @@ def main(token, lang):
 
     dispatcher.add_handler(DONATION_STATISTIC_HANDLER)
 
-    # # PRODUCTS
-    dispatcher.add_handler(ESHOP_MENU)
-    dispatcher.add_handler(PRODUCT_ADD_HANDLER)
-    dispatcher.add_handler(DELETE_PRODUCT_HANDLER)
-    dispatcher.add_handler(PRODUCT_EDIT_HANDLER)
-    dispatcher.add_handler(PRODUCT_EDIT_FINISH_HANDLER)
-    dispatcher.add_handler(PRODUCT_ADD_FINISH_HANDLER)
-    dispatcher.add_handler(DELETE_PRODUCT_CONTENT_HANDLER)
-    dispatcher.add_handler(PRODUCTS_MENU_HANDLER)
-    dispatcher.add_handler(PURCHASE_HANDLER)
-    dispatcher.add_handler(product_handler_han)
-    dispatcher.add_handler(CHNAGE_SHOP_CONFIG)
-    dispatcher.add_handler(CONFIGS_SHOP_GENERAL)
-    dispatcher.add_handler(CREATE_SHOP_HANDLER)
+
     # MESSAGES
     dispatcher.add_handler(MESSAGES_MENU)
     dispatcher.add_handler(SEE_MESSAGES_FINISH_BACK_HANDLER)
