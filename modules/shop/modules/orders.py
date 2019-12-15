@@ -1,18 +1,21 @@
-from telegram import (Update)
+import logging
+
+import requests
+from telegram import Update, ParseMode
 from telegram.ext import (ConversationHandler, CallbackQueryHandler,
                           CallbackContext)
-from modules.shop.helper.helper import delete_messages
-from modules.shop.helper.decorator import catch_request_exception
-from modules.shop.helper.pagination import APIPaginatedPage, set_page_key
-import requests
-import logging
-from modules.shop.helper.strings import strings
-from modules.shop.helper.keyboards import keyboards
-from config import conf
+
+from helper_funcs.pagination import Pagination
+from modules.shop.helper.keyboards import keyboards, back_kb, back_btn
+from modules.shop.helper.helper import clear_user_data
 from modules.shop.components.order import Order
 from modules.shop.components.product import Product
-from .welcome import Welcome
-from modules.shop.helper.helper import clear_user_data
+from helper_funcs.pagination import set_page_key
+from modules.shop.helper.pagination import APIPaginatedPage
+from modules.shop.modules.welcome import Welcome
+from config import conf
+from database import orders_table
+from helper_funcs.misc import delete_messages
 
 
 logging.basicConfig(format='%(asctime)s - %(name)s - '
@@ -22,86 +25,95 @@ logger = logging.getLogger(__name__)
 
 
 class OrdersHandler(object):
-    @catch_request_exception
     def orders(self, update: Update, context: CallbackContext):
-        set_page_key(update, context)
-        resp = requests.get(f"{conf['API_URL']}/orders",
-                            params={"page": context.user_data["page"],
-                                    "per_page": 3})
-        pagin = APIPaginatedPage(resp)
-        pagin.start(update, context,
-                    strings["orders_title"],
-                    strings["no_orders"])
-        for order in pagin.data["orders_data"]:
-            Order(order).send_short_template(update, context)
-        pagin.send_pagin(update, context)
-        return ORDERS
+        delete_messages(update, context, True)
+        set_page_key(update, context, "orders")
+        all_orders = orders_table.find({"in_trash": False}).sort([["_id", 1]])
+        return self.orders_layout(update, context, all_orders, ORDERS)
 
-    @catch_request_exception
+    def orders_layout(self, update, context, all_orders, state):
+        # Title
+        context.user_data['to_delete'].append(
+            context.bot.send_message(
+                chat_id=update.callback_query.message.chat_id,
+                text=context.bot.lang_dict["shop_admin_orders_title"].format(all_orders.count()),
+                parse_mode=ParseMode.MARKDOWN))
+
+        if all_orders.count() == 0:
+            context.user_data["to_delete"].append(
+                context.bot.send_message(
+                    chat_id=update.effective_chat.id,
+                    text=context.bot.lang_dict["shop_admin_no_orders"],
+                    reply_markup=back_kb("back_to_main_menu", context=context)))
+        else:
+            pagination = Pagination(
+                all_orders, page=context.user_data["page"], per_page=5)
+            for order in pagination.content:
+                Order(order).send_short_template(update, context)
+            pagination.send_keyboard(
+                update, context, [[back_btn("back_to_main_menu", context=context)]])
+        return state
+
+    def confirm_to_trash(self, update: Update, context: CallbackContext):
+        delete_messages(update, context, True)
+        set_page_key(update, context, name="item_page", start_data={})
+        order_id = update.callback_query.data.split("/")[1]
+        context.user_data["order"] = Order(order_id)
+        context.user_data["order"].send_full_template(
+            update, context,
+            context.bot.lang_dict["shop_admin_confirm_to_trash_new"],
+            keyboards(context)["confirm_to_trash"])
+        return CONFIRM_TO_TRASH
+
+    def finish_to_trash(self, update: Update, context: CallbackContext):
+        context.bot.send_chat_action(update.effective_chat.id, "typing")
+        delete_messages(update, context, True)
+        context.user_data["order"].update({"in_trash": True})
+        update.callback_query.answer(context.bot.lang_dict["shop_admin_moved_to_trash_blink"])
+        return self.back_to_orders(update, context)
+
+    # TODO all next methods broken! Need to change !
+
     def confirm_to_done(self, update: Update, context: CallbackContext):
-        delete_messages(update, context)
-        set_page_key(update, context, "item_page")
+        delete_messages(update, context, True)
+        set_page_key(update, context, name="item_page", start_data={})
         if update.callback_query.data.startswith("to_done"):
-            order_id = int(update.callback_query.data.split("/")[1])
+            order_id = update.callback_query.data.split("/")[1]
             context.user_data["order"] = Order(order_id)
         context.user_data["order"].send_full_template(
             update, context,
-            strings["confirm_to_done"],
-            keyboards["confirm_to_done"])
+            context.bot.lang_dict["shop_admin_confirm_to_done"],
+            keyboards(context)["confirm_to_done"])
         return CONFIRM_TO_DONE
 
-    @catch_request_exception
     def finish_to_done(self, update: Update, context: CallbackContext):
         context.bot.send_chat_action(update.effective_chat.id, "typing")
-        delete_messages(update, context)
+        delete_messages(update, context, True)
         context.user_data["order"].change_status({"new_status": True})
-        update.callback_query.answer(strings["moved_to_done_blink"])
+        update.callback_query.answer(context.bot.lang_dict["shop_admin_moved_to_done_blink"])
         return self.back_to_orders(update, context)
 
-    @catch_request_exception
     def confirm_cancel_order(self, update: Update, context: CallbackContext):
-        delete_messages(update, context)
-        set_page_key(update, context, "item_page")
+        delete_messages(update, context, True)
+        set_page_key(update, context=context, name="item_page", start_data={})  # TODO hz what is this, double check
         if update.callback_query.data.startswith("cancel_order"):
             order_id = int(update.callback_query.data.split("/")[1])
             context.user_data["order"] = Order(order_id)
         context.user_data["order"].send_full_template(
             update, context,
-            strings["confirm_cancel"],
-            keyboards["confirm_cancel"])
+            context.bot.lang_dict["shop_admin_confirm_cancel"],
+            keyboards(context)["confirm_cancel"])
         return CONFIRM_CANCEL
 
-    @catch_request_exception
     def finish_cancel(self, update: Update, context: CallbackContext):
         context.bot.send_chat_action(update.effective_chat.id, "typing")
-        delete_messages(update, context)
+        delete_messages(update, context, True)
         context.user_data["order"].change_status({"new_status": False})
-        update.callback_query.answer(strings["order_canceled_blink"])
+        update.callback_query.answer(context.bot.lang_dict["shop_admin_order_canceled_blink"])
         return self.back_to_orders(update, context)
 
-    @catch_request_exception
-    def confirm_to_trash(self, update: Update, context: CallbackContext):
-        delete_messages(update, context)
-        set_page_key(update, context, "item_page")
-        order_id = int(update.callback_query.data.split("/")[1])
-        context.user_data["order"] = Order(order_id)
-        context.user_data["order"].send_full_template(
-            update, context,
-            strings["confirm_to_trash_new"],
-            keyboards["confirm_to_trash"])
-        return CONFIRM_TO_TRASH
-
-    @catch_request_exception
-    def finish_to_trash(self, update: Update, context: CallbackContext):
-        context.bot.send_chat_action(update.effective_chat.id, "typing")
-        delete_messages(update, context)
-        context.user_data["order"].change_status({"new_trash_status": True})
-        update.callback_query.answer(strings["moved_to_trash_blink"])
-        return self.back_to_orders(update, context)
-
-    @catch_request_exception
     def edit(self, update: Update, context: CallbackContext):
-        delete_messages(update, context)
+        delete_messages(update, context, True)
         set_page_key(update, context, "item_page")
         if update.callback_query.data.startswith("edit"):
             try:
@@ -111,22 +123,20 @@ class OrdersHandler(object):
                 context.user_data["order"].refresh()
         context.user_data["order"].send_full_template(
             update, context,
-            strings["edit_menu"],
-            keyboards["edit_keyboard"],
+            context.bot.lang_dict["shop_admin_edit_menu"],
+            keyboards(context)["edit_keyboard"],
             delete_kb=True)
         return EDIT
 
-    @catch_request_exception
     def remove_item(self, update: Update, context: CallbackContext):
-        delete_messages(update, context)
+        delete_messages(update, context, True)
         item_id = update.callback_query.data.split("/")[1]
         context.user_data["order"].remove_item(item_id)
-        update.callback_query.answer(strings["item_removed_blink"])
+        update.callback_query.answer(context.bot.lang_dict["shop_admin_item_removed_blink"])
         return self.edit(update, context)
 
-    @catch_request_exception
     def add_item(self, update: Update, context: CallbackContext):
-        delete_messages(update, context)
+        delete_messages(update, context, True)
         set_page_key(update, context, "choose_product_page")
         resp = requests.get(
             f"{conf['API_URL']}/admin_products",
@@ -135,19 +145,18 @@ class OrdersHandler(object):
                     "status": "not_sold"})
         pagin = APIPaginatedPage(resp)
         pagin.start(update, context,
-                    f'{strings["choose_products_title"]}'
+                    f'{context.bot.lang_dict["shop_admin_choose_products_title"]}'
                     f'\n{context.user_data["order"].template}',
-                    strings["no_products"])
+                    context.bot.lang_dict["shop_admin_no_products"])
         for product in pagin.data["products_data"]:
-            product = Product(product)
+            product = Product(context, product)
             add_kb = product.add_keyboard(context.user_data["order"])
-            product.send_short_template(update, context, kb=add_kb)
+            product.send_admin_short_template(update, context, kb=add_kb)
         pagin.send_pagin(update, context)
         return CHOOSE_PRODUCT
 
-    @catch_request_exception
     def finish_adding_item(self, update: Update, context: CallbackContext):
-        delete_messages(update, context)
+        delete_messages(update, context, True)
         item_data = update.callback_query.data.split("/")
         item = dict(
             article=item_data[1],

@@ -151,11 +151,11 @@ class UsersHandler(object):
                     context.bot.lang_dict["no_users_str"],
                     reply_markup=back_reply(context, "back_to_users_menu")))
         else:
-            pagination = Pagination(context, per_page, all_users)
-            for user in pagination.page_content():
+            pagination = Pagination(all_users, context.user_data["page"], per_page)
+            for user in pagination.content:
                 User(context, user).send_template(update)
             pagination.send_keyboard(
-                update, [[back_button(context, "back_to_users_menu")]])
+                update, context, [[back_button(context, "back_to_users_menu")]])
 
 
 class UsersStatistic(object):

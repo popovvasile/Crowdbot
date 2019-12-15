@@ -1,12 +1,13 @@
 from telegram import Update
 from telegram.ext import (ConversationHandler, CallbackQueryHandler,
                           CallbackContext)
-from modules.shop.helper.helper import delete_messages, clear_user_data
+
+from helper_funcs.misc import delete_messages
+from modules.shop.helper.helper import clear_user_data
 from modules.shop.helper.decorator import catch_request_exception
 from modules.shop.helper.pagination import APIPaginatedPage, set_page_key
 import requests
 import logging
-from modules.shop.helper.strings import strings
 from config import conf
 from modules.shop.components.wholesale_order import WholesaleOrder
 from .welcome import Welcome
@@ -27,8 +28,8 @@ class WholesaleOrdersHandler(object):
                                     "per_page": 3})
         pagin = APIPaginatedPage(resp)
         pagin.start(update, context,
-                    strings["orders_title"],
-                    strings["no_orders"])
+                    context.bot.lang_dict["shop_admin_orders_title"],
+                    context.bot.lang_dict["shop_admin_no_orders"])
         for order in pagin.data["data"]:
             WholesaleOrder(order).send_template(update, context)
         pagin.send_pagin(update, context)
@@ -41,13 +42,13 @@ class WholesaleOrdersHandler(object):
         order_id = int(update.callback_query.data.split("/")[1])
         if update.callback_query.data.startswith("to_done"):
             json = {"new_status": True}
-            blink = strings["moved_to_done_blink"]
+            blink = context.bot.lang_dict["shop_admin_moved_to_done_blink"]
         elif update.callback_query.data.startswith("to_trash"):
             json = {"new_trash_status": True}
-            blink = strings["moved_to_trash_blink"]
+            blink = context.bot.lang_dict["shop_admin_moved_to_trash_blink"]
         elif update.callback_query.data.startswith("cancel_order"):
             json = {"new_status": False}
-            blink = strings["order_canceled_blink"]
+            blink = context.bot.lang_dict["shop_admin_order_canceled_blink"]
         else:
             return self.wholesale_orders(update, context)
         WholesaleOrder(order_id).change_status(json)
@@ -61,7 +62,7 @@ class WholesaleOrdersHandler(object):
         delete_messages(update, context)
         order_id = update.callback_query.data.split("/")[1]
         WholesaleOrder(order_id=order_id).change_status({"new_status": True})
-        update.callback_query.answer(strings["moved_to_done_blink"])
+        update.callback_query.answer(context.bot.lang_dict["shop_admin_moved_to_done_blink"])
         return self.wholesale_orders(update, context)
 
     @catch_request_exception
@@ -72,7 +73,7 @@ class WholesaleOrdersHandler(object):
         order_id = update.callback_query.data.split("/")[1]
         WholesaleOrder(order_id=order_id).change_status(
             {"new_trash_status": True})
-        update.callback_query.answer(strings["moved_to_trash_blink"])
+        update.callback_query.answer(context.bot.lang_dict["shop_admin_moved_to_trash_blink"])
         return self.wholesale_orders(update, context)
 
     @catch_request_exception
@@ -82,7 +83,7 @@ class WholesaleOrdersHandler(object):
         delete_messages(update, context)
         order_id = update.callback_query.data.split("/")[1]
         WholesaleOrder(order_id=order_id).change_status({"new_status": True})
-        update.callback_query.answer(strings["moved_to_trash_blink"])
+        update.callback_query.answer(context.bot.lang_dict["shop_admin_moved_to_trash_blink"])
         return self.wholesale_orders(update, context)"""
 
     def back_to_wholesale_orders(self, update: Update, context: CallbackContext):

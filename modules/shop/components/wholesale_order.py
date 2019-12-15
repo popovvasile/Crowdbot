@@ -28,10 +28,10 @@ class WholesaleOrder(object):
 
     @property
     def template(self):
-        text = (strings["order_status_new"]
+        text = (context.bot.lang_dict["shop_admin_order_status_new"]
                 if self.status is False
-                else strings["order_status_true"]) + "\n" + \
-            strings["wholesale_order_temp"].format(
+                else context.bot.lang_dict["shop_admin_order_status_true"]) + "\n" + \
+            context.bot.lang_dict["shop_admin_wholesale_order_temp"].format(
                 self._id, self.timestamp, self.name, self.phone_number,
                 self.price, "\n".join([c["name"] for c in self.categories]),
                 [(i["brand"]["name"],
@@ -45,20 +45,20 @@ class WholesaleOrder(object):
         kb = [[]]
         if self.in_trash is True:
             kb[0].append(InlineKeyboardButton(
-                            strings["restore_btn"],
+                            context.bot.lang_dict["shop_admin_restore_btn"],
                             callback_data=f"restore_wholesale/{self._id}"))
             return InlineKeyboardMarkup(kb)
         if self.status is False:
             kb[0].append(InlineKeyboardButton(
-                            strings["to_done_btn"],
+                            context.bot.lang_dict["shop_admin_to_done_btn"],
                             callback_data=f"to_done/{self._id}"))
             kb[0].append(InlineKeyboardButton(
-                            strings["to_trash_btn"],
+                            context.bot.lang_dict["shop_admin_to_trash_btn"],
                             callback_data=f"to_trash/{self._id}"))
 
         elif self.status is True:
             kb[0].append(InlineKeyboardButton(
-                            strings["cancel_btn"],
+                            context.bot.lang_dict["shop_admin_cancel_btn"],
                             callback_data=f"cancel_order/{self._id}"))
         return InlineKeyboardMarkup(kb)
 

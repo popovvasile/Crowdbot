@@ -9,18 +9,10 @@ p.s. remember the port on mongo and the security- encrypt the messages and all d
 Admins: [send message] [send urgent message]
 Users: [send message] [ask for donation] [send survey]
 
-# TODO install ujson
-# TODO
+# TODO test payments and implements purchases payments statistics exactly as in donations + full list in csv
 
 
-# TODO statistics on purchases and payments + full list in csv
-# TODO brand/category filtration for the shop users
+# TODO user interface for shop
 # TODO products appear not as buttons, but as messages with pics and description (add pagination)
 # TODO make content with payment
-# TODO pagination for messages
-# TODO notify admin about new messages and purchases
-
-
-
-# todo create a proper master branch
-#todo fix the language rahat
+# TODO tickets on events with payment, location and hour

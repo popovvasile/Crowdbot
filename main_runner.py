@@ -58,7 +58,7 @@ from modules.shop.modules.orders import ORDERS_HANDLER
 from modules.shop.modules.wholesale_orders import WHOLESALE_ORDERS_HANDLER
 from modules.shop.modules.products import PRODUCTS_HANDLER
 from modules.shop.modules.trash import (TRASH_START, ORDERS_TRASH,
-                                WHOLESALE_TRASH, PRODUCTS_TRASH)
+                                 PRODUCTS_TRASH)
 from modules.shop.modules.brands import BRANDS_HANDLER
 
 
@@ -95,7 +95,6 @@ def main(token, lang):
     #  NEW SHOP
     dispatcher.add_handler(START_SHOP_HANDLER)
     dispatcher.add_handler(ORDERS_TRASH)
-    dispatcher.add_handler(WHOLESALE_TRASH)
     dispatcher.add_handler(PRODUCTS_TRASH)
     dispatcher.add_handler(ADD_PRODUCT_HANDLER)
     dispatcher.add_handler(ORDERS_HANDLER)

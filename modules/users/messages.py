@@ -626,8 +626,8 @@ class SeeMessageToAdmin(object):
             {"bot_id": context.bot.id}).sort([["_id", -1]])
         per_page = 5
         if messages.count() != 0:
-            pagination = Pagination(context, per_page, messages)
-            for message in pagination.page_content():
+            pagination = Pagination(messages, context.user_data["page"], per_page)
+            for message in pagination.content:
                 message_buttons = InlineKeyboardMarkup([
                     [InlineKeyboardButton(
                         text=context.bot.lang_dict["view_message_str"],
@@ -644,13 +644,14 @@ class SeeMessageToAdmin(object):
                         reply_markup=message_buttons,
                         parse_mode=ParseMode.HTML))
             pagination.send_keyboard(
-                update, delete_buttons,
+                update, context, delete_buttons,
                 context.bot.lang_dict["back_text"] +
-                context.bot.lang_dict["message_count_str"].format(messages.count()))
+                context.bot.lang_dict["message_count_str"].format(
+                    messages.count()))
         else:
             markup = InlineKeyboardMarkup([
                 [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                      callback_data="help_module(users)")]])
+                                      callback_data="help_module(messages)")]])
             context.bot.send_message(update.callback_query.message.chat_id,
                                      context.bot.lang_dict["send_message_6"],
                                      reply_markup=markup)

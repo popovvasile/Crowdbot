@@ -1,14 +1,14 @@
+import logging
+
 from telegram import Update
 from telegram.ext import (CommandHandler, ConversationHandler,
                           CallbackQueryHandler, CallbackContext)
 
-from modules.shop.helper.helper import delete_messages, clear_user_data
-import requests
-from requests.exceptions import ConnectionError
-import logging
-from modules.shop.helper.strings import strings
+from modules.shop.helper.helper import clear_user_data
 from modules.shop.helper.keyboards import start_keyboard
-from config import conf
+from database import orders_table, wholesale_orders_table
+from helper_funcs.misc import delete_messages
+
 
 logging.basicConfig(format='%(asctime)s - %(name)s - '
                            '%(levelname)s - %(message)s',
@@ -19,32 +19,25 @@ logger = logging.getLogger(__name__)
 class Welcome(object):
     @staticmethod
     def start(update: Update, context: CallbackContext):
-        delete_messages(update, context)
+        delete_messages(update, context, True)
         if context.user_data.get("msg_to_send"):
             context.user_data["to_delete"].append(
                 context.bot.send_message(
                     update.effective_chat.id,
                     context.user_data["msg_to_send"]))
-        try:
-            orders_quantity = requests.get(
-                f"{conf['API_URL']}/orders_quantity")
-        except ConnectionError:
-            context.user_data["to_delete"].append(
-                context.bot.send_message(
-                    update.effective_chat.id,
-                    strings["api_off"] + strings["try_later"]))
-            return ConversationHandler.END
-        if orders_quantity.status_code == 200:
-            context.user_data["to_delete"].append(
-                context.bot.send_message(
-                    update.effective_chat.id,
-                    strings["start_message"],
-                    reply_markup=start_keyboard(orders_quantity.json())))
-        else:
-            context.user_data["to_delete"].append(
-                context.bot.send_message(
-                    update.effective_chat.id,
-                    strings["something_gone_wrong"] + strings["try_later"]))
+
+        orders_quantity = {
+            "new_orders_quantity":
+                orders_table.find({"status": False,
+                                   "in_trash": False}).count(),
+            "new_wholesale_orders_quantity":
+                wholesale_orders_table.find({"status": False,
+                                            "in_trash": False}).count()}
+        context.user_data["to_delete"].append(
+            context.bot.send_message(
+                update.effective_chat.id,
+                context.bot.lang_dict["shop_admin_start_message"],
+                reply_markup=start_keyboard(orders_quantity, context)))
         return ConversationHandler.END
 
     @staticmethod
@@ -55,9 +48,10 @@ class Welcome(object):
         return Welcome.start(update, context)
 
 
-START_SHOP_HANDLER = CallbackQueryHandler(pattern="shop_start", callback=Welcome().start,
-                                          # filters=Filters.chat(conf["ADMINS"])
-                                          )
+START_SHOP_HANDLER = CallbackQueryHandler(pattern="shop_start",
+                                          callback=Welcome.start)
 
-BACK_TO_MAIN_MENU_HANDLER = CallbackQueryHandler(Welcome().back_to_main_menu,
+START_COMMAND = CommandHandler("start", callback=Welcome.start)
+
+BACK_TO_MAIN_MENU_HANDLER = CallbackQueryHandler(Welcome.back_to_main_menu,
                                                  pattern=r"back_to_main_menu")

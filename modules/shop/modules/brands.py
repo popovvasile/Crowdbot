@@ -1,11 +1,10 @@
 from telegram import Update
 from telegram.ext import (ConversationHandler, CallbackQueryHandler,
                           CallbackContext, MessageHandler, Filters)
-from modules.shop.helper.helper import delete_messages
+from helper_funcs.misc import delete_messages
 from modules.shop.helper.decorator import catch_request_exception
 from modules.shop.helper.pagination import APIPaginatedPage, set_page_key
 import requests
-from modules.shop.helper.strings import strings
 from modules.shop.helper.keyboards import keyboards
 
 from config import conf
@@ -23,10 +22,10 @@ class BrandsHandler(object):
                                     "per_page": 3})
         pagin = APIPaginatedPage(resp)
         pagin.start(update, context,
-                    strings["brands_title"],
-                    strings["no_brands"])
+                    context.bot.lang_dict["shop_admin_brands_title"],
+                    context.bot.lang_dict["shop_admin_no_brands"])
         for brand in pagin.data["data"]:
-            Brand(brand).send_template(update, context)
+            Brand(context, brand).send_template(update, context)
         pagin.send_pagin(update, context)
         return BRANDS
 
@@ -36,19 +35,19 @@ class BrandsHandler(object):
         if update.callback_query \
                 and update.callback_query.data.startswith("edit_brand"):
             brand_id = int(update.callback_query.data.split("/")[1])
-            context.user_data["brand"] = Brand(brand_id)
+            context.user_data["brand"] = Brand(context, brand_id)
         context.user_data["brand"].send_template(
             update, context,
-            strings["edit_brand_menu"],
-            keyboards["edit_brand"])
+            context.bot.lang_dict["shop_admin_edit_brand_menu"],
+            keyboards(context)["edit_brand"])
         return EDIT
 
     def price(self, update: Update, context: CallbackContext):
         delete_messages(update, context)
         context.user_data["brand"].send_template(
             update, context,
-            strings["set_brand_price"],
-            keyboards["back_to_brands"])
+            context.bot.lang_dict["shop_admin_set_brand_price"],
+            keyboards(context)["back_to_brands"])
         return PRICE
 
     @catch_request_exception

@@ -1,22 +1,15 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
-import datetime
-import logging
-# import random
-from haikunator import Haikunator
-from telegram import (InlineKeyboardButton, InlineKeyboardMarkup,
-                      ReplyKeyboardMarkup, ReplyKeyboardRemove, ParseMode)
+from telegram import (InlineKeyboardButton, InlineKeyboardMarkup, ParseMode)
 from telegram.ext import (MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
 
-from database import donations_table, users_table
-from helper_funcs.helper import get_help
+from database import users_table
 from helper_funcs.pagination import Pagination, set_page_key
 
 from helper_funcs.misc import delete_messages, back_button, back_reply, lang_timestamp
 from helper_funcs.helper import back_from_button_handler
 from bson.objectid import ObjectId
-from bson.errors import InvalidId
 from validate_email import validate_email
 from modules.users.users import get_obj  # , back_to_users_menu
 from uuid import uuid4
@@ -55,22 +48,18 @@ class Admin:
 
     @property
     def template(self):
-        return string_dict(self.context)["registered_admin_temp"].format(
+        return self.context.bot.lang_dict["registered_admin_temp"].format(
             self.name, self.email, self.timestamp) \
             if self.registered else \
-            string_dict(self.context)["not_registered_admin_temp"].format(
+            self.context.bot.lang_dict["not_registered_admin_temp"].format(
                 self.email)
+
 
     @property
     def reply_markup(self):
         reply_markup = [
-            [InlineKeyboardButton(string_dict(self.context)["delete_button_str"],
+            [InlineKeyboardButton(self.context.bot.lang_dict["delete_button_str"],
                                   callback_data=f"delete_admin/{self._id}")]]
-        # if not self.registered:
-        #     reply_markup[0].append(
-        #         InlineKeyboardButton(
-        #             context.bot.lang_dict["resend_password_btn_str"],
-        #             callback_data=f"resend_password/{self._id}"))
         return InlineKeyboardMarkup(reply_markup)
 
     def delete(self):
@@ -261,8 +250,6 @@ ADMINS_LIST_HANDLER = ConversationHandler(
                              callback=AdminHandler().back),
         CallbackQueryHandler(pattern=r"back_to_admin_list",
                              callback=AdminHandler().back_to_admins_list)
-        # CallbackQueryHandler(pattern=r"help_back",
-        #                      callback=UsersHandler()),
     ]
 )
 
@@ -284,7 +271,5 @@ ADD_ADMIN_HANDLER = ConversationHandler(
                              callback=AdminHandler().back),
         CallbackQueryHandler(pattern=r"back_to_admin_list",
                              callback=AdminHandler().back_to_admins_list)
-        # CallbackQueryHandler(pattern=r"help_back",
-        #                      callback=UsersHandler()),
     ]
 )

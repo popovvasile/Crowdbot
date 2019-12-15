@@ -1,5 +1,7 @@
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
-from .helper import delete_messages
+
+from helper_funcs.misc import delete_messages
+
 from requests.exceptions import RequestException
 from requests.models import Response
 from modules.shop.helper.strings import strings
@@ -47,13 +49,13 @@ class APIPaginatedPage(object):
                     else "..." if num["page"] is None else num["page"],
                     callback_data=str(num["page"]))
                   for num in self.data["iter_pages"]]] +
-                [[back_btn(back_button_data)]])
+                [[back_btn(back_button_data, context=context)]])
         else:
             # kb = keyboards["back_to_main_menu_keyboard"]
-            kb = InlineKeyboardMarkup([[back_btn(back_button_data)]])
+            kb = InlineKeyboardMarkup([[back_btn(back_button_data, context=context)]])
         context.user_data["to_delete"].append(
             context.bot.send_message(update.effective_chat.id,
-                                     strings["current_page"].format(
+                                     context.bot.lang_dict["shop_admin_current_page"].format(
                                          context.user_data["page"]),
                                      reply_markup=kb,
                                      parse_mode=ParseMode.MARKDOWN))

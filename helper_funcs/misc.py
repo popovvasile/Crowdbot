@@ -60,6 +60,8 @@ def lang_timestamp(bot_lang: (CallbackContext, str), timestamp,
 
 # May raise Exception and bson.errors.InvalidId
 def get_obj(table, obj: (ObjectId, dict, str)):
+    if obj is None:
+        return {}
     if type(obj) is dict:
         return obj
     elif type(obj) is ObjectId:

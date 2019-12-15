@@ -31,3 +31,8 @@ users_messages_to_admin_table = db["users_messages_to_admin_bot"]
 # support_admins_table = db['support_admins']
 # bot_father_bots_table = db['bot_father_bots']
 # bot_father_users_table = db['bot_father_users']
+
+# Api Shop To Mongo Shop
+brands_table = db["brands_table"]
+sizes_table = db["sizes_table"]
+orders_table = db["orders"]

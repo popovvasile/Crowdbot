@@ -1,9 +1,8 @@
-from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.error import TelegramError, BadRequest
-from modules.shop.helper.strings import strings
+from telegram import ParseMode
+from telegram.error import BadRequest
 
 
-def delete_messages(update, context):
+"""def delete_messages(update, context):
     try:
         context.bot.delete_message(
             update.effective_chat.id,
@@ -20,7 +19,7 @@ def delete_messages(update, context):
                 continue
         context.user_data['to_delete'] = list()
     else:
-        context.user_data['to_delete'] = list()
+        context.user_data['to_delete'] = list()"""
 
 
 def clear_user_data(context):
@@ -42,7 +41,7 @@ def send_media_arr(full_media_group, update, context):
         context.user_data["to_delete"].append(
             context.bot.send_message(
                 update.effective_chat.id,
-                strings["image_exception"],
+                context.bot.lang_dict["shop_admin_image_exception"],
                 parse_mode=ParseMode.MARKDOWN))
 
 
