@@ -3,11 +3,8 @@ from telegram.ext import (ConversationHandler, CallbackQueryHandler,
                           CallbackContext, MessageHandler, Filters)
 from helper_funcs.misc import delete_messages
 from modules.shop.helper.decorator import catch_request_exception
-from modules.shop.helper.pagination import APIPaginatedPage, set_page_key
-import requests
+from modules.shop.helper.pagination import set_page_key
 from modules.shop.helper.keyboards import keyboards
-
-from config import conf
 from modules.shop.components.brand import Brand
 from .welcome import Welcome
 from modules.shop.helper.helper import clear_user_data
@@ -17,16 +14,16 @@ class BrandsHandler(object):
     @catch_request_exception
     def brands(self, update: Update, context: CallbackContext):
         set_page_key(update, context)
-        resp = requests.get(f"{conf['API_URL']}/brands",
-                            params={"page": context.user_data["page"],
-                                    "per_page": 3})
-        pagin = APIPaginatedPage(resp)
-        pagin.start(update, context,
-                    context.bot.lang_dict["shop_admin_brands_title"],
-                    context.bot.lang_dict["shop_admin_no_brands"])
-        for brand in pagin.data["data"]:
-            Brand(context, brand).send_template(update, context)
-        pagin.send_pagin(update, context)
+        # resp = requests.get(f"{conf['API_URL']}/brands",   # TODO
+        #                     params={"page": context.user_data["page"],
+        #                             "per_page": 3})
+        # pagin = APIPaginatedPage(resp)
+        # pagin.start(update, context,
+        #             context.bot.lang_dict["shop_admin_brands_title"],
+        #             context.bot.lang_dict["shop_admin_no_brands"])
+        # for brand in pagin.data["data"]:
+        #     Brand(context, brand).send_template(update, context)
+        # pagin.send_pagin(update, context)
         return BRANDS
 
     @catch_request_exception

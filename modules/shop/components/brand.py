@@ -5,10 +5,9 @@ from telegram.error import BadRequest
 from bson.objectid import ObjectId
 
 from modules.shop.helper.strings import strings
-from config import conf
+# from config import conf
 from helper_funcs.misc import get_obj
 from database import brands_table
-from modules.shop.helper.keyboards import create_keyboard, back_btn
 
 
 class Brand(object):
@@ -56,11 +55,11 @@ class Brand(object):
                     parse_mode=ParseMode.MARKDOWN,
                     reply_markup=kb))
 
-    def edit(self, json):
-        resp = requests.post(f"{conf['API_URL']}/brand/{self._id}",
-                             json=json)
-        if resp.status_code == 200:
-            self.__init__(resp.json())
-        else:
-            raise RequestException
+    # def edit(self, json):
+    #     resp = requests.post(f"{conf['API_URL']}/brand/{self._id}",
+    #                          json=json)
+    #     if resp.status_code == 200:
+    #         self.__init__(resp.json())
+    #     else:
+    #         raise RequestException
 

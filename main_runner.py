@@ -51,7 +51,6 @@ from modules.donations.donation_statistic import DONATION_STATISTIC_HANDLER
 from modules.shop.modules.adding_product import ADD_PRODUCT_HANDLER
 from modules.shop.modules.welcome import START_SHOP_HANDLER, BACK_TO_MAIN_MENU_HANDLER
 from modules.shop.modules.orders import ORDERS_HANDLER
-from modules.shop.modules.wholesale_orders import WHOLESALE_ORDERS_HANDLER
 from modules.shop.modules.products import PRODUCTS_HANDLER
 from modules.shop.modules.trash import (TRASH_START, ORDERS_TRASH,
                                  PRODUCTS_TRASH)
@@ -100,7 +99,6 @@ def main(token, lang):
     dispatcher.add_handler(PRODUCTS_TRASH)
     dispatcher.add_handler(ADD_PRODUCT_HANDLER)
     dispatcher.add_handler(ORDERS_HANDLER)
-    dispatcher.add_handler(WHOLESALE_ORDERS_HANDLER)
     dispatcher.add_handler(PRODUCTS_HANDLER)
     dispatcher.add_handler(TRASH_START)
     dispatcher.add_handler(BRANDS_HANDLER)

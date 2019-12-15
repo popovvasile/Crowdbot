@@ -7,7 +7,6 @@ from modules.shop.helper.keyboards import keyboards
 from modules.shop.helper.helper import clear_user_data
 from modules.shop.modules.welcome import Welcome
 from modules.shop.components.order import Order
-from modules.shop.components.wholesale_order import WholesaleOrder
 from modules.shop.components.product import Product
 from modules.shop.modules.products import ProductsHandler
 from modules.shop.modules.orders import OrdersHandler
