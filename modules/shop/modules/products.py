@@ -50,7 +50,7 @@ class ProductsHandler:
             pagination = Pagination(
                 all_products, per_page=5)
             for product in pagination.content:
-                Product(product).send_admin_short_template(
+                Product(context=context, obj=product).send_admin_short_template(
                     update, context, kb=True)
             pagination.send_keyboard(
                 update, context, [[back_btn("back_to_main_menu", context=context)]])

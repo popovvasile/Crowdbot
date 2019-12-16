@@ -1016,7 +1016,6 @@ https://telegra.ph/Gajd-Podklyuchit-donaty-07-03
     shop_admin_add_product_btn=f"{emoji['plus']} Добавить товар",
     # delete_product_btn="➖ Удалить товар",
     shop_admin_orders_btn="📩 Заказы",
-    shop_admin_wholesale_orders_btn="🛍 Опт заказы",
     # add_brand_btn="👚 Добавить бренд",
     shop_admin_brands_btn=f"{emoji['shirt']} Бренды",
     # add_category_btn="👜 Добавить категорию",
@@ -1115,17 +1114,6 @@ https://telegra.ph/Gajd-Podklyuchit-donaty-07-03
     # EDIT ORDER
     shop_admin_choose_products_title="*Выбирите товар для добавления в заказ*"
                                      "\n_Количество товаров:_ `{}`",
-
-    # WHOLESALE ORDERS HANDLER
-    # wholesale_orders_title="*Список заказов*"
-    #                        "\n_Количество заказов:_ `{}`",
-    shop_admin_wholesale_order_temp="\n\n*Id Заказа:* `{}`" \
-                                    "\n*Время:* `{}`" \
-                                    "\n\n*Имя:* `{}`" \
-                                    "\n*Номер:* `{}`" \
-                                    "\n*Общая цена:* `{}`" \
-                                    "\n*Интересующие Категории:* \n`{}`" \
-                                    "\n\n*Заказ:* {}",
 
     # PRODUCTS HANDLER
     shop_admin_no_products="В магазине ещё нет товаров",

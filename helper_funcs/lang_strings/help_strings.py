@@ -9,34 +9,32 @@ def help_strings(context):
     string_d_str = context.bot.lang_dict
     payment_token = chatbots_table.find_one({"bot_id": context.bot.id})
     admins_keyboard = [
-        InlineKeyboardButton(text=string_d_str["payment_configure_button"],
-                             callback_data="payments_config"),
-        InlineKeyboardButton(text=string_d_str["donation_statistic_btn_str"],
-                             callback_data="donation_statistic")
+        InlineKeyboardButton(context.bot.lang_dict["shop"],
+                             callback_data="shop_menu"),
+        InlineKeyboardButton(context.bot.lang_dict["donations"],
+                             callback_data="donations_menu"),
     ]
     if "shop" in payment_token:
         admins_keyboard += [InlineKeyboardButton(text=context.bot.lang_dict["shop"],
-                                                 callback_data="shop_start"),
-                            InlineKeyboardButton(context.bot.lang_dict["donations"],
-                                                 callback_data="donations_config"),
-                            InlineKeyboardButton(text=context.bot.lang_dict["payments_statistics_str"],
-                                                 callback_data="payments_statistics"),
- ]
+                                                 callback_data="shop_start")]
+    # if "donate" in payment_token:
+    #     admins_keyboard += [InlineKeyboardButton(text=context.bot.lang_dict["donations"],
+    #                                              callback_data="donation_menu")]
 
-        help_dict["shop"] = dict(
-            mod_name=string_d_str["add_product_button"],
-            admin_keyboard=admins_keyboard,
-            admin_help=string_d_str["add_menu_buttons_help"],
-            visitor_keyboard=[InlineKeyboardButton(text=string_d_str["shop"],
-                                                   callback_data="products")],
-            visitor_help=string_d_str["add_menu_buttons_help_visitor"]
-        )
-    else:
-        help_dict["shop"] = dict(
-            mod_name=string_d_str["add_product_button"],
-            admin_keyboard=admins_keyboard,
-            admin_help=string_d_str["add_menu_buttons_help"],
-        )
+    #     help_dict["shop"] = dict(
+    #         mod_name=string_d_str["add_product_button"],
+    #         admin_keyboard=admins_keyboard,
+    #         admin_help=string_d_str["add_menu_buttons_help"],
+    #         visitor_keyboard=[InlineKeyboardButton(text=string_d_str["shop"],
+    #                                                callback_data="products")],
+    #         visitor_help=string_d_str["add_menu_buttons_help_visitor"]
+    #     )
+    # else:
+    help_dict["shop"] = dict(
+        mod_name=string_d_str["add_product_button"],
+        admin_keyboard=admins_keyboard,
+        admin_help=string_d_str["add_menu_buttons_help"],
+    )
     help_dict["channels"] = dict(
         mod_name='Channels',
         # start 'Channels' message
@@ -80,7 +78,7 @@ def help_strings(context):
 
         admin_keyboard=[
             InlineKeyboardButton(text=string_d_str["messages"] +
-                                 f" {not_read_messages_count}",
+                                      f" {not_read_messages_count}",
                                  callback_data="admin_messages"),
             InlineKeyboardButton(text=string_d_str["users_module"],
                                  callback_data="users_list"),  # TODO User statistics

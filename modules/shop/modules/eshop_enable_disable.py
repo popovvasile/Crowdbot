@@ -11,13 +11,50 @@ from database import chatbots_table
 from helper_funcs.auth import initiate_chat_id
 from helper_funcs.helper import get_help
 
-
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
 TYPING_TOKEN, TYPING_TITLE, TYPING_DESCRIPTION, SHOP_FINISH = range(4)
+
+
+def eshop_menu(update, context):  # TODO add shop config button
+    string_d_str = context.bot.lang_dict
+    context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                               message_id=update.callback_query.message.message_id)
+    chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
+    admin_keyboard = []
+    if chatbot.get("shop_enabled") is True:
+        admin_keyboard += [
+
+            [InlineKeyboardButton(text=string_d_str["products"],
+                                  callback_data="products")],
+            [InlineKeyboardButton(text=string_d_str["add_product_button"],
+                                  callback_data="create_product")],
+            [InlineKeyboardButton(text=string_d_str["edit_product"],
+                                  callback_data="edit_product")],
+            [InlineKeyboardButton(text=string_d_str["delete_product"],
+                                  callback_data="delete_product")],
+            [InlineKeyboardButton(text=context.bot.lang_dict["disable_shop_button"],
+                                  callback_data="change_shop_config")],
+            [InlineKeyboardButton(text=context.bot.lang_dict["configure_button"],
+                                  callback_data="shop_config")],
+        ]
+
+    elif "shop" in chatbot:
+        admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["allow_shop_button"],
+                                                    callback_data="change_shop_config")]),
+    else:
+        admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["allow_shop_button"],
+                                                    callback_data='allow_shop')]),
+
+
+    admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                                callback_data="help_module(shop)")])
+    context.bot.send_message(update.callback_query.message.chat.id,
+                             context.bot.lang_dict["shop"], reply_markup=InlineKeyboardMarkup(admin_keyboard))
+    return ConversationHandler.END
 
 
 def check_provider_token(provider_token, update, context):
@@ -203,3 +240,4 @@ CREATE_SHOP_HANDLER = ConversationHandler(
                MessageHandler(filters=Filters.command, callback=CreateShopHandler().back),
                ]
 )
+ESHOP_MENU = CallbackQueryHandler(callback=eshop_menu, pattern="shop_menu")

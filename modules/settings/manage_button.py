@@ -21,27 +21,29 @@ class ButtonEdit(object):
     def start(self, update, context):
         context.user_data["to_delete"] = []
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
         all_buttons = custom_buttons_table.find({"bot_id": context.bot.id})
         if all_buttons.count() > 0:
-            context.user_data["to_delete"].append(context.bot.send_message(chat_id=update.callback_query.message.chat_id,
-                                                           text=context.bot.lang_dict["manage_button_str_1"],
-                                                           reply_markup=ReplyKeyboardMarkup(
-                                                               [[button_name["button"]] for button_name in all_buttons]
-                                                           ),
-                                                           parse_mode='Markdown'))
+            context.user_data["to_delete"].append(context.bot.send_message(
+                chat_id=update.callback_query.message.chat_id,
+                text=context.bot.lang_dict["manage_button_str_1"],
+                reply_markup=ReplyKeyboardMarkup(
+                    [[button_name["button"]] for button_name in all_buttons]
+                ),
+                parse_mode='Markdown'))
             return CHOOSE_BUTTON
         else:
-            context.user_data["to_delete"].append(context.bot.send_message(chat_id=update.callback_query.message.chat_id,
-                                                           text=context.bot.lang_dict["manage_button_str_2"],
-                                                           reply_markup=InlineKeyboardMarkup(
-                                                               [[InlineKeyboardButton(
-                                                                   context.bot.lang_dict["create_button_button"],
-                                                                   callback_data="create_button"),
-                                                                   InlineKeyboardButton(
-                                                                       context.bot.lang_dict["back_button"],
-                                                                       callback_data="help_module(settings)")]]
-                                                           ), parse_mode='Markdown'))
+            context.user_data["to_delete"].append(
+                context.bot.send_message(chat_id=update.callback_query.message.chat_id,
+                                         text=context.bot.lang_dict["manage_button_str_2"],
+                                         reply_markup=InlineKeyboardMarkup(
+                                             [[InlineKeyboardButton(
+                                                 context.bot.lang_dict["create_button_button"],
+                                                 callback_data="create_button"),
+                                                 InlineKeyboardButton(
+                                                     context.bot.lang_dict["back_button"],
+                                                     callback_data="help_module(settings)")]]
+                                         ), parse_mode='Markdown'))
             return ConversationHandler.END
 
     def choose_button(self, update, context):
@@ -169,22 +171,25 @@ class ButtonEdit(object):
             else:
                 LOGGER.exception("Exception in edit buttons")
         context.user_data["to_delete"].append(context.bot.send_message(
-                                                       chat_id=update.message.chat_id,
-                                                       text=context.bot.lang_dict["manage_button_str_3"],
-                                                       reply_markup=ReplyKeyboardRemove()))
-        context.user_data["to_delete"].append(context.bot.send_message( chat_id=update.message.chat_id,
-                                                       text=context.bot.lang_dict["add_button_content"],
-                                                       reply_markup=InlineKeyboardMarkup(
-                                                           [[InlineKeyboardButton(text=context.bot.lang_dict["add_button"],
-                                                                                  callback_data="add_content{}".format(
-                                                                                      update.message.text))]])))
-        context.user_data["to_delete"].append(context.bot.send_message( chat_id=update.message.chat_id,
-                                                       text=context.bot.lang_dict["back_text"],
-                                                       reply_markup=InlineKeyboardMarkup(
-                                                           [[
-                                                               InlineKeyboardButton(
-                                                                   context.bot.lang_dict["back_button"],
-                                                                   callback_data="help_module(settings)")]])))
+            chat_id=update.message.chat_id,
+            text=context.bot.lang_dict["manage_button_str_3"],
+            reply_markup=ReplyKeyboardRemove()))
+        context.user_data["to_delete"].append(context.bot.send_message(
+            chat_id=update.message.chat_id,
+            text=context.bot.lang_dict["add_button_content"],
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(
+                    text=context.bot.lang_dict["add_button"],
+                    callback_data="add_content{}".format(
+                        update.message.text))]])))
+        context.user_data["to_delete"].append(context.bot.send_message(
+            chat_id=update.message.chat_id,
+            text=context.bot.lang_dict["back_text"],
+            reply_markup=InlineKeyboardMarkup(
+                [[
+                    InlineKeyboardButton(
+                        context.bot.lang_dict["back_button"],
+                        callback_data="help_module(settings)")]])))
         return ConversationHandler.END
 
     def edit_button(self, update, context):
@@ -193,14 +198,14 @@ class ButtonEdit(object):
         reply_markup = InlineKeyboardMarkup(
             reply_buttons)
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
         content_data = update.callback_query.data.replace("b_", "").split("___")  # here is the problem
         context.user_data["content_id"] = content_data[0]
         context.user_data["button"] = content_data[1]
         context.user_data["to_delete"].append(
-            context.bot.send_message( chat_id=update.callback_query.message.chat_id,
-                             text=context.bot.lang_dict["manage_button_str_4"],
-                             reply_markup=reply_markup))
+            context.bot.send_message(chat_id=update.callback_query.message.chat_id,
+                                     text=context.bot.lang_dict["manage_button_str_4"],
+                                     reply_markup=reply_markup))
         return EDIT_FINISH
 
     def edit_button_finish(self, update, context):
@@ -252,9 +257,9 @@ class ButtonEdit(object):
         )
         buttons = [
             [InlineKeyboardButton(text=context.bot.lang_dict["back_button"], callback_data="help_module(settings)")]]
-        context.bot.send_message( chat_id=update.message.chat_id,
-                         text=context.bot.lang_dict["manage_button_str_5"],
-                         reply_markup=InlineKeyboardMarkup(buttons))
+        context.bot.send_message(chat_id=update.message.chat_id,
+                                 text=context.bot.lang_dict["manage_button_str_5"],
+                                 reply_markup=InlineKeyboardMarkup(buttons))
         logger.info("Admin {} on bot {}:{} did  the following edit button: {}".format(
             update.effective_user.first_name, context.bot.first_name, context.bot.id, context.user_data["button"]))
         context.user_data.clear()
@@ -263,27 +268,27 @@ class ButtonEdit(object):
     # help_module(settings)
     def back_from_edit_button(self, update, context):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
         delete_messages(update, context)
         get_help(update, context)
 
     def back(self, update, context):
         context.bot.send_message(update.callback_query.message.chat.id,
-                         context.bot.lang_dict["manage_button_str_6"], reply_markup=ReplyKeyboardRemove(),
-                         parse_mode='Markdown'
-                         )
+                                 context.bot.lang_dict["manage_button_str_6"], reply_markup=ReplyKeyboardRemove(),
+                                 parse_mode='Markdown'
+                                 )
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
         get_help(update, context)
         context.user_data.clear()
         return ConversationHandler.END
 
     def cancel(self, update, context):
         context.bot.delete_message(chat_id=update.message.chat_id,
-                           message_id=update.message.message_id)
+                                   message_id=update.message.message_id)
         context.bot.send_message(update.message.chat.id,
-                         "Command is cancelled", reply_markup=ReplyKeyboardRemove(), parse_mode='Markdown'
-                         )
+                                 "Command is cancelled", reply_markup=ReplyKeyboardRemove(), parse_mode='Markdown'
+                                 )
 
         get_help(update, context)
         return ConversationHandler.END
@@ -296,12 +301,12 @@ class AddButtonContent(object):
         reply_markup = InlineKeyboardMarkup(
             reply_buttons)
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
         content_data = update.callback_query.data.replace("add_content", "")  # here is the problem
         context.user_data["button"] = content_data
-        context.bot.send_message( chat_id=update.callback_query.message.chat_id,
-                         text=context.bot.lang_dict["manage_button_str_4"],
-                         reply_markup=reply_markup)
+        context.bot.send_message(chat_id=update.callback_query.message.chat_id,
+                                 text=context.bot.lang_dict["manage_button_str_4"],
+                                 reply_markup=reply_markup)
         return EDIT_FINISH
 
     def add_content_button_finish(self, update, context):
@@ -347,9 +352,9 @@ class AddButtonContent(object):
         )
         buttons = [
             [InlineKeyboardButton(text=context.bot.lang_dict["back_button"], callback_data="help_module(settings)")]]
-        context.bot.send_message( chat_id=update.message.chat_id,
-                         text=context.bot.lang_dict["manage_button_str_5"],
-                         reply_markup=InlineKeyboardMarkup(buttons))
+        context.bot.send_message(chat_id=update.message.chat_id,
+                                 text=context.bot.lang_dict["manage_button_str_5"],
+                                 reply_markup=InlineKeyboardMarkup(buttons))
         logger.info("Admin {} on bot {}:{} did  the following edit button: {}".format(
             update.effective_user.first_name, context.bot.first_name, context.bot.id, context.user_data["button"]))
         context.user_data.clear()
@@ -357,20 +362,20 @@ class AddButtonContent(object):
 
     def back(self, update, context):
         context.bot.send_message(update.callback_query.message.chat.id,
-                         context.bot.lang_dict["manage_button_str_6"], reply_markup=ReplyKeyboardRemove()
-                         )
+                                 context.bot.lang_dict["manage_button_str_6"], reply_markup=ReplyKeyboardRemove()
+                                 )
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
         get_help(update, context)
         context.user_data.clear()
         return ConversationHandler.END
 
     def cancel(self, update, context):
         context.bot.delete_message(chat_id=update.message.chat_id,
-                           message_id=update.message.message_id)
+                                   message_id=update.message.message_id)
         context.bot.send_message(update.message.chat.id,
-                         "Command is cancelled", reply_markup=ReplyKeyboardRemove()
-                         )
+                                 "Command is cancelled", reply_markup=ReplyKeyboardRemove()
+                                 )
 
         get_help(update, context)
         return ConversationHandler.END
@@ -386,7 +391,7 @@ class DeleteButtonContent(object):
             buttons)
 
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
         content_data = update.callback_query.data.replace("d_", "").split("___")  # here is the problem
         context.user_data["content_id"] = content_data[0]
         context.user_data["button"] = content_data[1]
@@ -397,8 +402,8 @@ class DeleteButtonContent(object):
             if any(context.user_data["content_id"] in ext for ext in content_dict.values()):
                 button_info["content"].remove(content_dict)
         context.bot.send_message(chat_id=update.callback_query.message.chat_id,
-                         text=context.bot.lang_dict["delete_content"],
-                         reply_markup=reply_markup)
+                                 text=context.bot.lang_dict["delete_content"],
+                                 reply_markup=reply_markup)
         custom_buttons_table.replace_one(
             {"bot_id": context.bot.id, "button": context.user_data["button"]},
             button_info

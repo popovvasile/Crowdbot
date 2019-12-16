@@ -12,7 +12,8 @@ from modules.chanells.channels import MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER, 
     SEND_POST_HANDLER, CHANELLS_MENU
 from modules.chanells.channels_polls_surveys_donate import SEND_POLL_TO_CHANNEL_HANDLER, SEND_SURVEY_TO_CHANNEL_HANDLER, \
     SEND_DONATION_TO_CHANNEL_HANDLER
-from modules.shop.modules.user_side.echop_payment import PURCHASE_HANDLER
+from modules.shop.modules.eshop_enable_disable import ESHOP_MENU
+from modules.shop.modules.user_side.eshop_payment import PURCHASE_HANDLER
 from modules.groups.groups import MY_GROUPS_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER, \
     ADD_GROUP_HANLDER, GROUPS_MENU
 from modules.groups.groups_polls_surveys_donate import SEND_POLL_TO_GROUP_HANDLER, SEND_SURVEY_TO_GROUP_HANDLER, \
@@ -23,11 +24,11 @@ from modules.settings.settings import BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER,
 from modules.users.messages_admin import SEND_MESSAGE_ONLY_TO_ADMINS_HANDLER
 from modules.users.messages_donators import SEND_MESSAGE_TO_DONATORS_HANDLER
 from modules.surveys.surveys_answer import ANSWER_SURVEY_HANDLER
-from modules.donations.donation_enable import CREATE_DONATION_HANDLER
+from modules.donations.donation_enable_disable import CREATE_DONATION_HANDLER, DONATIONS_MENU
 from modules.surveys.surveys_create import DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_HANDLER, SEND_SURVEYS_HANDLER, \
     CREATE_SURVEY_HANDLER, SURVEYS_MENU
-from modules.payments.payments_config import EDIT_DONATION_HANDLER, PAYMENTS_CONFIG_KEYBOARD, CHNAGE_DONATIONS_CONFIG, \
-    CONFIGS_DONATIONS_GENERAL, CONFIGS_SHOP_GENERAL, CHNAGE_SHOP_CONFIG
+from modules.payments.payments_config import EDIT_DONATION_HANDLER, PAYMENTS_CONFIG_KEYBOARD, CHANGE_DONATIONS_CONFIG, \
+    CONFIGS_DONATIONS_GENERAL, CONFIGS_SHOP_GENERAL, CHANGE_SHOP_CONFIG
 from helper_funcs.helper import help_button, button_handler, get_help, WelcomeBot, \
     back_from_button_handler
 
@@ -88,10 +89,10 @@ def main(token, lang):
     dispatcher.add_handler(EDIT_BOT_DESCRIPTION_HANDLER)
 
     #  NEW SHOP
-
+    dispatcher.add_handler(ESHOP_MENU)
     dispatcher.add_handler(PURCHASE_HANDLER)
     # dispatcher.add_handler(product_handler_han)
-    dispatcher.add_handler(CHNAGE_SHOP_CONFIG)
+    dispatcher.add_handler(CHANGE_SHOP_CONFIG)
     dispatcher.add_handler(CONFIGS_SHOP_GENERAL)
 
     dispatcher.add_handler(START_SHOP_HANDLER)
@@ -133,12 +134,11 @@ def main(token, lang):
     dispatcher.add_handler(HANDLE_PRECHECKOUT)
     dispatcher.add_handler(EDIT_DONATION_HANDLER)
     dispatcher.add_handler(SEND_DONATION_TO_USERS_HANDLER)
-    dispatcher.add_handler(CHNAGE_DONATIONS_CONFIG)
+    dispatcher.add_handler(CHANGE_DONATIONS_CONFIG)
     dispatcher.add_handler(PAYMENTS_CONFIG_KEYBOARD)
     dispatcher.add_handler(CONFIGS_DONATIONS_GENERAL)
-
     dispatcher.add_handler(DONATION_STATISTIC_HANDLER)
-
+    dispatcher.add_handler(DONATIONS_MENU)
 
     # MESSAGES
     dispatcher.add_handler(MESSAGES_MENU)

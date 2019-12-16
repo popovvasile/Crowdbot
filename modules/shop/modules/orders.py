@@ -1,6 +1,4 @@
 import logging
-
-import requests
 from telegram import Update, ParseMode
 from telegram.ext import (ConversationHandler, CallbackQueryHandler,
                           CallbackContext)
@@ -11,9 +9,7 @@ from modules.shop.helper.helper import clear_user_data
 from modules.shop.components.order import Order
 from modules.shop.components.product import Product
 from helper_funcs.pagination import set_page_key
-from modules.shop.helper.pagination import APIPaginatedPage
 from modules.shop.modules.welcome import Welcome
-# from config import conf
 from database import orders_table
 from helper_funcs.misc import delete_messages
 
@@ -149,10 +145,10 @@ class OrdersHandler(object):
         #             f'\n{context.user_data["order"].template}',
         #             context.bot.lang_dict["shop_admin_no_products"])
         # for product in pagin.data["products_data"]:
-        #     product = Product(context, product)
-        #     add_kb = product.add_keyboard(context.user_data["order"])
-        #     product.send_admin_short_template(update, context, kb=add_kb)
-        # pagin.send_pagin(update, context)
+        product = Product(context, context.user_data["product"])
+        add_kb = product.add_keyboard(context.user_data["order"])
+        product.send_admin_short_template(update, context, kb=add_kb)
+        # Pagination().send_pagin(update, context)
         return CHOOSE_PRODUCT
 
     def finish_adding_item(self, update: Update, context: CallbackContext):

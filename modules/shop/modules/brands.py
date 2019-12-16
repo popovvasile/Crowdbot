@@ -2,8 +2,8 @@ from telegram import Update
 from telegram.ext import (ConversationHandler, CallbackQueryHandler,
                           CallbackContext, MessageHandler, Filters)
 from helper_funcs.misc import delete_messages
+from helper_funcs.pagination import set_page_key
 from modules.shop.helper.decorator import catch_request_exception
-from modules.shop.helper.pagination import set_page_key
 from modules.shop.helper.keyboards import keyboards
 from modules.shop.components.brand import Brand
 from .welcome import Welcome

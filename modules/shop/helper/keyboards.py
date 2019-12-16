@@ -9,18 +9,13 @@ def start_keyboard(orders_quantity, context):
         (f' {orders_quantity["new_orders_quantity"]}'
          if orders_quantity["new_orders_quantity"] != 0 else ""))
 
-    wholesale_orders_btn_text = (
-        context.bot.lang_dict["shop_admin_wholesale_orders_btn"] +
-        (f' {orders_quantity["new_wholesale_orders_quantity"]}'
-         if orders_quantity["new_wholesale_orders_quantity"] != 0 else ""))
+
 
     return InlineKeyboardMarkup([
         [InlineKeyboardButton(context.bot.lang_dict["shop_admin_add_product_btn"],
                               callback_data="add_product")],
         [InlineKeyboardButton(orders_btn_text,
                               callback_data="orders")],
-        # InlineKeyboardButton(wholesale_orders_btn_text,
-        #                      callback_data="wholesale_orders")],
         # [InlineKeyboardButton(context.bot.lang_dict["shop_admin_add_brand_btn"],
         # callback_data="add_brand"),
         #  InlineKeyboardButton(context.bot.lang_dict["shop_admin_add_category_btn"],
@@ -144,9 +139,7 @@ def keyboards(context):
         ]),
         trash_main=InlineKeyboardMarkup([
             [InlineKeyboardButton(context.bot.lang_dict["shop_admin_orders_btn"],
-                                  callback_data="trashed_orders"),
-             InlineKeyboardButton(context.bot.lang_dict["shop_admin_wholesale_orders_btn"],
-                                  callback_data="trashed_wholesale")],
+                                  callback_data="trashed_orders")],
             [InlineKeyboardButton(context.bot.lang_dict["shop_admin_products_btn"],
                                   callback_data="trashed_products")],
             [back_btn("back_to_main_menu_btn", context=context)]

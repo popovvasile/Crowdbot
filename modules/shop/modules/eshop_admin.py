@@ -21,35 +21,7 @@ TYPING_TO_DELETE_PRODUCT = 17
 TYPING_LINK, TYPING_PRODUCT_FINISH = range(2)
 
 
-def eshop_menu(update, context):
-    string_d_str = context.bot.lang_dict
-    context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                               message_id=update.callback_query.message.message_id)
-    chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
-    admin_keyboard = []
-    if chatbot["shop_enabled"] is True:
-        admin_keyboard += [[InlineKeyboardButton(text=string_d_str["products"],
-                                                 callback_data="products")],
-                           [InlineKeyboardButton(text=string_d_str["add_product_button"],
-                                                 callback_data="create_product")],
-                           [InlineKeyboardButton(text=string_d_str["edit_product"],
-                                                 callback_data="edit_product")],
-                           [InlineKeyboardButton(text=string_d_str["delete_product"],
-                                                 callback_data="delete_product")]]
-
-    else:
-        admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["allow_donations_button"],
-                                                    # TODO enforce to configure the tokens and everything first time
-                                                    callback_data="change_donations_config")]),
-
-    admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                                callback_data="help_module(settings)")])
-    context.bot.send_message(update.callback_query.message.chat.id,
-                             context.bot.lang_dict["shop"], reply_markup=InlineKeyboardMarkup(admin_keyboard))
-    return ConversationHandler.END
-
-
-class ProcductMenu(object):
+class ProductMenu(object):
     def send_product_menu(self, update, context):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                    message_id=update.callback_query.message.message_id)
@@ -728,8 +700,7 @@ class SeePurcheses(object):
         return EDIT_FINISH
 
 
-ESHOP_MENU = CallbackQueryHandler(callback=eshop_menu, pattern="shop_menu")
-PRODUCTS_MENU_HANDLER = CallbackQueryHandler(ProcductMenu().send_product_menu, pattern="products")
+PRODUCTS_MENU_HANDLER = CallbackQueryHandler(ProductMenu().send_product_menu, pattern="products")
 PRODUCT_ADD_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=AddProducts().start,
                                        pattern=r"create_product")],

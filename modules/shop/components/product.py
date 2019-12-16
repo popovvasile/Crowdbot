@@ -4,7 +4,7 @@ from telegram.error import BadRequest
 from bson.objectid import ObjectId
 from datetime import datetime
 
-from modules.shop.helper.strings import strings, emoji
+from modules.shop.helper.strings import emoji
 from modules.shop.helper.keyboards import back_btn, sizes_list
 from helper_funcs.misc import get_obj
 from modules.shop.helper.helper import send_media_arr
