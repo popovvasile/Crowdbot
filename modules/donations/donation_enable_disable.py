@@ -20,21 +20,18 @@ TYPING_TOKEN, TYPING_DESCRIPTION, DONATION_FINISH = range(3)
 
 
 def donation_menu(update, context):
-    string_d_str = context.bot.lang_dict
     context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                message_id=update.callback_query.message.message_id)
     chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
     admin_keyboard = []
     if chatbot["donations_enabled"] is True:
         no_channel_keyboard = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(text=string_d_str["payment_configure_button"],
-                                   callback_data="configure_donation")],
-             [InlineKeyboardButton(text=context.bot.lang_dict["ask_donation_button"],
+            [[InlineKeyboardButton(text=context.bot.lang_dict["ask_donation_button"],
                                    callback_data="send_donation_to_users")],
-             [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                   callback_data="help_module(shop)")],
              [InlineKeyboardButton(text=context.bot.lang_dict["configure_button"],
                                    callback_data="donations_config")],
+             [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                   callback_data="help_module(shop)")],
              ]
         )
         context.bot.send_message(update.callback_query.message.chat.id,

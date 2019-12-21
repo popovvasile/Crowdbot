@@ -98,13 +98,14 @@ class EnableDisableShopDonations(object):
                                                         callback_data="change_shop_config")]),
 
         admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                                    callback_data="help_module(shop)")])
+                                                    callback_data="back_to_main_menu")])
         context.bot.send_message(update.callback_query.message.chat.id,
                                  context.bot.lang_dict["payments_config_text"],
                                  reply_markup=InlineKeyboardMarkup(admin_keyboard))
         return ConversationHandler.END
 
     def enable_shop(self, update, context):  # TODO ask token if there is none
+        print("TEST")
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                    message_id=update.callback_query.message.message_id)
         chatbot = chatbots_table.find_one({"bot_id": context.bot.id})

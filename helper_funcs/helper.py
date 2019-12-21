@@ -30,13 +30,14 @@ def send_visitor_help(bot, chat_id, text, keyboard=None):
     donation_request = chatbots_table.find_one({"bot_id": bot.id})
     if donation_request.get("donate") is not None and donation_request.get("donate") != {}:
         buttons = [InlineKeyboardButton(bot.lang_dict["send_message_1"], callback_data="help_module(messages)"),
-                   InlineKeyboardButton(bot.lang_dict["pay_donation_mode_str"], callback_data='pay_donation')]
+                   InlineKeyboardButton(bot.lang_dict["pay_donation_mode_str"], callback_data='pay_donation'),]
+
     else:
         buttons = [InlineKeyboardButton(bot.lang_dict["send_message_1"], callback_data="help_module(messages)")]
     product_list_of_dicts = products_table.find({
         "bot_id": bot.id})
     if product_list_of_dicts.count() != 0:
-        buttons = buttons + [InlineKeyboardButton(text="Shop", callback_data="products")]
+        buttons = buttons + [InlineKeyboardButton(text=bot.lang_dict["shop"], callback_data="help_module(shop)")]
 
     buttons += [InlineKeyboardButton(button["button"],
                                      callback_data="button_{}".format(button["button"].replace(" ", "").lower()))
@@ -60,6 +61,7 @@ def send_admin_user_mode(bot, chat_id, text, keyboard=None):
     if donation_request.get("donate") is not None and donation_request.get("donate") != {}:
         buttons = [InlineKeyboardButton(bot.lang_dict["send_message_1"], callback_data="help_module(messages)"),
                    InlineKeyboardButton(bot.lang_dict["pay_donation_mode_str"], callback_data='pay_donation')]
+
     else:
         buttons = [InlineKeyboardButton(bot.lang_dict["send_message_1"], callback_data="help_module(messages)")]
     buttons += [InlineKeyboardButton(button["button"],
@@ -69,8 +71,11 @@ def send_admin_user_mode(bot, chat_id, text, keyboard=None):
                 for button in custom_buttons_table.find({"bot_id": bot.id, "link_button": True})]
     product_list_of_dicts = products_table.find({
         "bot_id": bot.id})
+    buttons = buttons + [InlineKeyboardButton(text=bot.lang_dict["shop"], callback_data="help_module(shop)")]
+    # TODO remove it later
+
     if product_list_of_dicts.count() != 0:
-        buttons = buttons + [InlineKeyboardButton(text="Shop", callback_data="products"),
+        buttons = buttons + [InlineKeyboardButton(text=bot.lang_dict["shop"], callback_data="help_module(shop)"),
                              InlineKeyboardButton(text="ADMIN MODE", callback_data="turn_user_mode_off")]
     else:
         buttons = buttons + [InlineKeyboardButton(text="ADMIN MODE", callback_data="turn_user_mode_off")]

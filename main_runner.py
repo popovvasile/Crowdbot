@@ -12,7 +12,7 @@ from modules.chanells.channels import MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER, 
     SEND_POST_HANDLER, CHANELLS_MENU
 from modules.chanells.channels_polls_surveys_donate import SEND_POLL_TO_CHANNEL_HANDLER, SEND_SURVEY_TO_CHANNEL_HANDLER, \
     SEND_DONATION_TO_CHANNEL_HANDLER
-from modules.shop.modules.eshop_enable_disable import ESHOP_MENU
+from modules.shop.modules.eshop_enable_disable import CREATE_SHOP_HANDLER
 from modules.shop.modules.user_side.eshop_payment import PURCHASE_HANDLER
 from modules.groups.groups import MY_GROUPS_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER, \
     ADD_GROUP_HANLDER, GROUPS_MENU
@@ -21,6 +21,7 @@ from modules.groups.groups_polls_surveys_donate import SEND_POLL_TO_GROUP_HANDLE
 from modules.settings.menu_description import EDIT_BOT_DESCRIPTION_HANDLER
 from modules.settings.settings import BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER, LINK_BUTTON_ADD_HANDLER, \
     CREATE_BUTTON_CHOOSE, BUTTONS_MENU
+from modules.shop.modules.user_side.products import USERS_ORDERS_HANDLER, USERS_PRODUCTS_HANDLER
 from modules.users.messages_admin import SEND_MESSAGE_ONLY_TO_ADMINS_HANDLER
 from modules.users.messages_donators import SEND_MESSAGE_TO_DONATORS_HANDLER
 from modules.surveys.surveys_answer import ANSWER_SURVEY_HANDLER
@@ -55,7 +56,6 @@ from modules.shop.modules.orders import ORDERS_HANDLER
 from modules.shop.modules.products import PRODUCTS_HANDLER
 from modules.shop.modules.trash import (TRASH_START, ORDERS_TRASH,
                                  PRODUCTS_TRASH)
-from modules.shop.modules.brands import BRANDS_HANDLER
 
 
 logging.basicConfig(
@@ -66,6 +66,11 @@ LOGGER = logging.getLogger(__name__)
 
 
 def main(token, lang):
+    from telegram.utils import request
+    # if request.is_con_pool_initialized():
+    #     raise RuntimeError('this is not prior to anything else...')
+    request.CON_POOL_SIZE = 10
+
     BotObj = Bot(token=token)
     with open('languages.json') as f:
         lang_dicts = json.load(f)
@@ -89,12 +94,11 @@ def main(token, lang):
     dispatcher.add_handler(EDIT_BOT_DESCRIPTION_HANDLER)
 
     #  NEW SHOP
-    dispatcher.add_handler(ESHOP_MENU)
     dispatcher.add_handler(PURCHASE_HANDLER)
     # dispatcher.add_handler(product_handler_han)
     dispatcher.add_handler(CHANGE_SHOP_CONFIG)
     dispatcher.add_handler(CONFIGS_SHOP_GENERAL)
-
+    dispatcher.add_handler(CREATE_SHOP_HANDLER)
     dispatcher.add_handler(START_SHOP_HANDLER)
     dispatcher.add_handler(ORDERS_TRASH)
     dispatcher.add_handler(PRODUCTS_TRASH)
@@ -102,8 +106,9 @@ def main(token, lang):
     dispatcher.add_handler(ORDERS_HANDLER)
     dispatcher.add_handler(PRODUCTS_HANDLER)
     dispatcher.add_handler(TRASH_START)
-    dispatcher.add_handler(BRANDS_HANDLER)
     dispatcher.add_handler(BACK_TO_MAIN_MENU_HANDLER)
+    dispatcher.add_handler(USERS_ORDERS_HANDLER)
+    dispatcher.add_handler(USERS_PRODUCTS_HANDLER)
 
     # ADD_BUTTONS
     dispatcher.add_handler(BUTTONS_MENU)

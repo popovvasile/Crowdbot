@@ -8,7 +8,7 @@ from modules.shop.helper.helper import clear_user_data
 from helper_funcs.pagination import Pagination
 
 from modules.shop.helper.keyboards import (
-    keyboards, sizes_checkboxes, back_kb, show_sizes, sizes_list, back_btn)
+    keyboards, back_kb, back_btn)
 from modules.shop.modules.welcome import Welcome
 from modules.shop.components.product import Product
 from database import products_table
@@ -62,6 +62,7 @@ class ProductsHandler:
                 update.callback_query.data.startswith("edit_product")):
             product_id = update.callback_query.data.split("/")[1]
             context.user_data["product"] = Product(context, product_id)
+            # TODO fix NoneType when creating the Product object
         context.user_data["product"].send_full_template(
             update, context, context.bot.lang_dict["shop_admin_edit_product_menu"],
             keyboards(context)["edit_product"])
@@ -140,90 +141,12 @@ class ProductsHandler:
         update.callback_query.answer(context.bot.lang_dict["shop_admin_moved_to_trash_blink"])
         return self.back_to_products(update, context)
 
-    def sizes_menu(self, update: Update, context: CallbackContext):
-        delete_messages(update, context, True)
-        context.user_data["product"].send_sizes_menu(update, context)
-        return SIZES_MENU
-
-    def remove_size(self, update: Update, context: CallbackContext):
-        delete_messages(update, context, True)
-        context.user_data["product"].remove_size(
-            update.callback_query.data.split("/")[1])
-        update.callback_query.answer(context.bot.lang_dict["shop_admin_size_removed_blink"])
-        return self.sizes_menu(update, context)
-
-    # Sizes Checkboxes
-    def set_new_sizes(self, update: Update, context: CallbackContext):
-        delete_messages(update, context, True)
-        to_remove = [i["size"]
-                     for i in context.user_data["product"].sizes]
-        if update.callback_query.data in sizes_list:
-            if update.callback_query.data \
-                    in context.user_data["selected_sizes"]:
-                context.user_data["selected_sizes"].remove(
-                    update.callback_query.data)
-            else:
-                context.user_data["selected_sizes"].append(
-                    update.callback_query.data)
-        else:
-            context.user_data["selected_sizes"] = list()
-        context.user_data["product"].send_full_template(
-            update, context, text=context.bot.lang_dict["shop_admin_set_new_sizes"],
-            kb=sizes_checkboxes(context.user_data["selected_sizes"],
-                                context=context,
-                                to_remove=to_remove,
-                                continue_data="set_quantity",
-                                back_data="back_to_products"))
-        return SET_SIZE
-
     def set_new_quantity(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        if not context.user_data.get("sizes"):
-            context.user_data["sizes"] = list()
-        if update.message:
-            context.user_data["sizes"][-1]["quantity"] = int(update.message.text)
-        if len(context.user_data["sizes"]) == \
-                len(context.user_data["selected_sizes"]):
-            return self.confirm_adding_sizes(update, context)
-        for size in context.user_data["selected_sizes"]:
-            if not any(i["size"] == size for i in context.user_data["sizes"]):
-                context.user_data["sizes"].append({"size": size})
-                context.user_data["product"].send_full_template(
-                    update, context, kb=back_kb("back_to_products", context),
-                    text=f"{context.bot.lang_dict['shop_admin_size_quantity'].format(size)}")
-                break
+
         return SET_QUANTITY
 
-    def confirm_adding_sizes(self, update: Update, context: CallbackContext):
-        delete_messages(update, context, True)
-        context.user_data["product"].send_full_template(
-            update, context, text="\n*Добавить данные размеры?*\n" +
-                                  show_sizes(context),
-            kb=keyboards(context)["confirm_adding_sizes"])
-        return CONFIRM_ADD_SIZES
 
-    def finish_add_sizes(self, update: Update, context: CallbackContext):
-        delete_messages(update, context, True)
-        context.user_data["product"].add_sizes(context.user_data["sizes"])
-        update.callback_query.answer(context.bot.lang_dict["shop_admin_sizes_added_blink"])
-        return self.edit(update, context)
-
-    def size_quantity(self, update: Update, context: CallbackContext):
-        delete_messages(update, context, True)
-        context.user_data["edited_size"] = \
-            update.callback_query.data.split("/")[1]
-        context.user_data["product"].send_full_template(
-            update, context, kb=back_kb("back_to_edit", context=context),
-            text=context.bot.lang_dict['shop_admin_size_quantity'].format(
-                context.user_data["edited_size"]))
-        return SIZE_QUANTITY
-
-    def finish_quantity_edit(self, update: Update, context: CallbackContext):
-        delete_messages(update, context, True)
-        context.user_data["product"].edit_size(
-            {"size": context.user_data["edited_size"],
-             "quantity": int(update.message.text)})
-        return self.sizes_menu(update, context)
 
     def back_to_products(self, update: Update, context: CallbackContext):
         page = context.user_data.get("page")
@@ -256,9 +179,7 @@ PRODUCTS_HANDLER = ConversationHandler(
                CallbackQueryHandler(ProductsHandler().description,
                                     pattern="change_description"),
                CallbackQueryHandler(ProductsHandler().name,
-                                    pattern="change_name"),
-               CallbackQueryHandler(ProductsHandler().sizes_menu,
-                                    pattern=r"sizes_menu")],
+                                    pattern="change_name")],
 
         CONFIRM_TO_TRASH: [CallbackQueryHandler(
                                 ProductsHandler().finish_to_trash,
@@ -277,27 +198,13 @@ PRODUCTS_HANDLER = ConversationHandler(
             Filters.regex("^[0-9]+$"),
             ProductsHandler().finish_discount_price)],
 
-        SIZES_MENU: [CallbackQueryHandler(ProductsHandler().remove_size,
-                                          pattern=r"remove_size"),
-                     CallbackQueryHandler(ProductsHandler().size_quantity,
-                                          pattern=r"change_size_quantity"),
-                     CallbackQueryHandler(ProductsHandler().set_new_sizes,
-                                          pattern=r"add_size")],
-
         SET_SIZE: [CallbackQueryHandler(ProductsHandler().set_new_quantity,
                                         pattern="set_quantity"),
                    CallbackQueryHandler(ProductsHandler().back_to_products,
-                                        pattern="back_to_products"),
-                   CallbackQueryHandler(ProductsHandler().set_new_sizes)],
+                                        pattern="back_to_products")],
 
         SET_QUANTITY: [MessageHandler(Filters.regex("^[0-9]+$"),
                                       ProductsHandler().set_new_quantity)],
-
-        CONFIRM_ADD_SIZES: [CallbackQueryHandler(ProductsHandler().finish_add_sizes,
-                                                 pattern=r"finish_add_sizes")],
-
-        SIZE_QUANTITY: [MessageHandler(Filters.regex("^[0-9]+$"),
-                                       ProductsHandler().finish_quantity_edit)]
     },
     fallbacks=[CallbackQueryHandler(Welcome.back_to_main_menu,
                                     pattern=r"back_to_main_menu"),

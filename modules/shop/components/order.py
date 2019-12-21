@@ -1,7 +1,5 @@
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
 from bson.objectid import ObjectId
-
-from modules.shop.helper.strings import strings
 from .product import Product
 from database import orders_table
 from helper_funcs.misc import get_obj
@@ -13,7 +11,8 @@ class Order(object):
         """
         {"status": False,
          "creation_timestamp": "time.time:time",
-         "last_modify_timestamp": "time.time:time",
+         "last_modiffrom database import brands_table
+y_timestamp": "time.time:time",
          "name": "yurec",
          "items": [{"size": "M",
                     "product": ObjectId('5df3f95621de961d524a1625'),
@@ -24,6 +23,7 @@ class Order(object):
          "comment": "Lil comment from user"}"""
 
         order = get_obj(orders_table, obj)
+        self.context = context
         self._id = order.get("_id")
         self.status = order.get("status")
         self.timestamp = order.get("creation_timestamp", ".").split(".")[0]
@@ -38,10 +38,10 @@ class Order(object):
 
     @property
     def template(self):
-        return (context.bot.lang_dict["shop_admin_order_status_new"]
+        return (self.context.bot.lang_dict["shop_admin_order_status_new"]
                 if self.status is False
-                else context.bot.lang_dict["shop_admin_order_status_true"]) + "\n" + \
-               context.bot.lang_dict["shop_admin_order_temp"].format(
+                else self.context.bot.lang_dict["shop_admin_order_status_true"]) + "\n" + \
+               self.context.bot.lang_dict["shop_admin_order_temp"].format(
                    self._id, self.timestamp,
                    self.str_status, self.name,
                    self.phone_number, self.price,
@@ -49,17 +49,17 @@ class Order(object):
 
     @property
     def str_status(self):
-        return context.bot.lang_dict["shop_admin_order_status_true"] if self.status is True \
-            else context.bot.lang_dict["shop_admin_some_product_not_exist"] \
+        return self.context.bot.lang_dict["shop_admin_order_status_true"] if self.status is True \
+            else self.context.bot.lang_dict["shop_admin_some_product_not_exist"] \
             if not self.all_items_exists \
-            else context.bot.lang_dict["shop_admin_empty_order"] if not len(self.items) \
-            else context.bot.lang_dict["shop_admin_all_products_exist"]
+            else self.context.bot.lang_dict["shop_admin_empty_order"] if not len(self.items) \
+            else self.context.bot.lang_dict["shop_admin_all_products_exist"]
 
     # todo refactor for long order items texts
     @property
     def str_order_items(self):
         return "\n".join(
-            [f'(артикул: {item.article}  размер: {item.item_size_name})'
+            [f'(артикул: {item.article} )'
              + (item.item_emoji if not self.status else "")
              for item in self.items])
 
@@ -68,27 +68,27 @@ class Order(object):
         kb = [[]]
         if self.in_trash:
             kb[0].append(InlineKeyboardButton(
-                            text=context.bot.lang_dict["shop_admin_restore_btn"],
+                            text=self.context.bot.lang_dict["shop_admin_restore_btn"],
                             callback_data=f"restore/{self._id}"))
             return InlineKeyboardMarkup(kb)
 
         if self.status is False:
             if self.all_items_exists and len(self.items):
                 kb[0].append(InlineKeyboardButton(
-                                text=context.bot.lang_dict["shop_admin_to_done_btn"],
+                                text=self.context.bot.lang_dict["shop_admin_to_done_btn"],
                                 callback_data=f"to_done/{self._id}"))
             else:
                 kb[0].append(InlineKeyboardButton(
-                                text=context.bot.lang_dict["shop_admin_edit_btn"],
+                                text=self.context.bot.lang_dict["shop_admin_edit_btn"],
                                 callback_data=f"edit/{self._id}"))
 
             kb[0].append(InlineKeyboardButton(
-                            text=context.bot.lang_dict["shop_admin_to_trash_btn"],
+                            text=self.context.bot.lang_dict["shop_admin_to_trash_btn"],
                             callback_data=f"to_trash/{self._id}"))
 
         elif self.status is True:
             kb[0].append(InlineKeyboardButton(
-                            text=context.bot.lang_dict["shop_admin_cancel_btn"],
+                            text=self.context.bot.lang_dict["shop_admin_cancel_btn"],
                             callback_data=f"cancel_order/{self._id}"))
         return InlineKeyboardMarkup(kb)
 
@@ -161,14 +161,8 @@ class OrderItem(Product):
     def __init__(self, order_item):
         super(OrderItem, self).__init__(order_item["product"])
         self.item_obj = order_item
-        self.item_size_name = order_item["size"]
-        self.item_size_obj = next(
-            (size_dict for size_dict in self.sizes
-             if size_dict["size"] == self.item_size_name),
-            {"size": self.item_size_name, "quantity": 0})
-        self.item_exist = (False if not self.sizes
-                           or self.item_size_obj["quantity"] == 0
-                           else True)
+
+        self.item_exist = (True) # TODO
 
     def send_template(self, update, context, delete_kb=None):
         if delete_kb:
@@ -178,9 +172,9 @@ class OrderItem(Product):
                     callback_data=f"remove_item/{self.item_obj['id']}")]])
 
         text = context.bot.lang_dict["shop_admin_product_temp_for_order_item"].format(
-            self.article, self.sizes_text, self.brand.name,
+            self.article,
             self.category["name"], self.price,
-            self.item_obj["size"] + f" {self.item_emoji}")
+            f" {self.item_emoji}")
         self.send_admin_short_template(update, context, text, delete_kb)
 
     @property

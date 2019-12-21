@@ -3,13 +3,9 @@ from telegram import (ParseMode, InputMediaPhoto, InlineKeyboardMarkup,
 from telegram.error import BadRequest
 from bson.objectid import ObjectId
 from datetime import datetime
-
-from modules.shop.helper.strings import emoji
-from modules.shop.helper.keyboards import back_btn, sizes_list
 from helper_funcs.misc import get_obj
 from modules.shop.helper.helper import send_media_arr
 from database import products_table, categories_table
-from modules.shop.components.brand import Brand
 
 
 class Product(object):
@@ -23,21 +19,12 @@ class Product(object):
         self.description = product.get("description")
         self.name = product.get("name")
         self.discount_price = product.get("discount_price")
-        self.sizes = product.get("sizes", list())
+        # self.sizes = product.get("sizes", list())
         self.order_ids = product.get("order_ids", list())
         self.images = product.get("images", list())
         self.in_trash = product.get("in_trash")
         self.category_id = product.get("category_id")
-        self.brand_id = product.get("brand_id")
-
-    @property
-    def brand_id(self):
-        return self._brand_id
-
-    @brand_id.setter
-    def brand_id(self, _id):
-        self._brand_id = _id
-        self.brand = Brand(self.context, self.brand_id)
+        # self.brand_id = product.get("brand_id")
 
     @property
     def category_id(self):
@@ -52,24 +39,23 @@ class Product(object):
     @property
     def template(self):
         return self.context.bot.lang_dict["shop_admin_product_template"].format(
-            self.article, True if not self.sold else False,
-            self.brand.name, self.category["name"], self.price,
-            self.sizes_text)
+            self.article, True if not self.sold else False, self.category["name"], self.price,
+            )
 
     def full_template(self, long_description=None):
         description = self.context.bot.lang_dict["shop_admin_description_below"] \
             if long_description else self.description
         return self.context.bot.lang_dict["shop_admin_full_product_template"].format(
             self.article, True if not self.sold else False,
-            self.name, self.brand.name, self.category["name"],
+            self.name, self.category["name"],
             description, self.price, self.discount_price,
-            self.sizes_text)
+            )
 
-    @property
-    def sizes_text(self):
-        return "\n".join([f"{i['size']} - {i['quantity']}"
-                          for i in self.sizes]) \
-            if self.sizes else "💢 *Товар Продан*"
+    # @property
+    # def sizes_text(self):
+    #     return "\n".join([f"{i['size']} - {i['quantity']}"
+    #                       for i in self.sizes]) \
+    #         if self.sizes else "💢 *Товар Продан*"
 
     # Admin Reply Markup For Product In Products List
     @property
@@ -174,46 +160,13 @@ class Product(object):
                                          reply_markup=kb,
                                          parse_mode=ParseMode.MARKDOWN))
 
-    def send_sizes_menu(self, update, context):
-        self.send_full_template(update, context, context.bot.lang_dict["shop_admin_sizes_menu_title"])
-        for item in self.sizes:
-            kb = InlineKeyboardMarkup([
-                [InlineKeyboardButton(emoji["x"],
-                                      callback_data=f"remove_size/"
-                                                    f"{item['size']}"),
-                 InlineKeyboardButton(context.bot.lang_dict["shop_admin_edit_btn"],
-                                      callback_data=f"change_size_quantity/"
-                                                    f"{item['size']}")]
-            ])
-            context.user_data["to_delete"].append(
-                context.bot.send_message(
-                    chat_id=update.effective_chat.id,
-                    text=context.bot.lang_dict["shop_admin_product_size_temp"].format(
-                        item["size"], item["quantity"]),
-                    reply_markup=kb,
-                    parse_mode=ParseMode.MARKDOWN))
-        kb = [[]]
-        if len(self.sizes) < len(sizes_list):
-            kb[0].append(InlineKeyboardButton(context.bot.lang_dict["shop_admin_add_size_btn"],
-                                              callback_data="add_size"))
-        kb[0].append(back_btn("back_to_edit", context))
-        context.user_data["to_delete"].append(
-            context.bot.send_message(chat_id=update.effective_chat.id,
-                                     text="Nice bro 😎",
-                                     reply_markup=InlineKeyboardMarkup(kb)))
 
     def add_keyboard(self, order):
         # remove items that already exist in the order
-        sizes = [size for size in self.sizes
-                 if not any(order_item["size"] == size["size"]
-                            and order_item["product"]["article"] == self.article
-                            for order_item in order.items)]
+
         return InlineKeyboardMarkup([
-            [InlineKeyboardButton(text=item["size"],
-                                  callback_data=f"finish_add_to_order/"
-                                                f"{self.article}/"
-                                                f"{item['size']}")
-             for item in sizes]
+            [InlineKeyboardButton(text="TODO",
+                                  callback_data="TODO")]
         ])
 
     def update(self, json=None):
@@ -228,42 +181,22 @@ class Product(object):
                      "discount_price": self.discount_price,
                      "description": self.description,
                      "name": self.name,
-                     "category_id": self.category_id,
-                     "brand_id": self.brand_id,
+                     # "category_id": self.category_id,
+                     # "brand_id": self.brand_id,
                      "images": self.images,
-                     "sizes": self.sizes,
+                     # "sizes": self.sizes,
                      "sold": self.sold,
                      "in_trash": self.in_trash,
                      "order_ids": self.order_ids}})
         self.__init__(self._id)
         # self.reset_sold_status()
 
-    def add_sizes(self, sizes):
-        for size_dict in sizes:
-            # $addToSet
-            products_table.update_one({"_id": self._id},
-                                      {"$push": {"sizes": size_dict}})
-        self.__init__(self._id)
-        # self.reset_sold_status()
-
-    def remove_size(self, size_name):
-        products_table.update_one({"_id": self._id},
-                                  {"$pull": {"sizes": {"size": size_name}}})
-        self.__init__(self._id)
-        # self.reset_sold_status()
-
-    def edit_size(self, size_dict):
-        next(size for size in self.sizes
-             if size["size"] == size_dict["size"]
-             )["quantity"] = size_dict["quantity"]
-        self.update()
 
     # Only For cloth shop method - for refresh "sold" field after product edit
-    def reset_sold_status(self):
+    def reset_sold_status(self):   # TODO modify
         products_table.update_one(
             {"_id": self._id},
-            {"$set": {"sold": not any(size for size in self.sizes
-                                     if size["quantity"] > 0)}})
+            {"$set": {"sold": 0}})
         self.__init__(self._id)
 
     def create(self):
@@ -272,11 +205,9 @@ class Product(object):
             "price": self.price,
             "discount_price": 0,
             "description": self.description,
-            "name": f"{self.brand.name} {self.category['name']}",
+            "name": self.description,  # TODO fix this
             "category_id": self.category_id,
-            "brand_id": self.brand_id,
             "images": self.images,
-            "sizes": self.sizes,
             "sold": False,
             "in_trash": False,
             "on_sale": True,

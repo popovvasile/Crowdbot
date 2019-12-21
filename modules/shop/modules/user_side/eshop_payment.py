@@ -7,7 +7,6 @@ import logging
 import datetime
 # Enable logging
 from database import purchases_table, products_table, chatbots_table
-from helper_funcs.helper import get_help
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)

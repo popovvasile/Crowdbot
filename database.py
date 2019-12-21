@@ -21,7 +21,6 @@ categories_table = db["categories"]
 user_categories_table = db["user_categories"]
 orders_quantity_table = db["orders_quantity"]
 shop_categories_table = db["shop_categories"]
-brand_table = db["brand_table"]
 DROPBOX_TOKEN = "xPAGp5mkaqgAAAAAAAABwK7yiygvq9ITgQj7j4KlBU8SYQ3WEmHCQnUxCIZUD-mR"
 
 # in bot_father.db
@@ -32,6 +31,4 @@ users_messages_to_admin_table = db["users_messages_to_admin_bot"]
 # bot_father_users_table = db['bot_father_users']
 
 # Api Shop To Mongo Shop
-brands_table = db["brands_table"]
-sizes_table = db["sizes_table"]
 orders_table = db["orders"]

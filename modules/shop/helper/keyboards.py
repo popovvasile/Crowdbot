@@ -1,67 +1,38 @@
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 
-from modules.shop.helper.strings import strings, emoji
+from database import chatbots_table
 
 
 def start_keyboard(orders_quantity, context):
+    chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
+
     orders_btn_text = (
-        context.bot.lang_dict["shop_admin_orders_btn"] +
-        (f' {orders_quantity["new_orders_quantity"]}'
-         if orders_quantity["new_orders_quantity"] != 0 else ""))
+            context.bot.lang_dict["shop_admin_orders_btn"] +
+            (f' {orders_quantity["new_orders_quantity"]}'
+             if orders_quantity["new_orders_quantity"] != 0 else ""))
 
-
-
-    return InlineKeyboardMarkup([
-        [InlineKeyboardButton(context.bot.lang_dict["shop_admin_add_product_btn"],
-                              callback_data="add_product")],
-        [InlineKeyboardButton(orders_btn_text,
-                              callback_data="orders")],
-        # [InlineKeyboardButton(context.bot.lang_dict["shop_admin_add_brand_btn"],
-        # callback_data="add_brand"),
-        #  InlineKeyboardButton(context.bot.lang_dict["shop_admin_add_category_btn"],
-        #  callback_data="add_category")],
-        [InlineKeyboardButton(context.bot.lang_dict["shop_admin_products_btn"],
-                              callback_data="products")],
-        # InlineKeyboardButton(context.bot.lang_dict["shop_admin_brands_btn"],
-        #                      callback_data="brands")],
-        # [InlineKeyboardButton(context.bot.lang_dict["shop_admin_manage_admins_btn"],
-        #                       callback_data="manage_admins")],
-        [InlineKeyboardButton(context.bot.lang_dict["shop_admin_trash_btn"],
-                              callback_data="trash")],
-        [InlineKeyboardButton(text="Back", callback_data="help_module(shop)")]],
-    )
-
-
-sizes_list = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
-
-
-def sizes_ls(to_remove: list = None):
-    return [i for i in sizes_list if i not in to_remove] \
-        if to_remove else sizes_list
-
-
-# Sizes Checkboxes
-def sizes_checkboxes(selected_sizes, context, to_remove=None,
-                     back_data="back_to_main_menu",
-                     continue_data="set_price"):
-    return InlineKeyboardMarkup(
-        [[InlineKeyboardButton(f"{emoji['white_check_mark']} {i}",
-                               callback_data=i)]
-         if i in selected_sizes else
-         [InlineKeyboardButton(f"{emoji['black_square_button']} {i}",
-                               callback_data=i)]
-         for i in sizes_ls(to_remove)] +
-        ([[back_btn(back_data, context)]]
-         if len(selected_sizes) == 0 else
-         [[InlineKeyboardButton(context.bot.lang_dict["shop_admin_continue_btn"],
-                                callback_data=continue_data)],
-          [back_btn(back_data, context)]]))
-
-
-def show_sizes(context):
-    return "\n".join(
-        [f"{i['size']} - {i['quantity']}"
-         for i in context.user_data["sizes"]])
+    if chatbot.get("shop_enabled") is True:
+        keyboard = [
+            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_add_product_btn"],
+                                  callback_data="add_product")],
+            [InlineKeyboardButton(orders_btn_text,
+                                  callback_data="orders")],
+            # [InlineKeyboardButton(context.bot.lang_dict["shop_admin_add_category_btn"],
+            #                       callback_data="add_category")],
+            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_products_btn"],
+                                  callback_data="products")],
+            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_trash_btn"],
+                                  callback_data="trash")],
+            [InlineKeyboardButton(text=context.bot.lang_dict["configure_button"],
+                                  callback_data="shop_config")],
+            [InlineKeyboardButton(text="Back", callback_data="help_module(shop)")]]
+    elif "shop" in chatbot:
+        keyboard = [InlineKeyboardButton(text=context.bot.lang_dict["allow_shop_button"],
+                                         callback_data="change_shop_config")]
+    else:
+        keyboard = [InlineKeyboardButton(text=context.bot.lang_dict["allow_shop_button"],
+                                         callback_data='allow_shop')]
+    return InlineKeyboardMarkup(keyboard)
 
 
 def create_keyboard(buttons, extra_buttons):
@@ -123,10 +94,10 @@ def keyboards(context):
              back_btn("back_to_orders_btn", context=context)]
         ]),
         confirm_to_trash_product=InlineKeyboardMarkup([
-                [InlineKeyboardButton(context.bot.lang_dict["shop_admin_to_trash_yes"],
-                                      callback_data="finish_to_trash"),
-                 back_btn("back_to_products_btn", context=context)]
-            ]),
+            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_to_trash_yes"],
+                                  callback_data="finish_to_trash"),
+             back_btn("back_to_products_btn", context=context)]
+        ]),
         confirm_cancel=InlineKeyboardMarkup([
             [InlineKeyboardButton(context.bot.lang_dict["shop_admin_cancel_yes"],
                                   callback_data="finish_cancel"),
@@ -158,15 +129,6 @@ def keyboards(context):
             [back_btn("back_to_products_btn", context=context)]
             # [InlineKeyboardButton(strings[""])]
         ]),
-        edit_brand=InlineKeyboardMarkup([
-            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_set_price_btn"],
-                                  callback_data="change_brand_price")],
-            [back_btn("back_to_brands_btn", context=context)]
-        ]),
-        confirm_adding_sizes=InlineKeyboardMarkup([
-            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_add_size_btn"],
-                                  callback_data="finish_add_sizes")],
-            [back_btn("back_to_products", context=context)]
-        ])
+
     )
     return keyboards

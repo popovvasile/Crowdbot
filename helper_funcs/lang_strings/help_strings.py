@@ -7,16 +7,14 @@ from database import chatbots_table, users_messages_to_admin_table
 def help_strings(context):
     help_dict = OrderedDict()
     string_d_str = context.bot.lang_dict
-    payment_token = chatbots_table.find_one({"bot_id": context.bot.id})
     admins_keyboard = [
-        InlineKeyboardButton(context.bot.lang_dict["shop"],
-                             callback_data="shop_menu"),
+
         InlineKeyboardButton(context.bot.lang_dict["donations"],
                              callback_data="donations_menu"),
     ]
-    if "shop" in payment_token:
-        admins_keyboard += [InlineKeyboardButton(text=context.bot.lang_dict["shop"],
-                                                 callback_data="shop_start")]
+    admins_keyboard += [InlineKeyboardButton(text=context.bot.lang_dict["shop"],
+                                             callback_data="shop_start")]
+
     # if "donate" in payment_token:
     #     admins_keyboard += [InlineKeyboardButton(text=context.bot.lang_dict["donations"],
     #                                              callback_data="donation_menu")]
@@ -34,6 +32,11 @@ def help_strings(context):
         mod_name=string_d_str["add_product_button"],
         admin_keyboard=admins_keyboard,
         admin_help=string_d_str["add_menu_buttons_help"],
+        visitor_help=string_d_str["add_product_button"],
+        visitor_keyboard=[InlineKeyboardButton(text="Магазин",
+                                               callback_data="open_shop"),
+                          InlineKeyboardButton(text="Мои покупки",
+                                               callback_data="my_orders")],
     )
     help_dict["channels"] = dict(
         mod_name='Channels',
@@ -123,9 +126,11 @@ def helpable_dict(bot):
         ADMIN_HELPABLE=admin_eng,
         ADMIN_USER_MODE={"💸 Donate ": "donation_payment",
                          "✉️ Message": "messages",
-                         "Admin view": "user_mode"},
+                         "Admin view": "user_mode",
+                         "Shop": "shop"},
         VISITOR_HELPABLE={"💸 Donate ": "donation_payment",
-                          "✉️ Message": "messages"},
+                          "✉️ Message": "messages",
+                          "💰 Shop": "shop"},
 
     ),
         "RUS": dict(
@@ -134,10 +139,11 @@ def helpable_dict(bot):
             ADMIN_USER_MODE={
                 "Режим админа": "user_mode",
                 "💸 Задонатить": "donation_payment",
-                "✉️ Сообщения": "messages"},
+                "✉️ Сообщения": "messages",
+                "Магазин": "shop"},
             VISITOR_HELPABLE={"💸💸 Задонатить": "donation_payment",
-                              "✉️ Сообщения": "messages"},
-
+                              "✉️ Сообщения": "messages",
+                              "Магазин": "shop_user_menu"},
         ),
     }
     # "channels", "donation_enable", "donation_payment", "donations_send_promotion",

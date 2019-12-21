@@ -10,7 +10,7 @@ Admins: [send message] [send urgent message]
 Users: [send message] [ask for donation] [send survey]
 
 # TODO test payments and implements purchases payments statistics exactly as in donations + full list in csv
-
+# TODO sending of donation buttons in groups and channels, as well as surveys/polls- make it inline
 
 # TODO user interface for shop
 # TODO products appear not as buttons, but as messages with pics and description (add pagination)

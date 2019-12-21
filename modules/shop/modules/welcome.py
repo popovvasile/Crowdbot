@@ -1,8 +1,7 @@
 import logging
 
 from telegram import Update
-from telegram.ext import (CommandHandler, ConversationHandler,
-                          CallbackQueryHandler, CallbackContext)
+from telegram.ext import (ConversationHandler, CallbackQueryHandler, CallbackContext)
 
 from modules.shop.helper.helper import clear_user_data
 from modules.shop.helper.keyboards import start_keyboard
@@ -48,7 +47,6 @@ class Welcome(object):
 START_SHOP_HANDLER = CallbackQueryHandler(pattern="shop_start",
                                           callback=Welcome.start)
 
-START_COMMAND = CommandHandler("start", callback=Welcome.start)
 
 BACK_TO_MAIN_MENU_HANDLER = CallbackQueryHandler(Welcome.back_to_main_menu,
                                                  pattern=r"back_to_main_menu")
