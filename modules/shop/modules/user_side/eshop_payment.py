@@ -23,7 +23,7 @@ class PurchaseBot(object):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                    message_id=update.callback_query.message.message_id, )
         purchase_request = products_table.find_one({"bot_id": context.bot.id,
-                                                    "title_lower": button_callback_data.replace(
+                                                    "product_id": button_callback_data.replace(
                                                         "pay_product_", "")})
 
         provider_token = chatbots_table.find_one({"bot_id": context.bot.id})["donate"][
@@ -82,7 +82,7 @@ class PurchaseBot(object):
 
 
 PURCHASE_HANDLER = CallbackQueryHandler(callback=PurchaseBot().start_purchase,
-                                        pattern=r'pay_product')
+                                        pattern=r'buy')
 
 HANDLE_PRECHECKOUT = PreCheckoutQueryHandler(PurchaseBot().precheckout_callback)
 
