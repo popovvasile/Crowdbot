@@ -31,7 +31,6 @@ strings = dict(
     products_btn="🗳 Товары",
     trash_btn="🗑 Корзина",
     manage_admins_btn=f"{emoji['gear']} Управлять админам",
-    size_quantity="\n\n _Выбери количество_ *{}* _размера_",
     # ADDING PRODUCT
     adding_product_start="Отправьте изображение товара",
     send_more_photo="Отправь ещe изображение или продолжай"
@@ -39,7 +38,6 @@ strings = dict(
     continue_btn=f"Продолжить {emoji['arrow_right']}",
     set_brand="Выберите бренд товара",
     set_category="Выберете категерию товара",
-    set_sizes="Укажите размеры товара",
     set_price=f"{emoji['money_with_wings']} *Укажите цену товара*",
     price_is_not_int="Цена должна быть целым числом."
                      "\nПришлите цену товара",
@@ -163,11 +161,6 @@ strings = dict(
     description_below=f"Описание ниже {emoji['arrow_down']}",
     set_discount_price=f"{emoji['gift_heart']} "
                        f"*Укажите скидочную цену для товара*",
-    sizes_menu_title="\n*Здесь вы можете управлять размерами*",
-    product_size_temp="*Размер:* `{}` | *Количество*: `{}`",
-    sizes_menu_btn=f"{emoji['ballot_box']} Размеры",
-    add_size_btn=f"{emoji['plus']} Добавить размер",
-    set_new_sizes="\n*Укажите новые размеры*",
     # BRANDS
     brands_title="*Список брендов*"
                  "\n_Количество брендов:_ `{}`",
@@ -196,9 +189,7 @@ strings = dict(
     order_restored_blink=f"{emoji['recycle']} Заказ восстановлён",
     product_restored_blink=f"{emoji['white_check_mark']} "
                            f"Товар снова в продаже",
-    size_removed_blink="Размер удалён",
-    sizes_added_blink=f"{emoji['white_check_mark']} "
-                      f"Размеры успешно добавлены",
+
     # description_changed_blink=f"{emoji['white_check_mark']} "
     #                            "Описание успешно изменено",
     # EXCEPTIONS

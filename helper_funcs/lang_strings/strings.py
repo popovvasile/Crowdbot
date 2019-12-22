@@ -1022,7 +1022,6 @@ https://telegra.ph/Gajd-Podklyuchit-donaty-07-03
     shop_admin_products_btn="🗳 Товары",
     shop_admin_trash_btn="🗑 Корзина",
     shop_admin_manage_admins_btn=f"{emoji['gear']} Управлять админам",
-    shop_admin_size_quantity="\n\n _Выбери количество_ *{}* _размера_",
     # ADDING PRODUCT
     shop_admin_adding_product_start="Отправьте изображение товара",
     shop_admin_send_more_photo="Отправь ещe изображение или продолжай"
@@ -1030,7 +1029,6 @@ https://telegra.ph/Gajd-Podklyuchit-donaty-07-03
     shop_admin_continue_btn=f"Продолжить {emoji['arrow_right']}",
     shop_admin_set_brand="Выберите бренд товара",
     shop_admin_set_category="Выберете категерию товара",
-    shop_admin_set_sizes="Укажите размеры товара",
     shop_admin_set_price=f"{emoji['money_with_wings']} *Укажите цену товара*",
     shop_admin_price_is_not_int="Цена должна быть целым числом."
                                 "\nПришлите цену товара",
@@ -1154,8 +1152,6 @@ https://telegra.ph/Gajd-Podklyuchit-donaty-07-03
     shop_admin_description_below=f"Описание ниже {emoji['arrow_down']}",
     shop_admin_set_discount_price=f"{emoji['gift_heart']} "
     f"*Укажите скидочную цену для товара*",
-    shop_admin_sizes_menu_title="\n*Здесь вы можете управлять размерами*",
-    shop_admin_product_size_temp="*Размер:* `{}` | *Количество*: `{}`",
     shop_admin_sizes_menu_btn=f"{emoji['ballot_box']} Размеры",
     shop_admin_add_size_btn=f"{emoji['plus']} Добавить размер",
     shop_admin_set_new_sizes="\n*Укажите новые размеры*",

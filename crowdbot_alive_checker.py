@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-
-import cProfile
-import os
 from multiprocessing import Process
 from pymongo import MongoClient
 import time
@@ -13,7 +10,7 @@ crowdbot_db = client['crowdbot_chatbots']
 crowdbot_bots_table = crowdbot_db["crowdbot_chatbots"]
 
 
-def multiple_bot_daemon():
+def multiple_bot_daemon():  # todo if token wrong- don't start it and notify
     my_process = {}
     print(crowdbot_bots_table.find().count())
     while True:

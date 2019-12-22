@@ -160,7 +160,6 @@ class Product(object):
                                          reply_markup=kb,
                                          parse_mode=ParseMode.MARKDOWN))
 
-
     def add_keyboard(self, order):
         # remove items that already exist in the order
 
@@ -170,25 +169,36 @@ class Product(object):
         ])
 
     def update(self, json=None):
+        print(json)
         if json:
             products_table.update_one({"_id": self._id}, {"$set": json})
+            product = products_table.find_one({"_id": self._id})
+            self._id = product.get("_id")
+            self.article = product.get("article")
+            self.sold = product.get("sold")
+            self.price = product.get("price")
+            self.description = product.get("description")
+            self.name = product.get("name")
+            self.discount_price = product.get("discount_price")
+            # self.sizes = product.get("sizes", list())
+            self.order_ids = product.get("order_ids", list())
+            self.images = product.get("images", list())
+            self.in_trash = product.get("in_trash")
+            self.category_id = product.get("category_id")
         else:
             products_table.update_one(
                 {"_id": self._id},
                 {"$set":
                     {"price": self.price,
-                     # "article": 1,
                      "discount_price": self.discount_price,
                      "description": self.description,
                      "name": self.name,
-                     # "category_id": self.category_id,
-                     # "brand_id": self.brand_id,
+                     "category_id": self.category_id,
                      "images": self.images,
-                     # "sizes": self.sizes,
                      "sold": self.sold,
                      "in_trash": self.in_trash,
                      "order_ids": self.order_ids}})
-        self.__init__(self._id)
+        # self.__init__(self._id)  # todo
         # self.reset_sold_status()
 
 

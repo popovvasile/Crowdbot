@@ -106,8 +106,7 @@ ADD_PRODUCT_HANDLER = ConversationHandler(
                            AddingProductHandler().received_image),
             CallbackQueryHandler(AddingProductHandler().set_category,
                                  pattern="continue")],
-        SET_CATEGORY: [  # CallbackQueryHandler(AddingProductHandler().set_size,
-            #                      pattern="^[0-9]+$")
+        SET_CATEGORY: [
 MessageHandler(Filters.text, AddingProductHandler().set_count),
             CallbackQueryHandler(AddingProductHandler().set_count,
                                  pattern=r"choose_category")],

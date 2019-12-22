@@ -124,8 +124,6 @@ def keyboards(context):
                                   callback_data="change_description"),
              InlineKeyboardButton(context.bot.lang_dict["shop_admin_set_name_btn"],
                                   callback_data="change_name")],
-            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_sizes_menu_btn"],
-                                  callback_data="sizes_menu")],
             [back_btn("back_to_products_btn", context=context)]
             # [InlineKeyboardButton(strings[""])]
         ]),
