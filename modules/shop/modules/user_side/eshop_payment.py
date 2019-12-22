@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from bson import ObjectId
 from telegram import LabeledPrice, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import (MessageHandler, Filters, PreCheckoutQueryHandler,
                           ConversationHandler, CallbackQueryHandler)
@@ -17,27 +18,26 @@ logger = logging.getLogger(__name__)
 class PurchaseBot(object):
 
     def start_purchase(self, update, context):
-        query = update.callback_query
-        button_callback_data = query.data
+        button_callback_data = update.callback_query.data
 
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                    message_id=update.callback_query.message.message_id, )
-        purchase_request = products_table.find_one({"bot_id": context.bot.id,
-                                                    "product_id": button_callback_data.replace(
-                                                        "pay_product_", "")})
+        product_id = ObjectId(button_callback_data.replace(
+                                                        "buy/", ""))
+        purchase_request = products_table.find_one({"_id": product_id})
 
-        provider_token = chatbots_table.find_one({"bot_id": context.bot.id})["donate"][
-            "payment_token"]  # TODO when creating products, double check if payment token has been added
+        shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
+             # TODO when creating products, double check if payment token has been added
         context.bot.send_message(update.callback_query.message.chat.id, "Pay:{} {}".format(
-            str(purchase_request["price"]), str(purchase_request["currency"])))
-        title = purchase_request['title']
-        description = purchase_request['title']
+            str(purchase_request["price"]), str(shop["currency"])))
+        title = purchase_request['name']
+        description = purchase_request['description']
         payload = "Purchase"
         start_parameter = "shop-payment"  # TODO change in production
-        currency = purchase_request['currency']
-        prices = [LabeledPrice(title, purchase_request["price"])]
+        currency = shop['currency']
+        prices = [LabeledPrice(title, int(purchase_request["price"]*100))]
         context.bot.sendInvoice(update.callback_query.message.chat_id, title, description, payload,
-                                provider_token, start_parameter, currency, prices,
+                                shop["payment_token"], start_parameter, currency, prices,
                                 need_name=True, need_phone_number=True,
                                 need_email=True, need_shipping_address=purchase_request["shipping"], is_flexible=True
                                 )
@@ -67,6 +67,7 @@ class PurchaseBot(object):
         # do something after successful receive of purchase?
         buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                          callback_data="help_back")]]
+        # TODO add a back function with deleting of old message
         markup = InlineKeyboardMarkup(buttons)
         context.user_data = dict()
         context.user_data["status"] = "Paid"

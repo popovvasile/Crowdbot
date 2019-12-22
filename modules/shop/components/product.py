@@ -218,6 +218,8 @@ class Product(object):
             "name": self.description,  # TODO fix this
             "category_id": self.category_id,
             "images": self.images,
+            "shipping": True,
+            # TODO ask if with shipping, ask currency and if online payment-make shop availble wihtout toekn
             "sold": False,
             "in_trash": False,
             "on_sale": True,
