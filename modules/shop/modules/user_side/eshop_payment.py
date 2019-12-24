@@ -29,12 +29,12 @@ class PurchaseBot(object):
         shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
              # TODO when creating products, double check if payment token has been added
         context.bot.send_message(update.callback_query.message.chat.id, "Pay:{} {}".format(
-            str(purchase_request["price"]), str(shop["currency"])))
+            str(purchase_request["price"]), str(purchase_request["currency"])))
         title = purchase_request['name']
         description = purchase_request['description']
         payload = "Purchase"
         start_parameter = "shop-payment"  # TODO change in production
-        currency = shop['currency']
+        currency = purchase_request['currency']
         prices = [LabeledPrice(title, int(purchase_request["price"]*100))]
         context.bot.sendInvoice(update.callback_query.message.chat_id, title, description, payload,
                                 shop["payment_token"], start_parameter, currency, prices,

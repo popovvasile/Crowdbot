@@ -1,8 +1,7 @@
-# TODO adding categories option
-# TODO sending of donation buttons in groups and channels, as well as surveys/polls- make it inline
 # TODO user interface for shop:
-1)Products should have and option: online payment, offline or both - adding_products
-2)Interface for users changes according to this
+    1)Products should have and option: online payment, offline or both - adding_products
+    2)Interface for users changes according to this
 # TODO add more content to products
+# TODO sending of donation buttons in groups and channels, as well as surveys/polls- make it inline
 # TODO make paid content
 # TODO tickets on events with payment, location and hour

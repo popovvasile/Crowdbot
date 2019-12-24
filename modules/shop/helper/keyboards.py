@@ -15,6 +15,8 @@ def start_keyboard(orders_quantity, context):
         keyboard = [
             [InlineKeyboardButton(context.bot.lang_dict["shop_admin_add_product_btn"],
                                   callback_data="add_product")],
+            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_categories_btn"],
+                                  callback_data="categories")],
             [InlineKeyboardButton(orders_btn_text,
                                   callback_data="orders")],
             # [InlineKeyboardButton(context.bot.lang_dict["shop_admin_add_category_btn"],

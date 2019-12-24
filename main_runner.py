@@ -12,6 +12,8 @@ from modules.chanells.channels import MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER, 
     SEND_POST_HANDLER, CHANELLS_MENU
 from modules.chanells.channels_polls_surveys_donate import SEND_POLL_TO_CHANNEL_HANDLER, SEND_SURVEY_TO_CHANNEL_HANDLER, \
     SEND_DONATION_TO_CHANNEL_HANDLER
+from modules.shop.modules.categories import ADD_CATEGORY_HANDLER, CATEGORIES_HANDLER, EDIT_CATEGORIES_HANDLER, \
+    RENAME_CATEGORY_HANDLER, DELETE_CATEGORY_HANDLER
 from modules.shop.modules.eshop_enable_disable import CREATE_SHOP_HANDLER
 from modules.shop.modules.user_side.eshop_payment import PURCHASE_HANDLER
 from modules.groups.groups import MY_GROUPS_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER, \
@@ -55,8 +57,7 @@ from modules.shop.modules.welcome import START_SHOP_HANDLER, BACK_TO_MAIN_MENU_H
 from modules.shop.modules.orders import ORDERS_HANDLER
 from modules.shop.modules.products import PRODUCTS_HANDLER
 from modules.shop.modules.trash import (TRASH_START, ORDERS_TRASH,
-                                 PRODUCTS_TRASH)
-
+                                        PRODUCTS_TRASH)
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -106,10 +107,14 @@ def main(token, lang):
     dispatcher.add_handler(ORDERS_HANDLER)
     dispatcher.add_handler(PRODUCTS_HANDLER)
     dispatcher.add_handler(TRASH_START)
-    dispatcher.add_handler(BACK_TO_MAIN_MENU_HANDLER)
     dispatcher.add_handler(USERS_ORDERS_HANDLER)
     dispatcher.add_handler(USERS_PRODUCTS_HANDLER)
-
+    dispatcher.add_handler(ADD_CATEGORY_HANDLER)
+    dispatcher.add_handler(CATEGORIES_HANDLER)
+    dispatcher.add_handler(EDIT_CATEGORIES_HANDLER)
+    dispatcher.add_handler(RENAME_CATEGORY_HANDLER)
+    dispatcher.add_handler(RENAME_CATEGORY_HANDLER)
+    dispatcher.add_handler(DELETE_CATEGORY_HANDLER)
     # ADD_BUTTONS
     dispatcher.add_handler(BUTTONS_MENU)
     dispatcher.add_handler(CREATE_BUTTON_CHOOSE)
@@ -210,7 +215,7 @@ def main(token, lang):
 
     rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), get_help)
     dispatcher.add_handler(rex_help_handler)
-
+    dispatcher.add_handler(BACK_TO_MAIN_MENU_HANDLER)
     dispatcher.add_handler(help_callback_handler)
 
     # error_help_callback_handler = CallbackQueryHandler(get_help, pattern=r"error_back")

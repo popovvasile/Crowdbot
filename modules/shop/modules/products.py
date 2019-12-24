@@ -146,8 +146,6 @@ class ProductsHandler:
 
         return SET_QUANTITY
 
-
-
     def back_to_products(self, update: Update, context: CallbackContext):
         page = context.user_data.get("page")
         clear_user_data(context)
