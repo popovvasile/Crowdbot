@@ -114,11 +114,13 @@ class AdminHandler(object):
                     context.bot.lang_dict["no_admins_str"],
                     reply_markup=back_reply(context, "help_module(settings)")))
         else:
-            pagination = Pagination(context, per_page, all_admins)
-            for admin in pagination.page_content():
+            pagination = Pagination(all_admins, context.user_data["page"],
+                                    per_page)
+            for admin in pagination.content:
                 Admin(context, admin).send_template(update)
             pagination.send_keyboard(
-                update, [[back_button(context, "help_module(settings)")]])
+                update, context,
+                [[back_button(context, "help_module(settings)")]])
 
     def confirm_delete_admin(self, update, context):
         delete_messages(update, context, True)
