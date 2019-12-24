@@ -93,7 +93,7 @@ class CreateShopHandler(object):
 
         return "\n".join(facts).join(['\n', '\n'])
 
-    def start_create_shop(self, update, context):
+    def start_create_shop(self, update, context):  # TODO add the option to skip the token
         buttons = list()
         buttons.append(
             [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
@@ -104,16 +104,10 @@ class CreateShopHandler(object):
         chatbot = chatbots_table.find_one({"bot_id": context.bot.id}) or {}
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                    message_id=update.callback_query.message.message_id)
-        if "shop" in chatbot:
-            if "payment_token" in chatbot["shop"]:
-                context.bot.send_message(update.callback_query.message.chat.id,
-                                         context.bot.lang_dict["create_shop_str_2"], reply_markup=reply_markup)
-                return TYPING_TITLE
-            else:
-                context.bot.send_message(update.callback_query.message.chat.id,
-                                         context.bot.lang_dict["create_shop_str_3"],
-                                         reply_markup=reply_markup)
-                return TYPING_TOKEN
+        if "payment_token" in chatbot.get("shop", {}):
+            context.bot.send_message(update.callback_query.message.chat.id,
+                                     context.bot.lang_dict["create_shop_str_2"], reply_markup=reply_markup)
+            return TYPING_TITLE
         else:
             context.bot.send_message(update.callback_query.message.chat.id,
                                      context.bot.lang_dict["create_shop_str_3"],

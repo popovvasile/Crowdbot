@@ -24,6 +24,8 @@ class Product(object):
         self.images = product.get("images", list())
         self.in_trash = product.get("in_trash")
         self.category_id = product.get("category_id")
+        self.shipping = product.get("shipping")
+        self.online_payment = product.get("online_payment")
 
     @property
     def category_id(self):
@@ -175,6 +177,8 @@ class Product(object):
             self.images = product.get("images", list())
             self.in_trash = product.get("in_trash")
             self.category_id = product.get("category_id")
+            self.shipping = product.get("shipping")
+            self.online_payment = product.get("online_payment")
         else:
             products_table.update_one(
                 {"_id": self._id},
@@ -188,7 +192,10 @@ class Product(object):
                       "images": self.images,
                       "sold": self.sold,
                       "in_trash": self.in_trash,
-                      "order_ids": self.order_ids}
+                      "order_ids": self.order_ids,
+                      "online_payment": self.online_payment,
+                      "shipping": self.shipping
+                      }
                  })
 
     # Only For cloth shop method - for refresh "sold" field after product edit
@@ -209,8 +216,8 @@ class Product(object):
             "name": self.name,
             "category_id": self.category_id,
             "images": self.images,
-            "shipping": True,
-            # TODO ask if with shipping, ask currency and if online payment-make shop availble wihtout toekn
+            "shipping": self.shipping,
+            "online_payment": self.online_payment,
             "sold": False,
             "in_trash": False,
             "on_sale": True,

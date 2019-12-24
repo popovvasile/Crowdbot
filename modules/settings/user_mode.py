@@ -51,7 +51,7 @@ class UserMode(object):
             buttons)
 
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id,)
+                                   message_id=update.callback_query.message.message_id,)
         current_user_mode = user_mode_table.find_one({"bot_id": context.bot.id,
                                                       "user_id": update.effective_user.id})
         if current_user_mode:

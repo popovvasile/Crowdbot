@@ -29,11 +29,11 @@ def send_admin_help(bot, chat_id, text, keyboard=None):
 def send_visitor_help(bot, chat_id, text, keyboard=None):
     donation_request = chatbots_table.find_one({"bot_id": bot.id})
     if donation_request.get("donate") is not None and donation_request.get("donate") != {}:
-        buttons = [InlineKeyboardButton(bot.lang_dict["send_message_1"], callback_data="help_module(messages)"),
-                   InlineKeyboardButton(bot.lang_dict["pay_donation_mode_str"], callback_data='pay_donation'),]
+        buttons = [InlineKeyboardButton(bot.lang_dict["send_message_1"], callback_data="help_module(users)"),
+                   InlineKeyboardButton(bot.lang_dict["pay_donation_mode_str"], callback_data='pay_donation'), ]
 
     else:
-        buttons = [InlineKeyboardButton(bot.lang_dict["send_message_1"], callback_data="help_module(messages)")]
+        buttons = [InlineKeyboardButton(bot.lang_dict["send_message_1"], callback_data="help_module(users)")]
     product_list_of_dicts = products_table.find({
         "bot_id": bot.id})
     if product_list_of_dicts.count() != 0:
@@ -59,11 +59,11 @@ def send_visitor_help(bot, chat_id, text, keyboard=None):
 def send_admin_user_mode(bot, chat_id, text, keyboard=None):
     donation_request = chatbots_table.find_one({"bot_id": bot.id})
     if donation_request.get("donate") is not None and donation_request.get("donate") != {}:
-        buttons = [InlineKeyboardButton(bot.lang_dict["send_message_1"], callback_data="help_module(messages)"),
+        buttons = [InlineKeyboardButton(bot.lang_dict["send_message_1"], callback_data="help_module(users)"),
                    InlineKeyboardButton(bot.lang_dict["pay_donation_mode_str"], callback_data='pay_donation')]
 
     else:
-        buttons = [InlineKeyboardButton(bot.lang_dict["send_message_1"], callback_data="help_module(messages)")]
+        buttons = [InlineKeyboardButton(bot.lang_dict["send_message_1"], callback_data="help_module(users)")]
     buttons += [InlineKeyboardButton(button["button"],
                                      callback_data="button_{}".format(button["button"].replace(" ", "").lower()))
                 for button in custom_buttons_table.find({"bot_id": bot.id, "link_button": False})]
@@ -71,8 +71,6 @@ def send_admin_user_mode(bot, chat_id, text, keyboard=None):
                 for button in custom_buttons_table.find({"bot_id": bot.id, "link_button": True})]
     product_list_of_dicts = products_table.find({
         "bot_id": bot.id})
-    buttons = buttons + [InlineKeyboardButton(text=bot.lang_dict["shop"], callback_data="help_module(shop)")]
-    # TODO remove it later
 
     if product_list_of_dicts.count() != 0:
         buttons = buttons + [InlineKeyboardButton(text=bot.lang_dict["shop"], callback_data="help_module(shop)"),
@@ -192,6 +190,7 @@ def button_handler(update, context):
     context.bot.send_message(chat_id=update.callback_query.message.chat_id,
                              text=context.bot.lang_dict["back_button"], reply_markup=InlineKeyboardMarkup(buttons))
 
+
 #
 # def product_handler(update, context):
 #     context.user_data['to_delete'] = []
@@ -287,29 +286,32 @@ def help_button(update, context):
         welcome_message = "Hello"
     try:
         if mod_match:
+            print(query.data)
             module = mod_match.group(1)
-            if module == "donate":
-                chatbot_info = chatbots_table.find_one(
-                    {"bot_id": context.bot.id})
-                if "donate" in chatbot_info:
-                    if "description" in chatbot_info["donate"]:
-                        text = chatbot_info["donate"]["description"]
             current_user_mode = user_mode_table.find_one({"bot_id": context.bot.id,
                                                           "user_id": update.effective_user.id})
             if if_admin(update=update, context=context.bot):
                 if current_user_mode:
-                    if current_user_mode.get("user_mode") is True:
-                        text = help_strings(context)[module]["visitor_help"]  # TODO modify for languages
-                        commands_keyboard = help_strings(context)[module]["visitor_keyboard"]
+                    if current_user_mode.get("user_mode"):
+                        text = help_strings(context, update)[module]["visitor_help"]
+                        commands_keyboard = help_strings(context, update)[module]["visitor_keyboard"]
                     else:
-                        text = help_strings(context)[module]["admin_help"]
-                        commands_keyboard = help_strings(context)[module]["admin_keyboard"]
+                        text = help_strings(context, update)[module]["admin_help"]
+                        commands_keyboard = help_strings(context, update)[module]["admin_keyboard"]
                 else:
-                    text = help_strings(context)[module]["admin_help"]
-                    commands_keyboard = help_strings(context)[module]["admin_keyboard"]
+                    text = help_strings(context, update)[module]["admin_help"]
+                    commands_keyboard = help_strings(context, update)[module]["admin_keyboard"]
+            elif module == "donate":
+                    chatbot_info = chatbots_table.find_one(
+                        {"bot_id": context.bot.id})
+                    if "description" in chatbot_info.get("donate", {}):
+                        text = chatbot_info["donate"]["description"]
+                    else:
+                        text = help_strings(context, update)[module]["admin_help"]
+                    commands_keyboard = help_strings(context, update)[module]["admin_keyboard"]
             else:
-                text = help_strings(context)[module]["visitor_help"]
-                commands_keyboard = help_strings(context)[module]["visitor_keyboard"]
+                text = help_strings(context, update)[module]["visitor_help"]
+                commands_keyboard = help_strings(context, update)[module]["visitor_keyboard"]
 
             pairs = list(zip(commands_keyboard[::2], commands_keyboard[1::2]))
 
@@ -357,6 +359,10 @@ def help_button(update, context):
 
 
 def get_help(update, context):
+    try:
+        delete_messages(update, context)
+    except BadRequest:
+        pass
     if users_table.find_one({"user_id": update.effective_user.id, "bot_id": context.bot.id}).get("blocked", False):
         update.effective_message.reply_text("You've been blocked from this chatbot")
         return ConversationHandler.END

@@ -21,7 +21,7 @@ class SendMessageToDonators(object):
     def send_message(self, update, context):
         buttons = list()
         buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                             callback_data="help_module(messages)")])
+                                             callback_data="help_module(users)")])
         reply_markup = InlineKeyboardMarkup(buttons)
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id)
@@ -49,7 +49,7 @@ class SendMessageToDonators(object):
         context.user_data["user_category"] = update.message.text
         buttons = list()
         buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                             callback_data="help_module(messages)")])
+                                             callback_data="help_module(users)")])
         reply_markup = InlineKeyboardMarkup(buttons)
         context.bot.send_message(update.message.chat_id,
                          "Cool",
@@ -99,7 +99,7 @@ class SendMessageToDonators(object):
 
         final_reply_markup = InlineKeyboardMarkup(
             [[InlineKeyboardButton(text=context.bot.lang_dict["done_button"], callback_data="send_message_finish")],
-             [InlineKeyboardButton(text=context.bot.lang_dict["cancel_button"], callback_data="help_module(messages)")]]
+             [InlineKeyboardButton(text=context.bot.lang_dict["cancel_button"], callback_data="help_module(users)")]]
         )
         context.bot.send_message(update.message.chat_id,
                          context.bot.lang_dict["send_message_4"],
@@ -148,7 +148,7 @@ class SendMessageToDonators(object):
                            message_id=update.callback_query.message.message_id)
         buttons = list()
         buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                             callback_data="help_module(messages)")])
+                                             callback_data="help_module(users)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         context.bot.send_message(update.callback_query.message.chat_id,
@@ -165,7 +165,7 @@ class SendMessageToDonators(object):
                            message_id=update.callback_query.message.message_id)
         buttons = list()
         buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                             callback_data="help_module(messages)")])
+                                             callback_data="help_module(users)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         context.bot.send_message(update.callback_query.message.chat_id,

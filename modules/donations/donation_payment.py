@@ -27,22 +27,23 @@ class DonationBot(object):
     def start_donation(self, update, context):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                            message_id=update.callback_query.message.message_id, )
+        context.user_data['to_delete'] = []
         donation_request = chatbots_table.find_one({"bot_id": context.bot.id})
         current_user_mode = user_mode_table.find_one({"bot_id": context.bot.id,
                                                       "user_id": update.effective_user.id}) or {"user_mode": False}
         if donation_request.get("donate") is not None and donation_request.get("donate") != {}:
-            context.bot.send_message(update.callback_query.message.chat.id,
-                             donation_request["donate"]["description"])
-            context.bot.send_message(update.callback_query.message.chat.id,
-                             context.bot.lang_dict["pay_donation_str_1"])
-            context.bot.send_message(update.callback_query.message.chat.id,
+            context.user_data['to_delete'].append(context.bot.send_message(update.callback_query.message.chat.id,
+                             donation_request["donate"]["description"]))
+            context.user_data['to_delete'].append(context.bot.send_message(update.callback_query.message.chat.id,
+                             context.bot.lang_dict["pay_donation_str_1"]))
+            context.user_data['to_delete'].append(context.bot.send_message(update.callback_query.message.chat.id,
                              context.bot.lang_dict["pay_donation_str_2"].format(
-                                 donation_request["donate"]['currency']))
-            context.bot.send_message(update.callback_query.message.chat.id,
+                                 donation_request["donate"]['currency'])))
+            context.user_data['to_delete'].append(context.bot.send_message(update.callback_query.message.chat.id,
                              text=context.bot.lang_dict["back_text"],
                              reply_markup=InlineKeyboardMarkup(
                                  [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                                        callback_data="help_back")]]))
+                                                        callback_data="help_back")]])))
             return EXECUTE_DONATION
 
         else:

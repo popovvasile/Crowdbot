@@ -52,7 +52,7 @@ def messages_menu(update, context):
 #     def add_category(self, update, context):
 #         buttons = list()
 #         buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-#                                              callback_data="help_module(messages)")])
+#                                              callback_data="help_module(users)")])
 #         reply_markup = InlineKeyboardMarkup(
 #             buttons)
 #         bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -68,7 +68,7 @@ def messages_menu(update, context):
 #                                 upsert=True)
 #         buttons = list()
 #         buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-#                                              callback_data="help_module(messages)")])
+#                                              callback_data="help_module(users)")])
 #         reply_markup = InlineKeyboardMarkup(
 #             buttons)
 #         bot.send_message(update.message.chat_id,
@@ -81,7 +81,7 @@ def messages_menu(update, context):
 #
 #     def show_category(self, update, context):
 #         buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-#                                          callback_data="help_module(messages)"),
+#                                          callback_data="help_module(users)"),
 #                     InlineKeyboardButton(text=context.bot.lang_dict["add_message_category"],
 #                                          callback_data="add_message_category"),
 #                     ]]
@@ -111,7 +111,7 @@ def messages_menu(update, context):
 #         bot.delete_message(chat_id=update.callback_query.message.chat_id,
 #                            message_id=update.callback_query.message.message_id)
 #         buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-#                                          callback_data="help_module(messages)")]]
+#                                          callback_data="help_module(users)")]]
 #         reply_markup = InlineKeyboardMarkup(
 #             buttons)
 #         categories_table.delete_one({"category": update.callback_query.data.replace("delete_category_", "")})
@@ -537,7 +537,7 @@ class DeleteMessage(object):
     # def delete_message_double_check(self, update, context):  #TODO
     #     buttons = list()
     #     buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-    #                                          callback_data="help_module(messages)")])
+    #                                          callback_data="help_module(users)")])
     #     reply_markup = InlineKeyboardMarkup(
     #         buttons)
     #     bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -651,7 +651,7 @@ class SeeMessageToAdmin(object):
         else:
             markup = InlineKeyboardMarkup([
                 [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                      callback_data="help_module(messages)")]])
+                                      callback_data="help_module(users)")]])
             context.bot.send_message(update.callback_query.message.chat_id,
                                      context.bot.lang_dict["send_message_6"],
                                      reply_markup=markup)

@@ -35,11 +35,12 @@ class PurchaseBot(object):
         payload = "Purchase"
         start_parameter = "shop-payment"  # TODO change in production
         currency = purchase_request['currency']
-        prices = [LabeledPrice(title, int(purchase_request["price"]*100))]
+        prices = [LabeledPrice(title, int(float(purchase_request["price"]) * 100))]
         context.bot.sendInvoice(update.callback_query.message.chat_id, title, description, payload,
                                 shop["payment_token"], start_parameter, currency, prices,
                                 need_name=True, need_phone_number=True,
-                                need_email=True, need_shipping_address=purchase_request["shipping"], is_flexible=True
+                                need_email=True, need_shipping_address=purchase_request.get("shipping"),
+                                is_flexible=True
                                 )
         context.bot.send_message(update.callback_query.message.chat.id,
                                  text=context.bot.lang_dict["back_text"],

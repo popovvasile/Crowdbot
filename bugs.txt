@@ -1,5 +1,8 @@
 # TODO user interface for shop:
+    0)Use get_obj function everywhere
     1)Products should have and option: online payment, offline or both - adding_products
+        -1)Change the edit products menu- shipping, currency, online payment
+    1.2)Admin views orders
     2)Interface for users changes according to this
 # TODO add more content to products
 # TODO sending of donation buttons in groups and channels, as well as surveys/polls- make it inline

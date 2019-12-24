@@ -25,16 +25,18 @@ y_timestamp": "time.time:time",
         order = get_obj(orders_table, obj)
         self.context = context
         self._id = order.get("_id")
+        self.bot_id = context.bot.id
         self.status = order.get("status")
         self.timestamp = order.get("creation_timestamp", ".").split(".")[0]
         self.name = order.get("name")
         self.phone_number = order.get("phone_number")
         self.price = order.get("price")
         self.in_trash = order.get("in_trash")
-        self.items_json = order.get("items")
-        self.items = [OrderItem(order_item) for order_item in self.items_json]
-        self.all_items_exists = not any(item.item_exist is False
-                                        for item in self.items)
+        self.product_id = order.get("product_id")
+        # self.items_json = order.get("items")
+        # self.items = [OrderItem(order_item) for order_item in self.items_json]
+        # self.all_items_exists = not any(item.item_exist is False
+        #                                 for item in self.items)
 
     @property
     def template(self):
