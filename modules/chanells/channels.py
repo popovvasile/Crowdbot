@@ -94,7 +94,7 @@ def channel_menu(update, context):
                                             \
                    [[InlineKeyboardButton(context.bot.lang_dict["add_channel"], callback_data='add_channel')],
                     [InlineKeyboardButton(context.bot.lang_dict["back_button"],
-                                          callback_data="help_module(channels)")]]
+                                          callback_data="help_module(channels_groups)")]]
 
     no_channel_keyboard = InlineKeyboardMarkup(command_list)
     context.bot.send_message(update.callback_query.message.chat.id,
@@ -132,7 +132,7 @@ class Channels(object):
         no_channel_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(context.bot.lang_dict["add_button"],
                                                                           callback_data='add_channel')],
                                                     [InlineKeyboardButton(context.bot.lang_dict["back_button"],
-                                                                          callback_data="help_module(channels)")]])
+                                                                          callback_data="help_module(channels_groups)")]])
 
         # bot.delete_message(update.effective_chat.id, update.effective_message.message_id)
         delete_messages(update, context)
@@ -224,7 +224,7 @@ class Channels(object):
                                                         callback_data='remove_channel_{}'.format(
                                                             channel_username))],
                                   [InlineKeyboardButton(context.bot.lang_dict["back_button"],
-                                                        callback_data="help_module(channels)")]])
+                                                        callback_data="help_module(channels_groups)")]])
         context.bot.send_message(update.callback_query.message.chat_id, context.bot.lang_dict["channels_menu"],
                                  reply_markup=one_channel_keyboard)
         return ConversationHandler.END
@@ -242,7 +242,7 @@ class Channels(object):
                                          reply_markup=InlineKeyboardMarkup([
                                              [InlineKeyboardButton(
                                                  text=context.bot.lang_dict["back_button"],
-                                                 callback_data="help_module(channels)")]])))
+                                                 callback_data="help_module(channels_groups)")]])))
             return ConversationHandler.END
         else:
             return self.make_channels_layout(update, context, CHOOSE_TO_REMOVE,
@@ -274,7 +274,7 @@ class Channels(object):
                                                                         callback_data="send_survey_to_channel_{}"
                                                                         .format(channel_username))],
                                                   [InlineKeyboardButton(context.bot.lang_dict["back_button"],
-                                                                        callback_data="help_module(channels)")]])
+                                                                        callback_data="help_module(channels_groups)")]])
             delete_messages(update, context)
             context.user_data['to_delete'].append(
                 context.bot.send_message(update.message.chat_id,
@@ -370,7 +370,7 @@ class SendPost(object):
         delete_messages(update, context)
         buttons = list()
         buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                             callback_data="help_module(channels)")])
+                                             callback_data="help_module(channels_groups)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         context.user_data['to_delete'].append(
@@ -387,7 +387,7 @@ class SendPost(object):
                                    message_id=update.callback_query.message.message_id)
         buttons = list()
         buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                             callback_data="help_module(channels)")])
+                                             callback_data="help_module(channels_groups)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         context.bot.send_message(update.callback_query.message.chat_id,

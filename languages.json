@@ -319,6 +319,7 @@
         "send_poll_to_group": "Poll to group",
         "send_post": "What do you want to post on your group({})?\nWe will forward your message to group.",
         "send_post_to_channel": "Write a post",
+        "send_post_channel": "What do you want to post on your channel({})?\nWe will forward your message to channel.",
         "send_post_to_group": "Write a post",
         "send_survey_button": "📤 Send survey",
         "send_survey_to_channel": "Survey to channel",

@@ -7,7 +7,6 @@ from telegram.ext import (MessageHandler, Filters,
 from database import chatbots_table, users_table
 from helper_funcs.helper import get_help
 
-
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
@@ -24,12 +23,12 @@ class SendDonationToUsers(object):
             buttons)
 
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
         chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
         if chatbot.get("donate") != {} and "donate" in chatbot:
             context.bot.send_message(update.callback_query.message.chat.id,
-                             context.bot.lang_dict["send_donation_request_1"],
-                             reply_markup=reply_markup)
+                                     context.bot.lang_dict["send_donation_request_1"],
+                                     reply_markup=reply_markup)
             return DONATION_TO_USERS
         else:
             admin_keyboard = [InlineKeyboardButton(text=context.bot.lang_dict["allow_donations_button"],
@@ -37,8 +36,8 @@ class SendDonationToUsers(object):
                               InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                    callback_data="help_module(shop)")]
             context.bot.send_message(update.callback_query.message.chat.id,
-                             context.bot.lang_dict["allow_donation_text"],
-                             reply_markup=InlineKeyboardMarkup([admin_keyboard]))
+                                     context.bot.lang_dict["allow_donation_text"],
+                                     reply_markup=InlineKeyboardMarkup([admin_keyboard]))
             return ConversationHandler.END
 
     def received_donation(self, update, context):
@@ -79,22 +78,22 @@ class SendDonationToUsers(object):
              ]
         )
         context.bot.send_message(update.message.chat_id,
-                         context.bot.lang_dict["send_donation_request_2"],
-                         reply_markup=final_reply_markup)
+                                 context.bot.lang_dict["send_donation_request_2"],
+                                 reply_markup=final_reply_markup)
 
         return DONATION_TO_USERS
 
     def send_donation_finish(self, update, context):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
         buttons = list()
         buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                             callback_data="help_module(shop)"),])
+                                             callback_data="help_module(shop)"), ])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         context.bot.send_message(update.callback_query.message.chat_id,
-                         context.bot.lang_dict["send_donation_request_3"],
-                         reply_markup=final_reply_markup)
+                                 context.bot.lang_dict["send_donation_request_3"],
+                                 reply_markup=final_reply_markup)
         if "user_category" not in context.user_data:
             chats = users_table.find({"bot_id": context.bot.id})
             chats2 = users_table.find({"bot_id": context.bot.id})
@@ -111,7 +110,7 @@ class SendDonationToUsers(object):
                     for content_dict in context.user_data["content"]:
                         if "text" in content_dict:
                             context.bot.send_message(chat["chat_id"],
-                                             content_dict["text"])
+                                                     content_dict["text"])
                         if "audio_file" in content_dict:
                             context.bot.send_audio(chat["chat_id"], content_dict["audio_file"])
                         if "voice_file" in content_dict:
@@ -134,28 +133,28 @@ class SendDonationToUsers(object):
         for chat in chats2:
             if chat["chat_id"] != update.callback_query.message.chat_id:
                 context.bot.send_message(chat["chat_id"],
-                                 text=context.bot.lang_dict["donate_button"],
-                                 reply_markup=final_reply_markup)
+                                         text=context.bot.lang_dict["donate_button"],
+                                         reply_markup=final_reply_markup)
         context.user_data.clear()
         return ConversationHandler.END
 
     def send_donation_cancel(self, update, context):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
         buttons = list()
         buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                              callback_data="help_module(shop)")])
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         context.bot.send_message(update.callback_query.message.chat_id,
-                         text=context.bot.lang_dict["send_message_9"],
-                         reply_markup=final_reply_markup)
+                                 text=context.bot.lang_dict["send_message_9"],
+                                 reply_markup=final_reply_markup)
         context.user_data.clear()
         return ConversationHandler.END
 
     def back(self, update, context):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                           message_id=update.callback_query.message.message_id)
+                                   message_id=update.callback_query.message.message_id)
         get_help(update, context)
         return ConversationHandler.END
 
@@ -173,7 +172,7 @@ SEND_DONATION_TO_USERS_HANDLER = ConversationHandler(
                                        callback=SendDonationToUsers().send_donation)],
 
     states={
-        DONATION_TO_USERS: [MessageHandler(Filters.all, SendDonationToUsers().received_donation),],
+        DONATION_TO_USERS: [MessageHandler(Filters.all, SendDonationToUsers().received_donation), ],
     },
 
     fallbacks=[CallbackQueryHandler(callback=SendDonationToUsers().send_donation_finish,

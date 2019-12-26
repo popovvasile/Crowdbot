@@ -1,6 +1,6 @@
 import re
 
-from telegram import ParseMode, InlineKeyboardMarkup, Bot, Update, InlineKeyboardButton
+from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.error import BadRequest, TimedOut, NetworkError, TelegramError, ChatMigrated
 from telegram.ext import ConversationHandler
 from urllib3.exceptions import HTTPError

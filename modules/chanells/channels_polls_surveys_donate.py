@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 class SendPoll(object):
     def handle_send_poll(self, update, context):
-
+        print("TEST1111")
         if update.callback_query:
             context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                        message_id=update.callback_query.message.message_id)
@@ -42,8 +42,6 @@ class SendPoll(object):
                 context.bot.send_message(update.callback_query.message.chat.id,
                                          "Choose a channel that you want to send",
                                          reply_markup=ReplyKeyboardMarkup([channels_markup]))
-                context.bot.delete_message(chat_id=update_data.message.chat_id,
-                                           message_id=update_data.message.message_id)
                 return CHOOSE_CHANNEL_TO_SEND_POLL
         else:
             channel_username = update.message.text
@@ -98,7 +96,7 @@ class SendPoll(object):
         context.bot.send_message(chat_id, context.bot.lang_dict["polls_str_12"], reply_markup=ReplyKeyboardRemove())
 
         create_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                                callback_data="help_module(channels)")]]
+                                                callback_data="help_module(channels_groups)")]]
         create_markup = InlineKeyboardMarkup(create_buttons)
         context.bot.send_message(update.message.chat.id, context.bot.lang_dict["back_text"],
                                  reply_markup=create_markup)
@@ -181,7 +179,7 @@ class SendSurvey(object):
                                                             ))]]
                                  ))
         create_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                                callback_data="help_module(channels)")]]
+                                                callback_data="help_module(channels_groups)")]]
         create_markup = InlineKeyboardMarkup(create_buttons)
         context.bot.send_message(update.message.chat.id, context.bot.lang_dict["back_text"],
                                  reply_markup=create_markup)
@@ -309,7 +307,7 @@ class SendDonationToChannel(object):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                    message_id=update.callback_query.message.message_id)
         buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                         callback_data="help_module(channels)")]]
+                                         callback_data="help_module(channels_groups)")]]
         final_reply_markup = InlineKeyboardMarkup(
             buttons)
         context.bot.send_message(update.callback_query.message.chat_id,

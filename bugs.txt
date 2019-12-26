@@ -8,3 +8,16 @@
 # TODO sending of donation buttons in groups and channels, as well as surveys/polls- make it inline
 # TODO make paid content
 # TODO tickets on events with payment, location and hour
+
+
+TODO delete chat/survey from all chats, including channels and groups
+
+1)  Send post send_post_to_channel in strings - error
+2)  Send survey is only for channels- send depending on what the user is doing
+3)  Fix survey results
+4)  Send post in group not working
+5)  Send poll to channel not working
+6)  Answer to message disappears after
+7) Delete all messages goes to item in shop???
+8*) find out the favorite currency of the token
+9) set a general currency for the entire shop

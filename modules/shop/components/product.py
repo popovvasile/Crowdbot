@@ -35,7 +35,9 @@ class Product(object):
     def category_id(self, _id):
         _id = ObjectId(_id) if type(_id) is str else _id
         self._category_id = _id
-        self.category = categories_table.find_one({"_id": ObjectId(_id)})
+        print(_id)
+        print(categories_table.find_one({"_id": ObjectId(_id)}))
+        self.category = categories_table.find_one({"_id": _id})
 
     @property
     def template(self):

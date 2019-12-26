@@ -7,7 +7,7 @@ from telegram.ext import (ConversationHandler, CallbackQueryHandler,
 
 from modules.shop.modules.welcome import Welcome
 from helper_funcs.misc import delete_messages
-from database import categories_table
+from database import categories_table, products_table
 from modules.shop.helper.keyboards import (back_btn)
 
 logging.basicConfig(format='%(asctime)s - %(name)s - '
@@ -66,6 +66,8 @@ class ProductCategoryHandler(object):
                                               "_id": ObjectId(category_id)})
         categories_table.delete_one({"bot_id": context.bot.id,
                                      "_id": ObjectId(category_id)})
+        products_table.delete_many({"bot_id": context.bot.id,
+                                    "category_id": ObjectId(category_id)})
         keyboard = InlineKeyboardMarkup([
             [back_btn("back_to_main_menu", context)],
         ]

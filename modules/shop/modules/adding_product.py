@@ -23,9 +23,14 @@ START_ADD_PRODUCT, ONLINE_PAYMENT, SHIPPING, SET_TITLE, SET_CATEGORY, SET_PRICE,
 class AddingProductHandler(object):
     def start(self, update: Update, context: CallbackContext):  # TODO add title
         delete_messages(update, context, True)
+        buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                         callback_data="back_to_main_menu")]]
+        reply_markup = InlineKeyboardMarkup(
+            buttons)
         context.user_data["to_delete"].append(
             context.bot.send_message(chat_id=update.effective_chat.id,
-                                     text="Introduce the name of your new product"))
+                                     text="Introduce the name of your new product",
+                                     reply_markup=reply_markup))
         return SET_TITLE
 
     def set_image(self, update: Update, context: CallbackContext):
@@ -74,10 +79,15 @@ class AddingProductHandler(object):
             return SET_CATEGORY
 
         else:
+            buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                             callback_data="back_to_main_menu")]]
+            reply_markup = InlineKeyboardMarkup(
+                buttons)
             context.bot.send_message(chat_id=update.callback_query.message.chat_id,
                                      text="You didn't set any categories yet.\n"
                                           "Please write a new category",
-                                     reply_markup=InlineKeyboardMarkup([[back_btn("back_to_main_menu_btn", context)]]))
+                                     reply_markup=reply_markup)
+
             return START_ADD_PRODUCT
 
     def set_count(self, update: Update, context: CallbackContext):
@@ -196,7 +206,9 @@ ADD_PRODUCT_HANDLER = ConversationHandler(
                            AddingProductHandler().received_image),
             CallbackQueryHandler(AddingProductHandler().set_category,
                                  pattern="continue"),
-            ],
+            MessageHandler(Filters.text, AddingProductHandler().set_category),
+
+        ],
         SET_CATEGORY: [
             MessageHandler(Filters.text, AddingProductHandler().set_category),
             CallbackQueryHandler(AddingProductHandler().set_count,

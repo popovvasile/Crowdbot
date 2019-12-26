@@ -39,7 +39,7 @@ def help_strings(context, update):
                           InlineKeyboardButton(text="My orders",
                                                callback_data="my_orders")],
     )
-    help_dict["channels"] = dict(
+    help_dict["channels_groups"] = dict(
         mod_name='Channels',
         # start 'Channels' message
         admin_help=string_d_str["channels_str_1"],
@@ -111,12 +111,12 @@ def helpable_dict(bot):
     admin_rus = OrderedDict()
     admin_rus["❓ Опросы"] = "polls"
     admin_rus["🛠 Настройки бота"] = "settings"
-    admin_rus["📱 Группы и каналы"] = "channels"
+    admin_rus["📱 Группы и каналы"] = "channels_groups"
     admin_rus["Магазин и платежи"] = "shop"
     admin_rus["✉️ Пользователи и Сообщения"] = "users"
 
     admin_eng = OrderedDict()
-    admin_eng["📱 Groups and Channels"] = "channels"
+    admin_eng["📱 Groups and Channels"] = "channels_groups"
     admin_eng["❓ Polls and Surveys"] = "polls"
     admin_eng["✉️ Users & Messages"] = "users"
     admin_eng["🛠 Bot and Menu Settings"] = "settings"

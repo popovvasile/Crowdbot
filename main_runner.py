@@ -10,8 +10,8 @@ from telegram.ext import CommandHandler, CallbackQueryHandler, MessageHandler, F
 from helper_funcs.admin_login import ADMIN_AUTHENTICATION_HANDLER
 from modules.chanells.channels import MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER, REMOVE_CHANNEL_HANDLER, \
     SEND_POST_HANDLER, CHANELLS_MENU
-from modules.chanells.channels_polls_surveys_donate import SEND_POLL_TO_CHANNEL_HANDLER, SEND_SURVEY_TO_CHANNEL_HANDLER, \
-    SEND_DONATION_TO_CHANNEL_HANDLER
+from modules.chanells.channels_polls_surveys_donate import \
+    SEND_POLL_TO_CHANNEL_HANDLER, SEND_SURVEY_TO_CHANNEL_HANDLER, SEND_DONATION_TO_CHANNEL_HANDLER
 from modules.shop.modules.categories import ADD_CATEGORY_HANDLER, CATEGORIES_HANDLER, EDIT_CATEGORIES_HANDLER, \
     RENAME_CATEGORY_HANDLER, DELETE_CATEGORY_HANDLER
 from modules.shop.modules.eshop_enable_disable import CREATE_SHOP_HANDLER
@@ -29,7 +29,7 @@ from modules.users.messages_donators import SEND_MESSAGE_TO_DONATORS_HANDLER
 from modules.surveys.surveys_answer import ANSWER_SURVEY_HANDLER
 from modules.donations.donation_enable_disable import CREATE_DONATION_HANDLER, DONATIONS_MENU
 from modules.surveys.surveys_create import DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_HANDLER, SEND_SURVEYS_HANDLER, \
-    CREATE_SURVEY_HANDLER, SURVEYS_MENU
+    CREATE_SURVEY_HANDLER, SURVEYS_MENU, SEND_SURVEYS_MENU_HANDLER
 from modules.payments.payments_config import EDIT_DONATION_HANDLER, PAYMENTS_CONFIG_KEYBOARD, CHANGE_DONATIONS_CONFIG, \
     CONFIGS_DONATIONS_GENERAL, CONFIGS_SHOP_GENERAL, CHANGE_SHOP_CONFIG
 from helper_funcs.helper import help_button, button_handler, get_help, WelcomeBot, \
@@ -39,7 +39,7 @@ from modules.settings.manage_button import BUTTON_EDIT_HANDLER, BUTTON_EDIT_FINI
     BUTTON_ADD_FINISH_HANDLER, back_from_edit_button_handler
 from modules.donations.donation_payment import DONATE_HANDLER, HANDLE_SUCCES, HANDLE_PRECHECKOUT
 from modules.pollbot.polls import POLL_HANDLER, SEND_POLLS_HANDLER, BUTTON_HANDLER, DELETE_POLLS_HANDLER, \
-    POLLS_RESULTS_HANDLER, POLLS_MENU
+    POLLS_RESULTS_HANDLER, POLLS_MENU, POLLS_SEND_MENU
 from modules.donations.donation_send_promotion import SEND_DONATION_TO_USERS_HANDLER
 from modules.users.messages import SEND_MESSAGE_TO_ADMIN_HANDLER, SEND_MESSAGE_TO_USERS_HANDLER, SEE_MESSAGES_HANDLER, \
     ANSWER_TO_MESSAGE_HANDLER, DELETE_MESSAGES_HANDLER, SEE_MESSAGES_FINISH_HANDLER, SEE_MESSAGES_BACK_HANDLER, \
@@ -67,10 +67,10 @@ LOGGER = logging.getLogger(__name__)
 
 
 def main(token, lang):
-    from telegram.utils import request
+    # from telegram.utils import request
     # if request.is_con_pool_initialized():
     #     raise RuntimeError('this is not prior to anything else...')
-    request.CON_POOL_SIZE = 10
+    # request.CON_POOL_SIZE = 10
 
     BotObj = Bot(token=token)
     with open('languages.json') as f:
@@ -177,7 +177,7 @@ def main(token, lang):
     dispatcher.add_handler(SEND_SURVEYS_HANDLER)
     dispatcher.add_handler(CREATE_SURVEY_HANDLER)
     dispatcher.add_handler(DELETE_SURVEYS_HANDLER)
-
+    dispatcher.add_handler(SEND_SURVEYS_MENU_HANDLER)
     # POLLS
     dispatcher.add_handler(POLLS_MENU)
     dispatcher.add_handler(POLL_HANDLER)
@@ -185,6 +185,7 @@ def main(token, lang):
     dispatcher.add_handler(BUTTON_HANDLER)
     dispatcher.add_handler(DELETE_POLLS_HANDLER)
     dispatcher.add_handler(POLLS_RESULTS_HANDLER)
+    dispatcher.add_handler(POLLS_SEND_MENU)
 
     # GROUPS
     dispatcher.add_handler(GROUPS_MENU)
