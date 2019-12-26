@@ -29,11 +29,11 @@ def start_keyboard(orders_quantity, context):
                                   callback_data="shop_config")],
             [InlineKeyboardButton(text="Back", callback_data="help_module(shop)")]]
     elif "shop" in chatbot:
-        keyboard = [InlineKeyboardButton(text=context.bot.lang_dict["allow_shop_button"],
-                                         callback_data="change_shop_config")]
+        keyboard = [[InlineKeyboardButton(text=context.bot.lang_dict["allow_shop_button"],
+                                         callback_data="change_shop_config")]]
     else:
-        keyboard = [InlineKeyboardButton(text=context.bot.lang_dict["allow_shop_button"],
-                                         callback_data='allow_shop')]
+        keyboard = [[InlineKeyboardButton(text=context.bot.lang_dict["allow_shop_button"],
+                                         callback_data='allow_shop')]]
     return InlineKeyboardMarkup(keyboard)
 
 
