@@ -17,7 +17,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - '
 logger = logging.getLogger(__name__)
 
 START_ADD_PRODUCT, ONLINE_PAYMENT, SHIPPING, SET_TITLE, SET_CATEGORY, SET_PRICE, \
-    SET_CURRENCY, SET_DESCRIPTION, CONFIRM_ADDING, FINISH_ADDING = range(10)
+    SET_DESCRIPTION, CONFIRM_ADDING, FINISH_ADDING = range(9)
 
 
 class AddingProductHandler(object):
@@ -98,34 +98,11 @@ class AddingProductHandler(object):
         context.user_data["new_product"].send_adding_product_template(
             update, context, "Write your price",
             keyboards(context)["back_to_main_menu_keyboard"])
-        return SET_CURRENCY
-
-    def set_currency(self, update: Update, context: CallbackContext):
-        delete_messages(update, context, True)
-        context.user_data["new_product"].price = format(Price.fromstring(update.message.text).amount, '.2f')
-        context.bot.send_message(
-            chat_id=update.message.chat_id,
-            text="Choose a currency",
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("EUR",
-                                      callback_data="currency_EUR")],
-                [InlineKeyboardButton("USD",
-                                      callback_data="currency_USD")],
-                [InlineKeyboardButton("RUB",
-                                      callback_data="currency_RUB")],
-                [InlineKeyboardButton("CHF",
-                                      callback_data="currency_CHF")],
-                [InlineKeyboardButton("GBP",
-                                      callback_data="currency_GBP")
-                 ],
-                [back_btn("back_to_main_menu_btn", context=context)]
-            ]))
         return SET_DESCRIPTION
 
     def set_description(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        context.user_data["new_product"].currency = \
-            update.callback_query.data.replace("currency_", "")
+        context.user_data["new_product"].price = format(Price.fromstring(update.message.text).amount, '.2f')
         context.user_data["new_product"].send_adding_product_template(
             update, context, "Write description",
             keyboards(context)["back_to_main_menu_keyboard"])
@@ -213,12 +190,12 @@ ADD_PRODUCT_HANDLER = ConversationHandler(
             MessageHandler(Filters.text, AddingProductHandler().set_category),
             CallbackQueryHandler(AddingProductHandler().set_count,
                                  pattern=r"choose_category")],
-        SET_CURRENCY: [MessageHandler(Filters.regex(r'(\d+\.\d{1,2})|(\d+\,\d{1,2})'),
-                                      AddingProductHandler().set_currency),
-                       MessageHandler(Filters.regex(r"^((?!@).)*$"), AddingProductHandler().set_count),
+        SET_DESCRIPTION: [MessageHandler(Filters.regex(r'(\d+\.\d{1,2})|(\d+\,\d{1,2})'),
+                                         AddingProductHandler().set_description),
+                          MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
+                                         AddingProductHandler().set_description),
+                          MessageHandler(Filters.regex(r"^((?!@).)*$"), AddingProductHandler().set_count),
                        ],
-        SET_DESCRIPTION: [CallbackQueryHandler(AddingProductHandler().set_description,
-                                            pattern="currency_")],
         ONLINE_PAYMENT: [MessageHandler(Filters.text, callback=AddingProductHandler().online_payment)],
 
         SHIPPING: [CallbackQueryHandler(AddingProductHandler().shipping,

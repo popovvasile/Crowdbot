@@ -16,7 +16,6 @@ class Product(object):
         self.article = product.get("article")
         self.sold = product.get("sold")
         self.price = product.get("price")
-        self.currency = product.get("currency")
         self.description = product.get("description")
         self.name = product.get("name")
         self.discount_price = product.get("discount_price")
@@ -97,18 +96,16 @@ class Product(object):
                     chat_id=update.effective_chat.id, text=text,
                     reply_markup=kb, parse_mode=ParseMode.MARKDOWN,
                     reply_to_message_id=context.user_data
-                    ["to_delete"][-len(context.user_data["product_images"]
+                    ["to_delete"][-len(context.user_data["new_product"].images
                                        )].message_id))
 
     # Method For Showing Product Template For Customer In Products List
-    # TODO add the "pay" button and more images/files/etc.
     def send_customer_template(self, update, context):
         reply_markup = InlineKeyboardMarkup([
             [InlineKeyboardButton("Buy", callback_data=f"buy/{self._id}")],
-            [InlineKeyboardButton("Open", callback_data=f"open/{self._id}")]
         ])
         context.user_data["to_delete"].append(
-            context.bot.send_photo(
+            context.bot.send_photo(   # TODO send album if  multiple images
                 chat_id=update.effective_chat.id, photo=self.images[0],
                 caption=self.template, parse_mode=ParseMode.MARKDOWN,
                 reply_markup=reply_markup, timeout=10))
@@ -212,7 +209,6 @@ class Product(object):
             # "article": 1,
             "bot_id":self.context.bot.id,
             "price": self.price,
-            "currency": self.currency,
             "discount_price": 0,
             "description": self.description,
             "name": self.name,

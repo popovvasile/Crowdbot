@@ -12,12 +12,18 @@
 
 TODO delete chat/survey from all chats, including channels and groups
 
-1)  Send post send_post_to_channel in strings - error
-2)  Send survey is only for channels- send depending on what the user is doing
-3)  Fix survey results
-4)  Send post in group not working
-5)  Send poll to channel not working
-6)  Answer to message disappears after
-7) Delete all messages goes to item in shop???
-8*) find out the favorite currency of the token
-9) set a general currency for the entire shop
+0) REPRESENTATION OF THE CREATED PRODUCT ADMIN SIDE
+1) EDIT EVERYTHING ADMIN SIDE
+2) ORDER DEPENDING ON SETTINGS USER SIDE
+3) ORDERS ADMIN SIDE
+
+
+10)buttons in buttons
+
+1)Currency fix
+2)Multiple pics as album in shop
+3)Price bug integers
+4)Settings for categories and other stuff
+5)USer side shop- ne rabotaet
+6)bot_id everywhere in shop- products appear in different shop
+7)Price with currency in descriptions and everywhere

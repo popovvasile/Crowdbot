@@ -49,7 +49,6 @@ def eshop_menu(update, context):  # TODO add shop config button
         admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["allow_shop_button"],
                                                     callback_data='allow_shop')]),
 
-
     admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                 callback_data="help_module(shop)")])
     context.bot.send_message(update.callback_query.message.chat.id,
@@ -181,6 +180,7 @@ class CreateShopHandler(object):
         if 'payment_token' not in context.user_data:
             # chatbot["shop"]["payment_token"] = user_data['payment_token']
             context.user_data["payment_token"] = chatbot["shop"]["payment_token"]
+        context.user_data["shop_enabled"] = True
         chatbot["shop"] = context.user_data
         chatbots_table.update_one({"bot_id": context.bot.id}, {'$set': chatbot}, upsert=True)
 
