@@ -23,7 +23,7 @@ class UserProductsHandler(object):
         delete_messages(update, context, True)
         set_page_key(update, context, "open_shop")
         all_products = products_table.find(
-            {"in_trash": False, "sold": False}).sort([["_id", 1]])
+            {"in_trash": False, "sold": False, "bot_id": context.bot.id}).sort([["_id", 1]])
         return self.products_layout(
             update, context, all_products, PRODUCTS)
 
@@ -51,6 +51,20 @@ class UserProductsHandler(object):
                 update, context, [[back_btn("help_module(shop)", context)]])
         return state
 
+    @staticmethod
+    def product_menu(update, context):
+        product_id = update.callback_query.data.replace("product_menu/", "")
+        context.bot.send_message(update.callback_query.message.chat.id,
+                                 text=context.bot.lang_dict["online_offline_payment"],
+                                 reply_markup=InlineKeyboardMarkup(
+                                     [[InlineKeyboardButton(text=context.bot.lang_dict["online_buy"],
+                                                            callback_data="online_buy/{}".format(product_id))],
+                                      [InlineKeyboardButton(text=context.bot.lang_dict["offline_buy"],
+                                                            callback_data="offline_buy/{}".format(product_id))],
+                                      [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                                            callback_data="help_back")],
+                                      ]))
+
 
 class UserOrdersHandler(object):
     def orders(self, update, context):
@@ -59,6 +73,8 @@ class UserOrdersHandler(object):
 
 PRODUCTS = range(1)
 
+PRODUCT_ASK_IF_ONLINE = CallbackQueryHandler(callback=UserProductsHandler.product_menu,
+                                             pattern=r"product_menu")
 
 USERS_PRODUCTS_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=UserProductsHandler().products,

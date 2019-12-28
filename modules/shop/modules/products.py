@@ -1,6 +1,6 @@
 import logging
 
-from telegram import Update, ParseMode
+from telegram import Update, ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (ConversationHandler, CallbackQueryHandler,
                           CallbackContext, MessageHandler, Filters)
 
@@ -8,10 +8,10 @@ from modules.shop.helper.helper import clear_user_data
 from helper_funcs.pagination import Pagination
 
 from modules.shop.helper.keyboards import (
-    keyboards, back_kb, back_btn)
+    keyboards, back_kb, back_btn, create_keyboard)
 from modules.shop.modules.welcome import Welcome
 from modules.shop.components.product import Product
-from database import products_table
+from database import products_table, categories_table
 from helper_funcs.pagination import set_page_key
 from helper_funcs.misc import delete_messages
 
@@ -27,7 +27,7 @@ class ProductsHandler:
         delete_messages(update, context, True)
         set_page_key(update, context, "products")
         all_products = products_table.find({
-            "in_trash": False}).sort([["_id", 1]])
+            "in_trash": False, "bot_id": context.bot.id}).sort([["_id", 1]])
         return self.products_layout(
             update, context, all_products, PRODUCTS)
 
@@ -50,8 +50,9 @@ class ProductsHandler:
             pagination = Pagination(
                 all_products, per_page=5)
             for product in pagination.content:
-                Product(context=context, obj=product).send_admin_short_template(
-                    update, context, kb=True)
+                prod_obj = Product(context=context, obj=product)
+                prod_obj.send_full_template(
+                    update, context, kb=prod_obj.admin_keyboard, text=prod_obj.description)
             pagination.send_keyboard(
                 update, context, [[back_btn("back_to_main_menu", context=context)]])
         return state
@@ -124,6 +125,109 @@ class ProductsHandler:
             {"discount_price": int(update.message.text)})
         return self.edit(update, context)
 
+    def images(self, update: Update, context: CallbackContext):
+        delete_messages(update, context, True)
+        context.user_data["product"].send_full_template(
+            update, context, context.bot.lang_dict["shop_admin_adding_product_start"],
+            keyboards(context)["back_to_products"])
+        return IMAGES
+
+    def finish_images(self, update: Update, context: CallbackContext):  # TODO modify for multiple photos
+        delete_messages(update, context, True)
+        context.user_data["product"].update(
+            {"images": [update.message.photo[-1].file_id]})
+        return self.edit(update, context)
+
+    def category(self, update: Update, context: CallbackContext):
+        delete_messages(update, context, True)
+        category_list = categories_table.find({"bot_id": context.bot.id})
+        if category_list.count() > 0:
+            keyboard = create_keyboard(
+                [InlineKeyboardButton(text=i["name"],
+                                      callback_data=f"category_{i['_id']}")
+                 for i in category_list],
+                [back_btn("back_to_main_menu_btn", context)])
+            context.user_data["product"].send_adding_product_template(
+                update, context, context.bot.lang_dict["shop_admin_set_category"], keyboard)
+
+        else:
+            buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                             callback_data="back_to_main_menu")]]
+            reply_markup = InlineKeyboardMarkup(
+                buttons)
+            context.bot.send_message(chat_id=update.callback_query.message.chat_id,
+                                     text="You didn't set any categories yet.\n"
+                                          "Please write a new category",
+                                     reply_markup=reply_markup)
+        return CATEGORY
+
+    def finish_category(self, update: Update, context: CallbackContext):
+        delete_messages(update, context, True)
+        if update.callback_query:
+            context.user_data["product"].update(
+                {"category_id": update.callback_query.data.replace("category_", "")})
+        else:
+            if update.message:
+                category_id = categories_table.insert_one({
+                    "name": update.message.text,
+                    "query_name": update.message.text,
+                    "bot_id": context.bot.id
+                }).inserted_id
+                context.user_data["product"].update(
+                    {"category": category_id})
+        return self.edit(update, context)
+
+    def payment(self, update: Update, context: CallbackContext):
+        delete_messages(update, context, True)
+        context.bot.send_message(
+            chat_id=update.callback_query.message.chat_id,
+            text="Do you want to make this product with online payment, offline payment or both?",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("With online payment",
+                                      callback_data="set_payment_online")],
+                [InlineKeyboardButton("Without online payment",
+                                      callback_data="set_payment_offline")],
+                [InlineKeyboardButton("Both options",
+                                      callback_data="set_payment_both")],
+                [back_btn("back_to_main_menu_btn", context=context)]
+            ]))
+        return PAYMENT
+
+    def finish_payment(self, update: Update, context: CallbackContext):
+        delete_messages(update, context, True)
+        if "online" in update.callback_query.data:
+            context.user_data["product"].update(dict(online_payment=True))
+            context.user_data["product"].update(dict(offline_payment=False))
+        elif "offline" in update.callback_query.data:
+            context.user_data["product"].update(dict(online_payment=False))
+            context.user_data["product"].update(dict(offline_payment=True))
+        elif "both" in update.callback_query.data:
+            context.user_data["product"].update(dict(online_payment=True))
+            context.user_data["product"].update(dict(offline_payment=True))
+        return self.edit(update, context)
+
+    def shipping(self, update: Update, context: CallbackContext):
+        delete_messages(update, context, True)
+        context.bot.send_message(
+            chat_id=update.effective_message.chat_id,
+            text="Do you want to make this product with shipping or without it?",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("With Shipping",
+                                      callback_data="shipping_true")],
+                [InlineKeyboardButton("Without Shipping",
+                                      callback_data="shipping_false")],
+                [back_btn("back_to_main_menu_btn", context=context)]
+            ]))
+        return SHIPPING
+
+    def finish_shipping(self, update: Update, context: CallbackContext):
+        delete_messages(update, context, True)
+        if "true" in update.callback_query.data:
+            context.user_data["product"].shipping = True
+        else:
+            context.user_data["product"].shipping = False
+        return self.edit(update, context)
+
     def confirm_to_trash(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         product_id = update.callback_query.data.split("/")[1]
@@ -154,9 +258,9 @@ class ProductsHandler:
 
 
 (PRODUCTS, EDIT, DESCRIPTION, NAME,  PRICE,
- DISCOUNT_PRICE, CONFIRM_TO_TRASH, SIZES_MENU,
+ DISCOUNT_PRICE, IMAGES, CATEGORY, SHIPPING, PAYMENT, CONFIRM_TO_TRASH, SIZES_MENU,
  SIZE_QUANTITY, SET_SIZE, SET_QUANTITY,
- CONFIRM_ADD_SIZES) = range(12)
+ CONFIRM_ADD_SIZES) = range(16)
 
 
 PRODUCTS_HANDLER = ConversationHandler(
@@ -177,11 +281,34 @@ PRODUCTS_HANDLER = ConversationHandler(
                CallbackQueryHandler(ProductsHandler().description,
                                     pattern="change_description"),
                CallbackQueryHandler(ProductsHandler().name,
-                                    pattern="change_name")],
+                                    pattern="change_name"),
+               CallbackQueryHandler(ProductsHandler().category,
+                                    pattern="change_category"),
+               CallbackQueryHandler(ProductsHandler().images,
+                                    pattern="change_images"),
+               CallbackQueryHandler(ProductsHandler().shipping,
+                                    pattern="change_shipping"),
+               CallbackQueryHandler(ProductsHandler().payment,
+                                    pattern="change_payment"),
+               ],
 
         CONFIRM_TO_TRASH: [CallbackQueryHandler(
                                 ProductsHandler().finish_to_trash,
                                 pattern=r"finish_to_trash")],
+        CATEGORY: [MessageHandler(Filters.text,
+                                  ProductsHandler().finish_category),
+                   CallbackQueryHandler(
+                       ProductsHandler().finish_category,
+                       pattern=r"category_")
+                   ],
+        IMAGES: [MessageHandler(Filters.photo,
+                                ProductsHandler().finish_images)],
+        PAYMENT: [CallbackQueryHandler(
+            ProductsHandler().finish_payment,
+            pattern=r"set_payment_")],
+        SHIPPING: [CallbackQueryHandler(
+            ProductsHandler().finish_shipping,
+            pattern=r"shipping_")],
 
         DESCRIPTION: [MessageHandler(Filters.text,
                                      ProductsHandler().finish_description)],
@@ -195,11 +322,6 @@ PRODUCTS_HANDLER = ConversationHandler(
         DISCOUNT_PRICE: [MessageHandler(
             Filters.regex("^[0-9]+$"),
             ProductsHandler().finish_discount_price)],
-
-        SET_SIZE: [CallbackQueryHandler(ProductsHandler().set_new_quantity,
-                                        pattern="set_quantity"),
-                   CallbackQueryHandler(ProductsHandler().back_to_products,
-                                        pattern="back_to_products")],
 
         SET_QUANTITY: [MessageHandler(Filters.regex("^[0-9]+$"),
                                       ProductsHandler().set_new_quantity)],

@@ -17,7 +17,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - '
 logger = logging.getLogger(__name__)
 
 START_ADD_PRODUCT, ONLINE_PAYMENT, SHIPPING, SET_TITLE, SET_CATEGORY, SET_PRICE, \
-    SET_DESCRIPTION, CONFIRM_ADDING, FINISH_ADDING = range(9)
+SET_DESCRIPTION, CONFIRM_ADDING, FINISH_ADDING = range(9)
 
 
 class AddingProductHandler(object):
@@ -116,15 +116,17 @@ class AddingProductHandler(object):
     def online_payment(self, update: Update, context: CallbackContext):
         if update.message:
             context.user_data["new_product"].description = update.message.text
-        # delete_messages(update, context, True)
+        delete_messages(update, context, True)
         context.bot.send_message(
             chat_id=update.message.chat_id,
-            text="Do you want to make this product with online payment or without it?",
+            text="Do you want to make this product with online payment, offline payment or both?",
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("With online payment",
-                                      callback_data="online_payment_true")],
+                                      callback_data="set_payment_online")],
                 [InlineKeyboardButton("Without online payment",
-                                      callback_data="online_payment_false")],
+                                      callback_data="set_payment_offline")],
+                [InlineKeyboardButton("Both options",
+                                      callback_data="set_payment_both")],
                 [back_btn("back_to_main_menu_btn", context=context)]
             ]))
         return SHIPPING
@@ -133,11 +135,15 @@ class AddingProductHandler(object):
         if update.message:
             context.user_data["new_product"].description = update.message.text
         else:
-            if "true" in update.callback_query.data:
+            if "online" in update.callback_query.data:
                 context.user_data["new_product"].online_payment = True
-            else:
+                context.user_data["new_product"].offline_payment = False
+            elif "offline" in update.callback_query.data:
                 context.user_data["new_product"].online_payment = False
-
+                context.user_data["new_product"].offline_payment = True
+            elif "both" in update.callback_query.data:
+                context.user_data["new_product"].online_payment = True
+                context.user_data["new_product"].offline_payment = True
         delete_messages(update, context, True)
         context.bot.send_message(
             chat_id=update.effective_message.chat_id,
@@ -195,18 +201,17 @@ ADD_PRODUCT_HANDLER = ConversationHandler(
                           MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
                                          AddingProductHandler().set_description),
                           MessageHandler(Filters.regex(r"^((?!@).)*$"), AddingProductHandler().set_count),
-                       ],
+                          ],
         ONLINE_PAYMENT: [MessageHandler(Filters.text, callback=AddingProductHandler().online_payment)],
 
         SHIPPING: [CallbackQueryHandler(AddingProductHandler().shipping,
-                                        pattern=r"online_payment"),
-                  MessageHandler(Filters.text, callback=AddingProductHandler().shipping)],
-
+                                        pattern=r"set_payment_"),
+                   MessageHandler(Filters.text, callback=AddingProductHandler().shipping)],
 
         CONFIRM_ADDING: [CallbackQueryHandler(AddingProductHandler().confirm_adding,
-                                 pattern=r"shipping_")],
+                                              pattern=r"shipping_")],
         FINISH_ADDING: [CallbackQueryHandler(AddingProductHandler().finish_adding,
-                                 pattern=r"send_product")]
+                                             pattern=r"send_product")]
 
     },
 

@@ -5,7 +5,7 @@ from bson.objectid import ObjectId
 from datetime import datetime
 from helper_funcs.misc import get_obj
 from modules.shop.helper.helper import send_media_arr
-from database import products_table, categories_table
+from database import products_table, categories_table, chatbots_table
 
 
 class Product(object):
@@ -13,6 +13,7 @@ class Product(object):
         self.context = context
         product = get_obj(products_table, obj)
         self._id = product.get("_id")
+        self.bot_id = context.bot.id
         self.article = product.get("article")
         self.sold = product.get("sold")
         self.price = product.get("price")
@@ -25,6 +26,7 @@ class Product(object):
         self.category_id = product.get("category_id")
         self.shipping = product.get("shipping")
         self.online_payment = product.get("online_payment")
+        self.offline_payment = product.get("offline_payment")
 
     @property
     def category_id(self):
@@ -40,8 +42,9 @@ class Product(object):
 
     @property
     def template(self):
+        shop = chatbots_table.find_one({"bot_id": self.context.bot.id})["shop"]
         return self.context.bot.lang_dict["shop_admin_product_template"].format(
-            self.name, True if not self.sold else False, self.category["name"], self.price,
+            self.name, True if not self.sold else False, self.category["name"], self.price, shop["currency"]
         )
 
     def full_template(self, long_description=None):
@@ -54,6 +57,9 @@ class Product(object):
             description,
             self.price,
             self.discount_price,
+            self.online_payment,
+            self.offline_payment,
+            self.shipping
         )
 
     @property
@@ -101,24 +107,41 @@ class Product(object):
 
     # Method For Showing Product Template For Customer In Products List
     def send_customer_template(self, update, context):
-        reply_markup = InlineKeyboardMarkup([
-            [InlineKeyboardButton("Buy", callback_data=f"buy/{self._id}")],
-        ])
+        if self.offline_payment and self.online_payment:
+            reply_markup = InlineKeyboardMarkup([
+                [InlineKeyboardButton("Buy", callback_data=f"product_menu/{self._id}")],
+            ])
+        elif self.online_payment:
+            reply_markup = InlineKeyboardMarkup([
+                [InlineKeyboardButton("Buy", callback_data=f"online_buy/{self._id}")],
+            ])
+        else:
+            reply_markup = InlineKeyboardMarkup([
+                [InlineKeyboardButton("Buy", callback_data=f"offline_buy/{self._id}")],
+            ])
         context.user_data["to_delete"].append(
-            context.bot.send_photo(   # TODO send album if  multiple images
-                chat_id=update.effective_chat.id, photo=self.images[0],
-                caption=self.template, parse_mode=ParseMode.MARKDOWN,
-                reply_markup=reply_markup, timeout=10))
+            context.bot.send_media_group(
+                chat_id=update.effective_chat.id, media=[InputMediaPhoto(x) for x in self.images]
+            ))
+        context.user_data["to_delete"].append(
+            context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=self.template, parse_mode=ParseMode.MARKDOWN, reply_markup=reply_markup
+            ))
 
     def send_admin_short_template(self, update, context, text=None, kb=None):
         text = text if text else self.template
         kb = self.admin_keyboard if kb is True else None if kb is None else kb
         try:
             context.user_data["to_delete"].append(
-                context.bot.send_photo(
-                    chat_id=update.effective_chat.id, photo=self.images[0],
-                    caption=text, parse_mode=ParseMode.MARKDOWN,
-                    reply_markup=kb, timeout=10))
+                context.bot.send_media_group(
+                    chat_id=update.effective_chat.id, media=[InputMediaPhoto(x) for x in self.images]
+                ))
+            context.user_data["to_delete"].append(
+                context.bot.send_message(
+                    chat_id=update.effective_chat.id,
+                    text=text, parse_mode=ParseMode.MARKDOWN, reply_markup=kb
+                     ))
         except (BadRequest, IndexError):
             context.user_data["to_delete"].append(
                 context.bot.send_message(
@@ -128,7 +151,7 @@ class Product(object):
 
     def send_full_template(self, update, context, text=None, kb=None):
         full_media_group = [InputMediaPhoto(
-            i, f'{self.article} - {self.name}') for i in self.images]
+            i, f'{self.name}') for i in self.images]
         send_media_arr(full_media_group, update, context)
         if len(self.description) > 2500:
             context.user_data["to_delete"].append(
@@ -165,25 +188,26 @@ class Product(object):
             products_table.update_one({"_id": self._id}, {"$set": json})
             product = products_table.find_one({"_id": self._id})
             self._id = product.get("_id")
+            self.bot_id = product.get("bot_id")
             self.sold = product.get("sold")
             self.price = product.get("price")
-            self.currency = product.get("currency")
             self.description = product.get("description")
             self.name = product.get("name")
             self.discount_price = product.get("discount_price")
-            # self.sizes = product.get("sizes", list())
             self.order_ids = product.get("order_ids", list())
             self.images = product.get("images", list())
             self.in_trash = product.get("in_trash")
             self.category_id = product.get("category_id")
             self.shipping = product.get("shipping")
             self.online_payment = product.get("online_payment")
+            self.offline_payment = product.get("offline_payment")
+
         else:
             products_table.update_one(
                 {"_id": self._id},
                 {"$set":
                      {"price": self.price,
-                      "currency": self.currency,
+                      "bot_id": self.bot_id,
                       "discount_price": self.discount_price,
                       "description": self.description,
                       "name": self.name,
@@ -193,6 +217,7 @@ class Product(object):
                       "in_trash": self.in_trash,
                       "order_ids": self.order_ids,
                       "online_payment": self.online_payment,
+                      "offline_payment": self.offline_payment,
                       "shipping": self.shipping
                       }
                  })
@@ -206,7 +231,6 @@ class Product(object):
 
     def create(self):
         products_table.insert_one({
-            # "article": 1,
             "bot_id":self.context.bot.id,
             "price": self.price,
             "discount_price": 0,
@@ -216,6 +240,7 @@ class Product(object):
             "images": self.images,
             "shipping": self.shipping,
             "online_payment": self.online_payment,
+            "offline_payment": self.offline_payment,
             "sold": False,
             "in_trash": False,
             "on_sale": True,

@@ -15,7 +15,8 @@ from modules.chanells.channels_polls_surveys_donate import \
 from modules.shop.modules.categories import ADD_CATEGORY_HANDLER, CATEGORIES_HANDLER, EDIT_CATEGORIES_HANDLER, \
     RENAME_CATEGORY_HANDLER, DELETE_CATEGORY_HANDLER
 from modules.shop.modules.eshop_enable_disable import CREATE_SHOP_HANDLER
-from modules.shop.modules.user_side.eshop_payment import PURCHASE_HANDLER
+from modules.shop.modules.user_side.offline_payment import OFFLINE_PURCHASE_HANDLER
+from modules.shop.modules.user_side.online_payment import ONLINE_PURCHASE_HANDLER
 from modules.groups.groups import MY_GROUPS_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER, \
     ADD_GROUP_HANLDER, GROUPS_MENU
 from modules.groups.groups_polls_surveys_donate import SEND_POLL_TO_GROUP_HANDLER, SEND_SURVEY_TO_GROUP_HANDLER, \
@@ -53,7 +54,7 @@ from modules.donations.donation_statistic import DONATION_STATISTIC_HANDLER
 
 # SHOP
 from modules.shop.modules.adding_product import ADD_PRODUCT_HANDLER
-from modules.shop.modules.welcome import START_SHOP_HANDLER, BACK_TO_MAIN_MENU_HANDLER
+from modules.shop.modules.welcome import START_SHOP_HANDLER, BACK_TO_MAIN_MENU_HANDLER, Welcome
 from modules.shop.modules.orders import ORDERS_HANDLER
 from modules.shop.modules.products import PRODUCTS_HANDLER
 from modules.shop.modules.trash import (TRASH_START, ORDERS_TRASH,
@@ -95,7 +96,9 @@ def main(token, lang):
     dispatcher.add_handler(EDIT_BOT_DESCRIPTION_HANDLER)
 
     #  NEW SHOP
-    dispatcher.add_handler(PURCHASE_HANDLER)
+    dispatcher.add_handler(ONLINE_PURCHASE_HANDLER)
+    dispatcher.add_handler(OFFLINE_PURCHASE_HANDLER)
+
     # dispatcher.add_handler(product_handler_han)
     dispatcher.add_handler(CHANGE_SHOP_CONFIG)
     dispatcher.add_handler(CONFIGS_SHOP_GENERAL)
@@ -218,7 +221,8 @@ def main(token, lang):
     dispatcher.add_handler(rex_help_handler)
     dispatcher.add_handler(BACK_TO_MAIN_MENU_HANDLER)
     dispatcher.add_handler(help_callback_handler)
-
+    dispatcher.add_handler(CallbackQueryHandler(Welcome.back_to_main_menu,
+                                                pattern=r"back_"))
     # error_help_callback_handler = CallbackQueryHandler(get_help, pattern=r"error_back")
     # dispatcher.add_handler(error_help_callback_handler)
 

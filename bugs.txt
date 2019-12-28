@@ -12,18 +12,17 @@
 
 TODO delete chat/survey from all chats, including channels and groups
 
-0) REPRESENTATION OF THE CREATED PRODUCT ADMIN SIDE
-1) EDIT EVERYTHING ADMIN SIDE
+-1) SET QUANTITY
 2) ORDER DEPENDING ON SETTINGS USER SIDE
 3) ORDERS ADMIN SIDE
-
+# TODO if payment token has not been added, don't allow online payments at all
+# DOUBLE CHECK ON DELETION OF CATEGORIES- all products must be deleted as well,
+# TODO DOUBLE CHECK ON DELETION OF PRODUCTS- all orders must be deleted as well, including those in trash
+# TODO ask about the order status - must change after completion
+# TODO idea- subscription option
 
 10)buttons in buttons
 
-1)Currency fix
 2)Multiple pics as album in shop
-3)Price bug integers
-4)Settings for categories and other stuff
-5)USer side shop- ne rabotaet
 6)bot_id everywhere in shop- products appear in different shop
 7)Price with currency in descriptions and everywhere

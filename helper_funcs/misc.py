@@ -27,12 +27,21 @@ def delete_messages(update, context, message_from_update=False):
             pass
     if 'to_delete' in context.user_data:
         for msg in context.user_data['to_delete']:
-            try:
-                if msg.message_id != update.effective_message.message_id:
-                    context.bot.delete_message(
-                        update.effective_chat.id, msg.message_id)
-            except TelegramError:
-                continue
+            if type(msg) is list:
+                for ms in msg:
+                    try:
+                        if ms.message_id != update.effective_message.message_id:
+                            context.bot.delete_message(
+                                update.effective_chat.id, ms.message_id)
+                    except TelegramError:
+                        continue
+            else:
+                try:
+                    if msg.message_id != update.effective_message.message_id:
+                        context.bot.delete_message(
+                            update.effective_chat.id, msg.message_id)
+                except TelegramError:
+                    continue
         context.user_data['to_delete'] = list()
     else:
         context.user_data['to_delete'] = list()
