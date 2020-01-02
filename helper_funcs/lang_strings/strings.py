@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 from database import chatbots_table
 
-
 # Telegram emoji. Original names
 emoji = dict(
     trash="🗑",
@@ -28,7 +27,8 @@ emoji = dict(
     disappointed_relieved="😥",
     ok_hand="👌",
     family_mwgb="👨‍👩‍👧‍👦",
-    email="📧")
+    email="📧",
+    new="🆕")
 
 ENG = dict(
     you_have_been_reg=", you have been registered as an authorized user of this bot.\n\n"

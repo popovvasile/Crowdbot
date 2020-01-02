@@ -1,12 +1,14 @@
+import logging
 from typing import List, Dict
-from telegram import (InlineKeyboardButton, InlineKeyboardMarkup)
+
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
 from telegram.error import TelegramError
-import logging
-from database import custom_buttons_table
 from babel.dates import format_datetime
-from database import chatbots_table
 from bson.objectid import ObjectId
+
+from database import custom_buttons_table
+from database import chatbots_table
 
 
 logging.basicConfig(
@@ -38,15 +40,6 @@ def delete_messages(update, context, message_from_update=False):
         context.user_data['to_delete'] = list()
 
 
-def back_button(context, callback_data: str):
-    return InlineKeyboardButton(
-        context.bot.lang_dict["back_button"], callback_data=callback_data)
-
-
-def back_reply(context, callback_data: str):
-    return InlineKeyboardMarkup([[back_button(context, callback_data)]])
-
-
 # http://babel.pocoo.org/en/latest/dates.html
 def lang_timestamp(bot_lang: (CallbackContext, str), timestamp,
                    pattern="d, MMM yyyy, hh:mm"):
@@ -70,6 +63,17 @@ def get_obj(table, obj: (ObjectId, dict, str)):
         return table.find_one({"_id": ObjectId(obj)})
     else:
         raise Exception
+
+
+def user_mention(user_id, string):
+    """
+    Users that have blocked the bot or never start it
+    can't be shown as the url mention using "tg://user?id=".
+
+    But can be showing using "https://t.me/"
+    but in this case we use username that must be checked for correct name
+    """
+    return f'<a href="tg://user?id={user_id}">{string}</a>'
 
 
 class EqInlineKeyboardButton(InlineKeyboardButton):
