@@ -73,7 +73,9 @@ class Pagination(object):
                             callback_data=f"{page_prefix}"
                                           f"{layout[num - 1] + 1}"
                             if num > layout.index(self.page)
-                            else layout[num + 1] - 1))
+                            else f"{page_prefix}"
+                                 f"{layout[num + 1] - 1}"
+                        ))
                 else:
                     pages_keyboard[0].append(
                         InlineKeyboardButton(

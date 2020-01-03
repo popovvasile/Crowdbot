@@ -167,6 +167,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 def main(token, lang):
+
     from telegram.utils import request
     # if request.is_con_pool_initialized():
     #     raise RuntimeError('this is not prior to anything else...')
@@ -187,10 +188,14 @@ def main(token, lang):
     help_handler = CommandHandler("help", get_help)
     # product_handler_han = CallbackQueryHandler(product_handler, pattern=r"product_")  # TODO think if to use this one
 
-    custom_button_callback_handler = CallbackQueryHandler(button_handler, pattern=r"button_")
-    custom_button_back_callback_handler = CallbackQueryHandler(back_from_button_handler,
-                                                               pattern=r"back_from_button")
-    help_callback_handler = CallbackQueryHandler(help_button, pattern=r"help_")
+    custom_button_callback_handler = CallbackQueryHandler(
+        callback=button_handler, pattern=r"button_")
+
+    custom_button_back_callback_handler = CallbackQueryHandler(
+        callback=back_from_button_handler, pattern=r"back_from_button")
+
+    help_callback_handler = CallbackQueryHandler(callback=help_button,
+                                                 pattern=r"help_")
 
     back_to_modules_handler = CallbackQueryHandler(pattern=r"back_to_module",
                                                    callback=back_to_modules)

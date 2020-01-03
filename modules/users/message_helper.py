@@ -4,9 +4,8 @@ from helper_funcs.lang_strings.strings import emoji
 from helper_funcs.misc import lang_timestamp, user_mention
 
 
-def send_message_content(update, context, message):
-    query = update.callback_query
-    for content_dict in message["content"]:
+"""def send_deleted_message_content(context, content, chat_id):
+    for content_dict in content:
         if "text" in content_dict:
             context.user_data["to_delete"].append(
                 query.message.reply_text(text=content_dict["text"]))
@@ -42,7 +41,77 @@ def send_message_content(update, context, message):
                     photo=content_dict["animation_file"]))
         if "sticker_file" in content_dict:
             context.user_data["to_delete"].append(query.message.reply_sticker(
-                photo=content_dict["sticker_file"]))
+                photo=content_dict["sticker_file"]))"""
+
+
+def send_deleted_message_content(context, content, chat_id):
+    for content_dict in content:
+        if "text" in content_dict:
+            context.user_data["to_delete"].append(
+                context.bot.send_message(chat_id, content_dict["text"]))
+        if "audio_file" in content_dict:
+            context.user_data["to_delete"].append(
+                context.bot.send_audio(chat_id, content_dict["audio_file"]))
+        if "voice_file" in content_dict:
+            context.user_data["to_delete"].append(
+                context.bot.send_voice(chat_id, content_dict["voice_file"]))
+        if "video_file" in content_dict:
+            context.user_data["to_delete"].append(
+                context.bot.send_video(chat_id, content_dict["video_file"]))
+        if "video_note_file" in content_dict:
+            context.user_data["to_delete"].append(
+                context.bot.send_video_note(chat_id,
+                                            content_dict["video_note_file"]))
+        if "document_file" in content_dict:
+            if (".png" in content_dict["document_file"] or
+                    ".jpg" in content_dict["document_file"]):
+                context.user_data["to_delete"].append(
+                    context.bot.send_photo(chat_id,
+                                           content_dict["document_file"]))
+            else:
+                context.user_data["to_delete"].append(
+                    context.bot.send_document(chat_id,
+                                              content_dict["document_file"]))
+        if "photo_file" in content_dict:
+            context.user_data["to_delete"].append(
+                context.bot.send_photo(chat_id, content_dict["photo_file"]))
+        if "animation_file" in content_dict:
+            context.user_data["to_delete"].append(
+                context.bot.send_animation(chat_id,
+                                           content_dict["animation_file"]))
+        if "sticker_file" in content_dict:
+            context.user_data["to_delete"].append(
+                context.bot.send_sticker(chat_id,
+                                         content_dict["sticker_file"]))
+
+
+def send_not_deleted_message_content(context, content, chat_id):
+    for content_dict in content:
+        if "text" in content_dict:
+            context.bot.send_message(chat_id, content_dict["text"])
+        if "audio_file" in content_dict:
+            context.bot.send_audio(chat_id, content_dict["audio_file"])
+        if "voice_file" in content_dict:
+            context.bot.send_voice(chat_id, content_dict["voice_file"])
+        if "video_file" in content_dict:
+            context.bot.send_video(chat_id, content_dict["video_file"])
+        if "video_note_file" in content_dict:
+            context.bot.send_video_note(chat_id,
+                                        content_dict["video_note_file"])
+        if "document_file" in content_dict:
+            if (".png" in content_dict["document_file"] or
+                    ".jpg" in content_dict["document_file"]):
+                context.bot.send_photo(chat_id, content_dict["document_file"])
+            else:
+                context.bot.send_document(chat_id,
+                                          content_dict["document_file"])
+        if "photo_file" in content_dict:
+            context.bot.send_photo(chat_id, content_dict["photo_file"])
+        if "animation_file" in content_dict:
+            context.bot.send_animation(chat_id,
+                                       content_dict["animation_file"])
+        if "sticker_file" in content_dict:
+            context.bot.send_sticker(chat_id, content_dict["sticker_file"])
 
 
 def add_to_content(update, context):

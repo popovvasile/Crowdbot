@@ -9,15 +9,16 @@ from telegram import (InlineKeyboardButton, InlineKeyboardMarkup,
 from telegram.ext import (MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
 
-from database import (
-    users_table, donations_table, users_messages_to_admin_table)
+from database import (users_table, donations_table,
+                      users_messages_to_admin_table)
 from helper_funcs.helper import get_help
 from helper_funcs.pagination import Pagination
-from helper_funcs.misc import (
-    delete_messages, lang_timestamp, get_obj, user_mention)
+from helper_funcs.misc import (delete_messages, lang_timestamp, get_obj,
+                               user_mention)
 from modules.statistic.donation_statistic import DonationStatistic
 from modules.users.message_helper import (
-    send_message_content, send_message_template, add_to_content)
+    send_message_template, add_to_content, send_deleted_message_content,
+    send_not_deleted_message_content)
 
 
 logging.basicConfig(
@@ -144,14 +145,16 @@ class UsersHandler(object):
                         text="Block",
                         callback_data=f"block_user_{user['user_id']}"))
 
-                if user["regular_messages_blocked"]:
-                    user_buttons[0].append(InlineKeyboardButton(
-                        text=context.bot.lang_dict["unblock_messages_button"],
-                        callback_data=f"unblock_messages_{user['user_id']}"))
-                else:
-                    user_buttons[0].append(InlineKeyboardButton(
-                        text=context.bot.lang_dict["block_messages_button"],
-                        callback_data=f"block_messages_{user['user_id']}"))
+                    if user["regular_messages_blocked"]:
+                        user_buttons[0].append(InlineKeyboardButton(
+                            text=context.bot.lang_dict[
+                                "unblock_messages_button"],
+                            callback_data=f"unblock_messages_"
+                                          f"{user['user_id']}"))
+                    else:
+                        user_buttons[0].append(InlineKeyboardButton(
+                            text=context.bot.lang_dict["block_messages_button"],
+                            callback_data=f"block_messages_{user['user_id']}"))
 
                 if message:
                     user_buttons[0].append(InlineKeyboardButton(
@@ -242,9 +245,10 @@ class UserBlockHandler(object):
             [InlineKeyboardButton(
                 text="Block",
                 callback_data="block_user_confirm_true"),
-                InlineKeyboardButton(
-                    text=context.bot.lang_dict["back_button"],
-                    callback_data="back_to_users_list")]])
+             InlineKeyboardButton(
+                 text=context.bot.lang_dict["back_button"],
+                 callback_data="back_to_users_list")]
+        ])
         # TODO STRINGS
         UserTemplate(user).send(
             update, context,
@@ -332,7 +336,11 @@ class SeeUserMessage(object):
                 users_messages_to_admin_table.update_one(
                     {"_id": message["_id"]}, {"$set": {"is_new": False}})
             context.user_data["message"] = message
-        send_message_content(update, context, context.user_data["message"])
+        # send_message_content(update, context, context.user_data["message"])
+        send_deleted_message_content(
+            context,
+            chat_id=update.effective_user.id,
+            content=context.user_data["message"]["content"])
         buttons = [
             [InlineKeyboardButton(
                 text=context.bot.lang_dict["answer_button_str"],
@@ -443,8 +451,11 @@ class AnswerToMessageFromUserList(object):
         context.bot.send_message(
             chat_id=context.user_data["chat_id"],
             text=context.bot.lang_dict["send_message_answer_user"])
-
-        for content_dict in context.user_data["content"]:
+        send_not_deleted_message_content(
+            context,
+            chat_id=context.user_data["chat_id"],
+            content=context.user_data["content"])
+        """for content_dict in context.user_data["content"]:
             if "text" in content_dict:
                 context.bot.send_message(context.user_data["chat_id"],
                                          content_dict["text"])
@@ -476,7 +487,7 @@ class AnswerToMessageFromUserList(object):
                                            content_dict["animation_file"])
             if "sticker_file" in content_dict:
                 context.bot.send_sticker(context.user_data["chat_id"],
-                                         content_dict["sticker_file"])
+                                         content_dict["sticker_file"])"""
 
         logger.info("Admin {} on bot {}:{} sent a message to the user".format(
             update.effective_user.first_name,
@@ -484,8 +495,11 @@ class AnswerToMessageFromUserList(object):
         update.callback_query.answer("Message sent")
         return SeeUserMessage().back_to_users_messages(update, context)
 
+    def delete_message(self, update, context):
+        delete_messages(update, context, True)
 
-# todo mb last seen for users. mb users photos
+
+# todo mb last seen for users. mb users images
 class UserTemplate(object):
     def __init__(self, obj: (ObjectId, dict, str)):
         # self.context = context

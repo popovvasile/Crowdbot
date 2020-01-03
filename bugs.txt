@@ -16,7 +16,7 @@
     * changed tokens and 2 bot instances running handlers
     * remove admins adding from bot_father and fix double admins bug
     * backs everywhere
-    *
-
+    * move information of the list to the pagination text
+    * maybe add dynamic changes using edit
 TODO
     * create bot on competitor platform(and take features from it)
