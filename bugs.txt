@@ -8,3 +8,15 @@
 # TODO sending of donation buttons in groups and channels, as well as surveys/polls- make it inline
 # TODO make paid content
 # TODO tickets on events with payment, location and hour
+
+# TODO
+    * delete users who blocked the bot and check for BadRequest when sending messages
+    * adding admins as the one-time button
+    * update channels, groups and users username's
+    * changed tokens and 2 bot instances running handlers
+    * remove admins adding from bot_father and fix double admins bug
+    * backs everywhere
+    *
+
+TODO
+    * create bot on competitor platform(and take features from it)

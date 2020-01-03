@@ -72,8 +72,8 @@ from telegram.ext import (CommandHandler, CallbackQueryHandler,
 
 from helper_funcs.admin_login import ADMIN_AUTHENTICATION_HANDLER
 from helper_funcs.helper import (
-    help_button, button_handler, get_help,
-    WelcomeBot, back_from_button_handler)
+    help_button, button_handler, get_help, WelcomeBot,
+    back_from_button_handler, back_to_modules)
 
 from modules.chanells.channels import (
     MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER, REMOVE_CHANNEL_HANDLER,
@@ -87,8 +87,8 @@ from modules.shop.modules.categories import (
     RENAME_CATEGORY_HANDLER, DELETE_CATEGORY_HANDLER)
 from modules.shop.modules.eshop_enable_disable import CREATE_SHOP_HANDLER
 from modules.shop.modules.user_side.eshop_payment import PURCHASE_HANDLER
-from modules.shop.modules.user_side.products import (USERS_ORDERS_HANDLER,
-                                                     USERS_PRODUCTS_HANDLER)
+from modules.shop.modules.user_side.products import (
+    USERS_ORDERS_HANDLER, USERS_PRODUCTS_HANDLER)
 
 from modules.groups.groups import (
     MY_GROUPS_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER,
@@ -106,8 +106,8 @@ from modules.settings.manage_button import (
     BUTTON_ADD_FINISH_HANDLER, back_from_edit_button_handler)
 from modules.settings.user_mode import USER_MODE_OFF, USER_MODE_ON
 from modules.settings.admins import ADMINS_LIST_HANDLER
-from modules.donations.donation_payment import (DONATE_HANDLER, HANDLE_SUCCES,
-                                                HANDLE_PRECHECKOUT)
+from modules.donations.donation_payment import (
+    DONATE_HANDLER, HANDLE_SUCCES, HANDLE_PRECHECKOUT)
 
 from modules.users.messages_admin import SEND_MESSAGE_ONLY_TO_ADMINS_HANDLER
 from modules.users.messages_donators import SEND_MESSAGE_TO_DONATORS_HANDLER
@@ -127,8 +127,8 @@ from modules.users.users import (
     BACK_TO_USERS_LIST, VIEW_USER_MESSAGE, BACk_TO_USER_OPEN_MESSAGE,
     CONFIRM_BAN_USER, FINISH_BAN_USER, FINISH_UNBUN_USER)
 
-from modules.statistic.statistic_main import (STATISTIC_MAIN_MENU,
-                                              BACK_TO_STATISTIC_MAIN)
+from modules.statistic.statistic_main import (
+    STATISTIC_MAIN_MENU, BACK_TO_STATISTIC_MAIN)
 from modules.statistic.user_statistic import USERS_STATISTIC_HANDLER
 from modules.statistic.donation_statistic import DONATION_STATISTIC_HANDLER
 
@@ -148,7 +148,6 @@ from modules.pollbot.polls import (
     POLLS_RESULTS_HANDLER, POLLS_MENU)
 from modules.donations.donation_send_promotion import (
     SEND_DONATION_TO_USERS_HANDLER)
-
 
 # SHOP
 from modules.shop.modules.adding_product import ADD_PRODUCT_HANDLER
@@ -192,6 +191,9 @@ def main(token, lang):
     custom_button_back_callback_handler = CallbackQueryHandler(back_from_button_handler,
                                                                pattern=r"back_from_button")
     help_callback_handler = CallbackQueryHandler(help_button, pattern=r"help_")
+
+    back_to_modules_handler = CallbackQueryHandler(pattern=r"back_to_module",
+                                                   callback=back_to_modules)
 
     dispatcher.add_handler(EDIT_BOT_DESCRIPTION_HANDLER)
 
@@ -240,8 +242,8 @@ def main(token, lang):
     dispatcher.add_handler(VIEW_USER_MESSAGE)
     dispatcher.add_handler(ANSWER_TO_MESSAGE_FROM_USER_LIST_HANDLER)
     dispatcher.add_handler(BACk_TO_USER_OPEN_MESSAGE)
-    dispatcher.add_handler(CONFIRM_BAN_USER)
     dispatcher.add_handler(FINISH_BAN_USER)
+    dispatcher.add_handler(CONFIRM_BAN_USER)
     dispatcher.add_handler(FINISH_UNBUN_USER)
 
     # STATISTIC
@@ -285,14 +287,14 @@ def main(token, lang):
     # dispatcher.add_handler(ADD_MESSAGE_CATEGORY_HANDLER)
     # dispatcher.add_handler(DELETE_MESSAGE_CATEGORY_HANDLER)
     # dispatcher.add_handler(MESSAGE_CATEGORY_HANDLER)
-    dispatcher.add_handler(CONFIRM_BLOCK_ANONIM_MESSAGING)
     dispatcher.add_handler(FINISH_BLOCK_ANONIM_MESSAGING)
+    dispatcher.add_handler(CONFIRM_BLOCK_ANONIM_MESSAGING)
     dispatcher.add_handler(BACK_TO_INBOX_VIEW_MESSAGE)
+    dispatcher.add_handler(BACK_TO_INBOX)
     dispatcher.add_handler(UNBLOCK_ANONIM_MESSAGING)
     dispatcher.add_handler(CONFIRM_BLOCK_MESSAGING_FROM_INBOX)
     dispatcher.add_handler(FINISH_BLOCK_MESSAGING_FROM_INBOX)
     dispatcher.add_handler(FINISH_UNBLOCK_MESSAGING_FROM_INBOX)
-    dispatcher.add_handler(BACK_TO_INBOX)
 
     # SURVEYS
     dispatcher.add_handler(SURVEYS_MENU)
@@ -340,6 +342,7 @@ def main(token, lang):
     rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), get_help)
     dispatcher.add_handler(rex_help_handler)
     dispatcher.add_handler(BACK_TO_MAIN_MENU_HANDLER)
+    dispatcher.add_handler(back_to_modules_handler)
     dispatcher.add_handler(help_callback_handler)
 
     # error_help_callback_handler = CallbackQueryHandler(get_help, pattern=r"error_back")

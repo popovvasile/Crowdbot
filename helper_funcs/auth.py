@@ -24,6 +24,9 @@ def register_chat(update, context):
                             "is_admin": True,
                             "superuser": True,
                             "timestamp": datetime.now(),
+                            "regular_messages_blocked": False,
+                            "anonim_messages_blocked": False,
+                            "blocked": False,
                             "tags": ["#all", "#user", "#admin"]
                             }, upsert=True)
     elif not users_table.find_one({"user_id": user_id,

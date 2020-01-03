@@ -253,6 +253,21 @@ def back_from_button_handler(update, context):
     help_button(update, context)
 
 
+def back_to_modules(update, context):
+    """
+    All backs to main menu buttons(modules) must be done through this func.
+    Need to do better with logic in help_button function.
+    Don't want to reformat for now so use little trick here.
+
+    update.callback_query.data = "back_to_module_{here is the name of module}"
+    """
+    delete_messages(update, context)
+    context.user_data.clear()
+    module_name = update.callback_query.data.replace("back_to_module_", "")
+    update.callback_query.data = f"help_module({module_name})"
+    return help_button(update, context)
+
+
 # chatbots_table.find_one({"bot_id": bot.id})["donation"]["description"]
 
 # ADMIN_USER_MODE = {'Donate': "",

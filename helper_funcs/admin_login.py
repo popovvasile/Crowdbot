@@ -65,6 +65,7 @@ class AdminAuthentication(object):
                                      "regular_messages_blocked": False,
                                      "anonim_messages_blocked": False,
                                      "superuser": superuser,
+                                     "blocked": False,
                                      "tags": ["#all", "#user", "#admin"]})
             get_help(update, context)
             return ConversationHandler.END
