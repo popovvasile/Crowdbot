@@ -648,11 +648,10 @@ class DeleteMessage(object):
             message_id = update.callback_query.data.replace("delete_message_", "")  # message_id
             if any(x in message_id for x in ["all", "week", "month"]):
                 buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["yes"],
-                                                 callback_data="trash_messages_" + message_id),
+                                                 callback_data="delete_messages_" + message_id),
                             InlineKeyboardButton(text=context.bot.lang_dict["no"],
                                                  callback_data="help_module(users)")]]
-                reply_markup = InlineKeyboardMarkup(
-                    buttons)
+                reply_markup = InlineKeyboardMarkup(buttons)
                 context.bot.send_message(update.callback_query.message.chat_id,
                                          context.bot.lang_dict["delete_messages_double_check"],
                                          reply_markup=reply_markup)
@@ -661,9 +660,10 @@ class DeleteMessage(object):
             else:
                 users_messages_to_admin_table.delete_one({# "bot_id": context.bot.id,
                                                           "_id": ObjectId(message_id)})
-                context.bot.send_message(update.callback_query.message.chat_id,
-                                         context.bot.lang_dict["delete_message_str_1"],
-                                         reply_markup=reply_markup)
+                context.bot.send_message(
+                    chat_id=update.callback_query.message.chat_id,
+                    text=context.bot.lang_dict["delete_message_str_1"],
+                    reply_markup=reply_markup)
                 return ConversationHandler.END
         else:
             context.bot.send_message(update.callback_query.message.chat_id,
@@ -948,7 +948,7 @@ DELETE_MESSAGES_HANDLER = ConversationHandler(
     states={
         DOUBLE_CHECK: [
             CallbackQueryHandler(
-                pattern="trash_messages_",
+                pattern=r"delete_messages",
                 callback=DeleteMessage().delete_message_double_check)]},
 
     fallbacks=[

@@ -64,12 +64,11 @@ from modules.shop.modules.trash import (TRASH_START, ORDERS_TRASH,
 import json
 import logging
 
+from telegram.utils import request
 import telegram.ext as tg
 from telegram import Bot
 from telegram.ext import (CommandHandler, CallbackQueryHandler,
                           MessageHandler, Filters)
-from telegram.utils import request
-
 
 from helper_funcs.admin_login import ADMIN_AUTHENTICATION_HANDLER
 from helper_funcs.helper import (
@@ -168,10 +167,6 @@ LOGGER = logging.getLogger(__name__)
 
 
 def main(token, lang):
-    # if request.is_con_pool_initialized():
-    #     raise RuntimeError('this is not prior to anything else...')
-    # request.CON_POOL_SIZE = 10
-
     # https://github.com/python-telegram-bot/python-telegram-bot/issues/787
     req = request.Request(con_pool_size=8)
     BotObj = Bot(token=token, request=req)
