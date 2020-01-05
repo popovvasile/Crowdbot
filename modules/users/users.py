@@ -227,7 +227,7 @@ class UserBlockHandler(object):
     def unblock_messaging_finish(self, update, context):
         user_id = int(
             update.callback_query.data.replace("unblock_messages_", ""))
-        users_table.update_one({"user_id": user_id},
+        users_table.update_one({"bot_id": context.bot.id, "user_id": user_id},
                                {"$set": {"regular_messages_blocked": False,
                                          "anonim_messages_blocked": False}})
         # TODO STRINGS
@@ -269,7 +269,7 @@ class UserBlockHandler(object):
     def unbun_finish(self, update, context):
         user_id = int(
             update.callback_query.data.replace("unblock_user_", ""))
-        users_table.update_one({"user_id": user_id},
+        users_table.update_one({"bot_id": context.bot.id, "user_id": user_id},
                                {"$set": {"blocked": False}})
         # TODO STRINGS
         update.callback_query.answer(

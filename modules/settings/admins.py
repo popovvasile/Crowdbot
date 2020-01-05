@@ -5,7 +5,8 @@ from threading import Thread
 
 from bson.objectid import ObjectId
 from validate_email import validate_email
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
+from telegram import (InlineKeyboardButton, InlineKeyboardMarkup, ParseMode,
+                      LoginUrl)
 from telegram.ext import (MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
 
@@ -38,21 +39,20 @@ class Admin:
 
     def send_template(self, update, text="", reply_markup=None):
         self.context.user_data["to_delete"].append(
-            self.context.bot.send_message(update.effective_chat.id,
-                                          f"{self.template}"
-                                          f"\n\n{text}",
-                                          parse_mode=ParseMode.MARKDOWN,
-                                          reply_markup=reply_markup
-                                          if reply_markup else
-                                          self.reply_markup))
+            self.context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=f"{self.template}\n\n{text}",
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=reply_markup if reply_markup
+                else self.reply_markup))
 
     @property
     def template(self):
-        return self.context.bot.lang_dict["registered_admin_temp"].format(
-            self.name, self.email, self.timestamp) \
-            if self.registered else \
+        return (
+            self.context.bot.lang_dict["registered_admin_temp"].format(
+                self.name, self.email, self.timestamp) if self.registered else
             self.context.bot.lang_dict["not_registered_admin_temp"].format(
-                self.email)
+                self.email))
 
     @property
     def reply_markup(self):
@@ -94,7 +94,6 @@ class Admin:
 
 
 class AdminHandler(object):
-    # todo maybe add new admins right in telegram
     def admins(self, update, context):
         delete_messages(update, context, True)
         # Set current page integer in user_data.
@@ -162,6 +161,43 @@ class AdminHandler(object):
 
     def start_add_admins(self, update, context):
         delete_messages(update, context, True)
+        # context.user_data["new_admins"] = list()
+        # context.user_data['to_delete'].append(
+        #     context.bot.send_message(
+        #         chat_id=update.effective_chat.id,
+        #         text=context.bot.lang_dict["enter_new_admin_email"],
+        #         reply_markup=InlineKeyboardMarkup([
+        #             [InlineKeyboardButton(
+        #                 text=context.bot.lang_dict["back_button"],
+        #                 callback_data="back_to_admin_list")]
+        #         ])))
+        context.user_data['to_delete'].append(
+            context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=f"<b>You have been invited as an administrator to</b> "
+                     f"{context.bot.get_me().mention_html()}.",
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton(
+                        text="Register",
+                        login_url=LoginUrl(
+                            bot_username="crowd_supportbot",
+                            # url=f"https://t.me/{context.bot.username}",
+                            url=f"https://t.me/crowd_supportbot",
+
+                            # forward_text="Become admin"
+                        ),
+                        # switch_inline_query="f",
+                    )],
+                    # [InlineKeyboardButton(
+                    #     text=context.bot.lang_dict["back_button"],
+                    #     callback_data="back_to_admin_list")]
+                ]),
+                parse_mode=ParseMode.HTML))
+        return ADD_ADMINS
+
+    """    
+    def start_add_admins(self, update, context):
+        delete_messages(update, context, True)
         context.user_data["new_admins"] = list()
         context.user_data['to_delete'].append(
             context.bot.send_message(
@@ -226,7 +262,8 @@ class AdminHandler(object):
             context.user_data["to_delete"].append(
                 context.bot.send_message(
                     update.effective_chat.id,
-                    emails_layout(context, context.bot.lang_dict["wrong_email"]),
+                    emails_layout(context, 
+                                  context.bot.lang_dict["wrong_email"]),
                     reply_markup=reply_markup))
         return ADD_ADMINS
 
@@ -236,7 +273,7 @@ class AdminHandler(object):
         update.callback_query.answer(context.bot.lang_dict["admins_added_blink"])
         # update.callback_query.data = "help_module(settings)"
         return self.back_to_admins_list(update, context)
-
+    """
     def back_to_admins_list(self, update, context):
         # delete_messages(update, context, True)
         page = context.user_data.get("page")
@@ -260,31 +297,33 @@ ADMINS_LIST_HANDLER = ConversationHandler(
 
     states={
         ADMINS: [
-            CallbackQueryHandler(pattern=r"admins_list_pagination",
-                                 callback=AdminHandler().admins),
+            CallbackQueryHandler(
+                pattern=r"admins_list_pagination",
+                callback=AdminHandler().admins),
             CallbackQueryHandler(
                 pattern=r"delete_admin",
                 callback=AdminHandler().confirm_delete_admin),
-            CallbackQueryHandler(pattern="start_add_admins",
-                                 callback=AdminHandler().start_add_admins)],
+            CallbackQueryHandler(
+                pattern="start_add_admins",
+                callback=AdminHandler().start_add_admins)],
 
         CONFIRM_DELETE_ADMIN: [
-            CallbackQueryHandler(pattern=r"finish_delete_admin",
-                                 callback=AdminHandler().finish_delete_admin)],
+            CallbackQueryHandler(
+                pattern=r"finish_delete_admin",
+                callback=AdminHandler().finish_delete_admin)]
 
-        ADD_ADMINS: [
-            MessageHandler(callback=AdminHandler().continue_add_admins,
-                           filters=Filters.text),
-            CallbackQueryHandler(AdminHandler().finish_add_admins,
-                                 pattern=r"finish_add_admins")]
+        # ADD_ADMINS: [
+        #     MessageHandler(callback=AdminHandler().continue_add_admins,
+        #                    filters=Filters.text),
+        #     CallbackQueryHandler(AdminHandler().finish_add_admins,
+        #                          pattern=r"finish_add_admins")]
     },
 
     fallbacks=[
         CallbackQueryHandler(pattern=r"help_module",
                              callback=AdminHandler().back),
         CallbackQueryHandler(pattern=r"back_to_admin_list",
-                             callback=AdminHandler().back_to_admins_list)
-    ]
+                             callback=AdminHandler().back_to_admins_list)]
 )
 
 """ADD_ADMIN_HANDLER = ConversationHandler(

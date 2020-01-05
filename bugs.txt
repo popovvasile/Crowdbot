@@ -20,3 +20,11 @@
     * maybe add dynamic changes using edit
 TODO
     * create bot on competitor platform(and take features from it)
+
+
+# TODO BUGS
+    # None on greating when greating comes from bot_father
+    # unblock doesn't work in messages and users
+    # no admin answer save(maybe do messages like in bot_father)
+    # We need inbox for users?
+    # Use one function for the same logic in blocks(inbox, user) and so on

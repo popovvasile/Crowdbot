@@ -848,8 +848,9 @@ class SeeMessageToAdmin(object):
         return self.back_to_view_message(update, context)
 
     def unblock_anonim_messaging_finish(self, update, context):
-        users_table.update_one({"bot_id": context.bot.id,
-                                "user_id": context.user_data["user_id"]},
+        user_id = int(update.callback_query.data.replace(
+            "unblock_anonim_messaging_", ""))
+        users_table.update_one({"bot_id": context.bot.id, "user_id": user_id},
                                {"$set": {"anonim_messages_blocked": False}})
         update.callback_query.answer("For now user can send anonim messages")
         return self.back_to_view_message(update, context)
@@ -891,7 +892,7 @@ class SeeMessageToAdmin(object):
     def unblock_messaging_finish(self, update, context):
         user_id = int(update.callback_query.data.replace(
             "from_inbox_unblock_messages_", ""))
-        users_table.update_one({"user_id": user_id},
+        users_table.update_one({"bot_id": context.bot.id, "user_id": user_id},
                                {"$set": {"regular_messages_blocked": False,
                                          "anonim_messages_blocked": False}})
         # TODO STRINGS
