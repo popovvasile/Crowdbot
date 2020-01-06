@@ -1,27 +1,22 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
-from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove, ParseMode
-from telegram.ext import (MessageHandler, Filters, ConversationHandler, CallbackQueryHandler)
 import logging
-import requests
-import json
 from pprint import pprint
-from database import donations_table, payments_requests_table
 from datetime import datetime, timedelta, time
-from telegram import LabeledPrice
-# Enable logging
-from database import chatbots_table
-from helper_funcs.auth import initiate_chat_id
-from helper_funcs.helper import get_help
 
-from telegram.error import TelegramError
-from math import ceil
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
+from telegram.ext import ConversationHandler, CallbackQueryHandler
+
+from database import donations_table, chatbots_table
+from helper_funcs.helper import get_help
 from helper_funcs.misc import delete_messages, lang_timestamp
 from helper_funcs.pagination import Pagination, set_page_key
+from modules.statistic.statistic_main import back_to_statistic_main_menu
 
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -51,18 +46,19 @@ class DonationStatistic(object):
     def show_statistic(self, update, context):
         delete_messages(update, context, True)
         kb = [[InlineKeyboardButton(
-                text=context.bot.lang_dict["donations_history_button"],
-                callback_data="show_history"),
+                   text=context.bot.lang_dict["donations_history_button"],
+                   callback_data="show_history"),
                InlineKeyboardButton(
-                text=context.bot.lang_dict["back_button"],
-                callback_data="help_module(donation_payment)")]]
+                   text=context.bot.lang_dict["back_button"],
+                   callback_data="back_to_statistic_main_menu")]]
         bot_lang = chatbots_table.find_one({"bot_id": context.bot.id})["lang"]
 
         today_date = datetime.combine(datetime.today(), time.min)
         week_ago_date = today_date - timedelta(days=7)
         month_ago_date = today_date - timedelta(days=30)
 
-        # https://www.w3resource.com/python-exercises/date-time-exercise/python-date-time-exercise-8.php
+        # https://www.w3resource.com/python-exercises/
+        # date-time-exercise/python-date-time-exercise-8.php
         all_donations = donations_table.find(
             {"bot_id": context.bot.id,
              "status": "Paid"}).sort([["_id", -1]])
@@ -89,17 +85,21 @@ class DonationStatistic(object):
 
         context.user_data["to_delete"].append(
             context.bot.send_message(
-                update.effective_chat.id,
-                context.bot.lang_dict["donation_statistic_template"].format(
-                    today_str=lang_timestamp(bot_lang, today_date, "d MMM yyyy"),
+                chat_id=update.effective_chat.id,
+                text=context.bot.lang_dict[
+                    "donation_statistic_template"].format(
+                    today_str=lang_timestamp(bot_lang, today_date,
+                                             "d MMM yyyy"),
                     today_count=daily_donations.count(),
                     today_amount=self.create_amount(daily_donations),
 
-                    week_from=lang_timestamp(bot_lang, week_ago_date, "d MMM yyyy"),
+                    week_from=lang_timestamp(bot_lang, week_ago_date,
+                                             "d MMM yyyy"),
                     week_count=week_donations.count(),
                     week_amount=self.create_amount(week_donations),
 
-                    month_from=lang_timestamp(bot_lang, month_ago_date, "d MMM yyyy"),
+                    month_from=lang_timestamp(bot_lang, month_ago_date,
+                                              "d MMM yyyy"),
                     month_count=month_donations.count(),
                     month_amount=self.create_amount(month_donations),
 
@@ -117,23 +117,30 @@ class DonationStatistic(object):
         all_donations = donations_table.find(
             {"bot_id": context.bot.id}).sort([["_id", -1]])
         per_page = 5
-        back_button = [[InlineKeyboardButton(text=context.bot.lang_dict["donation_statistic_btn_str"],
-                                             callback_data="donation_statistic"),
-                        InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                             callback_data="help_module(donation_payment)")]]
+        back_button = [[
+            InlineKeyboardButton(
+                text=context.bot.lang_dict["donation_statistic_btn_str"],
+                callback_data="donation_statistic"),
+            InlineKeyboardButton(
+                text=context.bot.lang_dict["back_button"],
+                callback_data="back_to_statistic_main_menu")]]
         if all_donations.count() == 0:
             context.user_data["to_delete"].append(
-                context.bot.send_message(update.effective_chat.id,
-                                         context.bot.lang_dict["no_donations"],
-                                         reply_markup=InlineKeyboardMarkup(back_button)))
+                context.bot.send_message(
+                    chat_id=update.effective_chat.id,
+                    text=context.bot.lang_dict["no_donations"],
+                    reply_markup=InlineKeyboardMarkup(back_button)))
         else:
             pagination = Pagination(context, per_page, all_donations)
-            page_content = \
-                context.bot.lang_dict["donation_history_title"] + \
-                "\n\n".join([context.bot.lang_dict["donation_history_item_temp"].format(
-                                 donation['mention_markdown'], donation['amount']/100, donation['currency'],
-                                 str(donation['timestamp_paid']).split('.')[0])
-                             for donation in pagination.page_content()])
+            page_content = (
+                context.bot.lang_dict["donation_history_title"] +
+                "\n\n".join(
+                    [context.bot.lang_dict[
+                        "donation_history_item_temp"].format(
+                        donation['mention_markdown'],
+                        donation['amount']/100, donation['currency'],
+                        str(donation['timestamp_paid']).split('.')[0])
+                        for donation in pagination.page_content()]))
             pagination.send_keyboard(update, back_button, page_content)
         return HISTORY
 
@@ -150,8 +157,9 @@ class DonationStatistic(object):
         return ConversationHandler.END
 
     def back(self, update, context):
-        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                                   message_id=update.callback_query.message.message_id)
+        context.bot.delete_message(
+            chat_id=update.callback_query.message.chat_id,
+            message_id=update.callback_query.message.message_id)
         get_help(update, context)
         context.user_data.clear()
         return ConversationHandler.END
@@ -161,22 +169,34 @@ DONATION_STATISTIC, DONATORS, HISTORY = range(3)
 
 
 DONATION_STATISTIC_HANDLER = ConversationHandler(
-    entry_points=[CallbackQueryHandler(DonationStatistic().show_statistic,
-                                       pattern=r"donation_statistic")],
+    entry_points=[
+        CallbackQueryHandler(
+            callback=DonationStatistic().show_statistic,
+            pattern=r"donation_statistic")],
     states={
-        DONATION_STATISTIC: [  # CallbackQueryHandler(DonationStatistic().show_donators,
+        DONATION_STATISTIC: [
+            # CallbackQueryHandler(DonationStatistic().show_donators,
             #                      pattern=r"donators")
-            CallbackQueryHandler(DonationStatistic().send_donation_history,
-                                 pattern=r"show_history")],
+            CallbackQueryHandler(
+                callback=back_to_statistic_main_menu,
+                pattern="back_to_statistic_main_menu"),
+
+            CallbackQueryHandler(
+                callback=DonationStatistic().send_donation_history,
+                pattern=r"show_history")],
 
         # DONATORS: [CallbackQueryHandler(DonationStatistic().show_donators,
         #                                 pattern="^[0-9]+$")],
 
-        HISTORY: [CallbackQueryHandler(DonationStatistic().send_donation_history,
-                                       pattern="^[0-9]+$"),
-                  CallbackQueryHandler(DonationStatistic().show_statistic,
-                                       pattern=r"donation_statistic")
-                  ]
+        HISTORY: [
+            CallbackQueryHandler(
+                callback=DonationStatistic().send_donation_history,
+                pattern="^[0-9]+$"),
+            CallbackQueryHandler(
+                callback=back_to_statistic_main_menu,
+                pattern="back_to_statistic_main_menu"),
+            CallbackQueryHandler(callback=DonationStatistic().show_statistic,
+                                 pattern=r"donation_statistic")]
     },
     fallbacks=[  # CallbackQueryHandler(callback=DonationStatistic().back,
                  #                      pattern=r"help_back"),

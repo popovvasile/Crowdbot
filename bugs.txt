@@ -26,3 +26,23 @@ TODO delete chat/survey from all chats, including channels and groups
 2)Multiple pics as album in shop
 6)bot_id everywhere in shop- products appear in different shop
 7)Price with currency in descriptions and everywhere
+=======
+# TODO
+    * delete users who blocked the bot and check for BadRequest when sending messages
+    * adding admins as the one-time button
+    * update channels, groups and users username's
+    * changed tokens and 2 bot instances running handlers
+    * remove admins adding from bot_father and fix double admins bug
+    * backs everywhere
+    * move information of the list to the pagination text
+    * maybe add dynamic changes using edit
+TODO
+    * create bot on competitor platform(and take features from it)
+
+
+# TODO BUGS
+    # None on greating when greating comes from bot_father
+    # unblock doesn't work in messages and users
+    # no admin answer save(maybe do messages like in bot_father)
+    # We need inbox for users?
+    # Use one function for the same logic in blocks(inbox, user) and so on

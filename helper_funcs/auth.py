@@ -18,26 +18,33 @@ def register_chat(update, context):
                             "user_id": user_id,
                             "username": update.effective_user.username,
                             "full_name": update.effective_user.full_name,
-                            "mention_markdown": update.effective_user.mention_markdown(),
-                            "mention_html": update.effective_user.mention_html(),
+                            # "mention_markdown": update.effective_user.mention_markdown(),
+                            # "mention_html": update.effective_user.mention_html(),
                             'registered': True,
                             "is_admin": True,
                             "superuser": True,
                             "timestamp": datetime.now(),
+                            "regular_messages_blocked": False,
+                            "anonim_messages_blocked": False,
+                            "blocked": False,
                             "tags": ["#all", "#user", "#admin"]
                             }, upsert=True)
-    elif users_table.find({"user_id": user_id, "bot_id": context.bot.id}).count() == 0:
+    elif not users_table.find_one({"user_id": user_id,
+                                   "bot_id": context.bot.id}):
         users_table.insert({'bot_id': context.bot.id,
                             "chat_id": chat_id,
                             "user_id": user_id,
                             "username": update.effective_user.username,
                             "full_name": update.effective_user.full_name,
-                            "mention_markdown": update.effective_user.mention_markdown(),
-                            "mention_html": update.effective_user.mention_html(),
+                            # "mention_markdown": update.effective_user.mention_markdown(),
+                            # "mention_html": update.effective_user.mention_html(),
                             "timestamp": datetime.now(),
                             'registered': False,
                             "is_admin": False,
                             "superuser": False,
+                            "regular_messages_blocked": False,
+                            "anonim_messages_blocked": False,
+                            "blocked": False,
                             "tags": ["#all", "#user"]})
 
 

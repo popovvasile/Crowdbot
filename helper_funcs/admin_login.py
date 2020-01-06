@@ -57,12 +57,15 @@ class AdminAuthentication(object):
                                      "email": used_email,
                                      "username": update.message.from_user.username,
                                      "full_name": update.message.from_user.full_name,
-                                     "mention_markdown": update.effective_user.mention_markdown(),
-                                     "mention_html": update.effective_user.mention_html(),
+                                     # "mention_markdown": update.effective_user.mention_markdown(),
+                                     # "mention_html": update.effective_user.mention_html(),
                                      "timestamp": datetime.now(),
                                      'registered': True,
                                      "is_admin": True,
+                                     "regular_messages_blocked": False,
+                                     "anonim_messages_blocked": False,
                                      "superuser": superuser,
+                                     "blocked": False,
                                      "tags": ["#all", "#user", "#admin"]})
             get_help(update, context)
             return ConversationHandler.END
