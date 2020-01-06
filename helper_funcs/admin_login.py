@@ -12,6 +12,11 @@ from datetime import datetime
 
 TYPING_PASS = 1
 
+"""
+**********************************************
+WITH NEW REGISTRATION THIS FILE CAN BE REMOVED
+"""
+
 
 class AdminAuthentication(object):
     def handle_email(self, update, context):
