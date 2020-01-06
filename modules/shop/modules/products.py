@@ -183,9 +183,9 @@ class ProductsHandler:
             chat_id=update.callback_query.message.chat_id,
             text="Do you want to make this product with online payment, offline payment or both?",
             reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("With online payment",
+                [InlineKeyboardButton("Online payment",
                                       callback_data="set_payment_online")],
-                [InlineKeyboardButton("Without online payment",
+                [InlineKeyboardButton("Offline payment",
                                       callback_data="set_payment_offline")],
                 [InlineKeyboardButton("Both options",
                                       callback_data="set_payment_both")],
