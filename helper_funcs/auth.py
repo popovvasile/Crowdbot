@@ -4,7 +4,6 @@ from functools import wraps
 from datetime import datetime
 
 from telegram import User, Bot, Update
-import pyotp
 
 from database import users_table, chatbots_table, admin_passwords_table
 
@@ -62,15 +61,12 @@ def register_chat(update, context):
 def register_admin(update, context):
     """
     Registers user as an administrator.
-    Uses PyOTP Library for generating and checking timed password
-    https://pyotp.readthedocs.io/en/latest/
     """
-    # Create TOTP instance for checking timed passwords
-    totp = pyotp.TOTP("base32secret3232")
-    # For first delete all invalid passwords
+    # For first delete all expired passwords
     for admin_password in admin_passwords_table.find(
             {"bot_id": context.bot.id}):
-        if not totp.verify(admin_password["password"]):
+        if ((datetime.today() - admin_password["timestamp"]).total_seconds()
+                > 3600):
             admin_passwords_table.delete_one({"_id": admin_password["_id"]})
     # Check if the user already admin if so - just back
     if users_table.find_one({"bot_id": context.bot.id,
@@ -92,20 +88,21 @@ def register_admin(update, context):
         # Set user as administrator
         users_table.update_one(
             {"user_id": update.effective_user.id, "bot_id": context.bot.id},
-            {'bot_id': context.bot.id,
-             "chat_id": update.effective_chat.id,
-             "user_id": update.effective_user.id,
-             "email": "No emails for now",
-             "username": update.effective_user.username,
-             "full_name": update.effective_user.full_name,
-             "timestamp": datetime.now(),
-             'registered': True,
-             "is_admin": True,
-             "regular_messages_blocked": False,
-             "anonim_messages_blocked": False,
-             "superuser": False,
-             "blocked": False,
-             "tags": ["#all", "#user", "#admin"]}, upsert=True)
+            {"$set": {
+                'bot_id': context.bot.id,
+                "chat_id": update.effective_chat.id,
+                "user_id": update.effective_user.id,
+                "email": "No emails for now",
+                "username": update.effective_user.username,
+                "full_name": update.effective_user.full_name,
+                "timestamp": datetime.now(),
+                'registered': True,
+                "is_admin": True,
+                "regular_messages_blocked": False,
+                "anonim_messages_blocked": False,
+                "superuser": False,
+                "blocked": False,
+                "tags": ["#all", "#user", "#admin"]}}, upsert=True)
 
         context.bot.send_message(
             chat_id=update.effective_chat.id,

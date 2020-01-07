@@ -3,8 +3,9 @@
 from uuid import uuid4
 from threading import Thread
 from datetime import datetime
+import secrets
+import string
 
-import pyotp
 from bson.objectid import ObjectId
 from validate_email import validate_email
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
@@ -162,24 +163,17 @@ class AdminHandler(object):
 
     def start_add_admins(self, update, context):
         delete_messages(update, context, True)
-        # Create TOTP instance for creating timed password.
-        totp = pyotp.TOTP("base32secret3232")
-        # Set time - 1 hour.
-        totp.at(3600)
-        # Create timed password.
-        password = totp.now()
-        # Save password to db to invalid it after user registration.
+        # Create 10 character length password
+        password = "".join(secrets.choice(
+            string.ascii_letters + string.digits) for i in range(10))
         # Created separate collection for the admins passwords
-        # because when u click "Add admin" button
+        # because when u click "Add admin" button(create new admin link)
         # u need to keep before created links active.
-        admin_passwords_table.update_one(
-            {"bot_id": context.bot.id, "password": password},
-            {"$set": {"bot_id": context.bot.id, "password": password}},
-            upsert=True)
-        # chatbots_table.update_one(
-        #     {"bot_id": context.bot.id},
-        #     {"$set": {"admin_password": {"password": password,
-        #                                  "valid": True}}})
+        # Save password to db to invalid it after user registration.
+        admin_passwords_table.insert_one(
+            {"bot_id": context.bot.id,
+             "password": password,
+             "timestamp": datetime.now()})
         # Message that must be forwarded to admin.
         context.user_data['to_delete'].append(
             context.bot.send_message(
