@@ -31,10 +31,9 @@ TODO delete chat/survey from all chats, including channels and groups
 
 # TODO
     * delete users who blocked the bot and check for BadRequest when sending messages
-    * adding admins as the one-time button
     * update channels, groups and users username's
     * changed tokens and 2 bot instances running handlers
-    * remove admins adding from bot_father and fix double admins bug
+    * fix double admins bug
     * backs everywhere
     * move information of the list to the pagination text
     * maybe add dynamic changes using edit
@@ -54,10 +53,7 @@ TODO delete chat/survey from all chats, including channels and groups
         - дальше меню с юзер инфой(донаты, покупки, сообщения, статусы)
         (удалить все сообщения, написать,
         история донатов, заблокировать, отключить сообщения)
-
-TODO
     * create bot on competitor platform(and take features from it)
-
 
 # TODO BUGS
     * None on greating (mb when greating comes from bot_father)
@@ -65,6 +61,14 @@ TODO
       when superuser come to user view and write message and then block messaging for himself and then come to user view again
       ("anonim_messages_blocked" and "regular_messages_blocked") - this fields become False(instead of True)
     * stickers bug in bot_father reports(check stickers for crowd)
+    * имя ансабов не обновляется
+    * если нет юзернейма использовать user_id mention, прпробывать оставить link preview
+    * внутри стейтов ловить апдейты статусов
+
 
 # TODO for discussion
     * One code style for whole project :) PEP 8 or 100 length(like ptb lib) or long strings
+    * Показывать только активных юзеров
+        или кнопка удалить под отписавшимися
+        или отдельный список под отписавшимися
+        или просто цифра ансабов

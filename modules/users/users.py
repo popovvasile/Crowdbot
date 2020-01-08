@@ -165,6 +165,10 @@ class UsersHandler(object):
                 if user["unsubscribed"]:
                     pass
                 else:
+                    user_buttons[0].append(InlineKeyboardButton(
+                        text="Send Message",
+                        callback_data=f"send_message_to_user_"
+                                      f"{user['user_id']}"))
                     if user["blocked"]:
                         user_buttons[0].append(InlineKeyboardButton(
                             text="Unblock",
@@ -321,9 +325,8 @@ class SeeUserMessage(object):
                     "pagination_user_messages_", ""))
         if not context.user_data.get("user_messages_page"):
             context.user_data["user_messages_page"] = 1
-        # Take user_id of from button data
-        # and set it in the user_data to show messages
-        # between pagination buttons clicks.
+        # Take user_id of from button data and set it in the user_data
+        # to show messages between pagination buttons clicks.
         if update.callback_query.data.startswith("user_messages"):
             context.user_data["user_id"] = int(
                 update.callback_query.data.replace("user_messages_", ""))
