@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""
+**********************************************
+WITH NEW REGISTRATION THIS FILE CAN BE REMOVED
+
+"""
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ConversationHandler, MessageHandler, Filters, RegexHandler, \
     CallbackQueryHandler
@@ -11,11 +16,6 @@ from helper_funcs.helper import get_help
 from datetime import datetime
 
 TYPING_PASS = 1
-
-"""
-**********************************************
-WITH NEW REGISTRATION THIS FILE CAN BE REMOVED
-"""
 
 
 class AdminAuthentication(object):

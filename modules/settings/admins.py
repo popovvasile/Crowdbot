@@ -9,15 +9,12 @@ import string
 from bson.objectid import ObjectId
 from validate_email import validate_email
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
-from telegram.ext import (MessageHandler, Filters,
-                          ConversationHandler, CallbackQueryHandler)
+from telegram.ext import ConversationHandler, CallbackQueryHandler
 
-
-from database import users_table, chatbots_table, admin_passwords_table
+from database import users_table, admin_passwords_table
 from helper_funcs.pagination import Pagination
 from helper_funcs.misc import delete_messages, lang_timestamp, get_obj
 from helper_funcs.helper import back_from_button_handler
-from helper_funcs.mailer import SMTPMailer
 
 
 # Make string for adding admins emails menu
@@ -73,7 +70,7 @@ class Admin:
                                  "is_admin": True,
                                  "superuser": False}).sort([["_id", -1]])
 
-    @staticmethod
+    """@staticmethod
     def add_new_admins(context):
         for admin in context.user_data["new_admins"]:
             admin["bot_id"] = context.bot.id
@@ -92,7 +89,7 @@ class Admin:
             else:
                 users_table.save(admin)
         Thread(target=SMTPMailer().send_registration_msgs,
-               args=(context, context.user_data['new_admins'])).start()
+               args=(context, context.user_data['new_admins'])).start()"""
 
 
 class AdminHandler(object):

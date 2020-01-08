@@ -4,46 +4,6 @@ from helper_funcs.lang_strings.strings import emoji
 from helper_funcs.misc import lang_timestamp, user_mention
 
 
-"""def send_deleted_message_content(context, content, chat_id):
-    for content_dict in content:
-        if "text" in content_dict:
-            context.user_data["to_delete"].append(
-                query.message.reply_text(text=content_dict["text"]))
-        if "audio_file" in content_dict:
-            context.user_data["to_delete"].append(
-                query.message.reply_audio(content_dict["audio_file"]))
-        if "voice_file" in content_dict:
-            context.user_data["to_delete"].append(
-                query.message.reply_audio(content_dict["voice_file"]))
-        if "video_file" in content_dict:
-            context.user_data["to_delete"].append(
-                query.message.reply_video(content_dict["video_file"]))
-        if "video_note_file" in content_dict:
-            context.user_data["to_delete"].append(
-                query.message.reply_video_note(
-                    content_dict["video_note_file"]))
-        if "document_file" in content_dict:
-            if (".png" in content_dict["document_file"] or
-                    ".jpg" in content_dict["document_file"]):
-                context.user_data["to_delete"].append(
-                    query.message.reply_photo(
-                        photo=content_dict["document_file"]))
-            else:
-                context.user_data["to_delete"].append(
-                    query.message.reply_document(
-                        document=content_dict["document_file"]))
-        if "photo_file" in content_dict:
-            context.user_data["to_delete"].append(
-                query.message.reply_photo(photo=content_dict["photo_file"]))
-        if "animation_file" in content_dict:
-            context.user_data["to_delete"].append(
-                query.message.reply_animation(
-                    photo=content_dict["animation_file"]))
-        if "sticker_file" in content_dict:
-            context.user_data["to_delete"].append(query.message.reply_sticker(
-                photo=content_dict["sticker_file"]))"""
-
-
 def send_deleted_message_content(context, content, chat_id):
     for content_dict in content:
         if "text" in content_dict:
@@ -163,7 +123,7 @@ def send_message_template(update, context, message, reply_markup, text=""):
             + context.bot.lang_dict["message_temp"].format(
                 f"<code>{message['user_full_name']}</code>"
                 if message["anonim"]
-                else user_mention(message["user_id"],
+                else user_mention(message["username"],
                                   message["user_full_name"]),
                 lang_timestamp(context, message["timestamp"]))
             + "\n\n" + text,

@@ -37,6 +37,7 @@ def register_chat(update, context):
                             "regular_messages_blocked": False,
                             "anonim_messages_blocked": False,
                             "blocked": False,
+                            "unsubscribed": False,
                             "tags": ["#all", "#user", "#admin"]
                             }, upsert=True)
     elif not users_table.find_one({"user_id": user_id,
@@ -55,6 +56,7 @@ def register_chat(update, context):
                             "regular_messages_blocked": False,
                             "anonim_messages_blocked": False,
                             "blocked": False,
+                            "unsubscribed": False,
                             "tags": ["#all", "#user"]})
 
 
@@ -102,6 +104,7 @@ def register_admin(update, context):
                 "anonim_messages_blocked": False,
                 "superuser": False,
                 "blocked": False,
+                "unsubscribed": False,
                 "tags": ["#all", "#user", "#admin"]}}, upsert=True)
 
         context.bot.send_message(

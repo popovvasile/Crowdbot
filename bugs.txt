@@ -46,6 +46,15 @@ TODO delete chat/survey from all chats, including channels and groups
         и при открытии показывать его вопрос и ответ.
     * В template сообщения показывать либо количество файлов(как в bot_father) либо просто названия файлов(как в телеграме)
     * Под каждым юзером в списке юзеров кнопка "Написать" и когда отправляешь сообщение - то просто приходит ответ юзеру и всё
+    * More information to the user list (active users count...)
+    * maybe delete button for unsubscribed users in the users list
+    * handling admins that leave the bot
+    Под каждым юзером в списке юзеров кнопка «открыть»
+        (если юзер отписался показать что он отписался и кнопка «удалить»)
+        - дальше меню с юзер инфой(донаты, покупки, сообщения, статусы)
+        (удалить все сообщения, написать,
+        история донатов, заблокировать, отключить сообщения)
+
 TODO
     * create bot on competitor platform(and take features from it)
 

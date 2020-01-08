@@ -27,10 +27,12 @@ from modules.shop.modules.categories import (
 from modules.shop.modules.eshop_enable_disable import CREATE_SHOP_HANDLER
 # from modules.shop.modules.user_side.eshop_payment import PURCHASE_HANDLER
 
-from modules.shop.modules.user_side.offline_payment import OFFLINE_PURCHASE_HANDLER
-from modules.shop.modules.user_side.online_payment import ONLINE_PURCHASE_HANDLER
-from modules.shop.modules.user_side.products import (
-    USERS_ORDERS_HANDLER, USERS_PRODUCTS_HANDLER)
+from modules.shop.modules.user_side.offline_payment import (
+    OFFLINE_PURCHASE_HANDLER)
+from modules.shop.modules.user_side.online_payment import (
+    ONLINE_PURCHASE_HANDLER)
+from modules.shop.modules.user_side.products import (USERS_ORDERS_HANDLER,
+                                                     USERS_PRODUCTS_HANDLER)
 
 from modules.groups.groups import (
     MY_GROUPS_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER,
@@ -48,19 +50,19 @@ from modules.settings.manage_button import (
     BUTTON_ADD_FINISH_HANDLER, back_from_edit_button_handler)
 from modules.settings.user_mode import USER_MODE_OFF, USER_MODE_ON
 from modules.settings.admins import ADMINS_LIST_HANDLER
-from modules.donations.donation_payment import (
-    DONATE_HANDLER, HANDLE_SUCCES, HANDLE_PRECHECKOUT)
+from modules.donations.donation_payment import (DONATE_HANDLER, HANDLE_SUCCES,
+                                                HANDLE_PRECHECKOUT)
 
 from modules.users.messages_admin import SEND_MESSAGE_ONLY_TO_ADMINS_HANDLER
 from modules.users.messages_donators import SEND_MESSAGE_TO_DONATORS_HANDLER
 from modules.users.messages import (
     SEND_MESSAGE_TO_ADMIN_HANDLER, SEND_MESSAGE_TO_USERS_HANDLER,
     SEE_MESSAGES_HANDLER, ANSWER_TO_MESSAGE_HANDLER, DELETE_MESSAGES_HANDLER,
-    SEE_MESSAGES_FINISH_HANDLER, BACK_TO_INBOX,
-    MESSAGES_MENU, BACK_TO_INBOX_VIEW_MESSAGE,
-    FINISH_BLOCK_ANONIM_MESSAGING, CONFIRM_BLOCK_ANONIM_MESSAGING,
-    UNBLOCK_ANONIM_MESSAGING, CONFIRM_BLOCK_MESSAGING_FROM_INBOX,
-    FINISH_BLOCK_MESSAGING_FROM_INBOX, FINISH_UNBLOCK_MESSAGING_FROM_INBOX)
+    SEE_MESSAGES_FINISH_HANDLER, BACK_TO_INBOX, MESSAGES_MENU,
+    BACK_TO_INBOX_VIEW_MESSAGE, FINISH_BLOCK_ANONIM_MESSAGING,
+    CONFIRM_BLOCK_ANONIM_MESSAGING, UNBLOCK_ANONIM_MESSAGING,
+    CONFIRM_BLOCK_MESSAGING_FROM_INBOX, FINISH_BLOCK_MESSAGING_FROM_INBOX,
+    FINISH_UNBLOCK_MESSAGING_FROM_INBOX)
 from modules.users.users import (
     USERS_LIST_HANDLER, USER_MESSAGES_LIST,
     ANSWER_TO_MESSAGE_FROM_USER_LIST_HANDLER, CONFIRM_BLOCK_MESSAGING,
@@ -108,13 +110,11 @@ LOGGER = logging.getLogger(__name__)
 
 
 def main(token, lang):
-
     # https://github.com/python-telegram-bot/python-telegram-bot/issues/787
     req = request.Request(con_pool_size=8)
     BotObj = Bot(token=token, request=req)
     with open('languages.json') as f:
         lang_dicts = json.load(f)
-
     if lang == "ENG":
         Bot.lang_dict = lang_dicts["ENG"]
     else:

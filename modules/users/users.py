@@ -2,23 +2,24 @@
 # # -*- coding: utf-8 -*-
 import datetime
 import logging
+from pprint import pprint
 
 from bson.objectid import ObjectId
-from telegram import (InlineKeyboardButton, InlineKeyboardMarkup,
-                      ParseMode)
+from telegram.error import BadRequest, Unauthorized
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 from telegram.ext import (MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
 
-from database import (users_table, donations_table,
-                      users_messages_to_admin_table)
 from helper_funcs.helper import get_help
 from helper_funcs.pagination import Pagination
-from helper_funcs.misc import (delete_messages, lang_timestamp, get_obj,
-                               user_mention)
+from helper_funcs.misc import (delete_messages, lang_timestamp,
+                               get_obj, user_mention)
 from modules.statistic.donation_statistic import DonationStatistic
 from modules.users.message_helper import (
-    send_message_template, add_to_content, send_deleted_message_content,
-    send_not_deleted_message_content)
+    send_message_template, add_to_content,
+    send_deleted_message_content, send_not_deleted_message_content)
+from database import (users_table, donations_table,
+                      users_messages_to_admin_table)
 
 
 logging.basicConfig(
@@ -128,6 +129,31 @@ class UsersHandler(object):
             pagination = Pagination(users, page=context.user_data["page"])
             # Loop over users on given page and send users templates.
             for user in pagination.content:
+                # Update user data(full_name, username).
+                # todo maybe put update logic into UserTemplate class
+                telegram_user = context.bot.get_chat_member(
+                    user["chat_id"], user["user_id"]).user
+                new_user_names = dict()
+                if telegram_user.username != user["username"]:
+                    new_user_names["username"] = telegram_user.username
+                    user["username"] = telegram_user.username
+                if telegram_user.full_name != user["full_name"]:
+                    new_user_names["full_name"] = telegram_user.full_name
+                    user["full_name"] = telegram_user.full_name
+                if new_user_names:
+                    users_table.update_one({"_id": user['_id']},
+                                           {"$set": new_user_names})
+                # if the user has unsubscribed set it as unsubscribed
+                try:
+                    context.bot.send_chat_action(chat_id=user["chat_id"],
+                                                 action="typing")
+                    if user["unsubscribed"]:
+                        new_user_names["unsubscribed"] = False
+                        user["unsubscribed"] = False
+                except Unauthorized:
+                    users_table.update_one({"_id": user['_id']},
+                                           {"$set": {"unsubscribed": True}})
+                    user["unsubscribed"] = True
                 # Check that there are at least one message from user.
                 message = users_messages_to_admin_table.find_one(
                     {"bot_id": context.bot.id,
@@ -136,30 +162,35 @@ class UsersHandler(object):
                 # Creating keyboard for user.
                 user_buttons = [[]]
                 # TODO STRINGS
-                if user["blocked"]:
-                    user_buttons[0].append(InlineKeyboardButton(
-                        text="Unblock",
-                        callback_data=f"unblock_user_{user['user_id']}"))
+                if user["unsubscribed"]:
+                    pass
                 else:
-                    user_buttons[0].append(InlineKeyboardButton(
-                        text="Block",
-                        callback_data=f"block_user_{user['user_id']}"))
-
-                    if user["regular_messages_blocked"]:
+                    if user["blocked"]:
                         user_buttons[0].append(InlineKeyboardButton(
-                            text=context.bot.lang_dict[
-                                "unblock_messages_button"],
-                            callback_data=f"unblock_messages_"
-                                          f"{user['user_id']}"))
+                            text="Unblock",
+                            callback_data=f"unblock_user_{user['user_id']}"))
                     else:
                         user_buttons[0].append(InlineKeyboardButton(
-                            text=context.bot.lang_dict["block_messages_button"],
-                            callback_data=f"block_messages_{user['user_id']}"))
+                            text="Block",
+                            callback_data=f"block_user_{user['user_id']}"))
 
-                if message:
-                    user_buttons[0].append(InlineKeyboardButton(
-                        text="Messages",
-                        callback_data=f"user_messages_{user['user_id']}"))
+                        if user["regular_messages_blocked"]:
+                            user_buttons[0].append(InlineKeyboardButton(
+                                text=context.bot.lang_dict[
+                                    "unblock_messages_button"],
+                                callback_data=f"unblock_messages_"
+                                              f"{user['user_id']}"))
+                        else:
+                            user_buttons[0].append(InlineKeyboardButton(
+                                text=context.bot.lang_dict[
+                                    "block_messages_button"],
+                                callback_data=f"block_messages_"
+                                              f"{user['user_id']}"))
+
+                    if message:
+                        user_buttons[0].append(InlineKeyboardButton(
+                            text="Messages",
+                            callback_data=f"user_messages_{user['user_id']}"))
                 # Send template with keyboard.
                 UserTemplate(user).send(
                     update, context,
@@ -169,6 +200,9 @@ class UsersHandler(object):
                 update, context,
                 page_prefix="users_list_pagination",
                 buttons=main_buttons)
+
+    def user(self, update, context):
+        delete_messages(update, context, True)
 
     def back_to_users(self, update, context):
         """
@@ -455,40 +489,6 @@ class AnswerToMessageFromUserList(object):
             context,
             chat_id=context.user_data["chat_id"],
             content=context.user_data["content"])
-        """for content_dict in context.user_data["content"]:
-            if "text" in content_dict:
-                context.bot.send_message(context.user_data["chat_id"],
-                                         content_dict["text"])
-            if "audio_file" in content_dict:
-                context.bot.send_audio(context.user_data["chat_id"],
-                                       content_dict["audio_file"])
-            if "voice_file" in content_dict:
-                context.bot.send_voice(context.user_data["chat_id"],
-                                       content_dict["voice_file"])
-            if "video_file" in content_dict:
-                context.bot.send_video(context.user_data["chat_id"],
-                                       content_dict["video_file"])
-            if "video_note_file" in content_dict:
-                context.bot.send_video_note(context.user_data["chat_id"],
-                                            content_dict["video_note_file"])
-            if "document_file" in content_dict:
-                if (".png" in content_dict["document_file"] or
-                        ".jpg" in content_dict["document_file"]):
-                    context.bot.send_photo(context.user_data["chat_id"],
-                                           content_dict["document_file"])
-                else:
-                    context.bot.send_document(context.user_data["chat_id"],
-                                              content_dict["document_file"])
-            if "photo_file" in content_dict:
-                context.bot.send_photo(context.user_data["chat_id"],
-                                       content_dict["photo_file"])
-            if "animation_file" in content_dict:
-                context.bot.send_animation(context.user_data["chat_id"],
-                                           content_dict["animation_file"])
-            if "sticker_file" in content_dict:
-                context.bot.send_sticker(context.user_data["chat_id"],
-                                         content_dict["sticker_file"])"""
-
         logger.info("Admin {} on bot {}:{} sent a message to the user".format(
             update.effective_user.first_name,
             context.bot.first_name, context.bot.id))
@@ -505,10 +505,11 @@ class UserTemplate(object):
         # self.context = context
         user_obj = get_obj(users_table, obj)
         self.user_id = user_obj["user_id"]
-        # self.username = user_obj["username"]
+        self.username = user_obj["username"]
         self.full_name = user_obj["full_name"]
         self.timestamp = user_obj["timestamp"]
         self.regular_messages_blocked = user_obj["regular_messages_blocked"]
+        self.unsubscribed = user_obj["unsubscribed"]
 
     def send(self, update, context, text="", reply_markup=None):
         context.user_data["to_delete"].append(
@@ -521,8 +522,10 @@ class UserTemplate(object):
     # todo add messages count
     def template(self, context):
         return (context.bot.lang_dict["user_temp"].format(
-            user_mention(self.user_id, self.full_name),
+            user_mention(self.username, self.full_name),
             lang_timestamp(context, self.timestamp))
+            # TODO STRINGS
+            + ("\n🚫 Отписался" if self.unsubscribed else "")
             + "\n" + self.donates_to_string(context))
 
     def donates_to_string(self, context):
