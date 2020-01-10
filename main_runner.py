@@ -87,7 +87,6 @@ from modules.shop.modules.categories import (
     ADD_CATEGORY_HANDLER, CATEGORIES_HANDLER, EDIT_CATEGORIES_HANDLER,
     RENAME_CATEGORY_HANDLER, DELETE_CATEGORY_HANDLER)
 from modules.shop.modules.eshop_enable_disable import CREATE_SHOP_HANDLER
-from modules.shop.modules.user_side.eshop_payment import PURCHASE_HANDLER
 
 from modules.shop.modules.user_side.offline_payment import OFFLINE_PURCHASE_HANDLER
 from modules.shop.modules.user_side.online_payment import ONLINE_PURCHASE_HANDLER
