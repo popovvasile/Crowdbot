@@ -46,7 +46,6 @@ TODO delete chat/survey from all chats, including channels and groups
     * В template сообщения показывать либо количество файлов(как в bot_father) либо просто названия файлов(как в телеграме)
     * Под каждым юзером в списке юзеров кнопка "Написать" и когда отправляешь сообщение - то просто приходит ответ юзеру и всё
     * More information to the user list (active users count...)
-    * maybe delete button for unsubscribed users in the users list
     * handling admins that leave the bot
     Под каждым юзером в списке юзеров кнопка «открыть»
         (если юзер отписался показать что он отписался и кнопка «удалить»)
@@ -62,8 +61,6 @@ TODO delete chat/survey from all chats, including channels and groups
       ("anonim_messages_blocked" and "regular_messages_blocked") - this fields become False(instead of True)
     * stickers bug in bot_father reports(check stickers for crowd)
     * имя ансабов не обновляется
-    * если нет юзернейма использовать user_id mention, прпробывать оставить link preview
-    * внутри стейтов ловить апдейты статусов
 
 
 # TODO for discussion
@@ -72,3 +69,4 @@ TODO delete chat/survey from all chats, including channels and groups
         или кнопка удалить под отписавшимися
         или отдельный список под отписавшимися
         или просто цифра ансабов
+    * внутри стейтов ловить апдейты статусов

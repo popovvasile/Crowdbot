@@ -16,8 +16,7 @@ from helper_funcs.misc import (delete_messages, lang_timestamp,
                                get_obj, user_mention)
 from modules.statistic.donation_statistic import DonationStatistic
 from modules.users.message_helper import (
-    send_message_template, add_to_content,
-    send_deleted_message_content, send_not_deleted_message_content)
+    send_message_template, send_deleted_message_content, AnswerToMessage)
 from database import (users_table, donations_table,
                       users_messages_to_admin_table)
 
@@ -29,25 +28,22 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-# TODO users that have blocked the bot can't be shown as the url mention
-#      and must be deleted. Count of unsubscribers.
-#      Check if the user active(Bot.send_chat_action) - if not remove it
-
 class UsersHandler(object):
     def users(self, update, context):
         delete_messages(update, context, True)
         # Set current page integer in user_data.
         if update.callback_query.data.startswith("users_list_pagination"):
             context.user_data["page"] = int(
-                update.callback_query.data.replace("users_list_pagination_",
-                                                   ""))
+                update.callback_query.data.replace(
+                    "users_list_pagination_", ""))
         # If one of the filters buttons clicked -
         # set new filters for query and new menu buttons
         if (update.callback_query.data == 'users_layout'
                 or update.callback_query.data == "show_all"):
             context.user_data['page'] = 1
             context.user_data["filter"] = {"bot_id": context.bot.id,
-                                           "is_admin": False}
+                                           "is_admin": False,
+                                           "unsubscribed": False}
             context.user_data["filters_buttons"] = [[
                 InlineKeyboardButton(
                     text=context.bot.lang_dict["show_banned_btn"],
@@ -62,7 +58,8 @@ class UsersHandler(object):
             context.user_data["filter"] = {"bot_id": context.bot.id,
                                            "is_admin": False,
                                            # "regular_messages_blocked": True
-                                           "blocked": True}
+                                           "blocked": True,
+                                           "unsubscribed": False}
             context.user_data["filters_buttons"] = [[
                 InlineKeyboardButton(
                     text=context.bot.lang_dict["show_all_users_btn"],
@@ -77,7 +74,8 @@ class UsersHandler(object):
             context.user_data["filter"] = {"bot_id": context.bot.id,
                                            "is_admin": False,
                                            # "regular_messages_blocked": False
-                                           "blocked": False}
+                                           "blocked": False,
+                                           "unsubscribed": False}
             context.user_data["filters_buttons"] = [[
                 InlineKeyboardButton(
                     text=context.bot.lang_dict["show_all_users_btn"],
@@ -98,26 +96,24 @@ class UsersHandler(object):
         users = users_table.find(
             context.user_data["filter"]).sort([["_id", -1]])
         # Send title for user list.
+        if context.user_data["filter"].get("blocked") is True:
+            title_str = "banned_users_title"
+        elif context.user_data["filter"].get("blocked") is False:
+            title_str = "not_banned_users_title"
+        else:
+            title_str = "users_layout_title"
         context.user_data['to_delete'].append(
             context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
-                text=context.bot.lang_dict[
-                    "banned_users_title"
-                    if context.user_data["filter"].get("blocked") is True
-                    else "not_banned_users_title"
-                    if context.user_data["filter"].get("blocked") is False
-                    else "users_layout_title"].format(users.count()),
+                text=context.bot.lang_dict[title_str].format(users.count()),
                 parse_mode=ParseMode.HTML))
-
+        # Keyboard with user list filters buttons
         main_buttons = (context.user_data["filters_buttons"]
                         + [[InlineKeyboardButton(
                                 text=context.bot.lang_dict["back_button"],
                                 callback_data="back_to_module_users")]])
         # If no users just send back button.
         if users.count() == 0:
-            # update.callback_query.answer(
-            #     context.bot.lang_dict["no_users_str"])
-            # return self.back_from_users_list(update, context)
             context.user_data["to_delete"].append(
                 context.bot.send_message(
                     chat_id=update.effective_chat.id,
@@ -125,35 +121,10 @@ class UsersHandler(object):
                     reply_markup=InlineKeyboardMarkup(main_buttons)
                 ))
         else:
-            # Send pagination keyboard.
+            # Create Pagination instance for showing page content and pages
             pagination = Pagination(users, page=context.user_data["page"])
             # Loop over users on given page and send users templates.
             for user in pagination.content:
-                # Update user data(full_name, username).
-                # todo maybe put update logic into UserTemplate class
-                telegram_user = context.bot.get_chat_member(
-                    user["chat_id"], user["user_id"]).user
-                new_user_names = dict()
-                if telegram_user.username != user["username"]:
-                    new_user_names["username"] = telegram_user.username
-                    user["username"] = telegram_user.username
-                if telegram_user.full_name != user["full_name"]:
-                    new_user_names["full_name"] = telegram_user.full_name
-                    user["full_name"] = telegram_user.full_name
-                if new_user_names:
-                    users_table.update_one({"_id": user['_id']},
-                                           {"$set": new_user_names})
-                # if the user has unsubscribed set it as unsubscribed
-                try:
-                    context.bot.send_chat_action(chat_id=user["chat_id"],
-                                                 action="typing")
-                    if user["unsubscribed"]:
-                        new_user_names["unsubscribed"] = False
-                        user["unsubscribed"] = False
-                except Unauthorized:
-                    users_table.update_one({"_id": user['_id']},
-                                           {"$set": {"unsubscribed": True}})
-                    user["unsubscribed"] = True
                 # Check that there are at least one message from user.
                 message = users_messages_to_admin_table.find_one(
                     {"bot_id": context.bot.id,
@@ -162,9 +133,7 @@ class UsersHandler(object):
                 # Creating keyboard for user.
                 user_buttons = [[]]
                 # TODO STRINGS
-                if user["unsubscribed"]:
-                    pass
-                else:
+                if not user["unsubscribed"]:
                     user_buttons[0].append(InlineKeyboardButton(
                         text="Send Message",
                         callback_data=f"send_message_to_user_"
@@ -190,7 +159,6 @@ class UsersHandler(object):
                                     "block_messages_button"],
                                 callback_data=f"block_messages_"
                                               f"{user['user_id']}"))
-
                     if message:
                         user_buttons[0].append(InlineKeyboardButton(
                             text="Messages",
@@ -209,9 +177,7 @@ class UsersHandler(object):
         delete_messages(update, context, True)
 
     def back_to_users(self, update, context):
-        """
-        All backs to user list must be done through this method
-        """
+        """All backs to user list must be done through this method"""
         delete_messages(update, context, True)
         try:
             page = context.user_data["page"]
@@ -381,7 +347,7 @@ class SeeUserMessage(object):
         buttons = [
             [InlineKeyboardButton(
                 text=context.bot.lang_dict["answer_button_str"],
-                callback_data=f"answer_to_user_message_"
+                callback_data=f"answer_to_user_message/"
                               + str(context.user_data["message"]['_id'])),
              InlineKeyboardButton(
                  text=context.bot.lang_dict["delete_button_str"],
@@ -451,7 +417,12 @@ class SeeUserMessage(object):
         return self.view_message(update, context)
 
 
-class AnswerToMessageFromUserList(object):
+'''class AnswerToMessageFromUserList(object):
+    """
+    * def send_message() def received_message() -> back_button
+    * state
+    * final callback
+    """
     def send_message(self, update, context):
         delete_messages(update, context, True)
         buttons = list()
@@ -495,19 +466,68 @@ class AnswerToMessageFromUserList(object):
         logger.info("Admin {} on bot {}:{} sent a message to the user".format(
             update.effective_user.first_name,
             context.bot.first_name, context.bot.id))
+        # TODO STRINGS
         update.callback_query.answer("Message sent")
         return SeeUserMessage().back_to_users_messages(update, context)
 
     def delete_message(self, update, context):
-        delete_messages(update, context, True)
+        delete_messages(update, context, True)'''
 
+''''
+class SendMessageToUser(object):
+    """
+    """
+    def send_message(self, update, context):
+        delete_messages(update, context, True)
+        context.user_data["user_id"] = users_table.find_one(
+            {"_id": ObjectId(update.callback_query.data.split("/")[1])})
+
+        reply_markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                  callback_data=self.back_button)]
+        ])
+        context.bot.send_message(
+            chat_id=update.callback_query.message.chat_id,
+            text=context.bot.lang_dict["send_message_3"],
+            reply_markup=reply_markup)
+        return self.STATE
+
+    def received_message(self, update, context):
+        add_to_content(update, context)
+        reply_markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton(text=context.bot.lang_dict["done_button"],
+                                  callback_data="send_message_finish")],
+            [InlineKeyboardButton(text=context.bot.lang_dict["cancel_button"],
+                                  callback_data=self.back_button)]
+        ])
+        context.bot.send_message(chat_id=update.message.chat_id,
+                                 text=context.bot.lang_dict["send_message_4"],
+                                 reply_markup=reply_markup)
+        return self.STATE
+
+    def send_message_finish(self, update, context):
+        context.bot.send_message(
+            chat_id=context.user_data["chat_id"],
+            text=context.bot.lang_dict["send_message_answer_user"])
+        send_not_deleted_message_content(
+            context,
+            chat_id=context.user_data["chat_id"],
+            content=context.user_data["content"])
+        logger.info("Admin {} on bot {}:{} sent a message to the user".format(
+            update.effective_user.first_name,
+            context.bot.first_name, context.bot.id))
+        # TODO STRINGS
+        update.callback_query.answer("Message sent")
+        return self.final_callback(update, context)
+'''''
 
 # todo mb last seen for users. mb users images
 class UserTemplate(object):
     def __init__(self, obj: (ObjectId, dict, str)):
-        # self.context = context
         user_obj = get_obj(users_table, obj)
+        self._id = user_obj["_id"]
         self.user_id = user_obj["user_id"]
+        self.chat_id = user_obj["chat_id"]
         self.username = user_obj["username"]
         self.full_name = user_obj["full_name"]
         self.timestamp = user_obj["timestamp"]
@@ -524,9 +544,15 @@ class UserTemplate(object):
 
     # todo add messages count
     def template(self, context):
+        self.update_fields(context)
+        if self.username:
+            _user_mention = user_mention(self.username, self.full_name)
+        else:
+            _user_mention = (
+                f'<a href="tg://user?id={self.user_id}">{self.full_name}</a>')
+
         return (context.bot.lang_dict["user_temp"].format(
-            user_mention(self.username, self.full_name),
-            lang_timestamp(context, self.timestamp))
+            _user_mention, lang_timestamp(context, self.timestamp))
             # TODO STRINGS
             + ("\n🚫 Отписался" if self.unsubscribed else "")
             + "\n" + self.donates_to_string(context))
@@ -535,19 +561,40 @@ class UserTemplate(object):
         donates = donations_table.find({"bot_id": context.bot.id,
                                         "user_id": self.user_id})
         return (context.bot.lang_dict["donations_count_str"].format(
+            # TODO import fom another module
             DonationStatistic().create_amount(donates))
             if donates.count() else "")
 
-    def messaging_status(self):
-        return ""
+    def update_fields(self, context):
+        # Update user full_name, username
+        telegram_user = context.bot.get_chat_member(self.chat_id,
+                                                    self.user_id).user
+        new_user_fields = dict()
+        if telegram_user.username != self.username:
+            new_user_fields["username"] = telegram_user.username
+            self.username = telegram_user.username
 
-    # def messages(self, context):
-    #     return users_messages_to_admin_table.find(
-    #         {"bot_id": context.bot.id,
-    #          "user_id": self.user_id}).sort([["_id", -1]])
+        if telegram_user.full_name != self.full_name:
+            new_user_fields["full_name"] = telegram_user.full_name
+            self.full_name = telegram_user.full_name
+
+        # if the user has unsubscribed set it as unsubscribed
+        try:
+            context.bot.send_chat_action(self.chat_id, action="typing")
+            if self.unsubscribed:
+                new_user_fields["unsubscribed"] = False
+                self.unsubscribed = False
+        except Unauthorized:
+            if not self.unsubscribed:
+                new_user_fields["unsubscribed"] = True
+                self.unsubscribed = True
+
+        if new_user_fields:
+            users_table.update_one({"_id": self._id},
+                                   {"$set": new_user_fields})
 
 
-MESSAGE_TO_USERS = range(1)
+MESSAGE_TO_USERS = 1
 
 USERS_LIST_HANDLER = CallbackQueryHandler(
     pattern="^(users_layout|"
@@ -557,9 +604,8 @@ USERS_LIST_HANDLER = CallbackQueryHandler(
             "users_list_pagination)",
     callback=UsersHandler().users)
 
-"""
-BLOCK AND UNBLOCK MESSAGING FOR USER
-"""
+
+"""BLOCK AND UNBLOCK MESSAGING FOR USER"""
 CONFIRM_BLOCK_MESSAGING = CallbackQueryHandler(
     pattern=r"block_messages",
     callback=UserBlockHandler().block_messaging_confirmation)
@@ -572,9 +618,8 @@ FINISH_UNBLOCK_MESSAGING = CallbackQueryHandler(
     pattern=r"unblock_messages",
     callback=UserBlockHandler().unblock_messaging_finish)
 
-"""
-BAN AND UNBUN USERS
-"""
+
+"""BAN AND UNBUN USERS"""
 CONFIRM_BAN_USER = CallbackQueryHandler(
     pattern=r"block_user",
     callback=UserBlockHandler().ban_confirmation)
@@ -587,9 +632,8 @@ FINISH_UNBUN_USER = CallbackQueryHandler(
     pattern=r"unblock_user",
     callback=UserBlockHandler().unbun_finish)
 
-"""
-USER MESSAGES
-"""
+
+"""USER MESSAGES"""
 USER_MESSAGES_LIST = CallbackQueryHandler(
     pattern="^(user_messages|pagination_user_messages)",
     callback=SeeUserMessage().see_messages)
@@ -598,32 +642,60 @@ VIEW_USER_MESSAGE = CallbackQueryHandler(
     pattern=r"view_user_message",
     callback=SeeUserMessage().view_message)
 
+
+"""ANSWER TO SUBSCRIBER MESSAGE"""
+answer_to_message = AnswerToMessage(
+    back_button="back_to_inbox_view_message",
+    state=MESSAGE_TO_USERS,
+    final_callback=SeeUserMessage().back_to_view_message)
+
 ANSWER_TO_MESSAGE_FROM_USER_LIST_HANDLER = ConversationHandler(
     entry_points=[
         CallbackQueryHandler(
             pattern=r"answer_to_user_message",
-            callback=AnswerToMessageFromUserList().send_message)],
-
+            callback=answer_to_message.send_message)],
     states={
         MESSAGE_TO_USERS: [
             MessageHandler(
                 filters=Filters.all,
-                callback=AnswerToMessageFromUserList().received_message)],
+                callback=answer_to_message.received_message)],
 
     },
-
     fallbacks=[
         CallbackQueryHandler(
             pattern=r"send_message_finish",
-            callback=AnswerToMessageFromUserList().send_message_finish),
+            callback=answer_to_message.send_message_finish),
         CallbackQueryHandler(
             pattern=r"back_to_view_message",
             callback=SeeUserMessage().back_to_view_message)]
 )
 
-"""
-BACKS
-"""
+'''
+"""SEND MESSAGE TO USER"""
+SEND_MESSAGE_TO_USER_HANDLER = ConversationHandler(
+    entry_points=[
+        CallbackQueryHandler(
+            pattern=r"answer_to_message",
+            callback=answer_to_message.send_message)],
+
+    states={
+        MESSAGE_TO_USERS: [
+            MessageHandler(
+                filters=Filters.all,
+                callback=answer_to_message.received_message)]
+    },
+
+    fallbacks=[
+        CallbackQueryHandler(
+            pattern=r"send_message_finish",
+            callback=answer_to_message.send_message_finish),
+        CallbackQueryHandler(
+            pattern=r"back_to_inbox_view_message",
+            callback=SeeMessageToAdmin.back_to_view_message)]
+)
+'''
+
+"""BACKS"""
 BACk_TO_USER_OPEN_MESSAGE = CallbackQueryHandler(
     pattern=r"back_to_users_messages",
     callback=SeeUserMessage().back_to_users_messages)

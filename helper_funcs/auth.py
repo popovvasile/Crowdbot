@@ -19,6 +19,8 @@ def register_chat(update, context):
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
 
+    user = users_table.find_one({"user_id": user_id,
+                                 "bot_id": context.bot.id})
     superuser = chatbots_table.find_one({"bot_id": context.bot.id})["superuser"]
     if user_id == superuser:
         users_table.update({"user_id": user_id,
@@ -40,8 +42,7 @@ def register_chat(update, context):
                             "unsubscribed": False,
                             "tags": ["#all", "#user", "#admin"]
                             }, upsert=True)
-    elif not users_table.find_one({"user_id": user_id,
-                                   "bot_id": context.bot.id}):
+    elif not user:
         users_table.insert({'bot_id': context.bot.id,
                             "chat_id": chat_id,
                             "user_id": user_id,
@@ -58,6 +59,9 @@ def register_chat(update, context):
                             "blocked": False,
                             "unsubscribed": False,
                             "tags": ["#all", "#user"]})
+    elif user["unsubscribed"]:
+        users_table.update_one({"user_id": user_id, "bot_id": context.bot.id},
+                               {"$set": {"unsubscribed": False}})
 
 
 def register_admin(update, context):
