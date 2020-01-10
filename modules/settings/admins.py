@@ -2,28 +2,27 @@
 # # -*- coding: utf-8 -*-
 from uuid import uuid4
 from threading import Thread
+from datetime import datetime
+import secrets
+import string
 
 from bson.objectid import ObjectId
 from validate_email import validate_email
-from telegram import (InlineKeyboardButton, InlineKeyboardMarkup, ParseMode,
-                      LoginUrl)
-from telegram.ext import (MessageHandler, Filters,
-                          ConversationHandler, CallbackQueryHandler)
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
+from telegram.ext import ConversationHandler, CallbackQueryHandler
 
-
-from database import users_table
+from database import users_table, admin_passwords_table
 from helper_funcs.pagination import Pagination
 from helper_funcs.misc import delete_messages, lang_timestamp, get_obj
 from helper_funcs.helper import back_from_button_handler
-from helper_funcs.mailer import SMTPMailer
 
 
 # Make string for adding admins emails menu
 def emails_layout(context, text) -> str:
     if len(context.user_data['new_admins']) > 0:
-        return f"{text} \nAdmins:\n" + \
-               '\n'.join([i['email']
-                          for i in context.user_data['new_admins']])
+        return (f"{text} \nAdmins:\n"
+                + '\n'.join([i['email']
+                             for i in context.user_data['new_admins']]))
     return text
 
 
@@ -71,7 +70,7 @@ class Admin:
                                  "is_admin": True,
                                  "superuser": False}).sort([["_id", -1]])
 
-    @staticmethod
+    """@staticmethod
     def add_new_admins(context):
         for admin in context.user_data["new_admins"]:
             admin["bot_id"] = context.bot.id
@@ -90,7 +89,7 @@ class Admin:
             else:
                 users_table.save(admin)
         Thread(target=SMTPMailer().send_registration_msgs,
-               args=(context, context.user_data['new_admins'])).start()
+               args=(context, context.user_data['new_admins'])).start()"""
 
 
 class AdminHandler(object):
@@ -161,38 +160,43 @@ class AdminHandler(object):
 
     def start_add_admins(self, update, context):
         delete_messages(update, context, True)
-        # context.user_data["new_admins"] = list()
-        # context.user_data['to_delete'].append(
-        #     context.bot.send_message(
-        #         chat_id=update.effective_chat.id,
-        #         text=context.bot.lang_dict["enter_new_admin_email"],
-        #         reply_markup=InlineKeyboardMarkup([
-        #             [InlineKeyboardButton(
-        #                 text=context.bot.lang_dict["back_button"],
-        #                 callback_data="back_to_admin_list")]
-        #         ])))
+        # Create 10 character length password
+        password = "".join(secrets.choice(
+            string.ascii_letters + string.digits) for i in range(10))
+        # Created separate collection for the admins passwords
+        # because when u click "Add admin" button(create new admin link)
+        # u need to keep before created links active.
+        # Save password to db to invalid it after user registration.
+        admin_passwords_table.insert_one(
+            {"bot_id": context.bot.id,
+             "password": password,
+             "timestamp": datetime.now()})
+        # Message that must be forwarded to admin.
         context.user_data['to_delete'].append(
             context.bot.send_message(
                 chat_id=update.effective_chat.id,
                 text=f"<b>You have been invited as an administrator to</b> "
-                     f"{context.bot.get_me().mention_html()}.",
+                     f"{context.bot.get_me().mention_html()}"
+                     "\n<code>Never forward this message "
+                     "to other persons.</code>",
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton(
                         text="Register",
-                        login_url=LoginUrl(
-                            bot_username="crowd_supportbot",
-                            # url=f"https://t.me/{context.bot.username}",
-                            url=f"https://t.me/crowd_supportbot",
-
-                            # forward_text="Become admin"
-                        ),
-                        # switch_inline_query="f",
-                    )],
-                    # [InlineKeyboardButton(
-                    #     text=context.bot.lang_dict["back_button"],
-                    #     callback_data="back_to_admin_list")]
+                        url=f"https://t.me/{context.bot.username}?"
+                            f"start=registration" + password)]
                 ]),
                 parse_mode=ParseMode.HTML))
+        context.user_data['to_delete'].append(
+            context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text="Forward ⬆ ️this ⬆️ message to admins."
+                     "\nThe button will be valid for one hour."
+                     "\nDon't send it to unauthorized persons!",
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton(
+                        text=context.bot.lang_dict["back_button"],
+                        callback_data="back_to_admin_list")]])
+            ))
         return ADD_ADMINS
 
     """    
@@ -274,8 +278,9 @@ class AdminHandler(object):
         # update.callback_query.data = "help_module(settings)"
         return self.back_to_admins_list(update, context)
     """
+
     def back_to_admins_list(self, update, context):
-        # delete_messages(update, context, True)
+        delete_messages(update, context, True)
         page = context.user_data.get("page")
         context.user_data.clear()
         context.user_data["page"] = page

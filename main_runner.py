@@ -1,67 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""import json
-import logging
-import telegram.ext as tg
-from telegram import Bot
-
-from telegram.ext import CommandHandler, CallbackQueryHandler, MessageHandler, Filters
-
-from helper_funcs.admin_login import ADMIN_AUTHENTICATION_HANDLER
-from modules.chanells.channels import MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER, REMOVE_CHANNEL_HANDLER, \
-    SEND_POST_HANDLER, CHANELLS_MENU
-from modules.chanells.channels_polls_surveys_donate import \
-    SEND_POLL_TO_CHANNEL_HANDLER, SEND_SURVEY_TO_CHANNEL_HANDLER, SEND_DONATION_TO_CHANNEL_HANDLER
-from modules.shop.modules.categories import ADD_CATEGORY_HANDLER, CATEGORIES_HANDLER, EDIT_CATEGORIES_HANDLER, \
-    RENAME_CATEGORY_HANDLER, DELETE_CATEGORY_HANDLER
-from modules.shop.modules.eshop_enable_disable import CREATE_SHOP_HANDLER
-from modules.shop.modules.user_side.offline_payment import OFFLINE_PURCHASE_HANDLER
-from modules.shop.modules.user_side.online_payment import ONLINE_PURCHASE_HANDLER
-from modules.groups.groups import MY_GROUPS_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER, \
-    ADD_GROUP_HANLDER, GROUPS_MENU
-from modules.groups.groups_polls_surveys_donate import SEND_POLL_TO_GROUP_HANDLER, SEND_SURVEY_TO_GROUP_HANDLER, \
-    SEND_DONATION_TO_GROUP_HANDLER
-from modules.settings.menu_description import EDIT_BOT_DESCRIPTION_HANDLER
-from modules.settings.settings import BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER, LINK_BUTTON_ADD_HANDLER, \
-    CREATE_BUTTON_CHOOSE, BUTTONS_MENU
-from modules.shop.modules.user_side.products import USERS_ORDERS_HANDLER, USERS_PRODUCTS_HANDLER
-from modules.users.messages_admin import SEND_MESSAGE_ONLY_TO_ADMINS_HANDLER
-from modules.users.messages_donators import SEND_MESSAGE_TO_DONATORS_HANDLER
-from modules.surveys.surveys_answer import ANSWER_SURVEY_HANDLER
-from modules.donations.donation_enable_disable import CREATE_DONATION_HANDLER, DONATIONS_MENU
-from modules.surveys.surveys_create import DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_HANDLER, SEND_SURVEYS_HANDLER, \
-    CREATE_SURVEY_HANDLER, SURVEYS_MENU, SEND_SURVEYS_MENU_HANDLER
-from modules.payments.payments_config import EDIT_DONATION_HANDLER, PAYMENTS_CONFIG_KEYBOARD, CHANGE_DONATIONS_CONFIG, \
-    CONFIGS_DONATIONS_GENERAL, CONFIGS_SHOP_GENERAL, CHANGE_SHOP_CONFIG
-from helper_funcs.helper import help_button, button_handler, get_help, WelcomeBot, \
-    back_from_button_handler
-
-from modules.settings.manage_button import BUTTON_EDIT_HANDLER, BUTTON_EDIT_FINISH_HANDLER, DELETE_CONTENT_HANDLER, \
-    BUTTON_ADD_FINISH_HANDLER, back_from_edit_button_handler
-from modules.donations.donation_payment import DONATE_HANDLER, HANDLE_SUCCES, HANDLE_PRECHECKOUT
-from modules.pollbot.polls import POLL_HANDLER, SEND_POLLS_HANDLER, BUTTON_HANDLER, DELETE_POLLS_HANDLER, \
-    POLLS_RESULTS_HANDLER, POLLS_MENU, POLLS_SEND_MENU
-from modules.donations.donation_send_promotion import SEND_DONATION_TO_USERS_HANDLER
-from modules.users.messages import SEND_MESSAGE_TO_ADMIN_HANDLER, SEND_MESSAGE_TO_USERS_HANDLER, SEE_MESSAGES_HANDLER, \
-    ANSWER_TO_MESSAGE_HANDLER, DELETE_MESSAGES_HANDLER, SEE_MESSAGES_FINISH_HANDLER, SEE_MESSAGES_BACK_HANDLER, \
-    SEE_MESSAGES_FINISH_BACK_HANDLER, BLOCK_USER, BLOCKED_USERS_LIST, UNBLOCK_USER, MESSAGES_MENU, \
-    SEE_MESSAGES_PAGINATION_HANDLER
-from modules.settings.user_mode import USER_MODE_OFF, USER_MODE_ON
-
-from modules.users.users import (
-    USERS_MENU, USERS_STATISTIC_HANDLER, USERS_LIST_HANDLER,
-    BACK_TO_USERS_LIST, USERS_LIST_PAGINATION, USER_MESSAGES_LIST,
-    USER_MESSAGES_PAGINATION, ANSWER_TO_MESSAGE_FROM_USER_LIST_HANDLER)
-from modules.settings.admins import ADMINS_LIST_HANDLER, ADD_ADMIN_HANDLER
-from modules.statistic.donation_statistic import DONATION_STATISTIC_HANDLER
-
-# SHOP
-from modules.shop.modules.adding_product import ADD_PRODUCT_HANDLER
-from modules.shop.modules.welcome import START_SHOP_HANDLER, BACK_TO_MAIN_MENU_HANDLER, Welcome
-from modules.shop.modules.orders import ORDERS_HANDLER
-from modules.shop.modules.products import PRODUCTS_HANDLER
-from modules.shop.modules.trash import (TRASH_START, ORDERS_TRASH,
-                                        PRODUCTS_TRASH)"""
 import json
 import logging
 
@@ -71,7 +9,7 @@ from telegram import Bot
 from telegram.ext import (CommandHandler, CallbackQueryHandler,
                           MessageHandler, Filters)
 
-from helper_funcs.admin_login import ADMIN_AUTHENTICATION_HANDLER
+# from helper_funcs.admin_login import ADMIN_AUTHENTICATION_HANDLER
 from helper_funcs.helper import (
     help_button, button_handler, get_help, WelcomeBot,
     back_from_button_handler, back_to_modules)
@@ -88,10 +26,12 @@ from modules.shop.modules.categories import (
     RENAME_CATEGORY_HANDLER, DELETE_CATEGORY_HANDLER)
 from modules.shop.modules.eshop_enable_disable import CREATE_SHOP_HANDLER
 
-from modules.shop.modules.user_side.offline_payment import OFFLINE_PURCHASE_HANDLER
-from modules.shop.modules.user_side.online_payment import ONLINE_PURCHASE_HANDLER
-from modules.shop.modules.user_side.products import (
-    USERS_ORDERS_HANDLER, USERS_PRODUCTS_HANDLER)
+from modules.shop.modules.user_side.offline_payment import (
+    OFFLINE_PURCHASE_HANDLER)
+from modules.shop.modules.user_side.online_payment import (
+    ONLINE_PURCHASE_HANDLER)
+from modules.shop.modules.user_side.products import (USERS_ORDERS_HANDLER,
+                                                     USERS_PRODUCTS_HANDLER)
 
 from modules.groups.groups import (
     MY_GROUPS_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER,
@@ -109,19 +49,19 @@ from modules.settings.manage_button import (
     BUTTON_ADD_FINISH_HANDLER, back_from_edit_button_handler)
 from modules.settings.user_mode import USER_MODE_OFF, USER_MODE_ON
 from modules.settings.admins import ADMINS_LIST_HANDLER
-from modules.donations.donation_payment import (
-    DONATE_HANDLER, HANDLE_SUCCES, HANDLE_PRECHECKOUT)
+from modules.donations.donation_payment import (DONATE_HANDLER, HANDLE_SUCCES,
+                                                HANDLE_PRECHECKOUT)
 
 from modules.users.messages_admin import SEND_MESSAGE_ONLY_TO_ADMINS_HANDLER
 from modules.users.messages_donators import SEND_MESSAGE_TO_DONATORS_HANDLER
 from modules.users.messages import (
     SEND_MESSAGE_TO_ADMIN_HANDLER, SEND_MESSAGE_TO_USERS_HANDLER,
     SEE_MESSAGES_HANDLER, ANSWER_TO_MESSAGE_HANDLER, DELETE_MESSAGES_HANDLER,
-    SEE_MESSAGES_FINISH_HANDLER, BACK_TO_INBOX,
-    MESSAGES_MENU, BACK_TO_INBOX_VIEW_MESSAGE,
-    FINISH_BLOCK_ANONIM_MESSAGING, CONFIRM_BLOCK_ANONIM_MESSAGING,
-    UNBLOCK_ANONIM_MESSAGING, CONFIRM_BLOCK_MESSAGING_FROM_INBOX,
-    FINISH_BLOCK_MESSAGING_FROM_INBOX, FINISH_UNBLOCK_MESSAGING_FROM_INBOX)
+    SEE_MESSAGES_FINISH_HANDLER, BACK_TO_INBOX, MESSAGES_MENU,
+    BACK_TO_INBOX_VIEW_MESSAGE, FINISH_BLOCK_ANONIM_MESSAGING,
+    CONFIRM_BLOCK_ANONIM_MESSAGING, UNBLOCK_ANONIM_MESSAGING,
+    CONFIRM_BLOCK_MESSAGING_FROM_INBOX, FINISH_BLOCK_MESSAGING_FROM_INBOX,
+    FINISH_UNBLOCK_MESSAGING_FROM_INBOX)
 from modules.users.users import (
     USERS_LIST_HANDLER, USER_MESSAGES_LIST,
     ANSWER_TO_MESSAGE_FROM_USER_LIST_HANDLER, CONFIRM_BLOCK_MESSAGING,
@@ -169,13 +109,11 @@ LOGGER = logging.getLogger(__name__)
 
 
 def main(token, lang):
-
     # https://github.com/python-telegram-bot/python-telegram-bot/issues/787
     req = request.Request(con_pool_size=8)
     BotObj = Bot(token=token, request=req)
     with open('languages.json') as f:
         lang_dicts = json.load(f)
-
     if lang == "ENG":
         Bot.lang_dict = lang_dicts["ENG"]
     else:
@@ -344,7 +282,7 @@ def main(token, lang):
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(help_handler)
 
-    dispatcher.add_handler(ADMIN_AUTHENTICATION_HANDLER)  # TODO priority is very important!!!!!!!!!!!!!!!!!!!!
+    # dispatcher.add_handler(ADMIN_AUTHENTICATION_HANDLER)  # TODO priority is very important!!!!!!!!!!!!!!!!!!!!
 
     rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), get_help)
     dispatcher.add_handler(rex_help_handler)

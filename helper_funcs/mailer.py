@@ -1,3 +1,8 @@
+"""
+**********************************************
+WITH NEW REGISTRATION THIS FILE CAN BE REMOVED
+
+"""
 import smtplib, ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart

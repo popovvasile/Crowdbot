@@ -1,16 +1,17 @@
 import re
 
-from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.error import BadRequest, TimedOut, NetworkError, TelegramError, ChatMigrated
-from telegram.ext import ConversationHandler
 from urllib3.exceptions import HTTPError
+from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram.ext import ConversationHandler
+from telegram.error import (BadRequest, TimedOut, NetworkError, TelegramError,
+                            ChatMigrated)
 
-from database import custom_buttons_table, users_table, chatbots_table, user_mode_table, products_table, groups_table
-from helper_funcs.auth import if_admin, initiate_chat_id, register_chat
 from helper_funcs.lang_strings.help_strings import help_strings, helpable_dict
-
 from helper_funcs.misc import paginate_modules, LOGGER, delete_messages
-
+from helper_funcs.auth import (if_admin, initiate_chat_id,
+                               register_chat, register_admin)
+from database import (custom_buttons_table, users_table, chatbots_table,
+                      user_mode_table, products_table, groups_table)
 HELP_STRINGS = """
 {}
 """
@@ -126,7 +127,6 @@ def error_callback(update, context):
         # handle slow connection problems
     except HTTPError:
         print("HTTPError")
-
 
     except NetworkError:
         print("Neworkerror")
@@ -254,8 +254,7 @@ def back_from_button_handler(update, context):
 
 
 def back_to_modules(update, context):
-    """
-    All backs to main menu buttons(modules) must be done through this func.
+    """All backs to main menu buttons(modules) must be done through this func.
     Need to do better with logic in help_button function.
     Don't want to reformat for now so use little trick here.
 
@@ -449,11 +448,13 @@ class WelcomeBot(object):
                                                                 ))]]
                                      ))
         elif "registration" in txt:
-            context.bot.send_message(chat_id=chat_id, text=context.bot.lang_dict["register_str"],
-                                     reply_markup=InlineKeyboardMarkup(
-                                         [[InlineKeyboardButton(text=context.bot.lang_dict["menu_button"],
-                                                                callback_data="help_back")]]
-                                     ))
+            # context.bot.send_message(chat_id=chat_id, text=context.bot.lang_dict["register_str"],
+            #                          reply_markup=InlineKeyboardMarkup(
+            #                              [[InlineKeyboardButton(text=context.bot.lang_dict["menu_button"],
+            #                                                     callback_data="help_back")]]
+            #                          ))
+            register_admin(update, context)
+            get_help(update, context)
         elif "pay_donation" in txt:
             context.bot.send_message(chat_id=chat_id, text=context.bot.lang_dict["donate_button"],
                                      reply_markup=InlineKeyboardMarkup(

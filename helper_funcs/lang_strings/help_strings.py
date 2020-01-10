@@ -94,17 +94,13 @@ def help_strings(context, update):
         admin_help=string_d_str["users_help_admin"],
 
         admin_keyboard=[
+            # TODO Send messages ==> to users, to donators, to customers
             InlineKeyboardButton(text=string_d_str["messages"]
                                  + (f" ({new_messages_count})"
                                     if new_messages_count else ""),
                                  callback_data="admin_messages"),
             InlineKeyboardButton(text=string_d_str["users_module"],
-                                 callback_data="users_layout"),
-            # TODO Send messages ==> to users, to donators, to customers
-            InlineKeyboardButton(text=string_d_str["user_mode_module"],
-                                 callback_data="turn_user_mode_on"),
-            # InlineKeyboardButton(text=string_d_str["send_message_button_6"],
-            #                      callback_data="blocked_users_list"),
+                                 callback_data="users_layout")
         ],
         visitor_help=string_d_str["send_message_user"],
         visitor_keyboard=[

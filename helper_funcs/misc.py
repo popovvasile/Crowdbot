@@ -49,6 +49,7 @@ def delete_messages(update, context, message_from_update=False):
         context.user_data['to_delete'] = list()
 
 
+# todo OVERKILL
 # http://babel.pocoo.org/en/latest/dates.html
 def lang_timestamp(bot_lang: (CallbackContext, str), timestamp,
                    pattern="d, MMM yyyy, hh:mm"):
@@ -74,15 +75,15 @@ def get_obj(table, obj: (ObjectId, dict, str)):
         raise Exception
 
 
-def user_mention(user_id, string):
-    """
-    Users that have blocked the bot or never start it
+def user_mention(username, string):
+    """Users that have blocked the bot or never start it
     can't be shown as the url mention using "tg://user?id=".
 
     But can be showing using "https://t.me/"
-    but in this case we use username that must be checked for correct name
+    but in this case we use username which must exist and be correct
     """
-    return f'<a href="tg://user?id={user_id}">{string}</a>'
+    # return f'<a href="tg://user?id={user_id}">{string}</a>'
+    return f'<a href="https://t.me/{username}">{string}</a>'
 
 
 class EqInlineKeyboardButton(InlineKeyboardButton):
