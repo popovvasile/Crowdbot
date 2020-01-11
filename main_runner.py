@@ -61,13 +61,17 @@ from modules.users.messages import (
     BACK_TO_INBOX_VIEW_MESSAGE, FINISH_BLOCK_ANONIM_MESSAGING,
     CONFIRM_BLOCK_ANONIM_MESSAGING, UNBLOCK_ANONIM_MESSAGING,
     CONFIRM_BLOCK_MESSAGING_FROM_INBOX, FINISH_BLOCK_MESSAGING_FROM_INBOX,
-    FINISH_UNBLOCK_MESSAGING_FROM_INBOX)
+    FINISH_UNBLOCK_MESSAGING_FROM_INBOX, SHOW_MESSAGE_HANDLER,
+    HIDE_MESSAGE_HANDLER)
 from modules.users.users import (
     USERS_LIST_HANDLER, USER_MESSAGES_LIST,
     ANSWER_TO_MESSAGE_FROM_USER_LIST_HANDLER, CONFIRM_BLOCK_MESSAGING,
     FINISH_BLOCK_MESSAGING, FINISH_UNBLOCK_MESSAGING,
-    BACK_TO_USERS_LIST, VIEW_USER_MESSAGE, BACk_TO_USER_OPEN_MESSAGE,
-    CONFIRM_BAN_USER, FINISH_BAN_USER, FINISH_UNBUN_USER)
+    BACK_TO_USERS_LIST, VIEW_USER_MESSAGE, BACK_TO_OPEN_MESSAGE,
+    CONFIRM_BAN_USER, FINISH_BAN_USER, FINISH_UNBUN_USER,
+    SEND_MESSAGE_TO_USER_HANDLER, BACK_TO_USER_MESSAGES_LIST,
+    # OPEN_USER_HANDLER
+)
 
 from modules.statistic.statistic_main import (
     STATISTIC_MAIN_MENU, BACK_TO_STATISTIC_MAIN)
@@ -185,10 +189,13 @@ def main(token, lang):
     dispatcher.add_handler(USER_MESSAGES_LIST)
     dispatcher.add_handler(VIEW_USER_MESSAGE)
     dispatcher.add_handler(ANSWER_TO_MESSAGE_FROM_USER_LIST_HANDLER)
-    dispatcher.add_handler(BACk_TO_USER_OPEN_MESSAGE)
+    dispatcher.add_handler(BACK_TO_OPEN_MESSAGE)
     dispatcher.add_handler(FINISH_BAN_USER)
     dispatcher.add_handler(CONFIRM_BAN_USER)
     dispatcher.add_handler(FINISH_UNBUN_USER)
+    dispatcher.add_handler(SEND_MESSAGE_TO_USER_HANDLER)
+    dispatcher.add_handler(BACK_TO_USER_MESSAGES_LIST)
+    # dispatcher.add_handler(OPEN_USER_HANDLER)
 
     # STATISTIC
     dispatcher.add_handler(STATISTIC_MAIN_MENU)
@@ -239,6 +246,8 @@ def main(token, lang):
     dispatcher.add_handler(CONFIRM_BLOCK_MESSAGING_FROM_INBOX)
     dispatcher.add_handler(FINISH_BLOCK_MESSAGING_FROM_INBOX)
     dispatcher.add_handler(FINISH_UNBLOCK_MESSAGING_FROM_INBOX)
+    dispatcher.add_handler(SHOW_MESSAGE_HANDLER)
+    dispatcher.add_handler(HIDE_MESSAGE_HANDLER)
 
     # SURVEYS
     dispatcher.add_handler(SURVEYS_MENU)
