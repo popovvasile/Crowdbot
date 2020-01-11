@@ -191,6 +191,7 @@ class AdminHandler(object):
                 chat_id=update.effective_chat.id,
                 text="Forward ⬆ ️this ⬆️ message to admins."
                      "\nThe button will be valid for one hour."
+                     "\nOne link - For one Admin"
                      "\nDon't send it to unauthorized persons!",
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton(

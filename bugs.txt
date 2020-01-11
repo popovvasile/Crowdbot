@@ -60,7 +60,8 @@ TODO delete chat/survey from all chats, including channels and groups
       when superuser come to user view and write message and then block messaging for himself and then come to user view again
       ("anonim_messages_blocked" and "regular_messages_blocked") - this fields become False(instead of True)
     * stickers bug in bot_father reports(check stickers for crowd)
-    * имя ансабов не обновляется
+    * имя и username ансабов не обновляется в списке юзеров
+    * if subscribers leave telegram - check for exceptions
 
 
 # TODO for discussion

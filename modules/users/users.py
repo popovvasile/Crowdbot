@@ -16,7 +16,8 @@ from helper_funcs.misc import (delete_messages, lang_timestamp,
                                get_obj, user_mention)
 from modules.statistic.donation_statistic import DonationStatistic
 from modules.users.message_helper import (
-    send_message_template, send_deleted_message_content, AnswerToMessage)
+    send_message_template, send_deleted_message_content, AnswerToMessage,
+    add_to_content, send_not_deleted_message_content)
 from database import (users_table, donations_table,
                       users_messages_to_admin_table)
 
@@ -125,56 +126,164 @@ class UsersHandler(object):
             pagination = Pagination(users, page=context.user_data["page"])
             # Loop over users on given page and send users templates.
             for user in pagination.content:
-                # Check that there are at least one message from user.
+                """"# Check that there are at least one message from user.
                 message = users_messages_to_admin_table.find_one(
                     {"bot_id": context.bot.id,
                      "user_id": user["user_id"],
                      "anonim": False})
                 # Creating keyboard for user.
-                user_buttons = [[]]
+                user_buttons = []
                 # TODO STRINGS
                 if not user["unsubscribed"]:
-                    user_buttons[0].append(InlineKeyboardButton(
-                        text="Send Message",
-                        callback_data=f"send_message_to_user_"
-                                      f"{user['user_id']}"))
+                    user_buttons.append(
+                        [InlineKeyboardButton(
+                            text="Send Message",
+                            callback_data=f"send_message_to_user/"
+                                          f"{user['chat_id']}")])
                     if user["blocked"]:
-                        user_buttons[0].append(InlineKeyboardButton(
-                            text="Unblock",
-                            callback_data=f"unblock_user_{user['user_id']}"))
+                        user_buttons.append(
+                            [InlineKeyboardButton(
+                                text="Unblock",
+                                callback_data=f"unblock_user_"
+                                              f"{user['user_id']}")])
                     else:
-                        user_buttons[0].append(InlineKeyboardButton(
-                            text="Block",
-                            callback_data=f"block_user_{user['user_id']}"))
+                        user_buttons.append(
+                            [InlineKeyboardButton(
+                                text="Block",
+                                callback_data=f"block_user_"
+                                              f"{user['user_id']}")])
 
                         if user["regular_messages_blocked"]:
-                            user_buttons[0].append(InlineKeyboardButton(
+                            user_buttons[-1].append(InlineKeyboardButton(
                                 text=context.bot.lang_dict[
                                     "unblock_messages_button"],
                                 callback_data=f"unblock_messages_"
                                               f"{user['user_id']}"))
                         else:
-                            user_buttons[0].append(InlineKeyboardButton(
+                            user_buttons[-1].append(InlineKeyboardButton(
                                 text=context.bot.lang_dict[
                                     "block_messages_button"],
                                 callback_data=f"block_messages_"
                                               f"{user['user_id']}"))
-                    if message:
+                    if message:   
                         user_buttons[0].append(InlineKeyboardButton(
                             text="Messages",
-                            callback_data=f"user_messages_{user['user_id']}"))
+                            callback_data=f"user_messages_{user['user_id']}"))"""
+                # reply_markup = None
+                # if not user["unsubscribed"]:
+                #     reply_markup = InlineKeyboardMarkup([
+                #         [InlineKeyboardButton(text="Open",
+                #                               callback_data=f"open_user/"
+                #                                             f"{user['_id']}")]
+                #     ])
                 # Send template with keyboard.
                 UserTemplate(user).send(
                     update, context,
-                    reply_markup=InlineKeyboardMarkup(user_buttons))
+                    reply_markup=self.user_markup(context, user)
+                    # reply_markup=reply_markup
+                )
             # Send pagination navigation keyboard.
             pagination.send_keyboard(
                 update, context,
                 page_prefix="users_list_pagination",
                 buttons=main_buttons)
 
-    def user(self, update, context):
+    """def user(self, update, context):
         delete_messages(update, context, True)
+        user_id = ObjectId(update.callback_query.data.split("/")[1])
+        user = users_table.find_one({"_id": user_id})
+        # Check that there are at least one message from user.
+        message = users_messages_to_admin_table.find_one(
+            {"bot_id": context.bot.id,
+             "user_id": user["user_id"],
+             "anonim": False})
+        # Creating keyboard for user.
+        user_buttons = []
+        # TODO STRINGS
+        # if not user["unsubscribed"]:
+        user_buttons.append(
+            [InlineKeyboardButton(
+                text="Send Message",
+                callback_data=f"send_message_to_user/{user['chat_id']}")])
+        if user["blocked"]:
+            user_buttons.append(
+                [InlineKeyboardButton(
+                    text="Unblock",
+                    callback_data=f"unblock_user_{user['user_id']}")])
+        else:
+            user_buttons.append(
+                [InlineKeyboardButton(
+                    text="Block",
+                    callback_data=f"block_user_{user['user_id']}")])
+
+            if user["regular_messages_blocked"]:
+                user_buttons[-1].append(
+                    InlineKeyboardButton(
+                        text=context.bot.lang_dict["unblock_messages_button"],
+                        callback_data=f"unblock_messages_{user['user_id']}"))
+            else:
+                user_buttons[-1].append(
+                    InlineKeyboardButton(
+                        text=context.bot.lang_dict["block_messages_button"],
+                        callback_data=f"block_messages_{user['user_id']}"))
+        if message:
+            user_buttons.append(
+                [InlineKeyboardButton(
+                    text="Messages",
+                    callback_data=f"user_messages_{user['user_id']}")])
+        user_buttons.append(
+            [InlineKeyboardButton(
+                text=context.bot.lang_dict["back_button"],
+                callback_data="back_to_module_users")])
+        UserTemplate(user).send(
+            update, context,
+            reply_markup=InlineKeyboardMarkup(user_buttons))"""
+
+    def user_markup(self, context, user):
+        # Check that there are at least one message from user.
+        message = users_messages_to_admin_table.find_one(
+            {"bot_id": context.bot.id,
+             "user_id": user["user_id"],
+             "anonim": False})
+        # Creating keyboard for user.
+        user_buttons = []
+        # TODO STRINGS
+        if not user["unsubscribed"]:
+            user_buttons.append(
+                [InlineKeyboardButton(
+                    text="Send Message",
+                    callback_data=f"send_message_to_user/{user['chat_id']}")])
+            if user["blocked"]:
+                user_buttons.append(
+                    [InlineKeyboardButton(
+                        text="Unblock",
+                        callback_data=f"unblock_user_{user['user_id']}")])
+            else:
+                user_buttons.append(
+                    [InlineKeyboardButton(
+                        text="Block",
+                        callback_data=f"block_user_{user['user_id']}")])
+
+                if user["regular_messages_blocked"]:
+                    user_buttons[-1].append(
+                        InlineKeyboardButton(
+                            text=context.bot.lang_dict[
+                                "unblock_messages_button"],
+                            callback_data=f"unblock_messages_"
+                                          f"{user['user_id']}"))
+                else:
+                    user_buttons[-1].append(
+                        InlineKeyboardButton(
+                            text=context.bot.lang_dict[
+                                "block_messages_button"],
+                            callback_data=f"block_messages_"
+                                          f"{user['user_id']}"))
+            if message:
+                user_buttons.append(
+                    [InlineKeyboardButton(
+                        text="Messages",
+                        callback_data=f"user_messages_{user['user_id']}")])
+        return InlineKeyboardMarkup(user_buttons)
 
     def back_to_users(self, update, context):
         """All backs to user list must be done through this method"""
@@ -331,19 +440,35 @@ class SeeUserMessage(object):
         delete_messages(update, context, True)
         # If "Open" button clicked - set message object in user data
         if update.callback_query.data.startswith("view_user_message_"):
-            message = users_messages_to_admin_table.find_one({"_id": ObjectId(
+            message_id = ObjectId(
                 update.callback_query.data.replace("view_user_message_", ""))
-            })
+            context.user_data["message"] = (
+                users_messages_to_admin_table.find_one({"_id": message_id}))
+
             # When message opened first time - mark it like read.
-            if message["is_new"]:
+            if context.user_data["message"]["is_new"]:
                 users_messages_to_admin_table.update_one(
-                    {"_id": message["_id"]}, {"$set": {"is_new": False}})
-            context.user_data["message"] = message
-        # send_message_content(update, context, context.user_data["message"])
+                    {"_id": message_id}, {"$set": {"is_new": False}})
+
+        # Send user message content
+        context.user_data["to_delete"].append(
+            context.bot.send_message(chat_id=update.effective_chat.id,
+                                     text="<b>User Message:</b>",
+                                     parse_mode=ParseMode.HTML))
         send_deleted_message_content(
             context,
             chat_id=update.effective_user.id,
             content=context.user_data["message"]["content"])
+        # If answer exist show it
+        if context.user_data["message"]["answer_content"]:
+            context.user_data["to_delete"].append(
+                context.bot.send_message(chat_id=update.effective_chat.id,
+                                         text="<b>Your Answer:</b>",
+                                         parse_mode=ParseMode.HTML))
+            send_deleted_message_content(
+                context,
+                chat_id=update.effective_user.id,
+                content=context.user_data["message"]["answer_content"])
         buttons = [
             [InlineKeyboardButton(
                 text=context.bot.lang_dict["answer_button_str"],
@@ -359,7 +484,8 @@ class SeeUserMessage(object):
                 callback_data="back_to_users_messages")]
         ]
         send_message_template(update, context, context.user_data["message"],
-                              reply_markup=InlineKeyboardMarkup(buttons))
+                              reply_markup=InlineKeyboardMarkup(buttons),
+                              short=True)
         return ConversationHandler.END
 
     def back_to_users_messages(self, update, context):
@@ -417,80 +543,22 @@ class SeeUserMessage(object):
         return self.view_message(update, context)
 
 
-'''class AnswerToMessageFromUserList(object):
-    """
-    * def send_message() def received_message() -> back_button
-    * state
-    * final callback
-    """
-    def send_message(self, update, context):
-        delete_messages(update, context, True)
-        buttons = list()
-        buttons.append(
-            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                  callback_data="back_to_view_message")])
-        reply_markup = InlineKeyboardMarkup(buttons)
-        message = users_messages_to_admin_table.find_one(
-            {"_id": ObjectId(update.callback_query.data.replace(
-                "answer_to_user_message_", ""))})
-        context.user_data["chat_id"] = message["chat_id"]
-
-        context.bot.send_message(
-            chat_id=update.callback_query.message.chat_id,
-            text=context.bot.lang_dict["send_message_3"],
-            reply_markup=reply_markup)
-        return MESSAGE_TO_USERS
-
-    def received_message(self, update, context):
-        add_to_content(update, context)
-        final_reply_markup = InlineKeyboardMarkup([
-            [InlineKeyboardButton(text=context.bot.lang_dict["done_button"],
-                                  callback_data="send_message_finish")],
-            [InlineKeyboardButton(text=context.bot.lang_dict["cancel_button"],
-                                  callback_data="back_to_view_message")]
-        ])
-        context.bot.send_message(chat_id=update.message.chat_id,
-                                 text=context.bot.lang_dict["send_message_4"],
-                                 reply_markup=final_reply_markup)
-
-        return MESSAGE_TO_USERS
-
-    def send_message_finish(self, update, context):
-        context.bot.send_message(
-            chat_id=context.user_data["chat_id"],
-            text=context.bot.lang_dict["send_message_answer_user"])
-        send_not_deleted_message_content(
-            context,
-            chat_id=context.user_data["chat_id"],
-            content=context.user_data["content"])
-        logger.info("Admin {} on bot {}:{} sent a message to the user".format(
-            update.effective_user.first_name,
-            context.bot.first_name, context.bot.id))
-        # TODO STRINGS
-        update.callback_query.answer("Message sent")
-        return SeeUserMessage().back_to_users_messages(update, context)
-
-    def delete_message(self, update, context):
-        delete_messages(update, context, True)'''
-
-''''
 class SendMessageToUser(object):
-    """
-    """
+    """Sending messages to user"""
     def send_message(self, update, context):
         delete_messages(update, context, True)
-        context.user_data["user_id"] = users_table.find_one(
-            {"_id": ObjectId(update.callback_query.data.split("/")[1])})
+        context.user_data["chat_id"] = int(
+            update.callback_query.data.split("/")[1])
 
         reply_markup = InlineKeyboardMarkup([
             [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                  callback_data=self.back_button)]
+                                  callback_data="back_to_users_list")]
         ])
         context.bot.send_message(
             chat_id=update.callback_query.message.chat_id,
             text=context.bot.lang_dict["send_message_3"],
             reply_markup=reply_markup)
-        return self.STATE
+        return MESSAGE_TO_USER
 
     def received_message(self, update, context):
         add_to_content(update, context)
@@ -498,17 +566,14 @@ class SendMessageToUser(object):
             [InlineKeyboardButton(text=context.bot.lang_dict["done_button"],
                                   callback_data="send_message_finish")],
             [InlineKeyboardButton(text=context.bot.lang_dict["cancel_button"],
-                                  callback_data=self.back_button)]
+                                  callback_data="back_to_users_list")]
         ])
         context.bot.send_message(chat_id=update.message.chat_id,
                                  text=context.bot.lang_dict["send_message_4"],
                                  reply_markup=reply_markup)
-        return self.STATE
+        return MESSAGE_TO_USER
 
     def send_message_finish(self, update, context):
-        context.bot.send_message(
-            chat_id=context.user_data["chat_id"],
-            text=context.bot.lang_dict["send_message_answer_user"])
         send_not_deleted_message_content(
             context,
             chat_id=context.user_data["chat_id"],
@@ -518,10 +583,9 @@ class SendMessageToUser(object):
             context.bot.first_name, context.bot.id))
         # TODO STRINGS
         update.callback_query.answer("Message sent")
-        return self.final_callback(update, context)
-'''''
+        return UsersHandler().back_to_users(update, context)
 
-# todo mb last seen for users. mb users images
+
 class UserTemplate(object):
     def __init__(self, obj: (ObjectId, dict, str)):
         user_obj = get_obj(users_table, obj)
@@ -594,7 +658,7 @@ class UserTemplate(object):
                                    {"$set": new_user_fields})
 
 
-MESSAGE_TO_USERS = 1
+MESSAGE_TO_USERS, MESSAGE_TO_USER = range(2)
 
 USERS_LIST_HANDLER = CallbackQueryHandler(
     pattern="^(users_layout|"
@@ -603,6 +667,10 @@ USERS_LIST_HANDLER = CallbackQueryHandler(
             "show_unbanned|"
             "users_list_pagination)",
     callback=UsersHandler().users)
+
+# OPEN_USER_HANDLER = CallbackQueryHandler(
+#     pattern=r"open_user",
+#     callback=UsersHandler().user)
 
 
 """BLOCK AND UNBLOCK MESSAGING FOR USER"""
@@ -645,7 +713,7 @@ VIEW_USER_MESSAGE = CallbackQueryHandler(
 
 """ANSWER TO SUBSCRIBER MESSAGE"""
 answer_to_message = AnswerToMessage(
-    back_button="back_to_inbox_view_message",
+    back_button="back_to_view_message",
     state=MESSAGE_TO_USERS,
     final_callback=SeeUserMessage().back_to_view_message)
 
@@ -670,36 +738,40 @@ ANSWER_TO_MESSAGE_FROM_USER_LIST_HANDLER = ConversationHandler(
             callback=SeeUserMessage().back_to_view_message)]
 )
 
-'''
+
 """SEND MESSAGE TO USER"""
 SEND_MESSAGE_TO_USER_HANDLER = ConversationHandler(
     entry_points=[
         CallbackQueryHandler(
-            pattern=r"answer_to_message",
-            callback=answer_to_message.send_message)],
+            pattern=r"send_message_to_user",
+            callback=SendMessageToUser().send_message)],
 
     states={
-        MESSAGE_TO_USERS: [
+        MESSAGE_TO_USER: [
             MessageHandler(
                 filters=Filters.all,
-                callback=answer_to_message.received_message)]
+                callback=SendMessageToUser().received_message)]
     },
 
     fallbacks=[
         CallbackQueryHandler(
             pattern=r"send_message_finish",
-            callback=answer_to_message.send_message_finish),
+            callback=SendMessageToUser().send_message_finish),
         CallbackQueryHandler(
-            pattern=r"back_to_inbox_view_message",
-            callback=SeeMessageToAdmin.back_to_view_message)]
+            pattern=r"back_to_users_list",
+            callback=UsersHandler().back_to_users)]
 )
-'''
+
 
 """BACKS"""
-BACk_TO_USER_OPEN_MESSAGE = CallbackQueryHandler(
+BACK_TO_USER_MESSAGES_LIST = CallbackQueryHandler(
     pattern=r"back_to_users_messages",
     callback=SeeUserMessage().back_to_users_messages)
 
 BACK_TO_USERS_LIST = CallbackQueryHandler(
     pattern=r"back_to_users_list",
     callback=UsersHandler().back_to_users)
+
+BACK_TO_OPEN_MESSAGE = CallbackQueryHandler(
+    pattern="back_to_view_message",
+    callback=SeeUserMessage().back_to_view_message)

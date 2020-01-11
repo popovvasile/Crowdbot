@@ -5,6 +5,7 @@ import logging
 
 from bson.objectid import ObjectId
 from haikunator import Haikunator
+from telegram.error import TelegramError
 from telegram import (InlineKeyboardButton, InlineKeyboardMarkup,
                       ReplyKeyboardMarkup, ReplyKeyboardRemove, ParseMode)
 from telegram.ext import (MessageHandler, Filters,
@@ -17,7 +18,7 @@ from helper_funcs.pagination import Pagination
 from modules.users.users import UserTemplate
 from modules.users.message_helper import (
     send_message_template, add_to_content, send_not_deleted_message_content,
-    send_deleted_message_content, AnswerToMessage)
+    send_deleted_message_content, AnswerToMessage, content_string)
 from database import (users_messages_to_admin_table,
                       user_categories_table, users_table)
 
@@ -131,7 +132,6 @@ def messages_menu(update, context):
 
 
 class SendMessageToAdmin(object):
-
     def send_message(self, update, context):
         context.bot.delete_message(
             chat_id=update.callback_query.message.chat_id,
@@ -156,7 +156,6 @@ class SendMessageToAdmin(object):
                 update.callback_query.answer("You have been blocked")
                 get_help(update, context)
                 return ConversationHandler.END
-
             context.user_data["new_message"]["anonim"] = True
             context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
@@ -198,37 +197,10 @@ class SendMessageToAdmin(object):
     #     return MESSAGE
 
     def received_message(self, update, context):
-        """if "content" not in context.user_data:
-            context.user_data["content"] = []
-        if update.message.text:
-            context.user_data["content"].append({"text": update.message.text})
-
-        elif update.message.photo:
-            photo_file = update.message.photo[-1].get_file().file_id
-            context.user_data["content"].append({"photo_file": photo_file})
-
-        elif update.message.audio:
-            audio_file = update.message.audio.get_file().file_id
-            context.user_data["content"].append({"audio_file": audio_file})
-
-        elif update.message.voice:
-            voice_file = update.message.voice.get_file().file_id
-            context.user_data["content"].append({"audio_file": voice_file})
-
-        elif update.message.document:
-            document_file = update.message.document.get_file().file_id
-            context.user_data["content"].append({"document_file": document_file})
-
-        elif update.message.video:
-            video_file = update.message.video.get_file().file_id
-            context.user_data["content"].append({"video_file": video_file})
-
-        elif update.message.video_note:
-            video_note_file = update.message.video_note.get_file().file_id
-            context.user_data["content"].append({"video_file": video_note_file})"""
+        delete_messages(update, context)
         add_to_content(update, context)
         # TODO STRINGS
-        final_reply_markup = InlineKeyboardMarkup([
+        reply_markup = InlineKeyboardMarkup([
             [InlineKeyboardButton(
                 text="Done",
                 callback_data="send_message_finish")],
@@ -236,10 +208,11 @@ class SendMessageToAdmin(object):
                 text="Cancel",
                 callback_data="help_back")]
         ])
-        context.bot.send_message(update.message.chat_id,
-                                 context.bot.lang_dict["send_message_4"],
-                                 reply_markup=final_reply_markup)
-
+        context.user_data["to_delete"].append(
+            context.bot.send_message(
+                chat_id=update.message.chat_id,
+                text=context.bot.lang_dict["send_message_4"],
+                reply_markup=reply_markup))
         return MESSAGE
 
     def send_message_finish(self, update, context):
@@ -251,28 +224,12 @@ class SendMessageToAdmin(object):
                             text=context.bot.lang_dict["back_button"],
                             callback_data="help_back")])
         final_reply_markup = InlineKeyboardMarkup(buttons)
-        # if context.user_data.get("anonim", None) is True:
-        #     context.user_data["user_full_name"] = "anonim_" + haikunator.haikunate()
-        #     context.user_data["chat_id"] = update.callback_query.message.chat_id
-        # else:
-        #     context.user_data["user_full_name"] = update.callback_query.from_user.mention_markdown()
-        #     context.user_data["chat_id"] = update.callback_query.message.chat_id
+
         context.bot.send_message(
             chat_id=update.callback_query.message.chat_id,
             text=context.bot.lang_dict["send_message_5"],
             reply_markup=final_reply_markup)
 
-        logger.info("User {} on bot {}:{} sent a message to the admin".format(
-            update.effective_user.first_name, context.bot.first_name,
-            context.bot.id))
-
-        # if "_id" in context.user_data:
-        #     context.user_data.pop("_id", None)
-        # context.user_data.pop("to_delete", None)
-        # context.user_data["message_id"] =
-        # update.callback_query.message.message_id
-        # context.user_data["mention_markdown"] = update.effective_user.mention_markdown()
-        # context.user_data["mention_html"] = update.effective_user.mention_html()
         if context.user_data["new_message"].get("anonim"):
             context.user_data["new_message"]["user_full_name"] = (
                 "anonim_" + Haikunator().haikunate())
@@ -281,15 +238,26 @@ class SendMessageToAdmin(object):
                 update.callback_query.from_user.full_name)
         context.user_data["new_message"]["content"] = (
             context.user_data["content"])
-        context.user_data["new_message"]["answer"] = list()
+        # Set string coz it is constanta so don't need to create every time
+        context.user_data["new_message"]["content_string"] = (
+            content_string(context.user_data["content"])
+        )
+
+        context.user_data["new_message"]["answer_content"] = list()
+        context.user_data["new_message"]["answer_string"] = ""
         context.user_data["new_message"]["is_new"] = True
         context.user_data["new_message"]["user_id"] = update.effective_user.id
         context.user_data["new_message"]["bot_id"] = context.bot.id
         context.user_data["new_message"]["chat_id"] = update.effective_chat.id
         context.user_data["new_message"]["timestamp"] = (
             datetime.datetime.now().replace(microsecond=0))
+
         users_messages_to_admin_table.insert(context.user_data["new_message"])
+
         context.user_data.clear()
+        logger.info("User {} on bot {}:{} sent a message to the admin".format(
+            update.effective_user.first_name, context.bot.first_name,
+            context.bot.id))
         # TODO MAYBE JUST RETURN TO THE MAIN MENU WITH BLINK MESSAGE
         return ConversationHandler.END
 
@@ -367,42 +335,6 @@ class SendMessageToUsers(object):
         return MESSAGE_TO_USERS
 
     def received_message(self, update, context):
-        """if "content" not in context.user_data:
-            context.user_data["content"] = []
-        if update.message.text:
-            context.user_data["content"].append({"text": update.message.text})
-
-        elif update.message.photo:
-            photo_file = update.message.photo[-1].get_file().file_id
-            context.user_data["content"].append({"photo_file": photo_file})
-
-        elif update.message.audio:
-            audio_file = update.message.audio.get_file().file_id
-            context.user_data["content"].append({"audio_file": audio_file})
-
-        elif update.message.voice:
-            voice_file = update.message.voice.get_file().file_id
-            context.user_data["content"].append({"audio_file": voice_file})
-
-        elif update.message.document:
-            document_file = update.message.document.get_file().file_id
-            context.user_data["content"].append({"document_file": document_file})
-
-        elif update.message.video:
-            video_file = update.message.video.get_file().file_id
-            context.user_data["content"].append({"video_file": video_file})
-
-        elif update.message.video_note:
-            video_note_file = update.message.video_note.get_file().file_id
-            context.user_data["content"].append({"video_note_file": video_note_file})
-
-        elif update.message.animation:
-            animation_file = update.message.animation.get_file().file_id
-            context.user_data["content"].append({"animation_file": animation_file})
-
-        elif update.message.sticker:
-            sticker_file = update.message.sticker.get_file().file_id
-            context.user_data["content"].append({"sticker_file": sticker_file})"""
         add_to_content(update, context)
         final_reply_markup = InlineKeyboardMarkup([
             [InlineKeyboardButton(text=context.bot.lang_dict["done_button"],
@@ -430,30 +362,6 @@ class SendMessageToUsers(object):
                         context,
                         chat_id=chat["chat_id"],
                         content=context.user_data["content"])
-                    """for content_dict in context.user_data["content"]:
-                        if "text" in content_dict:
-                            context.bot.send_message(chat["chat_id"],
-                                             content_dict["text"])
-                        if "audio_file" in content_dict:
-                            context.bot.send_audio(chat["chat_id"], content_dict["audio_file"])
-                        if "voice_file" in content_dict:
-                            context.bot.send_voice(chat["chat_id"], content_dict["voice_file"])
-                        if "video_file" in content_dict:
-                            context.bot.send_video(chat["chat_id"], content_dict["video_file"])
-                        if "video_note_file" in content_dict:
-                            context.bot.send_video_note(chat["chat_id"], content_dict["video_note_file"])
-                        if "document_file" in content_dict:
-                            if ".png" in content_dict["document_file"] or ".jpg" in content_dict["document_file"]:
-                                context.bot.send_photo(chat["chat_id"], content_dict["document_file"])
-                            else:
-                                context.bot.send_document(chat["chat_id"], content_dict["document_file"])
-                        if "photo_file" in content_dict:
-                            context.bot.send_photo(chat["chat_id"], content_dict["photo_file"])
-                        if "animation_file" in content_dict:
-                            context.bot.send_animation(chat["chat_id"], content_dict["animation_file"])
-                        if "sticker_file" in content_dict:
-                            context.bot.send_sticker(chat["chat_id"], content_dict["sticker_file"])"""
-
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                    message_id=update.callback_query.message.message_id)
         buttons = list()
@@ -489,250 +397,6 @@ class SendMessageToUsers(object):
                                    message_id=update.callback_query.message.message_id)
         get_help(update, context)
         return ConversationHandler.END
-
-
-'''class AnswerToMessage(object):
-    """
-    * def send_message() def received_message() -> back_button
-    * state
-    * final callback
-    """
-    def __init__(self, back_button, state, final_callback):
-        self.back_button = back_button
-        self.STATE = state
-        self.final_callback = final_callback
-
-    def send_message(self, update, context):
-        delete_messages(update, context, True)
-        buttons = list()
-        buttons.append([InlineKeyboardButton(
-                            text=context.bot.lang_dict["back_button"],
-                            callback_data="help_module(users)")])
-        reply_markup = InlineKeyboardMarkup(buttons)
-        context.user_data["message_id"] = update.callback_query.data.replace(
-            "answer_to_message_", "")
-        message = users_messages_to_admin_table.find_one(
-            {"_id": ObjectId(context.user_data["message_id"])})
-        context.user_data["chat_id"] = message["chat_id"]
-
-        # context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-        #                            message_id=update.callback_query.message.message_id)
-        context.bot.send_message(
-            chat_id=update.callback_query.message.chat_id,
-            text=context.bot.lang_dict["send_message_3"],
-            reply_markup=reply_markup)
-        return MESSAGE_TO_USERS
-
-    def received_message(self, update, context):
-        """if "content" not in context.user_data:
-            context.user_data["content"] = []
-        if update.message.text:
-            context.user_data["content"].append({"text": update.message.text})
-
-        elif update.message.photo:
-            photo_file = update.message.photo[-1].get_file().file_id
-            context.user_data["content"].append({"photo_file": photo_file})
-
-        elif update.message.audio:
-            audio_file = update.message.audio.get_file().file_id
-            context.user_data["content"].append({"audio_file": audio_file})
-
-        elif update.message.voice:
-            voice_file = update.message.voice.get_file().file_id
-            context.user_data["content"].append({"audio_file": voice_file})
-
-        elif update.message.document:
-            document_file = update.message.document.get_file().file_id
-            context.user_data["content"].append({"document_file": document_file})
-
-        elif update.message.video:
-            video_file = update.message.video.get_file().file_id
-            context.user_data["content"].append({"video_file": video_file})
-
-        elif update.message.video_note:
-            video_note_file = update.message.video_note.get_file().file_id
-            context.user_data["content"].append({"video_note_file": video_note_file})
-
-        elif update.message.animation:
-            animation_file = update.message.animation.get_file().file_id
-            context.user_data["content"].append({"animation_file": animation_file})
-
-        elif update.message.sticker:
-            sticker_file = update.message.sticker.get_file().file_id
-            context.user_data["content"].append({"sticker_file": sticker_file})"""
-        add_to_content(update, context)
-        final_reply_markup = InlineKeyboardMarkup([
-            [InlineKeyboardButton(text=context.bot.lang_dict["done_button"],
-                                  callback_data="send_message_finish")],
-            [InlineKeyboardButton(text=context.bot.lang_dict["cancel_button"],
-                                  callback_data="help_module(users)")]
-        ])
-        context.bot.send_message(chat_id=update.message.chat_id,
-                                 text=context.bot.lang_dict["send_message_4"],
-                                 reply_markup=final_reply_markup)
-        return MESSAGE_TO_USERS
-
-    def send_message_finish(self, update, context):
-        context.bot.send_message(
-            chat_id=context.user_data["chat_id"],
-            text=context.bot.lang_dict["send_message_answer_user"])
-
-        send_not_deleted_message_content(
-            context,
-            chat_id=context.user_data["chat_id"],
-            content=context.user_data["content"])
-
-        """for content_dict in context.user_data["content"]:
-            if "text" in content_dict:
-                context.bot.send_message(context.user_data["chat_id"],
-                                         content_dict["text"])
-            if "audio_file" in content_dict:
-                context.bot.send_audio(context.user_data["chat_id"], content_dict["audio_file"])
-            if "voice_file" in content_dict:
-                context.bot.send_voice(context.user_data["chat_id"], content_dict["voice_file"])
-            if "video_file" in content_dict:
-                context.bot.send_video(context.user_data["chat_id"], content_dict["video_file"])
-            if "video_note_file" in content_dict:
-                context.bot.send_video_note(context.user_data["chat_id"], content_dict["video_note_file"])
-            if "document_file" in content_dict:
-                if ".png" in content_dict["document_file"] or ".jpg" in content_dict["document_file"]:
-                    context.bot.send_photo(context.user_data["chat_id"], content_dict["document_file"])
-                else:
-                    context.bot.send_document(context.user_data["chat_id"], content_dict["document_file"])
-            if "photo_file" in content_dict:
-                context.bot.send_photo(context.user_data["chat_id"], content_dict["photo_file"])
-            if "animation_file" in content_dict:
-                context.bot.send_animation(context.user_data["chat_id"], content_dict["animation_file"])
-            if "sticker_file" in content_dict:
-                context.bot.send_sticker(context.user_data["chat_id"], content_dict["sticker_file"])"""
-
-        context.bot.delete_message(
-            chat_id=update.callback_query.message.chat_id,
-            message_id=update.callback_query.message.message_id)
-        buttons = list()
-        buttons.append([InlineKeyboardButton(
-                            text=context.bot.lang_dict["back_button"],
-                            callback_data="help_module(users)")])
-        final_reply_markup = InlineKeyboardMarkup(
-            buttons)
-        context.bot.send_message(update.callback_query.message.chat_id,
-                                 context.bot.lang_dict["send_message_5"],
-                                 reply_markup=final_reply_markup)
-        logger.info("Admin {} on bot {}:{} sent a message to the user".format(
-            update.effective_user.first_name, context.bot.first_name,
-            context.bot.id))
-        context.user_data.clear()
-        return ConversationHandler.END
-
-    def back(self, update, context):
-        context.bot.delete_message(
-            chat_id=update.callback_query.message.chat_id,
-            message_id=update.callback_query.message.message_id)
-        get_help(update, context)
-        return ConversationHandler.END'''
-
-
-'''class AnswerToMessage(object):
-    """
-    * def send_message() def received_message() -> back_button
-    * state
-    * final callback
-    IMPORT TO modules/users/users
-    """
-    def __init__(self, back_button, state, final_callback):
-        self.back_button = back_button  # "help_module(users)"
-        self.STATE = state  # MESSAGE_TO_USERS
-        self.final_callback = final_callback
-        # SeeMessageToAdmin().back_to_view_message(update, context)
-
-    def send_message(self, update, context):
-        delete_messages(update, context, True)
-        buttons = list()
-        buttons.append([InlineKeyboardButton(
-                            text=context.bot.lang_dict["back_button"],
-                            callback_data=self.back_button)])
-        reply_markup = InlineKeyboardMarkup(buttons)
-        message = users_messages_to_admin_table.find_one(
-            {"_id": ObjectId(update.callback_query.data.replace(
-                "answer_to_user_message_", ""))})
-        context.user_data["chat_id"] = message["chat_id"]
-
-        context.bot.send_message(
-            chat_id=update.callback_query.message.chat_id,
-            text=context.bot.lang_dict["send_message_3"],
-            reply_markup=reply_markup)
-        return self.STATE
-
-    def received_message(self, update, context):
-        """if "content" not in context.user_data:
-            context.user_data["content"] = []
-        if update.message.text:
-            context.user_data["content"].append({"text": update.message.text})
-
-        elif update.message.photo:
-            photo_file = update.message.photo[-1].get_file().file_id
-            context.user_data["content"].append({"photo_file": photo_file})
-
-        elif update.message.audio:
-            audio_file = update.message.audio.get_file().file_id
-            context.user_data["content"].append({"audio_file": audio_file})
-
-        elif update.message.voice:
-            voice_file = update.message.voice.get_file().file_id
-            context.user_data["content"].append({"audio_file": voice_file})
-
-        elif update.message.document:
-            document_file = update.message.document.get_file().file_id
-            context.user_data["content"].append({"document_file": document_file})
-
-        elif update.message.video:
-            video_file = update.message.video.get_file().file_id
-            context.user_data["content"].append({"video_file": video_file})
-
-        elif update.message.video_note:
-            video_note_file = update.message.video_note.get_file().file_id
-            context.user_data["content"].append({"video_note_file": video_note_file})
-
-        elif update.message.animation:
-            animation_file = update.message.animation.get_file().file_id
-            context.user_data["content"].append({"animation_file": animation_file})
-
-        elif update.message.sticker:
-            sticker_file = update.message.sticker.get_file().file_id
-            context.user_data["content"].append({"sticker_file": sticker_file})"""
-        add_to_content(update, context)
-        final_reply_markup = InlineKeyboardMarkup([
-            [InlineKeyboardButton(text=context.bot.lang_dict["done_button"],
-                                  callback_data="send_message_finish")],
-            [InlineKeyboardButton(text=context.bot.lang_dict["cancel_button"],
-                                  callback_data=self.back_button)]
-        ])
-        context.bot.send_message(chat_id=update.message.chat_id,
-                                 text=context.bot.lang_dict["send_message_4"],
-                                 reply_markup=final_reply_markup)
-        return self.STATE
-
-    def send_message_finish(self, update, context):
-        context.bot.send_message(
-            chat_id=context.user_data["chat_id"],
-            text=context.bot.lang_dict["send_message_answer_user"])
-        send_not_deleted_message_content(
-            context,
-            chat_id=context.user_data["chat_id"],
-            content=context.user_data["content"])
-        logger.info("Admin {} on bot {}:{} sent a message to the user".format(
-            update.effective_user.first_name,
-            context.bot.first_name, context.bot.id))
-        # TODO STRINGS
-        update.callback_query.answer("Message sent")
-        return self.final_callback(update, context)
-
-    # def back(self, update, context):
-    #     context.bot.delete_message(
-    #         chat_id=update.callback_query.message.chat_id,
-    #         message_id=update.callback_query.message.message_id)
-    #     get_help(update, context)
-    #     return ConversationHandler.END'''
 
 
 class DeleteMessage(object):
@@ -870,36 +534,51 @@ class SeeMessageToAdmin(object):
     def view_message(self, update, context):
         delete_messages(update, context, True)
         if update.callback_query.data.startswith("view_message"):
-            context.user_data["message"] = \
-                users_messages_to_admin_table.find_one(
-                    {"_id": ObjectId(
-                        update.callback_query.data.replace(
-                            "view_message_", ""))})
+            message_id = ObjectId(
+                update.callback_query.data.replace("view_message_", ""))
+            context.user_data["message"] = (
+                users_messages_to_admin_table.find_one({"_id": message_id}))
+
+            if context.user_data["message"]["is_new"]:
+                users_messages_to_admin_table.update_one(
+                    {"_id": message_id}, {"$set": {"is_new": False}})
 
         user_sender = users_table.find_one(
             {"user_id": context.user_data["message"]["user_id"],
              "bot_id": context.bot.id})
-        if context.user_data["message"]["is_new"]:
-            users_messages_to_admin_table.update_one(
-                {"_id": context.user_data["message"]["_id"]},
-                {"$set": {"is_new": False}})
 
-        # send_message_content(update, context, context.user_data["message"])
+        # Send user message content
+        context.user_data["to_delete"].append(
+            context.bot.send_message(chat_id=update.effective_chat.id,
+                                     text="<b>User Message:</b>",
+                                     parse_mode=ParseMode.HTML))
         send_deleted_message_content(
             context,
             chat_id=update.effective_user.id,
             content=context.user_data["message"]["content"])
+        # If answer exist show it
+        if context.user_data["message"]["answer_content"]:
+            context.user_data["to_delete"].append(
+                context.bot.send_message(chat_id=update.effective_chat.id,
+                                         text="<b>Your Answer:</b>",
+                                         parse_mode=ParseMode.HTML))
+            send_deleted_message_content(
+                context,
+                chat_id=update.effective_user.id,
+                content=context.user_data["message"]["answer_content"])
 
-        buttons = [
-            [InlineKeyboardButton(
+        buttons = [[]]
+        if not context.user_data["message"]["answer_content"]:
+            buttons[0].append(InlineKeyboardButton(
                 text=context.bot.lang_dict["answer_button_str"],
                 callback_data="answer_to_message/"
-                              + str(context.user_data["message"]["_id"])),
-             InlineKeyboardButton(
+                              + str(context.user_data["message"]["_id"])))
+
+        buttons[0].append(InlineKeyboardButton(
                  text=context.bot.lang_dict["delete_button_str"],
                  callback_data="delete_message_"
-                               + str(context.user_data["message"]["_id"]))],
-        ]
+                               + str(context.user_data["message"]["_id"])))
+
         if context.user_data["message"]["anonim"]:
             if user_sender["anonim_messages_blocked"]:
                 buttons.append([InlineKeyboardButton(
@@ -929,7 +608,8 @@ class SeeMessageToAdmin(object):
 
         send_message_template(update, context, context.user_data["message"],
                               reply_markup=InlineKeyboardMarkup(buttons),
-                              text=context.bot.lang_dict["back_text"])
+                              text=context.bot.lang_dict["back_text"],
+                              short=True)
         return ConversationHandler.END
 
     def block_anonim_messaging_confirmation(self, update, context):
@@ -1043,6 +723,57 @@ class SeeMessageToAdmin(object):
         return self.see_messages(update, context)
 
 
+class SubscriberOpenMessage(object):
+    # TODO STRINGS
+    def open(self, update, context):
+        message_id = ObjectId(update.callback_query.data.split("/")[1])
+        message = users_messages_to_admin_table.find_one({"_id": message_id})
+        if "to_delete" not in context.user_data:
+            context.user_data["to_delete"] = list()
+        # Send user message content
+        context.user_data["to_delete"].append(
+            context.bot.send_message(chat_id=update.effective_chat.id,
+                                     text="<b>Your Message:</b>",
+                                     parse_mode=ParseMode.HTML))
+        send_deleted_message_content(context,
+                                     chat_id=update.effective_user.id,
+                                     content=message["content"])
+        # Send admin answer content.
+        # User can open message only if the answer exist
+        context.user_data["to_delete"].append(
+            context.bot.send_message(chat_id=update.effective_chat.id,
+                                     text="<b>Answer:</b>",
+                                     parse_mode=ParseMode.HTML))
+        send_deleted_message_content(context,
+                                     chat_id=update.effective_user.id,
+                                     content=message["answer_content"])
+        # Back button
+        reply_markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton(
+                text="Hide",
+                callback_data="hide_answer")]])
+        context.user_data["to_delete"].append(
+            context.bot.send_message(chat_id=update.effective_chat.id,
+                                     text=context.bot.lang_dict["back_text"],
+                                     reply_markup=reply_markup))
+        return ConversationHandler.END
+
+    # TODO Bug when in "to_delete" are another messages that must be save.
+    #   And another case when user_data must be without "to_delete" key
+    #   create own "to_delete"
+    def hide_answer(self, update, context):
+        # if 'open_delete' in context.user_data:
+        #     for msg in context.user_data['open_delete']:
+        #         try:
+        #             context.bot.delete_message(update.effective_chat.id,
+        #                                        msg.message_id)
+        #         except TelegramError:
+        #             continue
+        delete_messages(update, context, True)
+
+        return ConversationHandler.END
+
+
 TOPIC, SEND_ANONIM, MESSAGE = range(3)
 CHOOSE_CATEGORY, MESSAGE_TO_USERS = range(2)
 BLOCK_CONFIRMATION = 1
@@ -1096,6 +827,16 @@ SEND_MESSAGE_TO_ADMIN_HANDLER = ConversationHandler(
             pattern="help_back",
             callback=SendMessageToUsers().send_message_cancel)]
 )
+
+
+"""Open button for subscriber when answer ready"""
+SHOW_MESSAGE_HANDLER = CallbackQueryHandler(
+    pattern=r"subscriber_open_message",
+    callback=SubscriberOpenMessage().open)
+
+HIDE_MESSAGE_HANDLER = CallbackQueryHandler(
+    pattern=r"hide_answer",
+    callback=SubscriberOpenMessage().hide_answer)
 
 
 SEND_MESSAGE_TO_USERS_HANDLER = ConversationHandler(
@@ -1198,7 +939,7 @@ ANSWER_TO_MESSAGE_HANDLER = ConversationHandler(
             callback=answer_to_message.send_message_finish),
         CallbackQueryHandler(
             pattern=r"back_to_inbox_view_message",
-            callback=SeeMessageToAdmin.back_to_view_message)]
+            callback=SeeMessageToAdmin().back_to_view_message)]
 )
 
 # MESSAGE_CATEGORY_HANDLER = CallbackQueryHandler(pattern="show_message_categories",

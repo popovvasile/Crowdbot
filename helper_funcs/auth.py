@@ -65,10 +65,8 @@ def register_chat(update, context):
 
 
 def register_admin(update, context):
-    """
-    Registers user as an administrator.
-    """
-    # For first delete all expired passwords
+    """Registers user as an administrator"""
+    # Delete all expired passwords
     for admin_password in admin_passwords_table.find(
             {"bot_id": context.bot.id}):
         if ((datetime.today() - admin_password["timestamp"]).total_seconds()

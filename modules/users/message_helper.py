@@ -89,6 +89,7 @@ def send_not_deleted_message_content(context, content, chat_id):
 def add_to_content(update, context):
     if "content" not in context.user_data:
         context.user_data["content"] = []
+
     if update.message.text:
         context.user_data["content"].append({"text": update.message.text})
 
@@ -98,15 +99,18 @@ def add_to_content(update, context):
 
     elif update.message.audio:
         audio_file = update.message.audio.get_file().file_id
-        context.user_data["content"].append({"audio_file": audio_file})
+        context.user_data["content"].append(
+            {"audio_file": audio_file, "name": update.message.audio.title})
 
     elif update.message.voice:
         voice_file = update.message.voice.get_file().file_id
-        context.user_data["content"].append({"audio_file": voice_file})
+        context.user_data["content"].append({"voice_file": voice_file})
 
     elif update.message.document:
         document_file = update.message.document.get_file().file_id
-        context.user_data["content"].append({"document_file": document_file})
+        context.user_data["content"].append(
+            {"document_file": document_file,
+             "name": update.message.document.file_name})
 
     elif update.message.video:
         video_file = update.message.video.get_file().file_id
@@ -124,14 +128,18 @@ def add_to_content(update, context):
 
     elif update.message.sticker:
         sticker_file = update.message.sticker.get_file().file_id
-        context.user_data["content"].append({"sticker_file": sticker_file})
+        context.user_data["content"].append(
+            {"sticker_file": sticker_file,
+             "name": update.message.sticker.emoji})
 
 
-def send_message_template(update, context, message, reply_markup, text=""):
+def send_message_template(update, context, message, reply_markup,
+                          text="", short=False):
     # Get chat member to get user information
     # because database data can be incorrect
     user = context.bot.get_chat_member(message["chat_id"],
                                        message["user_id"]).user
+    # Create user html mention
     if message["anonim"]:
         _user_mention = f"<code>{message['user_full_name']}</code>"
     elif user.username:
@@ -139,15 +147,67 @@ def send_message_template(update, context, message, reply_markup, text=""):
     else:
         _user_mention = user.mention_html()
 
+    # If message is new - add emoji near it
+    title_emoji = ""
+    if message["is_new"]:
+        title_emoji = emoji['new'] + "\n"
+
+    if short:
+        template = (title_emoji
+                    + context.bot.lang_dict["short_message_temp"].format(
+                        _user_mention,
+                        lang_timestamp(context, message["timestamp"])))
+    else:
+        template = (title_emoji
+                    + context.bot.lang_dict["message_temp"].format(
+                        _user_mention,
+                        lang_timestamp(context, message["timestamp"]),
+                        # message["content_string"],
+                        # message["answer_string"]
+                        content_string(message["content"]),
+                    ))
+        if message["answer_content"]:
+            template += context.bot.lang_dict["answer_field"].format(
+                content_string(message["answer_content"]))
+
     context.user_data["to_delete"].append(
         context.bot.send_message(
             update.effective_chat.id,
-            text=((emoji['new'] + "\n") if message["is_new"] else "")
-            + context.bot.lang_dict["message_temp"].format(
-                _user_mention, lang_timestamp(context, message["timestamp"]))
-            + "\n\n" + text,
+            text=template + "\n\n" + text,
             reply_markup=reply_markup,
             parse_mode=ParseMode.HTML))
+
+
+# TODO STRINGS
+def content_string(content):
+    string = ""
+    for content_dict in content:
+        if "text" in content_dict:
+            str_for_text = content_dict['text'][:20]
+            if len(content_dict['text']) > 20:
+                str_for_text += "..."
+            string += f"• <code>{str_for_text}</code>\n"
+
+        if "photo_file" in content_dict:
+            string += "• Photo\n"
+
+        if "voice_file" in content_dict:
+            string += "• Voice message\n"
+
+        if ("audio_file" in content_dict or
+                "document_file" in content_dict or
+                "sticker_file" in content_dict):
+            string += f"• {content_dict['name']}\n"
+
+        if "video_file" in content_dict:
+            string += "• Video\n"
+
+        if "video_note_file" in content_dict:
+            string += "• Video message\n"
+
+        if "animation_file" in content_dict:
+            string += "• Animation\n"
+    return string[:-1]
 
 
 class AnswerToMessage(object):
@@ -169,9 +229,12 @@ class AnswerToMessage(object):
 
     def send_message(self, update, context):
         delete_messages(update, context, True)
+
         message = users_messages_to_admin_table.find_one(
             {"_id": ObjectId(update.callback_query.data.split("/")[1])})
-        context.user_data["chat_id"] = message["chat_id"]
+        # context.user_data["chat_id"] = message["chat_id"]
+        # context.user_data["message_id"] = message["_id"]
+        context.user_data["answer_to"] = message
 
         reply_markup = InlineKeyboardMarkup([
             [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
@@ -184,6 +247,7 @@ class AnswerToMessage(object):
         return self.STATE
 
     def received_message(self, update, context):
+        delete_messages(update, context)
         add_to_content(update, context)
         reply_markup = InlineKeyboardMarkup([
             [InlineKeyboardButton(text=context.bot.lang_dict["done_button"],
@@ -191,19 +255,41 @@ class AnswerToMessage(object):
             [InlineKeyboardButton(text=context.bot.lang_dict["cancel_button"],
                                   callback_data=self.back_button)]
         ])
-        context.bot.send_message(chat_id=update.message.chat_id,
-                                 text=context.bot.lang_dict["send_message_4"],
-                                 reply_markup=reply_markup)
+        context.user_data["to_delete"].append(
+            context.bot.send_message(
+                chat_id=update.message.chat_id,
+                text=context.bot.lang_dict["send_message_4"],
+                reply_markup=reply_markup))
         return self.STATE
 
     def send_message_finish(self, update, context):
+        # Set string coz it is constanta so don't need to create every time
+        answer_string = content_string(context.user_data['content'])
+        users_messages_to_admin_table.update_one(
+            {"_id": context.user_data["answer_to"]["_id"]},
+            {"$set": {"answer_content": context.user_data["content"],
+                      "answer_string": answer_string}})
+        # TODO STRINGS
+        user_message_temp = (
+            "<b>You got the Answer!</b>"
+            f"\n<b>Your message:</b>"
+            f"\n{context.user_data['answer_to']['content_string']}"
+            f"\n<b>Answer:</b>"
+            f"\n{answer_string}")
+        reply_markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton(
+                text="Show",
+                callback_data="subscriber_open_message/"
+                              + str(context.user_data["answer_to"]["_id"]))]])
         context.bot.send_message(
-            chat_id=context.user_data["chat_id"],
-            text=context.bot.lang_dict["send_message_answer_user"])
-        send_not_deleted_message_content(
-            context,
-            chat_id=context.user_data["chat_id"],
-            content=context.user_data["content"])
+            chat_id=context.user_data["answer_to"]["chat_id"],
+            text=user_message_temp,
+            reply_markup=reply_markup,
+            parse_mode=ParseMode.HTML)
+        # send_not_deleted_message_content(
+        #     context,
+        #     chat_id=context.user_data["chat_id"],
+        #     content=context.user_data["content"])
         logger.info("Admin {} on bot {}:{} sent a message to the user".format(
             update.effective_user.first_name,
             context.bot.first_name, context.bot.id))
