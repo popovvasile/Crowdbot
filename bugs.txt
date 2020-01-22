@@ -37,6 +37,7 @@ TODO delete chat/survey from all chats, including channels and groups
     * backs everywhere
     * move information of the list to the pagination text
     * maybe add dynamic changes using edit
+    * when delete in inbox - don't delete all telegram messages and don't show it again.
     * Use one code for the updating database in blocks(inbox, user) and so on
     * Application factory
     * В сообщенииях показывать ответ(ответить можно только один раз)
@@ -62,6 +63,7 @@ TODO delete chat/survey from all chats, including channels and groups
     * stickers bug in bot_father reports(check stickers for crowd)
     * имя и username ансабов не обновляется в списке юзеров
     * if subscribers leave telegram - check for exceptions
+    * normal back after delete message in inbox
 
 
 # TODO for discussion
@@ -70,4 +72,5 @@ TODO delete chat/survey from all chats, including channels and groups
         или кнопка удалить под отписавшимися
         или отдельный список под отписавшимися
         или просто цифра ансабов
-    * внутри стейтов ловить апдейты статусов
+    * User search problems
+

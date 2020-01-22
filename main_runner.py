@@ -62,7 +62,7 @@ from modules.users.messages import (
     CONFIRM_BLOCK_ANONIM_MESSAGING, UNBLOCK_ANONIM_MESSAGING,
     CONFIRM_BLOCK_MESSAGING_FROM_INBOX, FINISH_BLOCK_MESSAGING_FROM_INBOX,
     FINISH_UNBLOCK_MESSAGING_FROM_INBOX, SHOW_MESSAGE_HANDLER,
-    HIDE_MESSAGE_HANDLER)
+    HIDE_MESSAGE_HANDLER, BACK_TO_MESSAGES_MENU)
 from modules.users.users import (
     USERS_LIST_HANDLER, USER_MESSAGES_LIST,
     ANSWER_TO_MESSAGE_FROM_USER_LIST_HANDLER, CONFIRM_BLOCK_MESSAGING,
@@ -70,6 +70,7 @@ from modules.users.users import (
     BACK_TO_USERS_LIST, VIEW_USER_MESSAGE, BACK_TO_OPEN_MESSAGE,
     CONFIRM_BAN_USER, FINISH_BAN_USER, FINISH_UNBUN_USER,
     SEND_MESSAGE_TO_USER_HANDLER, BACK_TO_USER_MESSAGES_LIST,
+    DELETE_USER_MESSAGE_HANDLER
     # OPEN_USER_HANDLER
 )
 
@@ -141,6 +142,7 @@ def main(token, lang):
     back_to_modules_handler = CallbackQueryHandler(pattern=r"back_to_module",
                                                    callback=back_to_modules)
 
+    # TODO priority is very important!!!!!!!!!!!!!!!!!!!!
     dispatcher.add_handler(EDIT_BOT_DESCRIPTION_HANDLER)
 
     #  NEW SHOP
@@ -195,6 +197,7 @@ def main(token, lang):
     dispatcher.add_handler(FINISH_UNBUN_USER)
     dispatcher.add_handler(SEND_MESSAGE_TO_USER_HANDLER)
     dispatcher.add_handler(BACK_TO_USER_MESSAGES_LIST)
+    dispatcher.add_handler(DELETE_USER_MESSAGE_HANDLER)
     # dispatcher.add_handler(OPEN_USER_HANDLER)
 
     # STATISTIC
@@ -248,6 +251,7 @@ def main(token, lang):
     dispatcher.add_handler(FINISH_UNBLOCK_MESSAGING_FROM_INBOX)
     dispatcher.add_handler(SHOW_MESSAGE_HANDLER)
     dispatcher.add_handler(HIDE_MESSAGE_HANDLER)
+    dispatcher.add_handler(BACK_TO_MESSAGES_MENU)
 
     # SURVEYS
     dispatcher.add_handler(SURVEYS_MENU)
@@ -291,7 +295,7 @@ def main(token, lang):
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(help_handler)
 
-    # dispatcher.add_handler(ADMIN_AUTHENTICATION_HANDLER)  # TODO priority is very important!!!!!!!!!!!!!!!!!!!!
+    # dispatcher.add_handler(ADMIN_AUTHENTICATION_HANDLER)
 
     rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), get_help)
     dispatcher.add_handler(rex_help_handler)

@@ -1,16 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup
-from telegram.ext import ConversationHandler, CallbackQueryHandler, MessageHandler, Filters, RegexHandler
-from database import channels_table
-from telegram.error import TelegramError
-from helper_funcs.helper import get_help
-
 import logging
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
+from telegram.error import TelegramError
+from telegram import (InlineKeyboardMarkup, InlineKeyboardButton,
+                      ReplyKeyboardMarkup)
+from telegram.ext import (ConversationHandler, CallbackQueryHandler,
+                          MessageHandler, Filters, RegexHandler)
+
+from database import channels_table
+from helper_funcs.helper import get_help
+from helper_funcs.misc import delete_messages
+
+
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 # TODO:
 #       before every send check that bot admin and can send message
@@ -22,41 +29,16 @@ logger = logging.getLogger(__name__)
 #       HOW TO DELETE ALL RANDOM MESSAGES SEND BY USER
 #       IF USER DELETE BOT FROM CHANNEL
 
-# database schema
-channel_table_scheme = {
-    'bot_id': int,
-    'channel_name': str,
-    'chat_id': int
-}
 
 MY_CHANNELS, MANAGE_CHANNEL, ADD_CHANNEL, \
-CHOOSE_TO_REMOVE, REMOVE_CHANNEL, \
-CHOOSE_TO_SEND_POST, POST_TO_CHANNEL, MESSAGE_TO_USERS = range(8)
+    CHOOSE_TO_REMOVE, REMOVE_CHANNEL, \
+    CHOOSE_TO_SEND_POST, POST_TO_CHANNEL, MESSAGE_TO_USERS = range(8)
 CHOOSE_TO_SEND_POLL, CHOOSE_POLL_TO_SEND = range(2)
 CHOOSE_CHANNEL_TO_SEND_SURVEY, CHOOSE_SURVEY_TO_SEND = range(2)
 
 
 #     CHOOSE_TO_SEND_POLL, CHOOSE_POLL_TO_SEND,\
 #     CHOOSE_CHANNEL_TO_SEND_SURVEY, CHOOSE_SURVEY_TO_SEND = range(12)
-
-
-def delete_messages(update, context):
-    try:
-        context.bot.delete_message(update.effective_message.chat.id, update.effective_message.message_id)
-
-        if 'to_delete' in context.user_data:
-            for msg in context.user_data['to_delete']:
-                try:
-                    if msg.message_id != update.effective_message.message_id:
-                        context.bot.delete_message(update.effective_message.chat.id, msg.message_id)
-                except TelegramError:
-                    # print('except in delete_message---> {}, {}'.format(e, msg_id))
-                    continue
-            context.user_data['to_delete'] = list()
-        else:
-            context.user_data['to_delete'] = list()
-    except:
-        pass
 
 
 # check that bot is admin and can send messages to the channel
@@ -67,9 +49,13 @@ def check_channel(context, channel_username):
         # print(e)
         # if bot is not admin in the channel
         if str(e).startswith("Supergroup members are unavailable"):
-            return context.bot.lang_dict["bot_is_not_admin_of_channel"].format(channel_username)
-        elif str(e).startswith("There is no administrators in the private chat"):
-            return str(e) + "\n" + context.bot.lang_dict["wrong_channel_link_format"]
+            return context.bot.lang_dict[
+                "bot_is_not_admin_of_channel"].format(channel_username)
+
+        elif str(e).startswith(
+                "There is no administrators in the private chat"):
+            return (str(e) + "\n"
+                    + context.bot.lang_dict["wrong_channel_link_format"])
         # if channel link is wrong
         else:
             return context.bot.lang_dict["wrong_channel_link_format"]
@@ -85,9 +71,11 @@ def check_channel(context, channel_username):
 
 
 def channel_menu(update, context):
-    context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                               message_id=update.callback_query.message.message_id)
-    channels = Channels().update_channels_usernames(context, update.effective_chat.id)
+    context.bot.delete_message(
+        chat_id=update.callback_query.message.chat_id,
+        message_id=update.callback_query.message.message_id)
+    channels = Channels().update_channels_usernames(context,
+                                                    update.effective_chat.id)
     command_list = [[InlineKeyboardButton(x['channel_username'],
                                           callback_data="channel_{}".format(x['channel_username']))]
                     for x in channels] + \
@@ -105,7 +93,7 @@ def channel_menu(update, context):
 
 # DELETING USING USER_DATA
 class Channels(object):
-    # ################################## HELP METHODS ###########################################################
+    # ################################## HELP METHODS ########################
     # update channels usernames if channel username has benn changed.
     # call this only when at least one channel exists in db
     def update_channels_usernames(self, context, chat_id):
@@ -115,10 +103,12 @@ class Channels(object):
             check = check_channel(context, channel['channel_username'])
             if check is not True:
                 context.user_data['to_delete'].append(
-                    context.bot.send_message(chat_id,
-                                             context.bot.lang_dict["bot_is_not_admin_of_channel_2"]
-                                             .format(channel['channel_username'])))
-                channels_table.delete_one({'bot_id': context.bot.id, 'chat_id': channel['chat_id']})
+                    context.bot.send_message(
+                        chat_id,
+                        context.bot.lang_dict["bot_is_not_admin_of_channel_2"]
+                        .format(channel['channel_username'])))
+                channels_table.delete_one({'bot_id': context.bot.id,
+                                           'chat_id': channel['chat_id']})
                 continue
             # bot.get_chat() works with delay ?
             current_username = context.bot.get_chat(channel['chat_id']).username
@@ -129,21 +119,27 @@ class Channels(object):
 
     # to make keyboard with channels
     def make_channels_layout(self, update, context, state, text: str):
-        no_channel_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(context.bot.lang_dict["add_button"],
-                                                                          callback_data='add_channel')],
-                                                    [InlineKeyboardButton(context.bot.lang_dict["back_button"],
-                                                                          callback_data="help_module(channels_groups)")]])
+        no_channel_keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton(
+                context.bot.lang_dict["add_button"],
+                callback_data='add_channel')],
+            [InlineKeyboardButton(
+                context.bot.lang_dict["back_button"],
+                callback_data="help_module(channels_groups)")]])
 
-        # bot.delete_message(update.effective_chat.id, update.effective_message.message_id)
-        delete_messages(update, context)
+        # bot.delete_message(update.effective_chat.id,
+        #                    update.effective_message.message_id)
+        delete_messages(update, context, True)
         if channels_table.find({'bot_id': context.bot.id}).count() == 0:
             context.user_data['to_delete'].append(
                 context.bot.send_message(
-                    update.effective_chat.id, context.bot.lang_dict["no_channels"],
+                    update.effective_chat.id,
+                    context.bot.lang_dict["no_channels"],
                     reply_markup=no_channel_keyboard))
             return ConversationHandler.END
         else:
-            channels = self.update_channels_usernames(context, update.effective_chat.id)
+            channels = self.update_channels_usernames(
+                context, update.effective_chat.id)
             command_list = [[x['channel_username']] for x in channels] + [['Back']]
             # need to delete this message
             context.user_data['to_delete'].append(
@@ -157,7 +153,7 @@ class Channels(object):
         cancel_keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton(context.bot.lang_dict["cancel_button"],
                                   callback_data='help_back')]])
-        delete_messages(update, context)
+        delete_messages(update, context, True)
         context.user_data['to_delete'].append(
             context.bot.send_message(update.message.chat_id,
                                      context.bot.lang_dict["wrong_channel_link_format"]
@@ -234,7 +230,7 @@ class Channels(object):
         channel_username = update.callback_query.data.replace("remove_channel_", "")
         channel = channels_table.find_one({'bot_id': context.bot.id, 'channel_username': channel_username})
         if channel:
-            delete_messages(update, context)
+            delete_messages(update, context, True)
             channels_table.delete_one({'bot_id': context.bot.id, 'channel_username': channel_username})
             context.user_data['to_delete'].append(
                 context.bot.send_message(update.effective_chat.id,
@@ -253,7 +249,7 @@ class Channels(object):
     def add_channel(self, update, context):
         cancel_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(context.bot.lang_dict["cancel_button"],
                                                                       callback_data='help_back')]])
-        delete_messages(update, context)
+        delete_messages(update, context, True)
         context.user_data['to_delete'].append(
             context.bot.send_message(update.callback_query.message.chat_id, context.bot.lang_dict["channels_str_4"],
                                      reply_markup=cancel_keyboard))
@@ -275,7 +271,7 @@ class Channels(object):
                                                                         .format(channel_username))],
                                                   [InlineKeyboardButton(context.bot.lang_dict["back_button"],
                                                                         callback_data="help_module(channels_groups)")]])
-            delete_messages(update, context)
+            delete_messages(update, context, True)
             context.user_data['to_delete'].append(
                 context.bot.send_message(update.message.chat_id,
                                          context.bot.lang_dict["channel_added_success"].format(update.message.text),
@@ -291,7 +287,7 @@ class Channels(object):
         # need to return ConversationHandler.END here?
 
     def back(self, update, context):
-        delete_messages(update, context)
+        delete_messages(update, context, True)
         get_help(update, context)
         return ConversationHandler.END
 
@@ -303,7 +299,7 @@ class SendPost(object):
         reply_markup = InlineKeyboardMarkup(
             buttons)
         channel_username = update.callback_query.data.replace("write_post_channel_", "")
-        delete_messages(update, context)
+        delete_messages(update, context, True)
         context.user_data['channel'] = channel_username
         context.user_data['to_delete'].append(
             context.bot.send_message(update.callback_query.message.chat.id,
@@ -367,7 +363,7 @@ class SendPost(object):
             if "photo_file" in content_dict:
                 context.bot.send_photo(context.user_data['channel'], content_dict["photo_file"])
 
-        delete_messages(update, context)
+        delete_messages(update, context, True)
         buttons = list()
         buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                              callback_data="help_module(channels_groups)")])
@@ -405,7 +401,7 @@ class SendPost(object):
         return ConversationHandler.END
 
     def back(self, update, context):
-        delete_messages(update, context)
+        delete_messages(update, context, True)
         get_help(update, context)
         return ConversationHandler.END
 
