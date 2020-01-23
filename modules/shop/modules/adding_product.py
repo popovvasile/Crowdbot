@@ -47,8 +47,12 @@ class AddingProductHandler(object):
 
     def received_image(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        context.user_data["new_product"].images.append(
-            update.message.photo[-1].file_id)
+        if len(update.message.photo) >0:  # TODO receive image as files
+            context.user_data["new_product"].images.append(
+                update.message.photo[-1].file_id)
+        else:
+            context.user_data["new_product"].images.append(
+                update.message.document.file_id)
         context.user_data["new_product"].send_adding_product_template(
             update, context, context.bot.lang_dict["shop_admin_send_more_photo"].format(
                 len(context.user_data["new_product"].images)),
@@ -186,6 +190,8 @@ ADD_PRODUCT_HANDLER = ConversationHandler(
             MessageHandler(Filters.text, AddingProductHandler().set_image)],
         START_ADD_PRODUCT: [
             MessageHandler(Filters.photo,
+                           AddingProductHandler().received_image),
+            MessageHandler(Filters.document.image,
                            AddingProductHandler().received_image),
             CallbackQueryHandler(AddingProductHandler().set_category,
                                  pattern="continue"),

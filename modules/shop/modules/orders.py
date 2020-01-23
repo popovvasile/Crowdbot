@@ -45,7 +45,7 @@ class OrdersHandler(object):
             pagination = Pagination(
                 all_orders, page=context.user_data["page"], per_page=5)
             for order in pagination.content:
-                Order(order).send_short_template(update, context)
+                Order(context=context, obj=order).send_short_template(update, context)
             pagination.send_keyboard(
                 update, context, [[back_btn("back_to_main_menu", context=context)]])
         return state
