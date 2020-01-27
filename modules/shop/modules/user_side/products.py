@@ -8,7 +8,6 @@ from bson.objectid import ObjectId
 from helper_funcs.helper import get_help, back_to_modules
 from helper_funcs.misc import delete_messages
 from helper_funcs.pagination import Pagination
-from modules.shop.components.product import Product
 from database import (products_table, carts_table, chatbots_table,
                       categories_table)
 
@@ -19,6 +18,10 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+"""Where we are creating product template:
+        * Cart(increase, decrease)
+        * Shop
+"""
 
 class UserProductsHandler(object):
     def products(self, update, context):
@@ -317,11 +320,11 @@ class Cart(object):
                 product_buttons[0].append(
                     InlineKeyboardButton(
                         text="Remove",
-                        callback_data=f"cart_list_remove/{product['_id']}"))
+                        callback_data=f"list_cart_remove/{product['_id']}"))
                 product_buttons[0].append(
                     InlineKeyboardButton(
                         text="➕",
-                        callback_data=f"add_quantity/{product['_id']}"))
+                        callback_data=f"increase_quantity/{product['_id']}"))
 
                 # Create product template
                 if len(product["description"]) > 150:
@@ -348,7 +351,7 @@ class Cart(object):
                                     "\n*Description:* `{}`"
                                     "\n*Price:* `{} {}`"
                                     "\n*In stock:* `{}`"
-                                    "\n*Your quantity*: {}").format(
+                                    "\n*Your quantity*: `{}`").format(
                     product.get("article"),
                     product["name"],
                     category,
@@ -376,36 +379,94 @@ class Cart(object):
                     text=context.bot.lang_dict["shop_admin_no_products"],
                     reply_markup=InlineKeyboardMarkup(buttons)))
 
-    '''def add_quantity(self, update, context):
+    def increase_quantity(self, update, context):
         product_id = ObjectId(update.callback_query.data.split("/")[1])
         product = products_table.find_one({"_id": product_id})
         if product:
+            cart = carts_table.find_one({"bot_id": context.bot.id,
+                                         "user_id": update.effective_user.id})
+            cart_quantity = next(i for i in cart["products"]
+                                 if i["product_id"] == product_id)["quantity"]
+            if cart_quantity < product.get("quantity", 500):
+                # Increase product quantity
+                new_quantity = cart_quantity + 1
+                carts_table.find_and_modify(
+                    {"_id": cart["_id"], "products.product_id": product_id},
+                    {"$set": {"products.$.quantity": new_quantity}})
+                update.effective_message.edit_caption(
+                    caption=update.effective_message.caption_markdown.replace(
+                        f"\n*Your quantity*: `{cart_quantity}`",
+                        f"\n*Your quantity*: `{new_quantity}`"),
+                    parse_mode=ParseMode.MARKDOWN)
+                # Create product reply markup
+                product_buttons = [[]]
+                if new_quantity > 1:
+                    product_buttons[0].append(
+                        InlineKeyboardButton(
+                            text="➖",
+                            callback_data=f"reduce_quantity/"
+                                          f"{product['_id']}"))
+                product_buttons[0].append(
+                    InlineKeyboardButton(
+                        text="Remove",
+                        callback_data=f"list_cart_remove/{product['_id']}"))
+                product_buttons[0].append(
+                    InlineKeyboardButton(
+                        text="➕",
+                        callback_data=f"increase_quantity/{product['_id']}"))
+
+                # Create product template
+                if len(product["description"]) > 150:
+                    pass
+                    # product_buttons.append(
+                    #     [InlineKeyboardButton(
+                    #         text="View",
+                    #         callback_data=f"view_product/{product['_id']}")])
+                else:
+                    pass
+                    # if len(product["images"]) > 1:
+                    #     product_buttons.append(
+                    #         [InlineKeyboardButton(
+                    #             text="View",
+                    #             callback_data=f"view_product/"
+                    #                           f"{product['_id']}")])
+                update.effective_message.edit_reply_markup(
+                    reply_markup=InlineKeyboardMarkup(product_buttons))
+            elif cart_quantity > product["quantity"]:
+                # Set max quantity
+                pass
+            elif cart_quantity == product["quantity"]:
+                update.callback_query.answer("It is max available quantity")
+                # EDIT MARKUP
+        else:
+            # If the are no product document - remove product from cart
             carts_table.update_one(
                 {"bot_id": context.bot.id,
                  "user_id": update.effective_user.id},
-                {"$push": {"products": {"product_id": product_id,
-                                        "quantity": 1}}},
-                upsert=True)
-            update.callback_query.answer(f"{product['name']} Added to cart")
-            update.effective_message.edit_caption(
-                caption=update.effective_message.caption_markdown
-                        + "\n\nProduct already in the cart",
-                parse_mode=ParseMode.MARKDOWN)
-            update.effective_message.edit_reply_markup(
-                reply_markup=InlineKeyboardMarkup([
-                    [InlineKeyboardButton(
-                        text="Remove from the cart",
-                        callback_data=f"remove_from_cart/{product_id}")]]))
-        else:
+                {"$pull": {"products": {"product_id": product_id}}})
             update.callback_query.answer("No product")
-            return self.back_to_products(update, context)
-        return ConversationHandler.END'''
+            return self.back_to_cart(update, context)
+        return ConversationHandler.END
 
     def reduce_quantity(self, update, context):
         pass
 
     def remove_from_cart(self, update, context):
-        pass
+        product_id = ObjectId(update.callback_query.data.split("/")[1])
+        product = products_table.find_one({"_id": product_id}) or {}
+        carts_table.update_one(
+            {"bot_id": context.bot.id, "user_id": update.effective_user.id},
+            {"$pull": {"products": {"product_id": product_id}}})
+        update.callback_query.answer((product.get("name") or "")
+                                     + " Removed from cart")
+        return self.back_to_cart(update, context)
+
+    def back_to_cart(self, update, context):
+        delete_messages(update, context, True)
+        page = context.user_data["page"]
+        context.user_data.clear()
+        context.user_data["page"] = page
+        return self.cart(update, context)
 
 
 PRODUCTS = range(1)
@@ -431,6 +492,14 @@ REMOVE_FROM_CART = CallbackQueryHandler(
 CART = CallbackQueryHandler(
     pattern="^(cart|user_cart_pagination)",
     callback=Cart().cart)
+
+REMOVE_FROM_CART_LIST = CallbackQueryHandler(
+    pattern=r"list_cart_remove",
+    callback=Cart().remove_from_cart)
+
+INCREASE_QUANTITY = CallbackQueryHandler(
+    pattern=r"increase_quantity",
+    callback=Cart().increase_quantity)
 
 
 USERS_ORDERS_HANDLER = ConversationHandler(

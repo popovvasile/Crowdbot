@@ -67,6 +67,9 @@ TODO delete chat/survey from all chats, including channels and groups
 # TODO SHOP
     * Remove all sold and deleted products from cart
     * Products quantity handler for cart
+    *
+    * content
+    * 
 
 # TODO for discussion
     * One code style for whole project :) PEP 8 or 100 length(like ptb lib) or long strings
