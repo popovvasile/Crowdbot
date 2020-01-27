@@ -2,26 +2,6 @@ from telegram import ParseMode
 from telegram.error import BadRequest
 
 
-"""def delete_messages(update, context):
-    try:
-        context.bot.delete_message(
-            update.effective_chat.id,
-            update.effective_message.message_id)
-    except TelegramError:
-        pass
-    if 'to_delete' in context.user_data:
-        for msg in context.user_data['to_delete']:
-            try:
-                if msg.message_id != update.effective_message.message_id:
-                    context.bot.delete_message(
-                        update.effective_chat.id, msg.message_id)
-            except TelegramError:
-                continue
-        context.user_data['to_delete'] = list()
-    else:
-        context.user_data['to_delete'] = list()"""
-
-
 def clear_user_data(context):
     to_del = context.user_data.get('to_delete', list())
     context.user_data.clear()

@@ -11,8 +11,7 @@ class Order(object):
         """
         {"status": False,
          "creation_timestamp": "time.time:time",
-         "last_modiffrom database import brands_table
-y_timestamp": "time.time:time",
+         "last_modify_timestamp": "time.time:time",
          "name": "yurec",
          "items": [{"size": "M",
                     "product": ObjectId('5df3f95621de961d524a1625'),

@@ -415,7 +415,7 @@
         "offline_buy": "Pay offline",
         "shop_admin_some_product_not_exist": "📛 Some items are no more avalibale.",
         "shop_admin_something_gone_wrong": "😕 Something went wrong.\nContact support",
-        "f": "👋 Welcome to admin panel",
+        "shop_admin_start_message": "👋 Welcome to admin panel",
         "shop_admin_timed_out": "😕 Timed out",
         "shop_admin_to_done_btn": "✅",
         "shop_admin_to_done_yes": "✅ Done",

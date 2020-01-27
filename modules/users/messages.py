@@ -803,11 +803,7 @@ class SubscriberOpenMessage(object):
                                      reply_markup=reply_markup))
         return ConversationHandler.END
 
-    # TODO Bug when in "to_delete" are another messages that must be save.
-    #   And another case when user_data must be without "to_delete" key
-    #   create own "to_delete"
     def hide_answer(self, update, context):
-        # delete_messages(update, context, True)
         for msg in context.user_data.get('open_delete', list()):
             try:
                 context.bot.delete_message(update.effective_chat.id,

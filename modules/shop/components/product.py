@@ -36,16 +36,108 @@ class Product(object):
     def category_id(self, _id):
         _id = ObjectId(_id) if type(_id) is str else _id
         self._category_id = _id
-        print(_id)
-        print(categories_table.find_one({"_id": ObjectId(_id)}))
+        # print(_id)
+        # print(categories_table.find_one({"_id": ObjectId(_id)}))
         self.category = categories_table.find_one({"_id": _id})
 
     @property
     def template(self):
-        shop = chatbots_table.find_one({"bot_id": self.context.bot.id})["shop"]
-        return self.context.bot.lang_dict["shop_admin_product_template"].format(
-            self.name, True if not self.sold else False, self.category["name"], self.price, shop["currency"]
-        )
+        shop = chatbots_table.find_one(
+            {"bot_id": self.context.bot.id})["shop"]
+        return self.context.bot.lang_dict[
+            "shop_admin_product_template"].format(
+                self.name,
+                True if not self.sold else False,
+                self.category["name"],
+                self.price,
+                shop["currency"])
+
+    '''@property
+    def short_customer_template(self):
+        """Shows product for customers as the short version
+        to display it in the products list"""
+
+        shop = chatbots_table.find_one(
+            {"bot_id": self.context.bot.id})["shop"]
+
+        customer_template = ("*Article:* `{}`"
+                             "\n*Name:* `{}`"
+                             "\n*Category:* `{}`"
+                             "\n*Description:* `{}`"
+                             "\n*Price:* `{} {}`"
+                             "\n*Quantity:* `{}`")
+
+        if len(self.description) > 150:
+            description = self.description[:150] + "..."
+        else:
+            description = self.description
+
+        return customer_template.format(
+            self.article,
+            self.name,
+            self.category["name"],
+            description,
+            self.price, shop["currency"],
+            "Here must be quantity or None if quantity unlimited")'''
+
+    @property
+    def full_customer_template(self):
+        """Shows product for customers as the full version
+        to display it whenever user open it"""
+        shop = chatbots_table.find_one(
+            {"bot_id": self.context.bot.id})["shop"]
+
+        customer_template = ("*Article:* `{}`"
+                             "\n*Name:* `{}`"
+                             "\n*Category:* `{}`"
+                             "\n*Description:* `{}`"
+                             "\n*Price:* `{} {}`"
+                             "\n*Quantity:* `{}`")
+
+        if len(self.description) > 500:
+            description = self.context.bot.lang_dict[
+                "shop_admin_description_below"]
+        else:
+            description = self.description
+
+        return customer_template.format(
+            self.article,
+            self.name,
+            self.category["name"],
+            description,
+            self.price, shop["currency"],
+            "Here must be quantity or None if quantity unlimited")
+
+    '''def send_customer_template(self, update, temp,
+                               text="", reply_markup=None):  # TODO Content
+        """Sends product as full version(temp="full")
+        or short version(temp="short")"""
+
+        if temp == "short":
+            self.context.user_data["to_delete"].append(
+                self.context.bot.send_photo(
+                    chat_id=update.effective_chat.id,
+                    photo=self.images[0],
+                    caption=self.short_customer_template + "\n\n" + text,
+                    parse_mode=ParseMode.MARKDOWN,
+                    reply_markup=reply_markup))
+        else:
+            full_media_group = [
+                InputMediaPhoto(i, f'{self.name}') for i in self.images]
+            send_media_arr(full_media_group, update, self.context)
+
+            self.context.user_data["to_delete"].append(
+                self.context.bot.send_message(
+                    chat_id=update.effective_chat.id,
+                    text=self.full_customer_template + "\n\n" + text,
+                    parse_mode=ParseMode.MARKDOWN,
+                    reply_markup=reply_markup))
+
+            if len(self.description) > 500:
+                self.context.user_data["to_delete"].append(
+                    self.context.bot.send_message(
+                        chat_id=update.effective_chat.id,
+                        text=self.description))'''
 
     def full_template(self, long_description=None):
         description = self.context.bot.lang_dict["shop_admin_description_below"] \
@@ -106,7 +198,7 @@ class Product(object):
                                        )].message_id))
 
     # Method For Showing Product Template For Customer In Products List
-    def send_customer_template(self, update, context):
+    """def send_customer_template(self, update, context):
         if self.offline_payment and self.online_payment:
             reply_markup = InlineKeyboardMarkup([
                 [InlineKeyboardButton("Buy", callback_data=f"product_menu/{self._id}")],
@@ -127,7 +219,7 @@ class Product(object):
             context.bot.send_message(
                 chat_id=update.effective_chat.id,
                 text=self.template, parse_mode=ParseMode.MARKDOWN, reply_markup=reply_markup
-            ))
+            ))"""
 
     def send_admin_short_template(self, update, context, text=None, kb=None):
         text = text if text else self.template

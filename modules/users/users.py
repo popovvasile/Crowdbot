@@ -472,7 +472,8 @@ class SeeUserMessage(object):
         user_messages = users_messages_to_admin_table.find(
             {"bot_id": context.bot.id,
              "deleted": False,
-             "user_id": context.user_data["user_id"]})
+             "user_id": context.user_data["user_id"],
+             "anonim": False})
 
         if user_messages.count():
             return self.back_to_users_messages(update, context)
