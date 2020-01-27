@@ -186,6 +186,7 @@ class AdminHandler(object):
                             f"start=registration" + password)]
                 ]),
                 parse_mode=ParseMode.HTML))
+
         context.user_data['to_delete'].append(
             context.bot.send_message(
                 chat_id=update.effective_chat.id,

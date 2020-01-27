@@ -39,7 +39,9 @@ def help_strings(context, update):
         visitor_keyboard=[InlineKeyboardButton(text="Shop",
                                                callback_data="open_shop"),
                           InlineKeyboardButton(text="My orders",
-                                               callback_data="my_orders")],
+                                               callback_data="my_orders"),
+                          InlineKeyboardButton(text="Cart",
+                                               callback_data="cart")],
     )
     help_dict["channels_groups"] = dict(
         mod_name='Channels',

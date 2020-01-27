@@ -358,7 +358,10 @@ def help_button(update, context):
             return ConversationHandler.END
         # ensure no spiny white circle
         context.bot.answer_callback_query(query.id)
-        query.message.delete()
+        try:
+            query.message.delete()
+        except BadRequest:
+            pass
         return ConversationHandler.END
 
     except BadRequest as excp:
