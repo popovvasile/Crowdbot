@@ -19,7 +19,7 @@
 10)Paid/unpaid and release the content or send a notification that the item has been shipped
 
 
-
+# quantity- add products and edit product + to work with user buscket
 3)Pagination in items
 4)edit products content
 5)show products content
@@ -45,7 +45,6 @@ TODO delete chat/survey from all chats, including channels and groups
 2)Multiple pics as album in shop
 6)bot_id everywhere in shop- products appear in different shop
 7)Price with currency in descriptions and everywhere
-=======
 
 
 # TODO
