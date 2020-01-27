@@ -359,6 +359,8 @@
         "shop_admin_confirm_to_trash_new": "*Remove the order?*\n_The order is new and unprocessed.\nDeleting this order doesn't entail any changes..\nMake sure that the customer exactly refused the purchase_",
         "shop_admin_confirm_to_trash_product": "*Delete the product?*\n_Product wasn't ordered._",
         "shop_admin_continue_btn": "Сontinue ➡️",
+        "shop_admin_confirm_btn": "Сonfirm ➡️",
+
         "shop_admin_current_page": "*Current page:* `{}`",
         "shop_admin_description_below": "Description below ⬇️",
         "shop_admin_edit_brand_menu": "\n_Edit brand_",

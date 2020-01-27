@@ -33,8 +33,8 @@ y_timestamp": "time.time:time",
         self.price = order.get("price")
         self.in_trash = order.get("in_trash")
         self.product_id = order.get("product_id")
-        self.items_json = order.get("items")
-        self.items = [OrderItem(order_item) for order_item in self.items_json]
+        self.items_json = order.get("items") or []
+        self.items = [OrderItem(order_item) for order_item in self.items_json or []]
         self.all_items_exists = not any(item.item_exist is False
                                         for item in self.items)
 

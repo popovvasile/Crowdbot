@@ -70,8 +70,8 @@ def keyboards(context):
             [back_btn("back_to_brands_btn", context=context)]
         ]),
         confirm_add_product=InlineKeyboardMarkup([
-            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_add_product_btn"],
-                                  callback_data="send_product")],
+            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_confirm_btn"],
+                                  callback_data="confirm_product")],
             [back_btn("back_to_main_menu_btn", context=context)]
         ]),
         continue_back_kb=InlineKeyboardMarkup([

@@ -17,7 +17,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - '
 logger = logging.getLogger(__name__)
 
 START_ADD_PRODUCT, ONLINE_PAYMENT, SHIPPING, SET_TITLE, SET_CATEGORY, SET_PRICE, \
-SET_DESCRIPTION, CONFIRM_ADDING, FINISH_ADDING = range(9)
+SET_DESCRIPTION, CONFIRM_ADDING, ADDING_CONTENT, FINISH_ADDING = range(10)
 
 
 class AddingProductHandler(object):
@@ -40,19 +40,33 @@ class AddingProductHandler(object):
             context.bot.send_message(
                 chat_id=update.effective_chat.id,
                 text=context.bot.lang_dict["shop_admin_adding_product_start"],
-                reply_markup=keyboards(context)["back_to_main_menu_keyboard"]))
+                reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton(context.bot.lang_dict["shop_admin_continue_btn"],
+                                      callback_data="continue"),
+                 back_btn("back_to_main_menu_btn", context=context)]
+            ])))
         context.user_data["new_product"] = Product(context)
         context.user_data["new_product"].name = update.message.text
         return START_ADD_PRODUCT
 
+    # TODO add a "skip" button
+    # TODO add files on the end
     def received_image(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        if len(update.message.photo) >0:  # TODO receive image as files
+        if len(update.message.photo) > 0:
             context.user_data["new_product"].images.append(
                 update.message.photo[-1].file_id)
+
         else:
+            update.message.document.get_file().download(custom_path="files/{}".format(
+                update.message.document.file_name)
+            )
+            with open("files/{}".format(update.message.document.file_name), "rb") as file:
+                send_file = context.bot.send_photo(update.effective_chat.id, file)
+                context.user_data["to_delete"].append(send_file)
+                photo_file_id = send_file.photo[0].file_id
             context.user_data["new_product"].images.append(
-                update.message.document.file_id)
+                photo_file_id)
         context.user_data["new_product"].send_adding_product_template(
             update, context, context.bot.lang_dict["shop_admin_send_more_photo"].format(
                 len(context.user_data["new_product"].images)),
@@ -94,7 +108,19 @@ class AddingProductHandler(object):
 
             return START_ADD_PRODUCT
 
+    def set_price(self, update: Update, context: CallbackContext):
+        delete_messages(update, context, True)
+        if update.callback_query:
+            context.user_data["new_product"].category_id = \
+                update.callback_query.data.split("/")[1]
+        context.user_data["new_product"].send_adding_product_template(
+            update, context, "Write your price",
+            keyboards(context)["back_to_main_menu_keyboard"])
+        return SET_DESCRIPTION
+
     def set_count(self, update: Update, context: CallbackContext):
+        context.user_data["new_product"].price = format(Price.fromstring(update.message.text).amount, '.2f')
+
         delete_messages(update, context, True)
         if update.callback_query:
             context.user_data["new_product"].category_id = \
@@ -106,60 +132,192 @@ class AddingProductHandler(object):
 
     def set_description(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        context.user_data["new_product"].price = format(Price.fromstring(update.message.text).amount, '.2f')
+        context.user_data["new_product"].count = format(Price.fromstring(update.message.text).amount)
         context.user_data["new_product"].send_adding_product_template(
             update, context, "Write description",
             keyboards(context)["back_to_main_menu_keyboard"])
-        chatbot = chatbots_table.find_one({"bot_id": context.bot.id}) or {}
 
-        if "payment_token" in chatbot.get("shop", {}):
-            return ONLINE_PAYMENT
-        else:
-            return SHIPPING
-
-    def online_payment(self, update: Update, context: CallbackContext):
-        if update.message:
-            context.user_data["new_product"].description = update.message.text
-        delete_messages(update, context, True)
-        context.bot.send_message(
-            chat_id=update.message.chat_id,
-            text="Do you want to make this product with online payment, offline payment or both?",
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("Online payment",
-                                      callback_data="set_payment_online")],
-                [InlineKeyboardButton("Offline payment",
-                                      callback_data="set_payment_offline")],
-                [InlineKeyboardButton("Both options",
-                                      callback_data="set_payment_both")],
-                [back_btn("back_to_main_menu_btn", context=context)]
-            ]))
+        # chatbot = chatbots_table.find_one({"bot_id": context.bot.id}) or {}
+        # if "payment_token" in chatbot.get("shop", {}):
+        #     return ONLINE_PAYMENT
+        # else:
         return SHIPPING
+
+    # def online_payment(self, update: Update, context: CallbackContext):
+    #     if update.message:
+    #         context.user_data["new_product"].description = update.message.text
+    #     delete_messages(update, context, True)
+    #     context.bot.send_message(
+    #         chat_id=update.message.chat_id,
+    #         text="Do you want to make this product with online payment, offline payment or both?",
+    #         reply_markup=InlineKeyboardMarkup([
+    #             [InlineKeyboardButton("Online payment",
+    #                                   callback_data="set_payment_online")],
+    #             [InlineKeyboardButton("Offline payment",
+    #                                   callback_data="set_payment_offline")],
+    #             [InlineKeyboardButton("Both options",
+    #                                   callback_data="set_payment_both")],
+    #             [back_btn("back_to_main_menu_btn", context=context)]
+    #         ]))
+    #     return SHIPPING
 
     def shipping(self, update: Update, context: CallbackContext):
         if update.message:
             context.user_data["new_product"].description = update.message.text
-        else:
-            if "online" in update.callback_query.data:
-                context.user_data["new_product"].online_payment = True
-                context.user_data["new_product"].offline_payment = False
-            elif "offline" in update.callback_query.data:
-                context.user_data["new_product"].online_payment = False
-                context.user_data["new_product"].offline_payment = True
-            elif "both" in update.callback_query.data:
-                context.user_data["new_product"].online_payment = True
-                context.user_data["new_product"].offline_payment = True
+        # else:
+        #     if "online" in update.callback_query.data:
+        #         context.user_data["new_product"].online_payment = True
+        #         context.user_data["new_product"].offline_payment = False
+        #     elif "offline" in update.callback_query.data:
+        #         context.user_data["new_product"].online_payment = False
+        #         context.user_data["new_product"].offline_payment = True
+        #     elif "both" in update.callback_query.data:
+        #         context.user_data["new_product"].online_payment = True
+        #         context.user_data["new_product"].offline_payment = True
         delete_messages(update, context, True)
         context.bot.send_message(
             chat_id=update.effective_message.chat_id,
-            text="Do you want to make this product with shipping or without it?",
+            text="Do you want to make this product with shipping (or customer can pick it up at your store) or \n"
+                 "The item is not a physical one (paid content)",
             reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("With Shipping",
+                [InlineKeyboardButton("Shipping/In person",
                                       callback_data="shipping_true")],
-                [InlineKeyboardButton("Without Shipping",
+                [InlineKeyboardButton("Paid content",
                                       callback_data="shipping_false")],
                 [back_btn("back_to_main_menu_btn", context=context)]
             ]))
-        return CONFIRM_ADDING
+
+        return ADDING_CONTENT
+
+    def closed_content_handler(self, update, context):  #TODO
+        context.user_data["to_delete"].append(update.message)
+        reply_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                               callback_data="help_module(settings)")]]
+        reply_markup = InlineKeyboardMarkup(
+            reply_buttons)
+        if "content" not in context.user_data:
+            context.user_data["content"] = []
+        general_list = context.user_data["content"]
+        if update.callback_query:
+            if update.callback_query.data == "DONE":
+                self.confirm_adding(update, context)
+                return CONFIRM_ADDING
+            else:
+                done_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["done_button"],
+                                                      callback_data="DONE")]]
+                done_reply_markup = InlineKeyboardMarkup(
+                    done_buttons)
+                context.user_data["to_delete"].append(
+                    update.callback_query.message.reply_text(context.bot.lang_dict["add_menu_buttons_str_4"],
+                                                             reply_markup=done_reply_markup))
+                return ADDING_CONTENT
+        if update.message.text:
+            general_list.append({"text": update.message.text})
+
+        if update.message.photo:
+            photo_file = update.message.photo[-1].get_file().file_id
+            general_list.append({"photo_file": photo_file})
+
+        if update.message.audio:
+            audio_file = update.message.audio.get_file().file_id
+            general_list.append({"audio_file": audio_file})
+
+        if update.message.voice:
+            voice_file = update.message.voice.get_file().file_id
+            general_list.append({"voice_file": voice_file})
+
+        if update.message.document:
+            document_file = update.message.document.get_file().file_id
+            general_list.append({"document_file": document_file})
+
+        if update.message.video:
+            video_file = update.message.video.get_file().file_id
+            general_list.append({"video_file": video_file})
+
+        if update.message.video_note:
+            video_note_file = update.message.video_note.get_file().file_id
+            general_list.append({"video_note_file": video_note_file})
+        if update.message.animation:
+            animation_file = update.message.animation.get_file().file_id
+            general_list.append({"animation_file": animation_file})
+        if update.message.sticker:
+            sticker_file = update.message.sticker.get_file().file_id
+            general_list.append({"sticker_file": sticker_file})
+        context.user_data["to_delete"].append(update.message.reply_text(context.bot.lang_dict["back_text"],
+                                                                        reply_markup=reply_markup))
+        done_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["done_button"], callback_data="DONE")]]
+        done_reply_markup = InlineKeyboardMarkup(
+            done_buttons)
+        context.user_data["to_delete"].append(
+            update.message.reply_text(context.bot.lang_dict["add_menu_buttons_str_4"],
+                                      reply_markup=done_reply_markup))
+        context.user_data["content"] = general_list
+        return ADDING_CONTENT
+
+    def open_content_handler(self, update, context):
+        context.user_data["to_delete"].append(update.message)
+        reply_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                               callback_data="help_module(settings)")]]
+        reply_markup = InlineKeyboardMarkup(
+            reply_buttons)
+        if "content" not in context.user_data:
+            context.user_data["content"] = []
+        general_list = context.user_data["content"]
+        if update.callback_query:
+            if update.callback_query.data == "DONE":
+                self.confirm_adding(update, context)
+                return CONFIRM_ADDING
+            else:
+                done_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["done_button"],
+                                                      callback_data="DONE")]]
+                done_reply_markup = InlineKeyboardMarkup(
+                    done_buttons)
+                context.user_data["to_delete"].append(
+                    update.callback_query.message.reply_text(context.bot.lang_dict["add_menu_buttons_str_4"],
+                                                             reply_markup=done_reply_markup))
+                return ADDING_CONTENT
+        if update.message.text:
+            general_list.append({"text": update.message.text})
+
+        if update.message.photo:
+            photo_file = update.message.photo[-1].get_file().file_id
+            general_list.append({"photo_file": photo_file})
+
+        if update.message.audio:
+            audio_file = update.message.audio.get_file().file_id
+            general_list.append({"audio_file": audio_file})
+
+        if update.message.voice:
+            voice_file = update.message.voice.get_file().file_id
+            general_list.append({"voice_file": voice_file})
+
+        if update.message.document:
+            document_file = update.message.document.get_file().file_id
+            general_list.append({"document_file": document_file})
+
+        if update.message.video:
+            video_file = update.message.video.get_file().file_id
+            general_list.append({"video_file": video_file})
+
+        if update.message.video_note:
+            video_note_file = update.message.video_note.get_file().file_id
+            general_list.append({"video_note_file": video_note_file})
+        if update.message.animation:
+            animation_file = update.message.animation.get_file().file_id
+            general_list.append({"animation_file": animation_file})
+        if update.message.sticker:
+            sticker_file = update.message.sticker.get_file().file_id
+            general_list.append({"sticker_file": sticker_file})
+        context.user_data["to_delete"].append(update.message.reply_text(context.bot.lang_dict["back_text"],
+                                                                        reply_markup=reply_markup))
+        done_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["done_button"], callback_data="DONE")]]
+        done_reply_markup = InlineKeyboardMarkup(
+            done_buttons)
+        context.user_data["to_delete"].append(
+            update.message.reply_text(context.bot.lang_dict["add_menu_buttons_str_4"],
+                                      reply_markup=done_reply_markup))
+        context.user_data["content"] = general_list
+        return ADDING_CONTENT
 
     def confirm_adding(self, update: Update, context: CallbackContext):
         if "true" in update.callback_query.data:
@@ -200,15 +358,15 @@ ADD_PRODUCT_HANDLER = ConversationHandler(
         ],
         SET_CATEGORY: [
             MessageHandler(Filters.text, AddingProductHandler().set_category),
-            CallbackQueryHandler(AddingProductHandler().set_count,
+            CallbackQueryHandler(AddingProductHandler().set_price,
                                  pattern=r"choose_category")],
         SET_DESCRIPTION: [MessageHandler(Filters.regex(r'(\d+\.\d{1,2})|(\d+\,\d{1,2})'),
                                          AddingProductHandler().set_description),
                           MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
                                          AddingProductHandler().set_description),
-                          MessageHandler(Filters.regex(r"^((?!@).)*$"), AddingProductHandler().set_count),
+                          MessageHandler(Filters.regex(r"^((?!@).)*$"), AddingProductHandler().set_price),
                           ],
-        ONLINE_PAYMENT: [MessageHandler(Filters.text, callback=AddingProductHandler().online_payment)],
+        # ONLINE_PAYMENT: [MessageHandler(Filters.text, callback=AddingProductHandler().online_payment)],
 
         SHIPPING: [CallbackQueryHandler(AddingProductHandler().shipping,
                                         pattern=r"set_payment_"),
@@ -216,11 +374,16 @@ ADD_PRODUCT_HANDLER = ConversationHandler(
 
         CONFIRM_ADDING: [CallbackQueryHandler(AddingProductHandler().confirm_adding,
                                               pattern=r"shipping_")],
-        FINISH_ADDING: [CallbackQueryHandler(AddingProductHandler().finish_adding,
-                                             pattern=r"send_product")]
+        ADDING_CONTENT: [CallbackQueryHandler(AddingProductHandler().open_content_handler,
+                                              pattern=r"confirm_product"),
+                         MessageHandler(Filters.all, callback=AddingProductHandler().open_content_handler)],
+        # FINISH_ADDING: []
 
     },
 
     fallbacks=[CallbackQueryHandler(Welcome().back_to_main_menu,
-                                    pattern=r"back_to_main_menu")]
+                                    pattern=r"back_to_main_menu"),
+               CallbackQueryHandler(AddingProductHandler().finish_adding,
+                                    pattern=r"DONE")
+               ]
 )

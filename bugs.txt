@@ -8,7 +8,26 @@
 # TODO sending of donation buttons in groups and channels, as well as surveys/polls- make it inline
 # TODO make paid content
 # TODO tickets on events with payment, location and hour
+# TODO off/on the anonymous messages
+1)Categories as buttons - in users
+2)Bucket - in users
 
+
+
+3)Online/offline payment- shop in general
+8)payment instructions given by the admin - for the entire shop
+10)Paid/unpaid and release the content or send a notification that the item has been shipped
+
+
+
+3)Pagination in items
+4)edit products content
+5)show products content
+6)fix orders
+7)paid content- create "secret content" and release it only after the payment
+
+
+TODO: 1)SHOP Creation (offline/online), images and files, categories as buttons, amounts, on "buy" you show all content, paid content
 
 TODO delete chat/survey from all chats, including channels and groups
 

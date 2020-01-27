@@ -82,12 +82,18 @@ class Product(object):
 
     # Method For Sending Product Template While Adding New Product
     def send_adding_product_template(self, update, context, text, kb=None):
-        if len(self.images) < 2:
+        # TODO not only photo- every type of files
+        if len(self.images) < 1:
+            context.user_data["to_delete"].append(
+                context.bot.send_message(
+                    chat_id=update.effective_chat.id, text=text,
+                    reply_markup=kb, parse_mode=ParseMode.MARKDOWN))
+        elif len(self.images) < 2:
             context.user_data["to_delete"].append(
                 context.bot.send_photo(
                     chat_id=update.effective_chat.id, photo=self.images[0],
                     caption=text, parse_mode=ParseMode.MARKDOWN,
-                    reply_markup=kb))
+                    reply_markup=kb, mime_type="image"))
         else:
             # todo mb don't delete media group until product adding finish
             context.user_data["to_delete"].extend(
@@ -119,10 +125,12 @@ class Product(object):
             reply_markup = InlineKeyboardMarkup([
                 [InlineKeyboardButton("Buy", callback_data=f"offline_buy/{self._id}")],
             ])
-        context.user_data["to_delete"].append(
-            context.bot.send_media_group(
-                chat_id=update.effective_chat.id, media=[InputMediaPhoto(x) for x in self.images]
-            ))
+        if len(self.images) > 0:  # TODO double check and add the representation of the content
+            context.user_data["to_delete"].append(
+                context.bot.send_media_group(
+                    chat_id=update.effective_chat.id, media=[InputMediaPhoto(x) for x in self.images]
+                ))
+
         context.user_data["to_delete"].append(
             context.bot.send_message(
                 chat_id=update.effective_chat.id,
