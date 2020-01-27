@@ -382,13 +382,21 @@ class Cart(object):
                     cart_product["quantity"])
 
                 # Send short product template
-                context.user_data["to_delete"].append(
-                    context.bot.send_photo(
-                        chat_id=update.effective_chat.id,
-                        photo=product["images"][0],
-                        caption=product_template,
-                        parse_mode=ParseMode.MARKDOWN,
-                        reply_markup=InlineKeyboardMarkup(product_buttons)))
+                if len(product["images"]) > 0:
+                    context.user_data["to_delete"].append(
+                        context.bot.send_photo(
+                            chat_id=update.effective_chat.id,
+                            photo=product["images"][0],
+                            caption=product_template,
+                            parse_mode=ParseMode.MARKDOWN,
+                            reply_markup=InlineKeyboardMarkup(product_buttons)))
+                else:
+                    context.user_data["to_delete"].append(
+                        context.bot.send_message(
+                            chat_id=update.effective_chat.id,
+                            text=product_template,
+                            parse_mode=ParseMode.MARKDOWN,
+                            reply_markup=InlineKeyboardMarkup(product_buttons)))
             # Send main buttons
             pagination.send_keyboard(update, context,
                                      page_prefix="user_cart_pagination",
