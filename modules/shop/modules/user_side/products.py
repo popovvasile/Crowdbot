@@ -18,10 +18,12 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+
 """Where we are creating product template:
         * Cart(increase, decrease)
         * Shop
 """
+
 
 class UserProductsHandler(object):
     def products(self, update, context):

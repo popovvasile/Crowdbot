@@ -115,10 +115,10 @@ class CreateShopHandler(object):
         return ASK_TOKEN
 
     def ask_token(self, update, context):
-        reply_markup = InlineKeyboardMarkup(
-            [].append(
-                [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                      callback_data="help_module(shop)")]))
+        reply_markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                  callback_data="help_module(shop)")]
+        ])
         chatbot = chatbots_table.find_one({"bot_id": context.bot.id}) or {}
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                    message_id=update.callback_query.message.message_id)
@@ -155,13 +155,13 @@ class CreateShopHandler(object):
         return TYPING_TOKEN
 
     def handle_payment_explanation(self, update, context):
-        reply_markup = InlineKeyboardMarkup(
-            [].append(
-                [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                      callback_data="help_module(shop)")]))
-        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                                   message_id=update.callback_query.message.message_id)
-        context.bot.send_message(update.callback_query.message.chat.id,
+        reply_markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                  callback_data="help_module(shop)")]
+        ])
+        context.bot.delete_message(chat_id=update.effective_chat.id,
+                                   message_id=update.message.message_id)
+        context.bot.send_message(update.effective_chat.id,
                                  context.bot.lang_dict["create_shop_str_6"], reply_markup=reply_markup)
         return TYPING_DESCRIPTION
 
