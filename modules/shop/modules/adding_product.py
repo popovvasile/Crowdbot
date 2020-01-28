@@ -16,8 +16,8 @@ logging.basicConfig(format='%(asctime)s - %(name)s - '
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-START_ADD_PRODUCT, ONLINE_PAYMENT, SHIPPING, PAID_CONTENT, SET_TITLE, SET_CATEGORY, SET_PRICE, \
-SET_DESCRIPTION, CONFIRM_ADDING, ADDING_CONTENT, FINISH_ADDING = range(11)
+START_ADD_PRODUCT, ONLINE_PAYMENT, PAID_CONTENT, SET_TITLE, SET_CATEGORY, SET_PRICE, \
+SET_DESCRIPTION, CONFIRM_ADDING, ADDING_CONTENT, FINISH_ADDING = range(10)
 
 
 class AddingProductHandler(object):
@@ -292,10 +292,6 @@ class AddingProductHandler(object):
         return ADDING_CONTENT
 
     def confirm_adding(self, update: Update, context: CallbackContext):
-        if "true" in update.callback_query.data:
-            context.user_data["new_product"].shipping = True
-        else:
-            context.user_data["new_product"].shipping = False
         delete_messages(update, context, True)
         context.user_data["new_product"].send_adding_product_template(
             update, context,
@@ -343,7 +339,7 @@ ADD_PRODUCT_HANDLER = ConversationHandler(
                           ],
 
         CONFIRM_ADDING: [CallbackQueryHandler(AddingProductHandler().confirm_adding,
-                                              pattern=r"shipping_")],
+                                              pattern=r"DONE")],
         ADDING_CONTENT: [CallbackQueryHandler(AddingProductHandler().open_content_handler,
                                               pattern=r"confirm_product"),
                          MessageHandler(Filters.all, callback=AddingProductHandler().open_content_handler)],

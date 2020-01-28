@@ -39,7 +39,7 @@ class PurchaseBot(object):
         context.bot.sendInvoice(update.callback_query.message.chat_id, title, description, payload,
                                 shop["payment_token"], start_parameter, currency, prices,
                                 need_name=True, need_phone_number=True,
-                                need_email=True, need_shipping_address=purchase_request.get("shipping"),
+                                need_email=True, need_shipping_address=True,
                                 is_flexible=True
                                 )
         context.bot.send_message(update.callback_query.message.chat.id,
@@ -77,7 +77,6 @@ class PurchaseBot(object):
         context.user_data["chat_id"] = update.message.chat_id
         context.user_data["bot_id"] = context.bot.id
         # order_info
-        #shipping_option_id
         orders_table.insert_one(context.user_data)
         update.message.reply_text(context.bot.lang_dict["thank_purchase"], markup=markup)
         context.user_data.clear()

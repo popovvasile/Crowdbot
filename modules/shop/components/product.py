@@ -24,7 +24,6 @@ class Product(object):
         self.images = product.get("images", list())
         self.in_trash = product.get("in_trash")
         self.category_id = product.get("category_id")
-        self.shipping = product.get("shipping")
         self.online_payment = product.get("online_payment")
         self.offline_payment = product.get("offline_payment")
         self.physical = product.get("physical")
@@ -151,8 +150,7 @@ class Product(object):
             self.price,
             self.discount_price,
             self.online_payment,
-            self.offline_payment,
-            self.shipping
+            self.offline_payment
         )
 
     @property
@@ -299,7 +297,6 @@ class Product(object):
             self.images = product.get("images", list())
             self.in_trash = product.get("in_trash")
             self.category_id = product.get("category_id")
-            self.shipping = product.get("shipping")
             self.online_payment = product.get("online_payment")
             self.offline_payment = product.get("offline_payment")
             self.physical = product.get("physical")
@@ -320,7 +317,6 @@ class Product(object):
                       "order_ids": self.order_ids,
                       "online_payment": self.online_payment,
                       "offline_payment": self.offline_payment,
-                      "shipping": self.shipping,
                       "physical" : self.physical
 
             }
@@ -342,7 +338,6 @@ class Product(object):
             "name": self.name,
             "category_id": self.category_id,
             "images": self.images,
-            "shipping": self.shipping,
             "online_payment": self.online_payment,
             "offline_payment": self.offline_payment,
             "sold": False,

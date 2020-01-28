@@ -53,7 +53,7 @@ class PurchaseBot(object):
                                  reply_markup=InlineKeyboardMarkup(
                                      [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                             callback_data="help_back")]])))
-        if context.user_data["product"]["shipping"]:
+        if context.user_data["product"]["physical"]:
             return ORDER_ADDRESS
         else:
             return ORDER_FINISH
@@ -62,7 +62,7 @@ class PurchaseBot(object):
     def ask_address(update, context):
         context.user_data["contacts"] = update.message.text
         context.user_data["to_delete"].append(context.bot.send_message(update.message.chat.id,
-                                 text="Tell us your full address for the shipping",
+                                 text="Tell us your full address",
                                  reply_markup=InlineKeyboardMarkup(
                                      [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                             callback_data="help_back")]])))

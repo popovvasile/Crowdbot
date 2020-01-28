@@ -206,28 +206,6 @@ class ProductsHandler:
             context.user_data["product"].update(dict(offline_payment=True))
         return self.edit(update, context)
 
-    def shipping(self, update: Update, context: CallbackContext):
-        delete_messages(update, context, True)
-        context.bot.send_message(
-            chat_id=update.effective_message.chat_id,
-            text="Do you want to make this product with shipping or without it?",
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("With Shipping",
-                                      callback_data="shipping_true")],
-                [InlineKeyboardButton("Without Shipping",
-                                      callback_data="shipping_false")],
-                [back_btn("back_to_main_menu_btn", context=context)]
-            ]))
-        return SHIPPING
-
-    def finish_shipping(self, update: Update, context: CallbackContext):
-        delete_messages(update, context, True)
-        if "true" in update.callback_query.data:
-            context.user_data["product"].shipping = True
-        else:
-            context.user_data["product"].shipping = False
-        return self.edit(update, context)
-
     def confirm_to_trash(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         product_id = update.callback_query.data.split("/")[1]
@@ -258,9 +236,9 @@ class ProductsHandler:
 
 
 (PRODUCTS, EDIT, DESCRIPTION, NAME,  PRICE,
- DISCOUNT_PRICE, IMAGES, CATEGORY, SHIPPING, PAYMENT, CONFIRM_TO_TRASH, SIZES_MENU,
+ DISCOUNT_PRICE, IMAGES, CATEGORY, PAYMENT, CONFIRM_TO_TRASH, SIZES_MENU,
  SIZE_QUANTITY, SET_SIZE, SET_QUANTITY,
- CONFIRM_ADD_SIZES) = range(16)
+ CONFIRM_ADD_SIZES) = range(15)
 
 
 PRODUCTS_HANDLER = ConversationHandler(
@@ -286,8 +264,6 @@ PRODUCTS_HANDLER = ConversationHandler(
                                     pattern="change_category"),
                CallbackQueryHandler(ProductsHandler().images,
                                     pattern="change_images"),
-               CallbackQueryHandler(ProductsHandler().shipping,
-                                    pattern="change_shipping"),
                CallbackQueryHandler(ProductsHandler().payment,
                                     pattern="change_payment"),
                ],
@@ -306,9 +282,6 @@ PRODUCTS_HANDLER = ConversationHandler(
         PAYMENT: [CallbackQueryHandler(
             ProductsHandler().finish_payment,
             pattern=r"set_payment_")],
-        SHIPPING: [CallbackQueryHandler(
-            ProductsHandler().finish_shipping,
-            pattern=r"shipping_")],
 
         DESCRIPTION: [MessageHandler(Filters.text,
                                      ProductsHandler().finish_description)],
