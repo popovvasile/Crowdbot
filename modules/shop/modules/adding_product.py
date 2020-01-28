@@ -16,8 +16,8 @@ logging.basicConfig(format='%(asctime)s - %(name)s - '
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-START_ADD_PRODUCT, ONLINE_PAYMENT, SHIPPING, SET_TITLE, SET_CATEGORY, SET_PRICE, \
-SET_DESCRIPTION, CONFIRM_ADDING, ADDING_CONTENT, FINISH_ADDING = range(10)
+START_ADD_PRODUCT, ONLINE_PAYMENT, SHIPPING, PAID_CONTENT, SET_TITLE, SET_CATEGORY, SET_PRICE, \
+SET_DESCRIPTION, CONFIRM_ADDING, ADDING_CONTENT, FINISH_ADDING = range(11)
 
 
 class AddingProductHandler(object):
@@ -31,6 +31,24 @@ class AddingProductHandler(object):
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text="Introduce the name of your new product",
                                      reply_markup=reply_markup))
+        return PAID_CONTENT
+
+    def paid_content(self, update: Update, context: CallbackContext):
+
+        delete_messages(update, context, True)
+        context.user_data["to_delete"].append(
+            context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text="Is your product a physical one or do you want to sell content?",
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton("CONTENT",
+                                          callback_data="product_type_content")],
+                    [InlineKeyboardButton("PHYSICAL",
+                                          callback_data="product_type_physical")],
+                    [back_btn("back_to_main_menu_btn", context=context)]
+                ])))
+        context.user_data["new_product"] = Product(context)
+        context.user_data["new_product"].name = update.message.text
         return SET_TITLE
 
     def set_image(self, update: Update, context: CallbackContext):
@@ -41,12 +59,12 @@ class AddingProductHandler(object):
                 chat_id=update.effective_chat.id,
                 text=context.bot.lang_dict["shop_admin_adding_product_start"],
                 reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton(context.bot.lang_dict["shop_admin_continue_btn"],
-                                      callback_data="continue"),
-                 back_btn("back_to_main_menu_btn", context=context)]
-            ])))
+                    [InlineKeyboardButton(context.bot.lang_dict["shop_admin_continue_btn"],
+                                          callback_data="continue"),
+                     back_btn("back_to_main_menu_btn", context=context)]
+                ])))
         context.user_data["new_product"] = Product(context)
-        context.user_data["new_product"].name = update.message.text
+        context.user_data["new_product"].physical = "physical" in update.callback_query.data
         return START_ADD_PRODUCT
 
     # TODO add a "skip" button
@@ -189,7 +207,7 @@ class AddingProductHandler(object):
 
         return ADDING_CONTENT
 
-    def closed_content_handler(self, update, context):  #TODO
+    def closed_content_handler(self, update, context):  # TODO
         context.user_data["to_delete"].append(update.message)
         reply_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                callback_data="help_module(settings)")]]
@@ -344,8 +362,11 @@ ADD_PRODUCT_HANDLER = ConversationHandler(
                                        pattern=r"add_product")],
 
     states={  # TODO fix add category
+        PAID_CONTENT: [
+            MessageHandler(Filters.text, AddingProductHandler().paid_content)],
         SET_TITLE: [
-            MessageHandler(Filters.text, AddingProductHandler().set_image)],
+            CallbackQueryHandler(AddingProductHandler().set_image,
+                                 pattern="product_type")],
         START_ADD_PRODUCT: [
             MessageHandler(Filters.photo,
                            AddingProductHandler().received_image),

@@ -36,3 +36,21 @@
 
 я тут подумал над твоими словами что мы не являемся стартапом как таковым,
 может будем делать как в компаниях - каждый день созвон и у каждого спич по 5-10 мин что сделал за сегодня, что узнал, какие новые идеи и что будет делать
+
+
+ONLINE/OFFLINE
+
+ONLINE: TOKEN, EDIT TOKEN
+OFFLINE: PAYMENT EXPLANATION
+
+
+EDIT SHOP: Edit type, TOKEN only if there is one, Payment description if there is no token
+10)Paid/unpaid and release the content or send a notification that the item has been shipped
+
+ONLINE/OFFLINE Donations
+
+
+
+
+
+

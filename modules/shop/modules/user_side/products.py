@@ -422,11 +422,20 @@ class Cart(object):
                 carts_table.find_and_modify(
                     {"_id": cart["_id"], "products.product_id": product_id},
                     {"$set": {"products.$.quantity": new_quantity}})
-                update.effective_message.edit_caption(
-                    caption=update.effective_message.caption_markdown.replace(
-                        f"\n*Your quantity*: `{cart_quantity}`",
-                        f"\n*Your quantity*: `{new_quantity}`"),
-                    parse_mode=ParseMode.MARKDOWN)
+
+                if update.effective_message.caption_markdown:
+                    update.effective_message.edit_caption(
+                        caption=update.effective_message.caption_markdown.replace(
+                            f"\n*Your quantity*: `{cart_quantity}`",
+                            f"\n*Your quantity*: `{new_quantity}`"),
+                        parse_mode=ParseMode.MARKDOWN)
+                else:
+                    update.effective_message.edit_text(
+                        text=update.effective_message.text.replace(
+                            f"\n*Your quantity*: `{cart_quantity}`",
+                            f"\n*Your quantity*: `{new_quantity}`"),
+                        parse_mode=ParseMode.MARKDOWN)
+
                 # Create product reply markup
                 product_buttons = [[]]
                 if new_quantity > 1:

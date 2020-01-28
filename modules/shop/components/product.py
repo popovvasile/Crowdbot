@@ -27,6 +27,7 @@ class Product(object):
         self.shipping = product.get("shipping")
         self.online_payment = product.get("online_payment")
         self.offline_payment = product.get("offline_payment")
+        self.physical = product.get("physical")
 
     @property
     def category_id(self):
@@ -301,6 +302,7 @@ class Product(object):
             self.shipping = product.get("shipping")
             self.online_payment = product.get("online_payment")
             self.offline_payment = product.get("offline_payment")
+            self.physical = product.get("physical")
 
         else:
             products_table.update_one(
@@ -318,8 +320,10 @@ class Product(object):
                       "order_ids": self.order_ids,
                       "online_payment": self.online_payment,
                       "offline_payment": self.offline_payment,
-                      "shipping": self.shipping
-                      }
+                      "shipping": self.shipping,
+                      "physical" : self.physical
+
+            }
                  })
 
     # Only For cloth shop method - for refresh "sold" field after product edit
@@ -345,5 +349,7 @@ class Product(object):
             "in_trash": False,
             "on_sale": True,
             "order_ids": list(),
-            "creation_timestamp": datetime.now()
+            "creation_timestamp": datetime.now(),
+            "physical": self.physical
+
         })
