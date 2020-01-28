@@ -42,13 +42,15 @@ ONLINE/OFFLINE
 
 ONLINE: TOKEN, EDIT TOKEN
 OFFLINE: PAYMENT EXPLANATION
-
+Categories in categories
 
 EDIT SHOP: Edit type, TOKEN only if there is one, Payment description if there is no token
 10)Paid/unpaid and release the content or send a notification that the item has been shipped
 
 ONLINE/OFFLINE Donations
 
+
+Order ID-shnik
 
 
 

@@ -159,52 +159,6 @@ class AddingProductHandler(object):
         # if "payment_token" in chatbot.get("shop", {}):
         #     return ONLINE_PAYMENT
         # else:
-        return SHIPPING
-
-    # def online_payment(self, update: Update, context: CallbackContext):
-    #     if update.message:
-    #         context.user_data["new_product"].description = update.message.text
-    #     delete_messages(update, context, True)
-    #     context.bot.send_message(
-    #         chat_id=update.message.chat_id,
-    #         text="Do you want to make this product with online payment, offline payment or both?",
-    #         reply_markup=InlineKeyboardMarkup([
-    #             [InlineKeyboardButton("Online payment",
-    #                                   callback_data="set_payment_online")],
-    #             [InlineKeyboardButton("Offline payment",
-    #                                   callback_data="set_payment_offline")],
-    #             [InlineKeyboardButton("Both options",
-    #                                   callback_data="set_payment_both")],
-    #             [back_btn("back_to_main_menu_btn", context=context)]
-    #         ]))
-    #     return SHIPPING
-
-    def shipping(self, update: Update, context: CallbackContext):
-        if update.message:
-            context.user_data["new_product"].description = update.message.text
-        # else:
-        #     if "online" in update.callback_query.data:
-        #         context.user_data["new_product"].online_payment = True
-        #         context.user_data["new_product"].offline_payment = False
-        #     elif "offline" in update.callback_query.data:
-        #         context.user_data["new_product"].online_payment = False
-        #         context.user_data["new_product"].offline_payment = True
-        #     elif "both" in update.callback_query.data:
-        #         context.user_data["new_product"].online_payment = True
-        #         context.user_data["new_product"].offline_payment = True
-        delete_messages(update, context, True)
-        context.bot.send_message(
-            chat_id=update.effective_message.chat_id,
-            text="Do you want to make this product with shipping (or customer can pick it up at your store) or \n"
-                 "The item is not a physical one (paid content)",
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("Shipping/In person",
-                                      callback_data="shipping_true")],
-                [InlineKeyboardButton("Paid content",
-                                      callback_data="shipping_false")],
-                [back_btn("back_to_main_menu_btn", context=context)]
-            ]))
-
         return ADDING_CONTENT
 
     def closed_content_handler(self, update, context):  # TODO
