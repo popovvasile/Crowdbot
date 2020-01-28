@@ -341,18 +341,12 @@ ADD_PRODUCT_HANDLER = ConversationHandler(
                                          AddingProductHandler().set_description),
                           MessageHandler(Filters.regex(r"^((?!@).)*$"), AddingProductHandler().set_price),
                           ],
-        # ONLINE_PAYMENT: [MessageHandler(Filters.text, callback=AddingProductHandler().online_payment)],
-
-        SHIPPING: [CallbackQueryHandler(AddingProductHandler().shipping,
-                                        pattern=r"set_payment_"),
-                   MessageHandler(Filters.text, callback=AddingProductHandler().shipping)],
 
         CONFIRM_ADDING: [CallbackQueryHandler(AddingProductHandler().confirm_adding,
                                               pattern=r"shipping_")],
         ADDING_CONTENT: [CallbackQueryHandler(AddingProductHandler().open_content_handler,
                                               pattern=r"confirm_product"),
                          MessageHandler(Filters.all, callback=AddingProductHandler().open_content_handler)],
-        # FINISH_ADDING: []
 
     },
 
