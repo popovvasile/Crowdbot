@@ -18,7 +18,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-ASK_TOKEN, TYPING_TOKEN, TYPING_TITLE, TYPING_DESCRIPTION, TYPING_PAYMENT_EXPLANATION, SHOP_FINISH = range(6)
+ASK_TOKEN, TYPING_TOKEN, TYPING_DESCRIPTION, TYPING_PAYMENT_EXPLANATION, SHOP_FINISH = range(5)
 
 
 def eshop_menu(update, context):  # TODO add shop config button
@@ -116,15 +116,14 @@ class CreateShopHandler(object):
 
     def ask_token(self, update, context):
         reply_markup = InlineKeyboardMarkup(
-            [].append(
-                [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                      callback_data="help_module(shop)")]))
+            [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                   callback_data="help_module(shop)")]])
         chatbot = chatbots_table.find_one({"bot_id": context.bot.id}) or {}
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                    message_id=update.callback_query.message.message_id)
         if "payment_token" in chatbot.get("shop", {}) or "offline" in update.callback_query.data:
             context.bot.send_message(update.callback_query.message.chat.id,
-                                     context.bot.lang_dict["create_shop_str_6"], reply_markup=reply_markup)
+                                     context.bot.lang_dict["create_shop_str_2"], reply_markup=reply_markup)
             return TYPING_PAYMENT_EXPLANATION
         else:
             context.bot.send_message(update.callback_query.message.chat.id,
@@ -144,9 +143,9 @@ class CreateShopHandler(object):
 
             context.user_data['payment_token'] = txt
 
-            update.message.reply_text(context.bot.lang_dict["create_shop_str_4"], reply_markup=reply_markup)
+            update.message.reply_text(context.bot.lang_dict["create_shop_str_6"], reply_markup=reply_markup)
 
-            return TYPING_TITLE
+            return TYPING_DESCRIPTION
         else:
             update.message.reply_text(
                 context.bot.lang_dict["create_shop_str_5"],
@@ -155,17 +154,20 @@ class CreateShopHandler(object):
         return TYPING_TOKEN
 
     def handle_payment_explanation(self, update, context):
+        chat_id, txt = initiate_chat_id(update)
+        context.user_data["payment_explanation"] = txt
         reply_markup = InlineKeyboardMarkup(
-            [].append(
-                [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                      callback_data="help_module(shop)")]))
-        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                                   message_id=update.callback_query.message.message_id)
-        context.bot.send_message(update.callback_query.message.chat.id,
+            [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                   callback_data="help_module(shop)")]])
+        context.bot.delete_message(chat_id=update.message.chat_id,
+                                   message_id=update.message.message_id)
+        context.bot.send_message(update.message.chat.id,
                                  context.bot.lang_dict["create_shop_str_6"], reply_markup=reply_markup)
         return TYPING_DESCRIPTION
 
     def handle_description(self, update, context):
+        context.bot.delete_message(chat_id=update.message.chat_id,
+                                   message_id=update.message.message_id)
         chat_id, txt = initiate_chat_id(update)
         context.user_data["description"] = txt
         currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["CHF", "AUD", "RON", "PLN"]]

@@ -34,3 +34,5 @@ occupyguguta@gmail.com
 
 ssh root@67.211.220.14
 python#1917
+UnPasPentruMD#2019
+14a0b23822770c59b451e7a21f944cc532f1cee7

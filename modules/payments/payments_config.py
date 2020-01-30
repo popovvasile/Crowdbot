@@ -83,11 +83,18 @@ class EnableDisableShopDonations(object):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                    message_id=update.callback_query.message.message_id)
         chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
-        admin_keyboard = []
+
+        if "payment_token" in chatbot["shop"]:
+            button_text = "change_payment_token"
+            admin_keyboard = []
+        else:
+            button_text = "add_payment_token"
+            admin_keyboard = [[InlineKeyboardButton(text=context.bot.lang_dict["change_shop_payment_instruction"],
+                                                        callback_data="edit_change_shop_payment_instruction")]]
         if chatbot["shop_enabled"] is True and "shop" in chatbot:
             admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["disable_shop_button"],
                                                         callback_data="change_shop_config")]),
-            admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["change_payment_token"],
+            admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict[button_text],
                                                         callback_data="edit_change_shop_payment_token")]),
             admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["change_donation_greeting"],
                                                         callback_data="edit_change_shop_description")]),

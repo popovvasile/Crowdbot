@@ -17,7 +17,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - '
 logger = logging.getLogger(__name__)
 
 START_ADD_PRODUCT, ONLINE_PAYMENT, PAID_CONTENT, SET_TITLE, SET_CATEGORY, SET_PRICE, \
-SET_DESCRIPTION, CONFIRM_ADDING, ADDING_CONTENT, FINISH_ADDING = range(10)
+SET_DESCRIPTION, ASK_QUANTITY, CONFIRM_ADDING, ADDING_CONTENT, FINISH_ADDING = range(11)
 
 
 class AddingProductHandler(object):
@@ -132,17 +132,14 @@ class AddingProductHandler(object):
             context.user_data["new_product"].category_id = \
                 update.callback_query.data.split("/")[1]
         context.user_data["new_product"].send_adding_product_template(
-            update, context, "Write your price",
+            update, context, "Write the quantity of your product. How many copies do you want to sell?",
             keyboards(context)["back_to_main_menu_keyboard"])
-        return SET_DESCRIPTION
+        return ASK_QUANTITY
 
-    def set_count(self, update: Update, context: CallbackContext):
-        context.user_data["new_product"].price = format(Price.fromstring(update.message.text).amount, '.2f')
+    def set_quantity(self, update: Update, context: CallbackContext):
+        context.user_data["new_product"].quantity = format(Price.fromstring(update.message.text).amount)
 
         delete_messages(update, context, True)
-        if update.callback_query:
-            context.user_data["new_product"].category_id = \
-                update.callback_query.data.split("/")[1]
         context.user_data["new_product"].send_adding_product_template(
             update, context, "Write your price",
             keyboards(context)["back_to_main_menu_keyboard"])
@@ -150,7 +147,7 @@ class AddingProductHandler(object):
 
     def set_description(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        context.user_data["new_product"].count = format(Price.fromstring(update.message.text).amount)
+        context.user_data["new_product"].price = format(Price.fromstring(update.message.text).amount, '.2f')
         context.user_data["new_product"].send_adding_product_template(
             update, context, "Write description",
             keyboards(context)["back_to_main_menu_keyboard"])
@@ -331,6 +328,8 @@ ADD_PRODUCT_HANDLER = ConversationHandler(
             MessageHandler(Filters.text, AddingProductHandler().set_category),
             CallbackQueryHandler(AddingProductHandler().set_price,
                                  pattern=r"choose_category")],
+        ASK_QUANTITY: [MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
+                                      AddingProductHandler().set_quantity)],
         SET_DESCRIPTION: [MessageHandler(Filters.regex(r'(\d+\.\d{1,2})|(\d+\,\d{1,2})'),
                                          AddingProductHandler().set_description),
                           MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
