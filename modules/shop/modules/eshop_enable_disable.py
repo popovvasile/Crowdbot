@@ -108,8 +108,8 @@ class CreateShopHandler(object):
                                       callback_data="set_payment_online")],
                 [InlineKeyboardButton("Offline payment",
                                       callback_data="set_payment_offline")],
-                # [InlineKeyboardButton("Both options",
-                #                       callback_data="set_payment_both")],
+                [InlineKeyboardButton("Both options",
+                                      callback_data="set_payment_both")],
                 [back_btn("back_to_main_menu_btn", context=context)]
             ]))
         return ASK_TOKEN
@@ -121,7 +121,9 @@ class CreateShopHandler(object):
         chatbot = chatbots_table.find_one({"bot_id": context.bot.id}) or {}
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                    message_id=update.callback_query.message.message_id)
-        if "payment_token" in chatbot.get("shop", {}) or "offline" in update.callback_query.data:
+        context.user_data["shop_type"] = update.callback_query.data.replace("set_payment_", "")
+        if "payment_token" in chatbot.get("shop", {}) \
+                or "offline" in update.callback_query.data:
             context.bot.send_message(update.callback_query.message.chat.id,
                                      context.bot.lang_dict["create_shop_str_2"], reply_markup=reply_markup)
             return TYPING_PAYMENT_EXPLANATION
@@ -143,9 +145,12 @@ class CreateShopHandler(object):
 
             context.user_data['payment_token'] = txt
 
-            update.message.reply_text(context.bot.lang_dict["create_shop_str_6"], reply_markup=reply_markup)
-
-            return TYPING_DESCRIPTION
+            if context.user_data["shop_type"] == "both":
+                update.message.reply_text(context.bot.lang_dict["create_shop_str_2"], reply_markup=reply_markup)
+                return TYPING_PAYMENT_EXPLANATION
+            else:
+                update.message.reply_text(context.bot.lang_dict["create_shop_str_6"], reply_markup=reply_markup)
+                return TYPING_DESCRIPTION
         else:
             update.message.reply_text(
                 context.bot.lang_dict["create_shop_str_5"],

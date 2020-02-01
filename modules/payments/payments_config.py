@@ -21,7 +21,7 @@ START, CHOOSING_ACTION, FINISH_ACTION, EDIT_PAYMENT, CHOOSING_EDIT_ACTION, \
 TYPING_TITLE, TYPING_DESCRIPTION, TYPING_CURRENCY, \
 TYPING_TOKEN, TYPING_TOKEN_FINISH, EDIT_FINISH, DOUBLE_CHECK_DELETE, DELETE_FINISH = range(13)
 
-
+# TODO change type of shop in settings and instructions for payment
 def check_provider_token(provider_token, update, context):
     bot_token = chatbots_table.find_one({"bot_id": context.bot.id})["token"]
     prices = [LabeledPrice(context.bot.lang_dict["create_donation_str_1"], 10000)]
@@ -35,9 +35,6 @@ def check_provider_token(provider_token, update, context):
                                     prices=json.dumps([p.to_dict() for p in prices]),
                                     chat_id=update.effective_chat.id))
     return json.loads(data.content)["ok"]
-
-
-# TODO enable/diasble shop/donations
 
 
 class EnableDisableShopDonations(object):

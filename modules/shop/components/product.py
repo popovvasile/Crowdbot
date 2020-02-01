@@ -303,7 +303,6 @@ class Product(object):
             self.physical = product.get("physical")
             self.quantity = product.get("quantity")
 
-
         else:
             products_table.update_one(
                 {"_id": self._id},
