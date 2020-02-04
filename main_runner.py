@@ -32,7 +32,7 @@ from modules.shop.modules.user_side.online_payment import (
     ONLINE_PURCHASE_HANDLER)
 from modules.shop.modules.user_side.products import (
     USERS_ORDERS_HANDLER, USERS_PRODUCTS_LIST_HANDLER, ADD_TO_CART,
-    REMOVE_FROM_CART, CART, REMOVE_FROM_CART_LIST, INCREASE_QUANTITY)
+    REMOVE_FROM_CART, CART, REMOVE_FROM_CART_LIST, CHANGE_QUANTITY)
 
 from modules.groups.groups import (
     MY_GROUPS_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER,
@@ -167,7 +167,7 @@ def main(token, lang):
     dispatcher.add_handler(REMOVE_FROM_CART)
     dispatcher.add_handler(CART)
     dispatcher.add_handler(REMOVE_FROM_CART_LIST)
-    dispatcher.add_handler(INCREASE_QUANTITY)
+    dispatcher.add_handler(CHANGE_QUANTITY)
     dispatcher.add_handler(ADD_CATEGORY_HANDLER)
     dispatcher.add_handler(CATEGORIES_HANDLER)
     dispatcher.add_handler(EDIT_CATEGORIES_HANDLER)
