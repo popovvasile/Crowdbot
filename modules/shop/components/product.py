@@ -17,7 +17,7 @@ class Product(object):
         self.article = product.get("article")
         self.sold = product.get("sold")
         self.price = product.get("price")
-        self.description = product.get("description")
+        self.description = product.get("description", "")
         self.name = product.get("name")
         self.discount_price = product.get("discount_price")
         self.order_ids = product.get("order_ids", list())
