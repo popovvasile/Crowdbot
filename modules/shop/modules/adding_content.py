@@ -16,10 +16,10 @@ logging.basicConfig(format='%(asctime)s - %(name)s - '
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-START_ADD_PRODUCT, ONLINE_PAYMENT,  \
+START_ADD_PRODUCT, ONLINE_PAYMENT, PAID_CONTENT, \
     SET_TITLE, SET_CATEGORY, SET_PRICE, \
     SET_DESCRIPTION, SET_QUANTITY, CONFIRM_ADDING, \
-    ADDING_CONTENT, FINISH_ADDING = range(10)
+    ADDING_OPEN_CONTENT, ADDING_CONTENT, FINISH_ADDING = range(12)
 
 
 # TODO ADDING SKIP TO EVERYTHING
@@ -106,9 +106,90 @@ class AddingProductHandler(object):
         delete_messages(update, context, True)
         context.user_data["new_product"].price = format(Price.fromstring(update.message.text).amount, '.2f')
         context.user_data["new_product"].send_adding_product_template(
-            update, context, "Write description or add any files about this product: documents, images or videos",
+            update, context, "Write description",
             keyboards(context)["back_to_main_menu_keyboard"])
 
+        chatbot = chatbots_table.find_one({"bot_id": context.bot.id}) or {}
+        if "payment_token" in chatbot.get("shop", {}):
+            return PAID_CONTENT
+        else:
+            return ADDING_CONTENT
+
+    def paid_content(self, update: Update, context: CallbackContext):
+        delete_messages(update, context, True)
+        context.user_data["to_delete"].append(
+            context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text="Is your product a physical one or do you want to sell content?",
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton("CONTENT",
+                                          callback_data="product_type_content")],
+                    # => ADDING_CLOSED_CONTENT => ADDING_CONTENT
+                    [InlineKeyboardButton("PHYSICAL",
+                                          callback_data="product_type_physical")],
+                    # => ADDING_CONTENT
+                    [back_btn("back_to_main_menu_btn", context=context)]
+                ])))
+        context.user_data["new_product"] = Product(context)
+        context.user_data["new_product"].name = update.message.text
+        return ADDING_CONTENT
+
+    def closed_content_handler(self, update, context):
+
+        context.user_data["to_delete"].append(update.message)
+        reply_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                               callback_data="help_module(shop)")]]
+        reply_markup = InlineKeyboardMarkup(
+            reply_buttons)
+        if "content" not in context.user_data:
+            context.user_data["content"] = []
+        general_list = context.user_data["content"]
+        if update.message:
+            if update.message.text:
+                general_list.append({"text": update.message.text})
+
+            if update.message.photo:
+                photo_file = update.message.photo[-1].get_file().file_id
+                general_list.append({"photo_file": photo_file})
+
+            if update.message.audio:
+                audio_file = update.message.audio.get_file().file_id
+                general_list.append({"audio_file": audio_file})
+
+            if update.message.voice:
+                voice_file = update.message.voice.get_file().file_id
+                general_list.append({"voice_file": voice_file})
+
+            if update.message.document:
+                document_file = update.message.document.get_file().file_id
+                general_list.append({"document_file": document_file})
+
+            if update.message.video:
+                video_file = update.message.video.get_file().file_id
+                general_list.append({"video_file": video_file})
+
+            if update.message.video_note:
+                video_note_file = update.message.video_note.get_file().file_id
+                general_list.append({"video_note_file": video_note_file})
+            if update.message.animation:
+                animation_file = update.message.animation.get_file().file_id
+                general_list.append({"animation_file": animation_file})
+            if update.message.sticker:
+                sticker_file = update.message.sticker.get_file().file_id
+                general_list.append({"sticker_file": sticker_file})
+            message = update.message
+        else:
+            message = update.callback_query.message
+        context.user_data["to_delete"].append(message.reply_text(context.bot.lang_dict["back_text"],
+                                                                 reply_markup=reply_markup))
+        done_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["done_button"],
+                                              callback_data="product_type_physical")]]
+        done_reply_markup = InlineKeyboardMarkup(
+            done_buttons)
+        context.user_data["to_delete"].append(
+            message.reply_text(context.bot.lang_dict["add_menu_buttons_str_4"],
+                               reply_markup=done_reply_markup))
+        context.user_data["secret_content"] = general_list
         return ADDING_CONTENT
 
     def open_content_handler(self, update, context):
@@ -139,7 +220,7 @@ class AddingProductHandler(object):
                          back_btn("back_to_main_menu_btn", context=context)]
                     ]))
                 context.user_data["content"] = general_list
-                return ADDING_CONTENT
+                return ADDING_OPEN_CONTENT
 
             if update.message.audio:
                 audio_file = update.message.audio.get_file().file_id
@@ -178,7 +259,7 @@ class AddingProductHandler(object):
             message.reply_text(context.bot.lang_dict["add_menu_buttons_str_4"],
                                reply_markup=done_reply_markup))
         context.user_data["content"] = general_list
-        return ADDING_CONTENT
+        return ADDING_OPEN_CONTENT
 
     def confirm_adding(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
@@ -218,7 +299,16 @@ ADD_PRODUCT_HANDLER = ConversationHandler(
                                          AddingProductHandler().set_description),
                           MessageHandler(Filters.regex(r"^((?!@).)*$"), AddingProductHandler().set_price),
                           ],
-        ADDING_CONTENT: [
+        PAID_CONTENT: [MessageHandler(Filters.all, callback=AddingProductHandler().paid_content)],
+
+        ADDING_CONTENT: [CallbackQueryHandler(AddingProductHandler().open_content_handler,
+                                              pattern=r"product_type_physical"),
+                         CallbackQueryHandler(AddingProductHandler().closed_content_handler,
+                                              pattern=r"product_type_content"),
+
+                         MessageHandler(Filters.all, callback=AddingProductHandler().closed_content_handler)
+                         ],
+        ADDING_OPEN_CONTENT: [
             MessageHandler(Filters.all, callback=AddingProductHandler().open_content_handler),
             CallbackQueryHandler(AddingProductHandler().confirm_adding,
                                  pattern=r"continue"),

@@ -25,7 +25,7 @@ class Order(object):
         self.context = context
         self._id = order.get("_id")
         self.bot_id = context.bot.id
-        self.status = order.get("status")
+        self.status = order.get("status")  # TODO admin can change the status of the order- executed or not
         self.timestamp = order.get("creation_timestamp", ".").split(".")[0]
         self.name = order.get("name")
         self.phone_number = order.get("phone_number")
