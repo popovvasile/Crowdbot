@@ -32,5 +32,5 @@ occupyguguta@gmail.com
 @GugutaInternBot  OccupyGuguţă Intern        894721326:AAGJZKmGlRNc3oHwg6HrQvHQOc39SQiR3OY
 @GugutaShopBot    OccupyGuguţă Shop          833531405:AAEvURn6i6XPYJDbldW-Kk3hkracDzWGi6U
 
-ssh root@67.211.220.14
-python#1917
+
+

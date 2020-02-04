@@ -26,6 +26,7 @@ class Product(object):
         self.category_id = product.get("category_id")
         self.online_payment = product.get("online_payment")
         self.offline_payment = product.get("offline_payment")
+        self.quantity = product.get("quantity")
         self.physical = product.get("physical")
 
     @property
@@ -300,6 +301,7 @@ class Product(object):
             self.online_payment = product.get("online_payment")
             self.offline_payment = product.get("offline_payment")
             self.physical = product.get("physical")
+            self.quantity = product.get("quantity")
 
         else:
             products_table.update_one(
@@ -317,7 +319,8 @@ class Product(object):
                       "order_ids": self.order_ids,
                       "online_payment": self.online_payment,
                       "offline_payment": self.offline_payment,
-                      "physical" : self.physical
+                      "physical": self.physical,
+                      "quantity": self.quantity
 
             }
                  })
@@ -345,6 +348,7 @@ class Product(object):
             "on_sale": True,
             "order_ids": list(),
             "creation_timestamp": datetime.now(),
-            "physical": self.physical
+            "physical": self.physical,
+            "quantity": self.quantity
 
         })

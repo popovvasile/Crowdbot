@@ -48,9 +48,12 @@ EDIT SHOP: Edit type, TOKEN only if there is one, Payment description if there i
 10)Paid/unpaid and release the content or send a notification that the item has been shipped
 
 ONLINE/OFFLINE Donations
+Add quantity of products
+
+Order ID-shnik  and state of Order
 
 
-Order ID-shnik
+убрать часть с фотками
 
 
 
