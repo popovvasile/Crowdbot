@@ -1,8 +1,7 @@
 import time
+from pprint import pprint
 
-
-# In Linux or UNIX:
-# time python yourprogram.py
+from database import categories_table
 
 
 def dict_test():
@@ -166,7 +165,7 @@ def func_test():
     return ls
 
 
-def test():
+'''def test():
     # print(Order(order_id=3).all_items_exists)
 
     print("DICT")
@@ -177,7 +176,12 @@ def test():
     print("FUNC")
     start_time = time.time()
     func_test()
-    print(time.time() - start_time)
+    print(time.time() - start_time)'''
+
+
+def test():
+    for i in categories_table.find():
+        pprint(i)
 
 
 if __name__ == "__main__":
