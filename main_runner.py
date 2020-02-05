@@ -9,7 +9,6 @@ from telegram import Bot
 from telegram.ext import (CommandHandler, CallbackQueryHandler,
                           MessageHandler, Filters)
 
-# from helper_funcs.admin_login import ADMIN_AUTHENTICATION_HANDLER
 from helper_funcs.helper import (
     help_button, button_handler, get_help, WelcomeBot,
     back_from_button_handler, back_to_modules)
@@ -31,8 +30,9 @@ from modules.shop.modules.user_side.offline_payment import (
 from modules.shop.modules.user_side.online_payment import (
     ONLINE_PURCHASE_HANDLER)
 from modules.shop.modules.user_side.products import (
-    USERS_ORDERS_HANDLER, USERS_PRODUCTS_LIST_HANDLER, ADD_TO_CART,
-    REMOVE_FROM_CART, CART, REMOVE_FROM_CART_LIST, CHANGE_QUANTITY)
+    USERS_PRODUCTS_LIST_HANDLER, ADD_TO_CART, REMOVE_FROM_CART, CART,
+    REMOVE_FROM_CART_LIST, CHANGE_QUANTITY, BACK_TO_CART, MAKE_ORDER,
+    PRODUCTS_CATEGORIES, BACK_TO_CATEGORIES)
 
 from modules.groups.groups import (
     MY_GROUPS_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER,
@@ -161,11 +161,15 @@ def main(token, lang):
     dispatcher.add_handler(ORDERS_HANDLER)
     dispatcher.add_handler(PRODUCTS_HANDLER)
     dispatcher.add_handler(TRASH_START)
-    dispatcher.add_handler(USERS_ORDERS_HANDLER)
+    # dispatcher.add_handler(USERS_ORDERS_HANDLER)
+    dispatcher.add_handler(BACK_TO_CART)
     dispatcher.add_handler(USERS_PRODUCTS_LIST_HANDLER)
     dispatcher.add_handler(ADD_TO_CART)
     dispatcher.add_handler(REMOVE_FROM_CART)
     dispatcher.add_handler(CART)
+    dispatcher.add_handler(MAKE_ORDER)
+    dispatcher.add_handler(PRODUCTS_CATEGORIES)
+    dispatcher.add_handler(BACK_TO_CATEGORIES)
     dispatcher.add_handler(REMOVE_FROM_CART_LIST)
     dispatcher.add_handler(CHANGE_QUANTITY)
     dispatcher.add_handler(ADD_CATEGORY_HANDLER)

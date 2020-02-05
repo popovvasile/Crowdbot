@@ -55,6 +55,8 @@ Order ID-shnik  and state of Order
 
 убрать часть с фотками
 
+Changing shop currency - ask for the exchange rate and translate all prices
+
 
 
 

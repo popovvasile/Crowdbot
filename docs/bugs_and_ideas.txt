@@ -71,6 +71,7 @@ TODO delete chat/survey from all chats, including channels and groups
     * donations notifications(donate comment)
     * off/on message notification
     * Messages history
+    * Protect all /start, backs, get_help, help_button and so on with user_data.clear() function call
 
 # TODO BUGS
     * None on greating (mb when greating comes from bot_father)
