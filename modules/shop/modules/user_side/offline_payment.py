@@ -55,7 +55,7 @@ class PurchaseBot(object):
                                                                                text=context.bot.lang_dict[
                                                                                    "back_button"],
                                                                                callback_data="help_back")]])))
-        if context.user_data["product"]["physical"]:
+        if context.user_data["product"]["physical"]:  # TODO check in shop settings
             return ORDER_ADDRESS
         else:
             return ORDER_FINISH
