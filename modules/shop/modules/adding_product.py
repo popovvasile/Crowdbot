@@ -16,10 +16,10 @@ logging.basicConfig(format='%(asctime)s - %(name)s - '
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-START_ADD_PRODUCT, ONLINE_PAYMENT,  \
-    SET_TITLE, SET_CATEGORY, SET_PRICE, \
-    ASK_DESCRIPTION, SET_DESCRIPTION, SET_QUANTITY, CONFIRM_ADDING, \
-    ADDING_CONTENT, FINISH_ADDING = range(11)
+START_ADD_PRODUCT, ONLINE_PAYMENT, \
+SET_TITLE, SET_CATEGORY, SET_PRICE, SET_DISCOUNT, \
+ASK_DESCRIPTION, SET_DESCRIPTION, SET_QUANTITY, CONFIRM_ADDING, \
+ADDING_CONTENT, FINISH_ADDING = range(12)
 
 
 # TODO ADDING SKIP TO EVERYTHING
@@ -94,18 +94,35 @@ class AddingProductHandler(object):
         return SET_PRICE
 
     def set_price(self, update: Update, context: CallbackContext):
-        print(Price.fromstring(update.message.text).amount)
-        context.user_data["new_product"].quantity = int(format(Price.fromstring(update.message.text).amount))
-
+        context.user_data["new_product"].quantity = int(
+            format(Price.fromstring(update.message.text).amount))
         delete_messages(update, context, True)
         context.user_data["new_product"].send_adding_product_template(
             update, context, "Write your price",
+            keyboards(context)["back_to_main_menu_keyboard"])
+        return SET_DISCOUNT
+
+    def set_discount_price(self, update: Update, context: CallbackContext):
+        delete_messages(update, context, True)
+        context.user_data["new_product"].price = float(
+            format(Price.fromstring(update.message.text).amount, '.2f'))
+        context.user_data["new_product"].send_adding_product_template(
+            update, context, "Write a discount price for this product. Send 0 to skip",
             keyboards(context)["back_to_main_menu_keyboard"])
         return ASK_DESCRIPTION
 
     def ask_description(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        context.user_data["new_product"].price = float(format(Price.fromstring(update.message.text).amount, '.2f'))
+        discount_price = float(
+            format(Price.fromstring(update.message.text).amount, '.2f'))
+        if discount_price >= context.user_data["new_product"].price:
+            context.user_data["new_product"].send_adding_product_template(
+                update, context, "Your discount price is bigger than the price of the product itself. \n"
+                                 "Please write another discount price",
+                keyboards(context)["back_to_main_menu_keyboard"])
+            return ASK_DESCRIPTION
+        context.user_data["new_product"].discount_price = discount_price
+
         context.user_data["new_product"].send_adding_product_template(
             update, context, "Write description of this product.",
             keyboards(context)["back_to_main_menu_keyboard"])
@@ -222,11 +239,16 @@ ADD_PRODUCT_HANDLER = ConversationHandler(
         SET_PRICE: [MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
                                    AddingProductHandler().set_price),
                     MessageHandler(Filters.regex(r"^((?!@).)*$"), AddingProductHandler().set_quantity)],
+
+        SET_DISCOUNT: [MessageHandler(Filters.regex(r'(\d+\.\d{1,2})|(\d+\,\d{1,2})'),
+                                      AddingProductHandler().set_discount_price),
+                       MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
+                                      AddingProductHandler().set_discount_price)],
         ASK_DESCRIPTION: [
             MessageHandler(Filters.regex(r'(\d+\.\d{1,2})|(\d+\,\d{1,2})'),
-                                         AddingProductHandler().ask_description),
+                           AddingProductHandler().ask_description),
             MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
-                                         AddingProductHandler().ask_description),
+                           AddingProductHandler().ask_description),
         ],
         SET_DESCRIPTION: [MessageHandler(Filters.text, AddingProductHandler().set_description),
 
