@@ -123,12 +123,13 @@ class CreateShopHandler(object):
                                    message_id=update.callback_query.message.message_id)
         context.user_data["shop_type"] = update.callback_query.data.replace("set_payment_", "")
         if "offline" in update.callback_query.data:
-            reply_markup = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                                  callback_data="help_module(shop)")],
+            reply_markup = [
                             [InlineKeyboardButton(text="DELIVERY",
                                                   callback_data="shop_type_delivery")],
                             [InlineKeyboardButton(text="PICK UP",
                                                   callback_data="shop_type_pick_up")],
+                            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                                  callback_data="help_module(shop)")],
                             ]
             context.bot.send_message(update.callback_query.message.chat_id,
                                      context.bot.lang_dict["create_shop_str_9"],
@@ -161,8 +162,8 @@ class CreateShopHandler(object):
             return TYPING_TOKEN
 
     def handle_type(self, update, context):
-        context.bot.delete_message(chat_id=update.message.chat_id,
-                                   message_id=update.message.message_id)
+        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                                   message_id=update.callback_query.message.message_id)
         reply_markup = InlineKeyboardMarkup(
             [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                    callback_data="help_module(shop)")]])
@@ -174,7 +175,7 @@ class CreateShopHandler(object):
         else:
             context.user_data["shipping"] = False
             context.bot.send_message(update.callback_query.message.chat_id,
-                                     context.bot.lang_dict["create_shop_str_6"], reply_markup=reply_markup)
+                                     context.bot.lang_dict["create_shop_str_9"], reply_markup=reply_markup)
             return TYPING_SHOP_ADDRESS
 
     def handle_address(self, update, context):
@@ -183,7 +184,7 @@ class CreateShopHandler(object):
         reply_markup = InlineKeyboardMarkup(
             [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                    callback_data="help_module(shop)")]])
-        context.bot.send_message(update.callback_query.message.chat_id,
+        context.bot.send_message(update.message.chat_id,
                                  context.bot.lang_dict["create_shop_str_6"], reply_markup=reply_markup)
         return TYPING_DESCRIPTION
 
