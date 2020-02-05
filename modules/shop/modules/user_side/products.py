@@ -80,7 +80,7 @@ class UserProductsHandler(object):
                 parse_mode=ParseMode.MARKDOWN))
         # Products list buttons
         buttons = [[InlineKeyboardButton(
-                        text="Cart",
+                        text="🛒 Cart",
                         callback_data="cart"),
                     InlineKeyboardButton(
                         text=context.bot.lang_dict["back_button"],
@@ -251,7 +251,7 @@ class UserOrdersHandler(object):
 
 class CartHelper(object):
     @staticmethod
-    def validate_cart_item(cart, product) -> dict:
+    def validate_cart_item(cart, product: (ObjectId, str)) -> dict:
         """Check if the product exist and check product quantity
 
         * when cart opened from main menu button("Cart")
@@ -262,19 +262,26 @@ class CartHelper(object):
         :return: empty dict if product doesn't exist, sold of deleted
             or dict with data if item exist and correct
         """
+        if type(product) is ObjectId:
+            product_id = product
+            product = products_table.find_one({"_id": product_id})
+        else:
+            product_id = ObjectId(product)
+            product = products_table.find_one({"_id": product_id})
+
         cart = get_obj(carts_table, cart)
-        product = get_obj(products_table, product)
 
         if not product or product["in_trash"] or product["sold"]:
             carts_table.update_one(
                 {"_id": cart["_id"]},
-                {"$pull": {"products": {"product_id": product["_id"]}}})
+                {"$pull": {"products": {"product_id": product_id}}})
             return dict()
 
         cart_item = next((i for i in cart["products"]
-                          if i["product_id"] == product["_id"]), None)
+                          if i["product_id"] == product_id), None)
         if not cart_item:
             return dict()
+
         # If cart item quantity bigger than product
         # set cart item quantity to maximum count
         if (not product.get("unlimited")

@@ -22,6 +22,7 @@ categories_table = db["categories"]
 user_categories_table = db["user_categories"]
 orders_quantity_table = db["orders_quantity"]
 shop_categories_table = db["shop_categories"]
+customers_contacts_table = db["customers_contacts"]
 DROPBOX_TOKEN = "xPAGp5mkaqgAAAAAAAABwK7yiygvq9ITgQj7j4KlBU8SYQ3WEmHCQnUxCIZUD-mR"
 
 # in bot_father.db
