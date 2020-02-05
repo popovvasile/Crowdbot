@@ -123,10 +123,16 @@ class CreateShopHandler(object):
                                    message_id=update.callback_query.message.message_id)
         context.user_data["shop_type"] = update.callback_query.data.replace("set_payment_", "")
         if "offline" in update.callback_query.data:
-            context.bot.send_message(update.callback_query.message.chat.id,
-                                     # TODO here add the delivery keyboard
-                                     context.bot.lang_dict["create_shop_str_2"], reply_markup=reply_markup)
-
+            reply_markup = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                                  callback_data="help_module(shop)")],
+                            [InlineKeyboardButton(text="DELIVERY",
+                                                  callback_data="shop_type_delivery")],
+                            [InlineKeyboardButton(text="PICK UP",
+                                                  callback_data="shop_type_pick_up")],
+                            ]
+            context.bot.send_message(update.callback_query.message.chat_id,
+                                     context.bot.lang_dict["create_shop_str_9"],
+                                     reply_markup=InlineKeyboardMarkup(reply_markup))
             return CHOOSING_PICK_UP_OR_DELIVERY
 
         else:
@@ -152,39 +158,31 @@ class CreateShopHandler(object):
                 context.bot.lang_dict["create_shop_str_5"],
                 reply_markup=reply_markup)
 
-        return TYPING_TOKEN
+            return TYPING_TOKEN
 
-    def set_pickup_or_delivery(self, update, context):
-
-        context.user_data["pickup_or_delivery"] = update.callback_query.data.replace("shop_type_", "")
-        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                                   message_id=update.callback_query.message.message_id)
-        reply_markup = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                              callback_data="help_module(shop)")]]
-        if context.user_data["pickup_or_delivery"] == "pick_up":
-            reply_markup += [[InlineKeyboardButton(text="DELIVERY",
-                                                   callback_data="delivery")],
-                             [InlineKeyboardButton(text="PICK UP",
-                                                   callback_data="pick_up")],
-                             ]
-            context.bot.send_message(update.callback_query.message.chat_id,
-                                     context.bot.lang_dict["create_shop_str_9"],
-                                     reply_markup=InlineKeyboardMarkup(reply_markup))
-            return TYPING_SHOP_ADDRESS  # TODO we can use the Telegram "Venue" for showing address
-        else:
-            context.bot.send_message(update.callback_query.message.chat_id,
-                                     context.bot.lang_dict["create_shop_str_6"],
-                                     reply_markup=InlineKeyboardMarkup(reply_markup))
-            return TYPING_DESCRIPTION
-
-    def handle_address(self, update, context):
+    def handle_type(self, update, context):
         context.bot.delete_message(chat_id=update.message.chat_id,
                                    message_id=update.message.message_id)
         reply_markup = InlineKeyboardMarkup(
             [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                    callback_data="help_module(shop)")]])
+        if "delivery" in update.callback_query.data:
+            context.user_data["shipping"] = True
+            context.bot.send_message(update.callback_query.message.chat_id,
+                                     context.bot.lang_dict["create_shop_str_6"], reply_markup=reply_markup)
+            return TYPING_DESCRIPTION
+        else:
+            context.user_data["shipping"] = False
+            context.bot.send_message(update.callback_query.message.chat_id,
+                                     context.bot.lang_dict["create_shop_str_6"], reply_markup=reply_markup)
+            return TYPING_SHOP_ADDRESS
+
+    def handle_address(self, update, context):
         chat_id, txt = initiate_chat_id(update)
         context.user_data["address"] = txt
+        reply_markup = InlineKeyboardMarkup(
+            [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                   callback_data="help_module(shop)")]])
         context.bot.send_message(update.callback_query.message.chat_id,
                                  context.bot.lang_dict["create_shop_str_6"], reply_markup=reply_markup)
         return TYPING_DESCRIPTION
@@ -249,7 +247,8 @@ class CreateShopHandler(object):
 
 
 # Add conversation handler with the states CHOOSING, TYPING_CHOICE and TYPING_REPLY'
-
+# CHOOSING_PICK_UP_OR_DELIVERY:handle_type shop_type_
+# TYPING_SHOP_ADDRESS handle_address text
 CREATE_SHOP_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=CreateShopHandler().start_create_shop,
                                        pattern=r'allow_shop'),
@@ -261,8 +260,8 @@ CREATE_SHOP_HANDLER = ConversationHandler(
                                          pattern=r'set_payment')],
         TYPING_TOKEN: [MessageHandler(Filters.text,
                                       CreateShopHandler().handle_token)],
-        CHOOSING_PICK_UP_OR_DELIVERY: [CallbackQueryHandler(callback=CreateShopHandler().set_pickup_or_delivery,
-                                                            pattern=r"delivery")],
+        CHOOSING_PICK_UP_OR_DELIVERY: [CallbackQueryHandler(callback=CreateShopHandler().handle_type,
+                                                            pattern=r"shop_type_")],
         TYPING_SHOP_ADDRESS: [MessageHandler(Filters.text,
                                              CreateShopHandler().handle_address)],
         TYPING_DESCRIPTION: [MessageHandler(Filters.text,
