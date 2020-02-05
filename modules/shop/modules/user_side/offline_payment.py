@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import logging
+import datetime
+
 from bson import ObjectId
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import (MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
-import logging
-import datetime
-# Enable logging
-from database import products_table, chatbots_table, orders_table
+
+from database import orders_table, customers_contacts_table
 from helper_funcs.helper import get_help
 from helper_funcs.misc import delete_messages
 from modules.shop.modules.user_side.products import Cart
@@ -18,6 +19,8 @@ logging.basicConfig(
     level=logging.INFO)
 
 logger = logging.getLogger(__name__)
+
+
 ORDER_DESCRIPTION, ORDER_CONTACTS, ORDER_ADDRESS, ORDER_FINISH = range(4)
 
 
@@ -57,19 +60,27 @@ class PurchaseBot(object):
         if not context.user_data.get("order"):
             return Cart().back_to_cart(update, context)
         context.user_data["order"]["description"] = update.message.text
+        contacts = customers_contacts_table.find_one(
+            {"bot_id": context.bot.id, "user_id": update.effective_user.id})
+        if contacts and len(contacts["phone_numbers"]):
+            text = "Tell us your phone number or select one of with this:"
+            buttons = [contacts["phone_numbers"][x:x+2]
+                       for x in range(0, len(contacts["phone_numbers"]), 2)]
+        else:
+            text = "Tell us your phone number:"
+            buttons = []
+        buttons.append([InlineKeyboardButton(
+                            text=context.bot.lang_dict["back_button"],
+                            callback_data="back_to_cart")])
+        # context.user_data["customers_contacts"]
         context.user_data["to_delete"].append(
             context.bot.send_message(
                 chat_id=update.message.chat.id,
-                text="Tell us your email or phone number",
+                text="Tell us your phone number",
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton(
                         text=context.bot.lang_dict["back_button"],
                         callback_data="back_to_cart")]])))
-        # TODO !!
-        # if context.user_data["product"]["physical"]:
-        #     return ORDER_ADDRESS
-        # else:
-        #     return ORDER_FINISH
         return ORDER_ADDRESS
 
     @staticmethod
@@ -77,9 +88,9 @@ class PurchaseBot(object):
         delete_messages(update, context, True)
         if not context.user_data.get("order"):
             return Cart().back_to_cart(update, context)
-        
+
         context.user_data["order"]["contacts"] = update.message.text
-        context.user_data["customers contacts"]
+
         context.user_data["to_delete"].append(
             context.bot.send_message(
                 chat_id=update.message.chat.id,

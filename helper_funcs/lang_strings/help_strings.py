@@ -36,11 +36,11 @@ def help_strings(context, update):
         admin_keyboard=admins_keyboard,
         admin_help=string_d_str["add_menu_buttons_help"],
         visitor_help=string_d_str["add_product_button"],
-        visitor_keyboard=[InlineKeyboardButton(text="Shop",
+        visitor_keyboard=[InlineKeyboardButton(text="Catalog",
                                                callback_data="open_shop"),
-                          InlineKeyboardButton(text="My orders",
+                          InlineKeyboardButton(text="My Orders",
                                                callback_data="my_orders"),
-                          InlineKeyboardButton(text="Cart",
+                          InlineKeyboardButton(text="🛒 Cart",
                                                callback_data="cart")],
     )
     help_dict["channels_groups"] = dict(
