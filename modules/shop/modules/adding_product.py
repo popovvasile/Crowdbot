@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 
 START_ADD_PRODUCT, ONLINE_PAYMENT,  \
     SET_TITLE, SET_CATEGORY, SET_PRICE, \
-    SET_DESCRIPTION, SET_QUANTITY, CONFIRM_ADDING, \
-    ADDING_CONTENT, FINISH_ADDING = range(10)
+    ASK_DESCRIPTION, SET_DESCRIPTION, SET_QUANTITY, CONFIRM_ADDING, \
+    ADDING_CONTENT, FINISH_ADDING = range(11)
 
 
 # TODO ADDING SKIP TO EVERYTHING
@@ -83,7 +83,7 @@ class AddingProductHandler(object):
                 update, context, context.bot.lang_dict["shop_admin_set_category"], keyboard)
         return SET_CATEGORY
 
-    def set_price(self, update: Update, context: CallbackContext):
+    def set_quantity(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         if update.callback_query:
             context.user_data["new_product"].category_id = \
@@ -91,20 +91,29 @@ class AddingProductHandler(object):
         context.user_data["new_product"].send_adding_product_template(
             update, context, "Write the quantity of your product. How many copies do you want to sell?",
             keyboards(context)["back_to_main_menu_keyboard"])
-        return SET_QUANTITY
+        return SET_PRICE
 
-    def set_quantity(self, update: Update, context: CallbackContext):
-        context.user_data["new_product"].quantity = format(Price.fromstring(update.message.text).amount)
+    def set_price(self, update: Update, context: CallbackContext):
+        print(Price.fromstring(update.message.text).amount)
+        context.user_data["new_product"].quantity = int(format(Price.fromstring(update.message.text).amount))
 
         delete_messages(update, context, True)
         context.user_data["new_product"].send_adding_product_template(
             update, context, "Write your price",
             keyboards(context)["back_to_main_menu_keyboard"])
+        return ASK_DESCRIPTION
+
+    def ask_description(self, update: Update, context: CallbackContext):
+        delete_messages(update, context, True)
+        context.user_data["new_product"].price = float(format(Price.fromstring(update.message.text).amount, '.2f'))
+        context.user_data["new_product"].send_adding_product_template(
+            update, context, "Write description of this product.",
+            keyboards(context)["back_to_main_menu_keyboard"])
         return SET_DESCRIPTION
 
     def set_description(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        context.user_data["new_product"].price = format(Price.fromstring(update.message.text).amount, '.2f')
+        context.user_data["new_product"].description = update.message.text
         context.user_data["new_product"].send_adding_product_template(
             update, context, "Write description or add any files about this product: documents, images or videos",
             keyboards(context)["back_to_main_menu_keyboard"])
@@ -200,23 +209,27 @@ ADD_PRODUCT_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(AddingProductHandler().start,
                                        pattern=r"add_product")],
 
-    states={  # TODO fix add category
+    states={
         SET_TITLE: [
             MessageHandler(Filters.text,
                            AddingProductHandler().set_title)],
         SET_CATEGORY: [
             MessageHandler(Filters.text, AddingProductHandler().set_category),
-            CallbackQueryHandler(AddingProductHandler().set_price,
+            CallbackQueryHandler(AddingProductHandler().set_quantity,
                                  pattern=r"choose_category")
         ],
 
-        SET_QUANTITY: [MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
-                                      AddingProductHandler().set_quantity)],
-        SET_DESCRIPTION: [MessageHandler(Filters.regex(r'(\d+\.\d{1,2})|(\d+\,\d{1,2})'),
-                                         AddingProductHandler().set_description),
-                          MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
-                                         AddingProductHandler().set_description),
-                          MessageHandler(Filters.regex(r"^((?!@).)*$"), AddingProductHandler().set_price),
+        SET_PRICE: [MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
+                                   AddingProductHandler().set_price),
+                    MessageHandler(Filters.regex(r"^((?!@).)*$"), AddingProductHandler().set_quantity)],
+        ASK_DESCRIPTION: [
+            MessageHandler(Filters.regex(r'(\d+\.\d{1,2})|(\d+\,\d{1,2})'),
+                                         AddingProductHandler().ask_description),
+            MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
+                                         AddingProductHandler().ask_description),
+        ],
+        SET_DESCRIPTION: [MessageHandler(Filters.text, AddingProductHandler().set_description),
+
                           ],
         ADDING_CONTENT: [
             MessageHandler(Filters.all, callback=AddingProductHandler().open_content_handler),
