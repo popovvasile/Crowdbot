@@ -22,11 +22,9 @@ ASK_DESCRIPTION, SET_DESCRIPTION, SET_QUANTITY, CONFIRM_ADDING, \
 ADDING_CONTENT, FINISH_ADDING = range(12)
 
 
-# TODO ADDING SKIP TO EVERYTHING
-# ADD PRODUCT AND ADD CONTENT
 # EDIT WHAT- CONTENT OR PRODUCT
 class AddingProductHandler(object):
-    def start(self, update: Update, context: CallbackContext):  # TODO add title
+    def start(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                          callback_data="back_to_main_menu")]]
@@ -89,13 +87,22 @@ class AddingProductHandler(object):
             context.user_data["new_product"].category_id = \
                 update.callback_query.data.split("/")[1]
         context.user_data["new_product"].send_adding_product_template(
-            update, context, "Write the quantity of your product. How many copies do you want to sell?",
-            keyboards(context)["back_to_main_menu_keyboard"])
+            update, context, "Write the quantity of your product. How many copies do you want to sell?\n"
+                             "Press 'Unlimited' to skip",
+            InlineKeyboardMarkup([[InlineKeyboardButton(text="Unlimited",
+                                                        callback_data="unlimited")],
+                                  [back_btn("back_to_main_menu_btn", context)]]))
         return SET_PRICE
 
     def set_price(self, update: Update, context: CallbackContext):
-        context.user_data["new_product"].quantity = int(
-            format(Price.fromstring(update.message.text).amount))
+        if update.message:
+            context.user_data["new_product"].quantity = int(
+                format(Price.fromstring(update.message.text).amount))
+            context.user_data["new_product"].unlimited = False
+        elif update.callback_query.data == "unlimited":
+            context.user_data["new_product"].quantity = 0
+            context.user_data["new_product"].unlimited = True
+
         delete_messages(update, context, True)
         context.user_data["new_product"].send_adding_product_template(
             update, context, "Write your price",
@@ -197,7 +204,8 @@ class AddingProductHandler(object):
             message = update.callback_query.message
         context.user_data["to_delete"].append(message.reply_text(context.bot.lang_dict["back_text"],
                                                                  reply_markup=reply_markup))
-        done_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["done_button"], callback_data="continue")]]
+        done_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["done_button"],
+                                              callback_data="continue")]]
         done_reply_markup = InlineKeyboardMarkup(
             done_buttons)
         context.user_data["to_delete"].append(
@@ -236,7 +244,9 @@ ADD_PRODUCT_HANDLER = ConversationHandler(
                                  pattern=r"choose_category")
         ],
 
-        SET_PRICE: [MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
+        SET_PRICE: [CallbackQueryHandler(AddingProductHandler().set_price,
+                                         pattern=r"unlimited"),
+                    MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
                                    AddingProductHandler().set_price),
                     MessageHandler(Filters.regex(r"^((?!@).)*$"), AddingProductHandler().set_quantity)],
 

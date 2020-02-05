@@ -25,6 +25,7 @@ class Product(object):
         self.in_trash = product.get("in_trash")
         self.category_id = product.get("category_id")
         self.quantity = product.get("quantity")
+        self.unlimited = product.get("unlimited")
 
     @property
     def category_id(self):
@@ -293,7 +294,8 @@ class Product(object):
             self.images = product.get("images", list())
             self.in_trash = product.get("in_trash")
             self.category_id = product.get("category_id")
-            self.quantity = product.get("quantity")
+            self.quantity = product.get("quantity"),
+            self.unlimited = product.get("unlimited")
 
         else:
             products_table.update_one(
@@ -309,8 +311,8 @@ class Product(object):
                       "sold": self.sold,
                       "in_trash": self.in_trash,
                       "order_ids": self.order_ids,
-                      "quantity": self.quantity
-
+                      "quantity": self.quantity,
+                      "unlimited": self.unlimited
             }
                  })
 
@@ -335,6 +337,6 @@ class Product(object):
             "on_sale": True,
             "order_ids": list(),
             "creation_timestamp": datetime.now(),
-            "quantity": self.quantity
-
+            "quantity": self.quantity,
+            "unlimited": self.unlimited
         })
