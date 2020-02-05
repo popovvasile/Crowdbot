@@ -119,6 +119,7 @@
         "create_shop_str_6": "Now, send a description of you new shop. You can add any information you want about it.",
         "create_shop_str_7": "Choose the primary currency of your shop",
         "create_shop_str_8": "Your new shop has been created. Now your users can see it in their menu",
+        "create_shop_str_9": "Please tell me the exact location of your shop",
         "currency_button": "Currency",
         "current_page": "\n*Current page:* `{}`",
         "delete_button": "🗑 Delete a button",
