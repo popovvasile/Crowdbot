@@ -18,7 +18,8 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-ASK_TOKEN, TYPING_TOKEN, TYPING_DESCRIPTION, TYPING_PAYMENT_EXPLANATION, SHOP_FINISH = range(5)
+ASK_TOKEN, TYPING_TOKEN, TYPING_DESCRIPTION, \
+TYPING_SHOP_ADDRESS, SHOP_FINISH, CHOOSING_PICK_UP_OR_DELIVERY = range(6)
 
 
 def eshop_menu(update, context):  # TODO add shop config button
@@ -108,8 +109,8 @@ class CreateShopHandler(object):
                                       callback_data="set_payment_online")],
                 [InlineKeyboardButton("Offline payment",
                                       callback_data="set_payment_offline")],
-                [InlineKeyboardButton("Both options",
-                                      callback_data="set_payment_both")],
+                # [InlineKeyboardButton("Both options",
+                #                       callback_data="set_payment_both")],
                 [back_btn("back_to_main_menu_btn", context=context)]
             ]))
         return ASK_TOKEN
@@ -118,15 +119,23 @@ class CreateShopHandler(object):
         reply_markup = InlineKeyboardMarkup(
             [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                    callback_data="help_module(shop)")]])
-        chatbot = chatbots_table.find_one({"bot_id": context.bot.id}) or {}
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                    message_id=update.callback_query.message.message_id)
         context.user_data["shop_type"] = update.callback_query.data.replace("set_payment_", "")
-        if "payment_token" in chatbot.get("shop", {}) \
-                or "offline" in update.callback_query.data:
-            context.bot.send_message(update.callback_query.message.chat.id,
-                                     context.bot.lang_dict["create_shop_str_2"], reply_markup=reply_markup)
-            return TYPING_PAYMENT_EXPLANATION
+        if "offline" in update.callback_query.data:
+            reply_markup = [
+                            [InlineKeyboardButton(text="DELIVERY",
+                                                  callback_data="shop_type_delivery")],
+                            [InlineKeyboardButton(text="PICK UP",
+                                                  callback_data="shop_type_pick_up")],
+                            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                                  callback_data="help_module(shop)")],
+                            ]
+            context.bot.send_message(update.callback_query.message.chat_id,
+                                     context.bot.lang_dict["create_shop_str_9"],
+                                     reply_markup=InlineKeyboardMarkup(reply_markup))
+            return CHOOSING_PICK_UP_OR_DELIVERY
+
         else:
             context.bot.send_message(update.callback_query.message.chat.id,
                                      context.bot.lang_dict["create_shop_str_3"],
@@ -142,31 +151,40 @@ class CreateShopHandler(object):
             buttons)
         chat_id, txt = initiate_chat_id(update)
         if check_provider_token(provider_token=txt, update=update, context=context):
-
             context.user_data['payment_token'] = txt
-
-            if context.user_data["shop_type"] == "both":
-                update.message.reply_text(context.bot.lang_dict["create_shop_str_2"], reply_markup=reply_markup)
-                return TYPING_PAYMENT_EXPLANATION
-            else:
-                update.message.reply_text(context.bot.lang_dict["create_shop_str_6"], reply_markup=reply_markup)
-                return TYPING_DESCRIPTION
+            update.message.reply_text(context.bot.lang_dict["create_shop_str_6"], reply_markup=reply_markup)
+            return TYPING_DESCRIPTION
         else:
             update.message.reply_text(
                 context.bot.lang_dict["create_shop_str_5"],
                 reply_markup=reply_markup)
 
-        return TYPING_TOKEN
+            return TYPING_TOKEN
 
-    def handle_payment_explanation(self, update, context):
-        chat_id, txt = initiate_chat_id(update)
-        context.user_data["payment_explanation"] = txt
+    def handle_type(self, update, context):
+        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                                   message_id=update.callback_query.message.message_id)
         reply_markup = InlineKeyboardMarkup(
             [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                    callback_data="help_module(shop)")]])
-        context.bot.delete_message(chat_id=update.message.chat_id,
-                                   message_id=update.message.message_id)
-        context.bot.send_message(update.message.chat.id,
+        if "delivery" in update.callback_query.data:
+            context.user_data["shipping"] = True
+            context.bot.send_message(update.callback_query.message.chat_id,
+                                     context.bot.lang_dict["create_shop_str_6"], reply_markup=reply_markup)
+            return TYPING_DESCRIPTION
+        else:
+            context.user_data["shipping"] = False
+            context.bot.send_message(update.callback_query.message.chat_id,
+                                     context.bot.lang_dict["create_shop_str_9"], reply_markup=reply_markup)
+            return TYPING_SHOP_ADDRESS
+
+    def handle_address(self, update, context):
+        chat_id, txt = initiate_chat_id(update)
+        context.user_data["address"] = txt
+        reply_markup = InlineKeyboardMarkup(
+            [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                   callback_data="help_module(shop)")]])
+        context.bot.send_message(update.message.chat_id,
                                  context.bot.lang_dict["create_shop_str_6"], reply_markup=reply_markup)
         return TYPING_DESCRIPTION
 
@@ -230,7 +248,8 @@ class CreateShopHandler(object):
 
 
 # Add conversation handler with the states CHOOSING, TYPING_CHOICE and TYPING_REPLY'
-
+# CHOOSING_PICK_UP_OR_DELIVERY:handle_type shop_type_
+# TYPING_SHOP_ADDRESS handle_address text
 CREATE_SHOP_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(callback=CreateShopHandler().start_create_shop,
                                        pattern=r'allow_shop'),
@@ -242,8 +261,10 @@ CREATE_SHOP_HANDLER = ConversationHandler(
                                          pattern=r'set_payment')],
         TYPING_TOKEN: [MessageHandler(Filters.text,
                                       CreateShopHandler().handle_token)],
-        TYPING_PAYMENT_EXPLANATION: [MessageHandler(Filters.text,
-                                                    CreateShopHandler().handle_payment_explanation)],
+        CHOOSING_PICK_UP_OR_DELIVERY: [CallbackQueryHandler(callback=CreateShopHandler().handle_type,
+                                                            pattern=r"shop_type_")],
+        TYPING_SHOP_ADDRESS: [MessageHandler(Filters.text,
+                                             CreateShopHandler().handle_address)],
         TYPING_DESCRIPTION: [MessageHandler(Filters.text,
                                             CreateShopHandler().handle_description)],
         SHOP_FINISH: [MessageHandler(Filters.text,

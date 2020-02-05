@@ -24,10 +24,8 @@ class Product(object):
         self.images = product.get("images", list())
         self.in_trash = product.get("in_trash")
         self.category_id = product.get("category_id")
-        self.online_payment = product.get("online_payment")
-        self.offline_payment = product.get("offline_payment")
         self.quantity = product.get("quantity")
-        self.physical = product.get("physical")
+        self.unlimited = product.get("unlimited")
 
     @property
     def category_id(self):
@@ -149,9 +147,7 @@ class Product(object):
             self.category["name"],
             description,
             self.price,
-            self.discount_price,
-            self.online_payment,
-            self.offline_payment
+            self.discount_price
         )
 
     @property
@@ -298,10 +294,8 @@ class Product(object):
             self.images = product.get("images", list())
             self.in_trash = product.get("in_trash")
             self.category_id = product.get("category_id")
-            self.online_payment = product.get("online_payment")
-            self.offline_payment = product.get("offline_payment")
-            self.physical = product.get("physical")
-            self.quantity = product.get("quantity")
+            self.quantity = product.get("quantity"),
+            self.unlimited = product.get("unlimited")
 
         else:
             products_table.update_one(
@@ -317,11 +311,8 @@ class Product(object):
                       "sold": self.sold,
                       "in_trash": self.in_trash,
                       "order_ids": self.order_ids,
-                      "online_payment": self.online_payment,
-                      "offline_payment": self.offline_payment,
-                      "physical": self.physical,
-                      "quantity": self.quantity
-
+                      "quantity": self.quantity,
+                      "unlimited": self.unlimited
             }
                  })
 
@@ -341,14 +332,11 @@ class Product(object):
             "name": self.name,
             "category_id": self.category_id,
             "images": self.images,
-            "online_payment": self.online_payment,
-            "offline_payment": self.offline_payment,
             "sold": False,
             "in_trash": False,
             "on_sale": True,
             "order_ids": list(),
             "creation_timestamp": datetime.now(),
-            "physical": self.physical,
-            "quantity": self.quantity
-
+            "quantity": self.quantity,
+            "unlimited": self.unlimited
         })
