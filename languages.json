@@ -146,7 +146,7 @@
         "donations": "Donations",
         "donations_count_str": "💸 *User donations:* {}",
         "donations_edit_str_1": "Test donation. Ignore it",
-        "donations_edit_str_10": "✅ It’s in the bag!",
+        "donations_edit_str_10": "✅ Ready!",
         "donations_edit_str_11": "🗑 The payment is deleted",
         "donations_edit_str_12": "Enter a new token of your payment system",
         "donations_edit_str_13": "✅ New token updated!",

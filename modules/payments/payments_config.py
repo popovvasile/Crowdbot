@@ -194,7 +194,7 @@ CHANGE_DONATIONS_CONFIG = CallbackQueryHandler(pattern="change_donations_config"
                                                callback=EnableDisableShopDonations().enable_donations)
 
 
-class EditPaymentHandler(object):  # TODO change as a payment config, not donation
+class EditPaymentHandler(object):
 
     def handle_edit_action_finish(self, update, context):
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
@@ -263,15 +263,20 @@ class EditPaymentHandler(object):  # TODO change as a payment config, not donati
                 update.message.reply_text(
                     context.bot.lang_dict["donations_edit_str_12"],
                     reply_markup=reply_markup)
-
+            elif "address" in data:
+                context.user_data["action"] = "address"
+                context.bot.send_message(chat_id, context.bot.lang_dict["great_text"],
+                                         reply_markup=ReplyKeyboardRemove())
+                update.message.reply_text(
+                    context.bot.lang_dict["create_shop_str_9"],
+                    reply_markup=reply_markup)
             return EDIT_FINISH
 
-    def handle_edit_finish(self, update, context):  # TODO double check
-        finish_buttons = list()
-        finish_buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                                    callback_data="help_module(shop)")])
+    def handle_edit_finish(self, update, context):
+
         finish_markup = InlineKeyboardMarkup(
-            finish_buttons)
+            [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                   callback_data="help_module(shop)")]])
 
         chat_id, txt = initiate_chat_id(update)
         update_dict = {}
