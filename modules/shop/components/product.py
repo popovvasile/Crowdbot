@@ -43,13 +43,21 @@ class Product(object):
     def template(self):
         shop = chatbots_table.find_one(
             {"bot_id": self.context.bot.id})["shop"]
+        if self.unlimited is True:
+            quantity="Unlimited"
+        else:
+            quantity=self.quantity
         return self.context.bot.lang_dict[
             "shop_admin_product_template"].format(
                 self.name,
                 True if not self.sold else False,
                 self.category["name"],
                 self.price,
-                shop["currency"])
+                shop["currency"],
+                self.discount_price,
+                shop["currency"],
+                quantity
+                )
 
     '''@property
     def short_customer_template(self):
@@ -139,6 +147,12 @@ class Product(object):
                         text=self.description))'''
 
     def full_template(self, long_description=None):
+        shop = chatbots_table.find_one(
+            {"bot_id": self.context.bot.id})["shop"]
+        if self.unlimited is True:
+            quantity="Unlimited"
+        else:
+            quantity=self.quantity
         description = self.context.bot.lang_dict["shop_admin_description_below"] \
             if long_description else self.description
         return self.context.bot.lang_dict["shop_admin_full_product_template"].format(
@@ -147,9 +161,13 @@ class Product(object):
             self.category["name"],
             description,
             self.price,
-            self.discount_price
+            shop["currency"],
+            self.discount_price,
+            shop["currency"],
+            quantity
         )
 
+    "*Article:* `{}`\n*Availability:* `{}`\n*Category:* `{}`\n*Price:* `{} {}`\n*Discount Price:* `{}\n*Quantity:* `{}"
     @property
     def admin_keyboard(self):
         kb = [[]]

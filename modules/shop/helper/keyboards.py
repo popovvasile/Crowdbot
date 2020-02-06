@@ -70,9 +70,9 @@ def keyboards(context):
             [back_btn("back_to_brands_btn", context=context)]
         ]),
         confirm_add_product=InlineKeyboardMarkup([
+            [back_btn("back_to_main_menu_btn", context=context)],
             [InlineKeyboardButton(context.bot.lang_dict["shop_admin_confirm_btn"],
-                                  callback_data="confirm_product")],
-            [back_btn("back_to_main_menu_btn", context=context)]
+                                  callback_data="confirm_product")]
         ]),
         continue_back_kb=InlineKeyboardMarkup([
             [InlineKeyboardButton(context.bot.lang_dict["shop_admin_continue_btn"],
@@ -130,15 +130,18 @@ def keyboards(context):
                                   callback_data="change_description"),
              InlineKeyboardButton(context.bot.lang_dict["shop_admin_set_name_btn"],
                                   callback_data="change_name")],
-            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_set_images_btn"],  # TODO 4 new buttons
+            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_set_images_btn"],
                                   callback_data="change_images"),
              InlineKeyboardButton(context.bot.lang_dict["shop_admin_set_category_btn"],
                                   callback_data="change_category")],
-            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_set_online_btn"],
-                                  callback_data="change_payment")],
+            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_set_quantity_btn"],
+                                  callback_data="change_quantity")],
             [back_btn("back_to_products_btn", context=context)]
-            # [InlineKeyboardButton(strings[""])]
         ]),
-
+        edit_quantity=InlineKeyboardMarkup([
+            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_set_unlimited"],
+                                  callback_data='quantity_unlimited')],
+            [back_btn("back_to_products_btn", context=context)]
+        ])
     )
     return keyboards

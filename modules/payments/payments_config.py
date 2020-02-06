@@ -11,6 +11,7 @@ from telegram import LabeledPrice
 from database import chatbots_table
 from helper_funcs.auth import initiate_chat_id
 from helper_funcs.helper import get_help
+from modules.shop.helper.keyboards import back_btn
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -22,6 +23,37 @@ TYPING_TITLE, TYPING_DESCRIPTION, TYPING_CURRENCY, \
 TYPING_TOKEN, TYPING_TOKEN_FINISH, EDIT_FINISH, DOUBLE_CHECK_DELETE, DELETE_FINISH = range(13)
 
 # TODO change type of shop in settings and instructions for payment
+
+# def payment(self, update: Update, context: CallbackContext):
+#     delete_messages(update, context, True)
+#     context.bot.send_message(
+#         chat_id=update.callback_query.message.chat_id,
+#         text="Do you want to make this product with online payment, offline payment or both?",
+#         reply_markup=InlineKeyboardMarkup([
+#             [InlineKeyboardButton("Online payment",
+#                                   callback_data="set_payment_online")],
+#             [InlineKeyboardButton("Offline payment",
+#                                   callback_data="set_payment_offline")],
+#             [InlineKeyboardButton("Both options",
+#                                   callback_data="set_payment_both")],
+#             [back_btn("back_to_main_menu_btn", context=context)]
+#         ]))
+#     return PAYMENT
+#
+#
+# def finish_payment(self, update: Update, context: CallbackContext):
+#     delete_messages(update, context, True)
+#     if "online" in update.callback_query.data:
+#         context.user_data["product"].update(dict(online_payment=True))
+#         context.user_data["product"].update(dict(offline_payment=False))
+#     elif "offline" in update.callback_query.data:
+#         context.user_data["product"].update(dict(online_payment=False))
+#         context.user_data["product"].update(dict(offline_payment=True))
+#     elif "both" in update.callback_query.data:
+#         context.user_data["product"].update(dict(online_payment=True))
+#         context.user_data["product"].update(dict(offline_payment=True))
+#     return self.edit(update, context)
+#
 
 
 def check_provider_token(provider_token, update, context):
@@ -85,11 +117,13 @@ class EnableDisableShopDonations(object):
 
         if "payment_token" in chatbot["shop"]:
             button_text = "change_payment_token"
-            admin_keyboard = []
         else:
             button_text = "add_payment_token"
-            admin_keyboard = [[InlineKeyboardButton(text=context.bot.lang_dict["change_shop_payment_instruction"],
-                                                        callback_data="edit_change_shop_payment_instruction")]]
+        if chatbot["shop"]["shipping"] is True:
+            admin_keyboard = [[InlineKeyboardButton(text=context.bot.lang_dict["change_shop_address_button"],
+                                                    callback_data="edit_change_shop_address")]]
+        else:
+            admin_keyboard = []
         if chatbot["shop_enabled"] is True and "shop" in chatbot:
             admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["disable_shop_button"],
                                                         callback_data="change_shop_config")]),
@@ -163,11 +197,10 @@ CHANGE_DONATIONS_CONFIG = CallbackQueryHandler(pattern="change_donations_config"
 class EditPaymentHandler(object):  # TODO change as a payment config, not donation
 
     def handle_edit_action_finish(self, update, context):
-        buttons = list()
-        buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                             callback_data="help_module(shop)")])
-        reply_markup = InlineKeyboardMarkup(
-            buttons)
+        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                                   message_id=update.callback_query.message.message_id)
+
+        reply_markup = InlineKeyboardMarkup([[back_btn("back_to_main_menu_btn", context=context)]])
         update = update.callback_query
         data = update.data
         chat_id = update.message.chat_id
@@ -200,6 +233,8 @@ class EditPaymentHandler(object):  # TODO change as a payment config, not donati
                     reply_markup=reply_markup)
 
             return EDIT_FINISH
+        # edit_change_shop_address
+        # edit_change_shop_shipping
 
         if "shop" in data:
             context.user_data["target"] = "shop"

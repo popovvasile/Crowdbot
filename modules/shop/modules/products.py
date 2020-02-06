@@ -132,7 +132,7 @@ class ProductsHandler:
             keyboards(context)["back_to_products"])
         return IMAGES
 
-    def finish_images(self, update: Update, context: CallbackContext):  # TODO modify for multiple photos
+    def finish_images(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         context.user_data["product"].update(
             {"images": [update.message.photo[-1].file_id]})
@@ -177,34 +177,6 @@ class ProductsHandler:
                     {"category": category_id})
         return self.edit(update, context)
 
-    def payment(self, update: Update, context: CallbackContext):
-        delete_messages(update, context, True)
-        context.bot.send_message(
-            chat_id=update.callback_query.message.chat_id,
-            text="Do you want to make this product with online payment, offline payment or both?",
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("Online payment",
-                                      callback_data="set_payment_online")],
-                [InlineKeyboardButton("Offline payment",
-                                      callback_data="set_payment_offline")],
-                [InlineKeyboardButton("Both options",
-                                      callback_data="set_payment_both")],
-                [back_btn("back_to_main_menu_btn", context=context)]
-            ]))
-        return PAYMENT
-
-    def finish_payment(self, update: Update, context: CallbackContext):
-        delete_messages(update, context, True)
-        if "online" in update.callback_query.data:
-            context.user_data["product"].update(dict(online_payment=True))
-            context.user_data["product"].update(dict(offline_payment=False))
-        elif "offline" in update.callback_query.data:
-            context.user_data["product"].update(dict(online_payment=False))
-            context.user_data["product"].update(dict(offline_payment=True))
-        elif "both" in update.callback_query.data:
-            context.user_data["product"].update(dict(online_payment=True))
-            context.user_data["product"].update(dict(offline_payment=True))
-        return self.edit(update, context)
 
     def confirm_to_trash(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
@@ -223,10 +195,27 @@ class ProductsHandler:
         update.callback_query.answer(context.bot.lang_dict["shop_admin_moved_to_trash_blink"])
         return self.back_to_products(update, context)
 
-    def set_new_quantity(self, update: Update, context: CallbackContext):
-        delete_messages(update, context, True)
+    # TODO edit files
+    # TODO modify edit for multiple photos
 
+    def quantity(self, update: Update, context: CallbackContext):
+        delete_messages(update, context, True)
+        context.user_data["product"].send_full_template(
+            update, context, context.bot.lang_dict["shop_admin_set_quantity"],
+            keyboards(context)["edit_quantity"])
         return SET_QUANTITY
+
+    def finish_quantity(self, update: Update, context: CallbackContext):
+        delete_messages(update, context, True)
+        if update.message:
+            context.user_data["product"].update(
+                {"quantity": int(update.message.text),
+                 "unlimited": False})
+        elif update.callback_query.data == 'quantity_unlimited':
+            context.user_data["product"].update(
+                {"quantity": 0,
+                 "unlimited": True})
+        return self.edit(update, context)
 
     def back_to_products(self, update: Update, context: CallbackContext):
         page = context.user_data.get("page")
@@ -256,6 +245,8 @@ PRODUCTS_HANDLER = ConversationHandler(
                                     pattern="change_discount"),
                CallbackQueryHandler(ProductsHandler().price,
                                     pattern="change_price"),
+               CallbackQueryHandler(ProductsHandler().quantity,
+                                    pattern="change_quantity"),
                CallbackQueryHandler(ProductsHandler().description,
                                     pattern="change_description"),
                CallbackQueryHandler(ProductsHandler().name,
@@ -264,8 +255,6 @@ PRODUCTS_HANDLER = ConversationHandler(
                                     pattern="change_category"),
                CallbackQueryHandler(ProductsHandler().images,
                                     pattern="change_images"),
-               CallbackQueryHandler(ProductsHandler().payment,
-                                    pattern="change_payment"),
                ],
 
         CONFIRM_TO_TRASH: [CallbackQueryHandler(
@@ -279,9 +268,6 @@ PRODUCTS_HANDLER = ConversationHandler(
                    ],
         IMAGES: [MessageHandler(Filters.photo,
                                 ProductsHandler().finish_images)],
-        PAYMENT: [CallbackQueryHandler(
-            ProductsHandler().finish_payment,
-            pattern=r"set_payment_")],
 
         DESCRIPTION: [MessageHandler(Filters.text,
                                      ProductsHandler().finish_description)],
@@ -289,15 +275,27 @@ PRODUCTS_HANDLER = ConversationHandler(
         NAME: [MessageHandler(Filters.text,
                               ProductsHandler().finish_name)],
 
-        PRICE: [MessageHandler(Filters.regex("^[0-9]+$"),
-                               ProductsHandler().finish_price)],
+        PRICE: [MessageHandler(Filters.regex(r'(\d+\.\d{1,2})|(\d+\,\d{1,2})'),
+                               ProductsHandler().finish_price),
+                MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
+                               ProductsHandler().finish_price),
+                MessageHandler(Filters.regex(r"^((?!@).)*$"),
+                               ProductsHandler().price)
+                ],
 
-        DISCOUNT_PRICE: [MessageHandler(
-            Filters.regex("^[0-9]+$"),
-            ProductsHandler().finish_discount_price)],
+        DISCOUNT_PRICE: [
+                MessageHandler(Filters.regex(r'(\d+\.\d{1,2})|(\d+\,\d{1,2})'),
+                               ProductsHandler().finish_discount_price),
+                MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
+                               ProductsHandler().finish_discount_price),
+                MessageHandler(Filters.regex(r"^((?!@).)*$"),
+                               ProductsHandler().discount_price)
+        ],
 
         SET_QUANTITY: [MessageHandler(Filters.regex("^[0-9]+$"),
-                                      ProductsHandler().set_new_quantity)],
+                                      ProductsHandler().finish_quantity),
+                       CallbackQueryHandler(ProductsHandler().finish_quantity,
+                                            pattern=r'quantity_unlimited')],
     },
     fallbacks=[CallbackQueryHandler(Welcome.back_to_main_menu,
                                     pattern=r"back_to_main_menu"),
