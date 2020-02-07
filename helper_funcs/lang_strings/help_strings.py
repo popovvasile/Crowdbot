@@ -31,12 +31,12 @@ def help_strings(context, update):
     #         visitor_help=string_d_str["add_menu_buttons_help_visitor"]
     #     )
     # else:
-    shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
+    shop = chatbots_table.find_one({"bot_id": context.bot.id}).get("shop", {})
     help_dict["shop"] = dict(
         mod_name=string_d_str["add_product_button"],
         admin_keyboard=admins_keyboard,
         admin_help=string_d_str["add_menu_buttons_help"],
-        visitor_help=shop["description"],
+        visitor_help=shop.get("description", ""),
         visitor_keyboard=[InlineKeyboardButton(text="Catalog",
                                                callback_data="open_shop"),
                           InlineKeyboardButton(text="My Orders",

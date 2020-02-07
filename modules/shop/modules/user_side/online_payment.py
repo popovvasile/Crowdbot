@@ -74,6 +74,7 @@ class PurchaseBot(object):
         context.user_data["status"] = "Paid"
         context.user_data['timestamp_paid'] = datetime.datetime.now()
         context.user_data["amount"] = update.message.successful_payment.total_amount
+        # context.user_data["currency"]
         context.user_data["chat_id"] = update.message.chat_id
         context.user_data["bot_id"] = context.bot.id
         # order_info

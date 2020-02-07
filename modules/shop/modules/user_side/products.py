@@ -244,12 +244,41 @@ class UserProductsHandler(object):
         return self.categories_menu(update, context)
 
 
-class UserOrdersHandler(object):
-    def orders(self, update, context):
-        return ConversationHandler.END
-
-
 class CartHelper(object):
+    @classmethod
+    def order_data(cls, update, context):
+        """Make order from current cart products"""
+        cart = carts_table.find_one({"bot_id": context.bot.id,
+                                     "user_id": update.effective_user.id})
+        cart_items = list()
+        for cart_item in cart["products"]:
+            cart_item = cls.validate_cart_item(cart, cart_item["product_id"])
+            if cart_item:
+                cart_items.append(cart_item)
+
+        shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
+        template = "*Your Order*\n\n"
+        order_price = 0
+        for cart_item in cart_items:
+            item_price = (float(cart_item["product"]["price"])
+                          * cart_item["quantity"])
+            order_price += item_price
+            template += (
+                "{} - `{}`\n"
+                "x{} - `{}` {}\n\n").format(
+                cart_item["product"].get("article"),
+                cart_item["product"]["name"],
+                cart_item["quantity"],
+                item_price,
+                shop["currency"])
+        template += f"*Order Price:* `{order_price}` {shop['currency']}"
+        # Save order data. Need to check order data on each step??
+        order = dict()
+        order["items"] = cart_items
+        order["total_price"] = order_price
+        order["currency"] = shop['currency']
+        return {"order": order, "template": template, "shop": shop}
+
     @staticmethod
     def validate_cart_item(cart, product: (ObjectId, str)) -> dict:
         """Check if the product exist and check product quantity
@@ -370,40 +399,6 @@ class CartHelper(object):
 
 
 class Cart(CartHelper):
-    @classmethod
-    def order_data(cls, update, context):
-        """Make order from current cart products"""
-        cart = carts_table.find_one({"bot_id": context.bot.id,
-                                     "user_id": update.effective_user.id})
-        cart_items = list()
-        for cart_item in cart["products"]:
-            cart_item = cls.validate_cart_item(cart, cart_item["product_id"])
-            if cart_item:
-                cart_items.append(cart_item)
-
-        shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
-        template = "*Your Order*\n\n"
-        order_price = 0
-        for cart_item in cart_items:
-            item_price = (float(cart_item["product"]["price"])
-                          * cart_item["quantity"])
-            order_price += item_price
-            template += (
-                "{} - `{}`\n"
-                "x{} - `{}` {}\n\n").format(
-                cart_item["product"].get("article"),
-                cart_item["product"]["name"],
-                cart_item["quantity"],
-                item_price,
-                shop["currency"])
-        template += f"*Order Price:* `{order_price}` {shop['currency']}"
-        # Save order data. Need to check order data on each step??
-        order = dict()
-        order["items"] = cart_items
-        order["total_price"] = order_price
-        order["currency"] = shop['currency']
-        return {"order": order, "template": template, "shop": shop}
-
     def cart(self, update, context):
         delete_messages(update, context, True)
         context.bot.send_chat_action(chat_id=update.effective_chat.id,
@@ -617,6 +612,12 @@ class Cart(CartHelper):
         context.user_data.clear()
         context.user_data["page"] = page
         return self.cart(update, context)
+
+
+class UserOrdersHandler(object):
+    def orders(self, update, context):
+
+        return ConversationHandler.END
 
 
 PRODUCTS = range(1)
