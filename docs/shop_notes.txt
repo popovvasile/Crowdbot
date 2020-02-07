@@ -58,6 +58,9 @@ Order ID-shnik  and state of Order
 Changing shop currency - ask for the exchange rate and translate all prices
 
 
-
-
+Show orders to admin: paid/unpaid, executed/pending
+Send notification on orders
+Edit files in product
+Edit for multiple photos
+phone number validation
 
