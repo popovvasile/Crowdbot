@@ -370,6 +370,40 @@ class CartHelper(object):
 
 
 class Cart(CartHelper):
+    @classmethod
+    def order_data(cls, update, context):
+        """Make order from current cart products"""
+        cart = carts_table.find_one({"bot_id": context.bot.id,
+                                     "user_id": update.effective_user.id})
+        cart_items = list()
+        for cart_item in cart["products"]:
+            cart_item = cls.validate_cart_item(cart, cart_item["product_id"])
+            if cart_item:
+                cart_items.append(cart_item)
+
+        shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
+        template = "*Your Order*\n\n"
+        order_price = 0
+        for cart_item in cart_items:
+            item_price = (float(cart_item["product"]["price"])
+                          * cart_item["quantity"])
+            order_price += item_price
+            template += (
+                "{} - `{}`\n"
+                "x{} - `{}` {}\n\n").format(
+                cart_item["product"].get("article"),
+                cart_item["product"]["name"],
+                cart_item["quantity"],
+                item_price,
+                shop["currency"])
+        template += f"*Order Price:* `{order_price}` {shop['currency']}"
+        # Save order data. Need to check order data on each step??
+        order = dict()
+        order["items"] = cart_items
+        order["total_price"] = order_price
+        order["currency"] = shop['currency']
+        return {"order": order, "template": template, "shop": shop}
+
     def cart(self, update, context):
         delete_messages(update, context, True)
         context.bot.send_chat_action(chat_id=update.effective_chat.id,
@@ -516,18 +550,20 @@ class Cart(CartHelper):
     def make_order(self, update, context):
         delete_messages(update, context, True)
         # Prepare cart items for order
-        cart = carts_table.find_one({"bot_id": context.bot.id,
-                                     "user_id": update.effective_user.id})
-        cart_items = list()
-        for cart_item in cart["products"]:
-            cart_item = self.validate_cart_item(cart, cart_item["product_id"])
-            if cart_item:
-                cart_items.append(cart_item)
-        if not cart_items:
-            return self.back_to_cart(update, context)
+        order_data = self.order_data(update, context)
+
+        # cart = carts_table.find_one({"bot_id": context.bot.id,
+        #                              "user_id": update.effective_user.id})
+        # cart_items = list()
+        # for cart_item in cart["products"]:
+        #     cart_item = self.validate_cart_item(cart, cart_item["product_id"])
+        #     if cart_item:
+        #         cart_items.append(cart_item)
+        # if not cart_items:
+        #     return self.back_to_cart(update, context)
         # Create order template
-        shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
-        order_template = "*Your Order*\n\n"
+        # shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
+        """order_template = "*Your Order*\n\n"
         order_price = 0
         for cart_item in cart_items:
             item_price = (float(cart_item["product"]["price"])
@@ -535,7 +571,7 @@ class Cart(CartHelper):
             order_price += item_price
             order_template += (
                 "{} - `{}`\n"
-                " x{} - `{}` {}\n\n").format(
+                "x{} - `{}` {}\n\n").format(
                     cart_item["product"].get("article"),
                     cart_item["product"]["name"],
                     cart_item["quantity"],
@@ -546,15 +582,18 @@ class Cart(CartHelper):
         context.user_data["order"] = dict()
         context.user_data["order"]["items"] = cart_items
         context.user_data["order"]["total_price"] = order_price
-        context.user_data["order"]["currency"] = shop['currency']
+        context.user_data["order"]["currency"] = shop['currency']"""
+        if not order_data["order"]["items"]:
+            return self.back_to_cart(update, context)
+        context.user_data["order"] = order_data["order"]
         # Create reply markup
         buttons = []
-        if shop["shop_type"] == "offline":
+        if order_data["shop"]["shop_type"] == "offline":
             buttons.append(
                 [InlineKeyboardButton(
                     text=context.bot.lang_dict["offline_buy"],
                     callback_data=f"offline_buy")])
-        elif shop["shop_type"] == "online":
+        elif order_data["shop"]["shop_type"] == "online":
             buttons.append(
                 [InlineKeyboardButton(
                     text=context.bot.lang_dict["online_buy"],
@@ -567,7 +606,7 @@ class Cart(CartHelper):
         context.user_data["to_delete"].append(
             context.bot.send_message(
                 chat_id=update.effective_chat.id,
-                text=order_template,
+                text=order_data["template"],
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=InlineKeyboardMarkup(buttons)))
         return ConversationHandler.END
@@ -582,23 +621,6 @@ class Cart(CartHelper):
 
 PRODUCTS = range(1)
 
-# PRODUCT_ASK_IF_ONLINE = CallbackQueryHandler(
-#     callback=UserProductsHandler.product_menu,
-#     pattern=r"product_menu")
-
-# @staticmethod
-# def product_menu(update, context):
-#     product_id = update.callback_query.data.replace("product_menu/", "")
-#     context.bot.send_message(update.callback_query.message.chat.id,
-#                              text=context.bot.lang_dict["online_offline_payment"],
-#                              reply_markup=InlineKeyboardMarkup(
-#                                  [[InlineKeyboardButton(text=context.bot.lang_dict["online_buy"],
-#                                                         callback_data="online_buy/{}".format(product_id))],
-#                                   [InlineKeyboardButton(text=context.bot.lang_dict["offline_buy"],
-#                                                         callback_data="offline_buy/{}".format(product_id))],
-#                                   [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-#                                                         callback_data="help_back")],
-#                                   ]))
 
 """SHOP"""
 PRODUCTS_CATEGORIES = CallbackQueryHandler(
