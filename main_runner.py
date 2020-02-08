@@ -20,20 +20,6 @@ from modules.chanells.channels_polls_surveys_donate import (
     SEND_POLL_TO_CHANNEL_HANDLER, SEND_SURVEY_TO_CHANNEL_HANDLER,
     SEND_DONATION_TO_CHANNEL_HANDLER)
 
-from modules.shop.modules.categories import (
-    ADD_CATEGORY_HANDLER, CATEGORIES_HANDLER, EDIT_CATEGORIES_HANDLER,
-    RENAME_CATEGORY_HANDLER, DELETE_CATEGORY_HANDLER)
-from modules.shop.modules.eshop_enable_disable import CREATE_SHOP_HANDLER
-
-from modules.shop.modules.user_side.offline_payment import (
-    OFFLINE_PURCHASE_HANDLER)
-from modules.shop.modules.user_side.online_payment import (
-    ONLINE_PURCHASE_HANDLER)
-from modules.shop.modules.user_side.products import (
-    USERS_PRODUCTS_LIST_HANDLER, ADD_TO_CART, REMOVE_FROM_CART, CART,
-    REMOVE_FROM_CART_LIST, CHANGE_QUANTITY, BACK_TO_CART, MAKE_ORDER,
-    PRODUCTS_CATEGORIES, BACK_TO_CATEGORIES)
-
 from modules.groups.groups import (
     MY_GROUPS_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER,
     ADD_GROUP_HANLDER, GROUPS_MENU)
@@ -97,7 +83,7 @@ from modules.pollbot.polls import (
 from modules.donations.donation_send_promotion import (
     SEND_DONATION_TO_USERS_HANDLER)
 
-# SHOP
+# SHOP ADMIN SIDE
 from modules.shop.modules.adding_product import ADD_PRODUCT_HANDLER
 from modules.shop.modules.welcome import (START_SHOP_HANDLER,
                                           BACK_TO_MAIN_MENU_HANDLER, Welcome)
@@ -105,6 +91,20 @@ from modules.shop.modules.orders import ORDERS_HANDLER
 from modules.shop.modules.products import PRODUCTS_HANDLER
 from modules.shop.modules.trash import (TRASH_START, ORDERS_TRASH,
                                         PRODUCTS_TRASH)
+from modules.shop.modules.categories import (
+    ADD_CATEGORY_HANDLER, CATEGORIES_HANDLER, EDIT_CATEGORIES_HANDLER,
+    RENAME_CATEGORY_HANDLER, DELETE_CATEGORY_HANDLER)
+from modules.shop.modules.eshop_enable_disable import CREATE_SHOP_HANDLER
+
+# SHOP USER SIDE
+from modules.shop.modules.user_side.offline_payment import (
+    OFFLINE_PURCHASE_HANDLER)
+from modules.shop.modules.user_side.online_payment import (
+    ONLINE_PURCHASE_HANDLER)
+from modules.shop.modules.user_side.products import (
+    USERS_PRODUCTS_LIST_HANDLER, ADD_TO_CART, REMOVE_FROM_CART, CART,
+    REMOVE_FROM_CART_LIST, CHANGE_QUANTITY, BACK_TO_CART, MAKE_ORDER,
+    PRODUCTS_CATEGORIES, BACK_TO_CATEGORIES, USERS_ORDERS_LIST_HANDLER)
 
 
 logging.basicConfig(
@@ -146,10 +146,22 @@ def main(token, lang):
     # TODO priority is very important!!!!!!!!!!!!!!!!!!!!
     dispatcher.add_handler(EDIT_BOT_DESCRIPTION_HANDLER)
 
-    #  NEW SHOP
+    #  SHOP USER SIDE
     dispatcher.add_handler(ONLINE_PURCHASE_HANDLER)
     dispatcher.add_handler(OFFLINE_PURCHASE_HANDLER)
+    dispatcher.add_handler(BACK_TO_CART)
+    dispatcher.add_handler(USERS_PRODUCTS_LIST_HANDLER)
+    dispatcher.add_handler(ADD_TO_CART)
+    dispatcher.add_handler(REMOVE_FROM_CART)
+    dispatcher.add_handler(CART)
+    dispatcher.add_handler(MAKE_ORDER)
+    dispatcher.add_handler(PRODUCTS_CATEGORIES)
+    dispatcher.add_handler(BACK_TO_CATEGORIES)
+    dispatcher.add_handler(REMOVE_FROM_CART_LIST)
+    dispatcher.add_handler(CHANGE_QUANTITY)
+    dispatcher.add_handler(USERS_ORDERS_LIST_HANDLER)
 
+    #  SHOP ADMIN SIDE
     # dispatcher.add_handler(product_handler_han)
     dispatcher.add_handler(CHANGE_SHOP_CONFIG)
     dispatcher.add_handler(CONFIGS_SHOP_GENERAL)
@@ -162,22 +174,13 @@ def main(token, lang):
     dispatcher.add_handler(PRODUCTS_HANDLER)
     dispatcher.add_handler(TRASH_START)
     # dispatcher.add_handler(USERS_ORDERS_HANDLER)
-    dispatcher.add_handler(BACK_TO_CART)
-    dispatcher.add_handler(USERS_PRODUCTS_LIST_HANDLER)
-    dispatcher.add_handler(ADD_TO_CART)
-    dispatcher.add_handler(REMOVE_FROM_CART)
-    dispatcher.add_handler(CART)
-    dispatcher.add_handler(MAKE_ORDER)
-    dispatcher.add_handler(PRODUCTS_CATEGORIES)
-    dispatcher.add_handler(BACK_TO_CATEGORIES)
-    dispatcher.add_handler(REMOVE_FROM_CART_LIST)
-    dispatcher.add_handler(CHANGE_QUANTITY)
     dispatcher.add_handler(ADD_CATEGORY_HANDLER)
     dispatcher.add_handler(CATEGORIES_HANDLER)
     dispatcher.add_handler(EDIT_CATEGORIES_HANDLER)
     dispatcher.add_handler(RENAME_CATEGORY_HANDLER)
     dispatcher.add_handler(RENAME_CATEGORY_HANDLER)
     dispatcher.add_handler(DELETE_CATEGORY_HANDLER)
+
     # ADD_BUTTONS
     dispatcher.add_handler(BUTTONS_MENU)
     dispatcher.add_handler(CREATE_BUTTON_CHOOSE)
@@ -188,6 +191,7 @@ def main(token, lang):
     dispatcher.add_handler(BUTTON_EDIT_FINISH_HANDLER)
     dispatcher.add_handler(DELETE_CONTENT_HANDLER)
     dispatcher.add_handler(BUTTON_ADD_FINISH_HANDLER)
+
     # USER MODE
     dispatcher.add_handler(USER_MODE_ON)
     dispatcher.add_handler(USER_MODE_OFF)
@@ -289,6 +293,7 @@ def main(token, lang):
     dispatcher.add_handler(SEND_SURVEY_TO_GROUP_HANDLER)
     dispatcher.add_handler(SEND_DONATION_TO_GROUP_HANDLER)
     dispatcher.add_handler(ADD_GROUP_HANLDER)
+
     # CHANNELS
     dispatcher.add_handler(CHANELLS_MENU)
     dispatcher.add_handler(MY_CHANNELS_HANDLER)

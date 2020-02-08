@@ -9,7 +9,7 @@ from helper_funcs.helper import get_help, back_to_modules
 from helper_funcs.misc import delete_messages, get_obj
 from helper_funcs.pagination import Pagination
 from database import (products_table, carts_table, chatbots_table,
-                      categories_table)
+                      categories_table, orders_table)
 
 
 logging.basicConfig(
@@ -370,24 +370,23 @@ class CartHelper(object):
         :return: InlineKeyboardMarkup
         """
         product_buttons = [[]]
-        if cart_item["quantity"] > 1:
-            product_buttons[0].append(
-                InlineKeyboardButton(
-                    text="➖",
-                    callback_data=f"reduce_quantity/"
-                                  f"{cart_item['product_id']}"))
+        # if cart_item["quantity"] > 1:
+        product_buttons[0].append(
+            InlineKeyboardButton(
+                text="➖",
+                callback_data=f"reduce_quantity/{cart_item['product_id']}"))
         product_buttons[0].append(
             InlineKeyboardButton(
                 text="Remove",
                 callback_data=f"list_cart_remove/{cart_item['product_id']}"))
-
-        plus_button = InlineKeyboardButton(
-            text="➕",
-            callback_data=f"increase_quantity/{cart_item['product_id']}")
-        if cart_item["product"].get("unlimited"):
-            product_buttons[0].append(plus_button)
-        elif cart_item["quantity"] < int(cart_item["product"]["quantity"]):
-            product_buttons[0].append(plus_button)
+        product_buttons[0].append(
+            InlineKeyboardButton(
+                text="➕",
+                callback_data=f"increase_quantity/{cart_item['product_id']}"))
+        # if cart_item["product"].get("unlimited"):
+        #     product_buttons[0].append(plus_button)
+        # elif cart_item["quantity"] < int(cart_item["product"]["quantity"]):
+        #     product_buttons[0].append(plus_button)
 
         if (len(cart_item["product"]["description"]) > 150
                 or len(cart_item["product"]["images"]) > 1):
@@ -500,14 +499,20 @@ class Cart(CartHelper):
         cart_item = self.validate_cart_item(cart, product_id)
 
         if cart_item:
-            if (operation == "increase_quantity"
-                    and cart_item["quantity"] <
-                    int(cart_item["product"]["quantity"])):
-                # new_quantity = cart_item["quantity"] + 1
-                cart_item["quantity"] += 1
-            elif operation == "reduce_quantity" and cart_item["quantity"] > 1:
-                # new_quantity = cart_item["quantity"] - 1
-                cart_item["quantity"] -= 1
+            if operation == "increase_quantity":
+                if cart_item["product"]["unlimited"]:
+                    cart_item["quantity"] += 1
+                elif (cart_item["quantity"]
+                      < cart_item["product"]["quantity"]):
+                    cart_item["quantity"] += 1
+                else:
+                    update.callback_query.answer("Quantity is max")
+
+            elif operation == "reduce_quantity":
+                if cart_item["quantity"] > 1:
+                    cart_item["quantity"] -= 1
+                else:
+                    update.callback_query.answer("Quantity already 1")
             else:
                 return self.back_to_cart(update, context)
 
@@ -546,38 +551,6 @@ class Cart(CartHelper):
         delete_messages(update, context, True)
         # Prepare cart items for order
         order_data = self.order_data(update, context)
-
-        # cart = carts_table.find_one({"bot_id": context.bot.id,
-        #                              "user_id": update.effective_user.id})
-        # cart_items = list()
-        # for cart_item in cart["products"]:
-        #     cart_item = self.validate_cart_item(cart, cart_item["product_id"])
-        #     if cart_item:
-        #         cart_items.append(cart_item)
-        # if not cart_items:
-        #     return self.back_to_cart(update, context)
-        # Create order template
-        # shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
-        """order_template = "*Your Order*\n\n"
-        order_price = 0
-        for cart_item in cart_items:
-            item_price = (float(cart_item["product"]["price"])
-                          * cart_item["quantity"])
-            order_price += item_price
-            order_template += (
-                "{} - `{}`\n"
-                "x{} - `{}` {}\n\n").format(
-                    cart_item["product"].get("article"),
-                    cart_item["product"]["name"],
-                    cart_item["quantity"],
-                    item_price,
-                    shop["currency"])
-        order_template += f"*Order Price:* `{order_price}` {shop['currency']}"
-        # Save order data. Need to check order data on each step??
-        context.user_data["order"] = dict()
-        context.user_data["order"]["items"] = cart_items
-        context.user_data["order"]["total_price"] = order_price
-        context.user_data["order"]["currency"] = shop['currency']"""
         if not order_data["order"]["items"]:
             return self.back_to_cart(update, context)
         context.user_data["order"] = order_data["order"]
@@ -616,8 +589,81 @@ class Cart(CartHelper):
 
 class UserOrdersHandler(object):
     def orders(self, update, context):
+        delete_messages(update, context, True)
+        context.bot.send_chat_action(chat_id=update.effective_chat.id,
+                                     action="typing")
+        # Set current page integer in the user_data.
+        if update.callback_query.data.startswith("user_orders_pagination"):
+            context.user_data["page"] = int(
+                update.callback_query.data.replace("user_orders_pagination_",
+                                                   ""))
+        if not context.user_data.get("page"):
+            context.user_data["page"] = 1
 
+        # Get orders
+        orders = orders_table.find({"user_id": update.effective_user.id,
+                                    "bot_id": context.bot.id})
+
+        # Back to the shop menu if no order
+        if not orders.count():
+            update.callback_query.answer("There are no orders yet")
+            update.callback_query.data = "back_to_module_shop"
+            return back_to_modules(update, context)
+        # Send page content
+        self.send_orders_layout(update, context, orders)
         return ConversationHandler.END
+
+    def send_orders_layout(self, update, context, orders):
+        # Title
+        context.user_data['to_delete'].append(
+            context.bot.send_message(
+                chat_id=update.callback_query.message.chat_id,
+                text="*Your Orders* - `{}`".format(orders.count()),
+                parse_mode=ParseMode.MARKDOWN))
+        # Orders list buttons
+        buttons = [[InlineKeyboardButton(
+            text=context.bot.lang_dict["back_button"],
+            callback_data="back_to_module_shop")]]
+
+        if orders.count():
+            # Create page content and send it
+            pagination = Pagination(orders, page=context.user_data["page"])
+
+            for order in pagination.content:
+                reply_markup = InlineKeyboardMarkup([
+                    [InlineKeyboardButton(
+                        text="Order Items",
+                        callback_data=f"order_items/{order['_id']}")]])
+                template = ("\n*Order number:* `{}`"
+                            "\n*Order status:* `{}`"
+                            "\n*Order price:* `{}` {}"
+                            "\n*Your phone number:* `{}`").format(
+                                order.get("article"),
+                                order["status"],
+                                order["total_price"], order["currency"],
+                                order["phone_number"])
+                if order["shipping"]:
+                    template += f"\n*Delivery to* `{order['address']}`"
+                else:
+                    shop = chatbots_table.find_one(
+                        {"bot_id": context.bot.id})["shop"]
+                    template += f"\n*Pick up from* `{shop['address']}`"
+
+                context.user_data["to_delete"].append(
+                    context.bot.send_message(chat_id=update.effective_chat.id,
+                                             text=template,
+                                             parse_mode=ParseMode.MARKDOWN,
+                                             reply_markup=reply_markup))
+            # Send main buttons
+            pagination.send_keyboard(update, context,
+                                     page_prefix="user_orders_pagination",
+                                     buttons=buttons)
+        else:
+            context.user_data["to_delete"].append(
+                context.bot.send_message(
+                    chat_id=update.effective_chat.id,
+                    text="No Orders",
+                    reply_markup=InlineKeyboardMarkup(buttons)))
 
 
 PRODUCTS = range(1)
@@ -657,6 +703,11 @@ MAKE_ORDER = CallbackQueryHandler(
     pattern="make_order",
     callback=Cart().make_order)
 
+"""ORDERS"""
+USERS_ORDERS_LIST_HANDLER = CallbackQueryHandler(
+    pattern=r"^(my_orders|user_orders_pagination)",
+    callback=UserOrdersHandler().orders)
+
 """BACKS"""
 BACK_TO_CART = CallbackQueryHandler(
     pattern="back_to_cart",
@@ -665,13 +716,3 @@ BACK_TO_CART = CallbackQueryHandler(
 BACK_TO_CATEGORIES = CallbackQueryHandler(
     pattern=r"back_to_categories",
     callback=UserProductsHandler().back_to_categories)
-
-# USERS_ORDERS_HANDLER = ConversationHandler(
-#     entry_points=[CallbackQueryHandler(callback=UserOrdersHandler().orders,
-#                                        pattern=r"my_orders")],
-#     states={
-#         PRODUCTS: [CallbackQueryHandler(callback=UserOrdersHandler().orders,
-#                                         pattern="^[0-9]+$")]
-#     },
-#     fallbacks=[CallbackQueryHandler(get_help, pattern=r"help_")]
-# )

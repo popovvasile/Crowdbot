@@ -3,6 +3,7 @@
 import logging
 import datetime
 from pprint import pprint
+from random import randint
 
 from bson import ObjectId
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ParseMode
@@ -184,7 +185,8 @@ class PurchaseBot(object):
         # TODO ask about the status
         orders_table.insert_one(
             {**context.user_data["order"],
-             **{"status": "Pending",
+             **{"article": randint(10000, 99999),
+                 "status": "Pending",
                 "bot_id": context.bot.id,
                 "user_id": update.effective_user.id,
                 "creation_timestamp": datetime.datetime.now(),
