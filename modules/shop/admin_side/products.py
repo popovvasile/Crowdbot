@@ -8,10 +8,9 @@ from helper_funcs.pagination import Pagination
 from modules.shop.helper.helper import clear_user_data
 from modules.shop.helper.keyboards import (
     keyboards, back_kb, back_btn, create_keyboard)
-from modules.shop.modules.welcome import Welcome
+from modules.shop.admin_side.welcome import Welcome
 from modules.shop.components.product import Product
 from database import products_table, categories_table
-from helper_funcs.pagination import set_page_key
 from helper_funcs.misc import delete_messages
 
 
@@ -285,7 +284,7 @@ class ProductsHandler:
 
     def quantity(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        text = (context.user_data["product"].short_admin_template
+        text = (context.user_data["product"].admin_short_template
                 + "\n\n" + context.bot.lang_dict["shop_admin_set_quantity"])
         reply_markup = InlineKeyboardMarkup([
             [InlineKeyboardButton(

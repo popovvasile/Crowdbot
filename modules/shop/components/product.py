@@ -11,8 +11,10 @@ from modules.shop.helper.helper import send_media_arr
 from database import products_table, categories_table, chatbots_table
 
 """If product description length bigger than this integer
-description will be sends as separate message"""
-MAX_TEMP_DESCRIPTION_LENGTH = 250
+description will be sends as separate message
+
+User side also use this constant at the templates"""
+MAX_TEMP_DESCRIPTION_LENGTH = 150
 
 
 class Product(object):

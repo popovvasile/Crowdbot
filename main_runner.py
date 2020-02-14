@@ -84,29 +84,27 @@ from modules.donations.donation_send_promotion import (
     SEND_DONATION_TO_USERS_HANDLER)
 
 # SHOP ADMIN SIDE
-from modules.shop.modules.adding_product import ADD_PRODUCT_HANDLER
-from modules.shop.modules.welcome import (START_SHOP_HANDLER,
-                                          BACK_TO_MAIN_MENU_HANDLER, Welcome)
-from modules.shop.modules.orders import ORDERS_HANDLER
-from modules.shop.modules.products import PRODUCTS_HANDLER
-from modules.shop.modules.trash import (TRASH_START, ORDERS_TRASH,
-                                        PRODUCTS_TRASH)
-from modules.shop.modules.categories import (
+from modules.shop.admin_side.welcome import (
+    START_SHOP_HANDLER, BACK_TO_MAIN_MENU_HANDLER, Welcome)
+from modules.shop.admin_side.adding_product import ADD_PRODUCT_HANDLER
+from modules.shop.admin_side.orders import ORDERS_HANDLER
+from modules.shop.admin_side.products import PRODUCTS_HANDLER
+from modules.shop.admin_side.trash import (TRASH_START, ORDERS_TRASH,
+                                           PRODUCTS_TRASH)
+from modules.shop.admin_side.categories import (
     ADD_CATEGORY_HANDLER, CATEGORIES_HANDLER, EDIT_CATEGORIES_HANDLER,
     RENAME_CATEGORY_HANDLER, DELETE_CATEGORY_HANDLER)
-from modules.shop.modules.eshop_enable_disable import CREATE_SHOP_HANDLER
+from modules.shop.admin_side.eshop_enable_disable import CREATE_SHOP_HANDLER
 
 # SHOP USER SIDE
-from modules.shop.modules.user_side.offline_payment import (
-    OFFLINE_PURCHASE_HANDLER)
-from modules.shop.modules.user_side.online_payment import (
-    ONLINE_PURCHASE_HANDLER)
-from modules.shop.modules.user_side.products import (
-    USERS_PRODUCTS_LIST_HANDLER, ADD_TO_CART, REMOVE_FROM_CART, CART,
-    REMOVE_FROM_CART_LIST, CHANGE_QUANTITY, BACK_TO_CART, MAKE_ORDER,
-    PRODUCTS_CATEGORIES, BACK_TO_CATEGORIES, USERS_ORDERS_LIST_HANDLER,
+from modules.shop.user_side.offline_payment import OFFLINE_PURCHASE_HANDLER
+from modules.shop.user_side.online_payment import ONLINE_PURCHASE_HANDLER
+from modules.shop.user_side.products import (
+    USERS_PRODUCTS_LIST_HANDLER, ADD_TO_CART, REMOVE_FROM_CART,
+    PRODUCTS_CATEGORIES, BACK_TO_CATEGORIES, USERS_ORDERS_LIST_HANDLER)
+from modules.shop.user_side.cart import (
+    CART, REMOVE_FROM_CART_LIST, CHANGE_QUANTITY, BACK_TO_CART, MAKE_ORDER,
     VIEW_CART_PRODUCT)
-
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -118,25 +116,28 @@ LOGGER = logging.getLogger(__name__)
 def main(token, lang):
     # https://github.com/python-telegram-bot/python-telegram-bot/issues/787
     req = request.Request(con_pool_size=8)
-    BotObj = Bot(token=token, request=req)
+    bot_obj = Bot(token=token, request=req)
     with open('languages.json') as f:
         lang_dicts = json.load(f)
     if lang == "ENG":
         Bot.lang_dict = lang_dicts["ENG"]
     else:
         Bot.lang_dict = lang_dicts["RUS"]
-    updater = tg.Updater(use_context=True, bot=BotObj)
+    updater = tg.Updater(use_context=True, bot=bot_obj)
     dispatcher = updater.dispatcher
     # dispatcher.add_error_handler(error_callback)
     start_handler = CommandHandler("start", WelcomeBot().start)
     help_handler = CommandHandler("help", get_help)
-    # product_handler_han = CallbackQueryHandler(product_handler, pattern=r"product_")  # TODO think if to use this one
+    # product_handler_han = CallbackQueryHandler(
+    #   product_handler, pattern=r"product_")  # TODO think if to use this one
 
     custom_button_callback_handler = CallbackQueryHandler(
-        callback=button_handler, pattern=r"button_")
+        callback=button_handler,
+        pattern=r"button_")
 
     custom_button_back_callback_handler = CallbackQueryHandler(
-        callback=back_from_button_handler, pattern=r"back_from_button")
+        callback=back_from_button_handler,
+        pattern=r"back_from_button")
 
     help_callback_handler = CallbackQueryHandler(callback=help_button,
                                                  pattern=r"help_")
@@ -277,6 +278,7 @@ def main(token, lang):
     dispatcher.add_handler(CREATE_SURVEY_HANDLER)
     dispatcher.add_handler(DELETE_SURVEYS_HANDLER)
     dispatcher.add_handler(SEND_SURVEYS_MENU_HANDLER)
+
     # POLLS
     dispatcher.add_handler(POLLS_MENU)
     dispatcher.add_handler(POLL_HANDLER)
@@ -312,8 +314,6 @@ def main(token, lang):
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(help_handler)
 
-    # dispatcher.add_handler(ADMIN_AUTHENTICATION_HANDLER)
-
     rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), get_help)
     dispatcher.add_handler(rex_help_handler)
     dispatcher.add_handler(BACK_TO_MAIN_MENU_HANDLER)
@@ -321,7 +321,8 @@ def main(token, lang):
     dispatcher.add_handler(help_callback_handler)
     dispatcher.add_handler(CallbackQueryHandler(Welcome.back_to_main_menu,
                                                 pattern=r"back_"))
-    # error_help_callback_handler = CallbackQueryHandler(get_help, pattern=r"error_back")
+    # error_help_callback_handler = CallbackQueryHandler(get_help,
+    #                                                   pattern=r"error_back")
     # dispatcher.add_handler(error_help_callback_handler)
 
     LOGGER.info("Using long polling.")

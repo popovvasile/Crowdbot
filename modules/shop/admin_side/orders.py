@@ -9,7 +9,7 @@ from modules.shop.helper.helper import clear_user_data
 from modules.shop.components.order import Order
 from modules.shop.components.product import Product
 from helper_funcs.pagination import set_page_key
-from modules.shop.modules.welcome import Welcome
+from modules.shop.admin_side.welcome import Welcome
 from database import orders_table
 from helper_funcs.misc import delete_messages
 

@@ -3,7 +3,7 @@ from telegram import InlineKeyboardButton, Update, InlineKeyboardMarkup
 from telegram.ext import (ConversationHandler, CallbackQueryHandler,
                           CallbackContext, Filters, MessageHandler)
 
-from modules.shop.modules.welcome import Welcome
+from modules.shop.admin_side.welcome import Welcome
 from modules.shop.components.product import Product
 from helper_funcs.misc import delete_messages
 from price_parser import Price

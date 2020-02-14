@@ -1,17 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import logging
+import datetime
+
 from bson import ObjectId
 from telegram import LabeledPrice, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import (MessageHandler, Filters, PreCheckoutQueryHandler,
                           ConversationHandler, CallbackQueryHandler)
-import logging
-import datetime
-# Enable logging
+
 from database import products_table, chatbots_table, orders_table
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
 
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 

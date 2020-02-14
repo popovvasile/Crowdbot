@@ -255,7 +255,7 @@ class UserProductsHandler(UserProductsHelper):
         return self.categories_menu(update, context)
 
 
-class CartHelper(object):
+'''class CartHelper(object):
     @classmethod
     def order_data(cls, update, context):
         """Make order from current cart products"""
@@ -629,7 +629,7 @@ class Cart(CartHelper):
         page = context.user_data.get("page", 1)
         context.user_data.clear()
         context.user_data["page"] = page
-        return self.cart(update, context)
+        return self.cart(update, context)'''
 
 
 class UserOrdersHandler(object):
@@ -731,7 +731,7 @@ REMOVE_FROM_CART = CallbackQueryHandler(
     pattern=r"remove_from_cart",
     callback=UserProductsHandler().remove_from_cart)
 
-"""CART"""
+'''"""CART"""
 CART = CallbackQueryHandler(
     pattern="^(cart|user_cart_pagination)",
     callback=Cart().cart)
@@ -750,17 +750,17 @@ VIEW_CART_PRODUCT = CallbackQueryHandler(
 
 MAKE_ORDER = CallbackQueryHandler(
     pattern="make_order",
-    callback=Cart().make_order)
+    callback=Cart().make_order)'''
 
 """ORDERS"""
 USERS_ORDERS_LIST_HANDLER = CallbackQueryHandler(
     pattern=r"^(my_orders|user_orders_pagination)",
     callback=UserOrdersHandler().orders)
 
-"""BACKS"""
+'''"""BACKS"""
 BACK_TO_CART = CallbackQueryHandler(
     pattern="back_to_cart",
-    callback=Cart().back_to_cart)
+    callback=Cart().back_to_cart)'''
 
 BACK_TO_CATEGORIES = CallbackQueryHandler(
     pattern=r"back_to_categories",

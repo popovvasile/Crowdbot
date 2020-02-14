@@ -5,11 +5,11 @@ from telegram.ext import (ConversationHandler, CallbackQueryHandler,
 
 from modules.shop.helper.keyboards import keyboards
 from modules.shop.helper.helper import clear_user_data
-from modules.shop.modules.welcome import Welcome
+from modules.shop.admin_side.welcome import Welcome
 from modules.shop.components.order import Order
 from modules.shop.components.product import Product
-from modules.shop.modules.products import ProductsHandler
-from modules.shop.modules.orders import OrdersHandler
+from modules.shop.admin_side.products import ProductsHandler
+from modules.shop.admin_side.orders import OrdersHandler
 from helper_funcs.pagination import set_page_key
 from database import products_table, orders_table
 from helper_funcs.misc import delete_messages
