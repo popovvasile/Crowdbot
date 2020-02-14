@@ -13,16 +13,16 @@ Order ID-shnik  and state of Order
     * когда устанавливаешь discount price - исключение ?
     * При изменении плтежного токена - исключение
     * При удалении категории - удаляются все товары - придумать(если есть заказы и если есть товары) и пофиксить
-    * изменении категории товара - ведёт в юзер шоп
     * при изменении quantity на очень большое число - исключение. При изменении на маленькое число - в тексте отображается не правильно как tuple
+    * Фича которая выводит в главное меню при рандомном тексте ведёт не адекватно в некторых меню бота
+    [DONE] изменении категории товара - ведёт в юзер шоп
+
 
 -TODO ADMIN SIDE
     * После создания шопа - не показывать кнопку бек, а сразу в меню переводить
     * Показывать всю информацию о товаре во время добавления
-    * Добаваление разного контента
     * Edit files in product
     * edit самовывоз/доставка/both
-    * В списке товаров сделать caption, а не просто текст после фотки
     * Заказы Show orders to admin: paid/unpaid, executed/pending
     * Уведомления о заказах
     * Changing shop currency - give current exchange rate and ask for the exchange rate then translate all prices
@@ -30,9 +30,11 @@ Order ID-shnik  and state of Order
     * При изменении address, description, currency - показывать текущие значения
     * Paid/unpaid and release the content or send a notification that the item has been shipped
     * EDIT SHOP: Edit type, TOKEN only if there is one, Payment description if there is no token
+    [DONE] В списке товаров сделать caption, а не просто текст после фотки
+    [DONE] Добаваление разного контента
 
 -TODO USER SIDE
-    * Отображение разного контента
+    [DONE] Отображение разного контента
     * во время оформления заказа показывать все введённые поля
     * список товаров в заказе
     * Онлайн заказы
@@ -47,7 +49,7 @@ Order ID-shnik  and state of Order
 -TODO BOTH
     * Отображение комментария клиента в заказах
     * Discount price обработка()
-    * Кнопка "Просмотр" на товарах(если большое описание или много контента)
+    [DONE] Кнопка "Просмотр" на товарах(если большое описание или много контента)
     * Check messages length in templates and captions - to avoid exceptions
     * Добавить артукулы в заказы и товары
         https://www.mongodb.com/blog/post/generating-globally-unique-identifiers-for-use-with-mongodb

@@ -72,6 +72,7 @@ TODO delete chat/survey from all chats, including channels and groups
     * off/on message notification
     * Messages history
     * Protect all /start, backs, get_help, help_button and so on with user_data.clear() function call
+    * When user click "Open" and "Hide" in message - it works bad
 
 # TODO BUGS
     * None on greating (mb when greating comes from bot_father)

@@ -105,14 +105,17 @@ class CartHelper(object):
         return cart_item
 
     @staticmethod
-    def cart_item_template(cart_item, currency) -> str:
-        """
+    def short_cart_item_template(cart_item, currency) -> str:
+        """Short text representation of the cart item.
+
         :param cart_item: {
             "product_id": ObjectId,  # Object id of the product
             "quantity": int,  # Cart product quantity
             "product": dict  # Product document
         }
         :param currency: shop currency
+
+        :return str
         """
         # Create product template
         if (len(cart_item["product"]["description"])
@@ -142,8 +145,40 @@ class CartHelper(object):
         return template
 
     @staticmethod
-    def full_cart_item_template(cart, product, currency):
-        pass
+    def full_cart_item_template(cart_item, currency) -> str:
+        """Full text representation of the cart item.
+
+        :param cart_item: {
+            "product_id": ObjectId,  # Object id of the product
+            "quantity": int,  # Cart product quantity
+            "product": dict  # Product document
+        }
+        :param currency: shop currency
+
+        :return: str
+        """
+        category_name = categories_table.find_one(
+            {"_id": cart_item["product"]["category_id"]})["name"]
+
+        template = (
+            "*Article:* `{}`"
+            "\n*Name:* `{}`"
+            "\n*Category:* `{}`"
+            "\n*Price:* `{} {}`").format(
+                cart_item["product"].get("article"),
+                cart_item["product"]["name"],
+                category_name,
+                float(cart_item["product"]["price"]) * cart_item["quantity"],
+                currency)
+        if (len(cart_item["product"]["description"])
+                < MAX_TEMP_DESCRIPTION_LENGTH):
+            template = "\n*Description:* `{}`".format(
+                cart_item["product"]["description"])
+
+        if not cart_item["product"].get("unlimited"):
+            template += f"\n*In stock:* `{cart_item['product']['quantity']}`"
+        template += f"\n*Your quantity*: `{cart_item['quantity']}`"
+        return template
 
     @staticmethod
     def cart_item_markup(cart_item):
@@ -155,6 +190,7 @@ class CartHelper(object):
             "quantity": int,  # Cart quantity
             "product": dict  # product document
         }
+
         :return: InlineKeyboardMarkup
         """
         product_buttons = [[]]
@@ -249,7 +285,7 @@ class Cart(CartHelper):
                 # Create product reply markup and send short product template
                 cart_item["product"] = product
                 reply_markup = self.cart_item_markup(cart_item)
-                template = self.cart_item_template(cart_item, currency)
+                template = self.short_cart_item_template(cart_item, currency)
                 product_obj = Product(context, product)
                 product_obj.send_short_template(
                     update, context, text=template, reply_markup=reply_markup)
@@ -306,14 +342,14 @@ class Cart(CartHelper):
 
             currency = chatbots_table.find_one(
                 {"bot_id": context.bot.id})["shop"]["currency"]
+            template = self.short_cart_item_template(cart_item, currency)
+
             if update.effective_message.caption_markdown:
                 update.effective_message.edit_caption(
-                    caption=self.cart_item_template(cart_item, currency),
-                    parse_mode=ParseMode.MARKDOWN)
+                    caption=template, parse_mode=ParseMode.MARKDOWN)
             else:
                 update.effective_message.edit_text(
-                    text=self.cart_item_template(cart_item, currency),
-                    parse_mode=ParseMode.MARKDOWN)
+                    text=template, parse_mode=ParseMode.MARKDOWN)
 
             update.effective_message.edit_reply_markup(
                 reply_markup=self.cart_item_markup(cart_item))
@@ -341,24 +377,17 @@ class Cart(CartHelper):
         cart_item = self.validate_cart_item(cart, product_id)
         if not cart_item:
             return self.back_to_cart(update, context)
+
         prod_obj = Product(context, cart_item["product"])
         currency = chatbots_table.find_one(
             {"bot_id": context.bot.id})["shop"]["currency"]
-        template = self.cart_item_template(cart_item, currency)
-        prod_obj.send_full_template(
-            update, context, text=template,
-            reply_markup=self.cart_item_markup(cart_item))
-
+        template = self.full_cart_item_template(cart_item, currency)
         back_button = InlineKeyboardMarkup([
             [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                   callback_data="back_to_cart")]])
+        prod_obj.send_full_template(
+            update, context, text=template, reply_markup=back_button)
 
-        context.user_data["to_delete"].append(
-            context.bot.send_message(
-                chat_id=update.effective_chat.id,
-                text=";)",
-                parse_mode=ParseMode.MARKDOWN,
-                reply_markup=back_button))
         return ConversationHandler.END
 
     def make_order(self, update, context):

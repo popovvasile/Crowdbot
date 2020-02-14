@@ -101,7 +101,8 @@ from modules.shop.user_side.offline_payment import OFFLINE_PURCHASE_HANDLER
 from modules.shop.user_side.online_payment import ONLINE_PURCHASE_HANDLER
 from modules.shop.user_side.products import (
     USERS_PRODUCTS_LIST_HANDLER, ADD_TO_CART, REMOVE_FROM_CART,
-    PRODUCTS_CATEGORIES, BACK_TO_CATEGORIES, USERS_ORDERS_LIST_HANDLER)
+    PRODUCTS_CATEGORIES, BACK_TO_CATEGORIES, USERS_ORDERS_LIST_HANDLER,
+    VIEW_PRODUCT, BACK_TO_CUSTOMER_SHOP)
 from modules.shop.user_side.cart import (
     CART, REMOVE_FROM_CART_LIST, CHANGE_QUANTITY, BACK_TO_CART, MAKE_ORDER,
     VIEW_CART_PRODUCT)
@@ -163,6 +164,8 @@ def main(token, lang):
     dispatcher.add_handler(CHANGE_QUANTITY)
     dispatcher.add_handler(USERS_ORDERS_LIST_HANDLER)
     dispatcher.add_handler(VIEW_CART_PRODUCT)
+    dispatcher.add_handler(VIEW_PRODUCT)
+    dispatcher.add_handler(BACK_TO_CUSTOMER_SHOP)
 
     #  SHOP ADMIN SIDE
     # dispatcher.add_handler(product_handler_han)
@@ -314,8 +317,8 @@ def main(token, lang):
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(help_handler)
 
-    rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), get_help)
-    dispatcher.add_handler(rex_help_handler)
+    # rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), get_help)
+    # dispatcher.add_handler(rex_help_handler)
     dispatcher.add_handler(BACK_TO_MAIN_MENU_HANDLER)
     dispatcher.add_handler(back_to_modules_handler)
     dispatcher.add_handler(help_callback_handler)
