@@ -104,7 +104,8 @@ from modules.shop.modules.user_side.online_payment import (
 from modules.shop.modules.user_side.products import (
     USERS_PRODUCTS_LIST_HANDLER, ADD_TO_CART, REMOVE_FROM_CART, CART,
     REMOVE_FROM_CART_LIST, CHANGE_QUANTITY, BACK_TO_CART, MAKE_ORDER,
-    PRODUCTS_CATEGORIES, BACK_TO_CATEGORIES, USERS_ORDERS_LIST_HANDLER)
+    PRODUCTS_CATEGORIES, BACK_TO_CATEGORIES, USERS_ORDERS_LIST_HANDLER,
+    VIEW_CART_PRODUCT)
 
 
 logging.basicConfig(
@@ -160,6 +161,7 @@ def main(token, lang):
     dispatcher.add_handler(REMOVE_FROM_CART_LIST)
     dispatcher.add_handler(CHANGE_QUANTITY)
     dispatcher.add_handler(USERS_ORDERS_LIST_HANDLER)
+    dispatcher.add_handler(VIEW_CART_PRODUCT)
 
     #  SHOP ADMIN SIDE
     # dispatcher.add_handler(product_handler_han)

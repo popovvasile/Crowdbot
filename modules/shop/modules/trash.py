@@ -15,9 +15,9 @@ from database import products_table, orders_table
 from helper_funcs.misc import delete_messages
 
 
-logging.basicConfig(format='%(asctime)s - %(name)s - '
-                           '%(levelname)s - %(message)s',
-                    level=logging.INFO)
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -35,8 +35,7 @@ class TrashHandler(Welcome):
     def orders(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         set_page_key(update, context, start_data={})  # TODO double check
-        all_orders = orders_table.find(
-            {"in_trash": True}).sort([["_id", 1]])
+        all_orders = orders_table.find({"in_trash": True}).sort([["_id", 1]])
         return OrdersHandler().orders_layout(
             update, context, all_orders, ORDERS)
 
@@ -44,7 +43,8 @@ class TrashHandler(Welcome):
         context.bot.send_chat_action(update.effective_chat.id, "typing")
         order_id = update.callback_query.data.split("/")[1]
         Order(order_id).update({"in_trash": False})
-        update.callback_query.answer(context.bot.lang_dict["shop_admin_order_restored_blink"])
+        update.callback_query.answer(
+            context.bot.lang_dict["shop_admin_order_restored_blink"])
         return self.back_to_orders(update, context)
 
     def products(self, update: Update, context: CallbackContext):
@@ -59,7 +59,8 @@ class TrashHandler(Welcome):
         context.bot.send_chat_action(update.effective_chat.id, "typing")
         product_id = update.callback_query.data.split("/")[1]
         Product(context, product_id).update({"in_trash": False})
-        update.callback_query.answer(context.bot.lang_dict["shop_admin_product_restored_blink"])
+        update.callback_query.answer(
+            context.bot.lang_dict["shop_admin_product_restored_blink"])
         return self.back_to_products(update, context)
 
     def back_to_orders(self, update, context):

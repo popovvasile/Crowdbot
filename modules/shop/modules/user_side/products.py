@@ -8,6 +8,8 @@ from bson.objectid import ObjectId
 from helper_funcs.helper import get_help, back_to_modules
 from helper_funcs.misc import delete_messages, get_obj
 from helper_funcs.pagination import Pagination
+from modules.shop.components.product import (Product,
+                                             MAX_TEMP_DESCRIPTION_LENGTH)
 from database import (products_table, carts_table, chatbots_table,
                       categories_table, orders_table)
 
@@ -18,13 +20,89 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+view_button_str = "🔎 View"
+add_button_str = "➕ Add"
+remove_button_str = "❌ Remove"
 
-class UserProductsHandler(object):
+
+class UserProductsHelper(object):
+    @staticmethod
+    def product_markup(cart, product):
+        """Keyboard for the product in product list.
+        :param product: mongo document of the product
+        :param cart: mongo document of the cart
+        :return: InlineKeyboardMarkup
+        """
+        buttons = [[]]
+        if (len(product["description"]) > MAX_TEMP_DESCRIPTION_LENGTH
+                or len(product["content"]) > 1):
+            buttons[0].append(
+                InlineKeyboardButton(
+                    text=view_button_str,
+                    callback_data=f"view_product/{product['_id']}"))
+
+        if any(cart_product["product_id"] == product["_id"]
+               for cart_product in cart.get("products", list())):
+            buttons[0].append(
+                InlineKeyboardButton(
+                    text=remove_button_str,
+                    callback_data=f"remove_from_cart/{product['_id']}"))
+        else:
+            buttons[0].append(
+                InlineKeyboardButton(
+                    text=add_button_str,
+                    callback_data=f"add_to_cart/{product['_id']}"))
+        return InlineKeyboardMarkup(buttons)
+
+    @staticmethod
+    def product_template(cart, product, currency):
+        """Keyboard for the product in product list.
+        :param product: mongo document of the product
+        :param cart: mongo document of the cart
+        :param currency: currency of the shop
+        :return: str
+        """
+        if len(product["description"]) > MAX_TEMP_DESCRIPTION_LENGTH:
+            description = (
+                    product["description"][
+                    :MAX_TEMP_DESCRIPTION_LENGTH] + "...")
+        else:
+            description = product["description"]
+
+        category = categories_table.find_one(
+            {"_id": product["category_id"]})["name"]
+
+        template = (
+            "*Article:* `{}`"
+            "\n*Name:* `{}`"
+            "\n*Category:* `{}`"
+            "\n*Description:* `{}`"
+            "\n*Price:* `{} {}`").format(
+            product.get("article"),
+            product["name"],
+            category,
+            description,
+            product["price"], currency)
+
+        if not product["unlimited"]:
+            template += f"\n*Quantity:* `{product['quantity']}`"
+
+        if any(cart_product["product_id"] == product["_id"]
+               for cart_product in cart.get("products", list())):
+            template += "\n\n✅ Product already in the cart"
+        return template
+
+    @staticmethod
+    def full_product_template(cart, product, currency):
+        pass
+
+
+class UserProductsHandler(UserProductsHelper):
     def categories_menu(self, update, context):
         delete_messages(update, context, True)
         categories_buttons = [
             InlineKeyboardButton(text=x["name"],
-                                 callback_data=f"category/{x['_id']}")
+                                 callback_data=f"catalog/{x['_id']}")
             for x in categories_table.find({"bot_id": context.bot.id})]
 
         if categories_buttons:
@@ -55,7 +133,7 @@ class UserProductsHandler(object):
         if not context.user_data.get("page"):
             context.user_data["page"] = 1
 
-        if update.callback_query.data.startswith("category"):
+        if update.callback_query.data.startswith("catalog"):
             context.user_data["category_id"] = ObjectId(
                 update.callback_query.data.split("/")[1])
 
@@ -69,8 +147,7 @@ class UserProductsHandler(object):
         self.send_products_layout(update, context, all_products)
         return ConversationHandler.END
 
-    @staticmethod
-    def send_products_layout(update, context, all_products):
+    def send_products_layout(self, update, context, all_products):
         # Title
         context.user_data['to_delete'].append(
             context.bot.send_message(
@@ -96,72 +173,14 @@ class UserProductsHandler(object):
                  "user_id": update.effective_user.id}) or {}
 
             for product in pagination.content:
-                product_buttons = [[]]
-
-                # Create product template
-                if len(product["description"]) > 150:
-                    description = product["description"][:150] + "..."
-                    product_buttons[0].append(
-                        InlineKeyboardButton(
-                            text="View",
-                            callback_data=f"view_product/{product['_id']}"))
-                else:
-                    description = product["description"]
-                    if len(product["images"]) > 1:
-                        product_buttons[0].append(
-                            InlineKeyboardButton(
-                                text="View",
-                                callback_data=f"view_product/{product['_id']}"
-                            ))
-
-                category = categories_table.find_one(
-                    {"_id": product["category_id"]})["name"]
-
-                product_template = (
-                    "*Article:* `{}`"
-                    "\n*Name:* `{}`"
-                    "\n*Category:* `{}`"
-                    "\n*Description:* `{}`"
-                    "\n*Price:* `{} {}`").format(
-                        product.get("article"),
-                        product["name"],
-                        category,
-                        description,
-                        product["price"], shop["currency"])
-                if not product.get("unlimited"):
-                    product_template += (
-                        f"\n*Quantity:* `{product['quantity']}`")
-
-                if any(cart_product["product_id"] == product["_id"]
-                       for cart_product in cart.get("products", list())):
-                    product_buttons[0].append(
-                        InlineKeyboardButton(
-                            text="Remove from the cart",
-                            callback_data=f"remove_from_cart/{product['_id']}"
-                        ))
-                    product_template += "\n\n✅ Product already in the cart"
-                else:
-                    product_buttons[0].append(
-                        InlineKeyboardButton(
-                            text="Add",
-                            callback_data=f"add_to_cart/{product['_id']}"))
-
                 # Send short product template
-                if len(product["images"]) > 0:
-                    context.user_data["to_delete"].append(
-                        context.bot.send_photo(
-                            chat_id=update.effective_chat.id,
-                            photo=product["images"][0],
-                            caption=product_template,
-                            parse_mode=ParseMode.MARKDOWN,
-                            reply_markup=InlineKeyboardMarkup(product_buttons)))
-                else:
-                    context.user_data["to_delete"].append(
-                        context.bot.send_message(
-                            chat_id=update.effective_chat.id,
-                            text=product_template,
-                            parse_mode=ParseMode.MARKDOWN,
-                            reply_markup=InlineKeyboardMarkup(product_buttons)))
+                reply_markup = self.product_markup(cart, product)
+                template = self.product_template(cart, product,
+                                                 shop["currency"])
+                product_obj = Product(context, product)
+                product_obj.send_short_template(
+                    update, context, text=template, reply_markup=reply_markup)
+
             # Send main buttons
             pagination.send_keyboard(update, context,
                                      page_prefix="user_products_pagination",
@@ -177,58 +196,50 @@ class UserProductsHandler(object):
         product_id = ObjectId(update.callback_query.data.split("/")[1])
         product = products_table.find_one({"_id": product_id})
         if product:
-            carts_table.update_one(
+            cart = carts_table.find_and_modify(
                 {"bot_id": context.bot.id,
                  "user_id": update.effective_user.id},
                 {"$push": {"products": {"product_id": product_id,
                                         "quantity": 1}}},
-                upsert=True)
+                upsert=True, new=True)
             update.callback_query.answer(f"{product['name']} Added to cart")
-            if len(product["images"]) > 0:
-                update.effective_message.edit_caption(
-                    caption=update.effective_message.caption_markdown
-                    + "\n\n✅ Product already in the cart",
-                    parse_mode=ParseMode.MARKDOWN)
 
+            shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
+            template = self.product_template(cart, product, shop["currency"])
+            if len(product["content"]) > 0:
+                update.effective_message.edit_caption(
+                    caption=template, parse_mode=ParseMode.MARKDOWN)
             else:
                 update.effective_message.edit_text(
-                    text=update.effective_message.text_markdown
-                    + "\n\n✅ Product already in the cart",
-                    parse_mode=ParseMode.MARKDOWN)
+                    text=template, parse_mode=ParseMode.MARKDOWN)
+
             update.effective_message.edit_reply_markup(
-                reply_markup=InlineKeyboardMarkup([
-                    [InlineKeyboardButton(
-                        text="Remove from the cart",
-                        callback_data=f"remove_from_cart/{product_id}")]]))
+                reply_markup=self.product_markup(cart, product))
         else:
             update.callback_query.answer("No product")
             return self.back_to_products(update, context)
         return ConversationHandler.END
 
-    @staticmethod
-    def remove_from_cart(update, context):
+    def remove_from_cart(self, update, context):
         product_id = ObjectId(update.callback_query.data.split("/")[1])
         product = products_table.find_one({"_id": product_id}) or {}
-        carts_table.update_one(
+        cart = carts_table.find_and_modify(
             {"bot_id": context.bot.id, "user_id": update.effective_user.id},
-            {"$pull": {"products": {"product_id": product_id}}})
+            {"$pull": {"products": {"product_id": product_id}}}, new=True)
         update.callback_query.answer((product.get("name") or "")
                                      + " Removed from cart")
-        if len(product["images"]) > 0:
+
+        shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
+        template = self.product_template(cart, product, shop["currency"])
+        if len(product["content"]) > 0:
             update.effective_message.edit_caption(
-                caption=update.effective_message.caption_markdown.replace(
-                    "\n\n✅ Product already in the cart", ""),
-                parse_mode=ParseMode.MARKDOWN)
+                caption=template, parse_mode=ParseMode.MARKDOWN)
         else:
             update.effective_message.edit_text(
-                text=update.effective_message.text_markdown.replace(
-                    "\n\n✅ Product already in the cart", ""),
-                parse_mode=ParseMode.MARKDOWN)
+                text=template, parse_mode=ParseMode.MARKDOWN)
+
         update.effective_message.edit_reply_markup(
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton(
-                    text="Add",
-                    callback_data=f"add_to_cart/{product_id}")]]))
+            reply_markup=self.product_markup(cart, product))
         return ConversationHandler.END
 
     def back_to_products(self, update, context):
@@ -294,9 +305,11 @@ class CartHelper(object):
         if type(product) is ObjectId:
             product_id = product
             product = products_table.find_one({"_id": product_id})
-        else:
+        elif type(product) is str:
             product_id = ObjectId(product)
             product = products_table.find_one({"_id": product_id})
+        else:
+            product_id = product["_id"]
 
         cart = get_obj(carts_table, cart)
 
@@ -333,8 +346,10 @@ class CartHelper(object):
         :param currency: shop currency
         """
         # Create product template
-        if len(cart_item["product"]["description"]) > 150:
-            description = cart_item["product"]["description"][:150] + "..."
+        if (len(cart_item["product"]["description"])
+                > MAX_TEMP_DESCRIPTION_LENGTH):
+            description = (cart_item["product"]["description"]
+                           [:MAX_TEMP_DESCRIPTION_LENGTH] + "...")
         else:
             description = cart_item["product"]["description"]
         category_name = categories_table.find_one(
@@ -358,6 +373,10 @@ class CartHelper(object):
         return template
 
     @staticmethod
+    def full_cart_item_template(cart, product, currency):
+        pass
+
+    @staticmethod
     def cart_item_markup(cart_item):
         """Keyboard for the cart item.
         Product must exist in the cart and quantity must be correct
@@ -370,30 +389,26 @@ class CartHelper(object):
         :return: InlineKeyboardMarkup
         """
         product_buttons = [[]]
-        # if cart_item["quantity"] > 1:
         product_buttons[0].append(
             InlineKeyboardButton(
                 text="➖",
                 callback_data=f"reduce_quantity/{cart_item['product_id']}"))
         product_buttons[0].append(
             InlineKeyboardButton(
-                text="Remove",
+                text=remove_button_str,
                 callback_data=f"list_cart_remove/{cart_item['product_id']}"))
         product_buttons[0].append(
             InlineKeyboardButton(
                 text="➕",
                 callback_data=f"increase_quantity/{cart_item['product_id']}"))
-        # if cart_item["product"].get("unlimited"):
-        #     product_buttons[0].append(plus_button)
-        # elif cart_item["quantity"] < int(cart_item["product"]["quantity"]):
-        #     product_buttons[0].append(plus_button)
 
         if (len(cart_item["product"]["description"]) > 150
-                or len(cart_item["product"]["images"]) > 1):
+                or len(cart_item["product"]["content"]) > 1):
             product_buttons.append(
                 [InlineKeyboardButton(
-                    text="View",
-                    callback_data=f"view_product/{cart_item['product_id']}")])
+                    text=view_button_str,
+                    callback_data=f"view_cart_product/"
+                                  f"{cart_item['product_id']}")])
         return InlineKeyboardMarkup(product_buttons)
 
 
@@ -466,21 +481,20 @@ class Cart(CartHelper):
                 cart_item["product"] = product
                 reply_markup = self.cart_item_markup(cart_item)
                 template = self.cart_item_template(cart_item, currency)
-                if len(product["images"]) > 0:
-                    context.user_data["to_delete"].append(
-                        context.bot.send_photo(
-                            chat_id=update.effective_chat.id,
-                            photo=product["images"][0],
-                            caption=template,
-                            parse_mode=ParseMode.MARKDOWN,
-                            reply_markup=reply_markup))
-                else:
-                    context.user_data["to_delete"].append(
-                        context.bot.send_message(
-                            chat_id=update.effective_chat.id,
-                            text=template,
-                            parse_mode=ParseMode.MARKDOWN,
-                            reply_markup=reply_markup))
+                product_obj = Product(context, product)
+                product_obj.send_short_template(
+                    update, context, text=template, reply_markup=reply_markup)
+                # if len(product["content"]) > 0:
+                #     send_content(update.effective_chat.id, context,
+                #                  product["content"][0], caption=template,
+                #                  reply_markup=reply_markup)
+                # else:
+                #     context.user_data["to_delete"].append(
+                #         context.bot.send_message(
+                #             chat_id=update.effective_chat.id,
+                #             text=template,
+                #             parse_mode=ParseMode.MARKDOWN,
+                #             reply_markup=reply_markup))
             # Send main buttons
             pagination.send_keyboard(update, context,
                                      page_prefix="user_cart_pagination",
@@ -546,6 +560,37 @@ class Cart(CartHelper):
         update.callback_query.answer((product.get("name") or "")
                                      + " Removed from cart")
         return self.back_to_cart(update, context)
+
+    def view_product(self, update, context):
+        """When product description is too long
+        or there a few files in the product - "View" button
+        """
+        delete_messages(update, context, True)
+        cart = carts_table.find_one({"user_id": update.effective_user.id,
+                                     "bot_id": context.bot.id})
+        product_id = update.callback_query.data.split("/")[1]
+        cart_item = self.validate_cart_item(cart, product_id)
+        if not cart_item:
+            return self.back_to_cart(update, context)
+        prod_obj = Product(context, cart_item["product"])
+        currency = chatbots_table.find_one(
+            {"bot_id": context.bot.id})["shop"]["currency"]
+        template = self.cart_item_template(cart_item, currency)
+        prod_obj.send_full_template(
+            update, context, text=template,
+            reply_markup=self.cart_item_markup(cart_item))
+
+        back_button = InlineKeyboardMarkup([
+            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                  callback_data="back_to_cart")]])
+
+        context.user_data["to_delete"].append(
+            context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=";)",
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=back_button))
+        return ConversationHandler.END
 
     def make_order(self, update, context):
         delete_messages(update, context, True)
@@ -675,7 +720,7 @@ PRODUCTS_CATEGORIES = CallbackQueryHandler(
     callback=UserProductsHandler().categories_menu)
 
 USERS_PRODUCTS_LIST_HANDLER = CallbackQueryHandler(
-    pattern="^(category|user_products_pagination)",
+    pattern="^(catalog|user_products_pagination)",
     callback=UserProductsHandler().products)
 
 ADD_TO_CART = CallbackQueryHandler(
@@ -698,6 +743,10 @@ REMOVE_FROM_CART_LIST = CallbackQueryHandler(
 CHANGE_QUANTITY = CallbackQueryHandler(
     pattern=r"^(increase_quantity|reduce_quantity)",
     callback=Cart().change_quantity)
+
+VIEW_CART_PRODUCT = CallbackQueryHandler(
+    pattern=r"view_cart_product",
+    callback=Cart().view_product)
 
 MAKE_ORDER = CallbackQueryHandler(
     pattern="make_order",

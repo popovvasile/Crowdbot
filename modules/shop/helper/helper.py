@@ -26,4 +26,4 @@ def send_media_arr(full_media_group, update, context):
 
 
 def split_list(ls):
-    return [ls[i:i + 10] for i in range(0, len(ls), 10)]
+    return [ls[x:x + 10] for x in range(0, len(ls), 10)]

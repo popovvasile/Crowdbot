@@ -147,7 +147,7 @@ class OrdersHandler(object):
         # for product in pagin.data["products_data"]:
         product = Product(context, context.user_data["product"])
         add_kb = product.add_keyboard(context.user_data["order"])
-        product.send_admin_short_template(update, context, kb=add_kb)
+        product.send_admin_short_template(update, context, reply_markup=add_kb)
         # Pagination().send_pagin(update, context)
         return CHOOSE_PRODUCT
 

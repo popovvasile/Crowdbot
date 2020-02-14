@@ -4,9 +4,8 @@ from telegram import Update, ParseMode, InlineKeyboardButton, InlineKeyboardMark
 from telegram.ext import (ConversationHandler, CallbackQueryHandler,
                           CallbackContext, MessageHandler, Filters)
 
-from modules.shop.helper.helper import clear_user_data
 from helper_funcs.pagination import Pagination
-
+from modules.shop.helper.helper import clear_user_data
 from modules.shop.helper.keyboards import (
     keyboards, back_kb, back_btn, create_keyboard)
 from modules.shop.modules.welcome import Welcome
@@ -16,28 +15,59 @@ from helper_funcs.pagination import set_page_key
 from helper_funcs.misc import delete_messages
 
 
-logging.basicConfig(format='%(asctime)s - %(name)s - '
-                           '%(levelname)s - %(message)s',
-                    level=logging.INFO)
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 class ProductsHandler:
+    @staticmethod
+    def product_keyboard(context, product_obj):
+        """Create keyboard for product in "item list" and "trash list" """
+        reply_markup = [[]]
+        if product_obj.in_trash:
+            reply_markup[0].append(
+                InlineKeyboardButton(
+                    text=context.bot.lang_dict["shop_admin_restore_btn"],
+                    callback_data=f"restore_product/{product_obj._id}"))
+            return InlineKeyboardMarkup(reply_markup)
+        reply_markup[0].append(
+            InlineKeyboardButton(
+                text=context.bot.lang_dict["shop_admin_edit_btn"],
+                callback_data=f"edit_product/{product_obj._id}"))
+        if not product_obj.order_ids:
+            reply_markup[0].append(
+                InlineKeyboardButton(
+                    text=context.bot.lang_dict["shop_admin_to_trash_btn"],
+                    callback_data=f"to_trash/{product_obj._id}"))
+        return InlineKeyboardMarkup(reply_markup)
+
     def products(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        set_page_key(update, context, "products")
+        # Set current page integer in the user_data.
+        if update.callback_query.data.startswith("item_list_pagination"):
+            context.user_data["page"] = int(
+                update.callback_query.data.replace(
+                    "item_list_pagination_", ""))
+        if not context.user_data.get("page"):
+            context.user_data["page"] = 1
+
         all_products = products_table.find({
-            "in_trash": False, "bot_id": context.bot.id}).sort([["_id", 1]])
+            "in_trash": False, "bot_id": context.bot.id}).sort([["_id", -1]])
         return self.products_layout(
             update, context, all_products, PRODUCTS)
 
-    @staticmethod
-    def products_layout(update, context, all_products, state):
-        # Title
+    @classmethod
+    def products_layout(cls, update, context, all_products, state):
+        """This Method works for the admin item list and for the item trash"""
+        # Send Title
+        title = context.bot.lang_dict["shop_admin_products_title"].format(
+            all_products.count())
         context.user_data['to_delete'].append(
             context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
-                text=context.bot.lang_dict["shop_admin_products_title"].format(all_products.count()),
+                text=title,
                 parse_mode=ParseMode.MARKDOWN))
 
         if all_products.count() == 0:
@@ -45,16 +75,22 @@ class ProductsHandler:
                 context.bot.send_message(
                     chat_id=update.effective_chat.id,
                     text=context.bot.lang_dict["shop_admin_no_products"],
-                    reply_markup=back_kb("back_to_main_menu", context=context)))
+                    reply_markup=back_kb(
+                        "back_to_main_menu", context=context)))
         else:
-            pagination = Pagination(
-                all_products, per_page=5)
+            pagination = Pagination(all_products,
+                                    page=context.user_data["page"])
             for product in pagination.content:
                 prod_obj = Product(context=context, obj=product)
-                prod_obj.send_full_template(
-                    update, context, kb=prod_obj.admin_keyboard, text=prod_obj.description)
+                text = prod_obj.admin_short_template
+                reply_markup = cls.product_keyboard(context, prod_obj)
+                prod_obj.send_short_template(
+                    update, context, text=text, reply_markup=reply_markup)
+
             pagination.send_keyboard(
-                update, context, [[back_btn("back_to_main_menu", context=context)]])
+                update, context,
+                [[back_btn("back_to_main_menu", context=context)]],
+                page_prefix="item_list_pagination")
         return state
 
     def edit(self, update: Update, context: CallbackContext):
@@ -64,16 +100,46 @@ class ProductsHandler:
             product_id = update.callback_query.data.split("/")[1]
             context.user_data["product"] = Product(context, product_id)
             # TODO fix NoneType when creating the Product object
+
+        text = (context.user_data["product"].admin_full_template + "\n"
+                + context.bot.lang_dict["shop_admin_edit_product_menu"])
+        reply_markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton(
+                context.bot.lang_dict["shop_admin_set_discount_btn"],
+                callback_data='change_discount'),
+             InlineKeyboardButton(
+                 context.bot.lang_dict["shop_admin_set_price_btn"],
+                 callback_data="change_price")],
+            [InlineKeyboardButton(
+                context.bot.lang_dict["shop_admin_set_description_btn"],
+                callback_data="change_description"),
+             InlineKeyboardButton(
+                 context.bot.lang_dict["shop_admin_set_name_btn"],
+                 callback_data="change_name")],
+            [InlineKeyboardButton(
+                "Content",
+                callback_data="change_images"),
+             InlineKeyboardButton(
+                 context.bot.lang_dict["shop_admin_set_category_btn"],
+                 callback_data="change_category")],
+            [InlineKeyboardButton(
+                context.bot.lang_dict["shop_admin_set_quantity_btn"],
+                callback_data="change_quantity")],
+            [InlineKeyboardButton(
+                context.bot.lang_dict["back_button"],
+                callback_data="back_to_products_btn")]])
+
         context.user_data["product"].send_full_template(
-            update, context, context.bot.lang_dict["shop_admin_edit_product_menu"],
-            keyboards(context)["edit_product"])
+            update, context, text=text, reply_markup=reply_markup)
         return EDIT
 
     def description(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        context.user_data["product"].send_full_template(
-            update, context, context.bot.lang_dict["shop_admin_set_description"],
-            keyboards(context)["back_to_products"])
+        text = (context.user_data["product"].admin_short_template
+                + "\n" + context.bot.lang_dict["shop_admin_set_description"])
+        context.user_data["product"].send_short_template(
+            update, context, text=text,
+            reply_markup=keyboards(context)["back_to_edit"])
         return DESCRIPTION
 
     def finish_description(self, update: Update, context: CallbackContext):
@@ -84,12 +150,15 @@ class ProductsHandler:
 
     def name(self, update: Update, context: CallbackContext, msg=None):
         delete_messages(update, context, True)
-        context.user_data["product"].send_full_template(
-            update, context, context.bot.lang_dict["shop_admin_change_name"],
-            keyboards(context)["back_to_products"])
+        text = (context.user_data["product"].admin_short_template
+                + "\n\n" + context.bot.lang_dict["shop_admin_change_name"])
+        context.user_data["product"].send_short_template(
+            update, context, text=text,
+            reply_markup=keyboards(context)["back_to_edit"])
         if msg:
-            context.bot.send_message(update.effective_chat.id,
-                                     context.bot.lang_dict["shop_admin_name_length_error"])
+            context.bot.send_message(
+                update.effective_chat.id,
+                context.bot.lang_dict["shop_admin_name_length_error"])
         return NAME
 
     def finish_name(self, update: Update, context: CallbackContext):
@@ -101,9 +170,11 @@ class ProductsHandler:
 
     def price(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        context.user_data["product"].send_full_template(
-            update, context, context.bot.lang_dict["shop_admin_set_price"],
-            keyboards(context)["back_to_products"])
+        text = (context.user_data["product"].admin_short_template
+                + "\n" + context.bot.lang_dict["shop_admin_set_price"])
+        context.user_data["product"].send_short_template(
+            update, context, text=text,
+            reply_markup=keyboards(context)["back_to_edit"])
         return PRICE
 
     def finish_price(self, update: Update, context: CallbackContext):
@@ -114,9 +185,12 @@ class ProductsHandler:
 
     def discount_price(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        context.user_data["product"].send_full_template(
-            update, context, context.bot.lang_dict["shop_admin_set_discount_price"],
-            keyboards(context)["back_to_products"])
+        text = (context.user_data["product"].admin_short_template + "\n"
+                + context.bot.lang_dict["shop_admin_set_discount_price"])
+
+        context.user_data["product"].send_short_template(
+            update, context, text=text,
+            reply_markup=keyboards(context)["back_to_edit"])
         return DISCOUNT_PRICE
 
     def finish_discount_price(self, update: Update, context: CallbackContext):
@@ -125,9 +199,11 @@ class ProductsHandler:
             {"discount_price": int(update.message.text)})
         return self.edit(update, context)
 
+    # TODO edit files
+    # TODO modify edit for multiple photos
     def images(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        context.user_data["product"].send_full_template(
+        context.user_data["product"].send_admin_full_template(
             update, context, context.bot.lang_dict["shop_admin_adding_product_start"],
             keyboards(context)["back_to_products"])
         return IMAGES
@@ -147,18 +223,21 @@ class ProductsHandler:
                                       callback_data=f"category_{i['_id']}")
                  for i in category_list],
                 [back_btn("back_to_main_menu_btn", context)])
-            context.user_data["product"].send_adding_product_template(
-                update, context, context.bot.lang_dict["shop_admin_set_category"], keyboard)
-
+            text = (context.user_data["product"].admin_short_template + "\n\n"
+                    + context.bot.lang_dict["shop_admin_set_category"])
+            context.user_data["product"].send_short_template(
+                update, context, text=text, reply_markup=keyboard)
         else:
-            buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                             callback_data="back_to_main_menu")]]
-            reply_markup = InlineKeyboardMarkup(
-                buttons)
-            context.bot.send_message(chat_id=update.callback_query.message.chat_id,
-                                     text="You didn't set any categories yet.\n"
-                                          "Please write a new category",
-                                     reply_markup=reply_markup)
+            buttons = [[
+                InlineKeyboardButton(
+                    text=context.bot.lang_dict["back_button"],
+                    callback_data="back_to_main_menu")]]
+            reply_markup = InlineKeyboardMarkup(buttons)
+            context.bot.send_message(
+                chat_id=update.callback_query.message.chat_id,
+                text="You didn't set any categories yet."
+                     "\nPlease write a new category",
+                reply_markup=reply_markup)
         return CATEGORY
 
     def finish_category(self, update: Update, context: CallbackContext):
@@ -171,38 +250,53 @@ class ProductsHandler:
                 category_id = categories_table.insert_one({
                     "name": update.message.text,
                     "query_name": update.message.text,
-                    "bot_id": context.bot.id
-                }).inserted_id
-                context.user_data["product"].update(
-                    {"category": category_id})
+                    "bot_id": context.bot.id}).inserted_id
+                context.user_data["product"].update({"category": category_id})
         return self.edit(update, context)
-
 
     def confirm_to_trash(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         product_id = update.callback_query.data.split("/")[1]
         context.user_data["product"] = Product(context, product_id)
-        context.user_data["product"].send_full_template(
-            update, context,
-            context.bot.lang_dict["shop_admin_confirm_to_trash_product"],
-            keyboards(context)["confirm_to_trash_product"])
+
+        text = (
+            context.user_data["product"].admin_short_template + "\n\n"
+            + context.bot.lang_dict["shop_admin_confirm_to_trash_product"])
+
+        reply_markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton(
+                context.bot.lang_dict["shop_admin_to_trash_yes"],
+                callback_data="finish_to_trash"),
+             InlineKeyboardButton(
+                 text=context.bot.lang_dict["back_button"],
+                 callback_data="back_to_products")]])
+
+        context.user_data["product"].send_short_template(
+            update, context, text=text, reply_markup=reply_markup)
         return CONFIRM_TO_TRASH
 
     def finish_to_trash(self, update: Update, context: CallbackContext):
         context.bot.send_chat_action(update.effective_chat.id, "typing")
         delete_messages(update, context, True)
         context.user_data["product"].update({"in_trash": True})
-        update.callback_query.answer(context.bot.lang_dict["shop_admin_moved_to_trash_blink"])
+        update.callback_query.answer(
+            context.bot.lang_dict["shop_admin_moved_to_trash_blink"])
         return self.back_to_products(update, context)
-
-    # TODO edit files
-    # TODO modify edit for multiple photos
 
     def quantity(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        context.user_data["product"].send_full_template(
-            update, context, context.bot.lang_dict["shop_admin_set_quantity"],
-            keyboards(context)["edit_quantity"])
+        text = (context.user_data["product"].short_admin_template
+                + "\n\n" + context.bot.lang_dict["shop_admin_set_quantity"])
+        reply_markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton(
+                text=context.bot.lang_dict["shop_admin_set_unlimited"],
+                callback_data='quantity_unlimited')],
+            [InlineKeyboardButton(
+                 text=context.bot.lang_dict["back_button"],
+                 callback_data="back_to_edit")]])
+
+        context.user_data["product"].send_short_template(
+            update, context, text=text, reply_markup=reply_markup)
         return SET_QUANTITY
 
     def finish_quantity(self, update: Update, context: CallbackContext):
@@ -235,7 +329,7 @@ PRODUCTS_HANDLER = ConversationHandler(
                                        pattern=r"products")],
     states={
         PRODUCTS: [CallbackQueryHandler(ProductsHandler().products,
-                                        pattern="^[0-9]+$"),
+                                        pattern=r"item_list_pagination"),
                    CallbackQueryHandler(ProductsHandler().edit,
                                         pattern=r"edit_product"),
                    CallbackQueryHandler(ProductsHandler().confirm_to_trash,
