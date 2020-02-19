@@ -56,9 +56,9 @@ class PurchaseBot(object):
         delete_messages(update, context, True)
         # TODO DESCRIPTION LENGTH VALIDATION
         if update.callback_query:
-            context.user_data["order"]["description"] = ""
+            context.user_data["order"]["user_comment"] = ""
         else:
-            context.user_data["order"]["description"] = update.message.text
+            context.user_data["order"]["user_comment"] = update.message.text
 
         context.user_data["used_contacts"] = (
             shop_customers_contacts_table.find_one(
@@ -135,7 +135,7 @@ class PurchaseBot(object):
             context.user_data["order"]["address"] = update.message.text
         else:
             context.user_data["order"]["address"] = ""
-        pprint(context.user_data["order"])
+        # pprint(context.user_data["order"])
         order_data = Cart().order_data(update, context)
         if not order_data["order"]["items"]:
             return Cart().back_to_cart(update, context)
@@ -165,9 +165,9 @@ class PurchaseBot(object):
         else:
             confirm_text += "\n*Pickup from* " + shop["address"]
 
-        if context.user_data["order"]["description"]:
+        if context.user_data["order"]["user_comment"]:
             confirm_text += (
-                f"\n*Comment:* `{context.user_data['order']['description']}`")
+                f"\n*Comment:* `{context.user_data['order']['user_comment']}`")
 
         context.user_data["to_delete"].append(
             context.bot.send_message(
@@ -184,13 +184,14 @@ class PurchaseBot(object):
         orders_table.insert_one(
             {**context.user_data["order"],
              **{"article": randint(10000, 99999),
-                 "status": "Pending",
+                "status": False,
                 "bot_id": context.bot.id,
                 "user_id": update.effective_user.id,
                 "creation_timestamp": datetime.datetime.now(),
-                "name": update.effective_user.name,
+                # "name": update.effective_user.name,
                 "in_trash": False,
-                "is_canceled": False}})
+                # "is_canceled": False
+                }})
 
         all_addresses = context.user_data["used_contacts"].get(
             "addresses", list())

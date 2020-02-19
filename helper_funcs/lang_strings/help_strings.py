@@ -4,7 +4,7 @@ from telegram import InlineKeyboardButton
 
 from helper_funcs.auth import if_admin
 from database import (chatbots_table, users_messages_to_admin_table,
-                      user_mode_table)
+                      user_mode_table, carts_table)
 
 
 def help_strings(context, update):
@@ -32,18 +32,24 @@ def help_strings(context, update):
     #     )
     # else:
     shop = chatbots_table.find_one({"bot_id": context.bot.id}).get("shop", {})
+    cart = carts_table.find_one({"bot_id": context.bot.id,
+                                 "user_id": update.effective_user.id}) or {}
+    cart_items_count = len(cart.get("products", list()))
+
     help_dict["shop"] = dict(
         mod_name=string_d_str["add_product_button"],
         admin_keyboard=admins_keyboard,
         admin_help=string_d_str["add_menu_buttons_help"],
         visitor_help=shop.get("description", ""),
-        visitor_keyboard=[InlineKeyboardButton(text="Catalog",
-                                               callback_data="open_shop"),
-                          InlineKeyboardButton(text="My Orders",
-                                               callback_data="my_orders"),
-                          InlineKeyboardButton(text="🛒 Cart",
-                                               callback_data="cart")],
-    )
+        visitor_keyboard=[
+            InlineKeyboardButton(text="Catalog",
+                                 callback_data="open_shop"),
+            InlineKeyboardButton(text="My Orders",
+                                 callback_data="my_orders"),
+            InlineKeyboardButton(text="🛒 Cart"
+                                      + (f" ({cart_items_count})"
+                                         if cart_items_count else ""),
+                                 callback_data="cart")])
     help_dict["channels_groups"] = dict(
         mod_name='Channels',
         # start 'Channels' message

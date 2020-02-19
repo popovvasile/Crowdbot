@@ -25,6 +25,9 @@ view_button_str = "🔎 View"
 
 
 class CartHelper(object):
+    """All "short" templates must be passed to send_short_template() method.
+    And all "full" templates must be passed to send_full_template() method.
+    """
     @classmethod
     def order_data(cls, update, context):
         """Make order from current cart products"""
@@ -172,7 +175,7 @@ class CartHelper(object):
                 currency)
         if (len(cart_item["product"]["description"])
                 < MAX_TEMP_DESCRIPTION_LENGTH):
-            template = "\n*Description:* `{}`".format(
+            template += "\n*Description:* `{}`".format(
                 cart_item["product"]["description"])
 
         if not cart_item["product"].get("unlimited"):
@@ -206,12 +209,12 @@ class CartHelper(object):
             InlineKeyboardButton(
                 text="➕",
                 callback_data=f"increase_quantity/{cart_item['product_id']}"))
-
-        if (len(cart_item["product"]["description"]) > 150
-                or len(cart_item["product"]["content"]) > 1):
+        content_len = len(cart_item["product"]["content"])
+        if len(cart_item["product"]["description"]) > 150 or content_len > 1:
             product_buttons.append(
                 [InlineKeyboardButton(
-                    text=view_button_str,
+                    text=view_button_str + (f" ({content_len} files)"
+                                            if content_len else ""),
                     callback_data=f"view_cart_product/"
                                   f"{cart_item['product_id']}")])
         return InlineKeyboardMarkup(product_buttons)
@@ -227,7 +230,8 @@ class Cart(CartHelper):
             context.user_data["page"] = int(
                 update.callback_query.data.replace("user_cart_pagination_",
                                                    ""))
-        if not context.user_data.get("page"):
+        if (not context.user_data.get("page")
+                or update.callback_query.data == "cart"):
             context.user_data["page"] = 1
         # Get cart products
         cart = carts_table.find_one({"user_id": update.effective_user.id,
@@ -289,17 +293,6 @@ class Cart(CartHelper):
                 product_obj = Product(context, product)
                 product_obj.send_short_template(
                     update, context, text=template, reply_markup=reply_markup)
-                # if len(product["content"]) > 0:
-                #     send_content(update.effective_chat.id, context,
-                #                  product["content"][0], caption=template,
-                #                  reply_markup=reply_markup)
-                # else:
-                #     context.user_data["to_delete"].append(
-                #         context.bot.send_message(
-                #             chat_id=update.effective_chat.id,
-                #             text=template,
-                #             parse_mode=ParseMode.MARKDOWN,
-                #             reply_markup=reply_markup))
             # Send main buttons
             pagination.send_keyboard(update, context,
                                      page_prefix="user_cart_pagination",

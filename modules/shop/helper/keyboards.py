@@ -8,7 +8,7 @@ def start_keyboard(orders_quantity, context):
 
     orders_btn_text = (
             context.bot.lang_dict["shop_admin_orders_btn"] +
-            (f' {orders_quantity["new_orders_quantity"]}'
+            (f' ({orders_quantity["new_orders_quantity"]})'
              if orders_quantity["new_orders_quantity"] != 0 else ""))
 
     if chatbot.get("shop_enabled") is True:

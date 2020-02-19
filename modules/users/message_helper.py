@@ -332,7 +332,7 @@ class MessageTemplate(object):
 
 # TODO STRINGS
 def content_string(content):
-    """Makes message content as string"""
+    """Makes message content as string for the message template"""
     string = ""
     for content_dict in content:
         if "text" in content_dict:

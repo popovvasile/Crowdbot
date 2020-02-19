@@ -6,7 +6,7 @@ from telegram.ext import (ConversationHandler, CallbackQueryHandler,
 from helper_funcs.pagination import Pagination
 from modules.shop.helper.keyboards import keyboards, back_kb, back_btn
 from modules.shop.helper.helper import clear_user_data
-from modules.shop.components.order import Order
+from modules.shop.components.order import Order, AdminOrder
 from modules.shop.components.product import Product
 from helper_funcs.pagination import set_page_key
 from modules.shop.admin_side.welcome import Welcome
@@ -14,16 +14,25 @@ from database import orders_table
 from helper_funcs.misc import delete_messages
 
 
-logging.basicConfig(format='%(asctime)s - %(name)s - '
-                           '%(levelname)s - %(message)s',
-                    level=logging.INFO)
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 class OrdersHandler(object):
     def orders(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        set_page_key(update, context, "orders")
+        # set_page_key(update, context, "orders")
+        # Set current page integer in the user_data.
+        if update.callback_query.data.startswith(
+                "admin_order_list_pagination"):
+            context.user_data["page"] = int(
+                update.callback_query.data.replace(
+                    "admin_order_list_pagination_", ""))
+        if not context.user_data.get("page"):
+            context.user_data["page"] = 1
+
         all_orders = orders_table.find({"in_trash": False}).sort([["_id", 1]])
         return self.orders_layout(update, context, all_orders, ORDERS)
 
@@ -32,7 +41,8 @@ class OrdersHandler(object):
         context.user_data['to_delete'].append(
             context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
-                text=context.bot.lang_dict["shop_admin_orders_title"].format(all_orders.count()),
+                text=context.bot.lang_dict["shop_admin_orders_title"].format(
+                    all_orders.count()),
                 parse_mode=ParseMode.MARKDOWN))
 
         if all_orders.count() == 0:
@@ -40,14 +50,17 @@ class OrdersHandler(object):
                 context.bot.send_message(
                     chat_id=update.effective_chat.id,
                     text=context.bot.lang_dict["shop_admin_no_orders"],
-                    reply_markup=back_kb("back_to_main_menu", context=context)))
+                    reply_markup=back_kb("back_to_main_menu",
+                                         context=context)))
         else:
             pagination = Pagination(
-                all_orders, page=context.user_data["page"], per_page=5)
+                all_orders, page=context.user_data["page"], per_page=2)
             for order in pagination.content:
-                Order(context=context, obj=order).send_short_template(update, context)
+                AdminOrder(context, order).send_short_template(update, context)
             pagination.send_keyboard(
-                update, context, [[back_btn("back_to_main_menu", context=context)]])
+                update, context,
+                [[back_btn("back_to_main_menu", context=context)]],
+                "admin_order_list_pagination")
         return state
 
     def confirm_to_trash(self, update: Update, context: CallbackContext):
@@ -178,7 +191,7 @@ ORDERS_HANDLER = ConversationHandler(
                                        pattern=r"orders")],
     states={
         ORDERS: [CallbackQueryHandler(OrdersHandler().orders,
-                                      pattern="^[0-9]+$"),
+                                      pattern="admin_order_list_pagination"),
                  CallbackQueryHandler(OrdersHandler().confirm_to_done,
                                       pattern=r"to_done"),
                  CallbackQueryHandler(OrdersHandler().confirm_to_trash,

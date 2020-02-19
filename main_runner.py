@@ -101,11 +101,13 @@ from modules.shop.user_side.offline_payment import OFFLINE_PURCHASE_HANDLER
 from modules.shop.user_side.online_payment import ONLINE_PURCHASE_HANDLER
 from modules.shop.user_side.products import (
     USERS_PRODUCTS_LIST_HANDLER, ADD_TO_CART, REMOVE_FROM_CART,
-    PRODUCTS_CATEGORIES, BACK_TO_CATEGORIES, USERS_ORDERS_LIST_HANDLER,
-    VIEW_PRODUCT, BACK_TO_CUSTOMER_SHOP)
+    PRODUCTS_CATEGORIES, BACK_TO_CATEGORIES, VIEW_PRODUCT,
+    BACK_TO_CUSTOMER_SHOP)
 from modules.shop.user_side.cart import (
     CART, REMOVE_FROM_CART_LIST, CHANGE_QUANTITY, BACK_TO_CART, MAKE_ORDER,
     VIEW_CART_PRODUCT)
+from modules.shop.user_side.orders import USERS_ORDERS_LIST_HANDLER
+
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
