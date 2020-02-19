@@ -8,6 +8,33 @@ def clear_user_data(context):
     context.user_data['to_delete'] = to_del
 
 
+def content_dict_as_string(content_dict):
+    string = ""
+    if not content_dict:
+        return string
+
+    if content_dict['type'] == "photo_file":
+        string += "• Photo\n"
+
+    if content_dict['type'] == "voice_file":
+        string += "• Voice message\n"
+
+    if (content_dict['type'] == "audio_file" or
+            content_dict['type'] == "document_file" or
+            content_dict['type'] == "sticker_file"):
+        string += f"• {content_dict['name']}\n"
+
+    if content_dict['type'] == "video_file":
+        string += "• Video\n"
+
+    if content_dict['type'] == "video_note_file":
+        string += "• Video message\n"
+
+    if content_dict['type'] == "animation_file":
+        string += "• Animation\n"
+    return string
+
+
 # COMPONENTS HELPER FUNCTIONS
 def send_media_arr(full_media_group, update, context):
     media_groups_arr = split_list(full_media_group)
@@ -26,4 +53,4 @@ def send_media_arr(full_media_group, update, context):
 
 
 def split_list(ls):
-    return [ls[i:i + 10] for i in range(0, len(ls), 10)]
+    return [ls[x:x + 10] for x in range(0, len(ls), 10)]

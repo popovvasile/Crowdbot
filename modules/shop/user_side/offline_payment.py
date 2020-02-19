@@ -3,17 +3,16 @@
 import logging
 import datetime
 from pprint import pprint
+from random import randint
 
-from bson import ObjectId
-from telegram import InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ParseMode
 from telegram.ext import (MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
 
-from database import (orders_table, chatbots_table,
+from database import (orders_table, chatbots_table, carts_table,
                       shop_customers_contacts_table)
-from helper_funcs.helper import get_help
 from helper_funcs.misc import delete_messages
-from modules.shop.modules.user_side.products import Cart
+from modules.shop.user_side.cart import Cart
 
 
 logging.basicConfig(
@@ -31,8 +30,6 @@ class PurchaseBot(object):
     @staticmethod
     def start_purchase(update, context):
         delete_messages(update, context, True)
-        if not context.user_data.get("order"):
-            return Cart().back_to_cart(update, context)
 
         context.user_data["to_delete"].append(
             context.bot.send_message(
@@ -40,6 +37,7 @@ class PurchaseBot(object):
                 text="Pay:{} {}".format(
                     str(context.user_data["order"]["total_price"]),
                     str(context.user_data["order"]["currency"]))))
+
         context.user_data["to_delete"].append(
             context.bot.send_message(
                 chat_id=update.callback_query.message.chat.id,
@@ -56,25 +54,24 @@ class PurchaseBot(object):
     @staticmethod
     def ask_contacts(update, context):
         delete_messages(update, context, True)
-        if not context.user_data.get("order"):
-            return Cart().back_to_cart(update, context)
+        # TODO DESCRIPTION LENGTH VALIDATION
         if update.callback_query:
-            context.user_data["order"]["description"] = ""
+            context.user_data["order"]["user_comment"] = ""
         else:
-            context.user_data["order"]["description"] = update.message.text
+            context.user_data["order"]["user_comment"] = update.message.text
 
-        context.user_data["contacts"] = (
+        context.user_data["used_contacts"] = (
             shop_customers_contacts_table.find_one(
                 {"bot_id": context.bot.id,
-                 "user_id": update.effective_user.id}))
-
-        if (context.user_data["contacts"]
-                and len(context.user_data["contacts"]["phone_numbers"])):
+                 "user_id": update.effective_user.id}) or {})
+        # TODO SHARE PHONE NUMBER
+        if (context.user_data["used_contacts"]
+                and len(context.user_data["used_contacts"]["phone_numbers"])):
             text = "Tell us your phone number or select one of with this:"
             buttons = [
                 [InlineKeyboardButton(text=x,
                                       callback_data=f"phone_number/{x}")]
-                for x in context.user_data["contacts"]["phone_numbers"]]
+                for x in context.user_data["used_contacts"]["phone_numbers"]]
         else:
             text = "Tell us your phone number:"
             buttons = []
@@ -92,8 +89,7 @@ class PurchaseBot(object):
     @staticmethod
     def ask_address(update, context):
         delete_messages(update, context, True)
-        if not context.user_data.get("order"):
-            return Cart().back_to_cart(update, context)
+        # TODO PHONE NUMBER VALIDATION
         if update.callback_query:
             context.user_data["order"]["phone_number"] = (
                 update.callback_query.data.split("/")[1])
@@ -103,14 +99,15 @@ class PurchaseBot(object):
             update.message.text = "phone"
 
         shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
+        # TODO SHARE GEO POSITION
         if shop["shipping"]:
-            if (context.user_data["contacts"]
-                    and len(context.user_data["contacts"]["addresses"])):
+            if (context.user_data["used_contacts"]
+                    and len(context.user_data["used_contacts"]["addresses"])):
                 text = "Tell us your full address or select one of with this:"
                 buttons = [
                     [InlineKeyboardButton(text=x,
                                           callback_data=f"address/{x}")]
-                    for x in context.user_data["contacts"]["addresses"]]
+                    for x in context.user_data["used_contacts"]["addresses"]]
             else:
                 text = "Tell us your full address"
                 buttons = []
@@ -124,43 +121,113 @@ class PurchaseBot(object):
                     chat_id=update.effective_chat.id,
                     text=text,
                     reply_markup=InlineKeyboardMarkup(buttons)))
-            return ORDER_FINISH
+            return CONFIRM_ORDER
         else:
             return PurchaseBot.confirm_order(update, context)
 
     @staticmethod
     def confirm_order(update, context):
         delete_messages(update, context, True)
-        if update.callback_query and "address" in update.callbackquery.data:
+        if update.callback_query and "address" in update.callback_query.data:
             context.user_data["order"]["address"] = (
-                update.callbackquery.data.split("/")[1])
-        if update.message and update.message.text != "phone":
+                update.callback_query.data.split("/")[1])
+        elif update.message and update.message.text != "phone":
             context.user_data["order"]["address"] = update.message.text
         else:
             context.user_data["order"]["address"] = ""
-        pprint(context.user_data["order"])
+        # pprint(context.user_data["order"])
+        order_data = Cart().order_data(update, context)
+        if not order_data["order"]["items"]:
+            return Cart().back_to_cart(update, context)
+
+        shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
+        context.user_data["order"] = {
+            **context.user_data["order"], **order_data["order"]}
+        context.user_data["order"]["shipping"] = shop["shipping"]
+
+        buttons = [
+            [InlineKeyboardButton(text="✅ Done!",
+                                  callback_data="finish_order")],
+            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                  callback_data="back_to_cart")]]
+
+        context.user_data["to_delete"].append(
+            context.bot.send_message(chat_id=update.effective_chat.id,
+                                     text=order_data["template"],
+                                     parse_mode=ParseMode.MARKDOWN))
+        confirm_text = ("*Your order* ☝️"
+                        "\n*Phone Number:* "
+                        f"{context.user_data['order']['phone_number']}")
+
+        if context.user_data["order"]["shipping"]:
+            confirm_text += ("\n*Delivery to* "
+                             + context.user_data["order"]['address'])
+        else:
+            confirm_text += "\n*Pickup from* " + shop["address"]
+
+        if context.user_data["order"]["user_comment"]:
+            confirm_text += (
+                f"\n*Comment:* `{context.user_data['order']['user_comment']}`")
+
+        context.user_data["to_delete"].append(
+            context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=confirm_text,
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=InlineKeyboardMarkup(buttons)))
+        return ORDER_FINISH
 
     @staticmethod
     def order_finish(update, context):
         delete_messages(update, context, True)
-        # if "contacts" not in context.user_data:
-        #     context.user_data["order"]["contacts"] = update.message.text
-        # else:
-        context.user_data["order"]["address"] = update.message.text
+        # TODO ask about the status
+        orders_table.insert_one(
+            {**context.user_data["order"],
+             **{"article": randint(10000, 99999),
+                "status": False,
+                "bot_id": context.bot.id,
+                "user_id": update.effective_user.id,
+                "creation_timestamp": datetime.datetime.now(),
+                # "name": update.effective_user.name,
+                "in_trash": False,
+                # "is_canceled": False
+                }})
 
-        orders_table.insert_one({"status": "Pending",  # TODO ask about the status
-                                 "bot_id": context.bot.id,
-                                 "user_id": update.effective_user.id,
-                                 "timestamp": datetime.datetime.now(),
-                                 "name": update.effective_user.name,
-                                 "in_trash": False,
-                                 # "product_id": context.user_data.get("product_id"),
-                                 # "description": context.user_data.get("description"),
-                                 # "contacts": context.user_data.get("contacts"),
-                                 # "address": context.user_data.get("address"),
-                                 })
+        all_addresses = context.user_data["used_contacts"].get(
+            "addresses", list())
+        all_numbers = context.user_data["used_contacts"].get(
+            "phone_numbers", list())
+
+        address = context.user_data["order"]["address"]
+        number = context.user_data["order"]["phone_number"]
+
+        if address and address not in all_addresses:
+            if len(all_addresses) > 5:
+                all_addresses.insert(0, address)
+                del all_addresses[-1]
+            else:
+                all_addresses.append(address)
+
+        if number not in all_numbers:
+            if len(all_numbers) > 5:
+                all_numbers.insert(0, number)
+                del all_numbers[-1]
+            else:
+                all_numbers.append(number)
+
+        shop_customers_contacts_table.update_one(
+            {"bot_id": context.bot.id,
+             "user_id": update.effective_user.id},
+            {"$set": {"phone_numbers": all_numbers,
+                      "addresses": all_addresses}},
+            upsert=True)
+
+        carts_table.update_one({"bot_id": context.bot.id,
+                                "user_id": update.effective_user.id},
+                               {"$set": {"products": list()}})
+
         context.bot.send_message(
-            chat_id=update.message.chat.id,
+            chat_id=update.effective_chat.id,
             text="Thank you!",
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton(
@@ -184,11 +251,16 @@ OFFLINE_PURCHASE_HANDLER = ConversationHandler(
                                  callback=PurchaseBot().ask_contacts),
             MessageHandler(Filters.text,
                            callback=PurchaseBot().ask_contacts)],
-        ORDER_FINISH: [
+        CONFIRM_ORDER: [
             CallbackQueryHandler(pattern=r"address",
                                  callback=PurchaseBot().confirm_order),
             MessageHandler(Filters.text,
                            callback=PurchaseBot().confirm_order)],
+
+        ORDER_FINISH: [
+            CallbackQueryHandler(pattern="finish_order",
+                                 callback=PurchaseBot().order_finish)
+        ]
 
 
     },
