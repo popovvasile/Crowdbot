@@ -3,15 +3,12 @@
 import logging
 import datetime
 from pprint import pprint
-
-from bson import ObjectId
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import (MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
 
 from database import (orders_table, chatbots_table,
                       shop_customers_contacts_table)
-from helper_funcs.helper import get_help
 from helper_funcs.misc import delete_messages
 from modules.shop.modules.user_side.products import Cart
 

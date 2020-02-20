@@ -324,10 +324,9 @@ def main(token, lang):
     #                       key='private.key',
     #                       cert='cert.pem',
     #                       webhook_url='https://104.248.82.166:{}/'.format(port) + token)
-    print(token)
     updater.start_polling(timeout=60, read_latency=60, clean=True, bootstrap_retries=5)
 
     updater.idle()
 #
 # if __name__ == '__main__':
-#     shop("633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg")
+#     main("633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg", "ENG")
