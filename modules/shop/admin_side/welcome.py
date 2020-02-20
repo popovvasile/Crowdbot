@@ -1,7 +1,8 @@
 import logging
 
 from telegram import Update
-from telegram.ext import (ConversationHandler, CallbackQueryHandler, CallbackContext)
+from telegram.ext import (ConversationHandler, CallbackQueryHandler,
+                          CallbackContext)
 
 from modules.shop.helper.helper import clear_user_data
 from modules.shop.helper.keyboards import start_keyboard
@@ -9,9 +10,9 @@ from database import orders_table
 from helper_funcs.misc import delete_messages
 
 
-logging.basicConfig(format='%(asctime)s - %(name)s - '
-                           '%(levelname)s - %(message)s',
-                    level=logging.INFO)
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 

@@ -17,7 +17,7 @@ from helper_funcs.misc import (delete_messages, lang_timestamp,
 from modules.statistic.donation_statistic import DonationStatistic
 from modules.users.message_helper import (
     MessageTemplate, send_deleted_message_content, AnswerToMessage,
-    add_to_content, send_not_deleted_message_content)
+    send_not_deleted_message_content, add_to_content)
 from database import (users_table, donations_table,
                       users_messages_to_admin_table)
 

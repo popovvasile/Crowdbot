@@ -17,8 +17,8 @@ from helper_funcs.misc import delete_messages, lang_timestamp, user_mention
 from helper_funcs.pagination import Pagination
 from modules.users.users import UserTemplate
 from modules.users.message_helper import (
-    MessageTemplate, add_to_content, send_not_deleted_message_content,
-    send_deleted_message_content, AnswerToMessage, content_string)
+    MessageTemplate, send_not_deleted_message_content, add_to_content,
+    send_deleted_message_content, AnswerToMessage)
 from database import (users_messages_to_admin_table,
                       user_categories_table, users_table)
 

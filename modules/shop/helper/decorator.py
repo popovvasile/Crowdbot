@@ -1,5 +1,5 @@
 from requests.exceptions import ConnectionError, RequestException
-from modules.shop.modules.welcome import Welcome
+from modules.shop.modules import Welcome
 from modules.shop.helper.helper import clear_user_data
 from telegram.error import TimedOut
 

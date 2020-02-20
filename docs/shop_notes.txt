@@ -1,66 +1,97 @@
-АДМИН ЧАСТЬ
-	* Показывать всю информацию о товаре во время добавления
-
-	* Поля товаров:
-		- Изображение(другие файлы или несколько изображений в качестве контента. Первый файл - заглавный файл для товара)
-		- Сейчас для каждого товара создается payment(сделать целый магазин одного типа, а не каждый товар)
-		- Количество товара( и когда покупается товар происходит -1 со склада)
-
-	* Предложить создать в трех вариантах(сейчас спрашиваетcя сразу токен):
-		- С онлайн оплатой используя токен с ботфазера
-		- онлайн оплатой через нас
-		- без онлайн оплаты
-
-	* После создания - переводить сразу в админку(сейчас приходится два раза включать шоп)
-
-	* заказы не работают
-
-	* для каждой категории добавить свои поля(и про добавлении товара в категорию спрашивать для заполнения эти поля)
-
-	* загрузка товаров таблицей
-
-
-ЮЗЕР ЧАСТЬ
-	* Когда человек открывает магазин - показывать ему категории товаров и после выбора категории показывать соответсвующие товары
-
-	* В списках где находятся товары информацию показывать как caption файла(а не как текст после фотки)  # и например когда нажимаешь "купить" открывается полный контент продукта с последующими кнопками
-
-	* после BACK с магазина кнопки перестают работать
-
-
-ФЛОУ
-	* без онлайн оплаты(юзер делает заказ - админу приходит уведомление - админ отменяет)
-	* с онлайн оплатой
-	* оплата через нас
-
-
-я тут подумал над твоими словами что мы не являемся стартапом как таковым,
-может будем делать как в компаниях - каждый день созвон и у каждого спич по 5-10 мин что сделал за сегодня, что узнал, какие новые идеи и что будет делать
-
-
 ONLINE/OFFLINE
 
 ONLINE: TOKEN, EDIT TOKEN
 OFFLINE: PAYMENT EXPLANATION
-Categories in categories
-
-EDIT SHOP: Edit type, TOKEN only if there is one, Payment description if there is no token
-10)Paid/unpaid and release the content or send a notification that the item has been shipped
 
 ONLINE/OFFLINE Donations
-Add quantity of products
-
 Order ID-shnik  and state of Order
-
-
 убрать часть с фотками
 
-Changing shop currency - ask for the exchange rate and translate all prices
+
+-TODO BUGS
+    * когда устанавливаешь discount price - исключение ?
+    * При изменении плтежного токена - исключение
+    * При удалении категории - удаляются все товары - придумать(если есть заказы и если есть товары) и пофиксить
+    * при изменении quantity на очень большое число - исключение. При изменении на маленькое число - в тексте отображается не правильно как tuple
+    * Фича которая выводит в главное меню при рандомном тексте ведёт не адекватно в некторых меню бота
+         Когда на прайсе вводишь текст, а не число - кидает в главное меню и отказывают кнопки
+    [DONE] изменении категории товара - ведёт в юзер шоп
 
 
-Show orders to admin: paid/unpaid, executed/pending
-Send notification on orders
-Edit files in product
-Edit for multiple photos
-phone number validation
+-TODO ADMIN SIDE
+    * category delete - при удалении если есть товары за категорией - уведомлять сколько товаров будут удалены
+    * После создания шопа - не показывать кнопку бек, а сразу в меню переводить
+    * Показывать всю информацию о товаре во время добавления
+    * edit самовывоз/доставка/both
+    * Заказы Show orders to admin: paid/unpaid, executed/pending
+    * Уведомления о заказах
+    * Changing shop currency - give current exchange rate and ask for the exchange rate then translate all prices
+    * При изменении address, description, currency - показывать текущие значения
+    * Paid/unpaid and release the content or send a notification that the item has been shipped
+    * EDIT SHOP: Edit type, TOKEN only if there is one, Payment description if there is no token
+    [DONE] Edit files in product
+    [DONE] В списке товаров сделать caption, а не просто текст после фотки
+    [DONE] Добаваление разного контента
 
+-TODO USER SIDE
+    * во время оформления заказа показывать все введённые поля
+    * список товаров в заказе
+    * Онлайн заказы
+    * Уведомления о заказах
+    * Send notification on orders
+    * Offline order creation:
+        DESCRIPTION LENGTH VALIDATION
+        SHARE PHONE NUMBER
+        PHONE NUMBER VALIDATION
+        SHARE GEO POSITION
+    [DONE] Отображение разного контента
+
+-TODO BOTH
+    * Отображение комментария клиента в заказах
+    * Discount price обработка()
+    * Check messages length in templates and captions - to avoid exceptions
+    * Добавить артукулы в заказы и товары
+        https://www.mongodb.com/blog/post/generating-globally-unique-identifiers-for-use-with-mongodb
+    [DONE] Кнопка "Просмотр" на товарах(если большое описание или много контента)
+
+
+
+
+
+-TODO FEATURES-USER SIDE
+    * Отмена заказа
+    * Предупреждать юзера о всех изменениях в корзине, заказах и тд.
+
+-TODO FEATURES-ADMIN SIDE
+    * Комментарий админа
+    * ексель добваление товара
+    * вывести текущий товар в ексель
+    * вывевести проданый товар в екселе(по датам от-до, по месяцам)
+    * для каждой категории добавить свои поля(и про добавлении товара в категорию спрашивать для заполнения эти поля)
+    * когда количество товара меняется и становиться меньше чем количество заказов(или считать корзину)
+        - админа предупреждают скольким клиентам прийдется отказать
+    * При создании товара кнопки - [[Отменить заказ], [Назад]], кнопка "Назад" переводит в предыдущие меню
+    * Возможность выбрать титульный файл для товара
+    * small pictures in the "edit item content" menu
+
+-TODO FEATURES-BOTH
+    * Categories in categories
+    * https://invitemember.com/ платный контент в виде групп и каналов
+    * Поиск по артикулам(товары, заказы)
+
+
+TODO TESTING
+    * test shop for unsubscribers
+    * test shop(and other part of the bot) with big texts, many items in orders, many content and so on
+    * test shop(and other part of the bot) with Markdown and HTML tags in messages
+    * TODO test product description (caption description)
+
+    """Offline order statuses:
+        * "Pending" (When order created)
+            - at this time order items can be sold to another customers
+
+        * "InProcess" (When order wait for customer or on the delivery way)
+            - items disappeared from the shop. Wait for the cancel or finish
+
+        * "Done" (When order circle finished)
+    """
