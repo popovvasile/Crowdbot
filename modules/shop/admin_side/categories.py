@@ -30,8 +30,7 @@ class ProductCategoryHandler(object):
             [InlineKeyboardButton(context.bot.lang_dict["shop_admin_add_category_btn"],
                                   callback_data="add_shop_category")],
             [back_btn("back_to_main_menu", context)],
-        ]
-        )
+        ])
 
         context.user_data["to_delete"] = [context.bot.send_message(
             chat_id=update.callback_query.message.chat_id,

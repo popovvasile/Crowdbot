@@ -7,20 +7,18 @@ from modules.shop.admin_side.welcome import Welcome
 from modules.shop.components.product import Product
 from helper_funcs.misc import delete_messages
 from price_parser import Price
-from database import categories_table
+from database import categories_table, chatbots_table
 from modules.shop.helper.keyboards import keyboards, back_btn, create_keyboard
-
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
 START_ADD_PRODUCT, ONLINE_PAYMENT, \
-    SET_TITLE, SET_CATEGORY, SET_PRICE, SET_DISCOUNT, \
-    ASK_DESCRIPTION, SET_DESCRIPTION, SET_QUANTITY, CONFIRM_ADDING, \
-    ADDING_CONTENT, FINISH_ADDING = range(12)
+SET_TITLE, SET_CATEGORY, SET_PRICE, SET_DISCOUNT, \
+ASK_DESCRIPTION, SET_DESCRIPTION, SET_QUANTITY, CONFIRM_ADDING, \
+ADDING_CONTENT, FINISH_ADDING = range(12)
 
 
 # EDIT WHAT- CONTENT OR PRODUCT
@@ -48,7 +46,7 @@ class AddingProductHandler(object):
                 [InlineKeyboardButton(
                     text=i["name"],
                     callback_data=f"choose_category/{i['_id']}")
-                 for i in category_list],
+                    for i in category_list],
                 [back_btn("back_to_main_menu_btn", context)])
             context.user_data["new_product"].send_full_template(
                 update, context,
@@ -81,7 +79,7 @@ class AddingProductHandler(object):
                 [InlineKeyboardButton(
                     text=i["name"],
                     callback_data=f"choose_category/{i['_id']}")
-                 for i in category_list],
+                    for i in category_list],
                 [back_btn("back_to_main_menu_btn", context)])
             context.user_data["new_product"].send_full_template(
                 update, context,
@@ -221,15 +219,30 @@ class AddingProductHandler(object):
                 [InlineKeyboardButton(
                     context.bot.lang_dict["shop_admin_continue_btn"],
                     callback_data="continue"),
-                 back_btn("back_to_main_menu_btn", context=context)]
+                    back_btn("back_to_main_menu_btn", context=context)]
             ]))
         return ADDING_CONTENT
 
     def confirm_adding(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
+        currency = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]["currency"]
+        category = categories_table.find_one({"_id": context.user_data["new_product"].category_id})["name"]
         context.user_data["new_product"].send_full_template(
             update, context,
-            "Confirm adding product",
+            "Confirm adding product:\n"
+            "Name: {name}\n"
+            "Price: {price} {currency}\n"
+            "Discount price: {discount_price} {currency}\n"
+            "Quantity: {quantity}\n"
+            "Category: {category}\n"
+            "Description: {description}\n".format(
+                currency=currency,
+                name=context.user_data["new_product"].name,
+                price=context.user_data["new_product"].price,
+                discount_price=context.user_data["new_product"].discount_price,
+                quantity=context.user_data["new_product"].quantity,
+                category=category,
+                description=context.user_data["new_product"].description),
             keyboards(context)["confirm_add_product"])
         return FINISH_ADDING
 
