@@ -265,13 +265,19 @@ ADD_PRODUCT_HANDLER = ConversationHandler(
             MessageHandler(Filters.regex(r'(\d+\.\d{1,2})|(\d+\,\d{1,2})'),
                            AddingProductHandler().set_discount_price),
             MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
-                           AddingProductHandler().set_discount_price)],
+                           AddingProductHandler().set_discount_price),
+            MessageHandler(Filters.regex(r"^((?!@).)*$"),
+                           AddingProductHandler().set_price)
+        ],
 
         ASK_DESCRIPTION: [
             MessageHandler(Filters.regex(r'(\d+\.\d{1,2})|(\d+\,\d{1,2})'),
                            AddingProductHandler().ask_description),
             MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
-                           AddingProductHandler().ask_description)],
+                           AddingProductHandler().ask_description),
+            MessageHandler(Filters.regex(r"^((?!@).)*$"),
+                           AddingProductHandler().set_discount_price)
+        ],
 
         SET_DESCRIPTION: [
             MessageHandler(Filters.text,

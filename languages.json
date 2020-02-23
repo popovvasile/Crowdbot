@@ -120,6 +120,10 @@
         "create_shop_str_7": "Choose the primary currency of your shop",
         "create_shop_str_8": "Your new shop has been created. Now your users can see it in their menu",
         "create_shop_str_9": "Please tell me the exact location of your shop",
+        "create_shop_str_10": "Your shipping has been switched to {}",
+        "create_shop_str_11": "Your shop type has been switched to {}",
+
+
         "change_shop_address_button": "Change address",
         "currency_button": "Currency",
         "current_page": "\n*Current page:* `{}`",
@@ -145,7 +149,7 @@
         "donation_statistic_template": "💸 *Donates statistic*\n\n*For today* \n`{today_str}`\n_Donates Quantity:_ `{today_count}`\n_Collected:_ `{today_amount}`\n\n*For week*\n*From:* `{week_from}`\n*To:* `{today_str}`\n_Donates Quantity:_ `{week_count}`\n_Collected:_ `{week_amount}`\n\n*For month*\n*From:* `{month_from}`\n*To:* `{today_str}`\n_Donates Quantity:_ `{month_count}`\n_Collected:_ `{month_amount}`\n\n*All time:*\n*First donate:*\n`{first_donate}`\n*Last donate:* \n`{last_donate}`\n_Donates Quantity:_ `{all_count}`\n_Collected:_ `{all_amount}`",
         "donations": "Donations",
         "donations_count_str": "💸 *User donations:* {}",
-        "donations_edit_str_1": "Test donation. Ignore it",
+        "donations_edit_str_1": "Test donati\"edit_change_shop_type\"on. Ignore it",
         "donations_edit_str_10": "✅ Ready!",
         "donations_edit_str_11": "🗑 The payment is deleted",
         "donations_edit_str_12": "Enter a new token of your payment system",
@@ -355,6 +359,8 @@
         "shop_admin_brands_title": "*Brand List*\n_Total brands:_ `{}`",
         "shop_admin_cancel_btn": "❌",
         "shop_admin_cancel_yes": "❌ Cancel",
+        "self-delivery": "Change to self-delivery",
+        "to customer delivery": "Change to delivery",
         "shop_admin_change_name": "*Enter a new name for the product*",
         "shop_admin_choose_products_title": "*Select product to add to order*\n_Total products:_ `{}`",
         "shop_admin_confirm_add_product": "Add product to store?",
@@ -369,6 +375,9 @@
         "shop_admin_description_above": "Description above ⬆️️",
         "shop_admin_edit_brand_menu": "\n_Edit brand_",
         "shop_admin_edit_btn": "🛠",
+        "edit_change_shop_type": "Switch to {}",
+        "edit_change_shop_shipping": "Switch to {}",
+
         "shop_admin_edit_menu": "*The order cannot be completed while there are sold goods.*\n❌ - _Remove the item from order_",
         "shop_admin_edit_product_menu": "\n_Edit item_",
         "shop_admin_empty_order": "⚠️ Empty order",

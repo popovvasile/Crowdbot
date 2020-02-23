@@ -9,24 +9,24 @@ Order ID-shnik  and state of Order
 
 
 -TODO BUGS
-    * когда устанавливаешь discount price - исключение ?
-    * При изменении плтежного токена - исключение
-    * При удалении категории - удаляются все товары - придумать(если есть заказы и если есть товары) и пофиксить
-    * при изменении quantity на очень большое число - исключение. При изменении на маленькое число - в тексте отображается не правильно как tuple
+    [DONE] При удалении категории - удаляются все товары - придумать(если есть заказы и если есть товары) и пофиксить
+    [DONE] When adding numbers in different parts of the bot- write back that the introduced number is wrong
     * Фича которая выводит в главное меню при рандомном тексте ведёт не адекватно в некторых меню бота
          Когда на прайсе вводишь текст, а не число - кидает в главное меню и отказывают кнопки
     [DONE] изменении категории товара - ведёт в юзер шоп
 
 
 -TODO ADMIN SIDE
-    * category delete - при удалении если есть товары за категорией - уведомлять сколько товаров будут удалены
-    * После создания шопа - не показывать кнопку бек, а сразу в меню переводить
+    [DONE] category delete - при удалении если есть товары за категорией - уведомлять сколько товаров будут удалены
+    [DONE] После создания шопа - не показывать кнопку бек, а сразу в меню переводить
     * Показывать всю информацию о товаре во время добавления
-    * edit самовывоз/доставка/both
+    [DONE] edit самовывоз/доставка
     * Заказы Show orders to admin: paid/unpaid, executed/pending
     * Уведомления о заказах
+    * Delete messages everywhere
     * Changing shop currency - give current exchange rate and ask for the exchange rate then translate all prices
-    * При изменении address, description, currency - показывать текущие значения
+    [DONE] При изменении address, description, currency - показывать текущие значения
+
     * Paid/unpaid and release the content or send a notification that the item has been shipped
     * EDIT SHOP: Edit type, TOKEN only if there is one, Payment description if there is no token
     [DONE] Edit files in product

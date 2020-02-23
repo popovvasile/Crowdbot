@@ -16,6 +16,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - '
 logger = logging.getLogger(__name__)
 
 START_ADD_CATEGORY, SET_CATEGORY, RENAME_CATEGORY = range(3)
+DELETE_CATEGORY_CONFIRM = 1
 
 
 class ProductCategoryHandler(object):
@@ -62,6 +63,42 @@ class ProductCategoryHandler(object):
     def delete_category(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         category_id = update.callback_query.data.replace("delete_shop_category/", "")
+        products = products_table.find({"bot_id": context.bot.id,
+                                        "category_id": ObjectId(category_id)})
+        category = categories_table.find_one({"bot_id": context.bot.id,
+                                              "_id": ObjectId(category_id)})
+
+        if products.count() > 0:
+            context.user_data["category_id"] = category_id
+            keyboard = InlineKeyboardMarkup([
+                [InlineKeyboardButton("YES", callback_data="del_cat_confirm")],
+                [InlineKeyboardButton("NO", callback_data="back_to_main_menu")]])
+            context.user_data["to_delete"] = [context.bot.send_message(
+                chat_id=update.callback_query.message.chat_id,
+                text="Category {} has {} products associated with it. \n"
+                     "They will be deleted as well. Are you sure that you want to continue?".
+                    format(category["name"], str(products.count())),
+                reply_markup=keyboard)]
+
+            return DELETE_CATEGORY_CONFIRM
+        else:
+            keyboard = InlineKeyboardMarkup([
+                [back_btn("back_to_main_menu", context)]])
+            categories_table.delete_one({"bot_id": context.bot.id,
+                                         "_id": ObjectId(category_id)})
+            products_table.delete_many({"bot_id": context.bot.id,
+                                        "category_id": ObjectId(category_id)})
+
+            context.user_data["to_delete"] = [context.bot.send_message(
+                chat_id=update.callback_query.message.chat_id,
+                text="Category {} has been deleted".format(category["name"]),
+                reply_markup=keyboard)]
+
+            return ConversationHandler.END
+
+    def delete_category_confirm(self, update: Update, context: CallbackContext):
+        delete_messages(update, context, True)
+        category_id = context.user_data["category_id"]
         category = categories_table.find_one({"bot_id": context.bot.id,
                                               "_id": ObjectId(category_id)})
         categories_table.delete_one({"bot_id": context.bot.id,
@@ -69,9 +106,8 @@ class ProductCategoryHandler(object):
         products_table.delete_many({"bot_id": context.bot.id,
                                     "category_id": ObjectId(category_id)})
         keyboard = InlineKeyboardMarkup([
-            [back_btn("back_to_main_menu", context)],
-        ]
-        )
+            [back_btn("back_to_main_menu", context)]])
+
         context.user_data["to_delete"] = [context.bot.send_message(
             chat_id=update.callback_query.message.chat_id,
             text="Category {} has been deleted".format(category["name"]),
@@ -101,10 +137,10 @@ class ProductCategoryHandler(object):
         ]
         )
         categories_table.update({"bot_id": context.bot.id,
-                                     "_id": ObjectId(context.user_data["category_id"])},
-                                    {"bot_id": context.bot.id,
-                                     "_id": ObjectId(context.user_data["category_id"]),
-                                     "name": update.message.text})
+                                 "_id": ObjectId(context.user_data["category_id"])},
+                                {"bot_id": context.bot.id,
+                                 "_id": ObjectId(context.user_data["category_id"]),
+                                 "name": update.message.text})
         context.user_data["to_delete"] = [context.bot.send_message(
             chat_id=update.message.chat_id,
             text="The category name has been changed",
@@ -177,8 +213,17 @@ RENAME_CATEGORY_HANDLER = ConversationHandler(
                              pattern=r"back_to_main_menu"),
     ]
 )
-DELETE_CATEGORY_HANDLER = CallbackQueryHandler(ProductCategoryHandler().delete_category,
-                                       pattern=r"delete_shop_category")
+DELETE_CATEGORY_HANDLER = ConversationHandler(
+    entry_points=[CallbackQueryHandler(ProductCategoryHandler().delete_category,
+                                       pattern=r"delete_shop_category")],
+    states={DELETE_CATEGORY_CONFIRM: [
+        CallbackQueryHandler(ProductCategoryHandler().delete_category_confirm,
+                             pattern="del_cat_confirm"),
+    ]},
+    fallbacks=[
+        CallbackQueryHandler(Welcome().back_to_main_menu,
+                             pattern=r"back_to_main_menu"),
+    ])
 ADD_CATEGORY_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(ProductCategoryHandler().add_category,
                                        pattern=r"add_shop_category")],
