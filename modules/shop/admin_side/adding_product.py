@@ -120,6 +120,15 @@ class AddingProductHandler(object):
 
     def set_price(self, update: Update, context: CallbackContext):
         if update.message:
+            try:
+                assert int(update.message.text) > 0
+            except (ValueError, AssertionError):
+                context.user_data["to_delete"].append(context.bot.send_message(
+                    chat_id=update.message.chat_id,
+                    text=context.bot.lang_dict["shop_admin_number_wrong"],
+                    reply_markup=InlineKeyboardMarkup([
+                        [back_btn("back_to_main_menu_btn", context)]])))
+                return SET_PRICE
             if len(update.message.text) <= 10:
                 context.user_data["new_product"].quantity = int(
                     format(Price.fromstring(update.message.text).amount))
@@ -143,6 +152,15 @@ class AddingProductHandler(object):
 
     def set_discount_price(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
+        try:
+            assert float(update.message.text) > 0
+        except (ValueError, AssertionError):
+            context.user_data["to_delete"].append(context.bot.send_message(
+                chat_id=update.message.chat_id,
+                text=context.bot.lang_dict["shop_admin_number_wrong"],
+                reply_markup=InlineKeyboardMarkup([
+                    [back_btn("back_to_main_menu_btn", context)]])))
+            return SET_DISCOUNT
         if update.message:
             if len(update.message.text) <= 7:
                 context.user_data["new_product"].price = float(
@@ -165,7 +183,15 @@ class AddingProductHandler(object):
 
     def ask_description(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-
+        try:
+            assert float(update.message.text) >= 0
+        except (ValueError, AssertionError):
+            context.user_data["to_delete"].append(context.bot.send_message(
+                chat_id=update.message.chat_id,
+                text=context.bot.lang_dict["shop_admin_number_wrong"],
+                reply_markup=InlineKeyboardMarkup([
+                    [back_btn("back_to_main_menu_btn", context)]])))
+            return ASK_DESCRIPTION
         if len(update.message.text) <= 10:
             discount_price = float(
                 format(Price.fromstring(update.message.text).amount, '.2f'))
@@ -306,7 +332,7 @@ ADD_PRODUCT_HANDLER = ConversationHandler(
         SET_PRICE: [CallbackQueryHandler(AddingProductHandler().set_price,
                                          pattern=r"unlimited"),
                     MessageHandler(Filters.regex(r'(\d+\.\d{1,2})|(\d+\,\d{1,2})'),
-                                   AddingProductHandler().set_discount_price),
+                                   AddingProductHandler().set_price),
                     MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
                                    AddingProductHandler().set_price),
                     MessageHandler(Filters.regex(r"^((?!@).)*$"),
