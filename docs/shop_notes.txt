@@ -11,6 +11,12 @@ BUG: the backs for the user are leading to the admin panel
 4)prepare the shop for online payments
 
 -TODO BUGS
+    * когда устанавливаешь discount price - исключение ?
+    * При изменении плтежного токена - исключение
+    * при изменении quantity на очень большое число - исключение. При изменении на маленькое число - в тексте отображается не правильно как tuple
+    * Фича которая выводит в главное меню при рандомном тексте ведёт не адекватно в некторых меню бота
+         Когда на прайсе вводишь текст, а не число - кидает в главное меню и отказывают кнопки
+    * Кнопка Back в выборе категорий в юзер-части выводит в админку(ловит другой хендлер)
     [DONE] При удалении категории - удаляются все товары - придумать(если есть заказы и если есть товары) и пофиксить
     [DONE] When adding numbers in different parts of the bot- write back that the introduced number is wrong
     [DONE]  Фича которая выводит в главное меню при рандомном тексте ведёт не адекватно в некторых меню бота
@@ -18,18 +24,19 @@ BUG: the backs for the user are leading to the admin panel
     [DONE] изменении категории товара - ведёт в юзер шоп
 
 
+
 -TODO ADMIN SIDE
+    * Paid/unpaid and release the content or send a notification that the item has been shipped
+    * Delete messages everywhere
+    * После создания шопа - не показывать кнопку бек, а сразу в меню переводить
     [DONE] category delete - при удалении если есть товары за категорией - уведомлять сколько товаров будут удалены
-    [DONE] После создания шопа - не показывать кнопку бек, а сразу в меню переводить
     [DONE] Показывать всю информацию о товаре во время добавления
     [DONE] edit самовывоз/доставка
-    * Заказы Show orders to admin: paid/unpaid, executed/pending
-    * Уведомления о заказах
-    * Delete messages everywhere
     [DONE] Changing shop currency - give current exchange rate and ask for the exchange rate then translate all prices
     [DONE] При изменении address, description, currency - показывать текущие значения
-    * Paid/unpaid and release the content or send a notification that the item has been shipped
     [DONE] EDIT SHOP: Edit type, TOKEN only if there is one, Payment description if there is no token
+    [DONE] Заказы Show orders to admin: paid/unpaid, executed/pending
+    [DONE] Уведомления о заказах
     [DONE] Edit files in product
     [DONE] В списке товаров сделать caption, а не просто текст после фотки
     [DONE] Добаваление разного контента
@@ -39,7 +46,6 @@ BUG: the backs for the user are leading to the admin panel
     * список товаров в заказе
     * Онлайн заказы
     * Уведомления о заказах
-    * Send notification on orders
     * Offline order creation:
         DESCRIPTION LENGTH VALIDATION
         SHARE PHONE NUMBER
@@ -49,6 +55,7 @@ BUG: the backs for the user are leading to the admin panel
 -TODO BOTH
     * Discount price обработка()
     * Check messages length in templates and captions - to avoid exceptions
+        https://python-telegram-bot.readthedocs.io/en/stable/telegram.constants.html
     * Добавить артукулы в заказы и товары
         https://www.mongodb.com/blog/post/generating-globally-unique-identifiers-for-use-with-mongodb
     [DONE] Отображение комментария клиента в заказах
