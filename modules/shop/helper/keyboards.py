@@ -117,13 +117,13 @@ def keyboards(context):
                                   callback_data="add_to_order")],
             [back_btn("back_to_orders_btn", context=context)]
         ]),
-        trash_main=InlineKeyboardMarkup([
-            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_orders_btn"],
-                                  callback_data="trashed_orders")],
-            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_products_btn"],
-                                  callback_data="trashed_products")],
-            [back_btn("back_to_main_menu_btn", context=context)]
-        ]),
+        # trash_main=InlineKeyboardMarkup([
+        #     [InlineKeyboardButton(context.bot.lang_dict["shop_admin_orders_btn"],
+        #                           callback_data="trashed_orders")],
+        #     [InlineKeyboardButton(context.bot.lang_dict["shop_admin_products_btn"],
+        #                           callback_data="trashed_products")],
+        #     [back_btn("back_to_main_menu_btn", context=context)]
+        # ]),
         # edit_product=InlineKeyboardMarkup([
         #     [InlineKeyboardButton(context.bot.lang_dict["shop_admin_set_discount_btn"],
         #                           callback_data='change_discount'),

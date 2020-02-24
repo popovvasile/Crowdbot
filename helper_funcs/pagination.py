@@ -2,16 +2,25 @@ from math import ceil
 from telegram import InlineKeyboardButton, ParseMode, InlineKeyboardMarkup
 
 
-def set_page_key(update, context, start_data=None, name: str = "page"):
-    try:
-        context.user_data[name] = int(update.callback_query.data)
-    except ValueError:
+# def set_page_key(update, context, start_data=None, name: str = "page"):
+#     try:
+#         context.user_data[name] = int(update.callback_query.data)
+#     except ValueError:
         # This thing is for remember last page after you back to list
-        if start_data:
-            if update.callback_query.data == start_data:
-                context.user_data[name] = 1
-        else:
-            context.user_data[name] = 1
+#        if start_data:
+#             if update.callback_query.data == start_data:
+#                 context.user_data[name] = 1
+#         else:
+#             context.user_data[name] = 1
+
+
+def set_page(update, context, page_prefix):
+    """Set page integer in the user_data"""
+    if update.callback_query.data.startswith(page_prefix):
+        context.user_data["page"] = int(
+            update.callback_query.data.replace(page_prefix, ""))
+    if not context.user_data.get("page"):
+        context.user_data["page"] = 1
 
 
 # TODO change this to take table, filters, sort, page, per_page and query db

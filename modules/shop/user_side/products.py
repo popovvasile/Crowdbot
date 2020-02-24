@@ -96,9 +96,14 @@ class UserProductsHelper(object):
         if not product["unlimited"]:
             template += f"\n*Quantity:* `{product['quantity']}`"
 
+        # Check if the product exist in the cart
         if any(cart_product["product_id"] == product["_id"]
                for cart_product in cart.get("products", list())):
             template += "\n\n✅ Product already in the cart"
+        # Check if the product exist in the not done order
+        # product_in_order = orders_table.find_one(
+        #     {""})
+
         return template
 
     @staticmethod
@@ -175,13 +180,31 @@ class UserProductsHandler(UserProductsHelper):
             context.user_data["category_id"] = ObjectId(
                 update.callback_query.data.split("/")[1])
 
-        filters = {"in_trash": False,
-                   "sold": False,
-                   "bot_id": context.bot.id}
-        if context.user_data.get("category_id"):
-            filters["category_id"] = context.user_data["category_id"]
+        # filters = {
+        #     "in_trash": False,
+        #     "sold": False,
+        #     "bot_id": context.bot.id,
+        #     "$or": [{'unlimited': True}, {"quantity": {"$gt": 0}}]
+        # }
 
-        all_products = products_table.find(filters).sort([["_id", -1]])
+        # if context.user_data.get("category_id"):
+        #     filters["category_id"] = context.user_data["category_id"]
+
+        filters = {"$or": [
+            {"in_trash": False, "sold": False, "bot_id": context.bot.id,
+             'unlimited': True},
+            {"in_trash": False, "sold": False, "bot_id": context.bot.id,
+             "quantity": {"$gt": 0}}]
+        }
+
+        if context.user_data.get("category_id"):
+            filters["$or"][0]["category_id"] = (
+                context.user_data["category_id"])
+            filters["$or"][1]["category_id"] = (
+                context.user_data["category_id"])
+
+        all_products = products_table.find(
+            filters).sort([["last_modify_timestamp", -1]])
         self.send_products_layout(update, context, all_products)
         return ConversationHandler.END
 
