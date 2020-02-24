@@ -1,52 +1,4 @@
-# TODO user interface for shop:
-    0)Use get_obj function everywhere
-    1)Products should have and option: online payment, offline or both - adding_products
-        -1)Change the edit products menu- shipping, currency, online payment
-    1.2)Admin views orders
-    2)Interface for users changes according to this
-# TODO add more content to products
-# TODO sending of donation buttons in groups and channels, as well as surveys/polls- make it inline
-# TODO make paid content
-# TODO tickets on events with payment, location and hour
-# TODO off/on the anonymous messages
-1)Categories as buttons - in users
-2)Bucket - in users
-
-
-
-3)Online/offline payment- shop in general
-8)payment instructions given by the admin - for the entire shop
-10)Paid/unpaid and release the content or send a notification that the item has been shipped
-
-
-# quantity- add products and edit product + to work with user buscket
-3)Pagination in items
-4)edit products content
-5)show products content
-6)fix orders
-7)paid content- create "secret content" and release it only after the payment
-
-
-TODO: 1)SHOP Creation (offline/online), images and files, categories as buttons, amounts, on "buy" you show all content, paid content
-
-TODO delete chat/survey from all chats, including channels and groups
-
--1) SET QUANTITY
-2) ORDER DEPENDING ON SETTINGS USER SIDE
-3) ORDERS ADMIN SIDE
-# TODO if payment token has not been added, don't allow online payments at all
-# DOUBLE CHECK ON DELETION OF CATEGORIES- all products must be deleted as well,
-# TODO DOUBLE CHECK ON DELETION OF PRODUCTS- all orders must be deleted as well, including those in trash
-# TODO ask about the order status - must change after completion
-# TODO idea- subscription option
-
-10)buttons in buttons
-
-2)Multiple pics as album in shop
-6)bot_id everywhere in shop- products appear in different shop
-7)Price with currency in descriptions and everywhere
-
-
+#TODO: Cython implementation
 
 
 # TODO ALL
@@ -84,13 +36,6 @@ TODO delete chat/survey from all chats, including channels and groups
     * имя и username ансабов не обновляется в списке юзеров
     * if subscribers leave telegram - check for exceptions
     * normal back after delete message in inbox
-
-# TODO SHOP
-    * Remove all sold and deleted products from cart
-    * Products quantity handler for cart
-    *
-    * content
-    * 
 
 # TODO for discussion
     * One code style for whole project :) PEP 8 or 100 length(like ptb lib) or long strings

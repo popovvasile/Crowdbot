@@ -319,17 +319,17 @@ def main(token, lang):
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(help_handler)
 
-    # rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), get_help)
-    # dispatcher.add_handler(rex_help_handler)
+    dispatcher.add_handler(CallbackQueryHandler(Welcome.back_to_main_menu,
+                                                pattern=r"back_"))
     dispatcher.add_handler(BACK_TO_MAIN_MENU_HANDLER)
     dispatcher.add_handler(back_to_modules_handler)
     dispatcher.add_handler(help_callback_handler)
-    dispatcher.add_handler(CallbackQueryHandler(Welcome.back_to_main_menu,
-                                                pattern=r"back_"))
+
     # error_help_callback_handler = CallbackQueryHandler(get_help,
     #                                                   pattern=r"error_back")
     # dispatcher.add_handler(error_help_callback_handler)
-
+    rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), get_help)
+    dispatcher.add_handler(rex_help_handler)
     LOGGER.info("Using long polling.")
     # updater.start_webhook(listen='0.0.0.0',
     #                       port=port,
@@ -337,10 +337,9 @@ def main(token, lang):
     #                       key='private.key',
     #                       cert='cert.pem',
     #                       webhook_url='https://104.248.82.166:{}/'.format(port) + token)
-    print(token)
     updater.start_polling(timeout=60, read_latency=60, clean=True, bootstrap_retries=5)
 
     updater.idle()
 #
 # if __name__ == '__main__':
-#     shop("633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg")
+#     main("633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg", "ENG")
