@@ -11,9 +11,11 @@ from telegram.ext import (MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
 
 from database import (orders_table, chatbots_table, carts_table,
-                      shop_customers_contacts_table)
+                      shop_customers_contacts_table, products_table,
+                      users_table)
 from helper_funcs.misc import delete_messages
 from modules.shop.user_side.cart import Cart
+from modules.shop.components.order import UserOrder, Product, AdminOrder
 
 
 logging.basicConfig(
@@ -181,8 +183,18 @@ class PurchaseBot(object):
     @staticmethod
     def order_finish(update, context):
         delete_messages(update, context, True)
-        # TODO ask about the status
-        orders_table.insert_one(
+        order = UserOrder(context, context.user_data["order"])
+        # Check products availability
+        for item in order.items:
+            if not item.item_exist:
+                update.callback_query.answer(
+                    "Some products has been removed from cart cuz "
+                    "that was deleted or sold. "
+                    "\nCheck your cart and try again",
+                    show_alert=True)
+                return Cart().back_to_cart(update, context)
+        # Create order
+        inserted_id = orders_table.insert_one(
             {**context.user_data["order"],
              **{"article": randint(10000, 99999),
                 "status": False,
@@ -192,40 +204,61 @@ class PurchaseBot(object):
                 # "name": update.effective_user.name,
                 "in_trash": False,
                 # "is_canceled": False
-                }})
-
+                }}).inserted_id
+        # Remove products from shop
+        for item in order.items_json:
+            new_fields = dict()
+            product = products_table.find_one({"_id": item["product_id"]})
+            if not product["unlimited"]:
+                new_fields["quantity"] = product["quantity"] - item["quantity"]
+                # if new_fields["quantity"] == 0:
+                #     new_fields["sold"] = True
+            if new_fields:
+                products_table.update_one({"_id": item["product_id"]},
+                                          {"$set": new_fields})
+        # Save contacts
         all_addresses = context.user_data["used_contacts"].get(
             "addresses", list())
         all_numbers = context.user_data["used_contacts"].get(
             "phone_numbers", list())
-
         address = context.user_data["order"]["address"]
         number = context.user_data["order"]["phone_number"]
-
         if address and address not in all_addresses:
             if len(all_addresses) > 5:
                 all_addresses.insert(0, address)
                 del all_addresses[-1]
             else:
                 all_addresses.append(address)
-
         if number not in all_numbers:
             if len(all_numbers) > 5:
                 all_numbers.insert(0, number)
                 del all_numbers[-1]
             else:
                 all_numbers.append(number)
-
         shop_customers_contacts_table.update_one(
             {"bot_id": context.bot.id,
              "user_id": update.effective_user.id},
             {"$set": {"phone_numbers": all_numbers,
                       "addresses": all_addresses}},
             upsert=True)
-
+        # Clear cart
         carts_table.update_one({"bot_id": context.bot.id,
                                 "user_id": update.effective_user.id},
                                {"$set": {"products": list()}})
+        # Send notification
+        # Send notification about new order to all admins
+        order = AdminOrder(context, inserted_id)
+        for admin in users_table.find({"bot_id": context.bot.id,
+                                       "is_admin": True}):
+            # Create notification text and send it.
+            text = ("🆕 <b>New Order</b>"
+                    + "\n<b>Order ID:</b> <code>{}</code>"
+                      "\n<b>From:</b> {}").format(
+                order.article, order.user_mention)
+
+            context.bot.send_message(chat_id=admin["chat_id"],
+                                     text=text,
+                                     parse_mode=ParseMode.HTML)
 
         context.bot.send_message(
             chat_id=update.effective_chat.id,

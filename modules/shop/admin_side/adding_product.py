@@ -142,6 +142,7 @@ class AddingProductHandler(object):
                 return SET_PRICE
         elif update.callback_query.data == "unlimited":
             context.user_data["new_product"].quantity = 0
+            context.user_data["new_product"].in_stock = 0
             context.user_data["new_product"].unlimited = True
 
         delete_messages(update, context, True)

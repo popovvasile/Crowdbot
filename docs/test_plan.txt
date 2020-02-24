@@ -1,3 +1,9 @@
+# TODO
+    * test shop for unsubscribers
+    * test shop(and other part of the bot) with big texts, many items in orders, many content and so on
+    * test shop(and other part of the bot) with Markdown and HTML tags in messages
+    * test shop product description (caption description)
+
 Список юзеров
 	[DONE] бан/разбан
 	[DONE] блок/разблок сообщения
@@ -33,3 +39,4 @@
 	* Добавление товара
 	* 
 	* 
+
