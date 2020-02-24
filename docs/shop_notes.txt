@@ -7,11 +7,16 @@ ONLINE/OFFLINE Donations
 Order ID-shnik  and state of Order
 убрать часть с фотками
 
+BUG: the backs for the user are leading to the admin panel
+1)check lenght of the texts and descriptions to avoid exceptions
+2)move the strings to languages.json and prepare it for Nikita
+3)check delete messages everywhere
+4)prepare the shop for online payments
 
 -TODO BUGS
     [DONE] При удалении категории - удаляются все товары - придумать(если есть заказы и если есть товары) и пофиксить
     [DONE] When adding numbers in different parts of the bot- write back that the introduced number is wrong
-    * Фича которая выводит в главное меню при рандомном тексте ведёт не адекватно в некторых меню бота
+    [DONE]  Фича которая выводит в главное меню при рандомном тексте ведёт не адекватно в некторых меню бота
          Когда на прайсе вводишь текст, а не число - кидает в главное меню и отказывают кнопки
     [DONE] изменении категории товара - ведёт в юзер шоп
 
@@ -19,16 +24,15 @@ Order ID-shnik  and state of Order
 -TODO ADMIN SIDE
     [DONE] category delete - при удалении если есть товары за категорией - уведомлять сколько товаров будут удалены
     [DONE] После создания шопа - не показывать кнопку бек, а сразу в меню переводить
-    * Показывать всю информацию о товаре во время добавления
+    [DONE] Показывать всю информацию о товаре во время добавления
     [DONE] edit самовывоз/доставка
     * Заказы Show orders to admin: paid/unpaid, executed/pending
     * Уведомления о заказах
     * Delete messages everywhere
-    * Changing shop currency - give current exchange rate and ask for the exchange rate then translate all prices
+    [DONE] Changing shop currency - give current exchange rate and ask for the exchange rate then translate all prices
     [DONE] При изменении address, description, currency - показывать текущие значения
-
     * Paid/unpaid and release the content or send a notification that the item has been shipped
-    * EDIT SHOP: Edit type, TOKEN only if there is one, Payment description if there is no token
+    [DONE] EDIT SHOP: Edit type, TOKEN only if there is one, Payment description if there is no token
     [DONE] Edit files in product
     [DONE] В списке товаров сделать caption, а не просто текст после фотки
     [DONE] Добаваление разного контента

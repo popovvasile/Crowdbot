@@ -36,7 +36,7 @@ class AddingProductHandler(object):
                 reply_markup=reply_markup))
         return SET_TITLE
 
-    def set_title(self, update: Update, context: CallbackContext):
+    def set_title(self, update: Update, context: CallbackContext):  # TODO HERE check strings sent by user
         context.user_data["new_product"] = Product(context)
         context.user_data["new_product"].name = update.message.text
         delete_messages(update, context, True)
@@ -65,7 +65,7 @@ class AddingProductHandler(object):
                 reply_markup=reply_markup)
         return SET_CATEGORY
 
-    def set_category(self, update: Update, context: CallbackContext):
+    def set_category(self, update: Update, context: CallbackContext):  # TODO HERE check strings sent by user
         delete_messages(update, context, True)
         category_list = categories_table.find({"bot_id": context.bot.id})
         if update.message:
@@ -102,7 +102,7 @@ class AddingProductHandler(object):
                 [back_btn("back_to_main_menu_btn", context)]]))
         return SET_PRICE
 
-    def set_price(self, update: Update, context: CallbackContext):
+    def set_price(self, update: Update, context: CallbackContext):# TODO HERE check floats sent by user- not too big
         if update.message:
             context.user_data["new_product"].quantity = int(
                 format(Price.fromstring(update.message.text).amount))
@@ -117,7 +117,7 @@ class AddingProductHandler(object):
             keyboards(context)["back_to_main_menu_keyboard"])
         return SET_DISCOUNT
 
-    def set_discount_price(self, update: Update, context: CallbackContext):
+    def set_discount_price(self, update: Update, context: CallbackContext): # TODO HERE check floats sent by user- not too big
         delete_messages(update, context, True)
         context.user_data["new_product"].price = float(
             format(Price.fromstring(update.message.text).amount, '.2f'))
@@ -127,7 +127,7 @@ class AddingProductHandler(object):
             keyboards(context)["back_to_main_menu_keyboard"])
         return ASK_DESCRIPTION
 
-    def ask_description(self, update: Update, context: CallbackContext):
+    def ask_description(self, update: Update, context: CallbackContext):# TODO HERE check floats sent by user- not too big
         delete_messages(update, context, True)
         discount_price = float(
             format(Price.fromstring(update.message.text).amount, '.2f'))
@@ -144,7 +144,7 @@ class AddingProductHandler(object):
             keyboards(context)["back_to_main_menu_keyboard"])
         return SET_DESCRIPTION
 
-    def set_description(self, update: Update, context: CallbackContext):
+    def set_description(self, update: Update, context: CallbackContext):# TODO HERE check strings sent by user
         delete_messages(update, context, True)
         context.user_data["new_product"].description = update.message.text
         context.user_data["new_product"].send_full_template(
