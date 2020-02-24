@@ -25,7 +25,7 @@ BUG: the backs for the user are leading to the admin panel
     [DONE] edit самовывоз/доставка
     * Заказы Show orders to admin: paid/unpaid, executed/pending
     * Уведомления о заказах
-    * Delete messages everywhere
+    [DONE] Delete messages everywhere
     [DONE] Changing shop currency - give current exchange rate and ask for the exchange rate then translate all prices
     [DONE] При изменении address, description, currency - показывать текущие значения
     * Paid/unpaid and release the content or send a notification that the item has been shipped
