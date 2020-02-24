@@ -23,12 +23,12 @@ Order ID-shnik  and state of Order
     * После создания шопа - не показывать кнопку бек, а сразу в меню переводить
     * Показывать всю информацию о товаре во время добавления
     * edit самовывоз/доставка/both
-    * Заказы Show orders to admin: paid/unpaid, executed/pending
-    * Уведомления о заказах
     * Changing shop currency - give current exchange rate and ask for the exchange rate then translate all prices
     * При изменении address, description, currency - показывать текущие значения
     * Paid/unpaid and release the content or send a notification that the item has been shipped
     * EDIT SHOP: Edit type, TOKEN only if there is one, Payment description if there is no token
+    [Done] Заказы Show orders to admin: paid/unpaid, executed/pending
+    [Done] Уведомления о заказах
     [DONE] Edit files in product
     [DONE] В списке товаров сделать caption, а не просто текст после фотки
     [DONE] Добаваление разного контента
@@ -43,26 +43,25 @@ Order ID-shnik  and state of Order
         DESCRIPTION LENGTH VALIDATION
         SHARE PHONE NUMBER
         PHONE NUMBER VALIDATION
-        SHARE GEO POSITION
     [DONE] Отображение разного контента
 
 -TODO BOTH
-    * Отображение комментария клиента в заказах
     * Discount price обработка()
     * Check messages length in templates and captions - to avoid exceptions
     * Добавить артукулы в заказы и товары
         https://www.mongodb.com/blog/post/generating-globally-unique-identifiers-for-use-with-mongodb
+    [DONE] Отображение комментария клиента в заказах
     [DONE] Кнопка "Просмотр" на товарах(если большое описание или много контента)
 
 
 
-
-
--TODO FEATURES-USER SIDE
+-TODO-FEATURES USER SIDE
     * Отмена заказа
     * Предупреждать юзера о всех изменениях в корзине, заказах и тд.
+    * Offline order creation:
+        SHARE GEO POSITION
 
--TODO FEATURES-ADMIN SIDE
+-TODO-FEATURES ADMIN SIDE
     * Комментарий админа
     * ексель добваление товара
     * вывести текущий товар в ексель
@@ -73,25 +72,24 @@ Order ID-shnik  and state of Order
     * При создании товара кнопки - [[Отменить заказ], [Назад]], кнопка "Назад" переводит в предыдущие меню
     * Возможность выбрать титульный файл для товара
     * small pictures in the "edit item content" menu
+    * В описание магазина можно добавить файлы
 
--TODO FEATURES-BOTH
+-TODO-FEATURES BOTH
     * Categories in categories
     * https://invitemember.com/ платный контент в виде групп и каналов
     * Поиск по артикулам(товары, заказы)
+    * timed discount price
+    * personal discount price
+    * e-bay auction
+    * PROMO CODE
 
 
-TODO TESTING
-    * test shop for unsubscribers
-    * test shop(and other part of the bot) with big texts, many items in orders, many content and so on
-    * test shop(and other part of the bot) with Markdown and HTML tags in messages
-    * TODO test product description (caption description)
+"""Offline order statuses:
+    * "Pending" (When order created)
+        - at this time order items can be sold to another customers
 
-    """Offline order statuses:
-        * "Pending" (When order created)
-            - at this time order items can be sold to another customers
+    * "InProcess" (When order wait for customer or on the delivery way)
+        - items disappeared from the shop. Wait for the cancel or finish
 
-        * "InProcess" (When order wait for customer or on the delivery way)
-            - items disappeared from the shop. Wait for the cancel or finish
-
-        * "Done" (When order circle finished)
-    """
+    * "Done" (When order circle finished)
+"""

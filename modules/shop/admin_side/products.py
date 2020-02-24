@@ -1,6 +1,7 @@
 import logging
 from pprint import pprint
 
+from bson.objectid import ObjectId
 from telegram import (Update, ParseMode, InlineKeyboardButton,
                       InlineKeyboardMarkup)
 from telegram.ext import (ConversationHandler, CallbackQueryHandler,
@@ -14,7 +15,8 @@ from modules.shop.helper.keyboards import (
 from modules.shop.components.product import (Product,
                                              MAX_TEMP_DESCRIPTION_LENGTH)
 from modules.shop.admin_side.welcome import Welcome
-from database import products_table, categories_table, chatbots_table
+from database import (products_table, categories_table, chatbots_table,
+                      orders_table)
 
 
 logging.basicConfig(
@@ -24,6 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 class ProductsHelper(object):
+    # TODO put this logic to the components/product -> class AdminProduct
     """All "short" templates must be passed to send_short_template() method.
     And all "full" templates must be passed to send_full_template() method.
     """
@@ -41,7 +44,12 @@ class ProductsHelper(object):
             InlineKeyboardButton(
                 text=context.bot.lang_dict["shop_admin_edit_btn"],
                 callback_data=f"edit_product/{product_obj.id_}"))
-        if not product_obj.order_ids:
+        orders = orders_table.find(
+                {"bot_id": context.bot.id,
+                 "status": False,
+                 "in_trash": False,
+                 "items.product_id": product_obj.id_})
+        if not orders.count():
             reply_markup[0].append(
                 InlineKeyboardButton(
                     text=context.bot.lang_dict["shop_admin_to_trash_btn"],
@@ -52,20 +60,63 @@ class ProductsHelper(object):
     def admin_short_template(context, product_obj: Product) -> str:
         """Admin short text representation of the product"""
         shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
+        # List of the NEW(status=False) orders
+        new_orders = orders_table.find(
+            {"bot_id": context.bot.id,
+             "status": False,
+             "in_trash": False,
+             "items.product_id": product_obj.id_})
+
+        # Quantity string
         if product_obj.unlimited is True:
             quantity = "Unlimited"
         else:
             quantity = product_obj.quantity
-        return context.bot.lang_dict[
+
+        # Admin product status string.
+        # Product was deleted
+        if product_obj.in_trash:
+            status = "🗑 Deleted"
+        # At least on item of the product on sale
+        elif product_obj.on_sale:
+            status = "✅ On Sale"
+        # Product not on sale because it is in the NEW order
+        elif new_orders.count():
+            status = f"🕐 {new_orders.count()} unfinished order(s)"
+        else:
+            status = "💸 Sold"
+
+        template = context.bot.lang_dict[
             "shop_admin_product_template"].format(
             product_obj.name,
-            True if not product_obj.sold else False,
+            # True if not product_obj.sold else False,
+            status,
             product_obj.category["name"],
             product_obj.price,
             shop["currency"],
             product_obj.discount_price,
             shop["currency"],
             quantity)
+
+        orders_string = ""
+        if new_orders.count():
+            # How many items wait for the customers now
+            orders_string += "\n\nNot finished orders:\n"
+            for order in new_orders:
+                product_items_count = next(
+                    item for item in order["items"]
+                    if item["product_id"] == product_obj.id_)["quantity"]
+
+                if order["shipping"]:
+                    emoji = "🚚"
+                else:
+                    emoji = "🖐"
+
+                orders_string += (
+                    "_Order ID:_ `{}` {} x`{}`\n\n".format(
+                        order["article"], emoji, product_items_count))
+            template += orders_string
+        return template
 
     @staticmethod
     def admin_full_template(context, product_obj: Product) -> str:
@@ -109,7 +160,8 @@ class ProductsHandler(ProductsHelper):
             context.user_data["page"] = 1
 
         all_products = products_table.find({
-            "in_trash": False, "bot_id": context.bot.id}).sort([["_id", -1]])
+            "in_trash": False,
+            "bot_id": context.bot.id}).sort([["last_modify_timestamp", -1]])
         return self.products_layout(
             update, context, all_products, PRODUCTS)
 

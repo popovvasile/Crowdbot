@@ -106,11 +106,14 @@ class AddingProductHandler(object):
 
     def set_price(self, update: Update, context: CallbackContext):
         if update.message:
-            context.user_data["new_product"].quantity = int(
+            quantity = int(
                 format(Price.fromstring(update.message.text).amount))
+            context.user_data["new_product"].quantity = quantity
+            context.user_data["new_product"].in_stock = quantity
             context.user_data["new_product"].unlimited = False
         elif update.callback_query.data == "unlimited":
             context.user_data["new_product"].quantity = 0
+            context.user_data["new_product"].in_stock = 0
             context.user_data["new_product"].unlimited = True
 
         delete_messages(update, context, True)
