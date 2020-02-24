@@ -8,9 +8,6 @@ Order ID-shnik  and state of Order
 убрать часть с фотками
 
 BUG: the backs for the user are leading to the admin panel
-1)check lenght of the texts and descriptions to avoid exceptions
-2)move the strings to languages.json and prepare it for Nikita
-3)check delete messages everywhere
 4)prepare the shop for online payments
 
 -TODO BUGS

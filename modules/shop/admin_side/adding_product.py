@@ -16,9 +16,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 START_ADD_PRODUCT, ONLINE_PAYMENT, \
-SET_TITLE, SET_CATEGORY, SET_PRICE, SET_DISCOUNT, \
-ASK_DESCRIPTION, SET_DESCRIPTION, SET_QUANTITY, CONFIRM_ADDING, \
-ADDING_CONTENT, FINISH_ADDING = range(12)
+    SET_TITLE, SET_CATEGORY, SET_PRICE, SET_DISCOUNT, \
+    ASK_DESCRIPTION, SET_DESCRIPTION, SET_QUANTITY, CONFIRM_ADDING, \
+    ADDING_CONTENT, FINISH_ADDING = range(12)
 
 
 # EDIT WHAT- CONTENT OR PRODUCT
@@ -30,15 +30,24 @@ class AddingProductHandler(object):
                                   callback_data="back_to_main_menu")]]
         reply_markup = InlineKeyboardMarkup(buttons)
         context.user_data["to_delete"].append(
-            context.bot.send_message(
+            context.user_data["to_delete"].append(context.bot.send_message(
                 chat_id=update.effective_chat.id,
-                text="Introduce the name of your new product",
-                reply_markup=reply_markup))
+                text=context.bot.lang_dict["shop_admin_product_title"],
+                reply_markup=reply_markup)))
         return SET_TITLE
 
-    def set_title(self, update: Update, context: CallbackContext):  # TODO HERE check strings sent by user
+    def set_title(self, update: Update, context: CallbackContext):
         context.user_data["new_product"] = Product(context)
         context.user_data["new_product"].name = update.message.text
+        if len(update.message.text) <= 4096:
+            context.user_data["new_product"].name = update.message.text
+        else:
+            context.user_data["to_delete"].append(context.bot.send_message(
+                chat_id=update.message.chat_id,
+                text=context.bot.lang_name["shop_admin_name_too_long"],
+                reply_markup=InlineKeyboardMarkup([
+                             [back_btn("back_to_main_menu_btn", context)]])))
+            return SET_TITLE
         delete_messages(update, context, True)
         category_list = categories_table.find({"bot_id": context.bot.id})
         if category_list.count() > 0:
@@ -58,22 +67,30 @@ class AddingProductHandler(object):
                     text=context.bot.lang_dict["back_button"],
                     callback_data="back_to_main_menu")]]
             reply_markup = InlineKeyboardMarkup(buttons)
-            context.bot.send_message(
+            context.user_data["to_delete"].append(context.bot.send_message(
                 chat_id=update.message.chat_id,
                 text="You didn't set any categories yet.\n"
                      "Please write a new category",
-                reply_markup=reply_markup)
+                reply_markup=reply_markup))
         return SET_CATEGORY
 
-    def set_category(self, update: Update, context: CallbackContext):  # TODO HERE check strings sent by user
+    def set_category(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         category_list = categories_table.find({"bot_id": context.bot.id})
         if update.message:
-            categories_table.insert_one({
-                "name": update.message.text,
-                "query_name": update.message.text,
-                "bot_id": context.bot.id
-            })
+            if len(update.message.text) <= 4096:
+                categories_table.insert_one({
+                    "name": update.message.text,
+                    "query_name": update.message.text,
+                    "bot_id": context.bot.id
+                })
+            else:
+                context.user_data["to_delete"].append(context.bot.send_message(
+                    chat_id=update.message.chat_id,
+                    text=context.bot.lang_name["shop_admin_category_too_long"],
+                    reply_markup=InlineKeyboardMarkup([
+                                 [back_btn("back_to_main_menu_btn", context)]])))
+            return SET_CATEGORY
         if category_list.count() > 0:
             keyboard = create_keyboard(
                 [InlineKeyboardButton(
@@ -94,48 +111,75 @@ class AddingProductHandler(object):
                 update.callback_query.data.split("/")[1])
         context.user_data["new_product"].send_full_template(
             update, context,
-            "Write the quantity of your product. "
-            "How many copies do you want to sell?\nPress 'Unlimited' to skip",
+            context.bot.lang_dict["shop_admin_write_quantity"],
             InlineKeyboardMarkup([
-                [InlineKeyboardButton(text="Unlimited",
+                [InlineKeyboardButton(text=context.bot.lang_dict["shop_admin_set_unlimited"],
                                       callback_data="unlimited")],
                 [back_btn("back_to_main_menu_btn", context)]]))
         return SET_PRICE
 
-    def set_price(self, update: Update, context: CallbackContext):# TODO HERE check floats sent by user- not too big
+    def set_price(self, update: Update, context: CallbackContext):
         if update.message:
-            context.user_data["new_product"].quantity = int(
-                format(Price.fromstring(update.message.text).amount))
-            context.user_data["new_product"].unlimited = False
+            if len(update.message.text) <= 10:
+                context.user_data["new_product"].quantity = int(
+                    format(Price.fromstring(update.message.text).amount))
+                context.user_data["new_product"].unlimited = False
+            else:
+                context.user_data["to_delete"].append(context.bot.send_message(
+                    chat_id=update.message.chat_id,
+                    text=context.bot.lang_dict["shop_admin_quantity_too_big"],
+                    reply_markup=InlineKeyboardMarkup([
+                                 [back_btn("back_to_main_menu_btn", context)]])))
+                return SET_PRICE
         elif update.callback_query.data == "unlimited":
             context.user_data["new_product"].quantity = 0
             context.user_data["new_product"].unlimited = True
 
         delete_messages(update, context, True)
         context.user_data["new_product"].send_full_template(
-            update, context, "Write your price",
+            update, context, context.bot.lang_dict["shop_admin_write_your_price"],
             keyboards(context)["back_to_main_menu_keyboard"])
         return SET_DISCOUNT
 
-    def set_discount_price(self, update: Update, context: CallbackContext): # TODO HERE check floats sent by user- not too big
+    def set_discount_price(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
+        if update.message:
+            if len(update.message.text) <= 7:
+                context.user_data["new_product"].price = float(
+                    format(Price.fromstring(update.message.text).amount, '.2f'))
+                context.user_data["new_product"].unlimited = False
+            else:
+                context.user_data["to_delete"].append(context.bot.send_message(
+                    chat_id=update.message.chat_id,
+                    text=context.bot.lang_dict["shop_admin_price_too_big"],
+                    reply_markup=InlineKeyboardMarkup([
+                                 [back_btn("back_to_main_menu_btn", context)]])))
+                return SET_DISCOUNT
         context.user_data["new_product"].price = float(
             format(Price.fromstring(update.message.text).amount, '.2f'))
         context.user_data["new_product"].send_full_template(
             update, context,
-            "Write a discount price for this product. Send 0 to skip",
+            context.bot.lang_dict["shop_admin_write_your_discount_price"],
             keyboards(context)["back_to_main_menu_keyboard"])
         return ASK_DESCRIPTION
 
-    def ask_description(self, update: Update, context: CallbackContext):# TODO HERE check floats sent by user- not too big
+    def ask_description(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        discount_price = float(
-            format(Price.fromstring(update.message.text).amount, '.2f'))
+
+        if len(update.message.text) <= 10:
+            discount_price = float(
+                format(Price.fromstring(update.message.text).amount, '.2f'))
+        else:
+            context.user_data["to_delete"].append(context.bot.send_message(
+                chat_id=update.message.chat_id,
+                text=context.bot.lang_dict["shop_admin_discount_price_too_big"],
+                reply_markup=InlineKeyboardMarkup([
+                    [back_btn("back_to_main_menu_btn", context)]])))
+            return ASK_DESCRIPTION
         if discount_price >= context.user_data["new_product"].price:
             context.user_data["new_product"].send_full_template(
                 update, context,
-                "Your discount price is bigger than the price of the product "
-                "itself. \n""Please write another discount price",
+                context.bot.lang_dict["shop_admin_discount_bigger_than_price"],
                 keyboards(context)["back_to_main_menu_keyboard"])
             return ASK_DESCRIPTION
         context.user_data["new_product"].discount_price = discount_price
@@ -144,14 +188,12 @@ class AddingProductHandler(object):
             keyboards(context)["back_to_main_menu_keyboard"])
         return SET_DESCRIPTION
 
-    def set_description(self, update: Update, context: CallbackContext):# TODO HERE check strings sent by user
+    def set_description(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         context.user_data["new_product"].description = update.message.text
         context.user_data["new_product"].send_full_template(
             update, context,
-            "Add any files about this product: documents, images or videos."
-            "\n_First file will be title file for the product_"
-            "\nFiles 0/10",
+            context.bot.lang_dict["shop_admin_files_adding"],
             keyboards(context)["back_to_main_menu_keyboard"])
         return ADDING_CONTENT
 
@@ -211,7 +253,7 @@ class AddingProductHandler(object):
             text = context.bot.lang_dict["shop_admin_send_more_photo"].format(
                 len(context.user_data["new_product"].content))
         else:
-            text = "Press 'Continue'"
+            text = context.bot.lang_dict["shop_admin_press_continue"]
         context.user_data["new_product"].send_full_template(
             update, context,
             text=text,
@@ -229,13 +271,7 @@ class AddingProductHandler(object):
         category = categories_table.find_one({"_id": context.user_data["new_product"].category_id})["name"]
         context.user_data["new_product"].send_full_template(
             update, context,
-            "Confirm adding product:\n"
-            "Name: {name}\n"
-            "Price: {price} {currency}\n"
-            "Discount price: {discount_price} {currency}\n"
-            "Quantity: {quantity}\n"
-            "Category: {category}\n"
-            "Description: {description}\n".format(
+            context.bot.lang_dict["shop_admin_product_description"].format(
                 currency=currency,
                 name=context.user_data["new_product"].name,
                 price=context.user_data["new_product"].price,
@@ -269,6 +305,8 @@ ADD_PRODUCT_HANDLER = ConversationHandler(
 
         SET_PRICE: [CallbackQueryHandler(AddingProductHandler().set_price,
                                          pattern=r"unlimited"),
+                    MessageHandler(Filters.regex(r'(\d+\.\d{1,2})|(\d+\,\d{1,2})'),
+                                   AddingProductHandler().set_discount_price),
                     MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
                                    AddingProductHandler().set_price),
                     MessageHandler(Filters.regex(r"^((?!@).)*$"),
