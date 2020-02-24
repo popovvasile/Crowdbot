@@ -4,7 +4,8 @@ from telegram.ext import (ConversationHandler, CallbackQueryHandler,
                           CallbackContext, Filters, MessageHandler)
 
 from modules.shop.admin_side.welcome import Welcome
-from modules.shop.components.product import Product
+from modules.shop.components.product import (Product,
+                                             MAX_TEMP_DESCRIPTION_LENGTH)
 from helper_funcs.misc import delete_messages
 from price_parser import Price
 from database import categories_table, chatbots_table
@@ -76,9 +77,8 @@ class AddingProductHandler(object):
 
     def set_category(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        category_list = categories_table.find({"bot_id": context.bot.id})
         if update.message:
-            if len(update.message.text) <= 4096:
+            if len(update.message.text) <= 100:
                 categories_table.insert_one({
                     "name": update.message.text,
                     "query_name": update.message.text,
@@ -90,7 +90,10 @@ class AddingProductHandler(object):
                     text=context.bot.lang_name["shop_admin_category_too_long"],
                     reply_markup=InlineKeyboardMarkup([
                                  [back_btn("back_to_main_menu_btn", context)]])))
-            return SET_CATEGORY
+                return SET_CATEGORY
+
+        category_list = categories_table.find({"bot_id": context.bot.id})
+
         if category_list.count() > 0:
             keyboard = create_keyboard(
                 [InlineKeyboardButton(
@@ -296,6 +299,12 @@ class AddingProductHandler(object):
         delete_messages(update, context, True)
         currency = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]["currency"]
         category = categories_table.find_one({"_id": context.user_data["new_product"].category_id})["name"]
+        if (len(context.user_data["new_product"].description)
+                > MAX_TEMP_DESCRIPTION_LENGTH):
+            description = "Description above"
+        else:
+            description = context.user_data["new_product"].description
+
         context.user_data["new_product"].send_full_template(
             update, context,
             context.bot.lang_dict["shop_admin_product_description"].format(
@@ -305,7 +314,8 @@ class AddingProductHandler(object):
                 discount_price=context.user_data["new_product"].discount_price,
                 quantity=context.user_data["new_product"].quantity,
                 category=category,
-                description=context.user_data["new_product"].description),
+                # description=context.user_data["new_product"].description),
+                description=description),
             keyboards(context)["confirm_add_product"])
         return FINISH_ADDING
 
