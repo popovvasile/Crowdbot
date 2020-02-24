@@ -10,7 +10,7 @@ from telegram.ext import ConversationHandler, CallbackQueryHandler
 from database import donations_table, chatbots_table
 from helper_funcs.helper import get_help
 from helper_funcs.misc import delete_messages, lang_timestamp
-from helper_funcs.pagination import Pagination, set_page_key
+from helper_funcs.pagination import Pagination  # , set_page_key
 from modules.statistic.statistic_main import back_to_statistic_main_menu
 
 
@@ -113,7 +113,16 @@ class DonationStatistic(object):
 
     def send_donation_history(self, update, context):
         delete_messages(update, context, True)
-        set_page_key(update, context, "show_history")
+        # set_page_key(update, context, "show_history")
+        # Set current page integer in the user_data.
+        if update.callback_query.data.startswith(
+                "donation_history_pagination"):
+            context.user_data["page"] = int(
+                update.callback_query.data.replace(
+                    "donation_history_pagination_", ""))
+        if (not context.user_data.get("page")
+                or update.callback_query.data == "show_history"):
+            context.user_data["page"] = 1
         all_donations = donations_table.find(
             {"bot_id": context.bot.id}).sort([["_id", -1]])
         per_page = 5
@@ -131,7 +140,7 @@ class DonationStatistic(object):
                     text=context.bot.lang_dict["no_donations"],
                     reply_markup=InlineKeyboardMarkup(back_button)))
         else:
-            pagination = Pagination(context, per_page, all_donations)
+            pagination = Pagination(all_donations, context.user_data["page"])
             page_content = (
                 context.bot.lang_dict["donation_history_title"] +
                 "\n\n".join(
@@ -141,7 +150,7 @@ class DonationStatistic(object):
                         donation['amount']/100, donation['currency'],
                         str(donation['timestamp_paid']).split('.')[0])
                         for donation in pagination.page_content()]))
-            pagination.send_keyboard(update, back_button, page_content)
+            pagination.send_keyboard(update, context, back_button)
         return HISTORY
 
     @staticmethod
@@ -191,7 +200,7 @@ DONATION_STATISTIC_HANDLER = ConversationHandler(
         HISTORY: [
             CallbackQueryHandler(
                 callback=DonationStatistic().send_donation_history,
-                pattern="^[0-9]+$"),
+                pattern="donation_history_pagination"),
             CallbackQueryHandler(
                 callback=back_to_statistic_main_menu,
                 pattern="back_to_statistic_main_menu"),

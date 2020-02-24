@@ -14,8 +14,7 @@ class Order(object):
         self.context = context
         self._id = order.get("_id")
         self.article = order.get("article")
-        # TODO admin can change the status of the order- executed or not
-        self.status = order.get("status")
+        self.status = order.get("status")  # True or False
         self.bot_id = order.get("bot_id") or context.bot.id
         self.user_id = order.get("user_id")
         self.creation_timestamp = str(
@@ -31,128 +30,64 @@ class Order(object):
         # self.name = order.get("name")
         # self.is_canceled = order.get("is_canceled")
 
-        self.items = [OrderItem(self.context, order_item)
-                      for order_item in self.items_json]
-        self.all_items_exists = not any(item.item_exist is False
-                                        for item in self.items)
-        # Get chat member to get user information
-        # because database data can be incorrect
-        user = context.bot.get_chat_member(self.user_id, self.user_id).user
-        # Create user html mention
-        if user.username:
-            self.user_mention = user_mention(user.username, user.full_name)
+    def create_fields(self, context=None, obj=None):
+        """Same as __init__ method"""
+        if obj:
+            order = get_obj(orders_table, obj)
         else:
-            self.user_mention = user.mention_html()
+            order = get_obj(orders_table, self._id)
+        self.context = context or self.context
+        self._id = order.get("_id")
+        self.article = order.get("article")
+        self.status = order.get("status")  # True or False
+        self.bot_id = order.get("bot_id") or context.bot.id
+        self.user_id = order.get("user_id")
+        self.creation_timestamp = str(
+            order.get("creation_timestamp", ".")).split(".")[0]
+        self.in_trash = order.get("in_trash")
+        self.total_price = order.get("total_price")
+        self.items_json = order.get("items", list())
+        self.currency = order.get("currency")
+        self.shipping = order.get("shipping")
+        self.user_comment = order.get("user_comment")
+        self.phone_number = order.get("phone_number")
+        self.address = order.get("address")
+        # self.name = order.get("name")
+        # self.is_canceled = order.get("is_canceled")
 
-    """@property
-    def template(self):
-        return (
-            self.context.bot.lang_dict["shop_admin_order_status_new"]
-            if self.status is False
-            else (
-                     self.context.bot.lang_dict[
-                         "shop_admin_order_status_true"])
-                 + "\n"
-                 + self.context.bot.lang_dict["shop_admin_order_temp"].format(
-                self.article,
-                self.creation_timestamp,
-                self.str_status,
-                self.user_mention,
-                self.phone_number,
-                self.total_price,
-                self.str_order_items))"""
-    """return (
-            self.context.bot.lang_dict["shop_admin_order_status_new"]
-            if self.status is False
-            else (
-                self.context.bot.lang_dict["shop_admin_order_status_true"]) 
-                + "\n" 
-                 + self.context.bot.lang_dict["shop_admin_order_temp"].format(
-                   self.article,
-                   self.creation_timestamp,
-                   self.str_status,
-                   self.user_mention,
-                   self.phone_number,
-                   self.total_price,
-                   self.str_order_items))"""
+    @property
+    def items(self):
+        return [OrderItem(self.context, order_item)
+                for order_item in self.items_json]
 
-    """@property
-    def str_status(self):
-        return self.context.bot.lang_dict["shop_admin_order_status_true"] if self.status is True \
-            else self.context.bot.lang_dict["shop_admin_some_product_not_exist"] \
-            if not self.all_items_exists \
-            else self.context.bot.lang_dict["shop_admin_empty_order"] if not len(self.items) \
-            else self.context.bot.lang_dict["shop_admin_all_products_exist"]"""
+    @property
+    def all_items_exists(self):
+        return not any(item.item_exist is False
+                       for item in self.items)
+
+    @property
+    def id_(self):
+        return self._id
 
     # todo refactor for long order items texts
-    @property
-    def str_order_items(self):
+    def str_order_items(self, currency=None):
+        if not currency:
+            currency = chatbots_table.find_one(
+                {"bot_id": self.context.bot.id})["shop"]["currency"]
         return "\n".join(
-            [f'(article: {item.article} )'
-             + (item.item_emoji if not self.status else "")
+            ["{} - <code>{}</code>\n"
+             "x{} - <code>{}</code> {}".format(
+                item.article,
+                item.name,
+                item.order_quantity,
+                item.price,
+                currency)
+             # + (item.item_emoji if not self.status else "")
              for item in self.items])
 
-    """@property
-    def single_keyboard(self):
-        kb = [[]]
-        if self.in_trash:
-            kb[0].append(InlineKeyboardButton(
-                            text=self.context.bot.lang_dict["shop_admin_restore_btn"],
-                            callback_data=f"restore/{self._id}"))
-            return InlineKeyboardMarkup(kb)
-
-        if self.status is False:
-            if self.all_items_exists and len(self.items):
-                kb[0].append(InlineKeyboardButton(
-                                text=self.context.bot.lang_dict["shop_admin_to_done_btn"],
-                                callback_data=f"to_done/{self._id}"))
-            else:
-                kb[0].append(InlineKeyboardButton(
-                                text=self.context.bot.lang_dict["shop_admin_edit_btn"],
-                                callback_data=f"edit/{self._id}"))
-
-            kb[0].append(InlineKeyboardButton(
-                            text=self.context.bot.lang_dict["shop_admin_to_trash_btn"],
-                            callback_data=f"to_trash/{self._id}"))
-
-        elif self.status is True:
-            kb[0].append(InlineKeyboardButton(
-                            text=self.context.bot.lang_dict["shop_admin_cancel_btn"],
-                            callback_data=f"cancel_order/{self._id}"))
-        return InlineKeyboardMarkup(kb)"""
-
-    """def send_short_template(self, update, context, kb=None):
-        context.user_data["to_delete"].append(
-            context.bot.send_message(
-                chat_id=update.effective_chat.id,
-                text=self.template,
-                reply_markup=kb if kb else self.single_keyboard,
-                parse_mode=ParseMode.MARKDOWN))"""
-
-    def send_full_template(self, update, context, text, kb, delete_kb=None):
-        context.user_data["to_delete"].append(
-            context.bot.send_message(
-                chat_id=update.effective_chat.id,
-                text=self.template,
-                parse_mode=ParseMode.MARKDOWN))
-
-        # PAGINATION OF ORDER ITEMS
-        # all_data = [item for item in self.items]
-        pagination = Pagination(
-            self.items_json, per_page=3,
-            page=context.user_data["item_page"])
-        for item in pagination.page_content():
-            OrderItem(self.context, item).send_template(
-                update, context, delete_kb=delete_kb)
-        pagination.send_keyboard(update, context)
-        context.user_data["to_delete"].append(
-            context.bot.send_message(chat_id=update.effective_chat.id,
-                                     text=text, reply_markup=kb,
-                                     parse_mode=ParseMode.MARKDOWN))
-
-    def update(self, json=None):
+    def update(self, json):
         orders_table.update_one({"_id": self._id}, {"$set": json})
-        self.__init__(self._id)
+        self.create_fields(self.context, self._id)
 
     # TODO CODE FROM SHOP-API - REFORMAT
     """def change_status(self, args):
@@ -252,108 +187,102 @@ class Order(object):
             abort(400, "Order is done and can't be deleted")
 """
 
-    """def remove_item(self, item_id):
-        resp = requests.post(
-            f"{conf['API_URL']}/order/{self._id}/edit_items",
-            json={"id_to_remove": int(item_id)})
-        if resp.status_code == 200:
-            self.__init__(resp.json())
-        else:
-            raise RequestException
-
-    def add_item(self, item: dict):
-        resp = requests.post(
-            f"{conf['API_URL']}/order/{self._id}/edit_items",
-            json={"to_add": [item]})
-        if resp.status_code == 200:
-            self.__init__(resp.json())
-        else:
-            raise RequestException
-
-    def change_status(self, json):
-        resp = requests.patch(
-            f"{conf['API_URL']}/order/{self._id}",
-            json=json)
-        if resp.status_code == 200:
-            self.__init__(resp.json())
-        else:
-            raise RequestException"""
-
-    def refresh(self):
-        self.__init__(self._id)
-
 
 class AdminOrder(Order):
     def __init__(self, context, obj: (ObjectId, dict, str) = None):
         super(AdminOrder, self).__init__(context, obj)
 
     @property
-    def template(self):
-        if self.status:
-            template = self.context.bot.lang_dict[
-                "shop_admin_order_status_true"]
-        else:
-            template = self.context.bot.lang_dict[
-                "shop_admin_order_status_new"]
+    def user_mention(self):
+        mention = ""
+        if self.user_id:
+            user = self.context.bot.get_chat_member(self.user_id,
+                                                    self.user_id).user
+            # Create user html mention
+            if user.username:
+                mention = user_mention(user.username, user.full_name)
+            else:
+                mention = user.mention_html()
+        return mention
 
-        template += (
+    @property
+    def template(self):
+        currency = chatbots_table.find_one(
+            {"bot_id": self.context.bot.id})["shop"]["currency"]
+
+        template = (
             "\n" + self.context.bot.lang_dict["shop_admin_order_temp"].format(
+                self.str_status,
                 self.article,
                 self.creation_timestamp,
-                self.str_status,
+                # self.str_product_status,
                 self.user_mention,
                 self.phone_number,
+                self.user_comment,
                 self.total_price,
-                self.str_order_items))
+                currency,
+                self.str_order_items(currency)))
         return template
+
+    # @property
+    # def str_product_status(self):
+    #     if self.status is True:
+    #         string = self.context.bot.lang_dict[
+    #             "shop_admin_order_status_true"]
+    #     elif not self.all_items_exists:
+    #         string = self.context.bot.lang_dict[
+    #             "shop_admin_some_product_not_exist"]
+    #     elif not len(self.items):
+    #         string = self.context.bot.lang_dict[
+    #             "shop_admin_empty_order"]
+    #     else:
+    #         string = self.context.bot.lang_dict[
+    #             "shop_admin_all_products_exist"]
+    #     return string
 
     @property
     def str_status(self):
-        return self.context.bot.lang_dict[
-            "shop_admin_order_status_true"] if self.status is True \
-            else self.context.bot.lang_dict[
-            "shop_admin_some_product_not_exist"] \
-            if not self.all_items_exists \
-            else self.context.bot.lang_dict[
-            "shop_admin_empty_order"] if not len(self.items) \
-            else self.context.bot.lang_dict["shop_admin_all_products_exist"]
-
-    @property
-    def single_keyboard(self):
-        kb = [[]]
         if self.in_trash:
-            kb[0].append(InlineKeyboardButton(
-                text=self.context.bot.lang_dict["shop_admin_restore_btn"],
-                callback_data=f"restore/{self._id}"))
-            return InlineKeyboardMarkup(kb)
+            string = "❌ Canceled"
+        elif self.status:
+            string = self.context.bot.lang_dict[
+                "shop_admin_order_status_true"]
+        else:
+            string = self.context.bot.lang_dict["shop_admin_order_status_new"]
 
-        if self.status is False:
-            if self.all_items_exists and len(self.items):
-                kb[0].append(InlineKeyboardButton(
-                    text=self.context.bot.lang_dict["shop_admin_to_done_btn"],
-                    callback_data=f"to_done/{self._id}"))
-            else:
-                kb[0].append(InlineKeyboardButton(
-                    text=self.context.bot.lang_dict["shop_admin_edit_btn"],
-                    callback_data=f"edit/{self._id}"))
+        if self.shipping:
+            string += f"\n🚚 Delivery to <code>{self.address}</code>"
+        else:
+            shop_address = chatbots_table.find_one(
+                {"bot_id": self.context.bot.id})["shop"]["address"]
+            string += f"\n🖐 Pick up <code>{shop_address}<code>"
+        return string
 
-            kb[0].append(InlineKeyboardButton(
-                text=self.context.bot.lang_dict["shop_admin_to_trash_btn"],
-                callback_data=f"to_trash/{self._id}"))
-
-        elif self.status is True:
-            kb[0].append(InlineKeyboardButton(
-                text=self.context.bot.lang_dict["shop_admin_cancel_btn"],
-                callback_data=f"cancel_order/{self._id}"))
-        return InlineKeyboardMarkup(kb)
-
-    def send_short_template(self, update, context, reply_markup=None):
+    def send_short_template(self, update, context,
+                            text="", reply_markup=None):
         context.user_data["to_delete"].append(
             context.bot.send_message(
                 chat_id=update.effective_chat.id,
-                text=self.template,
-                reply_markup=reply_markup if reply_markup
-                else self.single_keyboard,
+                text=self.template + "\n\n" + text,
+                reply_markup=reply_markup,
+                parse_mode=ParseMode.HTML))
+
+    def send_full_template(self, update, context, text="", reply_markup=None,
+                           item_reply_markup=None):
+        # PAGINATION OF ORDER ITEMS
+        pagination = Pagination(
+            self.items_json, page=context.user_data["item_page"])
+        for item in pagination.page_content():
+            OrderItem(self.context, item).send_template(
+                update, context, reply_markup=item_reply_markup)
+        pagination.send_keyboard(update, context,
+                                 page_prefix="admin_order_item_pagination")
+
+        context.user_data["to_delete"].append(
+            context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=self.template + "\n\n" + text,
+                reply_markup=reply_markup,
                 parse_mode=ParseMode.HTML))
 
 
@@ -363,60 +292,74 @@ class UserOrder(Order):
 
     @property
     def template(self):
-        template = ("\n*Order article:* `{}`"
-                    "\n*Order status:* {}"
-                    "\n*Order price:* `{}` {}"
-                    "\n*Your phone number:* `{}`"
-                    "\n*Your comment:*: `{}`").format(
+        template = ("\n<b>Order article:</b> <code>{}</code>"
+                    "\n<b>Order status:</b> {}"
+                    "\n<b>Order price:</b> <code>{}</code> {}"
+                    "\n<b>Your phone number:</b> <code>{}</code>"
+                    "\n<b>Your comment:</b> <code>{}</code>").format(
             self.article,
             self.str_status,
             self.total_price,
             self.currency,
             self.phone_number,
             self.user_comment)
-
-        if self.shipping:
-            template += f"\n🚚 *Delivery to* `{self.address}`"
-        else:
-            shop = chatbots_table.find_one(
-                {"bot_id": self.context.bot.id})["shop"]
-            template += f"\n🖐 *Pick up from* `{shop['address']}`"
+        template += "\n\n" + self.str_order_items()
         return template
 
     @property
     def str_status(self):
+        if self.in_trash:
+            return "❌ Canceled"
         if self.status:
-            string = "DONE"
+            string = self.context.bot.lang_dict[
+                "shop_admin_order_status_true"]
+        elif self.shipping:
+            string = f"🚚 On my way to <code>{self.address}</code>"
         else:
-            if self.shipping:
-                string = f"On my way to `{self.address}`"
-            else:
-                shop = chatbots_table.find_one(
-                    {"bot_id": self.context.bot.id})["shop"]
-                string = f"Your order wait for you `{shop['address']}`"
+            shop = chatbots_table.find_one(
+                {"bot_id": self.context.bot.id})["shop"]
+            string = (f"🖐 Your order wait for you on "
+                      f"<code>{shop['address']}</code>")
         return string
 
 
 class OrderItem(Product):
-    """For Showing Orders Items - Need to change for not cloth shop"""
+    """For showing and check orders items.
+    Works for both user and admin side"""
+
     def __init__(self, context, order_item):
-        super(OrderItem, self).__init__(context, order_item["product"])
-        self.item_obj = order_item
-        self.item_exist = True  # TODO
+        # change order_item["product_id"] to order_item["product"]
+        # - to take product data that was on the order creation moment
+        super(OrderItem, self).__init__(context, order_item["product_id"])
+        # Units of item that customer ordered
+        self.order_quantity = order_item.get("quantity")
+        # Check if the product exist, ready for sale, and quantity is right
+        self.item_exist = (
+            self._id  # if _id == None - mean find_one() call returns None
+            and self.on_sale
+            and (self.unlimited or (self.order_quantity <= self.quantity)))
+        # price of the item
+        self.item_price = self.price * self.order_quantity
 
-    def send_template(self, update, context, delete_kb=None):
-        if delete_kb:
-            delete_kb = InlineKeyboardMarkup(
-                [[InlineKeyboardButton(
-                    context.bot.lang_dict["shop_admin_cancel_btn"],
-                    callback_data=f"remove_item/{self.item_obj['id']}")]])
+    def send_template(self, update, context, reply_markup=None):
+        currency = chatbots_table.find_one(
+            {"bot_id": self.context.bot.id})["shop"]["currency"]
 
-        text = context.bot.lang_dict["shop_admin_product_temp_for_order_item"].format(
+        text = ("*Article:* `{}`"
+                # "\n*Availability:* `{}`"
+                "\n*Category:* `{}`"
+                # "\nIn stock: `{}`"
+                "\nx{} - `{}` {}").format(
             self.article,
-            self.category["name"], self.price,
-            f" {self.item_emoji}")
-        # self.send_admin_short_template(update, context, text, delete_kb)
+            # self.item_exist,
+            self.category["name"],
+            # quantity,
+            self.order_quantity,
+            self.item_price,
+            currency)
+        self.send_short_template(update, context, text, reply_markup)
 
-    @property
-    def item_emoji(self):
-        return " 📛" if not self.item_exist else ""
+    # @property
+    # def item_emoji(self):
+    #     """If product can't be sold returns red sticker, else empty string"""
+    #     return " 📛" if not self.item_exist else ""

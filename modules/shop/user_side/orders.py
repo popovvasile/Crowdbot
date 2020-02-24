@@ -9,13 +9,9 @@ from helper_funcs.helper import get_help, back_to_modules
 from helper_funcs.misc import delete_messages, get_obj
 from helper_funcs.pagination import Pagination
 from modules.shop.components.order import UserOrder
+from modules.shop.user_side.cart import CartHelper
 from database import (products_table, carts_table, chatbots_table,
                       categories_table, orders_table)
-
-
-class OrdersHelper(object):
-    def order_template(self, order):
-        pass
 
 
 class UserOrdersHandler(object):
@@ -32,8 +28,9 @@ class UserOrdersHandler(object):
             context.user_data["page"] = 1
 
         # Get orders
-        orders = orders_table.find({"user_id": update.effective_user.id,
-                                    "bot_id": context.bot.id})
+        orders = orders_table.find(
+            {"user_id": update.effective_user.id,
+             "bot_id": context.bot.id}).sort([["_id", -1]])
 
         # Back to the shop menu if no order
         if not orders.count():
@@ -83,7 +80,7 @@ class UserOrdersHandler(object):
                     context.bot.send_message(
                         chat_id=update.effective_chat.id,
                         text=UserOrder(context, order).template,
-                        parse_mode=ParseMode.MARKDOWN,
+                        parse_mode=ParseMode.HTML,
                         reply_markup=reply_markup))
             # Send main buttons
             pagination.send_keyboard(update, context,
@@ -97,7 +94,15 @@ class UserOrdersHandler(object):
                     reply_markup=InlineKeyboardMarkup(buttons)))
 
     def order_items(self, update, context):
-        pass
+        delete_messages(update, context, True)
+        order_id = ObjectId(update.callback_query.data.split("/")[1])
+        order = orders_table.find_one({"_id": order_id})
+        if not order:
+            return self.orders(update, context)
+        currency = chatbots_table.find_one(
+            {"bot_id": context.bot.id})["shop"]["currency"]
+        for order_item in order["items"]:
+            text = CartHelper.short_cart_item_template(order_item, currency)
 
 
 """ORDERS"""
