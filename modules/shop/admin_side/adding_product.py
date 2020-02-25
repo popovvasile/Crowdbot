@@ -169,7 +169,6 @@ class AddingProductHandler(object):
             if len(update.message.text) <= 7:
                 context.user_data["new_product"].price = float(
                     format(Price.fromstring(update.message.text).amount, '.2f'))
-                context.user_data["new_product"].unlimited = False
             else:
                 context.user_data["to_delete"].append(context.bot.send_message(
                     chat_id=update.message.chat_id,
