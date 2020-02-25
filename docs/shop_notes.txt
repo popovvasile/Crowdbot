@@ -20,6 +20,7 @@ Order ID-shnik  and state of Order
         потому что в chatbots_table["shop"] - нет ключа "address", а этот ключ используется во время оформления заказа
     * попытался поменять адресс через настройки - не получилось, в документ не добавляется ключ "address"
     * когда в настройке кликаешь "disable shop", а потом сразу кликаешь "shop" - " enable_shop" - telegram.error.BadRequest: Message to delete not found
+    * Delete messages everywhere
     
     [Done] Кнопка Back в выборе категорий в юзер-части выводит в админку(ловит другой хендлер)
     [DONE] При удалении категории - удаляются все товары - придумать(если есть заказы и если есть товары) и пофиксить
@@ -32,7 +33,6 @@ Order ID-shnik  and state of Order
 
 -TODO ADMIN SIDE
     * Paid/unpaid and release the content or send a notification that the item has been shipped
-    * Delete messages everywhere
     * После создания шопа - не показывать кнопку бек, а сразу в меню переводить
 
     [DONE] category delete - при удалении если есть товары за категорией - уведомлять сколько товаров будут удалены
@@ -47,6 +47,7 @@ Order ID-shnik  and state of Order
     [DONE] В списке товаров сделать caption, а не просто текст после фотки
     [DONE] Добаваление разного контента
 
+
 -TODO USER SIDE
     * во время оформления заказа показывать все введённые поля
     * список товаров в заказе
@@ -58,6 +59,7 @@ Order ID-shnik  and state of Order
         PHONE NUMBER VALIDATION
 
     [DONE] Отображение разного контента
+
 
 -TODO BOTH
     * Discount price обработка()

@@ -106,7 +106,9 @@ from modules.shop.user_side.products import (
 from modules.shop.user_side.cart import (
     CART, REMOVE_FROM_CART_LIST, CHANGE_QUANTITY, BACK_TO_CART, MAKE_ORDER,
     VIEW_CART_PRODUCT)
-from modules.shop.user_side.orders import USERS_ORDERS_LIST_HANDLER
+from modules.shop.user_side.orders import (
+    USERS_ORDERS_LIST_HANDLER, USER_ORDER_ITEMS_PAGINATION,
+    BACK_TO_USER_ORDERS)
 
 
 logging.basicConfig(
@@ -168,6 +170,8 @@ def main(token, lang):
     dispatcher.add_handler(VIEW_CART_PRODUCT)
     dispatcher.add_handler(VIEW_PRODUCT)
     dispatcher.add_handler(BACK_TO_CUSTOMER_SHOP)
+    dispatcher.add_handler(USER_ORDER_ITEMS_PAGINATION)
+    dispatcher.add_handler(BACK_TO_USER_ORDERS)
 
     #  SHOP ADMIN SIDE
     # dispatcher.add_handler(product_handler_han)

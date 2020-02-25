@@ -323,6 +323,24 @@ class UserOrder(Order):
                       f"<code>{shop['address']}</code>")
         return string
 
+    def send_full_template(self, update, context, text="", reply_markup=None,
+                           item_reply_markup=None):
+        # PAGINATION OF ORDER ITEMS
+        pagination = Pagination(
+            self.items_json, page=context.user_data["item_page"])
+        for item in pagination.page_content():
+            OrderItem(self.context, item).send_template(
+                update, context, reply_markup=item_reply_markup)
+        pagination.send_keyboard(update, context,
+                                 page_prefix="user_order_item_pagination")
+
+        context.user_data["to_delete"].append(
+            context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=self.template + "\n\n" + text,
+                reply_markup=reply_markup,
+                parse_mode=ParseMode.HTML))
+
 
 class OrderItem(Product):
     """For showing and check orders items.
