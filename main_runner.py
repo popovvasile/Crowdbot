@@ -319,10 +319,12 @@ def main(token, lang):
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(help_handler)
 
+    dispatcher.add_handler(back_to_modules_handler)
+
     dispatcher.add_handler(CallbackQueryHandler(Welcome.back_to_main_menu,
                                                 pattern=r"back_"))
     dispatcher.add_handler(BACK_TO_MAIN_MENU_HANDLER)
-    dispatcher.add_handler(back_to_modules_handler)
+
     dispatcher.add_handler(help_callback_handler)
 
     # error_help_callback_handler = CallbackQueryHandler(get_help,

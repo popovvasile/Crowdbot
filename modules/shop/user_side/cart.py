@@ -203,12 +203,12 @@ class CartHelper(object):
                 callback_data=f"reduce_quantity/{cart_item['product_id']}"))
         product_buttons[0].append(
             InlineKeyboardButton(
-                text=remove_button_str,
-                callback_data=f"list_cart_remove/{cart_item['product_id']}"))
-        product_buttons[0].append(
-            InlineKeyboardButton(
                 text="➕",
                 callback_data=f"increase_quantity/{cart_item['product_id']}"))
+        product_buttons[0].append(
+            InlineKeyboardButton(
+                text=remove_button_str,
+                callback_data=f"list_cart_remove/{cart_item['product_id']}"))
         content_len = len(cart_item["product"]["content"])
         if len(cart_item["product"]["description"]) > 150 or content_len > 1:
             product_buttons.append(

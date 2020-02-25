@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 from uuid import uuid4
+from pprint import pprint
 
 from bson.objectid import ObjectId
 from telegram.error import BadRequest
@@ -33,8 +34,7 @@ class Product(object):
         # Change _id attribute to id_
         self._id = product.get("_id")
         self.bot_id = context.bot.id
-        self.article = product.get("article")
-        self.sold = product.get("sold")
+        self.article = str(self._id) if self._id else None
         self.price = product.get("price")
         self.description = product.get("description", "")
         self.name = product.get("name")
@@ -68,8 +68,7 @@ class Product(object):
     @property
     def on_sale(self):
         """To check if at least one product unit is ready for sale"""
-        if (self.sold or self.in_trash
-                or (not self.unlimited and self.quantity == 0)):
+        if self.in_trash or (not self.unlimited and self.quantity == 0):
             return False
         else:
             return True
@@ -77,6 +76,27 @@ class Product(object):
     @property
     def files_str(self):
         return f"\n\n• Files {len(self.content)}/10"
+
+    @property
+    def status_str(self):
+        new_orders = orders_table.find(
+            {"bot_id": self.context.bot.id,
+             "status": False,
+             "in_trash": False,
+             "items.product_id": self._id})
+        # Admin product status string.
+        # Product was deleted
+        if self.in_trash:
+            status = "🗑 Deleted"
+        # At least on item of the product on sale
+        elif self.on_sale:
+            status = "✅ On Sale"
+        # Product not on sale because it is in the NEW order
+        elif new_orders.count():
+            status = f"🕐 {new_orders.count()} unfinished order(s)"
+        else:
+            status = "💸 Sold"
+        return status
 
     def send_short_template(self, update, context,
                             text=None, reply_markup=None):
@@ -353,7 +373,6 @@ class Product(object):
 
         self._id = product.get("_id")
         self.article = product.get("article")
-        self.sold = product.get("sold")
         self.price = product.get("price")
         self.description = product.get("description", "")
         self.name = product.get("name")
@@ -370,7 +389,6 @@ class Product(object):
             "_id": self._id,
             "bot_id": self.bot_id,
             "article": self.article,
-            "sold": self.sold,
             "price": self.price,
             "description": self.description,
             "name": self.name,
@@ -384,6 +402,7 @@ class Product(object):
         }
 
     def create(self):
+        pprint(self.to_dict())
         products_table.insert_one({
             "bot_id": self.context.bot.id,
             "price": self.price,
@@ -392,7 +411,6 @@ class Product(object):
             "name": self.name,
             "category_id": self.category_id,
             "content": self.content,
-            "sold": False,
             "in_trash": False,
             "on_sale": True,
             "order_ids": list(),

@@ -76,22 +76,22 @@ class ProductsHelper(object):
 
         # Admin product status string.
         # Product was deleted
-        if product_obj.in_trash:
-            status = "🗑 Deleted"
+        # if product_obj.in_trash:
+        #     status = "🗑 Deleted"
         # At least on item of the product on sale
-        elif product_obj.on_sale:
-            status = "✅ On Sale"
+        # elif product_obj.on_sale:
+        #     status = "✅ On Sale"
         # Product not on sale because it is in the NEW order
-        elif new_orders.count():
-            status = f"🕐 {new_orders.count()} unfinished order(s)"
-        else:
-            status = "💸 Sold"
+        # elif new_orders.count():
+        #     status = f"🕐 {new_orders.count()} unfinished order(s)"
+        # else:
+        #     status = "💸 Sold"
 
         template = context.bot.lang_dict[
             "shop_admin_product_template"].format(
+            product_obj.article,
             product_obj.name,
-            # True if not product_obj.sold else False,
-            status,
+            product_obj.status_str,
             product_obj.category["name"],
             product_obj.price,
             shop["currency"],
@@ -114,8 +114,8 @@ class ProductsHelper(object):
                     emoji = "🖐"
 
                 orders_string += (
-                    "_Order ID:_ `{}` {} x`{}`\n\n".format(
-                        order["article"], emoji, product_items_count))
+                    "_Order ID:_ `{}` \n{} x`{}`\n\n".format(
+                        order["_id"], emoji, product_items_count))
             template += orders_string
         return template
 
@@ -138,7 +138,8 @@ class ProductsHelper(object):
 
         return context.bot.lang_dict[
             "shop_admin_full_product_template"].format(
-            True if not product_obj.sold else False,
+            product_obj.status_str,
+            product_obj.id_,
             product_obj.name,
             product_obj.category["name"],
             product_obj.price,
@@ -147,6 +148,21 @@ class ProductsHelper(object):
             shop["currency"],
             quantity,
             description)
+
+    @staticmethod
+    def status_str(product_obj, new_orders):
+        # Admin product status string.
+        # Product was deleted
+        if product_obj.in_trash:
+            status = "🗑 Deleted"
+        # At least on item of the product on sale
+        elif product_obj.on_sale:
+            status = "✅ On Sale"
+        # Product not on sale because it is in the NEW order
+        elif new_orders.count():
+            status = f"🕐 {new_orders.count()} unfinished order(s)"
+        else:
+            status = "💸 Sold"
 
 
 class ProductsHandler(ProductsHelper):
