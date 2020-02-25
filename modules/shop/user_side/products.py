@@ -26,6 +26,8 @@ remove_button_str = "❌ Remove"
 
 
 class UserProductsHelper(object):
+    # TODO put this logic to the components/product -> class AdminProduct
+
     """All "short" templates must be passed to send_short_template() method.
     And all "full" templates must be passed to send_full_template() method.
     """
@@ -192,18 +194,20 @@ class UserProductsHandler(UserProductsHelper):
         #     filters["category_id"] = context.user_data["category_id"]
 
         filters = {"$or": [
-            {"in_trash": False, "sold": False, "bot_id": context.bot.id,
+            {"in_trash": False,
+             "bot_id": context.bot.id,
              'unlimited': True},
-            {"in_trash": False, "sold": False, "bot_id": context.bot.id,
-             "quantity": {"$gt": 0}}]
-        }
+            {"in_trash": False,
+             "bot_id": context.bot.id,
+             "quantity": {"$gt": 0}}
+        ]}
 
         if context.user_data.get("category_id"):
             filters["$or"][0]["category_id"] = (
                 context.user_data["category_id"])
             filters["$or"][1]["category_id"] = (
                 context.user_data["category_id"])
-
+        pprint(filters)
         all_products = products_table.find(
             filters).sort([["last_modify_timestamp", -1]])
         self.send_products_layout(update, context, all_products)
