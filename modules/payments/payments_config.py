@@ -1,5 +1,6 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
+import telegram
 from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import (MessageHandler, Filters, ConversationHandler, CallbackQueryHandler)
 import logging
@@ -113,8 +114,11 @@ class EnableDisableShopDonations(object):
         return ConversationHandler.END
 
     def config_shop(self, update, context):
-        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                                   message_id=update.callback_query.message.message_id)
+        try:
+            context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
+                                       message_id=update.callback_query.message.message_id)
+        except telegram.error.BadRequest:
+            pass
         chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
 
         if chatbot["shop"]["shop_type"] == "online":
