@@ -540,9 +540,14 @@ class ProductsHandler(ProductsHelper):
     def finish_quantity(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         if update.message:
-            context.user_data["product"].update(
-                {"quantity": int(update.message.text),
-                 "unlimited": False})
+            if int(update.message.text)<10**7:
+                context.user_data["product"].update(
+                    {"quantity": int(update.message.text),
+                     "unlimited": False})
+            else:
+                context.user_data["product"].update(
+                    {"quantity": 0,
+                     "unlimited": True})
         elif update.callback_query.data == 'quantity_unlimited':
             context.user_data["product"].update(
                 {"quantity": 0,
