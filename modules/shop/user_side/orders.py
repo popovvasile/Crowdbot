@@ -62,20 +62,6 @@ class UserOrdersHandler(object):
                     [InlineKeyboardButton(
                         text="Order Items",
                         callback_data=f"order_items/{order['_id']}")]])
-                # template = ("\n*Order number:* `{}`"
-                #             "\n*Order status:* `{}`"
-                #             "\n*Order price:* `{}` {}"
-                #             "\n*Your phone number:* `{}`").format(
-                #                 order.get("article"),
-                #                 order["status"],
-                #                 order["total_price"], order["currency"],
-                #                 order["phone_number"])
-                # if order["shipping"]:
-                #     template += f"\n*Delivery to* `{order['address']}`"
-                # else:
-                #     shop = chatbots_table.find_one(
-                #         {"bot_id": context.bot.id})["shop"]
-                #     template += f"\n*Pick up from* `{shop['address']}`"
                 context.user_data["to_delete"].append(
                     context.bot.send_message(
                         chat_id=update.effective_chat.id,
@@ -95,17 +81,47 @@ class UserOrdersHandler(object):
 
     def order_items(self, update, context):
         delete_messages(update, context, True)
-        order_id = ObjectId(update.callback_query.data.split("/")[1])
-        order = orders_table.find_one({"_id": order_id})
-        if not order:
-            return self.orders(update, context)
-        currency = chatbots_table.find_one(
-            {"bot_id": context.bot.id})["shop"]["currency"]
-        for order_item in order["items"]:
-            text = CartHelper.short_cart_item_template(order_item, currency)
+        if update.callback_query.data.startswith("order_items"):
+            order_id = ObjectId(update.callback_query.data.split("/")[1])
+            order = orders_table.find_one({"_id": order_id})
+            if not order:
+                return self.orders(update, context)
+            context.user_data["order"] = UserOrder(context, order)
+
+        if update.callback_query.data.startswith(
+                "user_order_item_pagination"):
+            context.user_data["item_page"] = int(
+                update.callback_query.data.replace(
+                    "user_order_item_pagination_", ""))
+        if not context.user_data.get("item_page"):
+            context.user_data["item_page"] = 1
+
+        context.user_data["order"].send_full_template(
+            update, context,
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton(
+                    text=context.bot.lang_dict["back_button"],
+                    callback_data="back_to_user_orders")]
+            ]))
+        return ConversationHandler.END
+
+    def back_to_orders(self, update, context):
+        delete_messages(update, context, True)
+        page = context.user_data["page"]
+        context.user_data.clear()
+        context.user_data["page"] = page
+        return self.orders(update, context)
 
 
 """ORDERS"""
 USERS_ORDERS_LIST_HANDLER = CallbackQueryHandler(
     pattern=r"^(my_orders|user_orders_pagination)",
     callback=UserOrdersHandler().orders)
+
+USER_ORDER_ITEMS_PAGINATION = CallbackQueryHandler(
+    pattern=r"^(order_items|user_order_item_pagination)",
+    callback=UserOrdersHandler().order_items)
+
+BACK_TO_USER_ORDERS = CallbackQueryHandler(
+    pattern="back_to_user_orders",
+    callback=UserOrdersHandler().back_to_orders)
