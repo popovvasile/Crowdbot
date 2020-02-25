@@ -38,28 +38,29 @@ class UserProductsHelper(object):
 
         :return: InlineKeyboardMarkup
         """
-        buttons = [[]]
+        buttons = []
         content_len = len(product["content"])
-        if (len(product["description"]) > MAX_TEMP_DESCRIPTION_LENGTH
-                or content_len > 1):
-            buttons[0].append(
-                InlineKeyboardButton(
-                    text=view_button_str + (f" ({content_len} files)"
-                                            if content_len else ""),
-                    callback_data=f"view_product_from_catalog/"
-                                  f"{product['_id']}"))
 
         if any(cart_product["product_id"] == product["_id"]
                for cart_product in cart.get("products", list())):
-            buttons[0].append(
-                InlineKeyboardButton(
+            buttons.append(
+                [InlineKeyboardButton(
                     text=remove_button_str,
-                    callback_data=f"remove_from_cart/{product['_id']}"))
+                    callback_data=f"remove_from_cart/{product['_id']}")])
         else:
-            buttons[0].append(
-                InlineKeyboardButton(
+            buttons.append(
+                [InlineKeyboardButton(
                     text=add_button_str,
-                    callback_data=f"add_to_cart/{product['_id']}"))
+                    callback_data=f"add_to_cart/{product['_id']}")])
+
+        if (len(product["description"]) > MAX_TEMP_DESCRIPTION_LENGTH
+                or content_len > 1):
+            buttons.append(
+                [InlineKeyboardButton(
+                    text=view_button_str + (f" ({content_len} files)"
+                                            if content_len else ""),
+                    callback_data=f"view_product_from_catalog/"
+                                  f"{product['_id']}")])
         return InlineKeyboardMarkup(buttons)
 
     @staticmethod
