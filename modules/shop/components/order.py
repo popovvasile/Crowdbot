@@ -255,7 +255,7 @@ class AdminOrder(Order):
         else:
             shop_address = chatbots_table.find_one(
                 {"bot_id": self.context.bot.id})["shop"]["address"]
-            string += f"\n🖐 Pick up <code>{shop_address}<code>"
+            string += f"\n🖐 Pick up <code>{shop_address}</code>"
         return string
 
     def send_short_template(self, update, context,
@@ -265,7 +265,8 @@ class AdminOrder(Order):
                 chat_id=update.effective_chat.id,
                 text=self.template + "\n\n" + text,
                 reply_markup=reply_markup,
-                parse_mode=ParseMode.HTML))
+                parse_mode=ParseMode.HTML
+            ))
 
     def send_full_template(self, update, context, text="", reply_markup=None,
                            item_reply_markup=None):
