@@ -85,7 +85,8 @@ class CartHelper(object):
 
         cart = get_obj(carts_table, cart)
 
-        if not product or product["in_trash"] or product["sold"]:
+        if not product or product["in_trash"] or (
+                not product["quantity"] and not product["unlimited"]):
             carts_table.update_one(
                 {"_id": cart["_id"]},
                 {"$pull": {"products": {"product_id": product_id}}})
