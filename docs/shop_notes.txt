@@ -7,7 +7,6 @@ ONLINE/OFFLINE Donations
 Order ID-shnik  and state of Order
 убрать часть с фотками
 
-BUG: the backs for the user are leading to the admin panel
 4)prepare the shop for online payments
 
 -TODO BUGS
@@ -17,6 +16,11 @@ BUG: the backs for the user are leading to the admin panel
     * Фича которая выводит в главное меню при рандомном тексте ведёт не адекватно в некторых меню бота
          Когда на прайсе вводишь текст, а не число - кидает в главное меню и отказывают кнопки
     * при добавлении товара не устанавливается unlimited, когда должно быть True, равно False
+    * Когда в настройках шопа меняешь доставка на самовывоз - нужно спросить адресс магазина,
+        потому что в chatbots_table["shop"] - нет ключа "address", а этот ключ используется во время оформления заказа
+    * попытался поменять адресс через настройки - не получилось, в документ не добавляется ключ "address"
+    * когда в настройке кликаешь "disable shop", а потом сразу кликаешь "shop" - " enable_shop" - telegram.error.BadRequest: Message to delete not found
+    
     [Done] Кнопка Back в выборе категорий в юзер-части выводит в админку(ловит другой хендлер)
     [DONE] При удалении категории - удаляются все товары - придумать(если есть заказы и если есть товары) и пофиксить
     [DONE] When adding numbers in different parts of the bot- write back that the introduced number is wrong
@@ -30,6 +34,7 @@ BUG: the backs for the user are leading to the admin panel
     * Paid/unpaid and release the content or send a notification that the item has been shipped
     * Delete messages everywhere
     * После создания шопа - не показывать кнопку бек, а сразу в меню переводить
+
     [DONE] category delete - при удалении если есть товары за категорией - уведомлять сколько товаров будут удалены
     [DONE] Показывать всю информацию о товаре во время добавления
     [DONE] edit самовывоз/доставка
@@ -55,6 +60,7 @@ BUG: the backs for the user are leading to the admin panel
         DESCRIPTION LENGTH VALIDATION
         SHARE PHONE NUMBER
         PHONE NUMBER VALIDATION
+
     [DONE] Отображение разного контента
 
 -TODO BOTH
@@ -63,6 +69,7 @@ BUG: the backs for the user are leading to the admin panel
         https://python-telegram-bot.readthedocs.io/en/stable/telegram.constants.html
     * Добавить артукулы в заказы и товары
         https://www.mongodb.com/blog/post/generating-globally-unique-identifiers-for-use-with-mongodb
+
     [DONE] Отображение комментария клиента в заказах
     [DONE] Кнопка "Просмотр" на товарах(если большое описание или много контента)
 
