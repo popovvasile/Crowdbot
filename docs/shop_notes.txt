@@ -10,12 +10,12 @@ Order ID-shnik  and state of Order
 4)prepare the shop for online payments
 
 -TODO BUGS
-    * когда устанавливаешь discount price - исключение ?
-    * При изменении плтежного токена - исключение
-    * при изменении quantity на очень большое число - исключение. При изменении на маленькое число - в тексте отображается не правильно как tuple
-    * Фича которая выводит в главное меню при рандомном тексте ведёт не адекватно в некторых меню бота
+   [DONE] когда устанавливаешь discount price - исключение ?
+   [DONE] При изменении плтежного токена - исключение
+   [DONE] при изменении quantity на очень большое число - исключение. При изменении на маленькое число - в тексте отображается не правильно как tuple
+  [DONE] Фича которая выводит в главное меню при рандомном тексте ведёт не адекватно в некторых меню бота
          Когда на прайсе вводишь текст, а не число - кидает в главное меню и отказывают кнопки
-    [Done] при добавлении товара не устанавливается unlimited, когда должно быть True, равно False
+  [DONE] при добавлении товара не устанавливается unlimited, когда должно быть True, равно False
     * Когда в настройках шопа меняешь доставка на самовывоз - нужно спросить адресс магазина,
         потому что в chatbots_table["shop"] - нет ключа "address", а этот ключ используется во время оформления заказа
     * попытался поменять адресс через настройки - не получилось, в документ не добавляется ключ "address"
@@ -38,6 +38,10 @@ Order ID-shnik  and state of Order
     [DONE] category delete - при удалении если есть товары за категорией - уведомлять сколько товаров будут удалены
     [DONE] Показывать всю информацию о товаре во время добавления
     [DONE] edit самовывоз/доставка
+    * Заказы Show orders to admin: paid/unpaid, executed/pending
+    * Уведомления о заказах
+    [DONE] Delete messages everywhere
+
     [DONE] Changing shop currency - give current exchange rate and ask for the exchange rate then translate all prices
     [DONE] При изменении address, description, currency - показывать текущие значения
     [DONE] EDIT SHOP: Edit type, TOKEN only if there is one, Payment description if there is no token
