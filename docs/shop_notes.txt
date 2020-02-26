@@ -19,9 +19,9 @@ Order ID-shnik  and state of Order
     * Когда в настройках шопа меняешь доставка на самовывоз - нужно спросить адресс магазина,
         потому что в chatbots_table["shop"] - нет ключа "address", а этот ключ используется во время оформления заказа
     * попытался поменять адресс через настройки - не получилось, в документ не добавляется ключ "address"
-    * когда в настройке кликаешь "disable shop", а потом сразу кликаешь "shop" - " enable_shop" - telegram.error.BadRequest: Message to delete not found
+    [Done] когда в настройке кликаешь "disable shop", а потом сразу кликаешь "shop" - " enable_shop" - telegram.error.BadRequest: Message to delete not found
     * Delete messages everywhere
-    
+
     [Done] Кнопка Back в выборе категорий в юзер-части выводит в админку(ловит другой хендлер)
     [DONE] При удалении категории - удаляются все товары - придумать(если есть заказы и если есть товары) и пофиксить
     [DONE] When adding numbers in different parts of the bot- write back that the introduced number is wrong
@@ -54,9 +54,8 @@ Order ID-shnik  and state of Order
 
 -TODO USER SIDE
     * во время оформления заказа показывать все введённые поля
-    * список товаров в заказе
+    [Done] список товаров в заказе
     * Онлайн заказы
-    * Уведомления о заказах
     * Offline order creation:
         DESCRIPTION LENGTH VALIDATION
         SHARE PHONE NUMBER
@@ -69,7 +68,7 @@ Order ID-shnik  and state of Order
     * Discount price обработка()
     * Check messages length in templates and captions - to avoid exceptions
         https://python-telegram-bot.readthedocs.io/en/stable/telegram.constants.html
-    * Добавить артукулы в заказы и товары
+    [Done] Добавить артукулы в заказы и товары
         https://www.mongodb.com/blog/post/generating-globally-unique-identifiers-for-use-with-mongodb
 
     [DONE] Отображение комментария клиента в заказах
