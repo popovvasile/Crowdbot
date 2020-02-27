@@ -28,8 +28,9 @@ class Welcome(object):
 
         orders_quantity = {
             "new_orders_quantity":
-                orders_table.find({"status": False,
-                                   "in_trash": False}).count(),}
+                orders_table.find({"bot_id": context.bot.id,
+                                   "status": False,
+                                   "in_trash": False}).count()}
         context.user_data["to_delete"].append(
             context.bot.send_message(
                 update.effective_chat.id,

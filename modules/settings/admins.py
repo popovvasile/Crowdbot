@@ -7,7 +7,6 @@ import secrets
 import string
 
 from bson.objectid import ObjectId
-from validate_email import validate_email
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 from telegram.ext import ConversationHandler, CallbackQueryHandler
 

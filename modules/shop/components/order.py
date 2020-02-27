@@ -254,7 +254,7 @@ class AdminOrder(Order):
             string += f"\n🚚 Delivery to <code>{self.address}</code>"
         else:
             shop_address = chatbots_table.find_one(
-                {"bot_id": self.context.bot.id})["shop"]["address"]
+                {"bot_id": self.context.bot.id})["shop"].get("address", "")
             string += f"\n🖐 Pick up <code>{shop_address}</code>"
         return string
 
