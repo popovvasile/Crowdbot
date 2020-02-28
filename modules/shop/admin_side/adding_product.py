@@ -70,8 +70,7 @@ class AddingProductHandler(object):
             reply_markup = InlineKeyboardMarkup(buttons)
             context.user_data["to_delete"].append(context.bot.send_message(
                 chat_id=update.message.chat_id,
-                text="You didn't set any categories yet.\n"
-                     "Please write a new category",
+                text=context.bot.lang_dict["add_product_didnt_set_category"],
                 reply_markup=reply_markup))
         return SET_CATEGORY
 
@@ -213,7 +212,7 @@ class AddingProductHandler(object):
             return ASK_DESCRIPTION
         context.user_data["new_product"].discount_price = discount_price
         context.user_data["new_product"].send_full_template(
-            update, context, "Write description of this product.",
+            update, context, context.bot.lang_dict["add_product_description"],
             keyboards(context)["back_to_main_menu_keyboard"])
         return SET_DESCRIPTION
 
@@ -229,55 +228,6 @@ class AddingProductHandler(object):
     def open_content_handler(self, update, context):
         delete_messages(update, context, True)
         if len(context.user_data["new_product"].content) < 10:
-            """# video_note_file and sticker_file - don't have captions
-            if update.message.photo:
-                photo_file = update.message.photo[-1].get_file().file_id
-                context.user_data["new_product"].content.append(
-                    {"file_id": photo_file,
-                     "type": "photo_file"
-                     # "photo_file": photo_file
-                     })
-
-            elif update.message.audio:
-                audio_file = update.message.audio.get_file().file_id
-                context.user_data["new_product"].content.append(
-                    {"file_id": audio_file,
-                     "type": "photo_file",
-                     # "audio_file": audio_file,
-                     "name": update.message.audio.title
-                     })
-
-            elif update.message.voice:
-                voice_file = update.message.voice.get_file().file_id
-                context.user_data["new_product"].content.append(
-                    {"file_id": voice_file,
-                     "type": "photo_file",
-                     # "voice_file": voice_file
-                     })
-
-            elif update.message.document:
-                document_file = update.message.document.get_file().file_id
-                context.user_data["new_product"].content.append(
-                    {"file_id": document_file,
-                     "type": "photo_file",
-                     # "document_file": document_file,
-                     "name": update.message.document.file_name})
-
-            elif update.message.video:
-                video_file = update.message.video.get_file().file_id
-                context.user_data["new_product"].content.append(
-                    {"file_id": video_file,
-                     "type": "photo_file",
-                     # "video_file": video_file
-                     })
-
-            elif update.message.animation:
-                animation_file = update.message.animation.get_file().file_id
-                context.user_data["new_product"].content.append(
-                    {"file_id": animation_file,
-                     "type": "photo_file",
-                     # "animation_file": animation_file
-                     })"""
             context.user_data["new_product"].add_content_dict(update)
             text = context.bot.lang_dict["shop_admin_send_more_photo"].format(
                 len(context.user_data["new_product"].content))
@@ -300,7 +250,7 @@ class AddingProductHandler(object):
         category = categories_table.find_one({"_id": context.user_data["new_product"].category_id})["name"]
         if (len(context.user_data["new_product"].description)
                 > MAX_TEMP_DESCRIPTION_LENGTH):
-            description = "Description above"
+            description = context.bot.lang_dict["add_product_description_above"]
         else:
             description = context.user_data["new_product"].description
 
@@ -371,8 +321,6 @@ ADD_PRODUCT_HANDLER = ConversationHandler(
                            AddingProductHandler().set_description)],
 
         ADDING_CONTENT: [
-            # video_note_file and sticker_file - don't have captions
-            # todo change Filters.all
             MessageHandler(Filters.all,
                            AddingProductHandler().open_content_handler),
             CallbackQueryHandler(AddingProductHandler().confirm_adding,

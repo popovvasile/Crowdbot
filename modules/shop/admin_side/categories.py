@@ -74,8 +74,7 @@ class ProductCategoryHandler(object):
                 [InlineKeyboardButton("NO", callback_data="back_to_main_menu")]])
             context.user_data["to_delete"] = [context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
-                text="Category {} has {} products associated with it. \n"
-                     "They will be deleted as well. Are you sure that you want to continue?".
+                text=context.bot.lang_dict["shop_category_will_be_deleted"].
                     format(category["name"], str(products.count())),
                 reply_markup=keyboard)]
 
@@ -142,7 +141,7 @@ class ProductCategoryHandler(object):
                                  "name": update.message.text})
         context.user_data["to_delete"] = [context.bot.send_message(
             chat_id=update.message.chat_id,
-            text="The category name has been changed",
+            text=context.bot.lang_dict["shop_category_changed_name"],
             reply_markup=keyboard)]
 
         return ConversationHandler.END
@@ -158,7 +157,7 @@ class ProductCategoryHandler(object):
 
         context.user_data["to_delete"] = [context.bot.send_message(
             chat_id=update.callback_query.message.chat_id,
-            text="Write a category that you want to add or write 'back' to return to the menu",
+            text=context.bot.lang_dict["shop_category_add_new"],
             reply_markup=keyboard)]
 
         return START_ADD_CATEGORY
@@ -182,7 +181,7 @@ class ProductCategoryHandler(object):
             )
             context.user_data["to_delete"].append(context.bot.send_message(
                 chat_id=update.message.chat_id,
-                text="Write another category or press continue",
+                text=context.bot.lang_dict["shop_category_add_or_continue"],
                 reply_markup=keyboard))
         return START_ADD_CATEGORY
 
