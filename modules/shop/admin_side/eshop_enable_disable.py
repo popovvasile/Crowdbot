@@ -11,6 +11,7 @@ from database import chatbots_table
 from helper_funcs.auth import initiate_chat_id
 from helper_funcs.helper import get_help
 from helper_funcs.misc import delete_messages
+from modules.payments.payments_config import EnableDisableShopDonations
 from modules.shop.helper.keyboards import back_btn
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -100,7 +101,7 @@ class CreateShopHandler(object):
         if update.message:
             context.user_data["new_product"].description = update.message.text
         delete_messages(update, context, True)
-        context.bot.send_message(
+        context.user_data["to_delete"].append(context.bot.send_message(
             chat_id=update.callback_query.message.chat_id,
             text="Do you want to make this product with online payment (in Telegram), offline payment or both?\n"
                  "For in-Telegram payments you will need a payment token, which must be set up in Bot Father settings.",
@@ -112,15 +113,13 @@ class CreateShopHandler(object):
                 # [InlineKeyboardButton("Both options",
                 #                       callback_data="set_payment_both")],
                 [back_btn("back_to_main_menu_btn", context=context)]
-            ]))
+            ])))
         return ASK_TOKEN
 
     def ask_token(self, update, context):
         reply_markup = InlineKeyboardMarkup(
             [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                    callback_data="help_module(shop)")]])
-        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                                   message_id=update.callback_query.message.message_id)
         context.user_data["shop_type"] = update.callback_query.data.replace("set_payment_", "")
         if "offline" in update.callback_query.data:
             reply_markup = [
@@ -131,15 +130,17 @@ class CreateShopHandler(object):
                             [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                   callback_data="help_module(shop)")],
                             ]
-            context.bot.send_message(update.callback_query.message.chat_id,
-                                     context.bot.lang_dict["create_shop_str_9"],
-                                     reply_markup=InlineKeyboardMarkup(reply_markup))
+            context.user_data["to_delete"].append(context.bot.send_message(
+                update.callback_query.message.chat_id,
+                context.bot.lang_dict["create_shop_str_9"],
+                reply_markup=InlineKeyboardMarkup(reply_markup)))
             return CHOOSING_PICK_UP_OR_DELIVERY
 
         else:
-            context.bot.send_message(update.callback_query.message.chat.id,
-                                     context.bot.lang_dict["create_shop_str_3"],
-                                     reply_markup=reply_markup)
+            context.user_data["to_delete"].append(context.bot.send_message(
+                update.callback_query.message.chat.id,
+                context.bot.lang_dict["create_shop_str_3"],
+                reply_markup=reply_markup))
             return TYPING_TOKEN
 
     def handle_token(self, update, context):
@@ -152,30 +153,30 @@ class CreateShopHandler(object):
         chat_id, txt = initiate_chat_id(update)
         if check_provider_token(provider_token=txt, update=update, context=context):
             context.user_data['payment_token'] = txt
-            update.message.reply_text(context.bot.lang_dict["create_shop_str_6"], reply_markup=reply_markup)
+            context.user_data["to_delete"].append(
+                update.message.reply_text(context.bot.lang_dict["create_shop_str_6"],
+                                          reply_markup=reply_markup))
             return TYPING_DESCRIPTION
         else:
-            update.message.reply_text(
+            context.user_data["to_delete"].append(update.message.reply_text(
                 context.bot.lang_dict["create_shop_str_5"],
-                reply_markup=reply_markup)
+                reply_markup=reply_markup))
 
             return TYPING_TOKEN
 
     def handle_type(self, update, context):
-        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                                   message_id=update.callback_query.message.message_id)
         reply_markup = InlineKeyboardMarkup(
             [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                    callback_data="help_module(shop)")]])
         if "delivery" in update.callback_query.data:
             context.user_data["shipping"] = True
-            context.bot.send_message(update.callback_query.message.chat_id,
-                                     context.bot.lang_dict["create_shop_str_6"], reply_markup=reply_markup)
+            context.user_data["to_delete"].append(context.bot.send_message(update.callback_query.message.chat_id,
+                                     context.bot.lang_dict["create_shop_str_6"], reply_markup=reply_markup))
             return TYPING_DESCRIPTION
         else:
             context.user_data["shipping"] = False
-            context.bot.send_message(update.callback_query.message.chat_id,
-                                     context.bot.lang_dict["create_shop_str_9"], reply_markup=reply_markup)
+            context.user_data["to_delete"].append(context.bot.send_message(update.callback_query.message.chat_id,
+                                     context.bot.lang_dict["create_shop_str_9"], reply_markup=reply_markup))
             return TYPING_SHOP_ADDRESS
 
     def handle_address(self, update, context):
@@ -184,45 +185,38 @@ class CreateShopHandler(object):
         reply_markup = InlineKeyboardMarkup(
             [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                    callback_data="help_module(shop)")]])
-        context.bot.send_message(update.message.chat_id,
-                                 context.bot.lang_dict["create_shop_str_6"], reply_markup=reply_markup)
+        context.user_data["to_delete"].append(context.bot.send_message(update.message.chat_id,
+                                 context.bot.lang_dict["create_shop_str_6"], reply_markup=reply_markup))
         return TYPING_DESCRIPTION
 
     def handle_description(self, update, context):
-        context.bot.delete_message(chat_id=update.message.chat_id,
-                                   message_id=update.message.message_id)
         chat_id, txt = initiate_chat_id(update)
         context.user_data["description"] = txt
         currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["CHF", "AUD", "RON", "PLN"]]
-        update.message.reply_text(context.bot.lang_dict["create_shop_str_7"],
-                                  reply_markup=ReplyKeyboardMarkup(currency_keyboard, one_time_keyboard=True))
+        context.user_data["to_delete"].append(update.message.reply_text(context.bot.lang_dict["create_shop_str_7"],
+                                  reply_markup=ReplyKeyboardMarkup(currency_keyboard, one_time_keyboard=True)))
 
         return SHOP_FINISH
 
     def handle_shop_finish(self, update, context):
-
-        create_buttons = [
-            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                  callback_data="help_module(shop)")]]
-        create_markup = InlineKeyboardMarkup(
-            create_buttons)
-
         chat_id, txt = initiate_chat_id(update)
         currency = txt
         context.user_data["currency"] = currency
 
         context.bot.send_message(chat_id,
-                                 context.bot.lang_dict["create_shop_str_8"],
-                                 reply_markup=create_markup)
+                                 context.bot.lang_dict["create_shop_str_8"])
+
         chatbot = chatbots_table.find_one({"bot_id": context.bot.id}) or {}
 
         context.user_data.pop("to_delete", None)
         chatbot["shop_enabled"] = True
         chatbot["shop"] = context.user_data
         chatbots_table.update_one({"bot_id": context.bot.id}, {'$set': chatbot}, upsert=True)
+        EnableDisableShopDonations().config_shop(update, context)
 
         logger.info("Admin {} on bot {}:{} added a shop config".format(
             update.effective_user.first_name, context.bot.first_name, context.bot.id))
+        delete_messages(update, context)
         context.user_data.clear()
         return ConversationHandler.END
 

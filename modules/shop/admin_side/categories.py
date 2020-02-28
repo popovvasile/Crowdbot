@@ -23,14 +23,14 @@ class ProductCategoryHandler(object):
     def menu(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         category_list = categories_table.find({"bot_id": context.bot.id})
-        keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton(text=i["name"],
-                                  callback_data=f"edit_category/{i['_id']}")
-             for i in category_list],
-            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_add_category_btn"],
-                                  callback_data="add_shop_category")],
-            [back_btn("back_to_main_menu", context)],
-        ])
+        keyboard = InlineKeyboardMarkup(
+            [[InlineKeyboardButton(text=i["name"],
+                                   callback_data=f"edit_category/{i['_id']}")]
+             for i in category_list]
+            + [[InlineKeyboardButton(context.bot.lang_dict["shop_admin_add_category_btn"],
+                                    callback_data="add_shop_category")],
+            [back_btn("back_to_main_menu", context)]],
+        )
 
         context.user_data["to_delete"] = [context.bot.send_message(
             chat_id=update.callback_query.message.chat_id,
@@ -151,11 +151,9 @@ class ProductCategoryHandler(object):
         delete_messages(update, context, True)
         category_list = categories_table.find({"bot_id": context.bot.id})
         keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton(text=i["name"],
-                                  callback_data=f"edit_category/{i['_id']}")
+            [InlineKeyboardButton(text=i["name"])
              for i in category_list],
-            [back_btn("back_to_main_menu", context)],
-        ]
+            [back_btn("back_to_main_menu", context)]]
         )
 
         context.user_data["to_delete"] = [context.bot.send_message(
