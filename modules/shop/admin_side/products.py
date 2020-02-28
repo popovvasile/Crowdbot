@@ -1,7 +1,5 @@
 import logging
 from price_parser import Price
-
-from bson.objectid import ObjectId
 from telegram import (Update, ParseMode, InlineKeyboardButton,
                       InlineKeyboardMarkup)
 from telegram.ext import (ConversationHandler, CallbackQueryHandler,
@@ -14,8 +12,7 @@ from modules.shop.helper.helper import clear_user_data, content_dict_as_string
 from modules.shop.helper.keyboards import keyboards, back_kb, back_btn, create_keyboard
 from modules.shop.components.product import Product, MAX_TEMP_DESCRIPTION_LENGTH
 from modules.shop.admin_side.welcome import Welcome
-from database import (products_table, categories_table, chatbots_table,
-                      orders_table)
+from database import orders_table
 
 from database import products_table, categories_table, chatbots_table
 
@@ -242,7 +239,7 @@ class ProductsHandler(ProductsHelper):
                     context.bot.lang_dict["shop_admin_set_name_btn"],
                     callback_data="change_name")],
             [InlineKeyboardButton(
-                "Content",
+                context.bot.lang_dict["add_product_content"],
                 callback_data="content_menu"),
                 InlineKeyboardButton(
                     context.bot.lang_dict["shop_admin_set_category_btn"],
@@ -316,7 +313,7 @@ class ProductsHandler(ProductsHelper):
         except ValueError:
             context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
-                text="You introduced a wrong number. \nPlease write a valid floating point number",
+                text=context.bot.lang_dict["add_product_wrong_floating point number"],
                 reply_markup=back_kb(
                     "back_to_main_menu", context=context))
             return DISCOUNT_PRICE
@@ -343,7 +340,7 @@ class ProductsHandler(ProductsHelper):
         except ValueError:
             context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
-                text="You introduced a wrong number. \nPlease write a valid floating point number",
+                text=context.bot.lang_dict["add_product_wrong_floating point number"],
                 reply_markup=back_kb(
                     "back_to_main_menu", context=context))
             return DISCOUNT_PRICE
@@ -365,7 +362,7 @@ class ProductsHandler(ProductsHelper):
 
         buttons = [
             [InlineKeyboardButton(
-                text="Add new Content",
+                text=context.bot.lang_dict["add_product_add_content"],
                 callback_data="add_new_content")],
             [InlineKeyboardButton(
                 text=context.bot.lang_dict["shop_admin_back_btn"],
@@ -373,7 +370,7 @@ class ProductsHandler(ProductsHelper):
         text = (self.admin_short_template(context,
                                           context.user_data["product"])
                 + "\n\n"
-                + "If you want to delete content click '❌' on item")
+                + context.bot.lang_dict["add_product_to_delete_click"])
         context.user_data["to_delete"].append(
             context.bot.send_message(
                 update.effective_chat.id,
@@ -389,8 +386,8 @@ class ProductsHandler(ProductsHelper):
         content_dict = next((content_dict for content_dict
                              in context.user_data["product"].content
                              if content_dict["id"] == content_id), {})
-        update.callback_query.answer(f"{content_dict_as_string(content_dict)}"
-                                     "was successfully removed")
+        update.callback_query.answer(f"{content_dict_as_string(content_dict)}"+
+                                     context.bot.lang_dict["add_product_was_removed"])
         product = products_table.find_and_modify(
             {"_id": context.user_data["product"].id_},
             {"$pull": {"content": {"id": content_id}}}, new=True)
@@ -400,13 +397,12 @@ class ProductsHandler(ProductsHelper):
     def start_adding_content(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         if len(context.user_data["product"].content) >= 10:
-            update.callback_query.answer("Already 10/10 files added")
+            update.callback_query.answer(context.bot.lang_dict["add_product_10_files"])
             return CONTENT_MENU
         text = (
                 self.admin_short_template(context, context.user_data["product"])
                 + "\n\n"
-                + "Add any files about this product: documents, images or videos."
-                  "\n_First file will be title file for the product_"
+                + context.bot.lang_dict["add_product_add_files"]
                 + context.user_data['product'].files_str)
 
         context.user_data["product"].send_full_template(
@@ -424,13 +420,12 @@ class ProductsHandler(ProductsHelper):
         if len(context.user_data["product"].content) < 10:
             context.user_data["product"].add_content_dict(update, to_save=True)
         else:
-            update.callback_query.answer("Already 10/10 files added")
+            update.callback_query.answer(context.bot.lang_dict["add_product_10_files"])
             return self.content_menu(update, context)
         text = (
                 self.admin_short_template(context, context.user_data["product"])
                 + "\n\n"
-                + "Add any files about this product: documents, images or videos."
-                  "\n_First file will be title file for the product_"
+                + context.bot.lang_dict["add_product_add_files"]
                 + context.user_data['product'].files_str)
 
         context.user_data["product"].send_full_template(
@@ -468,8 +463,7 @@ class ProductsHandler(ProductsHelper):
             reply_markup = InlineKeyboardMarkup(buttons)
             context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
-                text="You didn't set any categories yet."
-                     "\nPlease write a new category",
+                text=context.bot.lang_dict["add_product_didnt_set_category"],
                 reply_markup=reply_markup)
         return CATEGORY
 

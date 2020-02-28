@@ -96,15 +96,13 @@ class CreateShopHandler(object):
 
         return "\n".join(facts).join(['\n', '\n'])
 
-    def start_create_shop(self, update, context):  # TODO add the option to skip the token
-
+    def start_create_shop(self, update, context):
         if update.message:
             context.user_data["new_product"].description = update.message.text
         delete_messages(update, context, True)
         context.user_data["to_delete"].append(context.bot.send_message(
             chat_id=update.callback_query.message.chat_id,
-            text="Do you want to make this product with online payment (in Telegram), offline payment or both?\n"
-                 "For in-Telegram payments you will need a payment token, which must be set up in Bot Father settings.",
+            text=context.bot.lang_dict["shop_creation_online_or_offline"],
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("Online payment",
                                       callback_data="set_payment_online")],
@@ -123,9 +121,9 @@ class CreateShopHandler(object):
         context.user_data["shop_type"] = update.callback_query.data.replace("set_payment_", "")
         if "offline" in update.callback_query.data:
             reply_markup = [
-                            [InlineKeyboardButton(text="DELIVERY",
+                            [InlineKeyboardButton(text=context.bot.lang_dict["shop_creation_delivery"],
                                                   callback_data="shop_type_delivery")],
-                            [InlineKeyboardButton(text="PICK UP",
+                            [InlineKeyboardButton(text=context.bot.lang_dict["shop_creation_pick_up"],
                                                   callback_data="shop_type_pick_up")],
                             [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                   callback_data="help_module(shop)")],
