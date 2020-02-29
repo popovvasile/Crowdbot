@@ -149,10 +149,9 @@ class ProductCategoryHandler(object):
     def add_category(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         category_list = categories_table.find({"bot_id": context.bot.id})
-        keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton(text=i["name"])
-             for i in category_list],
-            [back_btn("back_to_main_menu", context)]]
+        keyboard = InlineKeyboardMarkup(
+            [[InlineKeyboardButton(text=i["name"], callback_data="nigga_dont_touch_me")] for i in category_list] +
+            [[back_btn("back_to_main_menu", context)]]
         )
 
         context.user_data["to_delete"] = [context.bot.send_message(
