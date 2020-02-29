@@ -41,10 +41,10 @@ class OrdersHandlerHelper(object):
                     InlineKeyboardButton(
                         text=context.bot.lang_dict["shop_admin_to_done_btn"],
                         callback_data=f"to_done/{order.id_}"))
-            kb[0].append(
-                InlineKeyboardButton(
-                    text=context.bot.lang_dict["shop_admin_edit_btn"],
-                    callback_data=f"edit/{order.id_}"))
+            # kb[0].append(
+            #     InlineKeyboardButton(
+            #         text=context.bot.lang_dict["shop_admin_edit_btn"],
+            #         callback_data=f"edit/{order.id_}"))
 
             # kb[0].append(InlineKeyboardButton(
             #     text=context.bot.lang_dict["shop_admin_to_trash_btn"],
@@ -185,7 +185,7 @@ class OrdersHandler(OrdersHandlerHelper):
                 if not product.unlimited:
                     product.quantity = item["quantity"]
                 product.create()
-
+            # increase quantity if document exist and product is not unlimited
             elif not product["unlimited"]:
                 products_table.update_one(
                     {"_id": item["product_id"]},
@@ -194,7 +194,7 @@ class OrdersHandler(OrdersHandlerHelper):
             context.bot.lang_dict["shop_admin_order_canceled_blink"])
         return self.back_to_orders(update, context)
 
-    def edit(self, update: Update, context: CallbackContext):
+    """def edit(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         # Set current page integer in the user_data.
         if update.callback_query.data.startswith(
@@ -253,7 +253,7 @@ class OrdersHandler(OrdersHandlerHelper):
             size=item_data[2]
         )
         context.user_data["order"].add_item(item)
-        return self.edit(update, context)
+        return self.edit(update, context)"""
 
     def back_to_orders(self, update, context):
         page = context.user_data.get("page")
@@ -289,9 +289,10 @@ ORDERS_HANDLER = ConversationHandler(
                           CallbackQueryHandler(
                               OrdersHandler().confirm_to_done,
                               pattern="admin_order_item_pagination"),
-                          CallbackQueryHandler(
-                              OrdersHandler().edit,
-                              pattern=r"edit")],
+                          # CallbackQueryHandler(
+                          #     OrdersHandler().edit,
+                          #     pattern=r"edit")
+                          ],
 
         CONFIRM_CANCEL: [CallbackQueryHandler(OrdersHandler().finish_cancel,
                                               pattern=r"finish_cancel"),
@@ -302,17 +303,17 @@ ORDERS_HANDLER = ConversationHandler(
         #     CallbackQueryHandler(OrdersHandler().finish_to_trash,
         #                          pattern=r"finish_to_trash")],
 
-        EDIT: [CallbackQueryHandler(OrdersHandler().add_item,
-                                    pattern=r"add_to_order"),
-               CallbackQueryHandler(OrdersHandler().remove_item,
-                                    pattern=r"remove_item"),
-               CallbackQueryHandler(OrdersHandler().edit,
-                                    pattern="admin_order_item_pagination")],
-
-        CHOOSE_PRODUCT: [CallbackQueryHandler(OrdersHandler().finish_adding_item,
-                                              pattern=r"finish_add_to_order"),
-                         CallbackQueryHandler(OrdersHandler().add_item,
-                                              pattern="^[0-9]+$")]
+        # EDIT: [CallbackQueryHandler(OrdersHandler().add_item,
+        #                             pattern=r"add_to_order"),
+        #        CallbackQueryHandler(OrdersHandler().remove_item,
+        #                             pattern=r"remove_item"),
+        #        CallbackQueryHandler(OrdersHandler().edit,
+        #                             pattern="admin_order_item_pagination")],
+        #
+        # CHOOSE_PRODUCT: [CallbackQueryHandler(OrdersHandler().finish_adding_item,
+        #                                       pattern=r"finish_add_to_order"),
+        #                  CallbackQueryHandler(OrdersHandler().add_item,
+        #                                       pattern="^[0-9]+$")]
     },
     fallbacks=[CallbackQueryHandler(OrdersHandler().back_to_orders,
                                     pattern=r"back_to_orders"),

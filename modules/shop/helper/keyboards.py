@@ -93,8 +93,8 @@ def keyboards(context):
                                   callback_data="finish_to_done")],
             # [InlineKeyboardButton(context.bot.lang_dict["shop_admin_add_product_btn"],
             #                       callback_data="add_product_to_order")],
-            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_edit_btn"],
-                                  callback_data=f"edit")],
+            # [InlineKeyboardButton(context.bot.lang_dict["shop_admin_edit_btn"],
+            #                       callback_data=f"edit")],
             [back_btn("back_to_orders_btn", context=context)]
         ]),
         confirm_to_trash=InlineKeyboardMarkup([

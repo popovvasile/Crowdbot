@@ -47,9 +47,9 @@ class CartHelper(object):
                           * cart_item["quantity"])
             order_price += item_price
             template += (
-                "{} - `{}`\n"
+                "_{}_ - `{}`\n"
                 "x{} - `{}` {}\n\n").format(
-                cart_item["product"].get("article"),
+                cart_item["product"]["_id"],
                 cart_item["product"]["name"],
                 cart_item["quantity"],
                 item_price,
