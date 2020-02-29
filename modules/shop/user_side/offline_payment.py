@@ -6,7 +6,8 @@ from pprint import pprint
 
 from random import randint
 
-from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ParseMode
+from telegram import (InlineKeyboardMarkup, InlineKeyboardButton, ParseMode,
+                      OrderInfo)
 from telegram.ext import (MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
 

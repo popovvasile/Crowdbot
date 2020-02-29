@@ -75,7 +75,7 @@ class Order(object):
             currency = chatbots_table.find_one(
                 {"bot_id": self.context.bot.id})["shop"]["currency"]
         return "\n".join(
-            ["{} - <code>{}</code>\n"
+            ["<i>{}</i> - <code>{}</code>\n"
              "x{} - <code>{}</code> {}".format(
                 item.article,
                 item.name,
@@ -88,104 +88,6 @@ class Order(object):
     def update(self, json):
         orders_table.update_one({"_id": self._id}, {"$set": json})
         self.create_fields(self.context, self._id)
-
-    # TODO CODE FROM SHOP-API - REFORMAT
-    """def change_status(self, args):
-        if args["new_status"] is not None:
-            if args["new_status"] is False:
-                self.move_to_new()
-            if args["new_status"] is True:
-                self.move_to_done()
-        if args["new_trash_status"] is not None:
-            self.change_delete_status(args["new_trash_status"])
-
-    def move_to_new(self):
-        if self.status is False:
-            # todo 400
-            abort(400, "Order already new")
-        for order_item in self.items:
-            order_item.product_item.current_quantity += 1
-            if len(order_item.product_item.product.sizes_list()) > 0 \
-                    and order_item.product_item.product.sold_out is True:
-                order_item.product_item.product.sold_out = False
-        self.status = False
-        db.session.add(self)
-        db.session.commit()
-
-    def move_to_done(self):
-        if self.status is True:
-            # todo 400
-            abort(400, "Order already done")
-        order_errors = list()
-        for order_item in self.items:
-            if not order_item.exist():
-                order_errors.append(order_item.item_error())
-            else:
-                order_item.product_item.current_quantity -= 1
-                if len(order_item.product_item.product.sizes_list()) == 0:
-                    order_item.product_item.product.sold_out = True
-        if order_errors:
-            # todo 400
-            abort(400, order_errors)
-        else:
-            self.status = True
-            db.session.add(self)
-            db.session.commit()
-
-    def add_items(self, items):
-        order_errors = list()
-        # price = self.price if self.price else 0
-        self.price = self.price or 0
-        for item in items:
-            product_size = ProductSize.query.join(Size, Product).filter(
-                (Size.name == item["size"]) &
-                (Product.article == item["article"])).first()
-            if not product_size or product_size.current_quantity == 0:
-                order_errors.append(self.item_error(item["article"]))
-            else:
-                # product = Product.query.get_or_404(item["article"])
-                # self.products.append(product)
-                order_item = OrderItem(product_item=product_size,
-                                       order=self)
-                # product_size.size.orders.append(order_item)
-                # self.items.append(order_item)
-                self.price += product_size.product.price \
-                    if product_size.product.discount_price == 0 \
-                    else product_size.product.discount_price
-        if order_errors:
-            abort(409, order_errors)
-        # if not order_errors:
-            # self.price = price
-            # self.price = sum(item.product_item.product.price
-            #                  if item.product_item.product.discount_price==0
-            #                  else item.product_item.product.discount_price
-            #                  for item in self.items)
-        #     return True
-        # else:
-        #     return order_errors
-
-    def remove_item(self, id_to_remove):
-        item = self.items.filter_by(id=id_to_remove).first()
-        if item:
-            self.items.remove(item)
-            db.session.add(self)
-            db.session.commit()
-        else:
-            abort(400, f"There are not item with given id -> {id_to_remove}")
-
-    def change_delete_status(self, new_delete_status):
-        if self.status is False:
-            self.in_trash = new_delete_status
-            # if new_delete_status is True:
-            #     self.in_trash = True
-            # elif new_delete_status is False:
-            #     self.in_trash = False
-            db.session.add(self)
-            db.session.commit()
-        elif self.status is True:
-            # todo 400
-            abort(400, "Order is done and can't be deleted")
-"""
 
 
 class AdminOrder(Order):
@@ -348,17 +250,24 @@ class OrderItem(Product):
 
     def __init__(self, context, order_item):
         # change order_item["product_id"] to order_item["product"]
-        # - to take product data that was on the order creation moment
+        # and item data will be taken from order document.
+        # Items data that was on the order creation moment
         super(OrderItem, self).__init__(context, order_item["product_id"])
         # Units of item that customer ordered
         self.order_quantity = order_item.get("quantity")
         # Check if the product exist, ready for sale, and quantity is right
-        self.item_exist = (
-            self._id  # if _id == None - mean find_one() call returns None
-            and self.on_sale
-            and (self.unlimited or (self.order_quantity <= self.quantity)))
+        # self.item_exist = (
+        #     self._id  # if _id == None - mean find_one() call returns None
+        #     and self.on_sale
+        #     and (self.unlimited or (self.order_quantity <= self.quantity)))
         # price of the item
         self.item_price = self.price * self.order_quantity
+
+    @property
+    def item_exist(self):
+        return (self._id  # if _id == None - mean find_one() call returns None
+                and self.on_sale
+                and (self.unlimited or (self.order_quantity <= self.quantity)))
 
     def send_template(self, update, context, reply_markup=None):
         currency = chatbots_table.find_one(
