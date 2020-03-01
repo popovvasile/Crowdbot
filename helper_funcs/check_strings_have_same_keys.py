@@ -30,9 +30,11 @@ def check_strings():
                 lang_dict["RUS"][key] = lang_dict["ENG"][key]
         for key in lang_dict["RUS"]:
             if key in lang_dict["ENG"]:
-                continue
+                if lang_dict["RUS"][key].count("{}") != lang_dict["ENG"][key].count("{}"):
+                    lang_dict["RUS"][key] = lang_dict["ENG"][key]
             else:
                 lang_dict["ENG"][key] = lang_dict["RUS"][key]
+
         with open('languages2.json', 'w') as fp:
             json.dump(lang_dict, fp, sort_keys=True, indent=4, ensure_ascii=False)
 

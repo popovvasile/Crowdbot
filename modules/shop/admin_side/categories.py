@@ -70,8 +70,8 @@ class ProductCategoryHandler(object):
         if products.count() > 0:
             context.user_data["category_id"] = category_id
             keyboard = InlineKeyboardMarkup([
-                [InlineKeyboardButton("YES", callback_data="del_cat_confirm")],
-                [InlineKeyboardButton("NO", callback_data="back_to_main_menu")]])
+                [InlineKeyboardButton(context.bot.lang_dict["yes"], callback_data="del_cat_confirm")],
+                [InlineKeyboardButton(context.bot.lang_dict["no"], callback_data="back_to_main_menu")]])
             context.user_data["to_delete"] = [context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
                 text=context.bot.lang_dict["shop_category_will_be_deleted"].
@@ -86,6 +86,7 @@ class ProductCategoryHandler(object):
                                          "_id": ObjectId(category_id)})
             products_table.delete_many({"bot_id": context.bot.id,
                                         "category_id": ObjectId(category_id)})
+            #  TODO to trash, not delete (if there are active orders)
 
             context.user_data["to_delete"] = [context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
