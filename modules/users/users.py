@@ -11,7 +11,8 @@ from telegram.ext import MessageHandler, Filters, ConversationHandler, CallbackQ
 
 from helper_funcs.helper import get_help
 from helper_funcs.pagination import Pagination
-from helper_funcs.misc import delete_messages, lang_timestamp, get_obj, user_mention
+from helper_funcs.misc import (delete_messages, lang_timestamp, get_obj, user_mention,
+                               update_user_fields)
 from modules.statistic.donation_statistic import DonationStatistic
 from modules.users.message_helper import (MessageTemplate, send_deleted_message_content,
                                           AnswerToMessage, send_not_deleted_message_content,
@@ -225,15 +226,15 @@ class UsersHandler(object):
     def back_to_open_user(self, update, context):
         """All backs to open user must be done through this method"""
         delete_messages(update, context, True)
-        # try:
-        user_id = context.user_data["user"]["_id"]
-        self.clear_and_reset_user_data(context)
-        context.user_data["user"] = users_table.find_one({"_id": user_id})
-        return self.open_user(update, context)
-        # except KeyError:
-        #     logger.info("Something gone wrong while back to open user")
-        #     context.user_data.clear()
-        #     return get_help(update, context)
+        try:
+            user_id = context.user_data["user"]["_id"]
+            self.clear_and_reset_user_data(context)
+            context.user_data["user"] = users_table.find_one({"_id": user_id})
+            return self.open_user(update, context)
+        except KeyError:
+            logger.info("Something gone wrong while back to open user")
+            context.user_data.clear()
+            return get_help(update, context)
 
 
 class UserBlockHandler(object):
@@ -635,7 +636,7 @@ class UserTemplate(object):
                                    {"$set": new_user_fields})"""
 
 
-def update_user_fields(context, user):
+"""def update_user_fields(context, user):
     # Update user full_name, username
     telegram_user = context.bot.get_chat_member(user["chat_id"],
                                                 user["user_id"]).user
@@ -661,7 +662,7 @@ def update_user_fields(context, user):
 
     if new_user_fields:
         users_table.update_one({"_id": user["_id"]},
-                               {"$set": new_user_fields})
+                               {"$set": new_user_fields})"""
 
 
 MESSAGE_TO_USERS, MESSAGE_TO_USER, DOUBLE_CHECK = range(3)

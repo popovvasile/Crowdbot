@@ -91,7 +91,9 @@ def help_strings(context, update):
     )
     # Get unread messages count.
     new_messages_count = users_messages_to_admin_table.find(
-        {"bot_id": context.bot.id, "is_new": True}).count()
+        {"bot_id": context.bot.id,
+         "is_new": True,
+         "deleted": False}).count()
     current_user_mode = user_mode_table.find_one(
         {"bot_id": context.bot.id, "user_id": update.effective_user.id})
     if if_admin(update, context) and not current_user_mode.get("user_mode"):
@@ -127,7 +129,9 @@ def help_strings(context, update):
 def helpable_dict(bot):
     # Get unread messages count.
     new_messages_count = users_messages_to_admin_table.find(
-        {"bot_id": bot.id, "is_new": True}).count()
+        {"bot_id": bot.id,
+         "is_new": True,
+         "deleted": False}).count()
     # Create unread messages string
     new_messages_str = (f" ({new_messages_count})"
                         if new_messages_count else "")

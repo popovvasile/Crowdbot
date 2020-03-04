@@ -12,7 +12,8 @@ from telegram.ext import ConversationHandler, CallbackQueryHandler
 
 from database import users_table, admin_passwords_table
 from helper_funcs.pagination import Pagination
-from helper_funcs.misc import delete_messages, lang_timestamp, get_obj
+from helper_funcs.misc import (delete_messages, lang_timestamp, get_obj, update_user_fields,
+                               user_mention)
 from helper_funcs.helper import back_from_button_handler
 
 
@@ -30,27 +31,34 @@ class Admin:
         self.context = context
         obj = get_obj(users_table, obj)
         self._id = obj["_id"]
-        self.name = obj.get("mention_markdown")
-        self.email = obj.get("email")
-        self.registered = obj["registered"]
+        self.user_id = obj["user_id"]
+        self.full_name = obj["full_name"]
+        self.username = obj["username"]
         self.timestamp = lang_timestamp(self.context, obj.get("timestamp"))
+        self.unsubscribed = obj["unsubscribed"]
 
     def send_template(self, update, text="", reply_markup=None):
         self.context.user_data["to_delete"].append(
             self.context.bot.send_message(
                 chat_id=update.effective_chat.id,
                 text=f"{self.template}\n\n{text}",
-                parse_mode=ParseMode.MARKDOWN,
+                parse_mode=ParseMode.HTML,
                 reply_markup=reply_markup if reply_markup
                 else self.reply_markup))
 
     @property
     def template(self):
-        return (
-            self.context.bot.lang_dict["registered_admin_temp"].format(
-                self.name, self.email, self.timestamp) if self.registered else
-            self.context.bot.lang_dict["not_registered_admin_temp"].format(
-                self.email))
+        if self.username:
+            _user_mention = user_mention(self.username, self.full_name)
+        else:
+            _user_mention = f'<a href="tg://user?id={self.user_id}">{self.full_name}</a>'
+        return self.context.bot.lang_dict["registered_admin_temp"].format(
+                _user_mention, self.timestamp)
+        # return (
+        #     self.context.bot.lang_dict["registered_admin_temp"].format(
+        #         self.name, self.timestamp) if self.registered else
+        #     self.context.bot.lang_dict["not_registered_admin_temp"].format(
+        #         self.email))
 
     @property
     def reply_markup(self):
@@ -61,7 +69,8 @@ class Admin:
         return InlineKeyboardMarkup(reply_markup)
 
     def delete(self):
-        users_table.delete_one({"_id": self._id})
+        users_table.update_one({"_id": self._id},
+                               {"$set": {"is_admin": False}})
 
     @staticmethod
     def get_all(context):
@@ -128,6 +137,7 @@ class AdminHandler(object):
         else:
             pagination = Pagination(all_admins, context.user_data["page"])
             for admin in pagination.content:
+                update_user_fields(context, admin)
                 Admin(context, admin).send_template(update)
             pagination.send_keyboard(
                 update, context,
