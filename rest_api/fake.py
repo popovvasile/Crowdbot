@@ -1,6 +1,10 @@
-from database import users_table, users_messages_to_admin_table
-from datetime import datetime
+from datetime import datetime, timedelta
+from random import randint
+
 from faker import Faker
+from bson import ObjectId
+
+from database import users_table, users_messages_to_admin_table
 
 
 class FakeUsers:
@@ -67,6 +71,30 @@ class FakeMessages:
     bot_id = 771382519
     fake = Faker()
 
+    def fake_vasi_messages(self, count=20):
+
+        messsage = {
+            'anonim': False,
+            'answer_content': [
+                # {'name': '🤢',
+                #  'sticker_file':
+                #      'CAACAgIAAxkBAAKx-V5dekGET3yk4MRzEsGfvbQJTZedAAKwAAO_ZtAXiyPzJWW1vkEYBA'},
+                # {'name': '😅',
+                #  'sticker_file':
+                #      'CAACAgIAAxkBAAKx-15dekufHcCYTi7B_F4kGDViV1esAALIAQAC-eRsAAGSghyFw1_y4RgE'}
+            ],
+            'bot_id': self.bot_id,
+            'chat_id': 244356086,
+            'content': [{'text': self.fake.text()}],
+            'deleted': False,
+            'is_new': True,
+            'timestamp': datetime.now() - timedelta(seconds=randint(1, 50000)),
+            'user_full_name': 'Vasi',
+            'user_id': 244356086}
+        for x in range(count):
+            users_messages_to_admin_table.insert_one(messsage)
+        # users_messages_to_admin_table.insert_many([messsage for x in range(count)])
+
     def messages(self, count=20):
         count = 0
         for user in users_table.find():
@@ -108,4 +136,5 @@ class FakeMessages:
 
 if __name__ == "__main__":
     # FakeUsers().users()
-    FakeMessages().messages()
+    # FakeMessages().messages()
+    FakeMessages().fake_vasi_messages()

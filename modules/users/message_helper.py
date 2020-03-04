@@ -53,8 +53,14 @@ class AnswerToMessage(object):
         return self.STATE
 
     def received_message(self, update, context):
-        delete_messages(update, context)
+        if update.callback_query:
+            delete_messages(update, context, True)
+        else:
+            delete_messages(update, context)
         add_to_content(update, context)
+        if not context.user_data.get("final_delete"):
+            context.user_data["final_delete"] = list()
+        context.user_data["final_delete"].append(update.message)
         reply_markup = InlineKeyboardMarkup([
             [InlineKeyboardButton(text=context.bot.lang_dict["done_button"],
                                   callback_data="send_message_finish")],
@@ -69,6 +75,7 @@ class AnswerToMessage(object):
         return self.STATE
 
     def send_message_finish(self, update, context):
+        context.user_data["to_delete"].extend(context.user_data["final_delete"])
         users_messages_to_admin_table.update_one(
             {"_id": context.user_data["answer_to"]["_id"]},
             {"$set": {"answer_content": context.user_data["content"],

@@ -13,20 +13,21 @@ from helper_funcs.helper import (
     help_button, button_handler, get_help, WelcomeBot,
     back_from_button_handler, back_to_modules)
 
+# CHANNELS
 from modules.chanells.channels import (
     MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER, REMOVE_CHANNEL_HANDLER,
     SEND_POST_HANDLER, CHANELLS_MENU)
 from modules.chanells.channels_polls_surveys_donate import (
     SEND_POLL_TO_CHANNEL_HANDLER, SEND_SURVEY_TO_CHANNEL_HANDLER,
     SEND_DONATION_TO_CHANNEL_HANDLER)
-
+# GROUPS
 from modules.groups.groups import (
     MY_GROUPS_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER,
     ADD_GROUP_HANLDER, GROUPS_MENU)
 from modules.groups.groups_polls_surveys_donate import (
     SEND_POLL_TO_GROUP_HANDLER, SEND_SURVEY_TO_GROUP_HANDLER,
     SEND_DONATION_TO_GROUP_HANDLER)
-
+# SETTINGS
 from modules.settings.menu_description import EDIT_BOT_DESCRIPTION_HANDLER
 from modules.settings.settings import (
     BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER, LINK_BUTTON_ADD_HANDLER,
@@ -38,7 +39,7 @@ from modules.settings.user_mode import USER_MODE_OFF, USER_MODE_ON
 from modules.settings.admins import ADMINS_LIST_HANDLER
 from modules.donations.donation_payment import (DONATE_HANDLER, HANDLE_SUCCES,
                                                 HANDLE_PRECHECKOUT)
-
+# USERS AND MESSAGES
 from modules.users.messages_admin import SEND_MESSAGE_ONLY_TO_ADMINS_HANDLER
 from modules.users.messages_donators import SEND_MESSAGE_TO_DONATORS_HANDLER
 from modules.users.messages import (
@@ -49,34 +50,30 @@ from modules.users.messages import (
     CONFIRM_BLOCK_ANONIM_MESSAGING, UNBLOCK_ANONIM_MESSAGING,
     CONFIRM_BLOCK_MESSAGING_FROM_INBOX, FINISH_BLOCK_MESSAGING_FROM_INBOX,
     FINISH_UNBLOCK_MESSAGING_FROM_INBOX, SHOW_MESSAGE_HANDLER,
-    HIDE_MESSAGE_HANDLER, BACK_TO_MESSAGES_MENU)
+    HIDE_MESSAGE_HANDLER, BACK_TO_MESSAGES_MENU, DELETE_MESSAGES_MENU_HANDLER)
 from modules.users.users import (
-    USERS_LIST_HANDLER, USER_MESSAGES_LIST,
-    ANSWER_TO_MESSAGE_FROM_USER_LIST_HANDLER, CONFIRM_BLOCK_MESSAGING,
-    FINISH_BLOCK_MESSAGING, FINISH_UNBLOCK_MESSAGING,
-    BACK_TO_USERS_LIST, VIEW_USER_MESSAGE, BACK_TO_OPEN_MESSAGE,
-    CONFIRM_BAN_USER, FINISH_BAN_USER, FINISH_UNBUN_USER,
-    SEND_MESSAGE_TO_USER_HANDLER, BACK_TO_USER_MESSAGES_LIST,
-    DELETE_USER_MESSAGE_HANDLER
-    # OPEN_USER_HANDLER
-)
+    USERS_LIST_HANDLER, USER_MESSAGES_LIST, ANSWER_TO_MESSAGE_FROM_USER_LIST_HANDLER,
+    CONFIRM_BLOCK_MESSAGING, FINISH_BLOCK_MESSAGING, FINISH_UNBLOCK_MESSAGING, BACK_TO_USERS_LIST,
+    VIEW_USER_MESSAGE, BACK_TO_OPEN_MESSAGE, CONFIRM_BAN_USER, FINISH_BAN_USER, FINISH_UNBUN_USER,
+    SEND_MESSAGE_TO_USER_HANDLER, BACK_TO_USER_MESSAGES_LIST, DELETE_USER_MESSAGE_HANDLER,
+    OPEN_USER_HANDLER, BACK_TO_OPEN_USER)
 
 from modules.statistic.statistic_main import (
     STATISTIC_MAIN_MENU, BACK_TO_STATISTIC_MAIN)
 from modules.statistic.user_statistic import USERS_STATISTIC_HANDLER
 from modules.statistic.donation_statistic import DONATION_STATISTIC_HANDLER
-
+# SURVEYS
 from modules.surveys.surveys_answer import ANSWER_SURVEY_HANDLER
 from modules.surveys.surveys_create import (
     DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_HANDLER, SEND_SURVEYS_HANDLER,
     CREATE_SURVEY_HANDLER, SURVEYS_MENU, SEND_SURVEYS_MENU_HANDLER)
-
+# PAYMENTS
 from modules.payments.payments_config import (
     EDIT_DONATION_HANDLER, PAYMENTS_CONFIG_KEYBOARD, CHANGE_DONATIONS_CONFIG,
     CONFIGS_DONATIONS_GENERAL, CONFIGS_SHOP_GENERAL, CHANGE_SHOP_CONFIG)
 from modules.donations.donation_enable_disable import (
     CREATE_DONATION_HANDLER, DONATIONS_MENU)
-
+# POLLS
 from modules.pollbot.polls import (
     POLL_HANDLER, SEND_POLLS_HANDLER, BUTTON_HANDLER, DELETE_POLLS_HANDLER,
     POLLS_RESULTS_HANDLER, POLLS_MENU, POLLS_SEND_MENU)
@@ -224,7 +221,8 @@ def main(token, lang):
     dispatcher.add_handler(SEND_MESSAGE_TO_USER_HANDLER)
     dispatcher.add_handler(BACK_TO_USER_MESSAGES_LIST)
     dispatcher.add_handler(DELETE_USER_MESSAGE_HANDLER)
-    # dispatcher.add_handler(OPEN_USER_HANDLER)
+    dispatcher.add_handler(OPEN_USER_HANDLER)
+    dispatcher.add_handler(BACK_TO_OPEN_USER)
 
     # STATISTIC
     dispatcher.add_handler(STATISTIC_MAIN_MENU)
@@ -278,6 +276,7 @@ def main(token, lang):
     dispatcher.add_handler(SHOW_MESSAGE_HANDLER)
     dispatcher.add_handler(HIDE_MESSAGE_HANDLER)
     dispatcher.add_handler(BACK_TO_MESSAGES_MENU)
+    dispatcher.add_handler(DELETE_MESSAGES_MENU_HANDLER)
 
     # SURVEYS
     dispatcher.add_handler(SURVEYS_MENU)

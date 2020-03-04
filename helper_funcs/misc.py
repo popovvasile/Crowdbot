@@ -69,7 +69,7 @@ def get_obj(table, obj: (ObjectId, dict, str)):
     if type(obj) is dict:
         return obj
     elif type(obj) is ObjectId:
-        return table.find_one({"_id": obj})
+        return table.find_one({"_id": obj}) or {}
     elif type(obj) is str:
         return table.find_one({"_id": ObjectId(obj)})
     else:
