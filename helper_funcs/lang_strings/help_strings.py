@@ -50,16 +50,16 @@ def help_strings(context, update):
                                       + (f" ({cart_items_count})"
                                          if cart_items_count else ""),
                                  callback_data="cart")])
-    help_dict["channels_groups"] = dict(
-        mod_name='Channels',
-        # start 'Channels' message
-        admin_help=string_d_str["channels_str_1"],
-        # and keyboard for start message
-        admin_keyboard=[InlineKeyboardButton(text=string_d_str["channels"],
-                                             callback_data='channels'),
-                        InlineKeyboardButton(text=string_d_str["groups"],
-                                             callback_data='groups')]
-    )
+    # help_dict["channels_groups"] = dict(
+    #     mod_name='Channels',
+    #     # start 'Channels' message
+    #     admin_help=string_d_str["channels_str_1"],
+    #     # and keyboard for start message
+    #     admin_keyboard=[InlineKeyboardButton(text=string_d_str["channels"],
+    #                                          callback_data='channels'),
+    #                     InlineKeyboardButton(text=string_d_str["groups"],
+    #                                          callback_data='groups')]
+    # )
 
     help_dict["settings"] = dict(
         mod_name=string_d_str["add_menu_module_button"],
@@ -70,8 +70,6 @@ def help_strings(context, update):
                                  callback_data="edit_bot_description"),
             InlineKeyboardButton(text=string_d_str["user_mode_module"],
                                  callback_data="turn_user_mode_on"),
-            InlineKeyboardButton(text=string_d_str["payment_configure_button"],
-                                 callback_data="payments_config"),
             InlineKeyboardButton(text=string_d_str["admins_btn_str"],
                                  callback_data="admins"),
             InlineKeyboardButton(text=string_d_str["statistic_btn_str"],
@@ -132,16 +130,15 @@ def helpable_dict(bot):
     new_messages_str = (f" ({new_messages_count})"
                         if new_messages_count else "")
     admin_rus = OrderedDict()
-    admin_rus["📱 Группы и каналы"] = "channels"
-    admin_rus["❓ Опросы"] = "polls"
+    # admin_rus["📱 Группы и каналы"] = "channels_groups"
+    # admin_rus["❓ Опросы"] = "polls"
     admin_rus[f"✉️ Пользователи и Сообщения {new_messages_str}"] = "users"
     admin_rus["🛠 Настройки бота"] = "settings"
-    admin_rus["📱 Группы и каналы"] = "channels_groups"
     admin_rus["Магазин и платежи"] = "shop"
 
     admin_eng = OrderedDict()
-    admin_eng["📱 Groups and Channels"] = "channels_groups"
-    admin_eng["❓ Polls and Surveys"] = "polls"
+    # admin_eng["📱 Groups and Channels"] = "channels_groups"
+    # admin_eng["❓ Polls and Surveys"] = "polls"
     admin_eng[f"✉️ Users & Messages {new_messages_str}"] = "users"
     admin_eng["🛠 Bot and Menu Settings"] = "settings"
     admin_eng["💰 Shop and Payments"] = "shop"

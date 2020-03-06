@@ -74,21 +74,24 @@ class AddCommands(object):
         buttons = chatbots_table.find_one({"bot_id": context.bot.id})["buttons"]
         if buttons is not None and buttons != []:
             markup = ReplyKeyboardMarkup([buttons], one_time_keyboard=True)
-            context.user_data["to_delete"].append(context.bot.send_message(update.callback_query.message.chat.id,
-                                                                           context.bot.lang_dict[
-                                                                               "add_menu_buttons_str_1"],
-                                                                           reply_markup=markup))
-            context.user_data["to_delete"].append(context.bot.send_message(update.callback_query.message.chat.id,
-                                                                           context.bot.lang_dict["back_text"],
-                                                                           reply_markup=reply_markup))
+            context.user_data["to_delete"].append(context.bot.send_message(
+                update.callback_query.message.chat.id,
+                context.bot.lang_dict["add_menu_buttons_str_1"],
+                reply_markup=markup))
+            context.user_data["to_delete"].append(context.bot.send_message(
+                update.callback_query.message.chat.id,
+                context.bot.lang_dict["back_text"],
+                reply_markup=reply_markup))
             return TYPING_BUTTON
         else:
-            context.user_data["to_delete"].append(context.bot.send_message(update.callback_query.message.chat.id,
-                                                                           context.bot.lang_dict[
-                                                                               "add_menu_buttons_str_1_1"]))
-            context.user_data["to_delete"].append(context.bot.send_message(update.callback_query.message.chat.id,
-                                                                           context.bot.lang_dict["back_text"],
-                                                                           reply_markup=reply_markup))
+            context.user_data["to_delete"].append(context.bot.send_message(
+                update.callback_query.message.chat.id,
+                context.bot.lang_dict["add_menu_buttons_str_1_1"]))
+
+            context.user_data["to_delete"].append(context.bot.send_message(
+                update.callback_query.message.chat.id,
+                context.bot.lang_dict["back_text"],
+                reply_markup=reply_markup))
             return TYPING_BUTTON
 
     def button_handler(self, update, context):
