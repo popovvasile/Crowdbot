@@ -92,7 +92,7 @@ class AnswerToMessage(object):
         reply_markup = InlineKeyboardMarkup([
             [InlineKeyboardButton(
                 text="Show",
-                callback_data="subscriber_open_message/"
+                callback_data="subscriber_open_message_true/"
                               + str(context.user_data["answer_to"]["_id"]))]])
 
         context.bot.send_message(

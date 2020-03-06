@@ -118,9 +118,10 @@ def help_strings(context, update):
             InlineKeyboardButton(
                 text=string_d_str["send_message_button_to_admin"],
                 callback_data="send_message_to_admin"),
-            InlineKeyboardButton(
-                text=string_d_str["send_message_button_to_admin_anonim"],
-                callback_data="send_message_to_admin_anonim")]
+            # InlineKeyboardButton(
+            #     text=string_d_str["send_message_button_to_admin_anonim"],
+            #     callback_data="send_message_to_admin_anonim")
+        ]
     )
 
     return help_dict

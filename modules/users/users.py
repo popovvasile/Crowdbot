@@ -553,7 +553,7 @@ class SendMessageToUser(object):
                 # TODO NO CHAT_ID HERE
                 chat_id=context.user_data["chat_id"],
                 content=context.user_data["content"])
-        except BadRequest:
+        except:
             update.callback_query.answer("Something gone wrong")
             return UsersHandler().back_to_open_user(update, context)
         logger.info("Admin {} on bot {}:{} sent a message to the user".format(

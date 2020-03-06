@@ -13,7 +13,7 @@ from telegram.ext import (MessageHandler, Filters, ConversationHandler,
 
 from helper_funcs.helper import get_help
 from helper_funcs.lang_strings.strings import emoji
-from helper_funcs.misc import delete_messages, lang_timestamp, user_mention
+from helper_funcs.misc import delete_messages, lang_timestamp, user_mention, update_user_fields
 from helper_funcs.pagination import Pagination
 from modules.users.users import UserTemplate
 from modules.users.message_helper import (
@@ -142,10 +142,7 @@ def back_to_messages_menu(update, context):
 
 class SendMessageToAdmin(object):
     def send_message(self, update, context):
-        context.bot.delete_message(
-            chat_id=update.callback_query.message.chat_id,
-            message_id=update.callback_query.message.message_id)
-
+        delete_messages(update, context, True)
         buttons = [[InlineKeyboardButton(
                         text=context.bot.lang_dict["back_button"],
                         callback_data="help_back")]]
@@ -168,11 +165,11 @@ class SendMessageToAdmin(object):
                 return ConversationHandler.END
 
             context.user_data["new_message"]["anonim"] = True
-            context.bot.send_message(
-                chat_id=update.callback_query.message.chat_id,
-                text=context.bot.lang_dict[
-                    "send_message_from_user_to_admin_anonim_text"],
-                reply_markup=reply_markup)
+            context.user_data["to_delete"].append(
+                context.bot.send_message(
+                    chat_id=update.callback_query.message.chat_id,
+                    text=context.bot.lang_dict["send_message_from_user_to_admin_anonim_text"],
+                    reply_markup=reply_markup))
         else:
             if user.get("regular_messages_blocked"):
                 # TODO STRINGS
@@ -185,11 +182,11 @@ class SendMessageToAdmin(object):
                 return ConversationHandler.END
 
             context.user_data["new_message"]["anonim"] = False
-            context.bot.send_message(
-                chat_id=update.callback_query.message.chat_id,
-                text=context.bot.lang_dict[
-                    "send_message_from_user_to_admin_text"],
-                reply_markup=reply_markup)
+            context.user_data["to_delete"].append(
+                context.bot.send_message(
+                    chat_id=update.callback_query.message.chat_id,
+                    text=context.bot.lang_dict["send_message_from_user_to_admin_text"],
+                    reply_markup=reply_markup))
         return MESSAGE
 
     # def send_topic(self, update, context):
@@ -252,9 +249,8 @@ class SendMessageToAdmin(object):
 
         users_messages_to_admin_table.insert(context.user_data["new_message"])
         # Send notification about new message to all admins
-        for admin in users_table.find({"bot_id": context.bot.id,
+        """for admin in users_table.find({"bot_id": context.bot.id,
                                        "is_admin": True}):
-            # TODO STRINGS
             # Create notification text and send it.
             text = ("<b>New Message</b> "
                     + MessageTemplate(context.user_data["new_message"],
@@ -267,7 +263,7 @@ class SendMessageToAdmin(object):
             context.bot.send_message(chat_id=admin["chat_id"],
                                      text=text,
                                      # reply_markup=reply_markup,
-                                     parse_mode=ParseMode.HTML)
+                                     parse_mode=ParseMode.HTML)"""
         # Console log
         logger.info("User {} on bot {}:{} sent a message to the admin".format(
             update.effective_user.first_name, context.bot.first_name,
@@ -365,20 +361,27 @@ class SendMessageToUsers(object):
     # @run_async
     def send_message_finish(self, update, context):  # TODO does not work
         if "user_category" not in context.user_data:
-            chats = users_table.find({"bot_id": context.bot.id})
+            users = users_table.find({"bot_id": context.bot.id,
+                                      "blocked": False,
+                                      "unsubscribed": False})
         elif context.user_data["user_category"] == "All":
-            chats = users_table.find({"bot_id": context.bot.id})
+            users = users_table.find({"bot_id": context.bot.id,
+                                      "blocked": False,
+                                      "unsubscribed": False})
         else:
-            chats = users_table.find(
+            users = users_table.find(
                 {"bot_id": context.bot.id,
-                 "user_category": context.user_data["user_category"]})
-        for chat in chats:
-            if "chat_id" in chat:
-                if chat["chat_id"] != update.callback_query.message.chat_id:
+                 "user_category": context.user_data["user_category"],
+                 "blocked": False,
+                 "unsubscribed": False})
+        for user in users:
+            update_user_fields(context, user)
+            if user["chat_id"] != update.callback_query.message.chat_id:
+                if not user["unsubscribed"]:
                     try:
                         send_not_deleted_message_content(
                             context,
-                            chat_id=chat["chat_id"],
+                            chat_id=user["chat_id"],
                             content=context.user_data["content"])
                     except:
                         continue
@@ -815,7 +818,14 @@ class SeeMessageToAdmin(object):
 class SubscriberOpenMessage(object):
     # TODO STRINGS
     def open(self, update, context):
+        delete_messages(update, context)
         message_id = ObjectId(update.callback_query.data.split("/")[1])
+        # update.effective_message.edit_reply_markup(
+        #     reply_markup=InlineKeyboardMarkup([
+        #         [InlineKeyboardButton(
+        #             text="Show",
+        #             callback_data=f"subscriber_open_message_false/{message_id}")]
+        #     ]))
         message = users_messages_to_admin_table.find_one({"_id": message_id})
         if "open_delete" not in context.user_data:
             context.user_data["open_delete"] = list()
