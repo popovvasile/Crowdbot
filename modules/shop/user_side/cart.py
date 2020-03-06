@@ -43,8 +43,12 @@ class CartHelper(object):
         template = "*Your Order*\n\n"
         order_price = 0
         for cart_item in cart_items:
-            item_price = (float(cart_item["product"]["price"])
-                          * cart_item["quantity"])
+            if "discount_price" in cart_item["product"]:
+                item_price = (float(cart_item["product"]["discount_price"])
+                              * cart_item["quantity"])
+            else:
+                item_price = (float(cart_item["product"]["price"])
+                              * cart_item["quantity"])
             order_price += item_price
             template += (
                 "_{}_ - `{}`\n"

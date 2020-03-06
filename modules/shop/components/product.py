@@ -34,7 +34,7 @@ class Product(object):
         # Change _id attribute to id_
         self._id = product.get("_id")
         self.bot_id = context.bot.id
-        self.article = str(self._id) if self._id else None
+        self.article = str(self._id) if self._id else uuid4()
         self.price = product.get("price")
         self.description = product.get("description", "")
         self.name = product.get("name")
@@ -109,7 +109,9 @@ class Product(object):
             if len(self.content):
                 self.send_content(
                     update.effective_chat.id, context, self.content[0],
-                    caption=text, reply_markup=reply_markup)
+                    caption=text, reply_markup=reply_markup,
+                    parse_mode=ParseMode.HTML
+                )
             else:
                 context.user_data["to_delete"].append(
                     context.bot.send_message(chat_id=update.effective_chat.id,

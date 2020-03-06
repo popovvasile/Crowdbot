@@ -1,0 +1,156 @@
+--SHOP  -- status, in_trash, on_sale
+	[DONE] + * После создания шопа - не показывать кнопку бек, а сразу в меню переводить
+	[DONE] + * Убрать discount price с добавления товара
+	[DONE] + * Подтверждение при смене валюты
+	[DONE] + * Иногда при Изменение валюты(USD->RUB) 4 символа после точки, и если после точки 0 отображать цену как integer
+	[DONE] + * при удалении категории кроме товаров чекнуть NEW заказы и если они есть - запретить удаление категории пока не закроются все NEW заказы
+	[DONE] + * С первого раза не переключается на онлайн
+	[DONE] + * Уменьшить цену тестового инвойса до минимума(см. ссылку) и вставить мини гайд(гифка) в текст
+		https://core.telegram.org/bots/payments#supported-currencies
+	[DONE] + * Указание цены товара(при добавлении и редактировании) Payments- can't pay less them 1$ and more then Max amount
+		https://core.telegram.org/bots/payments#supported-currencies
+	[DONE] * Discount price обработка()
+	+ * Offline/online order creation data validation:
+		DESCRIPTION LENGTH VALIDATION
+		SHARE PHONE NUMBER
+		PHONE NUMBER VALIDATION
+	[DONE] * Если нет товаров в категории - не показывать категорию юзерам
+	[DONE] + * Если вообще нет товаров - blink(о отм что нет товара) когда нажимаешь catalog - there is no shop
+	+ * В Full template заказа убрать пагинацию и сделать кнопку Items - которая будет показывать товары с заказа
+	+ * В Full template и Short template заказа - при слишком большом тексте(Items) - обрывать текст и показывать три точки
+	+ * В Short template товара - при слишком большом тексте(Not finished orders) - обрывать текст и показывать три точки
+	+ * В Редактировании категории товара если только одна категория - blink и всё
+	+ * ФЛОУ ОНЛАЙН - (см. карту флоу)
+		[DONE] 1) Убрать пункт онлайн/оффлайн шоп при создании шопа.
+		[DONE] 2) Добавить в настройки способ оплаты: безналичный расчёт.(Появляется кнопка изменить токен)
+	- * Поиск товара и заказа по id
+	- * Поменять реплай маркап на инлайн маркап в ЧЕНЧ КЬЮРЭНСИ.
+	- * Изменение контента товара - показывать blink сообщение при добавлении контента
+	- * Уведомление когда товар продан
+	- * Payments- parse the payment token from forwarded message (same in BotFather Crowdbot)
+	- * Добавить кнопки фильтров в заказы(новые, выполненные)
+	- * Добавление товара: убрать шаг с двойным подтверждением нового товара. Добавлять строки в описание товара при добавлении новой инфы о товаре.
+	- * Выключить оповещения о новых заказах? Фича: присылать оповещения раз в 30мин. У вас ХХ новых заказов.
+	- * В корзине, ордерс. Добавить кнопку: очистить корзину(Спорно из за проверки _id товаров)
+
+
+--MESSAGES
+	+ * Убрать анонимные сообщения
+	+ * Убрать пока ноутификешены о новых сообщениях(send_message)
+	+ * When user click "Open" and "Hide" in message notification - it works bad
+	+ * Когда отправляем сообщения(юзеру или всем) - try/except for BadRequest
+	+ * УБРАТЬ КНОПКУ send message to donators
+	- * Messages history
+   	- * send message to users - do check and delay and threads
+	- * добавить кнопку send message to customers
+		(если не подключен шоп - предложить создать)
+		(если нет покупателей) - об этом сообщается
+	- * Добавить фичю вкл/выкл в настройки бота
+
+--USERS
+	+ * под юзером в списке юзеров создать одну кнопку которая будет выводить на карточку юзера со всеми фичами связаными с юзером
+		и добавить в магаз эту фичу
+	+ * Когда отправляем сообщения(юзеру или всем) - try/except for BadRequest
+	- * Юрцу чекнуть что происходит - Обработка юзеров которые заблочили бота или удалили аккаунт(в заказах шопа, в списке юзеров)
+		имя и username ансабов не обновляется в списке юзеров * handling admins that leave the bot
+	- * Поиса юзеров(User search problems)
+
+--SETINGS
+	+ * Пофиксить список админов(стрингс), fix double admins bug
+	+ * Пофиксить удаление админов(Что бы переносило в обычные юзеры)
+
+--BUTTONS
+	+ * Кастомные кнопки - убираем с главного меню
+	+ *
+		1)Список существующих кнопок + добавить
+		2)  --Редактировать контент--
+		    --Поменять название--
+		    --Удалить--
+		3)(Редактрование) - как в продукте
+
+		Ссылочные кнопки-
+		1)  --Поменять название--
+		    --Ред. ссылку--
+		    --удалить кнопку--
+		* Поменять реплай маркап на инлайн маркап в ЭДИТ БАТТОН
+
+--MENUS +++++++++++
+	+ * Кнопки удаления сообщений в messages сделать отдельную менюшку с этими 3мя кнопка удаления
+	+ * Убираем донаты, а именно
+		- убираем "Configure payments" с настройки бота
+		- В основном меню вместо кнопки Shop and Payments
+	+ * Убираем статистику донатов, и переносим кнопку User Statistic в настройки
+	+ * МЕНЮ ЮЗЕРА
+		1)ЕСЛИ ШОП не подключен - кнопка "send messages" в один ряд, потом кастомные
+		2) ЕСЛИ ПОДКЛЮЧЕН 	 - кнопка "send message", "shop", потом кастомные
+		3) КНОПКА ADMIN MODE всегда внизу
+	+ * Сделать все меню в один столбик
+	+ * Перенести юзер вью в главное меню. Убрать юзер вью из кнопок
+
+--SYSTEM +++++++++++
+	* Узнать за Timed Out Error в ботах
+	* Перепроверить везде to_delete()
+	* проверить и проработать функции helper_funcs.helper, errors callbacks, Protect all /start, backs, get_help, help_button and so on with user_data.clear() function call
+	* сделать одну back_to_modules_<nameOfModule> функцию
+	* Удалить все лишние строки с languages(используя парсинг кода)
+    	* changed tokens and 2 bot instances running handlers(with notifications to BotFather and with token change feature)
+   	* Cython implementation
+	* Получаемые сообщения множаться.
+
+--PRODUCTION
+	* Application factory  (production vs local)
+	* NGINX for the website
+
+
+--BACK BUTTONS
+	* normal back after delete message in inbox
+	1. Трэш----айтем лист----неверный бэк
+	2. Едит дескрипшн. Неверный бэк
+	3. Неверный бэк из делита категорий.
+	4. Меняешь греетинг и переводит в главное меню, а не в настройки
+	5. Настройки кнопки. Неверный бэк
+	6. Удаляешь кнопку----меню редактирования кнопок
+
+--STRINGS
+	* Карточка заказа у админа: выделить название, сделать артикул меньше
+	* Придумать строку для тестового платежа
+	* Убрать пресс БЭК-стрингз везде
+
+--BOTFATHER
+	* stickers bug in bot_father reports(check stickers for crowd)
+	* Payments- parse the token from forwarded message
+	* Убрать третий шаг приветсвие
+
+--TESTING
+	+ * Проверить Все NEW и DONE заказы считаются по цене которая была на момент заказа
+	+ * test shop(and other part of the bot) with Markdown and HTML tags in messages
+	+ * ПРОВЕРИТЬ РУССКИЙ ТЕКСТ(Подсчитать количество "{}" в русских строках - и пофиксить русские строки)
+	* test shop(and other part of the bot) with big texts, many items in orders, many content and so on
+
+	- * Баг когда отвечаешь на сообщение
+	  	File "demo-bot/modules/users/users.py", line 573, in send_message_finish
+	  	chat_id=context.user_data["chat_id"],
+	  	KeyError: 'chat_id'
+	+ * Check messages length in templates and captions - to avoid exceptions
+        	https://python-telegram-bot.readthedocs.io/en/stable/telegram.constants.html
+
+	* Полностью проверить Users
+	* Проверить работу бота с отписчиками и удалёнными аккаунтамиы
+
+
+* One code style for whole project - lil rules :)
+	1) max 100 symbols on one line
+	2) imports(first build-in,
+		   then dependencies,
+		   then project imports)
+	3) InlineKeyboardMarkup formation:
+		reply_markup = InlineKeyboardMarkup([
+			[InlineKeyboardButton("",
+					      c)],
+			[InlineKeyboardButton()]
+		])
+	4) in all "context.bot.send_" methods: don't write "user_id=" instead just "update.effective_chat.id" and all other parameters need to set name
+	5) in all InlineKeyboardButton: don't write "text=" and all other parameters need to set name
+
+
+

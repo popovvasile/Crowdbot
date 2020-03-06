@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 import logging
 import datetime
-from pprint import pprint
 from random import randint
+
 from telegram import LabeledPrice, InlineKeyboardMarkup, InlineKeyboardButton, ParseMode
 from telegram.ext import (MessageHandler, Filters, PreCheckoutQueryHandler,
                           ConversationHandler, CallbackQueryHandler)

@@ -9,7 +9,7 @@ from telegram.ext import (MessageHandler, Filters, ConversationHandler, Callback
 import logging
 from database import chatbots_table
 from helper_funcs.auth import initiate_chat_id
-from helper_funcs.helper import get_help
+from helper_funcs.helper import get_help, check_provider_token
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -48,32 +48,6 @@ def donation_menu(update, context):
     context.bot.send_message(update.callback_query.message.chat.id,
                              context.bot.lang_dict["shop"], reply_markup=InlineKeyboardMarkup(admin_keyboard))
     return ConversationHandler.END
-
-
-def check_provider_token(provider_token, update, context):
-    bot_token = chatbots_table.find_one({"bot_id": context.bot.id})["token"]
-    prices = [LabeledPrice(context.bot.lang_dict["create_donation_str_1"], 10000)]
-    data = requests.get("https://api.telegram.org/bot{}/sendInvoice".format(bot_token),
-                        params=dict(title="TEST",
-                                    description="A testing payment invoice to check the token",
-                                    payload="test",
-                                    provider_token=provider_token,
-                                    currency="USD",
-                                    start_parameter="test",
-                                    prices=json.dumps([p.to_dict() for p in prices]),
-                                    chat_id=update.effective_chat.id))
-    if "description" in json.loads(data.content):
-        if json.loads(data.content)["description"] == "Bad Request: CURRENCY_INVALID":
-            data = requests.get("https://api.telegram.org/bot{}/sendInvoice".format(bot_token),
-                                params=dict(title="TEST",
-                                            description="A testing payment invoice to check the token",
-                                            payload="test",
-                                            provider_token=provider_token,
-                                            currency="RUB",
-                                            start_parameter="test",
-                                            prices=json.dumps([p.to_dict() for p in prices]),
-                                            chat_id=update.effective_chat.id))
-    return json.loads(data.content)["ok"]
 
 
 class CreateDonationHandler(object):
@@ -139,7 +113,7 @@ class CreateDonationHandler(object):
     def handle_description(self, update, context):
         chat_id, txt = initiate_chat_id(update)
         context.user_data["description"] = txt
-        currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["CHF", "AUD", "RON", "PLN"]]
+        currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["KZT", "UAH", "RON", "PLN"]]
         update.message.reply_text(context.bot.lang_dict["create_donation_str_7"],
                                   reply_markup=ReplyKeyboardMarkup(currency_keyboard, one_time_keyboard=True))
 

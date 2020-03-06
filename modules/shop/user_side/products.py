@@ -13,7 +13,6 @@ from modules.shop.components.product import (Product,
 from database import (products_table, carts_table, chatbots_table,
                       categories_table, orders_table)
 
-
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO)
@@ -31,6 +30,7 @@ class UserProductsHelper(object):
     """All "short" templates must be passed to send_short_template() method.
     And all "full" templates must be passed to send_full_template() method.
     """
+
     @staticmethod
     def product_markup(cart, product):
         """Keyboard for the product in product list.
@@ -62,7 +62,7 @@ class UserProductsHelper(object):
                     text=view_button_str + (f" ({content_len} files)"
                                             if content_len else ""),
                     callback_data=f"view_product_from_catalog/"
-                                  f"{product['_id']}")])
+                    f"{product['_id']}")])
         return InlineKeyboardMarkup(buttons)
 
     @staticmethod
@@ -77,27 +77,39 @@ class UserProductsHelper(object):
         """
         if len(product["description"]) > MAX_TEMP_DESCRIPTION_LENGTH:
             description = (
-                product["description"][:MAX_TEMP_DESCRIPTION_LENGTH] + "...")
+                    product["description"][:MAX_TEMP_DESCRIPTION_LENGTH] + "...")
         else:
             description = product["description"]
 
         category = categories_table.find_one(
             {"_id": product["category_id"]})["name"]
-
-        template = (
-            "*Article:* `{}`"
-            "\n*Name:* `{}`"
-            "\n*Category:* `{}`"
-            "\n*Price:* `{} {}`"
-            "\n*Description:* `{}`").format(
-            product.get("article"),
-            product["name"],
-            category,
-            product["price"], currency,
-            description)
+        if "discount_price" in product:
+            template = ("<b>Article:</b>      {}"
+                        "\n<b>Name:</b>       {}"
+                        "\n<b>Category:</b>   {}"
+                        '\n<b>New Price:</b> <b><u>{} {}</u></b>'
+                        "\n<b>Old Price:</b> <s>{} {}</s>"
+                        "\n<b>Description:</b>  {}").format(
+                product.get("article"),
+                product["name"],
+                category,
+                product["discount_price"], currency,
+                product["price"], currency,
+                description)
+        else:
+            template = ("<b>Article:</b>{}"
+                        "\n<b>Name:</b>{}"
+                        "\n<b>Category:</b> {}"
+                        "\n<b>Price:</b> <b>{} {}</b>"
+                        "\n<b>Description:</b> {}").format(
+                product.get("article"),
+                product["name"],
+                category,
+                product["price"], currency,
+                description)
 
         if not product["unlimited"]:
-            template += f"\n*Quantity:* `{product['quantity']}`"
+            template += f"\n<b>Quantity:<b> `{product['quantity']}`"
 
         # Check if the product exist in the cart
         if any(cart_product["product_id"] == product["_id"]
@@ -122,14 +134,28 @@ class UserProductsHelper(object):
         category = categories_table.find_one(
             {"_id": product["category_id"]})["name"]
 
-        template = ("*Article:* `{}`"
-                    "\n*Name:* `{}`"
-                    "\n*Category:* `{}`"
-                    "\n*Price:* `{} {}`").format(
-                        product.get("article"),
-                        product["name"],
-                        category,
-                        product["price"], currency)
+        if "discount_price" in product:
+            template = ("*Article:* `{}`"
+                        "\n*Name:* `{}`"
+                        "\n*Category:* `{}`"
+                        "\n*New Price:* `{} {}`"
+                        "\n*Old Price:* `{} {}`").format(
+                product.get("article"),
+                product["name"],
+                category,
+                product["discount_price"], currency,
+                product["price"], currency,
+                )
+        else:
+            template = ("*Article:* `{}`"
+                        "\n*Name:* `{}`"
+                        "\n*Category:* `{}`"
+                        "\n*Price:* `{} {}`").format(
+                product.get("article"),
+                product["name"],
+                category,
+                product["price"], currency,
+                )
 
         if len(product["description"]) < MAX_TEMP_DESCRIPTION_LENGTH:
             template += "\n*Description:* `{}`".format(product["description"])
@@ -145,23 +171,26 @@ class UserProductsHelper(object):
 
 class UserProductsHandler(UserProductsHelper):
     def categories_menu(self, update, context):
+
         delete_messages(update, context, True)
+        categories_list_ids = [x["category_id"]
+                               for x in products_table.find({"bot_id": context.bot.id})]
+        categories_list = [categories_table.find_one({"_id": x})
+                           for x in set(categories_list_ids)]
         categories_buttons = [
             InlineKeyboardButton(text=x["name"],
                                  callback_data=f"catalog/{x['_id']}")
-            for x in categories_table.find({"bot_id": context.bot.id})]
+            for x in categories_list]
 
         if categories_buttons:
-            categories_reply_markup = InlineKeyboardMarkup([
-                categories_buttons[x:x+2]
-                for x in range(0, len(categories_buttons), 2)]
-                + [[InlineKeyboardButton(
-                        text=context.bot.lang_dict["back_button"],
-                        callback_data="back_to_module_shop")]])
+            categories_reply_markup = InlineKeyboardMarkup(
+                [categories_buttons[x:x + 2]for x in range(0, len(categories_buttons),2)]
+                + [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                         callback_data="back_to_module_shop")]])
 
             context.user_data["to_delete"].append(
                 context.bot.send_message(chat_id=update.effective_chat.id,
-                                         text="Choose category",
+                                         text=context.bot.lang_dict["shop_user_choose_category"],
                                          reply_markup=categories_reply_markup))
         else:
             return self.products(update, context)
@@ -223,11 +252,11 @@ class UserProductsHandler(UserProductsHelper):
                 parse_mode=ParseMode.MARKDOWN))
         # Products list buttons
         buttons = [[InlineKeyboardButton(
-                        text="🛒 Cart",
-                        callback_data="cart"),
-                    InlineKeyboardButton(
-                        text=context.bot.lang_dict["back_button"],
-                        callback_data="back_to_categories")]]
+            text="🛒 Cart",
+            callback_data="cart"),
+            InlineKeyboardButton(
+                text=context.bot.lang_dict["back_button"],
+                callback_data="back_to_categories")]]
 
         if all_products.count():
             # Create page content and send it
@@ -368,7 +397,6 @@ REMOVE_FROM_CART = CallbackQueryHandler(
 VIEW_PRODUCT = CallbackQueryHandler(
     pattern=r"view_product_from_catalog",
     callback=UserProductsHandler().view_product)
-
 
 """BACKS"""
 BACK_TO_CATEGORIES = CallbackQueryHandler(

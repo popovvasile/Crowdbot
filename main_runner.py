@@ -11,7 +11,7 @@ from telegram.ext import (CommandHandler, CallbackQueryHandler,
 
 from helper_funcs.helper import (
     help_button, button_handler, get_help, WelcomeBot,
-    back_from_button_handler, back_to_modules)
+    back_from_button_handler, back_to_modules, error_callback)
 
 # CHANNELS
 from modules.chanells.channels import (
@@ -330,9 +330,6 @@ def main(token, lang):
 
     dispatcher.add_handler(help_callback_handler)
 
-    # error_help_callback_handler = CallbackQueryHandler(get_help,
-    #                                                   pattern=r"error_back")
-    # dispatcher.add_handler(error_help_callback_handler)
     rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), get_help)
     dispatcher.add_handler(rex_help_handler)
     LOGGER.info("Using long polling.")

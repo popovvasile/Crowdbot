@@ -316,7 +316,8 @@ class ProductsHandler(ProductsHelper):
                 text=context.bot.lang_dict["add_product_wrong_floating point number"],
                 reply_markup=back_kb(
                     "back_to_main_menu", context=context))
-            return DISCOUNT_PRICE
+            return PRICE
+
         context.user_data["product"].update(
             {"price": price})
         return self.edit(update, context)
@@ -335,7 +336,7 @@ class ProductsHandler(ProductsHelper):
     def finish_discount_price(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         try:
-            price = float(
+            discount_price = float(
                 format(Price.fromstring(update.message.text).amount, '.2f'))
         except ValueError:
             context.bot.send_message(
@@ -344,13 +345,18 @@ class ProductsHandler(ProductsHelper):
                 reply_markup=back_kb(
                     "back_to_main_menu", context=context))
             return DISCOUNT_PRICE
+        if discount_price >= context.user_data["product"].price:
+            context.user_data["product"].send_full_template(
+                update, context,
+                context.bot.lang_dict["shop_admin_discount_bigger_than_price"],
+                keyboards(context)["back_to_main_menu_keyboard"])
+            return DISCOUNT_PRICE
         context.user_data["product"].update(
-            {"discount_price": price})
+            {"discount_price": discount_price})
         return self.edit(update, context)
 
     def content_menu(self, update, context):
         delete_messages(update, context, True)
-        # pprint(context.user_data["product"].to_dict())
         for content_dict in context.user_data["product"].content:
             reply_markup = InlineKeyboardMarkup([
                 [InlineKeyboardButton(

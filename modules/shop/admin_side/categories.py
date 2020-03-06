@@ -7,7 +7,7 @@ from telegram.ext import (ConversationHandler, CallbackQueryHandler,
 
 from modules.shop.admin_side.welcome import Welcome
 from helper_funcs.misc import delete_messages
-from database import categories_table, products_table
+from database import categories_table, products_table, orders_table
 from modules.shop.helper.keyboards import (back_btn)
 
 logging.basicConfig(format='%(asctime)s - %(name)s - '
@@ -27,8 +27,9 @@ class ProductCategoryHandler(object):
             [[InlineKeyboardButton(text=i["name"],
                                    callback_data=f"edit_category/{i['_id']}")]
              for i in category_list]
-            + [[InlineKeyboardButton(context.bot.lang_dict["shop_admin_add_category_btn"],
-                                    callback_data="add_shop_category")],
+            + [[InlineKeyboardButton(
+                context.bot.lang_dict["shop_admin_add_category_btn"],
+                callback_data="add_shop_category")],
             [back_btn("back_to_main_menu", context)]],
         )
 
@@ -43,8 +44,9 @@ class ProductCategoryHandler(object):
         delete_messages(update, context, True)
         category_id = update.callback_query.data.replace("edit_category/", "")
         keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("Change the name",
-                                  callback_data="edit_name_shop_category/{}".format(category_id))],
+            [InlineKeyboardButton(
+                "Change the name",
+                callback_data="edit_name_shop_category/{}".format(category_id))],
             [InlineKeyboardButton("Delete",
                                   callback_data="delete_shop_category/{}".format(category_id))],
 
@@ -64,29 +66,55 @@ class ProductCategoryHandler(object):
         category_id = update.callback_query.data.replace("delete_shop_category/", "")
         products = products_table.find({"bot_id": context.bot.id,
                                         "category_id": ObjectId(category_id)})
+        orders = orders_table.find({"bot_id": context.bot.id,
+                                    "category_id": ObjectId(category_id),
+                                    "status": False,
+                                    "in_trash": False})
+        all_orders = orders_table.find({"bot_id": context.bot.id,
+                                       "category_id": ObjectId(category_id)})
         category = categories_table.find_one({"bot_id": context.bot.id,
                                               "_id": ObjectId(category_id)})
+        if orders.count() > 0:
+            context.user_data["category_id"] = category_id
+            keyboard = InlineKeyboardMarkup([
+                [InlineKeyboardButton(context.bot.lang_dict["yes"],
+                                      callback_data="del_cat_confirm")],
+                [InlineKeyboardButton(context.bot.lang_dict["no"],
+                                      callback_data="back_to_main_menu")]])
+            context.user_data["to_delete"] = [context.bot.send_message(
+                chat_id=update.callback_query.message.chat_id,
+                text=context.bot.lang_dict["shop_orders_cannot_be_deleted"].
+                    format(category["name"], str(orders.count())),
+                reply_markup=keyboard)]
+            self.menu(update, context)
+            return ConversationHandler.END
 
         if products.count() > 0:
             context.user_data["category_id"] = category_id
             keyboard = InlineKeyboardMarkup([
-                [InlineKeyboardButton(context.bot.lang_dict["yes"], callback_data="del_cat_confirm")],
-                [InlineKeyboardButton(context.bot.lang_dict["no"], callback_data="back_to_main_menu")]])
+                [InlineKeyboardButton(context.bot.lang_dict["yes"],
+                                      callback_data="del_cat_confirm")],
+                [InlineKeyboardButton(context.bot.lang_dict["no"],
+                                      callback_data="back_to_main_menu")]])
             context.user_data["to_delete"] = [context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
                 text=context.bot.lang_dict["shop_category_will_be_deleted"].
-                    format(category["name"], str(products.count())),
+                    format(category["name"], str(products.count()), str(all_orders.count())),
                 reply_markup=keyboard)]
 
             return DELETE_CATEGORY_CONFIRM
+
         else:
             keyboard = InlineKeyboardMarkup([
                 [back_btn("back_to_main_menu", context)]])
+            # TODO discuss with team- I think orders and
+            #  products must be deleted forever if there is no category
             categories_table.delete_one({"bot_id": context.bot.id,
                                          "_id": ObjectId(category_id)})
             products_table.delete_many({"bot_id": context.bot.id,
                                         "category_id": ObjectId(category_id)})
-            #  TODO to trash, not delete (if there are active orders)
+            orders_table.delete_many({"bot_id": context.bot.id,
+                                      "category_id": ObjectId(category_id)})
 
             context.user_data["to_delete"] = [context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
@@ -116,7 +144,8 @@ class ProductCategoryHandler(object):
 
     def rename_category(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        context.user_data["category_id"] = update.callback_query.data.replace("edit_name_shop_category/", "")
+        context.user_data["category_id"] = update.callback_query.data.replace(
+                                                "edit_name_shop_category/", "")
         keyboard = InlineKeyboardMarkup([
             [back_btn("back_to_main_menu", context)],
         ]
@@ -151,7 +180,8 @@ class ProductCategoryHandler(object):
         delete_messages(update, context, True)
         category_list = categories_table.find({"bot_id": context.bot.id})
         keyboard = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(text=i["name"], callback_data="nigga_dont_touch_me")] for i in category_list] +
+            [[InlineKeyboardButton(text=i["name"],
+                                   callback_data="nigga_dont_touch_me")] for i in category_list] +
             [[back_btn("back_to_main_menu", context)]]
         )
 

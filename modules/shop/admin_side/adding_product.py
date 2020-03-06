@@ -3,6 +3,7 @@ from telegram import InlineKeyboardButton, Update, InlineKeyboardMarkup
 from telegram.ext import (ConversationHandler, CallbackQueryHandler,
                           CallbackContext, Filters, MessageHandler)
 
+from helper_funcs.helper import currency_limits_dict
 from modules.shop.admin_side.welcome import Welcome
 from modules.shop.components.product import (Product,
                                              MAX_TEMP_DESCRIPTION_LENGTH)
@@ -39,8 +40,7 @@ class AddingProductHandler(object):
 
     def set_title(self, update: Update, context: CallbackContext):
         context.user_data["new_product"] = Product(context)
-        context.user_data["new_product"].name = update.message.text
-        if len(update.message.text) <= 4096:
+        if len(update.message.text) <= 30:
             context.user_data["new_product"].name = update.message.text
         else:
             context.user_data["to_delete"].append(context.bot.send_message(
@@ -77,7 +77,7 @@ class AddingProductHandler(object):
     def set_category(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         if update.message:
-            if len(update.message.text) <= 100:
+            if len(update.message.text) <= 30:
                 categories_table.insert_one({
                     "name": update.message.text,
                     "query_name": update.message.text,
@@ -151,42 +151,15 @@ class AddingProductHandler(object):
         context.user_data["new_product"].send_full_template(
             update, context, context.bot.lang_dict["shop_admin_write_your_price"],
             keyboards(context)["back_to_main_menu_keyboard"])
-        return SET_DISCOUNT
-
-    def set_discount_price(self, update: Update, context: CallbackContext):
-        delete_messages(update, context, True)
-        try:
-            assert float(update.message.text) > 0
-        except (ValueError, AssertionError):
-            context.user_data["to_delete"].append(context.bot.send_message(
-                chat_id=update.message.chat_id,
-                text=context.bot.lang_dict["shop_admin_number_wrong"],
-                reply_markup=InlineKeyboardMarkup([
-                    [back_btn("back_to_main_menu_btn", context)]])))
-            return SET_DISCOUNT
-        if update.message:
-            if len(update.message.text) <= 7:
-                context.user_data["new_product"].price = float(
-                    format(Price.fromstring(update.message.text).amount, '.2f'))
-            else:
-                context.user_data["to_delete"].append(context.bot.send_message(
-                    chat_id=update.message.chat_id,
-                    text=context.bot.lang_dict["shop_admin_price_too_big"],
-                    reply_markup=InlineKeyboardMarkup([
-                                 [back_btn("back_to_main_menu_btn", context)]])))
-                return SET_DISCOUNT
-        context.user_data["new_product"].price = float(
-            format(Price.fromstring(update.message.text).amount, '.2f'))
-        context.user_data["new_product"].send_full_template(
-            update, context,
-            context.bot.lang_dict["shop_admin_write_your_discount_price"],
-            keyboards(context)["back_to_main_menu_keyboard"])
         return ASK_DESCRIPTION
 
     def ask_description(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
+        currency_limits = currency_limits_dict[
+            chatbots_table.find_one({"bot_id": context.bot.id})["shop"]["currency"]]
+
         try:
-            assert float(update.message.text) >= 0
+            assert currency_limits["min"] < int(update.message.text) < currency_limits["max"]
         except (ValueError, AssertionError):
             context.user_data["to_delete"].append(context.bot.send_message(
                 chat_id=update.message.chat_id,
@@ -194,23 +167,19 @@ class AddingProductHandler(object):
                 reply_markup=InlineKeyboardMarkup([
                     [back_btn("back_to_main_menu_btn", context)]])))
             return ASK_DESCRIPTION
-        if len(update.message.text) <= 10:
-            discount_price = float(
+
+        if len(update.message.text) <= 7:
+            context.user_data["new_product"].price = float(
                 format(Price.fromstring(update.message.text).amount, '.2f'))
+            context.user_data["new_product"].discount_price = 0
         else:
             context.user_data["to_delete"].append(context.bot.send_message(
                 chat_id=update.message.chat_id,
-                text=context.bot.lang_dict["shop_admin_discount_price_too_big"],
+                text=context.bot.lang_dict["shop_admin_price_too_big"],
                 reply_markup=InlineKeyboardMarkup([
-                    [back_btn("back_to_main_menu_btn", context)]])))
+                             [back_btn("back_to_main_menu_btn", context)]])))
             return ASK_DESCRIPTION
-        if discount_price >= context.user_data["new_product"].price:
-            context.user_data["new_product"].send_full_template(
-                update, context,
-                context.bot.lang_dict["shop_admin_discount_bigger_than_price"],
-                keyboards(context)["back_to_main_menu_keyboard"])
-            return ASK_DESCRIPTION
-        context.user_data["new_product"].discount_price = discount_price
+
         context.user_data["new_product"].send_full_template(
             update, context, context.bot.lang_dict["add_product_description"],
             keyboards(context)["back_to_main_menu_keyboard"])
@@ -246,8 +215,12 @@ class AddingProductHandler(object):
 
     def confirm_adding(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        currency = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]["currency"]
-        category = categories_table.find_one({"_id": context.user_data["new_product"].category_id})["name"]
+        currency = chatbots_table.find_one(
+            {"bot_id": context.bot.id})["shop"]["currency"]
+
+        category = categories_table.find_one(
+            {"_id": context.user_data["new_product"].category_id})["name"]
+
         if (len(context.user_data["new_product"].description)
                 > MAX_TEMP_DESCRIPTION_LENGTH):
             description = context.bot.lang_dict["add_product_description_above"]
@@ -298,22 +271,13 @@ ADD_PRODUCT_HANDLER = ConversationHandler(
                     MessageHandler(Filters.regex(r"^((?!@).)*$"),
                                    AddingProductHandler().set_quantity)],
 
-        SET_DISCOUNT: [
-            MessageHandler(Filters.regex(r'(\d+\.\d{1,2})|(\d+\,\d{1,2})'),
-                           AddingProductHandler().set_discount_price),
-            MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
-                           AddingProductHandler().set_discount_price),
-            MessageHandler(Filters.regex(r"^((?!@).)*$"),
-                           AddingProductHandler().set_price)
-        ],
-
         ASK_DESCRIPTION: [
             MessageHandler(Filters.regex(r'(\d+\.\d{1,2})|(\d+\,\d{1,2})'),
                            AddingProductHandler().ask_description),
             MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
                            AddingProductHandler().ask_description),
             MessageHandler(Filters.regex(r"^((?!@).)*$"),
-                           AddingProductHandler().set_discount_price)
+                           AddingProductHandler().set_price)
         ],
 
         SET_DESCRIPTION: [
