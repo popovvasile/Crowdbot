@@ -69,13 +69,11 @@ def register_admin(update, context):
     # Delete all expired passwords
     for admin_password in admin_passwords_table.find(
             {"bot_id": context.bot.id}):
-        if ((datetime.today() - admin_password["timestamp"]).total_seconds()
-                > 3600):
+        if (datetime.today() - admin_password["timestamp"]).total_seconds() > 3600:
             admin_passwords_table.delete_one({"_id": admin_password["_id"]})
     # Check if the user already admin if so - just back
     if users_table.find_one({"bot_id": context.bot.id,
-                             "user_id": update.effective_user.id})[
-            "is_admin"]:
+                             "user_id": update.effective_user.id})["is_admin"]:
         return False
     # Take password from update
     password = update.message.text.split("registration")[-1]

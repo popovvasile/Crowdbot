@@ -9,7 +9,7 @@ from database import users_table, users_messages_to_admin_table
 
 class FakeUsers:
     # def __init__(self):
-    bot_id = 771382519
+    bot_id = 771382519  # @test_user_crowd_bot
     fake = Faker()
     user_ids = [305465575, 378826409, 573858793,
                 244356086, 620501777, 479438338]
