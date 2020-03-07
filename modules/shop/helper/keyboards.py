@@ -19,20 +19,22 @@ def start_keyboard(orders_quantity, context):
                                   callback_data="categories")],
             [InlineKeyboardButton(orders_btn_text,
                                   callback_data="orders")],
-            [InlineKeyboardButton(text=context.bot.lang_dict["user_mode_module"],
-                                  callback_data="turn_user_mode_on")],
             [InlineKeyboardButton(context.bot.lang_dict["shop_admin_products_btn"],
                                   callback_data="products")],
             [InlineKeyboardButton(context.bot.lang_dict["shop_admin_trash_btn"],
                                   callback_data="trash")],
             [InlineKeyboardButton(text=context.bot.lang_dict["configure_button"],
                                   callback_data="shop_config")],
-            [InlineKeyboardButton(text="Back", callback_data="help_module(shop)")]]
+            [InlineKeyboardButton(text=context.bot.lang_dict["user_mode_module"],
+                                  callback_data="turn_user_mode_on")],
+            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                  callback_data="help_back")]]
     elif "shop" in chatbot:
         keyboard = [[InlineKeyboardButton(text=context.bot.lang_dict["allow_shop_button"],
                                           callback_data="change_shop_config")],
 
-                    [InlineKeyboardButton(text="Back", callback_data="help_module(shop)")]
+                    [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                          callback_data="help_module(shop)")]
                     ]
     else:
         keyboard = [[InlineKeyboardButton(text=context.bot.lang_dict["allow_shop_button"],

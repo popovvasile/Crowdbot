@@ -10,7 +10,6 @@ from bson.objectid import ObjectId
 from database import custom_buttons_table
 from database import chatbots_table, users_table
 
-
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     level=logging.INFO)
@@ -129,23 +128,18 @@ class EqInlineKeyboardButton(InlineKeyboardButton):
 
 
 def paginate_modules(module_dict: Dict, prefix, bot_id, chat=None) -> List:
-    buttons = [[EqInlineKeyboardButton(button["button"],
-                                       callback_data="button_{}".format(button["button"].replace(" ", "").lower()))]
-               for button in custom_buttons_table.find({"bot_id": bot_id, "link_button": False})]
-    buttons += [[EqInlineKeyboardButton(text=button["button"],
-                url=button["link"])]
-                for button in custom_buttons_table.find({"bot_id": bot_id, "link_button": True})]
+    buttons = []
 
     if not chat:
-        modules = [
-                      [EqInlineKeyboardButton(x, callback_data="{}_module({})".format(prefix, module_dict[x]))]
-                      for x in module_dict
-                  ] + buttons
+        modules = [[
+            EqInlineKeyboardButton(x,
+                                   callback_data="{}_module({})".format(prefix, module_dict[x]))]
+                      for x in module_dict] + buttons
     else:
-        modules = [
-            [EqInlineKeyboardButton(x, callback_data="{}_module({},{})".format(prefix, chat, module_dict[x]))]
-            for x in module_dict
-        ]
+        modules = [[
+            EqInlineKeyboardButton(x,
+                                   callback_data="{}_module({},{})"
+                                   .format(prefix, chat, module_dict[x]))] for x in module_dict]
     pairs = modules
 
     return pairs

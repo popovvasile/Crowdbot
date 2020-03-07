@@ -30,20 +30,21 @@ def send_admin_help(bot, chat_id, text, keyboard=None):
 
 
 def send_visitor_help(bot, chat_id, text):
-    donation_request = chatbots_table.find_one({"bot_id": bot.id})
-    if donation_request.get("donate") is not None and donation_request.get("donate") != {}:
-        buttons = [InlineKeyboardButton(bot.lang_dict["send_message_1"],
-                                        callback_data="send_message_to_admin"),
-                   InlineKeyboardButton(bot.lang_dict["pay_donation_mode_str"],
-                                        callback_data='pay_donation'), ]
-
-    else:
-        buttons = [InlineKeyboardButton(bot.lang_dict["send_message_1"],
-                                        callback_data="send_message_to_admin")]
+    # donation_request = chatbots_table.find_one({"bot_id": bot.id})
+    # if donation_request.get("donate") is not None and donation_request.get("donate") != {}:
+    #     buttons = [InlineKeyboardButton(bot.lang_dict["send_message_1"],
+    #                                     callback_data="send_message_to_admin"),
+    #                InlineKeyboardButton(bot.lang_dict["pay_donation_mode_str"],
+    #                                     callback_data='pay_donation'), ]
+    #
+    # else:
+    first_buttons = [[InlineKeyboardButton(bot.lang_dict["send_message_1"],
+                                           callback_data="send_message_to_admin")]]
     product_list_of_dicts = products_table.find({
         "bot_id": bot.id})
+    buttons = list()
     if product_list_of_dicts.count() != 0:
-        buttons = buttons + [InlineKeyboardButton(text=bot.lang_dict["shop"],
+        buttons = [InlineKeyboardButton(text=bot.lang_dict["shop"],
                                                   callback_data="help_module(shop)")]
 
     buttons += [InlineKeyboardButton(button["button"],
@@ -58,6 +59,8 @@ def send_visitor_help(bot, chat_id, text):
         pairs = list(zip(buttons[::2], buttons[1::2]))
     else:
         pairs = list(zip(buttons[::2], buttons[1::2])) + [(buttons[-1],)]
+    pairs = first_buttons+ pairs
+
     bot.send_message(chat_id=chat_id,
                      text=text,
                      parse_mode=ParseMode.MARKDOWN,
@@ -67,17 +70,17 @@ def send_visitor_help(bot, chat_id, text):
 
 
 def send_admin_user_mode(bot, chat_id, text):
-    donation_request = chatbots_table.find_one({"bot_id": bot.id})
-    if donation_request.get("donate") is not None and donation_request.get("donate") != {}:
-        buttons = [InlineKeyboardButton(bot.lang_dict["send_message_1"],
-                                        callback_data="send_message_to_admin"),
-                   InlineKeyboardButton(bot.lang_dict["pay_donation_mode_str"],
-                                        callback_data='pay_donation')]
-
-    else:
-        buttons = [InlineKeyboardButton(bot.lang_dict["send_message_1"],
-                                        callback_data="send_message_to_admin")]
-    buttons += [InlineKeyboardButton(button["button"],
+    # donation_request = chatbots_table.find_one({"bot_id": bot.id})
+    # if donation_request.get("donate") is not None and donation_request.get("donate") != {}:
+    #     buttons = [InlineKeyboardButton(bot.lang_dict["send_message_1"],
+    #                                     callback_data="send_message_to_admin"),
+    #                InlineKeyboardButton(bot.lang_dict["pay_donation_mode_str"],
+    #                                     callback_data='pay_donation')]
+    #
+    # else:
+    first_buttons = [[InlineKeyboardButton(bot.lang_dict["send_message_1"],
+                                        callback_data="send_message_to_admin")]]
+    buttons = [InlineKeyboardButton(button["button"],
                                      callback_data="button_{}"
                                      .format(button["button"].replace(" ", "").lower()))
                 for button in custom_buttons_table.find({"bot_id": bot.id, "link_button": False})]
@@ -99,6 +102,7 @@ def send_admin_user_mode(bot, chat_id, text):
         pairs = list(zip(buttons[::2], buttons[1::2]))
     else:
         pairs = list(zip(buttons[::2], buttons[1::2])) + [(buttons[-1],)]
+    pairs = first_buttons+ pairs
     bot.send_message(chat_id=chat_id,
                      text=text,
                      parse_mode=ParseMode.MARKDOWN,
@@ -356,7 +360,7 @@ def help_button(update, context):
         welcome_message = "Hello"
     try:
         if mod_match:
-            print(query.data)
+
             module = mod_match.group(1)
             current_user_mode = user_mode_table.find_one({"bot_id": context.bot.id,
                                                           "user_id": update.effective_user.id})
@@ -372,22 +376,24 @@ def help_button(update, context):
                 else:
                     text = help_strings(context, update)[module]["admin_help"]
                     commands_keyboard = help_strings(context, update)[module]["admin_keyboard"]
-            elif module == "donate":
-                chatbot_info = chatbots_table.find_one(
-                    {"bot_id": context.bot.id})
-                if "description" in chatbot_info.get("donate", {}):
-                    text = chatbot_info["donate"]["description"]
-                else:
-                    text = help_strings(context, update)[module]["admin_help"]
-                commands_keyboard = help_strings(context, update)[module]["admin_keyboard"]
+            # elif module == "donate":
+            #     chatbot_info = chatbots_table.find_one(
+            #         {"bot_id": context.bot.id})
+            #     if "description" in chatbot_info.get("donate", {}):
+            #         text = chatbot_info["donate"]["description"]
+            #     else:
+            #         text = help_strings(context, update)[module]["admin_help"]
+            #     commands_keyboard = help_strings(context, update)[module]["admin_keyboard"]
             else:
                 text = help_strings(context, update)[module]["visitor_help"]
                 commands_keyboard = help_strings(context, update)[module]["visitor_keyboard"]
+            print(commands_keyboard)
 
-            pairs = list(zip(commands_keyboard[::2], commands_keyboard[1::2]))
 
-            if len(commands_keyboard) % 2 == 1:
-                pairs.append((commands_keyboard[-1],))
+            pairs = commands_keyboard
+
+            # if len(commands_keyboard) % 2 == 1:
+            #     pairs.append((commands_keyboard[-1],))
             pairs.append(
                 [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                       callback_data="help_back")]
