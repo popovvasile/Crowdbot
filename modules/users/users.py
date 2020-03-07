@@ -47,8 +47,8 @@ class UsersHandler(object):
                                            "unsubscribed": False}
             context.user_data["filters_buttons"] = [[
                 InlineKeyboardButton(context.bot.lang_dict["show_banned_btn"],
-                                     callback_data="show_banned"),
-                InlineKeyboardButton(context.bot.lang_dict["show_unbanned_btn"],
+                                     callback_data="show_banned")],
+                [InlineKeyboardButton(context.bot.lang_dict["show_unbanned_btn"],
                                      callback_data="show_unbanned")]]
 
         elif update.callback_query.data == "show_banned":
@@ -73,8 +73,8 @@ class UsersHandler(object):
                                            "unsubscribed": False}
             context.user_data["filters_buttons"] = [[
                 InlineKeyboardButton(context.bot.lang_dict["show_all_users_btn"],
-                                     callback_data="show_all"),
-                InlineKeyboardButton(
+                                     callback_data="show_all")],
+                [InlineKeyboardButton(
                     text=context.bot.lang_dict["show_banned_btn"],
                     callback_data="show_banned")]]
         if not context.user_data.get("page"):
@@ -101,9 +101,9 @@ class UsersHandler(object):
                                      parse_mode=ParseMode.HTML))
         # Keyboard with user list filters buttons
         main_buttons = (context.user_data["filters_buttons"]
-                        + [[InlineKeyboardButton("🔎",
-                                                 callback_data="search_user"),
-                            InlineKeyboardButton(context.bot.lang_dict["back_button"],
+                        + [[InlineKeyboardButton("🔎 Search",
+                                                 callback_data="search_user")],
+                            [InlineKeyboardButton(context.bot.lang_dict["back_button"],
                                                  callback_data="back_to_module_users")]])
         # If no users just send back button.
         if users.count() == 0:

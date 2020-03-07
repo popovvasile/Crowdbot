@@ -402,6 +402,7 @@ def help_button(update, context):
         elif back_match or back_button_match:
             context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                        message_id=update.callback_query.message.message_id)
+            delete_messages(update, context)
             get_help(update, context)
             return ConversationHandler.END
         else:

@@ -11,7 +11,7 @@ from database import donations_table, chatbots_table
 from helper_funcs.helper import get_help
 from helper_funcs.misc import delete_messages, lang_timestamp
 from helper_funcs.pagination import Pagination  # , set_page_key
-from modules.statistic.statistic_main import back_to_statistic_main_menu
+# from modules.statistic.statistic_main import back_to_statistic_main_menu
 
 
 logging.basicConfig(
@@ -177,38 +177,38 @@ class DonationStatistic(object):
 DONATION_STATISTIC, DONATORS, HISTORY = range(3)
 
 
-DONATION_STATISTIC_HANDLER = ConversationHandler(
-    entry_points=[
-        CallbackQueryHandler(
-            callback=DonationStatistic().show_statistic,
-            pattern=r"donation_statistic")],
-    states={
-        DONATION_STATISTIC: [
-            # CallbackQueryHandler(DonationStatistic().show_donators,
-            #                      pattern=r"donators")
-            CallbackQueryHandler(
-                callback=back_to_statistic_main_menu,
-                pattern="back_to_statistic_main_menu"),
-
-            CallbackQueryHandler(
-                callback=DonationStatistic().send_donation_history,
-                pattern=r"show_history")],
-
-        # DONATORS: [CallbackQueryHandler(DonationStatistic().show_donators,
-        #                                 pattern="^[0-9]+$")],
-
-        HISTORY: [
-            CallbackQueryHandler(
-                callback=DonationStatistic().send_donation_history,
-                pattern="donation_history_pagination"),
-            CallbackQueryHandler(
-                callback=back_to_statistic_main_menu,
-                pattern="back_to_statistic_main_menu"),
-            CallbackQueryHandler(callback=DonationStatistic().show_statistic,
-                                 pattern=r"donation_statistic")]
-    },
-    fallbacks=[  # CallbackQueryHandler(callback=DonationStatistic().back,
-                 #                      pattern=r"help_back"),
-        CallbackQueryHandler(callback=DonationStatistic().back,
-                             pattern=r"help_module")]
-)
+# DONATION_STATISTIC_HANDLER = ConversationHandler(
+#     entry_points=[
+#         CallbackQueryHandler(
+#             callback=DonationStatistic().show_statistic,
+#             pattern=r"donation_statistic")],
+#     states={
+#         DONATION_STATISTIC: [
+#             # CallbackQueryHandler(DonationStatistic().show_donators,
+#             #                      pattern=r"donators")
+#             CallbackQueryHandler(
+#                 callback=back_to_statistic_main_menu,
+#                 pattern="back_module(settings)"),
+#
+#             CallbackQueryHandler(
+#                 callback=DonationStatistic().send_donation_history,
+#                 pattern=r"show_history")],
+#
+#         # DONATORS: [CallbackQueryHandler(DonationStatistic().show_donators,
+#         #                                 pattern="^[0-9]+$")],
+#
+#         HISTORY: [
+#             CallbackQueryHandler(
+#                 callback=DonationStatistic().send_donation_history,
+#                 pattern="donation_history_pagination"),
+#             CallbackQueryHandler(
+#                 callback=back_to_statistic_main_menu,
+#                 pattern="back_to_statistic_main_menu"),
+#             CallbackQueryHandler(callback=DonationStatistic().show_statistic,
+#                                  pattern=r"donation_statistic")]
+#     },
+#     fallbacks=[  # CallbackQueryHandler(callback=DonationStatistic().back,
+#                  #                      pattern=r"help_back"),
+#         CallbackQueryHandler(callback=DonationStatistic().back,
+#                              pattern=r"help_module")]
+# )

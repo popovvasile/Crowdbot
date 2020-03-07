@@ -58,10 +58,10 @@ from modules.users.users import (
     SEND_MESSAGE_TO_USER_HANDLER, BACK_TO_USER_MESSAGES_LIST, DELETE_USER_MESSAGE_HANDLER,
     OPEN_USER_HANDLER, BACK_TO_OPEN_USER)
 
-from modules.statistic.statistic_main import (
-    STATISTIC_MAIN_MENU, BACK_TO_STATISTIC_MAIN)
+# from modules.statistic.statistic_main import (
+#     STATISTIC_MAIN_MENU, BACK_TO_STATISTIC_MAIN)
 from modules.statistic.user_statistic import USERS_STATISTIC_HANDLER
-from modules.statistic.donation_statistic import DONATION_STATISTIC_HANDLER
+# from modules.statistic.donation_statistic import DONATION_STATISTIC_HANDLER
 # SURVEYS
 from modules.surveys.surveys_answer import ANSWER_SURVEY_HANDLER
 from modules.surveys.surveys_create import (
@@ -225,9 +225,9 @@ def main(token, lang):
     dispatcher.add_handler(BACK_TO_OPEN_USER)
 
     # STATISTIC
-    dispatcher.add_handler(STATISTIC_MAIN_MENU)
-    dispatcher.add_handler(BACK_TO_STATISTIC_MAIN)
-    dispatcher.add_handler(DONATION_STATISTIC_HANDLER)
+    # dispatcher.add_handler(STATISTIC_MAIN_MENU)
+    # dispatcher.add_handler(BACK_TO_STATISTIC_MAIN)
+    # dispatcher.add_handler(DONATION_STATISTIC_HANDLER)
     dispatcher.add_handler(USERS_STATISTIC_HANDLER)
 
     # ADMINS
