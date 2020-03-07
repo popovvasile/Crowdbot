@@ -22,7 +22,9 @@ HELP_STRINGS = """
 def send_admin_help(bot, chat_id, text, keyboard=None):
     if not keyboard:
         keyboard = InlineKeyboardMarkup(
-            paginate_modules(helpable_dict(bot)["ADMIN_HELPABLE"], "help", bot.id))
+            paginate_modules(helpable_dict(bot)["ADMIN_HELPABLE"], "help", bot.id)+\
+                   [[InlineKeyboardButton(text=bot.lang_dict["user_mode_module"],
+                                          callback_data="turn_user_mode_on")]])
     bot.send_message(chat_id=chat_id,
                      text=text,
                      parse_mode=ParseMode.MARKDOWN,
@@ -405,6 +407,8 @@ def help_button(update, context):
             delete_messages(update, context)
             get_help(update, context)
             return ConversationHandler.END
+
+
         else:
             query.message.reply_text(text=HELP_STRINGS.format(welcome_message),
                                      reply_markup=InlineKeyboardMarkup(

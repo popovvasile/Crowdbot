@@ -97,8 +97,6 @@ def help_strings(context, update):
                                  callback_data="admins")],
             [InlineKeyboardButton(text=string_d_str["statistic_btn_str"],
                                  callback_data="users_statistic")],
-            [InlineKeyboardButton(text=string_d_str["user_mode_module"],
-                                  callback_data="turn_user_mode_on")],
         ],
         admin_help=string_d_str["add_menu_buttons_help"]
     )
