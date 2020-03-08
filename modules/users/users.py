@@ -2,7 +2,6 @@
 # # -*- coding: utf-8 -*-
 import datetime
 import logging
-from pprint import pprint
 
 from bson.objectid import ObjectId
 from telegram.error import BadRequest, Unauthorized

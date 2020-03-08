@@ -47,7 +47,7 @@ class UserOrdersHandler(object):
             context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
                 text="*Your Orders* - `{}`".format(orders.count()),
-                parse_mode=ParseMode.MARKDOWN))
+                parse_mode=ParseMode.HTML))
         # Orders list buttons
         buttons = [[InlineKeyboardButton(
             text=context.bot.lang_dict["back_button"],

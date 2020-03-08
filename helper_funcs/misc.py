@@ -19,6 +19,14 @@ LOAD = []
 NO_LOAD = ['translation', 'rss']
 
 
+def dismiss(update, context):
+    try:
+        context.bot.delete_message(update.effective_chat.id,
+                                   update.effective_message.message_id)
+    except TelegramError:
+        pass
+
+
 def delete_messages(update, context, message_from_update=False):
     if message_from_update:
         try:

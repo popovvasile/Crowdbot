@@ -49,7 +49,7 @@ def send_media_arr(full_media_group, update, context):
             context.bot.send_message(
                 update.effective_chat.id,
                 context.bot.lang_dict["shop_admin_image_exception"],
-                parse_mode=ParseMode.MARKDOWN))
+                parse_mode=ParseMode.HTML))
 
 
 def split_list(ls):

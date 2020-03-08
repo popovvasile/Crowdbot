@@ -1,11 +1,8 @@
 import logging
-from pprint import pprint
 
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ConversationHandler, CallbackQueryHandler
 from bson.objectid import ObjectId
-
-from helper_funcs.helper import get_help, back_to_modules
 from helper_funcs.misc import delete_messages, get_obj
 from helper_funcs.pagination import Pagination
 from modules.shop.components.product import (Product,
@@ -83,7 +80,7 @@ class UserProductsHelper(object):
 
         category = categories_table.find_one(
             {"_id": product["category_id"]})["name"]
-        if "discount_price" in product:
+        if product.get("discount_price") > 0:
             template = ("<b>Article:</b>      {}"
                         "\n<b>Name:</b>       {}"
                         "\n<b>Category:</b>   {}"
@@ -97,12 +94,12 @@ class UserProductsHelper(object):
                 product["price"], currency,
                 description)
         else:
-            template = ("<b>Article:</b>{}"
-                        "\n<b>Name:</b>{}"
+            template = ("<b>Article:</b>   {}"
+                        "\n<b>Name:</b>    {}"
                         "\n<b>Category:</b> {}"
                         "\n<b>Price:</b> <b>{} {}</b>"
                         "\n<b>Description:</b> {}").format(
-                product.get("article"),
+                str(product.get("_id")),
                 product["name"],
                 category,
                 product["price"], currency,
@@ -134,34 +131,36 @@ class UserProductsHelper(object):
         category = categories_table.find_one(
             {"_id": product["category_id"]})["name"]
 
-        if "discount_price" in product:
-            template = ("*Article:* `{}`"
-                        "\n*Name:* `{}`"
-                        "\n*Category:* `{}`"
-                        "\n*New Price:* `{} {}`"
-                        "\n*Old Price:* `{} {}`").format(
-                product.get("article"),
+        if product.get("discount_price")>0:
+            template = ("<b>Article:</b>      {}"
+                        "\n<b>Name:</b>       {}"
+                        "\n<b>Category:</b>   {}"
+                        '\n<b>New Price:</b> <b><u>{} {}</u></b>'
+                        "\n<b>Old Price:</b> <s>{} {}</s>"
+                        ).format(
+                str(product.get("_id")),
                 product["name"],
                 category,
                 product["discount_price"], currency,
                 product["price"], currency,
                 )
         else:
-            template = ("*Article:* `{}`"
-                        "\n*Name:* `{}`"
-                        "\n*Category:* `{}`"
-                        "\n*Price:* `{} {}`").format(
-                product.get("article"),
+            template = ("<b>Article:</b>   {}"
+                        "\n<b>Name:</b>    {}"
+                        "\n<b>Category:</b> {}"
+                        "\n<b>Price:</b> <b>{} {}</b>"
+                        ).format(
+                str(product.get("_id")),
                 product["name"],
                 category,
                 product["price"], currency,
                 )
 
         if len(product["description"]) < MAX_TEMP_DESCRIPTION_LENGTH:
-            template += "\n*Description:* `{}`".format(product["description"])
+            template += "\n<b>Description:</b>  {}".format(product["description"])
 
         if not product["unlimited"]:
-            template += f"\n*Quantity:* `{product['quantity']}`"
+            template += f"\n<b>Quantity:</b>   {product['quantity']}"
 
         if any(cart_product["product_id"] == product["_id"]
                for cart_product in cart.get("products", list())):
@@ -236,7 +235,6 @@ class UserProductsHandler(UserProductsHelper):
                 context.user_data["category_id"])
             filters["$or"][1]["category_id"] = (
                 context.user_data["category_id"])
-        pprint(filters)
         all_products = products_table.find(
             filters).sort([["last_modify_timestamp", -1]])
         self.send_products_layout(update, context, all_products)
@@ -249,7 +247,7 @@ class UserProductsHandler(UserProductsHelper):
                 chat_id=update.callback_query.message.chat_id,
                 text=context.bot.lang_dict[
                     "shop_admin_products_title"].format(all_products.count()),
-                parse_mode=ParseMode.MARKDOWN))
+                parse_mode=ParseMode.HTML))
         # Products list buttons
         buttons = [[InlineKeyboardButton(
             text="🛒 Cart",
@@ -304,10 +302,10 @@ class UserProductsHandler(UserProductsHelper):
                                                    shop["currency"])
             if len(product["content"]) > 0:
                 update.effective_message.edit_caption(
-                    caption=template, parse_mode=ParseMode.MARKDOWN)
+                    caption=template, parse_mode=ParseMode.HTML)
             else:
                 update.effective_message.edit_text(
-                    text=template, parse_mode=ParseMode.MARKDOWN)
+                    text=template, parse_mode=ParseMode.HTML)
 
             update.effective_message.edit_reply_markup(
                 reply_markup=self.product_markup(cart, product))
@@ -330,10 +328,10 @@ class UserProductsHandler(UserProductsHelper):
                                                shop["currency"])
         if len(product["content"]) > 0:
             update.effective_message.edit_caption(
-                caption=template, parse_mode=ParseMode.MARKDOWN)
+                caption=template, parse_mode=ParseMode.HTML)
         else:
             update.effective_message.edit_text(
-                text=template, parse_mode=ParseMode.MARKDOWN)
+                text=template, parse_mode=ParseMode.HTML)
 
         update.effective_message.edit_reply_markup(
             reply_markup=self.product_markup(cart, product))

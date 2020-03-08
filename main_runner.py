@@ -14,6 +14,7 @@ from helper_funcs.helper import (
     back_from_button_handler, back_to_modules, error_callback)
 
 # CHANNELS
+from helper_funcs.misc import  dismiss
 from modules.chanells.channels import (
     MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER, REMOVE_CHANNEL_HANDLER,
     SEND_POST_HANDLER, CHANELLS_MENU)
@@ -146,7 +147,9 @@ def main(token, lang):
 
     back_to_modules_handler = CallbackQueryHandler(pattern=r"back_to_module",
                                                    callback=back_to_modules)
-
+    dismiss_handler = CallbackQueryHandler(pattern="dismiss",
+                                           callback=dismiss)
+    dispatcher.add_handler(dismiss_handler)
     # TODO priority is very important!!!!!!!!!!!!!!!!!!!!
     dispatcher.add_handler(EDIT_BOT_DESCRIPTION_HANDLER)
 

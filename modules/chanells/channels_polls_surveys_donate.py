@@ -29,12 +29,10 @@ logger = logging.getLogger(__name__)
 
 class SendPoll(object):
     def handle_send_poll(self, update, context):
-        print("TEST1111")
         if update.callback_query:
             context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                        message_id=update.callback_query.message.message_id)
             channel_username = update.callback_query.data.replace("send_poll_to_channel_", "")
-            print(channel_username)
             update_data = update.callback_query
             if channel_username == "send_poll_to_channel":
                 channels_markup = [channel['channel_username'] for

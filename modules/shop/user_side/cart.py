@@ -1,6 +1,4 @@
 import logging
-from pprint import pprint
-
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ConversationHandler, CallbackQueryHandler
 from bson.objectid import ObjectId
@@ -40,7 +38,7 @@ class CartHelper(object):
                 cart_items.append(cart_item)
 
         shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
-        template = "*Your Order*\n\n"
+        template = "<b>Your Order</b>\n\n"
         order_price = 0
         for cart_item in cart_items:
             if "discount_price" in cart_item["product"]:
@@ -51,14 +49,14 @@ class CartHelper(object):
                               * cart_item["quantity"])
             order_price += item_price
             template += (
-                "_{}_ - `{}`\n"
-                "x{} - `{}` {}\n\n").format(
+                "{}_ - {}\n"
+                "x{} - {} {}\n\n").format(
                 cart_item["product"]["_id"],
                 cart_item["product"]["name"],
                 cart_item["quantity"],
                 item_price,
                 shop["currency"])
-        template += f"*Order Price:* `{order_price}` {shop['currency']}"
+        template += f"<b>Order Price:</b> {order_price} {shop['currency']}"
         # Save order data. Need to check order data on each step??
         order = dict()
         order["items"] = cart_items
@@ -136,20 +134,18 @@ class CartHelper(object):
             {"_id": cart_item["product"]["category_id"]})["name"]
 
         template = (
-            "*Article:* `{}`"
-            "\n*Name:* `{}`"
-            "\n*Category:* `{}`"
-            "\n*Description:* `{}`"
-            "\n*Price:* `{} {}`").format(
-                cart_item["product"].get("article"),
+            "<b>Article:</b>      {}"
+            "\n<b>Name:</b>       {}"
+            "\n<b>Category:</b>   {}"
+            '\n<b>Price:        </b> <b><u>{} {}</u></b>').format(
+                str(cart_item["product"].get("_id")),
                 cart_item["product"]["name"],
                 category_name,
-                description,
                 float(cart_item["product"]["price"]) * cart_item["quantity"],
                 currency)
         if not cart_item["product"].get("unlimited"):
-            template += f"\n*In stock:* `{cart_item['product']['quantity']}`"
-        template += f"\n*Your quantity*: `{cart_item['quantity']}`"
+            template += f"\n<b>In stock:</b> {cart_item['product']['quantity']}"
+        template += f"\n<b>Your quantity</b>: {cart_item['quantity']}"
         return template
 
     @staticmethod
@@ -169,23 +165,23 @@ class CartHelper(object):
             {"_id": cart_item["product"]["category_id"]})["name"]
 
         template = (
-            "*Article:* `{}`"
-            "\n*Name:* `{}`"
-            "\n*Category:* `{}`"
-            "\n*Price:* `{} {}`").format(
-                cart_item["product"].get("article"),
+            "<b>Article:</b>      {}"
+            "\n<b>Name:</b>       {}"
+            "\n<b>Category:</b>   {}"
+            '\n<b>Price:</b> <b><u>{} {}</u></b>').format(
+                str(cart_item["product"].get("_id")),
                 cart_item["product"]["name"],
                 category_name,
                 float(cart_item["product"]["price"]) * cart_item["quantity"],
                 currency)
         if (len(cart_item["product"]["description"])
                 < MAX_TEMP_DESCRIPTION_LENGTH):
-            template += "\n*Description:* `{}`".format(
+            template += "\n<b>Description:</b> {}".format(
                 cart_item["product"]["description"])
 
         if not cart_item["product"].get("unlimited"):
-            template += f"\n*In stock:* `{cart_item['product']['quantity']}`"
-        template += f"\n*Your quantity*: `{cart_item['quantity']}`"
+            template += f"\n<b>In stock: </b>{cart_item['product']['quantity']}"
+        template += f"\n<b>Your quantity</b>: {cart_item['quantity']}"
         return template
 
     @staticmethod
@@ -270,7 +266,7 @@ class Cart(CartHelper):
                 chat_id=update.callback_query.message.chat_id,
                 text=context.bot.lang_dict[
                     "shop_admin_products_title"].format(len(cart_products)),
-                parse_mode=ParseMode.MARKDOWN))
+                parse_mode=ParseMode.HTML))
         # Products list buttons
         buttons = [[InlineKeyboardButton(
                         text=context.bot.lang_dict["back_button"],
@@ -291,6 +287,7 @@ class Cart(CartHelper):
                     {"_id": cart_item["product_id"]})
                 if not product:
                     continue
+
                 # Create product reply markup and send short product template
                 cart_item["product"] = product
                 reply_markup = self.cart_item_markup(cart_item)
@@ -344,10 +341,10 @@ class Cart(CartHelper):
 
             if update.effective_message.caption_markdown:
                 update.effective_message.edit_caption(
-                    caption=template, parse_mode=ParseMode.MARKDOWN)
+                    caption=template, parse_mode=ParseMode.HTML)
             else:
                 update.effective_message.edit_text(
-                    text=template, parse_mode=ParseMode.MARKDOWN)
+                    text=template, parse_mode=ParseMode.HTML)
 
             update.effective_message.edit_reply_markup(
                 reply_markup=self.cart_item_markup(cart_item))
@@ -416,7 +413,7 @@ class Cart(CartHelper):
             context.bot.send_message(
                 chat_id=update.effective_chat.id,
                 text=order_data["template"],
-                parse_mode=ParseMode.MARKDOWN,
+                parse_mode=ParseMode.HTML,
                 reply_markup=InlineKeyboardMarkup(buttons)))
         return ConversationHandler.END
 

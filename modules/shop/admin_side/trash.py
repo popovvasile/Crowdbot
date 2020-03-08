@@ -39,7 +39,7 @@ class TrashHandler(Welcome):
             context.bot.send_message(
                 update.effective_chat.id,
                 context.bot.lang_dict["shop_admin_trash_start"],
-                parse_mode=ParseMode.MARKDOWN,
+                parse_mode=ParseMode.HTML,
                 reply_markup=reply_markup))
         return ConversationHandler.END
 

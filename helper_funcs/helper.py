@@ -379,8 +379,6 @@ def help_button(update, context):
             else:
                 text = help_strings(context, update)[module]["visitor_help"]
                 commands_keyboard = help_strings(context, update)[module]["visitor_keyboard"]
-            print(commands_keyboard)
-
             pairs = commands_keyboard
 
             # if len(commands_keyboard) % 2 == 1:

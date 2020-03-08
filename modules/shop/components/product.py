@@ -1,13 +1,11 @@
 import logging
 from datetime import datetime
 from uuid import uuid4
-from pprint import pprint
 
 from bson.objectid import ObjectId
 from telegram.error import BadRequest
 from telegram.constants import MAX_CAPTION_LENGTH
-from telegram import (ParseMode, InputMediaPhoto, InlineKeyboardMarkup,
-                      InlineKeyboardButton)
+from telegram import (ParseMode, InputMediaPhoto)
 
 from helper_funcs.misc import get_obj
 from modules.shop.helper.helper import send_media_arr
@@ -117,7 +115,7 @@ class Product(object):
                     context.bot.send_message(chat_id=update.effective_chat.id,
                                              text=text,
                                              reply_markup=reply_markup,
-                                             parse_mode=ParseMode.MARKDOWN))
+                                             parse_mode=ParseMode.HTML))
 
         except (BadRequest, IndexError):
             context.user_data["to_delete"].append(
@@ -125,7 +123,7 @@ class Product(object):
                     chat_id=update.effective_chat.id,
                     text=context.bot.lang_dict["shop_admin_image_exception"]
                     + "\n\n" + text,
-                    parse_mode=ParseMode.MARKDOWN,
+                    parse_mode=ParseMode.HTML,
                     reply_markup=reply_markup))
 
     def send_full_template(self, update, context,
@@ -150,7 +148,7 @@ class Product(object):
                     chat_id=update.effective_chat.id,
                     text=text,
                     reply_markup=reply_markup,
-                    parse_mode=ParseMode.MARKDOWN,
+                    parse_mode=ParseMode.HTML,
                     reply_to_message_id=reply_to_message_id))
 
         elif len(self.content) == 1:
@@ -171,7 +169,7 @@ class Product(object):
                             update.effective_chat.id,
                             text=text,
                             reply_markup=reply_markup,
-                            parse_mode=ParseMode.MARKDOWN,
+                            parse_mode=ParseMode.HTML,
                             reply_to_message_id=reply_to_message_id))
                 else:
                     self.send_content(update.effective_chat.id,
@@ -184,7 +182,7 @@ class Product(object):
                             update.effective_chat.id,
                             text=text,
                             reply_markup=reply_markup,
-                            parse_mode=ParseMode.MARKDOWN,
+                            parse_mode=ParseMode.HTML,
                             reply_to_message_id=reply_to_message_id))
             else:
                 self.send_content(update.effective_chat.id,
@@ -238,7 +236,7 @@ class Product(object):
                     chat_id=update.effective_chat.id,
                     text=text,
                     reply_markup=reply_markup,
-                    parse_mode=ParseMode.MARKDOWN,
+                    parse_mode=ParseMode.HTML,
                     reply_to_message_id=reply_to_message_id))
 
     def add_content_dict(self, update, to_save=False):
@@ -298,7 +296,7 @@ class Product(object):
 
     @staticmethod
     def send_content(chat_id, context, content_dict,
-                     caption=None, parse_mode=ParseMode.MARKDOWN,
+                     caption=None, parse_mode=ParseMode.HTML,
                      reply_markup=None):
         """Sends one content_dict
 
@@ -404,7 +402,6 @@ class Product(object):
         }
 
     def create(self):
-        pprint(self.to_dict())
         products_table.insert_one({
             "bot_id": self.context.bot.id,
             "price": self.price,

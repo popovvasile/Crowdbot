@@ -273,11 +273,11 @@ class OrderItem(Product):
         currency = chatbots_table.find_one(
             {"bot_id": self.context.bot.id})["shop"]["currency"]
 
-        text = ("*Article:* `{}`"
+        text = ("<b>Article:</b>    {}"
                 # "\n*Availability:* `{}`"
-                "\n*Category:* `{}`"
+                "\n<b>Category:</b> {}"
                 # "\nIn stock: `{}`"
-                "\nx{} - `{}` {}").format(
+                "\nx<b>{}</b> - {} {}").format(
             self.article,
             # self.item_exist,
             self.category["name"],

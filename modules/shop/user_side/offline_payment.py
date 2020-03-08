@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 import logging
 import datetime
-from pprint import pprint
-
 from random import randint
 
 from telegram import (InlineKeyboardMarkup, InlineKeyboardButton, ParseMode,
@@ -158,26 +156,26 @@ class PurchaseBot(object):
         context.user_data["to_delete"].append(
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text=order_data["template"],
-                                     parse_mode=ParseMode.MARKDOWN))
-        confirm_text = ("*Your order* ☝️"
-                        "\n*Phone Number:* "
+                                     parse_mode=ParseMode.HTML))
+        confirm_text = ("<b>Your order</b> ☝️"
+                        "\n<b>Phone Number:</b> "
                         f"{context.user_data['order']['phone_number']}")
 
         if context.user_data["order"]["shipping"]:
-            confirm_text += ("\n*Delivery to* "
+            confirm_text += ("\n<b>Delivery to</b> "
                              + context.user_data["order"]['address'])
         else:
-            confirm_text += "\n*Pickup from* " + shop["address"]
+            confirm_text += "\n<b>Pickup from</b> " + shop["address"]
 
         if context.user_data["order"]["user_comment"]:
             confirm_text += (
-                f"\n*Comment:* `{context.user_data['order']['user_comment']}`")
+                f"\n<b>Comment:</b> `{context.user_data['order']['user_comment']}`")
 
         context.user_data["to_delete"].append(
             context.bot.send_message(
                 chat_id=update.effective_chat.id,
                 text=confirm_text,
-                parse_mode=ParseMode.MARKDOWN,
+                parse_mode=ParseMode.HTML,
                 reply_markup=InlineKeyboardMarkup(buttons)))
         return ORDER_FINISH
 
@@ -259,6 +257,9 @@ class PurchaseBot(object):
 
             context.bot.send_message(chat_id=admin["chat_id"],
                                      text=text,
+                                     reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
+                                         text="Close ❌", callback_data="dismiss"
+                                     )]]),
                                      parse_mode=ParseMode.HTML)
 
         context.bot.send_message(

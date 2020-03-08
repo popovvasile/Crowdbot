@@ -1,12 +1,10 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
 import logging
-from pprint import pprint
 from datetime import datetime, timedelta, time
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
-from telegram.ext import ConversationHandler, CallbackQueryHandler
-
+from telegram.ext import ConversationHandler
 from database import donations_table, chatbots_table
 from helper_funcs.helper import get_help
 from helper_funcs.misc import delete_messages, lang_timestamp

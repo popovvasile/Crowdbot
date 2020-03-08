@@ -189,7 +189,7 @@ class ProductsHandler(ProductsHelper):
             context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
                 text=title,
-                parse_mode=ParseMode.MARKDOWN))
+                parse_mode=ParseMode.HTML))
 
         if all_products.count() == 0:
             context.user_data["to_delete"].append(
@@ -381,7 +381,7 @@ class ProductsHandler(ProductsHelper):
             context.bot.send_message(
                 update.effective_chat.id,
                 text=text,
-                parse_mode=ParseMode.MARKDOWN,
+                parse_mode=ParseMode.HTML,
                 reply_markup=InlineKeyboardMarkup(buttons)))
 
         return CONTENT_MENU
@@ -556,8 +556,10 @@ class ProductsHandler(ProductsHelper):
 
     def back_to_products(self, update: Update, context: CallbackContext):
         page = context.user_data.get("page")
+        delete_messages(update, context)
         clear_user_data(context)
         context.user_data["page"] = page
+
         return self.products(update, context)
 
 
