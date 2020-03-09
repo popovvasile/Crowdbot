@@ -129,9 +129,9 @@ def main(token, lang):
         Bot.lang_dict = lang_dicts["RUS"]
     updater = tg.Updater(use_context=True, bot=bot_obj)
     dispatcher = updater.dispatcher
-    if os.environ['SHOP_PRODUCTION'] is True:
+    # os.environ['SHOP_PRODUCTION'] is True --- returns False, dunno why
+    if os.environ['SHOP_PRODUCTION'] == "1":
         dispatcher.add_error_handler(error_callback)
-        print("PRODUCTION")
     start_handler = CommandHandler("start", WelcomeBot().start)
     help_handler = CommandHandler("help", get_help)
     # product_handler_han = CallbackQueryHandler(
