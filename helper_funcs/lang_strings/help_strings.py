@@ -10,23 +10,21 @@ from database import (chatbots_table, users_messages_to_admin_table,
 def help_strings(context, update):
     help_dict = OrderedDict()
     string_d_str = context.bot.lang_dict
-    # admins_keyboard = [
-    #     #
-    #     # InlineKeyboardButton(context.bot.lang_dict["donations"],
-    #     #                      callback_data="donations_menu"),
-    # ]
-    # admins_keyboard += [InlineKeyboardButton(text=context.bot.lang_dict["shop"],
-    #                                          callback_data="shop_start")]
     orders_quantity = {
         "new_orders_quantity":
             orders_table.find({"bot_id": context.bot.id,
                                "status": False,
                                "in_trash": False}).count()}
+
+    chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
+
     orders_btn_text = (
             context.bot.lang_dict["shop_admin_orders_btn"] +
             (f' ({orders_quantity["new_orders_quantity"]})'
              if orders_quantity["new_orders_quantity"] != 0 else ""))
-    admins_keyboard = [
+
+    if chatbot.get("shop_enabled") is True:
+        admins_keyboard = [
             [InlineKeyboardButton(context.bot.lang_dict["shop_admin_add_product_btn"],
                                   callback_data="add_product")],
             [InlineKeyboardButton(context.bot.lang_dict["shop_admin_categories_btn"],
@@ -40,54 +38,41 @@ def help_strings(context, update):
             [InlineKeyboardButton(text=context.bot.lang_dict["configure_button"],
                                   callback_data="shop_config")],
             [InlineKeyboardButton(text=context.bot.lang_dict["user_mode_module"],
-                                  callback_data="turn_user_mode_on")],
-    ]
+                                  callback_data="turn_user_mode_on")]]
+    elif "shop" in chatbot:
+        admins_keyboard = [[InlineKeyboardButton(text=context.bot.lang_dict["allow_shop_button"],
+                                                 callback_data="change_shop_config")],
 
-    # if "donate" in payment_token:
-    #     admins_keyboard += [InlineKeyboardButton(text=context.bot.lang_dict["donations"],
-    #                                              callback_data="donation_menu")]
+                           [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                                 callback_data="help_module(shop)")]
+                           ]
+    else:
+        admins_keyboard = [[InlineKeyboardButton(text=context.bot.lang_dict["allow_shop_button"],
+                                                 callback_data='allow_shop')],
+                           [InlineKeyboardButton(text="Back", callback_data="help_module(shop)")]]
 
-    #     help_dict["shop"] = dict(
-    #         mod_name=string_d_str["add_product_button"],
-    #         admin_keyboard=admins_keyboard,
-    #         admin_help=string_d_str["add_menu_buttons_help"],
-    #         visitor_keyboard=[InlineKeyboardButton(text=string_d_str["shop"],
-    #                                                callback_data="products")],
-    #         visitor_help=string_d_str["add_menu_buttons_help_visitor"]
-    #     )
-    # else:
     shop = chatbots_table.find_one({"bot_id": context.bot.id}).get("shop", {})
     cart = carts_table.find_one({"bot_id": context.bot.id,
                                  "user_id": update.effective_user.id}) or {}
     cart_items_count = len(cart.get("products", list()))
-    user_keyboard_shop=[
-            [InlineKeyboardButton(text="Catalog",
-                                 callback_data="open_shop")],
-            [InlineKeyboardButton(text="My Orders",
-                                 callback_data="my_orders")],
-            [InlineKeyboardButton(text="🛒 Cart"
-                                      + (f" ({cart_items_count})"
-                                         if cart_items_count else ""),
-                                 callback_data="cart")]]
+    user_keyboard_shop = [
+        [InlineKeyboardButton(text="Catalog",
+                              callback_data="open_shop")],
+        [InlineKeyboardButton(text="My Orders",
+                              callback_data="my_orders")],
+        [InlineKeyboardButton(text="🛒 Cart"
+                                   + (f" ({cart_items_count})"
+                                      if cart_items_count else ""),
+                              callback_data="cart")]]
     if shop.get("shipping") is False:
         user_keyboard_shop += [[InlineKeyboardButton(text="Contacts&Address",
-                                callback_data="contacts_shop")]]
+                                                     callback_data="contacts_shop")]]
     help_dict["shop"] = dict(
         mod_name=string_d_str["add_product_button"],
         admin_keyboard=admins_keyboard,
         admin_help=string_d_str["add_menu_buttons_help"],
         visitor_help=shop.get("description", ""),
         visitor_keyboard=user_keyboard_shop)
-    # help_dict["channels_groups"] = dict(
-    #     mod_name='Channels',
-    #     # start 'Channels' message
-    #     admin_help=string_d_str["channels_str_1"],
-    #     # and keyboard for start message
-    #     admin_keyboard=[InlineKeyboardButton(text=string_d_str["channels"],
-    #                                          callback_data='channels'),
-    #                     InlineKeyboardButton(text=string_d_str["groups"],
-    #                                          callback_data='groups')]
-    # )
 
     help_dict["settings"] = dict(
         mod_name=string_d_str["add_menu_module_button"],
@@ -95,26 +80,15 @@ def help_strings(context, update):
             [InlineKeyboardButton(text=string_d_str["edit_menu_text"],
                                   callback_data="edit_bot_description")],
             [InlineKeyboardButton(text=string_d_str["buttons"],
-                                 callback_data="buttons")],
+                                  callback_data="buttons")],
             [InlineKeyboardButton(text=string_d_str["admins_btn_str"],
-                                 callback_data="admins")],
+                                  callback_data="admins")],
             [InlineKeyboardButton(text=string_d_str["statistic_btn_str"],
-                                 callback_data="users_statistic")],
+                                  callback_data="users_statistic")],
         ],
         admin_help=string_d_str["add_menu_buttons_help"]
     )
 
-    # help_dict["polls"] = dict(
-    #     admin_keyboard=[
-    #         InlineKeyboardButton(text=string_d_str["polls_mode_str"],
-    #                              callback_data="polls"),
-    #         InlineKeyboardButton(text=string_d_str["survey_mode_str"],
-    #                              callback_data="surveys"),
-    #     ],
-    #     mod_name=string_d_str["polls_module_str"],
-    #     admin_help=string_d_str["polls_help_admin"]
-    # )
-    # Get unread messages count.
     new_messages_count = users_messages_to_admin_table.find(
         {"bot_id": context.bot.id,
          "is_new": True,
@@ -132,21 +106,12 @@ def help_strings(context, update):
         admin_keyboard=[
             # TODO Send messages ==> to users, to donators, to customers
             [InlineKeyboardButton(text=string_d_str["messages"]
-                                 + (f" ({new_messages_count})"
-                                    if new_messages_count else ""),
-                                 callback_data="admin_messages")],
+                                       + (f" ({new_messages_count})"
+                                          if new_messages_count else ""),
+                                  callback_data="admin_messages")],
             [InlineKeyboardButton(text=string_d_str["users_module"],
-                                 callback_data="users_layout")]
-        ],
-        # visitor_help=string_d_str["send_message_user"],
-        # visitor_keyboard=[
-        #     [InlineKeyboardButton(
-        #         text=string_d_str["send_message_button_to_admin"],
-        #         callback_data="send_message_to_admin")],
-        #     # InlineKeyboardButton(
-        #     #     text=string_d_str["send_message_button_to_admin_anonim"],
-        #     #     callback_data="send_message_to_admin_anonim")
-        # ]
+                                  callback_data="users_layout")]
+        ]
     )
 
     return help_dict
@@ -162,15 +127,13 @@ def helpable_dict(bot):
     new_messages_str = (f" ({new_messages_count})"
                         if new_messages_count else "")
     admin_rus = OrderedDict()
-    # admin_rus["📱 Группы и каналы"] = "channels_groups"
-    # admin_rus["❓ Опросы"] = "polls"
+
     admin_rus[f"✉️ Пользователи и Сообщения {new_messages_str}"] = "users"
     admin_rus["🛠 Настройки бота"] = "settings"
     admin_rus["Магазин и платежи"] = "shop"
 
     admin_eng = OrderedDict()
-    # admin_eng["📱 Groups and Channels"] = "channels_groups"
-    # admin_eng["❓ Polls and Surveys"] = "polls"
+
     admin_eng[f"✉️ Users & Messages {new_messages_str}"] = "users"
     admin_eng["🛠 Bot and Menu Settings"] = "settings"
     admin_eng["💰 Shop and Payments"] = "shop"
@@ -179,12 +142,12 @@ def helpable_dict(bot):
         ALL_MODULES=[],
         ADMIN_HELPABLE=admin_eng,
         ADMIN_USER_MODE={
-                         "✉️ Message": "users",
-                         "Admin view": "user_mode",
-                         "Shop": "shop"},
+            "✉️ Message": "users",
+            "Admin view": "user_mode",
+            "Shop": "shop"},
         VISITOR_HELPABLE={
-                          "✉️ Message": "users",
-                          "💰 Shop": "shop"},
+            "✉️ Message": "users",
+            "💰 Shop": "shop"},
 
     ),
         "RUS": dict(
@@ -195,8 +158,8 @@ def helpable_dict(bot):
                 "✉️ Сообщения": "users",
                 "Магазин": "shop"},
             VISITOR_HELPABLE={
-                              "✉️ Сообщения": "users",
-                              "Магазин": "shop_user_menu"},
+                "✉️ Сообщения": "users",
+                "Магазин": "shop_user_menu"},
         ),
     }
     # "channels", "donation_enable", "donation_payment", "donations_send_promotion",
