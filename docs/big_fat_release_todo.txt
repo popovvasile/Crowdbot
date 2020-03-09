@@ -25,7 +25,7 @@
 	Unread message is not read- it must appear on the very bottom
 	Make difference between shop settings and bot settings
 	To contacts and address must be added more info- multiple messages
-
+    Remove all the strings from hard-code and move them to languages.json, especially the shop
  	+ * В Full template заказа убрать пагинацию и сделать кнопку Items - которая будет показывать товары с заказа
 	+ * В Full template и Short template заказа - при слишком большом тексте(Items) - обрывать текст и показывать три точки
 	+ * В Short template товара - при слишком большом тексте(Not finished orders) - обрывать текст и показывать три точки

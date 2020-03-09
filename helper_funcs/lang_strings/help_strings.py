@@ -55,18 +55,23 @@ def help_strings(context, update):
     cart = carts_table.find_one({"bot_id": context.bot.id,
                                  "user_id": update.effective_user.id}) or {}
     cart_items_count = len(cart.get("products", list()))
+    # "shop_catalog": "Catalog",
+    # "shop_my_orders": "My Orders",
+    # "shop_cart": " Cart",
+    # "shop_contact_and_address": "Contacts&Address",
     user_keyboard_shop = [
-        [InlineKeyboardButton(text="Catalog",
+        [InlineKeyboardButton(text=context.bot.lang_dict["shop_catalog"],
                               callback_data="open_shop")],
-        [InlineKeyboardButton(text="My Orders",
+        [InlineKeyboardButton(text=context.bot.lang_dict["shop_my_orders"],
                               callback_data="my_orders")],
-        [InlineKeyboardButton(text="🛒 Cart"
+        [InlineKeyboardButton(text=context.bot.lang_dict["shop_cart"]
                                    + (f" ({cart_items_count})"
                                       if cart_items_count else ""),
                               callback_data="cart")]]
     if shop.get("shipping") is False:
-        user_keyboard_shop += [[InlineKeyboardButton(text="Contacts&Address",
-                                                     callback_data="contacts_shop")]]
+        user_keyboard_shop += [[
+            InlineKeyboardButton(text=context.bot.lang_dict["shop_contact_and_address"],
+                                 callback_data="contacts_shop")]]
     help_dict["shop"] = dict(
         mod_name=string_d_str["add_product_button"],
         admin_keyboard=admins_keyboard,

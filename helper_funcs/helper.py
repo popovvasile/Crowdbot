@@ -123,11 +123,12 @@ def check_provider_token(provider_token, update, context):
                                     need_email=True, need_shipping_address=False,
                                     is_flexible=True
                                     ))
-        return True
+
     except Exception as e:
         print(e)
         return False
-
+    delete_messages(update, context, True)
+    return True
 
 # for test purposes
 def error_callback(update, context):
