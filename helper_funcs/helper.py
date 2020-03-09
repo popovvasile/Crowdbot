@@ -1,3 +1,4 @@
+import logging
 import re
 from urllib3.exceptions import HTTPError
 
@@ -170,7 +171,8 @@ def error_callback(update, context):
 
     except TelegramError:
         print("TeelgramError")
-    except:  # TODO
+    except Exception as e:
+        logging.error(e.__repr__())
         context.bot.send_message(update.effective_message.chat.id,
                                  "An error happened =( Please proceed to the shop menu",
                                  reply_markup=InlineKeyboardMarkup(
