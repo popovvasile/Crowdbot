@@ -100,7 +100,7 @@ from modules.shop.user_side.online_payment import ONLINE_PURCHASE_HANDLER
 from modules.shop.user_side.products import (
     USERS_PRODUCTS_LIST_HANDLER, ADD_TO_CART, REMOVE_FROM_CART,
     PRODUCTS_CATEGORIES, BACK_TO_CATEGORIES, VIEW_PRODUCT,
-    BACK_TO_CUSTOMER_SHOP)
+    BACK_TO_CUSTOMER_SHOP, SHOP_CONTACTS)
 from modules.shop.user_side.cart import (
     CART, REMOVE_FROM_CART_LIST, CHANGE_QUANTITY, BACK_TO_CART, MAKE_ORDER,
     VIEW_CART_PRODUCT)
@@ -172,6 +172,7 @@ def main(token, lang):
     dispatcher.add_handler(BACK_TO_CUSTOMER_SHOP)
     dispatcher.add_handler(USER_ORDER_ITEMS_PAGINATION)
     dispatcher.add_handler(BACK_TO_USER_ORDERS)
+    dispatcher.add_handler(SHOP_CONTACTS)
 
     #  SHOP ADMIN SIDE
     # dispatcher.add_handler(product_handler_han)

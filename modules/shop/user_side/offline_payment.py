@@ -44,13 +44,13 @@ class PurchaseBot(object):
             context.bot.send_message(
                 chat_id=update.callback_query.message.chat.id,
                 text="Add some details to your order or continue",
-                reply_markup=InlineKeyboardMarkup([
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
+                         text="Continue",
+                         callback_data="pass_order_comment")],
                     [InlineKeyboardButton(
                          text=context.bot.lang_dict["back_button"],
-                         callback_data="back_to_cart"),
-                     InlineKeyboardButton(
-                         text="Continue",
-                         callback_data="pass_order_comment")]])))
+                         callback_data="back_to_cart")]
+                     ])))
         return ORDER_CONTACTS
 
     @staticmethod

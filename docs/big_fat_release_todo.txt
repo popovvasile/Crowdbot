@@ -16,21 +16,16 @@
 		PHONE NUMBER VALIDATION
 	[DONE] * Если нет товаров в категории - не показывать категорию юзерам
 	[DONE] + * Если вообще нет товаров - blink(о отм что нет товара) когда нажимаешь catalog - there is no shop
-	Bug- total price is 0
-	Notifications must have a buttons "DISMISS"
 	Picture must be smaller
-	Change description bug on back
 	Back from statistics heads to shop
-	Buttons marazm on edit
 	Messages (5 messaegs, 2 new)
 	Blink on new messages
-	off/on on notifications on messages
-	BUG: answer not only once to messages, but also let tthe possibility to write more messages
+	BUG: answer not only once to messages, but also let the possibility to write more messages
 	One block for messages and the entire bot
 	Unread message is not read- it must appear on the very bottom
 	Make difference between shop settings and bot settings
-	Shop settings back to shop settings- not to shop
-	Add possiblity to see address (Contact button) in bot button
+	To contacts and address must be added more info- multiple messages
+
  	+ * В Full template заказа убрать пагинацию и сделать кнопку Items - которая будет показывать товары с заказа
 	+ * В Full template и Short template заказа - при слишком большом тексте(Items) - обрывать текст и показывать три точки
 	+ * В Short template товара - при слишком большом тексте(Not finished orders) - обрывать текст и показывать три точки

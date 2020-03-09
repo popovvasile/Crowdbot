@@ -7,7 +7,7 @@ from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMa
     ReplyKeyboardRemove
 from telegram.ext import (MessageHandler, Filters, ConversationHandler, CallbackQueryHandler)
 
-from database import chatbots_table, products_table
+from database import chatbots_table, products_table, db
 from helper_funcs.auth import initiate_chat_id
 from helper_funcs.helper import get_help, check_provider_token
 from helper_funcs.misc import delete_messages
@@ -186,7 +186,7 @@ class EditPaymentHandler(object):
     def handle_edit_action_finish(self, update, context):
         delete_messages(update, context, True)
 
-        reply_markup = InlineKeyboardMarkup([[back_btn("back_to_main_menu_btn", context=context)]])
+        reply_markup = InlineKeyboardMarkup([[back_btn("shop_config", context=context)]])
         update = update.callback_query
         data = update.data
         chat_id = update.message.chat_id
@@ -316,8 +316,11 @@ class EditPaymentHandler(object):
             return EDIT_FINISH
 
     def handle_edit_finish(self, update, context):
+        delete_messages(update, context)
+        context.bot.delete_message(update.effective_chat.id,
+                                   update.effective_message.message_id)
         finish_markup = InlineKeyboardMarkup(
-            [[back_btn("back_to_main_menu_btn", context=context)]])
+            [[back_btn("shop_config", context=context)]])
 
         chat_id, txt = initiate_chat_id(update)
         update_dict = {}
@@ -339,7 +342,7 @@ class EditPaymentHandler(object):
                                    callback_data="change_currency_finish_YES")],
              [InlineKeyboardButton(text=context.bot.lang_dict["no"],
                                    callback_data="change_currency_finish_NO")],
-             [back_btn("back_to_main_menu_btn", context=context)]])
+             [back_btn("shop_config", context=context)]])
 
             context.user_data["to_delete"].append(update.message.reply_text(
                 context.bot.lang_dict["payments_currency_change"].format(
@@ -351,7 +354,7 @@ class EditPaymentHandler(object):
 
         if context.user_data["action"] == "payment_token":
             update_dict["payment_token"] = txt
-            update_dict["shop_type"] = context.user_data["shop_type"]
+            update_dict["shop_type"] = "online"
             if check_provider_token(provider_token=txt, update=update, context=context):
                 if context.user_data["target"] == "donations":
                     chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
@@ -393,36 +396,47 @@ class EditPaymentHandler(object):
             chatbots_table.update_one({"bot_id": context.bot.id}, {'$set': chatbot})
             context.user_data["to_delete"].append(
                 update.message.reply_text(context.bot.lang_dict["donations_edit_str_10"],
-                                      reply_markup=finish_markup))
+                                          reply_markup=finish_markup))
 
         logger.info("Admin {} on bot {}:{} did  the following edit on donation: {}".format(
             update.effective_user.first_name, context.bot.first_name, context.bot.id,
             context.user_data["action"]))
-        delete_messages(update, context)
         context.user_data.clear()
 
         return ConversationHandler.END
 
     def change_currency_finish(self, update, context):
         converted = context.user_data["converted"]
+        context.bot.delete_message(update.effective_chat.id,
+                                   update.effective_message.message_id)
         if "YES" in update.callback_query.data:
             chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
             chatbot["shop"]["currency"] = context.user_data["currency"]
             chatbots_table.update_one({"bot_id": context.bot.id}, {'$set': chatbot})
+
             products_table.update_many(
                 {"bot_id": context.bot.id},
                 {"$mul": {"price": converted,
                           "discount_price": converted}})
-            products_table.update_many(
-                {"bot_id": context.bot.id},
-                {"$set": { "$round": ["$price", 2]}})
-            products_table.update_many(
-                {"bot_id": context.bot.id},
-                {"$set": {"$round": ["$discount_price", 2]}})
+            all_products = products_table.find({})
+            # stupid solution, couldn't find anything inside
+            # the pymongo framework which would make it easy
+            # old solution below (does not work)
+            for prod in all_products:
+                products_table.update_many(
+                    {"bot_id": context.bot.id},
+                    {"$set": {"price": round(prod["price"], 2),
+                              "discount_price": round(prod["discount_price"], 2)}})
+            # products_table.update_many(
+            #     {"bot_id": context.bot.id},
+            #     {"$set": { "$round": ["$price", 2]}})
+            # products_table.update_many(
+            #     {"bot_id": context.bot.id},
+            #     {"$set": {"$round": ["$discount_price", 2]}})
             delete_messages(update, context)
             update.callback_query.message.reply_text(
-                context.bot.lang_dict["payments_currency_has_changed"])
-            EnableDisableShopDonations().config_shop(update=update, context=context)
+                context.bot.lang_dict["payments_currency_has_changed"],
+                reply_markup=InlineKeyboardMarkup([[back_btn("shop_config", context)]]))
         else:
             EnableDisableShopDonations().config_shop(update=update, context=context)
 
@@ -476,6 +490,8 @@ EDIT_DONATION_HANDLER = ConversationHandler(
     },
 
     fallbacks=[
+        CallbackQueryHandler(callback=EnableDisableShopDonations.config_shop,
+                             pattern=r"shop_config"),
         CallbackQueryHandler(callback=Welcome().back_to_main_menu,
                              pattern=r"back_to_main_menu_btn"),
         CallbackQueryHandler(callback=Welcome().back_to_main_menu, pattern=r"help_back"),

@@ -249,21 +249,22 @@ class SendMessageToAdmin(object):
 
         users_messages_to_admin_table.insert(context.user_data["new_message"])
         # Send notification about new message to all admins
-        """for admin in users_table.find({"bot_id": context.bot.id,
+        for admin in users_table.find({"bot_id": context.bot.id,
                                        "is_admin": True}):
             # Create notification text and send it.
             text = ("<b>New Message</b> "
                     + MessageTemplate(context.user_data["new_message"],
                                       context).super_short_temp())
-
-            # reply_markup = InlineKeyboardMarkup([
-            #     [InlineKeyboardButton(
-            #         text=context.bot.lang_dict["view_message_str"],
-            #         callback_data="notification_message_view")]])
+            reply_markup = InlineKeyboardMarkup([
+                [InlineKeyboardButton(
+                    text="Close ❌", callback_data="dismiss"
+                )]
+            ])
             context.bot.send_message(chat_id=admin["chat_id"],
                                      text=text,
-                                     # reply_markup=reply_markup,
-                                     parse_mode=ParseMode.HTML)"""
+                                     reply_markup=reply_markup,
+                                     parse_mode=ParseMode.HTML)
+
         # Console log
         logger.info("User {} on bot {}:{} sent a message to the admin".format(
             update.effective_user.first_name, context.bot.first_name,

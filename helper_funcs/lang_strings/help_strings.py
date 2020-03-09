@@ -60,13 +60,7 @@ def help_strings(context, update):
     cart = carts_table.find_one({"bot_id": context.bot.id,
                                  "user_id": update.effective_user.id}) or {}
     cart_items_count = len(cart.get("products", list()))
-
-    help_dict["shop"] = dict(
-        mod_name=string_d_str["add_product_button"],
-        admin_keyboard=admins_keyboard,
-        admin_help=string_d_str["add_menu_buttons_help"],
-        visitor_help=shop.get("description", ""),
-        visitor_keyboard=[
+    user_keyboard_shop=[
             [InlineKeyboardButton(text="Catalog",
                                  callback_data="open_shop")],
             [InlineKeyboardButton(text="My Orders",
@@ -74,7 +68,16 @@ def help_strings(context, update):
             [InlineKeyboardButton(text="🛒 Cart"
                                       + (f" ({cart_items_count})"
                                          if cart_items_count else ""),
-                                 callback_data="cart")]])
+                                 callback_data="cart")]]
+    if shop.get("shipping") is False:
+        user_keyboard_shop += [[InlineKeyboardButton(text="Contacts&Address",
+                                callback_data="contacts_shop")]]
+    help_dict["shop"] = dict(
+        mod_name=string_d_str["add_product_button"],
+        admin_keyboard=admins_keyboard,
+        admin_help=string_d_str["add_menu_buttons_help"],
+        visitor_help=shop.get("description", ""),
+        visitor_keyboard=user_keyboard_shop)
     # help_dict["channels_groups"] = dict(
     #     mod_name='Channels',
     #     # start 'Channels' message

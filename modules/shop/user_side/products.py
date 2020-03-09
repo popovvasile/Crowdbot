@@ -177,13 +177,13 @@ class UserProductsHandler(UserProductsHelper):
         categories_list = [categories_table.find_one({"_id": x})
                            for x in set(categories_list_ids)]
         categories_buttons = [
-            InlineKeyboardButton(text=x["name"],
-                                 callback_data=f"catalog/{x['_id']}")
+            [InlineKeyboardButton(text=x["name"],
+                                 callback_data=f"catalog/{x['_id']}")]
             for x in categories_list]
 
         if categories_buttons:
             categories_reply_markup = InlineKeyboardMarkup(
-                [categories_buttons[x:x + 2]for x in range(0, len(categories_buttons),2)]
+                categories_buttons
                 + [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                          callback_data="back_to_module_shop")]])
 
@@ -250,9 +250,9 @@ class UserProductsHandler(UserProductsHelper):
                 parse_mode=ParseMode.HTML))
         # Products list buttons
         buttons = [[InlineKeyboardButton(
-            text="🛒 Cart",
-            callback_data="cart"),
-            InlineKeyboardButton(
+            text="Buy 🛒 ",
+            callback_data="cart")],
+            [InlineKeyboardButton(
                 text=context.bot.lang_dict["back_button"],
                 callback_data="back_to_categories")]]
 
@@ -360,6 +360,16 @@ class UserProductsHandler(UserProductsHelper):
 
         return ConversationHandler.END
 
+    def shop_contacts(self, update, context):
+        delete_messages(update, context, True)
+        address = chatbots_table.find_one({"bot_id": context.bot.id})["shop"].get("address")
+        back_button = InlineKeyboardMarkup([
+            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                  callback_data="back_to_module_shop")]])
+        update.effective_message.reply_text(text="{}".format(address),
+                                            reply_markup=back_button)
+        return ConversationHandler.END
+
     def back_to_products(self, update, context):
         delete_messages(update, context, True)
         page = context.user_data["page"]
@@ -404,3 +414,6 @@ BACK_TO_CATEGORIES = CallbackQueryHandler(
 BACK_TO_CUSTOMER_SHOP = CallbackQueryHandler(
     pattern=r"back_to_customer_shop",
     callback=UserProductsHandler().back_to_products)
+
+SHOP_CONTACTS = CallbackQueryHandler(pattern="contacts_shop",
+                                   callback=UserProductsHandler().shop_contacts)
