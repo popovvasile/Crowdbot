@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
+import os
 
 from telegram.utils import request
 import telegram.ext as tg
@@ -128,7 +129,9 @@ def main(token, lang):
         Bot.lang_dict = lang_dicts["RUS"]
     updater = tg.Updater(use_context=True, bot=bot_obj)
     dispatcher = updater.dispatcher
-    # dispatcher.add_error_handler(error_callback)
+    if os.environ['SHOP_PRODUCTION'] is True:
+        dispatcher.add_error_handler(error_callback)
+        print("PRODUCTION")
     start_handler = CommandHandler("start", WelcomeBot().start)
     help_handler = CommandHandler("help", get_help)
     # product_handler_han = CallbackQueryHandler(
