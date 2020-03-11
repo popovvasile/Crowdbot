@@ -423,16 +423,11 @@ class EditPaymentHandler(object):
             # the pymongo framework which would make it easy
             # old solution below (does not work)
             for prod in all_products:
-                products_table.update_many(
-                    {"bot_id": context.bot.id},
+                products_table.update_one(
+                    {"_id": prod["_id"]},
                     {"$set": {"price": round(prod["price"], 2),
                               "discount_price": round(prod["discount_price"], 2)}})
-            # products_table.update_many(
-            #     {"bot_id": context.bot.id},
-            #     {"$set": { "$round": ["$price", 2]}})
-            # products_table.update_many(
-            #     {"bot_id": context.bot.id},
-            #     {"$set": {"$round": ["$discount_price", 2]}})
+
             delete_messages(update, context)
             update.callback_query.message.reply_text(
                 context.bot.lang_dict["payments_currency_has_changed"],

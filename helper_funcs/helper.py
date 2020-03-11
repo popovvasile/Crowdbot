@@ -105,7 +105,7 @@ def send_admin_user_mode(bot, chat_id, text):
 
 
 def check_provider_token(provider_token, update, context):
-    prices = [LabeledPrice(context.bot.lang_dict["create_shop_str_1"], 100)]
+    prices = [LabeledPrice("TEST", 100)]
     if "to_delete" not in context.user_data:
         context.user_data["to_delete"] = []
 
