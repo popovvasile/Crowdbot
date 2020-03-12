@@ -404,7 +404,7 @@
         "shop_admin_empty_order": "⚠️ Empty order",
         "shop_admin_exception_in_adding_product": "😕 Что-то пошло не так. Обратитесь в поддержку.",
         "shop_admin_files_adding": "Add any files about this product: documents, images or videos.\n<i>First file will be title file for the product</i>\nFiles 0/10",
-        "shop_admin_full_product_template": "<b>Availability:</b> `{}`\n<b>Article </b>: `{}`\n<b>Name </b>: `{}`\n<b>Category: </b>`{}`\n<b>Price: </b>  `{} {}`\n<b>Discount price: </b>`{} {}`\n<b>Quantity: </b> `{}`\n<b>Description </b>: `{}`\n",
+        "shop_admin_full_product_template": "<b>Availability:</b> {}\n<b>Article </b>: <i>{}</i>\n<b>Name </b>: <code>{}</code>\n<b>Category: </b><code>{}</code>\n<b>Price: </b>  <code>{} {}</code>\n<b>Discount price: </b><code>{} {}</code>\n<b>Quantity: </b> <code>{}</code>\n<b>Description </b>: <code>{}</code>\n",
         "shop_admin_image_brand_exception": "😕 Failed to send brand logo.\n_Check the brand logo in the store_",
         "shop_admin_image_exception": "😕 Failed to send item image.\n_Check the product in the store for the article_",
         "shop_admin_item_added_blink": "✅ Item added to the order",

@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 # STRINGS
 open_btn_str = "Open"
 no_user_str = "There are no such user"
-search_user_str = "Send me username"
+search_user_str = "Send username or name"
 
 
 class UsersHandler(object):

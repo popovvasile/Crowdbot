@@ -8,7 +8,7 @@ from telegram.error import (BadRequest, TimedOut, NetworkError, TelegramError,
                             ChatMigrated)
 
 from helper_funcs.lang_strings.help_strings import help_strings, helpable_dict
-from helper_funcs.misc import paginate_modules, LOGGER, delete_messages
+from helper_funcs.misc import paginate_modules, LOGGER, delete_messages, send_content_dict
 from helper_funcs.auth import (if_admin, initiate_chat_id,
                                register_chat, register_admin)
 from database import (custom_buttons_table, users_table, chatbots_table,
@@ -195,7 +195,8 @@ def button_handler(update, context):
             {"bot_id": context.bot.id, "button_lower": button_callback_data.replace("button_", "")}
         )
         for content_dict in button_info["content"]:
-            if "text" in content_dict:
+            send_content_dict(query.message.chat.id, context, content_dict)
+            """if "text" in content_dict:
                 context.user_data['to_delete'].append(
                     query.message.reply_text(text=content_dict["text"], parse_mode='Markdown'))
             if "audio_file" in content_dict:
@@ -229,7 +230,7 @@ def button_handler(update, context):
                     query.message.reply_animation(content_dict["animation_file"]))
             if "sticker_file" in content_dict:
                 context.user_data['to_delete'].append(query.message.reply_sticker(
-                    content_dict["sticker_file"]))
+                    content_dict["sticker_file"]))"""
 
     except BadRequest as excp:
         if excp.message == "Message is not modified":

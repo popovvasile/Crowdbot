@@ -1,4 +1,5 @@
 import logging
+
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
 from bson.objectid import ObjectId
 
@@ -8,9 +9,8 @@ from helper_funcs.misc import lang_timestamp, user_mention, get_obj
 from database import users_messages_to_admin_table
 
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO)
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
