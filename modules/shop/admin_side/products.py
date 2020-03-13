@@ -6,9 +6,9 @@ from telegram.ext import (ConversationHandler, CallbackQueryHandler,
                           CallbackContext, MessageHandler, Filters)
 
 from helper_funcs.pagination import Pagination
-from helper_funcs.misc import delete_messages
+from helper_funcs.misc import delete_messages, content_dict_as_string
 
-from modules.shop.helper.helper import clear_user_data, content_dict_as_string
+from modules.shop.helper.helper import clear_user_data
 from modules.shop.helper.keyboards import keyboards, back_kb, back_btn, create_keyboard
 from modules.shop.components.product import Product, MAX_TEMP_DESCRIPTION_LENGTH
 from modules.shop.admin_side.welcome import Welcome
@@ -111,7 +111,7 @@ class ProductsHelper(object):
                     emoji = "🖐"
 
                 orders_string += (
-                    "_Order ID:_ `{}` \n{} x`{}`\n\n".format(
+                    "<b>Order ID:</b> <i>{}</i> \n{} x{}\n\n".format(
                         order["_id"], emoji, product_items_count))
             template += orders_string
         return template
@@ -426,7 +426,8 @@ class ProductsHandler(ProductsHelper):
         if len(context.user_data["product"].content) < 10:
             context.user_data["product"].add_content_dict(update, to_save=True)
         else:
-            update.callback_query.answer(context.bot.lang_dict["add_product_10_files"])
+            # update.callback_query == None
+            # update.callback_query.answer(context.bot.lang_dict["add_product_10_files"])
             return self.content_menu(update, context)
         text = (
                 self.admin_short_template(context, context.user_data["product"])

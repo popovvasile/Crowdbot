@@ -1,27 +1,32 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
+import logging
+
 from telegram.error import BadRequest
 from telegram.ext import MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
-import logging
+from telegram import (ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup,
+                      ReplyKeyboardRemove)
+
 from database import custom_buttons_table
 from helper_funcs.helper import get_help
-
 from helper_funcs.misc import delete_messages
+
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
-LOGGER = logging.getLogger(__name__)
+
+
 CHOOSE_BUTTON = 1
 EDIT_FINISH = 1
 
 
 class ButtonEdit(object):
     def start(self, update, context):
-        context.user_data["to_delete"] = []
-        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                                   message_id=update.callback_query.message.message_id)
+        # context.user_data["to_delete"] = []
+        # context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
+        #                            message_id=update.callback_query.message.message_id)
+        delete_messages(update, context, True)
         all_buttons = custom_buttons_table.find({"bot_id": context.bot.id})
         if all_buttons.count() > 0:
             context.user_data["to_delete"].append(context.bot.send_message(
@@ -169,7 +174,7 @@ class ButtonEdit(object):
             elif excp.message == "Message can't be deleted":
                 pass
             else:
-                LOGGER.exception("Exception in edit buttons")
+                logger.exception("Exception in edit buttons")
         context.user_data["to_delete"].append(context.bot.send_message(
             chat_id=update.message.chat_id,
             text=context.bot.lang_dict["manage_button_str_3"],

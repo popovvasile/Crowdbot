@@ -8,7 +8,7 @@ from telegram.error import (BadRequest, TimedOut, NetworkError, TelegramError,
                             ChatMigrated)
 
 from helper_funcs.lang_strings.help_strings import help_strings, helpable_dict
-from helper_funcs.misc import paginate_modules, LOGGER, delete_messages
+from helper_funcs.misc import paginate_modules, LOGGER, delete_messages, send_content_dict
 from helper_funcs.auth import (if_admin, initiate_chat_id,
                                register_chat, register_admin)
 from database import (custom_buttons_table, users_table, chatbots_table,
@@ -195,7 +195,8 @@ def button_handler(update, context):
             {"bot_id": context.bot.id, "button_lower": button_callback_data.replace("button_", "")}
         )
         for content_dict in button_info["content"]:
-            if "text" in content_dict:
+            send_content_dict(query.message.chat.id, context, content_dict)
+            """if "text" in content_dict:
                 context.user_data['to_delete'].append(
                     query.message.reply_text(text=content_dict["text"], parse_mode='Markdown'))
             if "audio_file" in content_dict:
@@ -229,7 +230,7 @@ def button_handler(update, context):
                     query.message.reply_animation(content_dict["animation_file"]))
             if "sticker_file" in content_dict:
                 context.user_data['to_delete'].append(query.message.reply_sticker(
-                    content_dict["sticker_file"]))
+                    content_dict["sticker_file"]))"""
 
     except BadRequest as excp:
         if excp.message == "Message is not modified":
@@ -308,6 +309,7 @@ def back_from_button_handler(update, context):
 
 
 def back_to_modules(update, context):
+    # todo rewrite it to use as the back function in the handlers
     """All backs to main menu buttons(modules) must be done through this func.
     Need to do better with logic in help_button function.
     Don't want to reformat for now so use little trick here.
@@ -316,6 +318,7 @@ def back_to_modules(update, context):
     """
     delete_messages(update, context)
     context.user_data.clear()
+    # here can be exception if callback_query is None
     module_name = update.callback_query.data.replace("back_to_module_", "")
     update.callback_query.data = f"help_module({module_name})"
     return help_button(update, context)

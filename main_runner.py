@@ -7,40 +7,41 @@ import os
 from telegram.utils import request
 import telegram.ext as tg
 from telegram import Bot
-from telegram.ext import (CommandHandler, CallbackQueryHandler,
-                          MessageHandler, Filters)
+from telegram.ext import CommandHandler, CallbackQueryHandler, MessageHandler, Filters
 
-from helper_funcs.helper import (
-    help_button, button_handler, get_help, WelcomeBot,
-    back_from_button_handler, back_to_modules, error_callback)
+from helper_funcs.misc import dismiss
+from helper_funcs.helper import (help_button, button_handler, get_help, WelcomeBot,
+                                 back_from_button_handler, back_to_modules, error_callback)
 
 # CHANNELS
-from helper_funcs.misc import  dismiss
-from modules.chanells.channels import (
-    MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER, REMOVE_CHANNEL_HANDLER,
-    SEND_POST_HANDLER, CHANELLS_MENU)
+from modules.chanells.channels import (MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER,
+                                       REMOVE_CHANNEL_HANDLER, SEND_POST_HANDLER, CHANELLS_MENU)
 from modules.chanells.channels_polls_surveys_donate import (
     SEND_POLL_TO_CHANNEL_HANDLER, SEND_SURVEY_TO_CHANNEL_HANDLER,
     SEND_DONATION_TO_CHANNEL_HANDLER)
+
 # GROUPS
 from modules.groups.groups import (
-    MY_GROUPS_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER,
-    ADD_GROUP_HANLDER, GROUPS_MENU)
+    MY_GROUPS_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER, ADD_GROUP_HANLDER,
+    GROUPS_MENU)
 from modules.groups.groups_polls_surveys_donate import (
-    SEND_POLL_TO_GROUP_HANDLER, SEND_SURVEY_TO_GROUP_HANDLER,
-    SEND_DONATION_TO_GROUP_HANDLER)
+    SEND_POLL_TO_GROUP_HANDLER, SEND_SURVEY_TO_GROUP_HANDLER, SEND_DONATION_TO_GROUP_HANDLER)
+
 # SETTINGS
 from modules.settings.menu_description import EDIT_BOT_DESCRIPTION_HANDLER
 from modules.settings.settings import (
     BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER, LINK_BUTTON_ADD_HANDLER,
-    CREATE_BUTTON_CHOOSE, BUTTONS_MENU)
-from modules.settings.manage_button import (
-    BUTTON_EDIT_HANDLER, BUTTON_EDIT_FINISH_HANDLER, DELETE_CONTENT_HANDLER,
-    BUTTON_ADD_FINISH_HANDLER, back_from_edit_button_handler)
+    CREATE_BUTTON_CHOOSE, BUTTONS_MENU, ONE_BUTTON_MENU, BACK_TO_BUTTONS_MENU,
+    BACK_TO_ONE_BUTTON_MENU, CHANGE_BUTTON_NAME_HANDLER, EDIT_BUTTON_CONTENT_HANDLER,
+    EDIT_BUTTON_LINK_HANDLER)
+# from modules.settings.manage_button import (
+#     BUTTON_EDIT_HANDLER, BUTTON_EDIT_FINISH_HANDLER, DELETE_CONTENT_HANDLER,
+#     BUTTON_ADD_FINISH_HANDLER, back_from_edit_button_handler)
 from modules.settings.user_mode import USER_MODE_OFF, USER_MODE_ON
 from modules.settings.admins import ADMINS_LIST_HANDLER
 from modules.donations.donation_payment import (DONATE_HANDLER, HANDLE_SUCCES,
                                                 HANDLE_PRECHECKOUT)
+
 # USERS AND MESSAGES
 from modules.users.messages_admin import SEND_MESSAGE_ONLY_TO_ADMINS_HANDLER
 from modules.users.messages_donators import SEND_MESSAGE_TO_DONATORS_HANDLER
@@ -58,23 +59,27 @@ from modules.users.users import (
     CONFIRM_BLOCK_MESSAGING, FINISH_BLOCK_MESSAGING, FINISH_UNBLOCK_MESSAGING, BACK_TO_USERS_LIST,
     VIEW_USER_MESSAGE, BACK_TO_OPEN_MESSAGE, CONFIRM_BAN_USER, FINISH_BAN_USER, FINISH_UNBUN_USER,
     SEND_MESSAGE_TO_USER_HANDLER, BACK_TO_USER_MESSAGES_LIST, DELETE_USER_MESSAGE_HANDLER,
-    OPEN_USER_HANDLER, BACK_TO_OPEN_USER)
+    OPEN_USER_HANDLER, BACK_TO_OPEN_USER, SEARCH_USER)
 
+# STATISTIC
 # from modules.statistic.statistic_main import (
 #     STATISTIC_MAIN_MENU, BACK_TO_STATISTIC_MAIN)
 from modules.statistic.user_statistic import USERS_STATISTIC_HANDLER
 # from modules.statistic.donation_statistic import DONATION_STATISTIC_HANDLER
+
 # SURVEYS
 from modules.surveys.surveys_answer import ANSWER_SURVEY_HANDLER
 from modules.surveys.surveys_create import (
     DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_HANDLER, SEND_SURVEYS_HANDLER,
     CREATE_SURVEY_HANDLER, SURVEYS_MENU, SEND_SURVEYS_MENU_HANDLER)
+
 # PAYMENTS
 from modules.payments.payments_config import (
     EDIT_DONATION_HANDLER, PAYMENTS_CONFIG_KEYBOARD, CHANGE_DONATIONS_CONFIG,
     CONFIGS_DONATIONS_GENERAL, CONFIGS_SHOP_GENERAL, CHANGE_SHOP_CONFIG)
 from modules.donations.donation_enable_disable import (
     CREATE_DONATION_HANDLER, DONATIONS_MENU)
+
 # POLLS
 from modules.pollbot.polls import (
     POLL_HANDLER, SEND_POLLS_HANDLER, BUTTON_HANDLER, DELETE_POLLS_HANDLER,
@@ -110,9 +115,8 @@ from modules.shop.user_side.orders import (
     BACK_TO_USER_ORDERS)
 
 
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.INFO)
+logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+                    level=logging.INFO)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -197,16 +201,22 @@ def main(token, lang):
     dispatcher.add_handler(RENAME_CATEGORY_HANDLER)
     dispatcher.add_handler(DELETE_CATEGORY_HANDLER)
 
-    # ADD_BUTTONS
+    # BUTTONS
+    dispatcher.add_handler(ONE_BUTTON_MENU)
+    dispatcher.add_handler(CHANGE_BUTTON_NAME_HANDLER)
+    dispatcher.add_handler(EDIT_BUTTON_CONTENT_HANDLER)
+    dispatcher.add_handler(EDIT_BUTTON_LINK_HANDLER)
     dispatcher.add_handler(BUTTONS_MENU)
     dispatcher.add_handler(CREATE_BUTTON_CHOOSE)
     dispatcher.add_handler(LINK_BUTTON_ADD_HANDLER)
     dispatcher.add_handler(BUTTON_ADD_HANDLER)
     dispatcher.add_handler(DELETE_BUTTON_HANDLER)
-    dispatcher.add_handler(BUTTON_EDIT_HANDLER)
-    dispatcher.add_handler(BUTTON_EDIT_FINISH_HANDLER)
-    dispatcher.add_handler(DELETE_CONTENT_HANDLER)
-    dispatcher.add_handler(BUTTON_ADD_FINISH_HANDLER)
+    # dispatcher.add_handler(BUTTON_EDIT_HANDLER)
+    # dispatcher.add_handler(BUTTON_EDIT_FINISH_HANDLER)
+    # dispatcher.add_handler(DELETE_CONTENT_HANDLER)
+    # dispatcher.add_handler(BUTTON_ADD_FINISH_HANDLER)
+    dispatcher.add_handler(BACK_TO_BUTTONS_MENU)
+    dispatcher.add_handler(BACK_TO_ONE_BUTTON_MENU)
 
     # USER MODE
     dispatcher.add_handler(USER_MODE_ON)
@@ -217,7 +227,6 @@ def main(token, lang):
     dispatcher.add_handler(CONFIRM_BLOCK_MESSAGING)
     dispatcher.add_handler(FINISH_BLOCK_MESSAGING)
     dispatcher.add_handler(FINISH_UNBLOCK_MESSAGING)
-    dispatcher.add_handler(BACK_TO_USERS_LIST)
     dispatcher.add_handler(USER_MESSAGES_LIST)
     dispatcher.add_handler(VIEW_USER_MESSAGE)
     dispatcher.add_handler(ANSWER_TO_MESSAGE_FROM_USER_LIST_HANDLER)
@@ -226,6 +235,8 @@ def main(token, lang):
     dispatcher.add_handler(CONFIRM_BAN_USER)
     dispatcher.add_handler(FINISH_UNBUN_USER)
     dispatcher.add_handler(SEND_MESSAGE_TO_USER_HANDLER)
+    dispatcher.add_handler(SEARCH_USER)
+    dispatcher.add_handler(BACK_TO_USERS_LIST)
     dispatcher.add_handler(BACK_TO_USER_MESSAGES_LIST)
     dispatcher.add_handler(DELETE_USER_MESSAGE_HANDLER)
     dispatcher.add_handler(OPEN_USER_HANDLER)
@@ -325,7 +336,7 @@ def main(token, lang):
 
     dispatcher.add_handler(custom_button_back_callback_handler)
     dispatcher.add_handler(custom_button_callback_handler)
-    dispatcher.add_handler(back_from_edit_button_handler)
+    # dispatcher.add_handler(back_from_edit_button_handler)
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(help_handler)
 

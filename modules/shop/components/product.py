@@ -240,6 +240,7 @@ class Product(object):
                     reply_to_message_id=reply_to_message_id))
 
     def add_content_dict(self, update, to_save=False):
+        # todo use create_content_dict from misc(note about text video_note_file and sticker_file)
         """Create content_dict from update and add it to product.
         If to_save == True - save it to db
 
@@ -298,6 +299,7 @@ class Product(object):
     def send_content(chat_id, context, content_dict,
                      caption=None, parse_mode=ParseMode.HTML,
                      reply_markup=None):
+        # todo use send_content_dict from misc(note about text, video_note_file and sticker_file)
         """Sends one content_dict
 
         video_note_file and sticker_file - don't have captions"""

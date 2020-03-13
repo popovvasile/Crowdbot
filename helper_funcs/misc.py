@@ -1,13 +1,13 @@
 import logging
 from typing import List, Dict
+from uuid import uuid4
 
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 from telegram.ext import CallbackContext
 from telegram.error import TelegramError, Unauthorized
 from babel.dates import format_datetime
 from bson.objectid import ObjectId
 
-from database import custom_buttons_table
 from database import chatbots_table, users_table
 
 logging.basicConfig(
@@ -122,6 +122,182 @@ def update_user_fields(context, user):
     if new_user_fields:
         users_table.update_one({"_id": user["_id"]},
                                {"$set": new_user_fields})
+
+
+def create_content_dict(update):
+    """Creates content_dict from update.
+    # todo use this function for all content_dict (messages, shop products, buttons)
+    "id" field coz of -
+    https://github.com/python-telegram-bot/python-telegram-bot/issues/1267
+    """
+
+    content_dict = {}
+    if update.message.text:
+        content_dict = {"file_id": update.message.text,
+                        "type": "text",
+                        "id": str(uuid4())}
+
+    if update.message.photo:
+        photo_file = update.message.photo[-1].get_file().file_id
+        content_dict = {"file_id": photo_file,
+                        "type": "photo_file",
+                        "id": str(uuid4())}
+
+    elif update.message.audio:
+        audio_file = update.message.audio.get_file().file_id
+        content_dict = {"file_id": audio_file,
+                        "type": "audio_file",
+                        "id": str(uuid4()),
+                        "name": update.message.audio.title}
+
+    elif update.message.voice:
+        voice_file = update.message.voice.get_file().file_id
+        content_dict = {"file_id": voice_file,
+                        "type": "voice_file",
+                        "id": str(uuid4())}
+
+    elif update.message.document:
+        document_file = update.message.document.get_file().file_id
+        content_dict = {"file_id": document_file,
+                        "type": "document_file",
+                        "id": str(uuid4()),
+                        "name": update.message.document.file_name}
+
+    elif update.message.video:
+        video_file = update.message.video.get_file().file_id
+        content_dict = {"file_id": video_file,
+                        "type": "video_file",
+                        "id": str(uuid4())}
+
+    elif update.message.animation:
+        animation_file = update.message.animation.get_file().file_id
+        content_dict = {"file_id": animation_file,
+                        "type": "animation_file",
+                        "id": str(uuid4())}
+
+    elif update.message.video_note:
+        video_note_file = update.message.video_note.get_file().file_id
+        content_dict = {"file_id": video_note_file,
+                        "type": "video_note_file",
+                        "id": str(uuid4())}
+
+    elif update.message.sticker:
+        sticker_file = update.message.sticker.get_file().file_id
+        content_dict = {"file_id": sticker_file,
+                        "type": "sticker_file",
+                        "id": str(uuid4()),
+                        "name": update.message.sticker.emoji}
+    return content_dict
+
+
+def send_content_dict(chat_id, context, content_dict,
+                      caption=None, parse_mode=ParseMode.HTML, reply_markup=None):
+    # todo use this function for all content_dict (shop products, buttons)
+    """Sends one content_dict"""
+    if content_dict["type"] == "text":
+        context.user_data["to_delete"].append(
+            context.bot.send_message(chat_id,
+                                     content_dict["file_id"],
+                                     parse_mode=parse_mode,
+                                     reply_markup=reply_markup))
+
+    if content_dict["type"] == "audio_file":
+        context.user_data["to_delete"].append(
+            context.bot.send_audio(chat_id,
+                                   content_dict["file_id"],
+                                   caption=caption,
+                                   parse_mode=parse_mode,
+                                   reply_markup=reply_markup))
+
+    if content_dict["type"] == "voice_file":
+        context.user_data["to_delete"].append(
+            context.bot.send_voice(chat_id,
+                                   content_dict["file_id"],
+                                   caption=caption,
+                                   parse_mode=parse_mode,
+                                   reply_markup=reply_markup))
+
+    if content_dict["type"] == "video_file":
+        context.user_data["to_delete"].append(
+            context.bot.send_video(chat_id,
+                                   content_dict["file_id"],
+                                   caption=caption,
+                                   parse_mode=parse_mode,
+                                   reply_markup=reply_markup))
+
+    if content_dict["type"] == "document_file":
+        if (".png" in content_dict["file_id"] or
+                ".jpg" in content_dict["file_id"]):
+            context.user_data["to_delete"].append(
+                context.bot.send_photo(chat_id,
+                                       content_dict["file_id"],
+                                       caption=caption,
+                                       parse_mode=parse_mode,
+                                       reply_markup=reply_markup))
+        else:
+            context.user_data["to_delete"].append(
+                context.bot.send_document(chat_id,
+                                          content_dict["file_id"],
+                                          caption=caption,
+                                          parse_mode=parse_mode,
+                                          reply_markup=reply_markup))
+
+    if content_dict["type"] == "photo_file":
+        context.user_data["to_delete"].append(
+            context.bot.send_photo(chat_id,
+                                   content_dict["file_id"],
+                                   caption=caption,
+                                   parse_mode=parse_mode,
+                                   reply_markup=reply_markup,
+                                   # mime_type="image"
+                                   ))
+
+    if content_dict["type"] == "animation_file":
+        context.user_data["to_delete"].append(
+            context.bot.send_animation(chat_id,
+                                       content_dict["file_id"],
+                                       caption=caption,
+                                       parse_mode=parse_mode,
+                                       reply_markup=reply_markup))
+
+    elif content_dict["type"] == "video_note_file":
+        context.user_data["to_delete"].append(
+            context.bot.send_video_note(chat_id,
+                                        content_dict["file_id"],
+                                        reply_markup=reply_markup))
+
+    elif content_dict["type"] == "sticker_file":
+        context.user_data["to_delete"].append(
+            context.bot.send_sticker(chat_id,
+                                     content_dict["file_id"],
+                                     reply_markup=reply_markup))
+
+
+def content_dict_as_string(content_dict):
+    string = ""
+    if not content_dict:
+        return string
+
+    if content_dict['type'] == "photo_file":
+        string += "• Photo\n"
+
+    if content_dict['type'] == "voice_file":
+        string += "• Voice message\n"
+
+    if (content_dict['type'] == "audio_file" or
+            content_dict['type'] == "document_file" or
+            content_dict['type'] == "sticker_file"):
+        string += f"• {content_dict['name']}\n"
+
+    if content_dict['type'] == "video_file":
+        string += "• Video\n"
+
+    if content_dict['type'] == "video_note_file":
+        string += "• Video message\n"
+
+    if content_dict['type'] == "animation_file":
+        string += "• Animation\n"
+    return string
 
 
 class EqInlineKeyboardButton(InlineKeyboardButton):
