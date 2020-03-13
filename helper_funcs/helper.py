@@ -309,6 +309,7 @@ def back_from_button_handler(update, context):
 
 
 def back_to_modules(update, context):
+    # todo rewrite it to use as the back function in the handlers
     """All backs to main menu buttons(modules) must be done through this func.
     Need to do better with logic in help_button function.
     Don't want to reformat for now so use little trick here.
@@ -317,6 +318,7 @@ def back_to_modules(update, context):
     """
     delete_messages(update, context)
     context.user_data.clear()
+    # here can be exception if callback_query is None
     module_name = update.callback_query.data.replace("back_to_module_", "")
     update.callback_query.data = f"help_module({module_name})"
     return help_button(update, context)

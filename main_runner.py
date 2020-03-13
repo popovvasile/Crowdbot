@@ -59,7 +59,7 @@ from modules.users.users import (
     CONFIRM_BLOCK_MESSAGING, FINISH_BLOCK_MESSAGING, FINISH_UNBLOCK_MESSAGING, BACK_TO_USERS_LIST,
     VIEW_USER_MESSAGE, BACK_TO_OPEN_MESSAGE, CONFIRM_BAN_USER, FINISH_BAN_USER, FINISH_UNBUN_USER,
     SEND_MESSAGE_TO_USER_HANDLER, BACK_TO_USER_MESSAGES_LIST, DELETE_USER_MESSAGE_HANDLER,
-    OPEN_USER_HANDLER, BACK_TO_OPEN_USER)
+    OPEN_USER_HANDLER, BACK_TO_OPEN_USER, SEARCH_USER)
 
 # STATISTIC
 # from modules.statistic.statistic_main import (
@@ -227,7 +227,6 @@ def main(token, lang):
     dispatcher.add_handler(CONFIRM_BLOCK_MESSAGING)
     dispatcher.add_handler(FINISH_BLOCK_MESSAGING)
     dispatcher.add_handler(FINISH_UNBLOCK_MESSAGING)
-    dispatcher.add_handler(BACK_TO_USERS_LIST)
     dispatcher.add_handler(USER_MESSAGES_LIST)
     dispatcher.add_handler(VIEW_USER_MESSAGE)
     dispatcher.add_handler(ANSWER_TO_MESSAGE_FROM_USER_LIST_HANDLER)
@@ -236,6 +235,8 @@ def main(token, lang):
     dispatcher.add_handler(CONFIRM_BAN_USER)
     dispatcher.add_handler(FINISH_UNBUN_USER)
     dispatcher.add_handler(SEND_MESSAGE_TO_USER_HANDLER)
+    dispatcher.add_handler(SEARCH_USER)
+    dispatcher.add_handler(BACK_TO_USERS_LIST)
     dispatcher.add_handler(BACK_TO_USER_MESSAGES_LIST)
     dispatcher.add_handler(DELETE_USER_MESSAGE_HANDLER)
     dispatcher.add_handler(OPEN_USER_HANDLER)
