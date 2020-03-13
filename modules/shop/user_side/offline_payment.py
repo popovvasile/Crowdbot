@@ -32,7 +32,6 @@ class PurchaseBot(object):
     @staticmethod
     def start_purchase(update, context):
         delete_messages(update, context, True)
-
         context.user_data["to_delete"].append(
             context.bot.send_message(
                 chat_id=update.callback_query.message.chat.id,
@@ -137,7 +136,6 @@ class PurchaseBot(object):
             context.user_data["order"]["address"] = update.message.text
         else:
             context.user_data["order"]["address"] = ""
-        # pprint(context.user_data["order"])
         order_data = Cart().order_data(update, context)
         if not order_data["order"]["items"]:
             return Cart().back_to_cart(update, context)

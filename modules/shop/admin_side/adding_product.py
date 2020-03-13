@@ -155,15 +155,15 @@ class AddingProductHandler(object):
 
     def ask_description(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        currency_limits = currency_limits_dict[
-            chatbots_table.find_one({"bot_id": context.bot.id})["shop"]["currency"]]
-
+        currency = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]["currency"]
+        currency_limits = currency_limits_dict[currency]
         try:
             assert currency_limits["min"] < int(update.message.text) < currency_limits["max"]
         except (ValueError, AssertionError):
             context.user_data["to_delete"].append(context.bot.send_message(
                 chat_id=update.message.chat_id,
-                text=context.bot.lang_dict["shop_admin_number_wrong"],
+                text=context.bot.lang_dict["shop_admin_price_wrong"].format(
+                    currency_limits["min"], currency, currency_limits["max"], currency),
                 reply_markup=InlineKeyboardMarkup([
                     [back_btn("back_to_main_menu_btn", context)]])))
             return ASK_DESCRIPTION

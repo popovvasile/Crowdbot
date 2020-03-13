@@ -197,7 +197,7 @@ class ProductsHandler(ProductsHelper):
                     chat_id=update.effective_chat.id,
                     text=context.bot.lang_dict["shop_admin_no_products"],
                     reply_markup=back_kb(
-                        "back_to_main_menu", context=context)))
+                        "help_back", context=context)))
         else:
             pagination = Pagination(all_products,
                                     page=context.user_data["page"])
@@ -209,7 +209,7 @@ class ProductsHandler(ProductsHelper):
                     reply_markup=cls.product_keyboard(context, prod_obj))
             pagination.send_keyboard(
                 update, context,
-                [[back_btn("back_to_main_menu", context=context)]],
+                [[back_btn("help_back", context=context)]],
                 page_prefix="item_list_pagination")
         return state
 

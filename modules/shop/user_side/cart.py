@@ -1,4 +1,6 @@
 import logging
+from pprint import pprint
+
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ConversationHandler, CallbackQueryHandler
 from bson.objectid import ObjectId
@@ -36,17 +38,19 @@ class CartHelper(object):
             cart_item = cls.validate_cart_item(cart, cart_item["product_id"])
             if cart_item:
                 cart_items.append(cart_item)
-
+        # print(cart_items)
         shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
         template = "<b>Your Order</b>\n\n"
         order_price = 0
         for cart_item in cart_items:
-            if "discount_price" in cart_item["product"]:
+            pprint(cart_item)
+            if cart_item["product"].get("discount_price"):
                 item_price = (float(cart_item["product"]["discount_price"])
                               * cart_item["quantity"])
             else:
                 item_price = (float(cart_item["product"]["price"])
                               * cart_item["quantity"])
+            # print(item_price)
             order_price += item_price
             template += (
                 "{}_ - {}\n"
@@ -76,6 +80,7 @@ class CartHelper(object):
         :return: empty dict if product doesn't exist, sold of deleted
             or dict with data if item exist and correct
         """
+
         if type(product) is ObjectId:
             product_id = product
             product = products_table.find_one({"_id": product_id})
