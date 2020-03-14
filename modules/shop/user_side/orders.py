@@ -19,8 +19,7 @@ class UserOrdersHandler(object):
         # Set current page integer in the user_data.
         if update.callback_query.data.startswith("user_orders_pagination"):
             context.user_data["page"] = int(
-                update.callback_query.data.replace("user_orders_pagination_",
-                                                   ""))
+                update.callback_query.data.replace("user_orders_pagination_", ""))
         if not context.user_data.get("page"):
             context.user_data["page"] = 1
 
@@ -31,7 +30,7 @@ class UserOrdersHandler(object):
 
         # Back to the shop menu if no order
         if not orders.count():
-            update.callback_query.answer("There are no orders yet")
+            update.callback_query.answer(context.bot.lang_dict["no_orders_blink"])
             update.callback_query.data = "back_to_module_shop"
             return back_to_modules(update, context)
         # Send page content
@@ -43,7 +42,7 @@ class UserOrdersHandler(object):
         context.user_data['to_delete'].append(
             context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
-                text="*Your Orders* - `{}`".format(orders.count()),
+                text=context.bot.lang_dict["user_orders_title"].format(orders.count()),
                 parse_mode=ParseMode.HTML))
         # Orders list buttons
         buttons = [[InlineKeyboardButton(
@@ -57,7 +56,7 @@ class UserOrdersHandler(object):
             for order in pagination.content:
                 reply_markup = InlineKeyboardMarkup([
                     [InlineKeyboardButton(
-                        text="Order Items",
+                        text=context.bot.lang_dict["user_order_items_btn"],
                         callback_data=f"order_items/{order['_id']}")]])
                 context.user_data["to_delete"].append(
                     context.bot.send_message(
@@ -73,7 +72,7 @@ class UserOrdersHandler(object):
             context.user_data["to_delete"].append(
                 context.bot.send_message(
                     chat_id=update.effective_chat.id,
-                    text="No Orders",
+                    text=context.bot.lang_dict["no_orders_blink"],
                     reply_markup=InlineKeyboardMarkup(buttons)))
 
     def order_items(self, update, context):
@@ -85,11 +84,9 @@ class UserOrdersHandler(object):
                 return self.orders(update, context)
             context.user_data["order"] = UserOrder(context, order)
 
-        if update.callback_query.data.startswith(
-                "user_order_item_pagination"):
+        if update.callback_query.data.startswith("user_order_item_pagination"):
             context.user_data["item_page"] = int(
-                update.callback_query.data.replace(
-                    "user_order_item_pagination_", ""))
+                update.callback_query.data.replace("user_order_item_pagination_", ""))
         if not context.user_data.get("item_page"):
             context.user_data["item_page"] = 1
 

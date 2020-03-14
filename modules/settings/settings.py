@@ -26,16 +26,6 @@ ENTER_NEW_NAME = 1
 CONTENT_MENU, ADDING_CONTENT, ENTER_NEW_LINK = range(3)
 
 
-change_name_str = "Change name"
-no_button_blink = "There are no such button anymore"
-content_error = "<i>This can't be added as button content</i>"
-confirm_button_delete = "Are you sure you want to delete button \n<code>{}</code>"
-wrong_http_url = "Link is wrong. Send me another link"
-new_button_name = "Enter new name for the {} button"
-# content_menu_buttons = "If you want to delete content click '❌' on item\nIf you want to add send me everything you want"
-current_link_field = "\nCurrent link: {}"
-
-
 def buttons_menu(update, context):
     delete_messages(update, context, True)
     reply_buttons = [InlineKeyboardButton(button["button"],
@@ -73,7 +63,7 @@ def one_button_menu(update, context):
         button_id = ObjectId(update.callback_query.data.split("/")[1])
         context.user_data["button"] = custom_buttons_table.find_one({"_id": button_id})
     if not context.user_data["button"]:
-        update.callback_query.answer(no_button_blink)
+        update.callback_query.answer(context.bot.lang_dict["no_button_blink"])
         return back_to_buttons_menu(update, context)
 
     if context.user_data["button"]["link_button"]:
@@ -87,7 +77,7 @@ def one_button_menu(update, context):
         reply_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["edit_button_button"],
                                                callback_data="edit_button_content")]]
     reply_buttons.extend(
-        [[InlineKeyboardButton(text=change_name_str,
+        [[InlineKeyboardButton(text=context.bot.lang_dict["change_name_str"],
                                callback_data="change_button_name")],
          [InlineKeyboardButton(text=context.bot.lang_dict["delete_button"],
                                callback_data="delete_button")],
@@ -201,7 +191,7 @@ class AddCommands(object):
         else:
             context.user_data["to_delete"].append(
                 context.bot.send_message(update.effective_chat.id,
-                                         text=content_error,
+                                         text=context.bot.lang_dict["content_error"],
                                          parse_mode=ParseMode.HTML))
         msg_index = (len(context.user_data["user_input"])
                      - len(context.user_data["new_button"]["content"]))
@@ -289,7 +279,7 @@ class AddLinkButton(object):
             reply_markup = InlineKeyboardMarkup(reply_buttons)
             context.user_data["to_delete"].append(
                 update.message.reply_text(
-                    wrong_http_url,
+                    context.bot.lang_dict["wrong_http_url"],
                     reply_markup=reply_markup,
                     reply_to_message_id=context.user_data["user_input"][-1].message_id))
             return TYPING_LINK
@@ -320,7 +310,7 @@ class DeleteButton(object):
         reply_markup = InlineKeyboardMarkup(reply_buttons)
         context.user_data["to_delete"].append(
             context.bot.send_message(update.effective_chat.id,
-                                     text=confirm_button_delete.format(
+                                     text=context.bot.lang_dict["confirm_button_delete"].format(
                                          context.user_data["button"]["button"]),
                                      parse_mode=ParseMode.HTML,
                                      reply_markup=reply_markup))
@@ -351,7 +341,8 @@ class ChangeButtonName(object):
         context.user_data["to_delete"].append(
             context.bot.send_message(
                 update.callback_query.message.chat.id,
-                text=new_button_name.format(context.user_data["button"]["button"]),
+                text=context.bot.lang_dict["new_button_name"].format(
+                    context.user_data["button"]["button"]),
                 reply_markup=reply_markup))
         return ENTER_NEW_NAME
 
@@ -384,7 +375,8 @@ class EditButtonHandler(object):
         for content_dict in context.user_data["button"]["content"]:
             reply_markup = InlineKeyboardMarkup([
                 [InlineKeyboardButton(
-                    text="❌", callback_data=f"remove_from_content/"
+                    text=context.bot.lang_dict["remove_button_str"],
+                    callback_data=f"remove_from_content/"
                     f"{content_dict['id']}")]
             ])
             send_content_dict(update.effective_chat.id, context, content_dict,
@@ -413,7 +405,7 @@ class EditButtonHandler(object):
         content_dict = next((content_dict for content_dict
                              in context.user_data["button"]["content"]
                              if content_dict["id"] == content_id), {})
-        update.callback_query.answer(f"{content_dict_as_string(content_dict)}"
+        update.callback_query.answer(f"{content_dict_as_string(content_dict, context)}"
                                      + context.bot.lang_dict["add_product_was_removed"])
         button = custom_buttons_table.find_and_modify(
             {"_id": context.user_data["button"]["_id"]},
@@ -461,11 +453,12 @@ class EditButtonHandler(object):
                 context.user_data["to_delete"].append(
                     context.bot.send_message(
                         update.effective_chat.id,
-                        content_error,
+                        context.bot.lang_dict["content_error"],
                         parse_mode=ParseMode.HTML))
         else:
             return self.content_menu(update, context)
-        text = ("File added to {}".format(context.user_data["button"]["button"])
+        text = (context.bot.lang_dict["file_added_to"].format(
+                    context.user_data["button"]["button"])
                 + "\n\n"
                 + context.bot.lang_dict["add_product_add_files"])
 
@@ -492,7 +485,8 @@ class EditButtonHandler(object):
                 update.effective_chat.id,
                 context.bot.lang_dict["add_menu_buttons_str_2_link"]
                 + "\n"
-                + current_link_field.format(context.user_data["button"]["link"]),
+                + context.bot.lang_dict["current_link_field"].format(
+                    context.user_data["button"]["link"]),
                 reply_markup=reply_markup))
         return ENTER_NEW_LINK
 
@@ -506,7 +500,7 @@ class EditButtonHandler(object):
             reply_markup = InlineKeyboardMarkup(reply_buttons)
             context.user_data["to_delete"].append(
                 update.message.reply_text(
-                    wrong_http_url,
+                    context.bot.lang_dict["wrong_http_url"],
                     reply_markup=reply_markup,
                     reply_to_message_id=context.user_data["user_input"][-1].message_id))
             return ENTER_NEW_LINK

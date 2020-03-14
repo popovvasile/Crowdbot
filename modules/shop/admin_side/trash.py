@@ -1,9 +1,7 @@
 import logging
 
-from telegram import (ParseMode, Update, InlineKeyboardMarkup,
-                      InlineKeyboardButton)
-from telegram.ext import (ConversationHandler, CallbackQueryHandler,
-                          CallbackContext)
+from telegram import ParseMode, Update, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram.ext import ConversationHandler, CallbackQueryHandler, CallbackContext
 
 from modules.shop.helper.helper import clear_user_data
 from modules.shop.admin_side.welcome import Welcome
@@ -14,9 +12,8 @@ from database import products_table, orders_table
 from helper_funcs.misc import delete_messages
 
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO)
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -32,8 +29,7 @@ class TrashHandler(Welcome):
                 callback_data="trashed_products")],
             [InlineKeyboardButton(
                 context.bot.lang_dict["shop_admin_back_btn"],
-                callback_data="back_to_main_menu_btn"
-            )]
+                callback_data="back_to_main_menu_btn")]
         ])
         context.user_data["to_delete"].append(
             context.bot.send_message(
@@ -46,17 +42,14 @@ class TrashHandler(Welcome):
     def orders(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         # Set current page integer in the user_data.
-        if update.callback_query.data.startswith(
-                "admin_order_list_pagination"):
+        if update.callback_query.data.startswith("admin_order_list_pagination"):
             context.user_data["page"] = int(
-                update.callback_query.data.replace(
-                    "admin_order_list_pagination_", ""))
+                update.callback_query.data.replace("admin_order_list_pagination_", ""))
         if not context.user_data.get("page"):
             context.user_data["page"] = 1
 
         all_orders = orders_table.find({"in_trash": True}).sort([["_id", 1]])
-        return OrdersHandler().orders_layout(
-            update, context, all_orders, ORDERS)
+        return OrdersHandler().orders_layout(update, context, all_orders, ORDERS)
 
     # def restore_order(self, update: Update, context: CallbackContext):
     #     context.bot.send_chat_action(update.effective_chat.id, "typing")
@@ -71,22 +64,18 @@ class TrashHandler(Welcome):
         # Set current page integer in the user_data.
         if update.callback_query.data.startswith("item_list_pagination"):
             context.user_data["page"] = int(
-                update.callback_query.data.replace("item_list_pagination_",
-                                                   "")) 
+                update.callback_query.data.replace("item_list_pagination_", ""))
         if not context.user_data.get("page"):
             context.user_data["page"] = 1
 
-        all_products = products_table.find(
-            {"in_trash": True}).sort([["_id", 1]])
-        return ProductsHandler().products_layout(
-            update, context, all_products, PRODUCTS)
+        all_products = products_table.find({"in_trash": True}).sort([["_id", 1]])
+        return ProductsHandler().products_layout(update, context, all_products, PRODUCTS)
 
     def restore_product(self, update: Update, context: CallbackContext):
         context.bot.send_chat_action(update.effective_chat.id, "typing")
         product_id = update.callback_query.data.split("/")[1]
         Product(context, product_id).update({"in_trash": False})
-        update.callback_query.answer(
-            context.bot.lang_dict["shop_admin_product_restored_blink"])
+        update.callback_query.answer(context.bot.lang_dict["shop_admin_product_restored_blink"])
         return self.back_to_products(update, context)
 
     def back_to_orders(self, update, context):

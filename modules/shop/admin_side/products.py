@@ -84,8 +84,7 @@ class ProductsHelper(object):
         # else:
         #     status = "💸 Sold"
 
-        template = context.bot.lang_dict[
-            "shop_admin_product_template"].format(
+        template = context.bot.lang_dict["shop_admin_product_template"].format(
             product_obj.article,
             product_obj.name,
             product_obj.status_str,
@@ -99,7 +98,7 @@ class ProductsHelper(object):
         orders_string = ""
         if new_orders.count():
             # How many items wait for the customers now
-            orders_string += "\n\nNot finished orders:\n"
+            orders_string += context.bot.lang_dict["product_temp_part"]
             for order in new_orders:
                 product_items_count = next(
                     item for item in order["items"]
@@ -111,7 +110,7 @@ class ProductsHelper(object):
                     emoji = "🖐"
 
                 orders_string += (
-                    "<b>Order ID:</b> <i>{}</i> \n{} x{}\n\n".format(
+                    context.bot.lang_dict["product_temp_part_2"].format(
                         order["_id"], emoji, product_items_count))
             template += orders_string
         return template
@@ -122,19 +121,17 @@ class ProductsHelper(object):
         shop = chatbots_table.find_one(
             {"bot_id": context.bot.id})["shop"]
         if product_obj.unlimited is True:
-            quantity = "Unlimited"
+            quantity = context.bot.lang_dict["unlimited"]
         else:
             quantity = product_obj.quantity
         # If description is long send_full_template method
         # will send description as separate message
         if len(product_obj.description) > MAX_TEMP_DESCRIPTION_LENGTH:
-            description = context.bot.lang_dict[
-                "shop_admin_description_above"]
+            description = context.bot.lang_dict["shop_admin_description_above"]
         else:
             description = product_obj.description
 
-        return context.bot.lang_dict[
-            "shop_admin_full_product_template"].format(
+        return context.bot.lang_dict["shop_admin_full_product_template"].format(
             product_obj.status_str,
             product_obj.id_,
             product_obj.name,
@@ -168,8 +165,7 @@ class ProductsHandler(ProductsHelper):
         # Set current page integer in the user_data.
         if update.callback_query.data.startswith("item_list_pagination"):
             context.user_data["page"] = int(
-                update.callback_query.data.replace(
-                    "item_list_pagination_", ""))
+                update.callback_query.data.replace("item_list_pagination_", ""))
         if not context.user_data.get("page"):
             context.user_data["page"] = 1
 
@@ -215,14 +211,12 @@ class ProductsHandler(ProductsHelper):
 
     def edit(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        if (update.callback_query and
-                update.callback_query.data.startswith("edit_product")):
+        if update.callback_query and update.callback_query.data.startswith("edit_product"):
             product_id = update.callback_query.data.split("/")[1]
             context.user_data["product"] = Product(context, product_id)
             # TODO fix NoneType when creating the Product object
 
-        text = (
-                self.admin_full_template(context, context.user_data["product"])
+        text = (self.admin_full_template(context, context.user_data["product"])
                 + "\n"
                 + context.bot.lang_dict["shop_admin_edit_product_menu"])
         reply_markup = InlineKeyboardMarkup([
@@ -257,8 +251,7 @@ class ProductsHandler(ProductsHelper):
 
     def description(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        text = (
-                self.admin_short_template(context, context.user_data["product"])
+        text = (self.admin_short_template(context, context.user_data["product"])
                 + "\n"
                 + context.bot.lang_dict["shop_admin_set_description"])
         context.user_data["product"].send_short_template(
@@ -268,14 +261,12 @@ class ProductsHandler(ProductsHelper):
 
     def finish_description(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        context.user_data["product"].update(
-            {"description": update.message.text})
+        context.user_data["product"].update({"description": update.message.text})
         return self.edit(update, context)
 
     def name(self, update: Update, context: CallbackContext, msg=None):
         delete_messages(update, context, True)
-        text = (
-                self.admin_short_template(context, context.user_data["product"])
+        text = (self.admin_short_template(context, context.user_data["product"])
                 + "\n\n"
                 + context.bot.lang_dict["shop_admin_change_name"])
         context.user_data["product"].send_short_template(
@@ -296,8 +287,7 @@ class ProductsHandler(ProductsHelper):
 
     def price(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        text = (
-                self.admin_short_template(context, context.user_data["product"])
+        text = (self.admin_short_template(context, context.user_data["product"])
                 + "\n"
                 + context.bot.lang_dict["shop_admin_set_price"])
         context.user_data["product"].send_short_template(
@@ -318,14 +308,12 @@ class ProductsHandler(ProductsHelper):
                     "back_to_main_menu", context=context))
             return PRICE
 
-        context.user_data["product"].update(
-            {"price": price})
+        context.user_data["product"].update({"price": price})
         return self.edit(update, context)
 
     def discount_price(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        text = (
-                self.admin_short_template(context, context.user_data["product"])
+        text = (self.admin_short_template(context, context.user_data["product"])
                 + "\n"
                 + context.bot.lang_dict["shop_admin_set_discount_price"])
         context.user_data["product"].send_short_template(
@@ -342,8 +330,7 @@ class ProductsHandler(ProductsHelper):
             context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
                 text=context.bot.lang_dict["add_product_wrong_floating point number"],
-                reply_markup=back_kb(
-                    "back_to_main_menu", context=context))
+                reply_markup=back_kb("back_to_main_menu", context=context))
             return DISCOUNT_PRICE
         if discount_price >= context.user_data["product"].price:
             context.user_data["product"].send_full_template(
@@ -351,8 +338,7 @@ class ProductsHandler(ProductsHelper):
                 context.bot.lang_dict["shop_admin_discount_bigger_than_price"],
                 keyboards(context)["back_to_main_menu_keyboard"])
             return DISCOUNT_PRICE
-        context.user_data["product"].update(
-            {"discount_price": discount_price})
+        context.user_data["product"].update({"discount_price": discount_price})
         return self.edit(update, context)
 
     def content_menu(self, update, context):
@@ -360,7 +346,8 @@ class ProductsHandler(ProductsHelper):
         for content_dict in context.user_data["product"].content:
             reply_markup = InlineKeyboardMarkup([
                 [InlineKeyboardButton(
-                    text="❌", callback_data=f"remove_from_content/"
+                    text=context.bot.lang_dict["remove_button_str"],
+                    callback_data=f"remove_from_content/"
                     f"{content_dict['id']}")]
             ])
             Product.send_content(update.effective_chat.id, context,
@@ -373,8 +360,7 @@ class ProductsHandler(ProductsHelper):
             [InlineKeyboardButton(
                 text=context.bot.lang_dict["shop_admin_back_btn"],
                 callback_data="back_to_edit")]]
-        text = (self.admin_short_template(context,
-                                          context.user_data["product"])
+        text = (self.admin_short_template(context, context.user_data["product"])
                 + "\n\n"
                 + context.bot.lang_dict["add_product_to_delete_click"])
         context.user_data["to_delete"].append(
@@ -392,8 +378,8 @@ class ProductsHandler(ProductsHelper):
         content_dict = next((content_dict for content_dict
                              in context.user_data["product"].content
                              if content_dict["id"] == content_id), {})
-        update.callback_query.answer(f"{content_dict_as_string(content_dict)}"+
-                                     context.bot.lang_dict["add_product_was_removed"])
+        update.callback_query.answer(f"{content_dict_as_string(content_dict, context)}"
+                                     + context.bot.lang_dict["add_product_was_removed"])
         product = products_table.find_and_modify(
             {"_id": context.user_data["product"].id_},
             {"$pull": {"content": {"id": content_id}}}, new=True)
@@ -405,8 +391,7 @@ class ProductsHandler(ProductsHelper):
         if len(context.user_data["product"].content) >= 10:
             update.callback_query.answer(context.bot.lang_dict["add_product_10_files"])
             return CONTENT_MENU
-        text = (
-                self.admin_short_template(context, context.user_data["product"])
+        text = (self.admin_short_template(context, context.user_data["product"])
                 + "\n\n"
                 + context.bot.lang_dict["add_product_add_files"]
                 + context.user_data['product'].files_str)
@@ -429,8 +414,7 @@ class ProductsHandler(ProductsHelper):
             # update.callback_query == None
             # update.callback_query.answer(context.bot.lang_dict["add_product_10_files"])
             return self.content_menu(update, context)
-        text = (
-                self.admin_short_template(context, context.user_data["product"])
+        text = (self.admin_short_template(context, context.user_data["product"])
                 + "\n\n"
                 + context.bot.lang_dict["add_product_add_files"]
                 + context.user_data['product'].files_str)
@@ -455,8 +439,7 @@ class ProductsHandler(ProductsHelper):
                  for i in category_list],
                 [back_btn("back_to_main_menu_btn", context)])
 
-            text = (self.admin_short_template(
-                context, context.user_data["product"])
+            text = (self.admin_short_template(context, context.user_data["product"])
                     + "\n\n"
                     + context.bot.lang_dict["shop_admin_set_category"])
 
@@ -478,8 +461,7 @@ class ProductsHandler(ProductsHelper):
         delete_messages(update, context, True)
         if update.callback_query:
             context.user_data["product"].update(
-                {"category_id": update.callback_query.data.replace(
-                    "category_", "")})
+                {"category_id": update.callback_query.data.replace("category_", "")})
         else:
             if update.message:
                 category_id = categories_table.insert_one({
@@ -494,8 +476,7 @@ class ProductsHandler(ProductsHelper):
         product_id = update.callback_query.data.split("/")[1]
         context.user_data["product"] = Product(context, product_id)
 
-        text = (
-                self.admin_short_template(context, context.user_data["product"])
+        text = (self.admin_short_template(context, context.user_data["product"])
                 + "\n\n"
                 + context.bot.lang_dict["shop_admin_confirm_to_trash_product"])
 
@@ -515,14 +496,12 @@ class ProductsHandler(ProductsHelper):
         context.bot.send_chat_action(update.effective_chat.id, "typing")
         delete_messages(update, context, True)
         context.user_data["product"].update({"in_trash": True})
-        update.callback_query.answer(
-            context.bot.lang_dict["shop_admin_moved_to_trash_blink"])
+        update.callback_query.answer(context.bot.lang_dict["shop_admin_moved_to_trash_blink"])
         return self.back_to_products(update, context)
 
     def quantity(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        text = (
-                self.admin_short_template(context, context.user_data["product"])
+        text = (self.admin_short_template(context, context.user_data["product"])
                 + "\n\n"
                 + context.bot.lang_dict["shop_admin_set_quantity"])
 
@@ -541,7 +520,7 @@ class ProductsHandler(ProductsHelper):
     def finish_quantity(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         if update.message:
-            if int(update.message.text)<10**7:
+            if int(update.message.text) < 10**7:
                 context.user_data["product"].update(
                     {"quantity": int(update.message.text),
                      "unlimited": False})
@@ -613,6 +592,7 @@ PRODUCTS_HANDLER = ConversationHandler(
                 pattern=r"remove_from_content",
                 callback=ProductsHandler().finish_remove_from_content)],
 
+        # todo not Filters.all - there are no text, sticker, and video note
         ADDING_CONTENT: [
             MessageHandler(Filters.all,
                            ProductsHandler().open_content_handler)],

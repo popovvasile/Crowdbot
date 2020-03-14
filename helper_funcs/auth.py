@@ -110,7 +110,7 @@ def register_admin(update, context):
         context.bot.send_message(
             chat_id=update.effective_chat.id,
             # TODO STRINGS
-            text=f"Hello, {update.effective_user.full_name} New Admin!")
+            text=context.bot.lang_dict["hello_new_admin"])
 
         logger.info(f"New admin {update.effective_user.full_name} "
                     f"on bot {context.bot.first_name}:{context.bot.id}")
@@ -122,8 +122,7 @@ def register_admin(update, context):
         context.bot.send_message(
             chat_id=update.effective_chat.id,
             # TODO STRINGS
-            text="Registration link is no longer active. "
-                 "Ask admins for the new one")
+            text=context.bot.lang_dict["registration_link_not_active"])
         return False
 
 
@@ -166,6 +165,5 @@ def user_admin(func):
             pass
 
         else:
-            update.effective_message.reply_text("Who dis non-admin telling me what to do?")
-
+            update.effective_message.reply_text(context.bot.lang_dict["not_admin"])
     return is_admin

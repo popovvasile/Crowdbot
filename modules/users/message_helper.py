@@ -80,16 +80,13 @@ class AnswerToMessage(object):
                       # "answer_string": answer_string
                       }})
         # TODO STRINGS
-        user_message_temp = (
-            "<b>You got the Answer!</b>"
-            f"\n<b>Your message:</b>"
-            f"\n{content_string(context.user_data['answer_to']['content'])}"
-            f"\n<b>Answer:</b>"
-            f"\n{content_string(context.user_data['content'])}")
+        user_message_temp = context.bot.lang_dict["user_answer_notification"].format(
+            content_string(context.user_data['answer_to']['content'], context),
+            content_string(context.user_data['content'], context))
 
         reply_markup = InlineKeyboardMarkup([
             [InlineKeyboardButton(
-                text="Show",
+                text=context.bot.lang_dict["show_btn"],
                 callback_data="subscriber_open_message_true/"
                               + str(context.user_data["answer_to"]["_id"]))]])
 
@@ -260,7 +257,7 @@ class MessageTemplate(object):
             self.title_emoji = ""
 
     def super_short_temp(self):
-        return self.title_emoji + "<b>From:</b> " + self.user_mention
+        return self.title_emoji + self.context.bot.lang_dict["from"] + self.user_mention
 
     def short_temp(self):
         return (self.title_emoji
@@ -273,10 +270,10 @@ class MessageTemplate(object):
                     + self.context.bot.lang_dict["message_temp"].format(
                         self.user_mention,
                         lang_timestamp(self.context, self.timestamp),
-                        content_string(self.content)))
+                        content_string(self.content, self.context)))
         if self.answer_content:
             template += self.context.bot.lang_dict["answer_field"].format(
-                content_string(self.answer_content))
+                content_string(self.answer_content, self.context))
         return template
 
     def send(self, chat_id, temp="full", reply_markup=None, text=""):
@@ -336,7 +333,7 @@ class MessageTemplate(object):
 
 
 # TODO STRINGS
-def content_string(content):
+def content_string(content, context):
     """Makes message content as string for the message template"""
     string = ""
     for content_dict in content:
@@ -347,10 +344,10 @@ def content_string(content):
             string += f"• <code>{str_for_text}</code>\n"
 
         if "photo_file" in content_dict:
-            string += "• Photo\n"
+            string += context.bot.lang_dict["photo_file"]
 
         if "voice_file" in content_dict:
-            string += "• Voice message\n"
+            string += context.bot.lang_dict["voice_file"]
 
         if ("audio_file" in content_dict or
                 "document_file" in content_dict or
@@ -358,11 +355,11 @@ def content_string(content):
             string += f"• {content_dict['name']}\n"
 
         if "video_file" in content_dict:
-            string += "• Video\n"
+            string += context.bot.lang_dict["video_file"]
 
         if "video_note_file" in content_dict:
-            string += "• Video message\n"
+            string += context.bot.lang_dict["video_note_file"]
 
         if "animation_file" in content_dict:
-            string += "• Animation\n"
+            string += context.bot.lang_dict["animation_file"]
     return string[:-1]

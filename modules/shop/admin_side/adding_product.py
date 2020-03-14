@@ -1,21 +1,22 @@
 import logging
+
 from telegram import InlineKeyboardButton, Update, InlineKeyboardMarkup
 from telegram.ext import (ConversationHandler, CallbackQueryHandler,
                           CallbackContext, Filters, MessageHandler)
 
 from helper_funcs.helper import currency_limits_dict
 from modules.shop.admin_side.welcome import Welcome
-from modules.shop.components.product import (Product,
-                                             MAX_TEMP_DESCRIPTION_LENGTH)
+from modules.shop.components.product import Product, MAX_TEMP_DESCRIPTION_LENGTH
 from helper_funcs.misc import delete_messages
 from price_parser import Price
 from database import categories_table, chatbots_table
 from modules.shop.helper.keyboards import keyboards, back_btn, create_keyboard
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO)
+
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 START_ADD_PRODUCT, ONLINE_PAYMENT, \
     SET_TITLE, SET_CATEGORY, SET_PRICE, SET_DISCOUNT, \
@@ -27,9 +28,8 @@ START_ADD_PRODUCT, ONLINE_PAYMENT, \
 class AddingProductHandler(object):
     def start(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        buttons = [
-            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                  callback_data="back_to_main_menu")]]
+        buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                         callback_data="back_to_main_menu")]]
         reply_markup = InlineKeyboardMarkup(buttons)
         context.user_data["to_delete"].append(
             context.user_data["to_delete"].append(context.bot.send_message(

@@ -10,10 +10,11 @@ from helper_funcs.misc import delete_messages
 from database import categories_table, products_table, orders_table
 from modules.shop.helper.keyboards import (back_btn)
 
-logging.basicConfig(format='%(asctime)s - %(name)s - '
-                           '%(levelname)s - %(message)s',
+
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 START_ADD_CATEGORY, SET_CATEGORY, RENAME_CATEGORY = range(3)
 DELETE_CATEGORY_CONFIRM = 1
@@ -30,12 +31,12 @@ class ProductCategoryHandler(object):
             + [[InlineKeyboardButton(
                 context.bot.lang_dict["shop_admin_add_category_btn"],
                 callback_data="add_shop_category")],
-            [back_btn("back_to_main_menu", context)]],
+                [back_btn("back_to_main_menu", context)]],
         )
 
         context.user_data["to_delete"] = [context.bot.send_message(
             chat_id=update.callback_query.message.chat_id,
-            text="Choose ",
+            text=context.bot.lang_dict["products_categories_menu"],
             reply_markup=keyboard)]
 
         return ConversationHandler.END
@@ -45,9 +46,9 @@ class ProductCategoryHandler(object):
         category_id = update.callback_query.data.replace("edit_category/", "")
         keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton(
-                "Change the name",
+                context.bot.lang_dict["change_category_name"],
                 callback_data="edit_name_shop_category/{}".format(category_id))],
-            [InlineKeyboardButton("Delete",
+            [InlineKeyboardButton(context.bot.lang_dict["delete_button_str"],
                                   callback_data="delete_shop_category/{}".format(category_id))],
 
             [back_btn("back_to_main_menu", context)],
@@ -56,7 +57,7 @@ class ProductCategoryHandler(object):
 
         context.user_data["to_delete"] = [context.bot.send_message(
             chat_id=update.callback_query.message.chat_id,
-            text="Choose your action about this shop category",
+            text=context.bot.lang_dict["category_edit"],
             reply_markup=keyboard)]
 
         return ConversationHandler.END
@@ -83,8 +84,8 @@ class ProductCategoryHandler(object):
                                       callback_data="back_to_main_menu")]])
             context.user_data["to_delete"] = [context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
-                text=context.bot.lang_dict["shop_orders_cannot_be_deleted"].
-                    format(category["name"], str(orders.count())),
+                text=context.bot.lang_dict["shop_orders_cannot_be_deleted"].format(
+                    category["name"], str(orders.count())),
                 reply_markup=keyboard)]
             self.menu(update, context)
             return ConversationHandler.END
@@ -98,8 +99,8 @@ class ProductCategoryHandler(object):
                                       callback_data="back_to_main_menu")]])
             context.user_data["to_delete"] = [context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
-                text=context.bot.lang_dict["shop_category_will_be_deleted"].
-                    format(category["name"], str(products.count()), str(all_orders.count())),
+                text=context.bot.lang_dict["shop_category_will_be_deleted"].format(
+                    category["name"], str(products.count()), str(all_orders.count())),
                 reply_markup=keyboard)]
 
             return DELETE_CATEGORY_CONFIRM
@@ -118,7 +119,7 @@ class ProductCategoryHandler(object):
 
             context.user_data["to_delete"] = [context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
-                text="Category {} has been deleted".format(category["name"]),
+                text=context.bot.lang_dict["category_deleted"].format(category["name"]),
                 reply_markup=keyboard)]
 
             return ConversationHandler.END
@@ -137,7 +138,7 @@ class ProductCategoryHandler(object):
 
         context.user_data["to_delete"] = [context.bot.send_message(
             chat_id=update.callback_query.message.chat_id,
-            text="Category {} has been deleted".format(category["name"]),
+            text=context.bot.lang_dict["category_deleted"].format(category["name"]),
             reply_markup=keyboard)]
 
         return ConversationHandler.END
@@ -153,7 +154,7 @@ class ProductCategoryHandler(object):
 
         context.user_data["to_delete"] = [context.bot.send_message(
             chat_id=update.callback_query.message.chat_id,
-            text="Write a new name for this product category",
+            text=context.bot.lang_dict["write_new_category"],
             reply_markup=keyboard)]
 
         return RENAME_CATEGORY

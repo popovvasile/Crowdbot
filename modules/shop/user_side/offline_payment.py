@@ -4,23 +4,18 @@ import logging
 import datetime
 from random import randint
 
-from telegram import (InlineKeyboardMarkup, InlineKeyboardButton, ParseMode,
-                      OrderInfo)
-from telegram.ext import (MessageHandler, Filters,
-                          ConversationHandler, CallbackQueryHandler)
+from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ParseMode
+from telegram.ext import MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
 
-from database import (orders_table, chatbots_table, carts_table,
-                      shop_customers_contacts_table, products_table,
-                      users_table)
+from database import (orders_table, chatbots_table, carts_table, shop_customers_contacts_table,
+                      products_table, users_table)
 from helper_funcs.misc import delete_messages
 from modules.shop.user_side.cart import Cart
 from modules.shop.components.order import UserOrder, Product, AdminOrder
 
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO)
-
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -35,16 +30,16 @@ class PurchaseBot(object):
         context.user_data["to_delete"].append(
             context.bot.send_message(
                 chat_id=update.callback_query.message.chat.id,
-                text="Pay:{} {}".format(
+                text=context.bot.lang_dict["to_pay"].format(
                     str(context.user_data["order"]["total_price"]),
                     str(context.user_data["order"]["currency"]))))
 
         context.user_data["to_delete"].append(
             context.bot.send_message(
                 chat_id=update.callback_query.message.chat.id,
-                text="Add some details to your order or continue",
+                text=context.bot.lang_dict["add_order_comment"],
                 reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
-                         text="Continue",
+                         text=context.bot.lang_dict["shop_admin_continue_btn"],
                          callback_data="pass_order_comment")],
                     [InlineKeyboardButton(
                          text=context.bot.lang_dict["back_button"],
@@ -68,13 +63,13 @@ class PurchaseBot(object):
         # TODO SHARE PHONE NUMBER
         if (context.user_data["used_contacts"]
                 and len(context.user_data["used_contacts"]["phone_numbers"])):
-            text = "Tell us your phone number or select one of with this:"
+            text = context.bot.lang_dict["tell_phone_number"]
             buttons = [
                 [InlineKeyboardButton(text=x,
                                       callback_data=f"phone_number/{x}")]
                 for x in context.user_data["used_contacts"]["phone_numbers"]]
         else:
-            text = "Tell us your phone number:"
+            text = context.bot.lang_dict["tell_phone_number_short"]
             buttons = []
 
         buttons.append([InlineKeyboardButton(
@@ -104,13 +99,13 @@ class PurchaseBot(object):
         if shop["shipping"]:
             if (context.user_data["used_contacts"]
                     and len(context.user_data["used_contacts"]["addresses"])):
-                text = "Tell us your full address or select one of with this:"
+                text = context.bot.lang_dict["tell_address"]
                 buttons = [
                     [InlineKeyboardButton(text=x,
                                           callback_data=f"address/{x}")]
                     for x in context.user_data["used_contacts"]["addresses"]]
             else:
-                text = "Tell us your full address"
+                text = context.bot.lang_dict["tell_address_short"]
                 buttons = []
 
             buttons.append([InlineKeyboardButton(
@@ -146,7 +141,7 @@ class PurchaseBot(object):
         context.user_data["order"]["shipping"] = shop["shipping"]
 
         buttons = [
-            [InlineKeyboardButton(text="✅ Done!",
+            [InlineKeyboardButton(text=context.bot.lang_dict["finish_order_btn"],
                                   callback_data="finish_order")],
             [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                   callback_data="back_to_cart")]]
@@ -155,19 +150,18 @@ class PurchaseBot(object):
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text=order_data["template"],
                                      parse_mode=ParseMode.HTML))
-        confirm_text = ("<b>Your order</b> ☝️"
-                        "\n<b>Phone Number:</b> "
-                        f"{context.user_data['order']['phone_number']}")
+        confirm_text = context.bot.lang_dict["confirm_order_text"].format(
+            context.user_data['order']['phone_number'])
 
         if context.user_data["order"]["shipping"]:
-            confirm_text += ("\n<b>Delivery to</b> "
-                             + context.user_data["order"]['address'])
+            confirm_text += context.bot.lang_dict["delivery_to"].format(
+                context.user_data["order"]['address'])
         else:
-            confirm_text += "\n<b>Pickup from</b> " + shop["address"]
+            confirm_text += context.bot.lang_dict["pick_up_from"].format(shop["address"])
 
         if context.user_data["order"]["user_comment"]:
-            confirm_text += (
-                f"\n<b>Comment:</b> `{context.user_data['order']['user_comment']}`")
+            confirm_text += context.bot.lang_dict["comment_field"].format(
+                context.user_data['order']['user_comment'])
 
         context.user_data["to_delete"].append(
             context.bot.send_message(
@@ -185,9 +179,7 @@ class PurchaseBot(object):
         for item in order.items:
             if not item.item_exist:
                 update.callback_query.answer(
-                    "Some products has been removed from cart cuz "
-                    "that was deleted or sold. "
-                    "\nCheck your cart and try again",
+                    context.bot.lang_dict["cart_changed_notification"],
                     show_alert=True)
                 return Cart().back_to_cart(update, context)
         # Create order
@@ -248,21 +240,20 @@ class PurchaseBot(object):
         for admin in users_table.find({"bot_id": context.bot.id,
                                        "is_admin": True}):
             # Create notification text and send it.
-            text = ("🆕 <b>New Order</b>"
-                    + "\n<b>Order ID:</b> <code>{}</code>"
-                      "\n<b>From:</b> {}").format(
+            text = context.bot.lang_dict["new_order_notification"].format(
                 order.article, order.user_mention)
 
             context.bot.send_message(chat_id=admin["chat_id"],
                                      text=text,
                                      reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
-                                         text="Close ❌", callback_data="dismiss"
+                                         text=context.bot.lang_dict["notification_close_btn"],
+                                         callback_data="dismiss"
                                      )]]),
                                      parse_mode=ParseMode.HTML)
 
         context.bot.send_message(
             chat_id=update.effective_chat.id,
-            text="Thank you!",
+            text=context.bot.lang_dict["order_success"],
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton(
                     text=context.bot.lang_dict["back_button"],

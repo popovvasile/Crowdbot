@@ -1,5 +1,4 @@
 import logging
-from pprint import pprint
 
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ConversationHandler, CallbackQueryHandler
@@ -8,20 +7,13 @@ from bson.objectid import ObjectId
 from helper_funcs.helper import get_help, back_to_modules
 from helper_funcs.misc import delete_messages, get_obj
 from helper_funcs.pagination import Pagination
-from modules.shop.components.product import (Product,
-                                             MAX_TEMP_DESCRIPTION_LENGTH)
-from database import (products_table, carts_table, chatbots_table,
-                      categories_table, orders_table)
+from modules.shop.components.product import Product, MAX_TEMP_DESCRIPTION_LENGTH
+from database import products_table, carts_table, chatbots_table, categories_table, orders_table
 
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO)
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
-remove_button_str = "❌"
-view_button_str = "🔎 View"
 
 
 class CartHelper(object):
@@ -40,7 +32,7 @@ class CartHelper(object):
                 cart_items.append(cart_item)
         # print(cart_items)
         shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
-        template = "<b>Your Order</b>\n\n"
+        template = context.bot.lang_dict["order_create_title"]
         order_price = 0
         for cart_item in cart_items:
             pprint(cart_item)
@@ -60,7 +52,7 @@ class CartHelper(object):
                 cart_item["quantity"],
                 item_price,
                 shop["currency"])
-        template += f"<b>Order Price:</b> {order_price} {shop['currency']}"
+        template += context.bot.lang_dict["order_create_end"].format(order_price, shop['currency'])
         # Save order data. Need to check order data on each step??
         order = dict()
         order["items"] = cart_items
@@ -116,7 +108,7 @@ class CartHelper(object):
         return cart_item
 
     @staticmethod
-    def short_cart_item_template(cart_item, currency) -> str:
+    def short_cart_item_template(cart_item, currency, context) -> str:
         """Short text representation of the cart item.
 
         :param cart_item: {
@@ -125,12 +117,12 @@ class CartHelper(object):
             "product": dict  # Product document
         }
         :param currency: shop currency
+        :param context: CallbackContext
 
         :return str
         """
         # Create product template
-        if (len(cart_item["product"]["description"])
-                > MAX_TEMP_DESCRIPTION_LENGTH):
+        if len(cart_item["product"]["description"]) > MAX_TEMP_DESCRIPTION_LENGTH:
             description = (cart_item["product"]["description"]
                            [:MAX_TEMP_DESCRIPTION_LENGTH] + "...")
         else:
@@ -138,23 +130,21 @@ class CartHelper(object):
         category_name = categories_table.find_one(
             {"_id": cart_item["product"]["category_id"]})["name"]
 
-        template = (
-            "<b>Article:</b>      {}"
-            "\n<b>Name:</b>       {}"
-            "\n<b>Category:</b>   {}"
-            '\n<b>Price:        </b> <b><u>{} {}</u></b>').format(
+        template = context.bot.lang_dict["cart_item_template"].format(
                 str(cart_item["product"].get("_id")),
                 cart_item["product"]["name"],
                 category_name,
                 float(cart_item["product"]["price"]) * cart_item["quantity"],
                 currency)
         if not cart_item["product"].get("unlimited"):
-            template += f"\n<b>In stock:</b> {cart_item['product']['quantity']}"
-        template += f"\n<b>Your quantity</b>: {cart_item['quantity']}"
+            template += context.bot.lang_dict["in_stock_field"].format(
+                cart_item['product']['quantity'])
+        template += context.bot.lang_dict["cart_quantity_field"].format(
+            cart_item['quantity'])
         return template
 
     @staticmethod
-    def full_cart_item_template(cart_item, currency) -> str:
+    def full_cart_item_template(cart_item, currency, context) -> str:
         """Full text representation of the cart item.
 
         :param cart_item: {
@@ -163,17 +153,14 @@ class CartHelper(object):
             "product": dict  # Product document
         }
         :param currency: shop currency
+        :param context: CallbackContext
 
         :return: str
         """
         category_name = categories_table.find_one(
             {"_id": cart_item["product"]["category_id"]})["name"]
 
-        template = (
-            "<b>Article:</b>      {}"
-            "\n<b>Name:</b>       {}"
-            "\n<b>Category:</b>   {}"
-            '\n<b>Price:</b> <b><u>{} {}</u></b>').format(
+        template = context.bot.lang_dict["full_cart_item_template"].format(
                 str(cart_item["product"].get("_id")),
                 cart_item["product"]["name"],
                 category_name,
@@ -181,16 +168,17 @@ class CartHelper(object):
                 currency)
         if (len(cart_item["product"]["description"])
                 < MAX_TEMP_DESCRIPTION_LENGTH):
-            template += "\n<b>Description:</b> {}".format(
+            template += context.bot.lang_dict["description_field"].format(
                 cart_item["product"]["description"])
 
         if not cart_item["product"].get("unlimited"):
-            template += f"\n<b>In stock: </b>{cart_item['product']['quantity']}"
-        template += f"\n<b>Your quantity</b>: {cart_item['quantity']}"
+            template += context.bot.lang_dict["in_stock_field"].format(
+                cart_item['product']['quantity'])
+        template += context.bot.lang_dict["cart_quantity_field"].format(cart_item['quantity'])
         return template
 
     @staticmethod
-    def cart_item_markup(cart_item):
+    def cart_item_markup(cart_item, context):
         """Keyboard for the cart item.
         Product must exist in the cart and quantity must be correct
 
@@ -199,30 +187,31 @@ class CartHelper(object):
             "quantity": int,  # Cart quantity
             "product": dict  # product document
         }
+        :param context: CallbackContext
 
         :return: InlineKeyboardMarkup
         """
         product_buttons = [[]]
         product_buttons[0].append(
             InlineKeyboardButton(
-                text="➖",
+                text=context.bot.lang_dict["minus"],
                 callback_data=f"reduce_quantity/{cart_item['product_id']}"))
         product_buttons[0].append(
             InlineKeyboardButton(
-                text="➕",
+                text=context.bot.lang_dict["plus"],
                 callback_data=f"increase_quantity/{cart_item['product_id']}"))
         product_buttons[0].append(
             InlineKeyboardButton(
-                text=remove_button_str,
+                text=context.bot.lang_dict["remove_button_str"],
                 callback_data=f"list_cart_remove/{cart_item['product_id']}"))
         content_len = len(cart_item["product"]["content"])
         if len(cart_item["product"]["description"]) > 150 or content_len > 1:
             product_buttons.append(
                 [InlineKeyboardButton(
-                    text=view_button_str + (f" ({content_len} files)"
-                                            if content_len else ""),
-                    callback_data=f"view_cart_product/"
-                                  f"{cart_item['product_id']}")])
+                    text=context.bot.lang_dict["view_button_str"]
+                    + (context.bot.lang_dict["cart_view_help"].format(content_len)
+                       if content_len else ""),
+                    callback_data=f"view_cart_product/{cart_item['product_id']}")])
         return InlineKeyboardMarkup(product_buttons)
 
 
@@ -234,8 +223,7 @@ class Cart(CartHelper):
         # Set current page integer in the user_data.
         if update.callback_query.data.startswith("user_cart_pagination"):
             context.user_data["page"] = int(
-                update.callback_query.data.replace("user_cart_pagination_",
-                                                   ""))
+                update.callback_query.data.replace("user_cart_pagination_", ""))
         if (not context.user_data.get("page")
                 or update.callback_query.data == "cart"):
             context.user_data["page"] = 1
@@ -257,7 +245,7 @@ class Cart(CartHelper):
 
         # Back to the shop menu if cart is empty
         if not len(cart["products"]):
-            update.callback_query.answer("Your cart is empty")
+            update.callback_query.answer(context.bot.lang_dict["cart_empty_blink"])
             update.callback_query.data = "back_to_module_shop"
             return back_to_modules(update, context)
         # Send page content
@@ -269,8 +257,7 @@ class Cart(CartHelper):
         context.user_data['to_delete'].append(
             context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
-                text=context.bot.lang_dict[
-                    "shop_admin_products_title"].format(len(cart_products)),
+                text=context.bot.lang_dict["shop_admin_products_title"].format(len(cart_products)),
                 parse_mode=ParseMode.HTML))
         # Products list buttons
         buttons = [[InlineKeyboardButton(
@@ -279,7 +266,7 @@ class Cart(CartHelper):
 
         if len(cart_products):
             buttons.insert(0, [InlineKeyboardButton(
-                                   text="Make Order",
+                                   text=context.bot.lang_dict["make_order_btn"],
                                    callback_data="make_order")])
             # Create page content and send it
             pagination = Pagination(cart_products,
@@ -295,8 +282,8 @@ class Cart(CartHelper):
 
                 # Create product reply markup and send short product template
                 cart_item["product"] = product
-                reply_markup = self.cart_item_markup(cart_item)
-                template = self.short_cart_item_template(cart_item, currency)
+                reply_markup = self.cart_item_markup(cart_item, context)
+                template = self.short_cart_item_template(cart_item, currency, context)
                 product_obj = Product(context, product)
                 product_obj.send_short_template(
                     update, context, text=template, reply_markup=reply_markup)
@@ -325,13 +312,13 @@ class Cart(CartHelper):
                       < cart_item["product"]["quantity"]):
                     cart_item["quantity"] += 1
                 else:
-                    update.callback_query.answer("Quantity is max")
+                    update.callback_query.answer(context.bot.lang_dict["max_quantity_blink"])
 
             elif operation == "reduce_quantity":
                 if cart_item["quantity"] > 1:
                     cart_item["quantity"] -= 1
                 else:
-                    update.callback_query.answer("Quantity already 1")
+                    update.callback_query.answer(context.bot.lang_dict["min_quantity_blink"])
             else:
                 return self.back_to_cart(update, context)
 
@@ -342,7 +329,7 @@ class Cart(CartHelper):
 
             currency = chatbots_table.find_one(
                 {"bot_id": context.bot.id})["shop"]["currency"]
-            template = self.short_cart_item_template(cart_item, currency)
+            template = self.short_cart_item_template(cart_item, currency, context)
 
             if update.effective_message.caption_markdown:
                 update.effective_message.edit_caption(
@@ -352,7 +339,7 @@ class Cart(CartHelper):
                     text=template, parse_mode=ParseMode.HTML)
 
             update.effective_message.edit_reply_markup(
-                reply_markup=self.cart_item_markup(cart_item))
+                reply_markup=self.cart_item_markup(cart_item, context))
         else:
             return self.back_to_cart(update, context)
 
@@ -362,8 +349,8 @@ class Cart(CartHelper):
         carts_table.update_one(
             {"bot_id": context.bot.id, "user_id": update.effective_user.id},
             {"$pull": {"products": {"product_id": product_id}}})
-        update.callback_query.answer((product.get("name") or "")
-                                     + " Removed from cart")
+        update.callback_query.answer(
+            context.bot.lang_dict["removed_from_cart_blink"].format(product.get("name") or ""))
         return self.back_to_cart(update, context)
 
     def view_product(self, update, context):
@@ -381,7 +368,7 @@ class Cart(CartHelper):
         prod_obj = Product(context, cart_item["product"])
         currency = chatbots_table.find_one(
             {"bot_id": context.bot.id})["shop"]["currency"]
-        template = self.full_cart_item_template(cart_item, currency)
+        template = self.full_cart_item_template(cart_item, currency, context)
         back_button = InlineKeyboardMarkup([
             [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                   callback_data="back_to_cart")]])

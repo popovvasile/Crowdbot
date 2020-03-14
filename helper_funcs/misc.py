@@ -273,16 +273,16 @@ def send_content_dict(chat_id, context, content_dict,
                                      reply_markup=reply_markup))
 
 
-def content_dict_as_string(content_dict):
+def content_dict_as_string(content_dict, context):
     string = ""
     if not content_dict:
         return string
 
     if content_dict['type'] == "photo_file":
-        string += "• Photo\n"
+        string += context.bot.lang_dict["photo_file"]
 
     if content_dict['type'] == "voice_file":
-        string += "• Voice message\n"
+        string += context.bot.lang_dict["voice_file"]
 
     if (content_dict['type'] == "audio_file" or
             content_dict['type'] == "document_file" or
@@ -290,13 +290,13 @@ def content_dict_as_string(content_dict):
         string += f"• {content_dict['name']}\n"
 
     if content_dict['type'] == "video_file":
-        string += "• Video\n"
+        string += context.bot.lang_dict["video_file"]
 
     if content_dict['type'] == "video_note_file":
-        string += "• Video message\n"
+        string += context.bot.lang_dict["video_note_file"]
 
     if content_dict['type'] == "animation_file":
-        string += "• Animation\n"
+        string += context.bot.lang_dict["animation_file"]
     return string
 
 

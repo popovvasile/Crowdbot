@@ -106,8 +106,7 @@ class AdminHandler(object):
         # Set current page integer in user_data.
         if update.callback_query.data.startswith("admins_list_pagination"):
             context.user_data["page"] = int(
-                update.callback_query.data.replace("admins_list_pagination_",
-                                                   ""))
+                update.callback_query.data.replace("admins_list_pagination_", ""))
         if not context.user_data.get("page"):
             context.user_data["page"] = 1
         self.send_admins_layout(update, context)
@@ -118,8 +117,7 @@ class AdminHandler(object):
         context.user_data['to_delete'].append(
             context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
-                text=context.bot.lang_dict["admins_layout_title"].format(
-                    all_admins.count()),
+                text=context.bot.lang_dict["admins_layout_title"].format(all_admins.count()),
                 parse_mode=ParseMode.MARKDOWN))
         buttons = [
             [InlineKeyboardButton(
@@ -163,8 +161,7 @@ class AdminHandler(object):
     def finish_delete_admin(self, update, context):
         delete_messages(update, context, True)
         context.user_data["admin"].delete()
-        update.callback_query.answer(
-            context.bot.lang_dict["admin_deleted_blink"])
+        update.callback_query.answer(context.bot.lang_dict["admin_deleted_blink"])
         return self.back_to_admins_list(update, context)
 
     def start_add_admins(self, update, context):
@@ -184,13 +181,11 @@ class AdminHandler(object):
         context.user_data['to_delete'].append(
             context.bot.send_message(
                 chat_id=update.effective_chat.id,
-                text=f"<b>You have been invited as an administrator to</b> "
-                     f"{context.bot.get_me().mention_html()}"
-                     "\n<code>Never forward this message "
-                     "to other persons.</code>",
+                text=context.bot.lang_dict["admin_invite"].format(
+                    context.bot.get_me().mention_html()),
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton(
-                        text="Register",
+                        text=context.bot.lang_dict["admin_invite_btn"],
                         url=f"https://t.me/{context.bot.username}?"
                             f"start=registration" + password)]
                 ]),
@@ -199,10 +194,7 @@ class AdminHandler(object):
         context.user_data['to_delete'].append(
             context.bot.send_message(
                 chat_id=update.effective_chat.id,
-                text="Forward ⬆ ️this ⬆️ message to admins."
-                     "\nThe button will be valid for one hour."
-                     "\nOne link - For one Admin"
-                     "\nDon't send it to unauthorized persons!",
+                text=context.bot.lang_dict["add_admin_menu"],
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton(
                         text=context.bot.lang_dict["back_button"],
