@@ -85,15 +85,16 @@ class Product(object):
         # Admin product status string.
         # Product was deleted
         if self.in_trash:
-            status = "🗑 Deleted"
+            status = self.context.bot.lang_dict["product_deleted_status"]
         # At least on item of the product on sale
         elif self.on_sale:
-            status = "✅ On Sale"
+            status = self.context.bot.lang_dict["product_on_sale_status"]
         # Product not on sale because it is in the NEW order
         elif new_orders.count():
-            status = f"🕐 {new_orders.count()} unfinished order(s)"
+            status = self.context.bot.lang_dict["product_unfinished_orders"].format(
+                new_orders.count())
         else:
-            status = "💸 Sold"
+            status = self.context.bot.lang_dict["product_sold_status"]
         return status
 
     def send_short_template(self, update, context,

@@ -257,7 +257,8 @@ class SendMessageToAdmin(object):
                                       context).super_short_temp())
             reply_markup = InlineKeyboardMarkup([
                 [InlineKeyboardButton(
-                    text="Close ❌", callback_data="dismiss"
+                    text=context.bot.lang_dict["notification_close_btn"],
+                    callback_data="dismiss"
                 )]
             ])
             context.bot.send_message(chat_id=admin["chat_id"],

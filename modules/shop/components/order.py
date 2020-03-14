@@ -145,19 +145,18 @@ class AdminOrder(Order):
     @property
     def str_status(self):
         if self.in_trash:
-            string = "❌ Canceled"
+            string = self.context.bot.lang_dict["order_status_canceled"]
         elif self.status:
-            string = self.context.bot.lang_dict[
-                "shop_admin_order_status_true"]
+            string = self.context.bot.lang_dict["shop_admin_order_status_true"]
         else:
             string = self.context.bot.lang_dict["shop_admin_order_status_new"]
 
         if self.shipping:
-            string += f"\n🚚 Delivery to <code>{self.address}</code>"
+            string += self.context.bot.lang_dict["delivery_to"].format(self.address)
         else:
             shop_address = chatbots_table.find_one(
                 {"bot_id": self.context.bot.id})["shop"].get("address", "")
-            string += f"\n🖐 Pick up <code>{shop_address}</code>"
+            string += self.context.bot.lang_dict["pick_up_from"].format(shop_address)
         return string
 
     def send_short_template(self, update, context,
@@ -195,11 +194,7 @@ class UserOrder(Order):
 
     @property
     def template(self):
-        template = ("\n<b>Order article:</b> <code>{}</code>"
-                    "\n<b>Order status:</b> {}"
-                    "\n<b>Order price:</b> <code>{}</code> {}"
-                    "\n<b>Your phone number:</b> <code>{}</code>"
-                    "\n<b>Your comment:</b> <code>{}</code>").format(
+        template = self.context.bot.lang_dict["user_order_temp"].format(
             self.article,
             self.str_status,
             self.total_price,
@@ -212,17 +207,14 @@ class UserOrder(Order):
     @property
     def str_status(self):
         if self.in_trash:
-            return "❌ Canceled"
+            return self.context.bot.lang_dict["order_status_canceled"]
         if self.status:
-            string = self.context.bot.lang_dict[
-                "shop_admin_order_status_true"]
+            string = self.context.bot.lang_dict["shop_admin_order_status_true"]
         elif self.shipping:
-            string = f"🚚 On my way to <code>{self.address}</code>"
+            string = self.context.bot.lang_dict["order_on_way_to"].format(self.address)
         else:
-            shop = chatbots_table.find_one(
-                {"bot_id": self.context.bot.id})["shop"]
-            string = (f"🖐 Your order wait for you on "
-                      f"<code>{shop['address']}</code>")
+            shop = chatbots_table.find_one({"bot_id": self.context.bot.id})["shop"]
+            string = self.context.bot.lang_dict["order_wait_on"].format(shop['address'])
         return string
 
     def send_full_template(self, update, context, text="", reply_markup=None,
@@ -273,11 +265,7 @@ class OrderItem(Product):
         currency = chatbots_table.find_one(
             {"bot_id": self.context.bot.id})["shop"]["currency"]
 
-        text = ("<b>Article:</b>    {}"
-                # "\n*Availability:* `{}`"
-                "\n<b>Category:</b> {}"
-                # "\nIn stock: `{}`"
-                "\nx<b>{}</b> - {} {}").format(
+        text = self.context.bot.lang_dict["order_item_template"].format(
             self.article,
             # self.item_exist,
             self.category["name"],

@@ -6,20 +6,19 @@ from telegram.ext import (ConversationHandler, CallbackQueryHandler, CallbackCon
 
 from helper_funcs.pagination import Pagination
 from helper_funcs.misc import delete_messages
-
 from modules.shop.helper.keyboards import keyboards, back_kb, back_btn
 from modules.shop.helper.helper import clear_user_data
 from modules.shop.components.order import AdminOrder
 from modules.shop.components.product import Product
 from modules.shop.admin_side.welcome import Welcome
+# todo bad import
+# from modules.users.users import UsersHandler
 
-from database import orders_table
-from database import products_table
+from database import orders_table, products_table, users_table
 
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO)
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -41,6 +40,7 @@ class OrdersHandlerHelper(object):
                     InlineKeyboardButton(
                         text=context.bot.lang_dict["shop_admin_to_done_btn"],
                         callback_data=f"to_done/{order.id_}"))
+
             # kb[0].append(
             #     InlineKeyboardButton(
             #         text=context.bot.lang_dict["shop_admin_edit_btn"],
@@ -49,8 +49,17 @@ class OrdersHandlerHelper(object):
             # kb[0].append(InlineKeyboardButton(
             #     text=context.bot.lang_dict["shop_admin_to_trash_btn"],
             #     callback_data=f"to_trash/{order.id_}"))
-
-        # elif order.status is True:
+        # todo maybe change "open_user/" callback_data for use user_id instead of _id
+        # user = users_table.find_one({"bot_id": context.bot.id,
+        #                              "user_id": order.user_id})
+        # kb[0].append(
+        #     InlineKeyboardButton(
+        #         text="👤",
+        #         callback_data=f"open_user/{user['_id']}"))
+        # kb[0].append(
+        #     InlineKeyboardButton(
+        #         text="🛍",
+        #         callback_data=f"admin_order_items/{order.id_}"))
         kb[0].append(
             InlineKeyboardButton(
                 text=context.bot.lang_dict["shop_admin_cancel_btn"],
@@ -62,11 +71,9 @@ class OrdersHandler(OrdersHandlerHelper):
     def orders(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         # Set current page integer in the user_data.
-        if update.callback_query.data.startswith(
-                "admin_order_list_pagination"):
+        if update.callback_query.data.startswith("admin_order_list_pagination"):
             context.user_data["page"] = int(
-                update.callback_query.data.replace(
-                    "admin_order_list_pagination_", ""))
+                update.callback_query.data.replace("admin_order_list_pagination_", ""))
         if not context.user_data.get("page"):
             context.user_data["page"] = 1
 
@@ -107,6 +114,39 @@ class OrdersHandler(OrdersHandlerHelper):
                 "admin_order_list_pagination")
         return state
 
+    # def order_items(self, update, context):
+    #     delete_messages(update, context, True)
+    #     if update.callback_query.data.startswith("admin_order_items"):
+    #         order_id = ObjectId(update.callback_query.data.split("/")[1])
+    #         order = orders_table.find_one({"_id": order_id})
+    #         if not order:
+    #             update.callback_query.answer(context.bot.lang_dict["no_such_order"])
+    #             return self.orders(update, context)
+    #         context.user_data["order"] = AdminOrder(context, order)
+    #
+    #     if update.callback_query.data.startswith("admin_order_item_pagination"):
+    #         context.user_data["item_page"] = int(
+    #             update.callback_query.data.replace("admin_order_item_pagination_", ""))
+    #     if not context.user_data.get("item_page"):
+    #         context.user_data["item_page"] = 1
+    #     PAGINATION OF ORDER ITEMS
+    #     pagination = Pagination(
+    #         self.items_json, page=context.user_data["item_page"])
+    #     for item in pagination.page_content():
+    #         OrderItem(self.context, item).send_template(
+    #             update, context, reply_markup=item_reply_markup)
+    #     pagination.send_keyboard(update, context,
+    #                              page_prefix="admin_order_item_pagination")
+    #
+    #     context.user_data["order"].send_full_template(
+    #         update, context,
+    #         reply_markup=InlineKeyboardMarkup([
+    #             [InlineKeyboardButton(
+    #                 text=context.bot.lang_dict["back_button"],
+    #                 callback_data="back_to_user_orders")]
+    #         ]))
+    #     return ConversationHandler.END
+
     # def confirm_to_trash(self, update: Update, context: CallbackContext):
     #     delete_messages(update, context, True)
     #     set_page_key(update, context, name="item_page", start_data={})
@@ -127,11 +167,9 @@ class OrdersHandler(OrdersHandlerHelper):
 
     def confirm_to_done(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        if update.callback_query.data.startswith(
-                "admin_order_item_pagination"):
+        if update.callback_query.data.startswith("admin_order_item_pagination"):
             context.user_data["item_page"] = int(
-                update.callback_query.data.replace(
-                    "admin_order_item_pagination_", ""))
+                update.callback_query.data.replace("admin_order_item_pagination_", ""))
         if not context.user_data.get("item_page"):
             context.user_data["item_page"] = 1
         if update.callback_query.data.startswith("to_done"):
@@ -154,11 +192,9 @@ class OrdersHandler(OrdersHandlerHelper):
     def confirm_cancel_order(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         # Set current page integer in the user_data.
-        if update.callback_query.data.startswith(
-                "admin_order_item_pagination"):
+        if update.callback_query.data.startswith("admin_order_item_pagination"):
             context.user_data["item_page"] = int(
-                update.callback_query.data.replace(
-                    "admin_order_item_pagination_", ""))
+                update.callback_query.data.replace("admin_order_item_pagination_", ""))
         if not context.user_data.get("item_page"):
             context.user_data["item_page"] = 1
         if update.callback_query.data.startswith("cancel_order"):
@@ -297,7 +333,8 @@ ORDERS_HANDLER = ConversationHandler(
         CONFIRM_CANCEL: [CallbackQueryHandler(OrdersHandler().finish_cancel,
                                               pattern=r"finish_cancel"),
                          CallbackQueryHandler(OrdersHandler().confirm_cancel_order,
-                                              pattern="admin_order_item_pagination")],
+                                              pattern="admin_order_item_pagination")
+                         ],
 
         # CONFIRM_TO_TRASH: [
         #     CallbackQueryHandler(OrdersHandler().finish_to_trash,
@@ -318,5 +355,8 @@ ORDERS_HANDLER = ConversationHandler(
     fallbacks=[CallbackQueryHandler(OrdersHandler().back_to_orders,
                                     pattern=r"back_to_orders"),
                CallbackQueryHandler(Welcome().back_to_main_menu,
-                                    pattern=r"back_to_main_menu")]
+                                    pattern=r"back_to_main_menu"),
+               # CallbackQueryHandler(UsersHandler().open_user,
+               #                      pattern="open_user")
+               ]
 )

@@ -23,9 +23,9 @@ HELP_STRINGS = """
 def send_admin_help(bot, chat_id, text, keyboard=None):
     if not keyboard:
         keyboard = InlineKeyboardMarkup(
-            paginate_modules(helpable_dict(bot)["ADMIN_HELPABLE"], "help", bot.id)+\
-                   [[InlineKeyboardButton(text=bot.lang_dict["user_mode_module"],
-                                          callback_data="turn_user_mode_on")]])
+            paginate_modules(helpable_dict(bot)["ADMIN_HELPABLE"], "help", bot.id)
+            + [[InlineKeyboardButton(text=bot.lang_dict["user_mode_module"],
+                                     callback_data="turn_user_mode_on")]])
     bot.send_message(chat_id=chat_id,
                      text=text,
                      parse_mode=ParseMode.MARKDOWN,
@@ -115,8 +115,9 @@ def check_provider_token(provider_token, update, context):
         update_data = update
     try:
         context.user_data["to_delete"].append(
-            context.bot.sendInvoice(update_data.message.chat_id, "TEST",
-                                    "A testing payment invoice to check the token",
+            context.bot.sendInvoice(update_data.message.chat_id,
+                                    context.bot.lang_dict["test_invoice_title"],
+                                    context.bot.lang_dict["test_invoice_description"],
                                     "test",
                                     provider_token, "test", "USD", prices,
                                     need_name=True, need_phone_number=True,
@@ -130,6 +131,7 @@ def check_provider_token(provider_token, update, context):
     delete_messages(update, context, True)
     return True
 
+
 # for test purposes
 def error_callback(update, context):
     try:
@@ -141,11 +143,11 @@ def error_callback(update, context):
         if update.effective_message.chat_id > 0:
             if hasattr(update, 'callback_query'):
                 context.bot.send_message(update.effective_message.chat_id,
-                                         "An error accured =( Please proceed to the shop menu",
+                                         context.bot.lang_dict["error_occurred"],
                                          reply_markup=back_buttons)
             elif hasattr(update, 'message'):
                 context.bot.send_message(update.effective_message.chat.id,
-                                         "An error happened =( Please proceed to the shop menu",
+                                         context.bot.lang_dict["error_occurred"],
                                          reply_markup=back_buttons)
 
             return
@@ -175,7 +177,7 @@ def error_callback(update, context):
     except Exception as e:
         logging.error(e.__repr__())
         context.bot.send_message(update.effective_message.chat.id,
-                                 "An error happened =( Please proceed to the shop menu",
+                                 context.bot.lang_dict["error_occurred"],
                                  reply_markup=InlineKeyboardMarkup(
                                      [[InlineKeyboardButton(
                                          text=context.bot.lang_dict["back_button"],
@@ -444,7 +446,7 @@ def get_help(update, context):
         pass
     if users_table.find_one({"user_id": update.effective_user.id, "bot_id": context.bot.id}).get(
             "blocked", False):
-        update.effective_message.reply_text("You've been blocked from this chatbot")
+        update.effective_message.reply_text(context.bot.lang_dict["you_have_been_blocked"])
         return ConversationHandler.END
     chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
     register_chat(update, context)
@@ -455,7 +457,7 @@ def get_help(update, context):
     if chatbot:
         if 'welcomeMessage' in chatbot:
             if if_admin(update=update, context=context.bot):
-                welcome_message = "Hi! Here is your bot menu. You can configure your bot as you wish"
+                welcome_message = context.bot.lang_dict["welcome"]
                 # TODO change to multlilingual
             else:
                 welcome_message = chatbot['welcomeMessage']
