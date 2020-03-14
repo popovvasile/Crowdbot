@@ -522,10 +522,10 @@ class WelcomeBot(object):
                                              callback_data="pay_donation")]]
                                      ))
         else:
-            if if_admin(update=update, context=context.bot):
-                context.bot.send_message(chat_id,
-                                         context.bot.lang_dict["start_help"].format(
-                                             context.bot.first_name))
+            # if if_admin(update=update, context=context.bot):
+            #     context.bot.send_message(chat_id,
+            #                              context.bot.lang_dict["start_help"].format(
+            #                                  context.bot.first_name))
             get_help(update, context)
 
         return ConversationHandler.END
