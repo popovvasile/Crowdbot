@@ -28,7 +28,6 @@ def eshop_menu(update, context):  # TODO add shop config button
     admin_keyboard = []
     if chatbot.get("shop_enabled") is True:
         admin_keyboard += [
-
             [InlineKeyboardButton(text=string_d_str["products"],
                                   callback_data="products")],
             [InlineKeyboardButton(text=string_d_str["add_product_button"],
@@ -87,7 +86,7 @@ class CreateShopHandler(object):
         ]
         context.user_data["to_delete"].append(context.bot.send_message(
             update.callback_query.message.chat_id,
-            context.bot.lang_dict["create_shop_str_9"],
+            context.bot.lang_dict["create_shop_str_13"],
             reply_markup=InlineKeyboardMarkup(reply_markup)))
         return CHOOSING_PICK_UP_OR_DELIVERY
 

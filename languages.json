@@ -69,7 +69,7 @@
         "allow_shop_button": " 💰 Enable shop",
         "animation_file": "• Animation\n",
         "answer_button_str": "Answer",
-        "answer_content_title": "<b>Your Answer:</b>",
+        "answer_content_title": "\n<b>Your Answer:</b>",
         "answer_field": "\n<b>Answer:</b> \n{}",
         "answer_survey_str_1": "Please answer the question.\n\n",
         "answer_survey_str_2": "Question:{}, Answer: {} \n",
@@ -159,6 +159,7 @@
         "create_shop_str_7": "Choose the primary currency of your shop",
         "create_shop_str_8": "Your new shop has been created. Now your users can see it in their menu",
         "create_shop_str_9": "Please tell me the exact location of your shop",
+        "create_shop_str_13": "Выбери каким способом клиент будет получать товар",
         "currency_button": "Currency",
         "current_link_field": "\nCurrent link: {}",
         "current_page": "\n*Current page:* `{}`",
@@ -244,7 +245,7 @@
         "max_quantity_blink": "Quantity is max",
         "menu_button": "ℹ️ Menu",
         "message_count_str": "\n_Total messages:_ `{}`",
-        "message_temp": "{}\n {}\n<b>Content:</b> \n{}",
+        "message_temp": "{}\n{}\n<b>Content:</b> \n{}",
         "messages": "✉️ Messages ",
         "messages_blocked_blink": "User won't be able to send messages anymore",
         "messages_unblocked": "User has been removed from the mute",
@@ -661,7 +662,8 @@
         "yes": "YES",
         "you_have_a_message_from": "You have a message from {}",
         "you_have_been_blocked": "You've been blocked from this chatbot",
-        "you_have_been_reg": ", you have been registered as an authorized user of this bot.\n\nEnter your password or click /cancel"
+        "you_have_been_reg": ", you have been registered as an authorized user of this bot.\n\nEnter your password or click /cancel",
+        "unsub": "\n🚫 Отписался"
     },
     "RUS": {
         "add_admin_btn_str": "➕ Добавить администратора",
@@ -823,6 +825,7 @@
         "create_shop_str_7": "Выбери валюту расчёта в магазине",
         "create_shop_str_8": "✅ Магазин создан. Юзеры видят его в меню бота",
         "create_shop_str_9": "Please tell me the exact location of your shop",
+        "create_shop_str_13": "Выбери каким способом клиент будет получать товар",
         "currency_button": "Валюта",
         "current_link_field": "\nCurrent link: {}",
         "current_page": "\n*Текущая страница:* `{}`",
@@ -1323,6 +1326,7 @@
         "yes": "Да",
         "you_have_a_message_from": "Вам пришло сообщение от {}",
         "you_have_been_blocked": "You've been blocked from this chatbot",
-        "you_have_been_reg": "Ты зарегистрирован как админ бота. \n\nВведи одноразовый пароль из письма."
+        "you_have_been_reg": "Ты зарегистрирован как админ бота. \n\nВведи одноразовый пароль из письма.",
+        "unsub": "\n🚫 Отписался"
     }
 }
