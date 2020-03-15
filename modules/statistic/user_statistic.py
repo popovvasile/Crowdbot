@@ -94,7 +94,7 @@ class UsersStatistic(object):
             reply_markup=InlineKeyboardMarkup([
                [InlineKeyboardButton(
                    text=context.bot.lang_dict["back_button"],
-                   callback_data="back_to_statistic_main_menu")]
+                   callback_data="back_to_module_settings")]
             ]),
             parse_mode=ParseMode.MARKDOWN),
         # CHANNELS STATISTIC

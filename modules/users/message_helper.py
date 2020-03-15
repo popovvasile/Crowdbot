@@ -246,8 +246,8 @@ class MessageTemplate(object):
         # Create user html mention
         if message_obj["anonim"]:
             self.user_mention = f"<code>{self.user_full_name}</code>"
-        elif user.username:
-            self.user_mention = user_mention(user.username, user.full_name)
+        # elif user.username:
+        #     self.user_mention = user_mention(user.username, user.full_name)
         else:
             self.user_mention = user.mention_html()
         # If message is new - add emoji near it

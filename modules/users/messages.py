@@ -641,7 +641,7 @@ class SeeMessageToAdmin(object):
         # Send user message content
         context.user_data["to_delete"].append(
             context.bot.send_message(chat_id=update.effective_chat.id,
-                                     text="<b>User Message:</b>",
+                                     text=context.bot.lang_dict["user_content_title"],
                                      parse_mode=ParseMode.HTML))
         send_deleted_message_content(
             context,
@@ -651,7 +651,7 @@ class SeeMessageToAdmin(object):
         if context.user_data["message"]["answer_content"]:
             context.user_data["to_delete"].append(
                 context.bot.send_message(chat_id=update.effective_chat.id,
-                                         text="<b>Your Answer:</b>",
+                                         text=context.bot.lang_dict["answer_content_title"],
                                          parse_mode=ParseMode.HTML))
             send_deleted_message_content(
                 context,

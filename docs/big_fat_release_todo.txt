@@ -19,8 +19,7 @@
 	* при добавлении товара цены с точкой плохо работают
 	* error callback - вызывается странно(shop trash(orders), catalog)
 	* регекс который выводит в главное меню при рандомном тексте - убиваeт кнопку если она находилась в state(мб потому что не указана в fallbacks)
-	Picture must be smaller
-	Back from statistics heads to shop
+	[DONE] Picture must be smaller
 	Messages (5 messaegs, 2 new)
 	Blink on new messages
 	BUG: answer not only once to messages, but also let the possibility to write more messages
@@ -28,7 +27,7 @@
 	Unread message is not read- it must appear on the very bottom
 	Make difference between shop settings and bot settings
 	To contacts and address must be added more info- multiple messages
-    Remove all the strings from hard-code and move them to languages.json, especially the shop
+    [DONE] Remove all the strings from hard-code and move them to languages.json, especially the shop
  	+ * В Full template заказа убрать пагинацию и сделать кнопку Items - которая будет показывать товары с заказа
 	+ * В Full template и Short template заказа - при слишком большом тексте(Items) - обрывать текст и показывать три точки
 	+ * В Short template товара - при слишком большом тексте(Not finished orders) - обрывать текст и показывать три точки
@@ -48,11 +47,28 @@
 
 
 STRINGS
-    * Убрать самое первое сообщение в меню
-    * Убрать слово "Назад" со всех back кнопок
-    Your answer - провести линию - добавить в json
-    back from change greeting - fix
-    back from statistic - fix
+    * Убрать самое первое сообщение в главном меню
+    Your answer - провести линию - добавить в json - ? выглядит так се
+    [DONE] * Убрать слово "Назад" со всех back кнопок
+    * Карточка заказа у админа: выделить название, сделать артикул меньше
+    * Придумать строку для тестового платежа
+    * Убрать пресс БЭК-стрингз везде
+    * add_product_add_files - два стригса для товаров и кнопок
+    * в админ инвайте сообщения убрать два текста и оставить один
+    * сделать большие шаблоны с параметрами
+    * Карточка заказа у админа: выделить название, сделать артикул меньше
+	* Придумать строку для тестового платежа
+	* Убрать пресс БЭК-стрингз везде
+
+--BACK BUTTONS
+    [DONE] back from change greeting - fix
+    [DONE] back from statistic - fix
+	[DONE] normal back after delete message in inbox
+	1. Трэш----айтем лист----неверный бэк
+	2. Едит дескрипшн. Неверный бэк
+	3. Неверный бэк из делита категорий.
+	4. Меняешь греетинг и переводит в главное меню, а не в настройки
+
 
 --MESSAGES
 	[DONE] + * Убрать анонимные сообщения
@@ -69,15 +85,17 @@ STRINGS
 
 --USERS
 	[DONE] + * под юзером в списке юзеров создать одну кнопку которая будет выводить на карточку юзера со всеми фичами связаными с юзером
-		и добавить в магаз эту фичу
+	* и добавить в магаз эту фичу
 	[DONE] + * Когда отправляем сообщения(юзеру или всем) - try/except for BadRequest
 	- * Юрцу чекнуть что происходит - Обработка юзеров которые заблочили бота или удалили аккаунт(в заказах шопа, в списке юзеров)
 		имя и username ансабов не обновляется в списке юзеров * handling admins that leave the bot
 	- * Поиса юзеров(User search problems)
 
+
 --SETINGS
 	[DONE] + * Пофиксить список админов(стрингс), fix double admins bug
 	[DONE] + * Пофиксить удаление админов(Что бы переносило в обычные юзеры)
+
 
 --BUTTONS
 	[DONE] + * Кастомные кнопки - убираем с главного меню
@@ -114,6 +132,7 @@ STRINGS
 	[DONE]+ * Перенести юзер вью в главное меню. Убрать юзер вью из кнопок
 	* Стандартное приветсвие
 
+
 --SYSTEM +++++++++++
 	* Узнать за Timed Out Error в ботах
 	* Перепроверить везде to_delete()
@@ -124,29 +143,17 @@ STRINGS
    	* Cython implementation
 	* Получаемые сообщения множаться.
 
+
 --PRODUCTION
 	* Application factory  (production vs local)
 	* NGINX for the website
 
 
---BACK BUTTONS
-	* normal back after delete message in inbox
-	1. Трэш----айтем лист----неверный бэк
-	2. Едит дескрипшн. Неверный бэк
-	3. Неверный бэк из делита категорий.
-	4. Меняешь греетинг и переводит в главное меню, а не в настройки
-	5. Настройки кнопки. Неверный бэк
-	6. Удаляешь кнопку----меню редактирования кнопок
-
---STRINGS
-	* Карточка заказа у админа: выделить название, сделать артикул меньше
-	* Придумать строку для тестового платежа
-	* Убрать пресс БЭК-стрингз везде
-
 --BOTFATHER
 	* stickers bug in bot_father reports(check stickers for crowd)
 	* Payments- parse the token from forwarded message
 	* Убрать третий шаг приветсвие
+
 
 --TESTING
 	+ * Проверить Все NEW и DONE заказы считаются по цене которая была на момент заказа
@@ -166,18 +173,13 @@ STRINGS
 
 
 * One code style for whole project - lil rules :)
-	1) max 100 symbols on one line
-	2) imports(first build-in,
-		   then dependencies,
-		   then project imports)
-	3) InlineKeyboardMarkup formation:
+	* max 100 symbols on one line
+	* imports(first build-in, then dependencies, then project imports)
+	* InlineKeyboardMarkup formation:
 		reply_markup = InlineKeyboardMarkup([
-			[InlineKeyboardButton("",
-					      c)],
+			[InlineKeyboardButton()],
 			[InlineKeyboardButton()]
 		])
-	4) in all "context.bot.send_" methods: don't write "user_id=" instead just "update.effective_chat.id" and all other parameters need to set name
-	5) in all InlineKeyboardButton: don't write "text=" and all other parameters need to set name
-
-
-
+	* use "update.effective_chat.id" to pass chat_id
+	* in all "context.bot.send_" methods: don't write "user_id=" and all other parameters need to set name
+	* in all InlineKeyboardButton: don't write "text=" and all other parameters need to set name

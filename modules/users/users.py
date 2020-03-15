@@ -689,13 +689,12 @@ class UserTemplate(object):
         if self.username:
             _user_mention = user_mention(self.username, self.full_name)
         else:
-            _user_mention = (
-                f'<a href="tg://user?id={self.user_id}">{self.full_name}</a>')
+            _user_mention = f'<a href="tg://user?id={self.user_id}">{self.full_name}</a>'
 
         return (context.bot.lang_dict["user_temp"].format(
             _user_mention, lang_timestamp(context, self.timestamp))
             # TODO STRINGS
-            + ("\n🚫 Отписался" if self.unsubscribed else "")
+            + (context.bot.lang_dict["unsub"] if self.unsubscribed else "")
             + "\n" + self.donates_to_string(context))
 
     def donates_to_string(self, context):

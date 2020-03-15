@@ -101,10 +101,10 @@ class AdminOrder(Order):
             user = self.context.bot.get_chat_member(self.user_id,
                                                     self.user_id).user
             # Create user html mention
-            if user.username:
-                mention = user_mention(user.username, user.full_name)
-            else:
-                mention = user.mention_html()
+            # if user.username:
+            #     mention = user_mention(user.username, user.full_name)
+            # else:
+            mention = user.mention_html()
         return mention
 
     @property

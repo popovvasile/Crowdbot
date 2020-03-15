@@ -57,6 +57,14 @@ def delete_messages(update, context, message_from_update=False):
         context.user_data['to_delete'] = list()
 
 
+def format_text_for_html(text):
+    """All <, > and & symbols that are not a part of a tag or an HTML entity
+    must be replaced with the corresponding HTML entities
+    (< with &lt;, > with &gt; and & with &amp;)
+    """
+    return text
+
+
 # todo OVERKILL
 # http://babel.pocoo.org/en/latest/dates.html
 def lang_timestamp(bot_lang: (CallbackContext, str), timestamp,
