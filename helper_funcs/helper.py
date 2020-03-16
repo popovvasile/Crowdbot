@@ -104,7 +104,7 @@ def send_admin_user_mode(bot, chat_id, text):
                      ))
 
 
-def check_provider_token(provider_token, update, context):
+def check_provider_token(currency, provider_token, update, context):
     prices = [LabeledPrice("TEST", 100)]
     if "to_delete" not in context.user_data:
         context.user_data["to_delete"] = []
@@ -119,10 +119,7 @@ def check_provider_token(provider_token, update, context):
                                     context.bot.lang_dict["test_invoice_title"],
                                     context.bot.lang_dict["test_invoice_description"],
                                     "test",
-                                    provider_token, "test", "USD", prices,
-                                    need_name=True, need_phone_number=True,
-                                    need_email=True, need_shipping_address=False,
-                                    is_flexible=True
+                                    provider_token, "test", currency, prices
                                     ))
 
     except Exception as e:

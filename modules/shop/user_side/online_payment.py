@@ -19,12 +19,124 @@ logging.basicConfig(
     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+ORDER_DESCRIPTION, ORDER_CONTACTS, ORDER_ADDRESS, CONFIRM_ORDER, \
+    ORDER_FINISH = range(5)
 
 class PurchaseBot(object):
+    @staticmethod
+    def start_purchase(update, context):
+        delete_messages(update, context, True)
+        context.user_data["to_delete"].append(
+            context.bot.send_message(
+                chat_id=update.callback_query.message.chat.id,
+                text=context.bot.lang_dict["to_pay"].format(
+                    str(context.user_data["order"]["total_price"]),
+                    str(context.user_data["order"]["currency"]))))
 
-    def start_purchase(self, update, context):
-        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                                   message_id=update.callback_query.message.message_id, )
+        context.user_data["to_delete"].append(
+            context.bot.send_message(
+                chat_id=update.callback_query.message.chat.id,
+                text=context.bot.lang_dict["add_order_comment"],
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
+                    text=context.bot.lang_dict["shop_admin_continue_btn"],
+                    callback_data="pass_order_comment")],
+                    [InlineKeyboardButton(
+                        text=context.bot.lang_dict["back_button"],
+                        callback_data="back_to_cart")]
+                ])))
+        return ORDER_CONTACTS
+
+    @staticmethod
+    def ask_contacts(update, context):
+        delete_messages(update, context, True)
+        # TODO DESCRIPTION LENGTH VALIDATION
+        if update.callback_query:
+            context.user_data["order"]["user_comment"] = ""
+        else:
+            context.user_data["order"]["user_comment"] = update.message.text
+
+        context.user_data["used_contacts"] = (
+                shop_customers_contacts_table.find_one(
+                    {"bot_id": context.bot.id,
+                     "user_id": update.effective_user.id}) or {})
+        # TODO SHARE PHONE NUMBER
+        if (context.user_data["used_contacts"]
+                and len(context.user_data["used_contacts"]["phone_numbers"])):
+            text = context.bot.lang_dict["tell_phone_number"]
+            buttons = [
+                [InlineKeyboardButton(text=x,
+                                      callback_data=f"phone_number/{x}")]
+                for x in context.user_data["used_contacts"]["phone_numbers"]]
+        else:
+            text = context.bot.lang_dict["tell_phone_number_short"]
+            buttons = []
+
+        buttons.append([InlineKeyboardButton(
+            text=context.bot.lang_dict["back_button"],
+            callback_data="back_to_cart")])
+        context.user_data["to_delete"].append(
+            context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=text,
+                reply_markup=InlineKeyboardMarkup(buttons)))
+        return ORDER_ADDRESS
+
+    @staticmethod
+    def ask_address(update, context):
+        delete_messages(update, context, True)
+        # TODO PHONE NUMBER VALIDATION
+        if update.callback_query:
+            context.user_data["order"]["phone_number"] = (
+                update.callback_query.data.split("/")[1])
+        else:
+            context.user_data["order"]["phone_number"] = update.message.text
+            # set it to check in the next step if there are no shipping
+            update.message.text = "phone"
+
+        shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
+        # TODO SHARE GEO POSITION
+        if shop["shipping"]:
+            if (context.user_data["used_contacts"]
+                    and len(context.user_data["used_contacts"]["addresses"])):
+                text = context.bot.lang_dict["tell_address"]
+                buttons = [
+                    [InlineKeyboardButton(text=x,
+                                          callback_data=f"address/{x}")]
+                    for x in context.user_data["used_contacts"]["addresses"]]
+            else:
+                text = context.bot.lang_dict["tell_address_short"]
+                buttons = []
+
+            buttons.append([InlineKeyboardButton(
+                text=context.bot.lang_dict["back_button"],
+                callback_data="back_to_cart")])
+
+            context.user_data["to_delete"].append(
+                context.bot.send_message(
+                    chat_id=update.effective_chat.id,
+                    text=text,
+                    reply_markup=InlineKeyboardMarkup(buttons)))
+            return ORDER_FINISH
+        else:
+            return PurchaseBot.order_finish(update, context)
+
+    @staticmethod
+    def order_finish(update, context):
+        if update.callback_query and "address" in update.callback_query.data:
+            context.user_data["order"]["address"] = (
+                update.callback_query.data.split("/")[1])
+        elif update.message and update.message.text != "phone":
+            context.user_data["order"]["address"] = update.message.text
+        else:
+            context.user_data["order"]["address"] = ""
+        order_data = Cart().order_data(update, context)
+        if not order_data["order"]["items"]:
+            return Cart().back_to_cart(update, context)
+
+        shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
+        context.user_data["order"] = {
+            **context.user_data["order"], **order_data["order"]}
+        context.user_data["order"]["shipping"] = shop["shipping"]
 
         shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
         order = UserOrder(context, context.user_data["order"])
@@ -37,10 +149,7 @@ class PurchaseBot(object):
         start_parameter = "shop-payment"  # TODO change in production
         prices = [LabeledPrice(title, int(float(order.total_price) * 100))]
         context.bot.sendInvoice(update.callback_query.message.chat_id, title, description, payload,
-                                shop["payment_token"], start_parameter, order.currency, prices,
-                                need_name=True, need_phone_number=True,
-                                need_email=True, need_shipping_address=shop["shipping"],
-                                is_flexible=True
+                                shop["payment_token"], start_parameter, order.currency, prices
                                 )
         context.bot.send_message(update.callback_query.message.chat.id,
                                  text=context.bot.lang_dict["back_text"],
@@ -53,6 +162,7 @@ class PurchaseBot(object):
         return ConversationHandler.END
 
     def precheckout_callback(self, update, context):
+
         # query = update.callback_query
         # if query:
         #     if query.data == "help_back":
@@ -62,24 +172,9 @@ class PurchaseBot(object):
         context.bot.answer_pre_checkout_query(pre_checkout_query_id=query.id, ok=True)
         return ConversationHandler.END
 
-    # def successful_payment_callback(self, update, context):
-    #     buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-    #                                      callback_data="back_to_cart")]]
-    #     markup = InlineKeyboardMarkup(buttons)
-    #     context.user_data = dict()
-    #     context.user_data["status"] = "Paid"
-    #     context.user_data['timestamp_paid'] = datetime.datetime.now()
-    #     context.user_data["amount"] = update.message.successful_payment.total_amount
-    #     # context.user_data["currency"]
-    #     context.user_data["chat_id"] = update.message.chat_id
-    #     context.user_data["bot_id"] = context.bot.id
-    #     # order_info
-    #     orders_table.insert_one(context.user_data)
-    #     update.message.reply_text(context.bot.lang_dict["thank_purchase"], markup=markup)
-    #     context.user_data.clear()
-    #     return ConversationHandler.END
     @staticmethod
     def successful_payment_callback(update, context):
+        print(update.pre_checkout_query)
         delete_messages(update, context, True)
         order = UserOrder(context, context.user_data["order"])
         # Check products availability
@@ -163,11 +258,36 @@ class PurchaseBot(object):
         return ConversationHandler.END
 
 
-ONLINE_PURCHASE_HANDLER = CallbackQueryHandler(callback=PurchaseBot().start_purchase,
-                                               pattern=r'online_buy')
+ONLINE_PURCHASE_HANDLER = ConversationHandler(
+    entry_points=[CallbackQueryHandler(callback=PurchaseBot().start_purchase,
+                                       pattern=r'online_buy')],
+    states={
+        ORDER_ADDRESS: [
+            CallbackQueryHandler(pattern=r"phone_number",
+                                 callback=PurchaseBot().ask_address),
+            MessageHandler(Filters.text,
+                           callback=PurchaseBot().ask_address)],
+
+        ORDER_CONTACTS: [
+            CallbackQueryHandler(pattern="pass_order_comment",
+                                 callback=PurchaseBot().ask_contacts),
+            MessageHandler(Filters.text,
+                           callback=PurchaseBot().ask_contacts)],
+
+
+        ORDER_FINISH: [
+            CallbackQueryHandler(pattern="address",
+                                 callback=PurchaseBot().order_finish)
+        ]
+
+
+    },
+    fallbacks=[CallbackQueryHandler(Cart().back_to_cart,
+                                    pattern="back_to_cart")]
+)
 
 HANDLE_PRECHECKOUT = PreCheckoutQueryHandler(
-    PurchaseBot().precheckout_callback)  # TODO make different for donations and shop
+    PurchaseBot().precheckout_callback)
 
 HANDLE_SUCCES = MessageHandler(Filters.successful_payment,
                                PurchaseBot().successful_payment_callback)

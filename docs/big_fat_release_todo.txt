@@ -8,6 +8,7 @@
 	[DONE] + * Уменьшить цену тестового инвойса до минимума(см. ссылку) и вставить мини гайд(гифка) в текст
 		https://core.telegram.org/bots/payments#supported-currencies
 	[DONE] + * Указание цены товара(при добавлении и редактировании) Payments- can't pay less them 1$ and more then Max amount
+	+ gather data from online payment on order- and error
 		https://core.telegram.org/bots/payments#supported-currencies
 	[DONE] * Discount price обработка()
 	+ * Offline/online order creation data validation:
