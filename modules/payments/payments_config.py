@@ -459,7 +459,7 @@ class EditPaymentHandler(object):
         return ConversationHandler.END
 
 
-EDIT_DONATION_HANDLER = ConversationHandler(
+EDIT_SHOP_HANDLER = ConversationHandler(
     entry_points=[
         CallbackQueryHandler(callback=EditPaymentHandler().handle_edit_action_finish,
                              pattern=r'edit_change_')

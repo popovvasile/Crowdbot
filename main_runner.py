@@ -76,7 +76,7 @@ from modules.surveys.surveys_create import (
 # PAYMENTS
 from modules.payments.payments_config import (
     # EDIT_DONATION_HANDLER, PAYMENTS_CONFIG_KEYBOARD, CHANGE_DONATIONS_CONFIG, CONFIGS_DONATIONS_GENERAL,
-    CONFIGS_SHOP_GENERAL, CHANGE_SHOP_CONFIG)
+    CONFIGS_SHOP_GENERAL, CHANGE_SHOP_CONFIG, EDIT_SHOP_HANDLER)
 # from modules.donations.donation_enable_disable import (
 #     CREATE_DONATION_HANDLER, DONATIONS_MENU)
 
@@ -162,6 +162,7 @@ def main(token, lang):
     dispatcher.add_handler(EDIT_BOT_DESCRIPTION_HANDLER)
 
     #  SHOP USER SIDE
+    dispatcher.add_handler(EDIT_SHOP_HANDLER)
     dispatcher.add_handler(ONLINE_PURCHASE_HANDLER)
     dispatcher.add_handler(OFFLINE_PURCHASE_HANDLER)
     dispatcher.add_handler(BACK_TO_CART)

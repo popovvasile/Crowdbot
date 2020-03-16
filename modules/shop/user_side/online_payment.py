@@ -8,7 +8,8 @@ from telegram import LabeledPrice, InlineKeyboardMarkup, InlineKeyboardButton, P
 from telegram.ext import (MessageHandler, Filters, PreCheckoutQueryHandler,
                           ConversationHandler, CallbackQueryHandler)
 
-from database import products_table, chatbots_table, orders_table, shop_customers_contacts_table, carts_table, \
+from database import products_table, chatbots_table, orders_table, \
+    shop_customers_contacts_table, carts_table, \
     users_table
 from helper_funcs.misc import delete_messages
 from modules.shop.components.order import UserOrder, AdminOrder
@@ -21,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 ORDER_DESCRIPTION, ORDER_CONTACTS, ORDER_ADDRESS, CONFIRM_ORDER, \
     ORDER_FINISH = range(5)
+
 
 class PurchaseBot(object):
     @staticmethod
@@ -122,27 +124,48 @@ class PurchaseBot(object):
 
     @staticmethod
     def order_finish(update, context):
-        if update.callback_query and "address" in update.callback_query.data:
-            context.user_data["order"]["address"] = (
-                update.callback_query.data.split("/")[1])
-        elif update.message and update.message.text != "phone":
-            context.user_data["order"]["address"] = update.message.text
-        else:
-            context.user_data["order"]["address"] = ""
-        order_data = Cart().order_data(update, context)
-        if not order_data["order"]["items"]:
-            return Cart().back_to_cart(update, context)
+        delete_messages(update, context, True)
+        order = UserOrder(context, context.user_data["order"])
+        # Check products availability
+        for item in order.items:
+            if not item.item_exist:
+                update.callback_query.answer(
+                    context.bot.lang_dict["cart_changed_notification"],
+                    show_alert=True)
+                return Cart().back_to_cart(update, context)
 
-        shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
-        context.user_data["order"] = {
-            **context.user_data["order"], **order_data["order"]}
-        context.user_data["order"]["shipping"] = shop["shipping"]
+        # Save contacts
+        all_addresses = context.user_data["used_contacts"].get(
+            "addresses", list())
+        all_numbers = context.user_data["used_contacts"].get(
+            "phone_numbers", list())
+        address = context.user_data["order"].get("address")
+        number = context.user_data["order"]["phone_number"]
+        if address and address not in all_addresses:
+            if len(all_addresses) > 5:
+                all_addresses.insert(0, address)
+                del all_addresses[-1]
+            else:
+                all_addresses.append(address)
+        if number not in all_numbers:
+            if len(all_numbers) > 5:
+                all_numbers.insert(0, number)
+                del all_numbers[-1]
+            else:
+                all_numbers.append(number)
+        shop_customers_contacts_table.update_one(
+            {"bot_id": context.bot.id,
+             "user_id": update.effective_user.id},
+            {"$set": {"phone_numbers": all_numbers,
+                      "addresses": all_addresses}},
+            upsert=True)
+        # Clear cart
+        carts_table.update_one({"bot_id": context.bot.id,
+                                "user_id": update.effective_user.id},
+                               {"$set": {"products": list()}})
 
         shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
         order = UserOrder(context, context.user_data["order"])
-        context.bot.send_message(update.callback_query.message.chat.id, "Pay:{} {}".format(
-            str(order.total_price),
-            str(order.currency)))
         title = order.items_json[0]["product"]['name']
         description = order.items_json[0]["product"]['description']
         payload = "Purchase"
@@ -154,8 +177,9 @@ class PurchaseBot(object):
         context.bot.send_message(update.callback_query.message.chat.id,
                                  text=context.bot.lang_dict["back_text"],
                                  reply_markup=InlineKeyboardMarkup(
-                                     [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                                            callback_data="back_to_cart")]]))
+                                     [[InlineKeyboardButton(
+                                         text=context.bot.lang_dict["back_button"],
+                                         callback_data="back_to_cart")]]))
         logger.info("User {} on bot {} requested a purchase".format(
             update.effective_user.first_name, context.bot.first_name))
 
@@ -185,7 +209,7 @@ class PurchaseBot(object):
                     show_alert=True)
                 return Cart().back_to_cart(update, context)
         # Create order
-        inserted_id = orders_table.insert_one(
+        inserted_id = orders_table.update_one(
             {**context.user_data["order"],
              **{"article": randint(10000, 99999),
                 "status": False,
@@ -194,6 +218,7 @@ class PurchaseBot(object):
                 "creation_timestamp": datetime.datetime.now(),
                 # "name": update.effective_user.name,
                 "in_trash": False,
+                "paid": True
                 # "is_canceled": False
                 }}).inserted_id
         # Remove products from shop
