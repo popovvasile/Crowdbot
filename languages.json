@@ -40,6 +40,12 @@
         "add_products_price": "Type the price in the following format: 10.50",
         "add_products_products_deleted_str": "You can add a new item to your shop or return to shop menu",
         "add_products_str_1": "Type the title for your new product",
+        "add_products_str_2": "add_products_str_2",
+        "add_products_str_3": "add_products_str_3",
+        "add_products_str_4": "add_products_str_4",
+        "add_products_str_5": "add_products_str_5",
+        "add_products_str_6": "add_products_str_6",
+        "add_products_str_7": "add_products_str_7",
         "add_products_str_added": "Product with the name {} has been added",
         "add_products_str_correct_format_price": "Please type the price in a correct format",
         "add_products_str_currency": "Now, type your currency",
@@ -145,6 +151,7 @@
         "create_shop_str_10": "Now your shop accepts only self-delivery (pick up from your store)",
         "create_shop_str_11": "Your shop type has been switched to {}",
         "create_shop_str_12": "Now your shop accepts only delivery at customers destination",
+        "create_shop_str_13": "Выбери каким способом клиент будет получать товар",
         "create_shop_str_2": "Send me the instructions for payments. How your users should pay you for your products? Cash, payapal, bitcoin, bank transfer?",
         "create_shop_str_3": "Send me the payment token from BotFather settings",
         "create_shop_str_4": "Send me the title of your new shop",
@@ -153,7 +160,6 @@
         "create_shop_str_7": "Choose the primary currency of your shop",
         "create_shop_str_8": "Your new shop has been created. Now your users can see it in their menu",
         "create_shop_str_9": "Please tell me the exact location of your shop",
-        "create_shop_str_13": "Выбери каким способом клиент будет получать товар",
         "currency_button": "Currency",
         "current_link_field": "\nCurrent link: {}",
         "current_page": "\n*Current page:* `{}`",
@@ -617,6 +623,7 @@
         "unblock_messages_button": "🔔 Unblock messaging",
         "unblock_user": "Unblock",
         "unlimited": "Unlimited",
+        "unsub": "\n🚫 Отписался",
         "user_answer_notification": "<b>You got the Answer!</b>\n<b>Your message:</b>\n{}\n<b>Answer:</b>\n{}",
         "user_banned_blink": "User won't be able to use your bot anymore",
         "user_chooses_category": "Thank you for your vote!",
@@ -656,8 +663,7 @@
         "yes": "YES",
         "you_have_a_message_from": "You have a message from {}",
         "you_have_been_blocked": "You've been blocked from this chatbot",
-        "you_have_been_reg": ", you have been registered as an authorized user of this bot.\n\nEnter your password or click /cancel",
-        "unsub": "\n🚫 Отписался"
+        "you_have_been_reg": ", you have been registered as an authorized user of this bot.\n\nEnter your password or click /cancel"
     },
     "RUS": {
         "add_admin_btn_str": "➕ Добавить администратора",
@@ -811,6 +817,7 @@
         "create_shop_str_10": "Now your shop accepts only self-delivery (pick up from your store)",
         "create_shop_str_11": "Your shop type has been switched to {}",
         "create_shop_str_12": "Now your shop accepts only delivery at customers destination",
+        "create_shop_str_13": "How your customers will receive your product?",
         "create_shop_str_2": "Send me the instructions for payments. How your users should pay you for your products? Cash, payapal, bitcoin, bank transfer?",
         "create_shop_str_3": "Отправь токен платёжной системы из настроек этого бота в @BotFather",
         "create_shop_str_4": "Как называется новый магазин?",
@@ -1280,6 +1287,7 @@
         "unblock_messages_button": "🔔 Разблокировать",
         "unblock_user": "Unblock",
         "unlimited": "Неограниченно",
+        "unsub": "\n🚫 Отписался",
         "user_answer_notification": "<b>You got the Answer!</b>\n<b>Your message:</b>\n{}\n<b>Answer:</b>\n{}",
         "user_banned_blink": "User won't be able to use your bot anymore",
         "user_chooses_category": "✅Спасибо",
@@ -1298,7 +1306,7 @@
         "user_temp": "{}\n<b>Начал пользоваться:</b> <code>{}</code>",
         "user_unbanned_blink": "User has been removed from the blacklist",
         "users_help_admin": "Тут сообщения и список пользователей",
-        "users_layout_title": "<b>Всего юзеров:<b> <code>{}</code>",
+        "users_layout_title": "<b>Всего юзеров:</b> <code>{}</code>",
         "users_list_btn_str": "📖 Список юзеров",
         "users_menu_str": "Здесь ты можешь увидеть своих юзеров",
         "users_module": "👨‍👩 Пользователи",
@@ -1319,7 +1327,6 @@
         "yes": "Да",
         "you_have_a_message_from": "Вам пришло сообщение от {}",
         "you_have_been_blocked": "You've been blocked from this chatbot",
-        "you_have_been_reg": "Ты зарегистрирован как админ бота. \n\nВведи одноразовый пароль из письма.",
-        "unsub": "\n🚫 Отписался"
+        "you_have_been_reg": "Ты зарегистрирован как админ бота. \n\nВведи одноразовый пароль из письма."
     }
 }
