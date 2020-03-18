@@ -3,6 +3,7 @@
 import json
 import logging
 import os
+import re
 
 from telegram.utils import request
 import telegram.ext as tg
@@ -351,7 +352,17 @@ def main(token, lang):
 
     dispatcher.add_handler(help_callback_handler)
 
-    rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), get_help)
+    # rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), get_help)
+    # dispatcher.add_handler(rex_help_handler)
+    rex_help_handler = MessageHandler(Filters.regex(re.compile(r"help", re.IGNORECASE))|
+                                      Filters.regex(re.compile(r"menu", re.IGNORECASE))|
+                                      Filters.regex(re.compile(r"hello", re.IGNORECASE))|
+                                      Filters.regex(re.compile(r"hi", re.IGNORECASE))|
+                                      Filters.regex(re.compile(r"але", re.IGNORECASE))|
+                                      Filters.regex(re.compile(r"меню", re.IGNORECASE))|
+                                      Filters.regex(re.compile(r"помощь", re.IGNORECASE)),
+                                      get_help)
+
     dispatcher.add_handler(rex_help_handler)
     LOGGER.info("Using long polling.")
     # updater.start_webhook(listen='0.0.0.0',

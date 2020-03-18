@@ -151,7 +151,7 @@
         "create_shop_str_10": "Now your shop accepts only self-delivery (pick up from your store)",
         "create_shop_str_11": "Your shop type has been switched to {}",
         "create_shop_str_12": "Now your shop accepts only delivery at customers destination",
-        "create_shop_str_13": "Выбери каким способом клиент будет получать товар",
+        "create_shop_str_13": "How your customers will receive your product?",
         "create_shop_str_2": "Send me the instructions for payments. How your users should pay you for your products? Cash, payapal, bitcoin, bank transfer?",
         "create_shop_str_3": "Send me the payment token from BotFather settings",
         "create_shop_str_4": "Send me the title of your new shop",
@@ -817,7 +817,8 @@
         "create_shop_str_10": "Now your shop accepts only self-delivery (pick up from your store)",
         "create_shop_str_11": "Your shop type has been switched to {}",
         "create_shop_str_12": "Now your shop accepts only delivery at customers destination",
-        "create_shop_str_13": "How your customers will receive your product?",
+
+        "create_shop_str_13": "Выбери каким способом клиент будет получать товар",
         "create_shop_str_2": "Send me the instructions for payments. How your users should pay you for your products? Cash, payapal, bitcoin, bank transfer?",
         "create_shop_str_3": "Отправь токен платёжной системы из настроек этого бота в @BotFather",
         "create_shop_str_4": "Как называется новый магазин?",
