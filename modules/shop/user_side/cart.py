@@ -46,7 +46,7 @@ class CartHelper(object):
             # print(item_price)
             order_price += item_price
             template += (
-                "{}_ - {}\n"
+                "{} - {}\n"
                 "x{} - {} {}\n\n").format(
                 cart_item["product"]["_id"],
                 cart_item["product"]["name"],

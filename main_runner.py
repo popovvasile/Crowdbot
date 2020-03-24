@@ -348,8 +348,8 @@ def main(token, lang):
 
     dispatcher.add_handler(help_callback_handler)
 
-    rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), get_help)
-    dispatcher.add_handler(rex_help_handler)
+    # rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), get_help)
+    # dispatcher.add_handler(rex_help_handler)
     LOGGER.info("Using long polling.")
     # updater.start_webhook(listen='0.0.0.0',
     #                       port=port,

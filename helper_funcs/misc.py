@@ -57,12 +57,16 @@ def delete_messages(update, context, message_from_update=False):
         context.user_data['to_delete'] = list()
 
 
-def format_text_for_html(text):
-    """All <, > and & symbols that are not a part of a tag or an HTML entity
-    must be replaced with the corresponding HTML entities
-    (< with &lt;, > with &gt; and & with &amp;)
-    """
-    return text
+# def html_format(text):
+#     """All <, > and & symbols that are not a part of a tag or an HTML entity
+#     must be replaced with the corresponding HTML entities
+#     (< with &lt;, > with &gt; and & with &amp;)
+#     """
+#     return text.replace("<", "&lt;").replace(">", "&gt;").replace("&", "&amp;")
+#
+#
+# def original_text(text):
+#     return text.replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&")
 
 
 # todo OVERKILL

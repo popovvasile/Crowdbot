@@ -1,24 +1,21 @@
 import logging
+
 from price_parser import Price
-from telegram import (Update, ParseMode, InlineKeyboardButton,
-                      InlineKeyboardMarkup)
+from telegram import Update, ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (ConversationHandler, CallbackQueryHandler,
                           CallbackContext, MessageHandler, Filters)
 
 from helper_funcs.pagination import Pagination
 from helper_funcs.misc import delete_messages, content_dict_as_string
-
 from modules.shop.helper.helper import clear_user_data
 from modules.shop.helper.keyboards import keyboards, back_kb, back_btn, create_keyboard
 from modules.shop.components.product import Product, MAX_TEMP_DESCRIPTION_LENGTH
 from modules.shop.admin_side.welcome import Welcome
-from database import orders_table
+from database import products_table, categories_table, chatbots_table, orders_table
 
-from database import products_table, categories_table, chatbots_table
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO)
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -112,6 +109,8 @@ class ProductsHelper(object):
                 orders_string += (
                     context.bot.lang_dict["product_temp_part_2"].format(
                         order["_id"], emoji, product_items_count))
+            if len(orders_string) > 550:
+                orders_string = orders_string[:550] + "..."
             template += orders_string
         return template
 
@@ -186,14 +185,15 @@ class ProductsHandler(ProductsHelper):
                 chat_id=update.callback_query.message.chat_id,
                 text=title,
                 parse_mode=ParseMode.HTML))
-
+        buttons = [[InlineKeyboardButton(context.bot.lang_dict["back_button"],
+                                         callback_data="back_to_main_menu")]]
         if all_products.count() == 0:
             context.user_data["to_delete"].append(
                 context.bot.send_message(
                     chat_id=update.effective_chat.id,
                     text=context.bot.lang_dict["shop_admin_no_products"],
-                    reply_markup=back_kb(
-                        "help_back", context=context)))
+                    reply_markup=InlineKeyboardMarkup(buttons)
+                ))
         else:
             pagination = Pagination(all_products,
                                     page=context.user_data["page"])
@@ -203,10 +203,8 @@ class ProductsHandler(ProductsHelper):
                     update, context,
                     text=cls.admin_short_template(context, prod_obj),
                     reply_markup=cls.product_keyboard(context, prod_obj))
-            pagination.send_keyboard(
-                update, context,
-                [[back_btn("help_back", context=context)]],
-                page_prefix="item_list_pagination")
+            pagination.send_keyboard(update, context, buttons,
+                                     page_prefix="item_list_pagination")
         return state
 
     def edit(self, update: Update, context: CallbackContext):

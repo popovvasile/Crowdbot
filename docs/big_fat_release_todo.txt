@@ -11,7 +11,7 @@
 		https://core.telegram.org/bots/payments#supported-currencies
 	[DONE] * Discount price обработка()
 	+ * Offline/online order creation data validation:
-		DESCRIPTION LENGTH VALIDATION
+	[DONE]	DESCRIPTION LENGTH VALIDATION
 		SHARE PHONE NUMBER
 		PHONE NUMBER VALIDATION
 	[DONE] * Если нет товаров в категории - не показывать категорию юзерам
@@ -89,7 +89,7 @@ STRINGS
 	[DONE] + * Когда отправляем сообщения(юзеру или всем) - try/except for BadRequest
 	- * Юрцу чекнуть что происходит - Обработка юзеров которые заблочили бота или удалили аккаунт(в заказах шопа, в списке юзеров)
 		имя и username ансабов не обновляется в списке юзеров * handling admins that leave the bot
-	- * Поиса юзеров(User search problems)
+	[DONE] * Поиса юзеров(User search problems)
 
 
 --SETINGS
