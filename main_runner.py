@@ -3,6 +3,7 @@
 import json
 import logging
 import os
+import re
 
 from telegram.utils import request
 import telegram.ext as tg
@@ -13,19 +14,19 @@ from helper_funcs.misc import dismiss
 from helper_funcs.helper import (help_button, button_handler, get_help, WelcomeBot,
                                  back_from_button_handler, back_to_modules, error_callback)
 
-# CHANNELS
-from modules.chanells.channels import (MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER,
-                                       REMOVE_CHANNEL_HANDLER, SEND_POST_HANDLER, CHANELLS_MENU)
-from modules.chanells.channels_polls_surveys_donate import (
-    SEND_POLL_TO_CHANNEL_HANDLER, SEND_SURVEY_TO_CHANNEL_HANDLER,
-    SEND_DONATION_TO_CHANNEL_HANDLER)
-
-# GROUPS
-from modules.groups.groups import (
-    MY_GROUPS_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER, ADD_GROUP_HANLDER,
-    GROUPS_MENU)
-from modules.groups.groups_polls_surveys_donate import (
-    SEND_POLL_TO_GROUP_HANDLER, SEND_SURVEY_TO_GROUP_HANDLER, SEND_DONATION_TO_GROUP_HANDLER)
+# # CHANNELS
+# from modules.chanells.channels import (MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER,
+#                                        REMOVE_CHANNEL_HANDLER, SEND_POST_HANDLER, CHANELLS_MENU)
+# from modules.chanells.channels_polls_surveys_donate import (
+#     SEND_POLL_TO_CHANNEL_HANDLER, SEND_SURVEY_TO_CHANNEL_HANDLER,
+#     SEND_DONATION_TO_CHANNEL_HANDLER)
+#
+# # GROUPS
+# from modules.groups.groups import (
+#     MY_GROUPS_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER, ADD_GROUP_HANLDER,
+#     GROUPS_MENU)
+# from modules.groups.groups_polls_surveys_donate import (
+#     SEND_POLL_TO_GROUP_HANDLER, SEND_SURVEY_TO_GROUP_HANDLER, SEND_DONATION_TO_GROUP_HANDLER)
 
 # SETTINGS
 from modules.settings.menu_description import EDIT_BOT_DESCRIPTION_HANDLER
@@ -39,8 +40,8 @@ from modules.settings.settings import (
 #     BUTTON_ADD_FINISH_HANDLER, back_from_edit_button_handler)
 from modules.settings.user_mode import USER_MODE_OFF, USER_MODE_ON
 from modules.settings.admins import ADMINS_LIST_HANDLER
-from modules.donations.donation_payment import (DONATE_HANDLER, HANDLE_SUCCES,
-                                                HANDLE_PRECHECKOUT)
+# from modules.donations.donation_payment import (DONATE_HANDLER, HANDLE_SUCCES,
+#                                                 HANDLE_PRECHECKOUT)
 
 # USERS AND MESSAGES
 from modules.users.messages_admin import SEND_MESSAGE_ONLY_TO_ADMINS_HANDLER
@@ -75,10 +76,10 @@ from modules.surveys.surveys_create import (
 
 # PAYMENTS
 from modules.payments.payments_config import (
-    EDIT_DONATION_HANDLER, PAYMENTS_CONFIG_KEYBOARD, CHANGE_DONATIONS_CONFIG,
-    CONFIGS_DONATIONS_GENERAL, CONFIGS_SHOP_GENERAL, CHANGE_SHOP_CONFIG)
-from modules.donations.donation_enable_disable import (
-    CREATE_DONATION_HANDLER, DONATIONS_MENU)
+    # EDIT_DONATION_HANDLER, PAYMENTS_CONFIG_KEYBOARD, CHANGE_DONATIONS_CONFIG, CONFIGS_DONATIONS_GENERAL,
+    CONFIGS_SHOP_GENERAL, CHANGE_SHOP_CONFIG, EDIT_SHOP_HANDLER)
+# from modules.donations.donation_enable_disable import (
+#     CREATE_DONATION_HANDLER, DONATIONS_MENU)
 
 # POLLS
 from modules.pollbot.polls import (
@@ -102,7 +103,8 @@ from modules.shop.admin_side.eshop_enable_disable import CREATE_SHOP_HANDLER
 
 # SHOP USER SIDE
 from modules.shop.user_side.offline_payment import OFFLINE_PURCHASE_HANDLER
-from modules.shop.user_side.online_payment import ONLINE_PURCHASE_HANDLER
+from modules.shop.user_side.online_payment import ONLINE_PURCHASE_HANDLER, HANDLE_SUCCES, \
+    HANDLE_PRECHECKOUT
 from modules.shop.user_side.products import (
     USERS_PRODUCTS_LIST_HANDLER, ADD_TO_CART, REMOVE_FROM_CART,
     PRODUCTS_CATEGORIES, BACK_TO_CATEGORIES, VIEW_PRODUCT,
@@ -161,6 +163,7 @@ def main(token, lang):
     dispatcher.add_handler(EDIT_BOT_DESCRIPTION_HANDLER)
 
     #  SHOP USER SIDE
+    dispatcher.add_handler(EDIT_SHOP_HANDLER)
     dispatcher.add_handler(ONLINE_PURCHASE_HANDLER)
     dispatcher.add_handler(OFFLINE_PURCHASE_HANDLER)
     dispatcher.add_handler(BACK_TO_CART)
@@ -200,7 +203,8 @@ def main(token, lang):
     dispatcher.add_handler(RENAME_CATEGORY_HANDLER)
     dispatcher.add_handler(RENAME_CATEGORY_HANDLER)
     dispatcher.add_handler(DELETE_CATEGORY_HANDLER)
-
+    dispatcher.add_handler(HANDLE_SUCCES)
+    dispatcher.add_handler(HANDLE_PRECHECKOUT)
     # BUTTONS
     dispatcher.add_handler(ONE_BUTTON_MENU)
     dispatcher.add_handler(CHANGE_BUTTON_NAME_HANDLER)
@@ -253,16 +257,16 @@ def main(token, lang):
     # dispatcher.add_handler(ADD_ADMIN_HANDLER)
 
     # DONATIONS
-    dispatcher.add_handler(CREATE_DONATION_HANDLER)
-    dispatcher.add_handler(DONATE_HANDLER)
-    dispatcher.add_handler(HANDLE_SUCCES)
-    dispatcher.add_handler(HANDLE_PRECHECKOUT)
-    dispatcher.add_handler(EDIT_DONATION_HANDLER)
-    dispatcher.add_handler(SEND_DONATION_TO_USERS_HANDLER)
-    dispatcher.add_handler(CHANGE_DONATIONS_CONFIG)
-    dispatcher.add_handler(PAYMENTS_CONFIG_KEYBOARD)
-    dispatcher.add_handler(CONFIGS_DONATIONS_GENERAL)
-    dispatcher.add_handler(DONATIONS_MENU)
+    # dispatcher.add_handler(CREATE_DONATION_HANDLER)
+    # dispatcher.add_handler(DONATE_HANDLER)
+    # dispatcher.add_handler(HANDLE_SUCCES)
+    # dispatcher.add_handler(HANDLE_PRECHECKOUT)
+    # dispatcher.add_handler(EDIT_DONATION_HANDLER)
+    # dispatcher.add_handler(SEND_DONATION_TO_USERS_HANDLER)
+    # dispatcher.add_handler(CHANGE_DONATIONS_CONFIG)
+    # dispatcher.add_handler(PAYMENTS_CONFIG_KEYBOARD)
+    # dispatcher.add_handler(CONFIGS_DONATIONS_GENERAL)
+    # dispatcher.add_handler(DONATIONS_MENU)
 
     # MESSAGES
     dispatcher.add_handler(MESSAGES_MENU)
@@ -306,33 +310,33 @@ def main(token, lang):
     dispatcher.add_handler(SEND_SURVEYS_MENU_HANDLER)
 
     # POLLS
-    dispatcher.add_handler(POLLS_MENU)
-    dispatcher.add_handler(POLL_HANDLER)
-    dispatcher.add_handler(SEND_POLLS_HANDLER)
-    dispatcher.add_handler(BUTTON_HANDLER)
-    dispatcher.add_handler(DELETE_POLLS_HANDLER)
-    dispatcher.add_handler(POLLS_RESULTS_HANDLER)
-    dispatcher.add_handler(POLLS_SEND_MENU)
+    # dispatcher.add_handler(POLLS_MENU)
+    # dispatcher.add_handler(POLL_HANDLER)
+    # dispatcher.add_handler(SEND_POLLS_HANDLER)
+    # dispatcher.add_handler(BUTTON_HANDLER)
+    # dispatcher.add_handler(DELETE_POLLS_HANDLER)
+    # dispatcher.add_handler(POLLS_RESULTS_HANDLER)
+    # dispatcher.add_handler(POLLS_SEND_MENU)
 
     # GROUPS
-    dispatcher.add_handler(GROUPS_MENU)
-    dispatcher.add_handler(MY_GROUPS_HANDLER)
-    dispatcher.add_handler(REMOVE_GROUP_HANDLER)
-    dispatcher.add_handler(SEND_POST_TO_GROUP_HANDLER)
-    dispatcher.add_handler(SEND_POLL_TO_GROUP_HANDLER)
-    dispatcher.add_handler(SEND_SURVEY_TO_GROUP_HANDLER)
-    dispatcher.add_handler(SEND_DONATION_TO_GROUP_HANDLER)
-    dispatcher.add_handler(ADD_GROUP_HANLDER)
+    # dispatcher.add_handler(GROUPS_MENU)
+    # dispatcher.add_handler(MY_GROUPS_HANDLER)
+    # dispatcher.add_handler(REMOVE_GROUP_HANDLER)
+    # dispatcher.add_handler(SEND_POST_TO_GROUP_HANDLER)
+    # dispatcher.add_handler(SEND_POLL_TO_GROUP_HANDLER)
+    # dispatcher.add_handler(SEND_SURVEY_TO_GROUP_HANDLER)
+    # dispatcher.add_handler(SEND_DONATION_TO_GROUP_HANDLER)
+    # dispatcher.add_handler(ADD_GROUP_HANLDER)
 
     # CHANNELS
-    dispatcher.add_handler(CHANELLS_MENU)
-    dispatcher.add_handler(MY_CHANNELS_HANDLER)
-    dispatcher.add_handler(ADD_CHANNEL_HANDLER)
-    dispatcher.add_handler(REMOVE_CHANNEL_HANDLER)
-    dispatcher.add_handler(SEND_POST_HANDLER)
-    dispatcher.add_handler(SEND_POLL_TO_CHANNEL_HANDLER)
-    dispatcher.add_handler(SEND_SURVEY_TO_CHANNEL_HANDLER)
-    dispatcher.add_handler(SEND_DONATION_TO_CHANNEL_HANDLER)
+    # dispatcher.add_handler(CHANELLS_MENU)
+    # dispatcher.add_handler(MY_CHANNELS_HANDLER)
+    # dispatcher.add_handler(ADD_CHANNEL_HANDLER)
+    # dispatcher.add_handler(REMOVE_CHANNEL_HANDLER)
+    # dispatcher.add_handler(SEND_POST_HANDLER)
+    # dispatcher.add_handler(SEND_POLL_TO_CHANNEL_HANDLER)
+    # dispatcher.add_handler(SEND_SURVEY_TO_CHANNEL_HANDLER)
+    # dispatcher.add_handler(SEND_DONATION_TO_CHANNEL_HANDLER)
 
     dispatcher.add_handler(custom_button_back_callback_handler)
     dispatcher.add_handler(custom_button_callback_handler)
@@ -350,6 +354,16 @@ def main(token, lang):
 
     # rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), get_help)
     # dispatcher.add_handler(rex_help_handler)
+    rex_help_handler = MessageHandler(Filters.regex(re.compile(r"help", re.IGNORECASE))|
+                                      Filters.regex(re.compile(r"menu", re.IGNORECASE))|
+                                      Filters.regex(re.compile(r"hello", re.IGNORECASE))|
+                                      Filters.regex(re.compile(r"hi", re.IGNORECASE))|
+                                      Filters.regex(re.compile(r"але", re.IGNORECASE))|
+                                      Filters.regex(re.compile(r"меню", re.IGNORECASE))|
+                                      Filters.regex(re.compile(r"помощь", re.IGNORECASE)),
+                                      get_help)
+
+    dispatcher.add_handler(rex_help_handler)
     LOGGER.info("Using long polling.")
     # updater.start_webhook(listen='0.0.0.0',
     #                       port=port,

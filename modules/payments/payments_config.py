@@ -303,15 +303,13 @@ class EditPaymentHandler(object):
                         reply_markup=reply_markup))
 
                 else:
-                    context.user_data["to_delete"].append(update.message.reply_text(
-                        context.bot.lang_dict["create_shop_str_11"].format(shoptype)))
                     chatbot["shop"].update({"shop_type": shoptype})
                     chatbots_table.update_one({"bot_id": context.bot.id}, {'$set': chatbot})
                     context.user_data["to_delete"].append(
                         context.bot.send_message(
-                            chat_id, context.bot.lang_dict["great_text"],
+                            chat_id, context.bot.lang_dict["create_shop_str_11"].format(shoptype),
                             reply_markup=reply_markup))
-                    return ConversationHandler.END
+                    return
 
             return EDIT_FINISH
 
@@ -328,9 +326,8 @@ class EditPaymentHandler(object):
             update_dict["description"] = txt
         if context.user_data["action"] == "address":
             update_dict["address"] = txt
-
+        chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
         if context.user_data["action"] == "currency":
-            chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
 
             update_dict["currency"] = txt
             context.user_data["currency"] = txt
@@ -355,22 +352,23 @@ class EditPaymentHandler(object):
         if context.user_data["action"] == "payment_token":
             update_dict["payment_token"] = txt
             update_dict["shop_type"] = "online"
-            if check_provider_token(provider_token=txt, update=update, context=context):
+            if check_provider_token(provider_token=txt, update=update,
+                                    context=context, currency=chatbot["shop"]["currency"]):
                 if context.user_data["target"] == "donations":
                     chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
                     chatbot["donate"].update(update_dict)
                     context.user_data["to_delete"].append(
                         update.message.reply_text(context.bot.lang_dict["donations_edit_str_10"],
-                                              reply_markup=finish_markup))
+                                                  reply_markup=finish_markup))
                     chatbots_table.update_one({"bot_id": context.bot.id}, {'$set': chatbot})
 
                 elif context.user_data["target"] == "shop":
                     chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
                     chatbot["shop"].update(update_dict)
                     chatbots_table.update_one({"bot_id": context.bot.id}, {'$set': chatbot})
-                    context.user_data["to_delete"].append(
+                    context.user_data["to_delete"]   .append(
                         update.message.reply_text(context.bot.lang_dict["donations_edit_str_10"],
-                                              reply_markup=finish_markup))
+                                                  reply_markup=finish_markup))
 
                 logger.info("Admin {} on bot {}:{} did  the following edit on shop: {}".format(
                     update.effective_user.first_name, context.bot.first_name, context.bot.id,
@@ -461,7 +459,7 @@ class EditPaymentHandler(object):
         return ConversationHandler.END
 
 
-EDIT_DONATION_HANDLER = ConversationHandler(
+EDIT_SHOP_HANDLER = ConversationHandler(
     entry_points=[
         CallbackQueryHandler(callback=EditPaymentHandler().handle_edit_action_finish,
                              pattern=r'edit_change_')

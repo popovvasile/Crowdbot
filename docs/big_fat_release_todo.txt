@@ -13,12 +13,14 @@
 	+ * Offline/online order creation data validation:
 	[DONE]	DESCRIPTION LENGTH VALIDATION
 		SHARE PHONE NUMBER
-		PHONE NUMBER VALIDATION
-	[DONE] * Если нет товаров в категории - не показывать категорию юзерам
-	[DONE] + * Если вообще нет товаров - blink(о отм что нет товара) когда нажимаешь catalog - there is no shop
+		PHONE NUMBER
 	* при добавлении товара цены с точкой плохо работают
 	* error callback - вызывается странно(shop trash(orders), catalog)
 	* регекс который выводит в главное меню при рандомном тексте - убиваeт кнопку если она находилась в state(мб потому что не указана в fallbacks)
+
+	[DONE] * Если нет товаров в категории - не показывать категорию юзерам
+	[DONE] + * Если вообще нет товаров - blink(о отм что нет товара) когда нажимаешь catalog - there is no shop
+
 	[DONE] Picture must be smaller
 	Messages (5 messaegs, 2 new)
 	Blink on new messages
@@ -152,7 +154,7 @@ STRINGS
 --BOTFATHER
 	* stickers bug in bot_father reports(check stickers for crowd)
 	* Payments- parse the token from forwarded message
-	* Убрать третий шаг приветсвие
+	[DONE] * Убрать третий шаг приветсвие
 
 
 --TESTING
