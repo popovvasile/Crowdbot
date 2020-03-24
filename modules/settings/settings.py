@@ -3,7 +3,7 @@
 import logging
 from pprint import pprint
 
-from telegram.error import BadRequest
+from telegram.error import BadRequest, TelegramError
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 from telegram.ext import MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
 from bson.objectid import ObjectId
@@ -119,17 +119,21 @@ def validate_link(update, context):
 
 class AddButtons(object):
     def start(self, update, context):
-        delete_messages(update, context, True)
-        reply_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["link_button_str"],
-                                               callback_data="create_link_button")],
-                         [InlineKeyboardButton(text=context.bot.lang_dict["simple_button_str"],
-                                               callback_data="create_simple_button")],
-                         [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                               callback_data="back_to_buttons_menu")]]
-        context.user_data["to_delete"].append(
-            context.bot.send_message(chat_id=update.callback_query.message.chat_id,
-                                     text=context.bot.lang_dict["choose_button_type_text"],
-                                     reply_markup=InlineKeyboardMarkup(reply_buttons)))
+        buttons = custom_buttons_table.find({"bot_id": context.bot.id})
+        if buttons.count() < 50:
+            delete_messages(update, context, True)
+            reply_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["link_button_str"],
+                                                   callback_data="create_link_button")],
+                             [InlineKeyboardButton(text=context.bot.lang_dict["simple_button_str"],
+                                                   callback_data="create_simple_button")],
+                             [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                                   callback_data="back_to_buttons_menu")]]
+            context.user_data["to_delete"].append(
+                context.bot.send_message(chat_id=update.callback_query.message.chat_id,
+                                         text=context.bot.lang_dict["choose_button_type_text"],
+                                         reply_markup=InlineKeyboardMarkup(reply_buttons)))
+        else:
+            update.callback_query.answer(context.bot.lang_dict["so_many_buttons"])
         return ConversationHandler.END
 
 
@@ -186,21 +190,42 @@ class AddCommands(object):
             context.user_data["new_button"]["content"] = list()
         content_dict = create_content_dict(update)
         if content_dict:
-            context.user_data["new_button"]["content"].append(content_dict)
-            context.user_data["user_input"].append(update.message)
+            if len(context.user_data["new_button"]["content"]) < 5:
+                context.user_data["new_button"]["content"].append(content_dict)
+                context.user_data["user_input"].append(update.message)
+            else:
+                context.user_data["to_delete"].append(
+                    context.bot.send_message(update.effective_chat.id,
+                                             context.bot.lang_dict["so_many_content"]))
+                try:
+                    context.bot.delete_message(update.effective_chat.id,
+                                               update.effective_message.message_id)
+                except TelegramError:
+                    pass
         else:
             context.user_data["to_delete"].append(
                 context.bot.send_message(update.effective_chat.id,
                                          text=context.bot.lang_dict["content_error"],
                                          parse_mode=ParseMode.HTML))
+            try:
+                context.bot.delete_message(update.effective_chat.id,
+                                           update.effective_message.message_id)
+            except TelegramError:
+                pass
         msg_index = (len(context.user_data["user_input"])
                      - len(context.user_data["new_button"]["content"]))
         reply_to = context.user_data["user_input"][msg_index].message_id
 
+        if len(context.user_data["new_button"]["content"]) < 5:
+            string = context.bot.lang_dict["add_menu_buttons_str_4"]
+        else:
+            string = context.bot.lang_dict["add_menu_buttons_str_11"]
+
         context.user_data["to_delete"].append(
-            update.message.reply_text(context.bot.lang_dict["add_menu_buttons_str_4"],
-                                      reply_markup=reply_markup,
-                                      reply_to_message_id=reply_to))
+            context.bot.send_message(update.effective_chat.id,
+                                     string,
+                                     reply_markup=reply_markup,
+                                     reply_to_message_id=reply_to))
         return TYPING_DESCRIPTION
 
     def description_finish(self, update, context):

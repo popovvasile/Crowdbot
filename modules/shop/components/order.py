@@ -74,7 +74,7 @@ class Order(object):
         if not currency:
             currency = chatbots_table.find_one(
                 {"bot_id": self.context.bot.id})["shop"]["currency"]
-        return "\n".join(
+        text = "\n".join(
             ["<i>{}</i> - <code>{}</code>\n"
              "x{} - <code>{}</code> {}".format(
                 item.article,
@@ -84,6 +84,9 @@ class Order(object):
                 currency)
              # + (item.item_emoji if not self.status else "")
              for item in self.items])
+        if len(text) > 550:
+            text = text[:550] + "..."
+        return text
 
     def update(self, json):
         orders_table.update_one({"_id": self._id}, {"$set": json})

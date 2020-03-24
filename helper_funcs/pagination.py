@@ -25,7 +25,7 @@ def set_page(update, context, page_prefix):
 
 # TODO change this to take table, filters, sort, page, per_page and query db
 class Pagination(object):
-    def __init__(self, all_data, page=None, per_page=2):
+    def __init__(self, all_data, page=None, per_page=5):
         # self.context = context
         self.all_data = list(all_data)
         self.total_items = len(self.all_data)
