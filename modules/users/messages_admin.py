@@ -193,12 +193,6 @@ class SendMessageToAdminsOnly(object):
         context.user_data.clear()
         return ConversationHandler.END
 
-    def back(self, update, context):
-        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                                   message_id=update.callback_query.message.message_id)
-        get_help(update, context)
-        return ConversationHandler.END
-
 
 SEND_MESSAGE_ONLY_TO_ADMINS_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(pattern="send_message_only_to_admins",
