@@ -1,5 +1,3 @@
-import logging
-
 from price_parser import Price
 from telegram import Update, ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (ConversationHandler, CallbackQueryHandler,
@@ -12,11 +10,6 @@ from modules.shop.helper.keyboards import keyboards, back_kb, back_btn, create_k
 from modules.shop.components.product import Product, MAX_TEMP_DESCRIPTION_LENGTH
 from modules.shop.admin_side.welcome import Welcome
 from database import products_table, categories_table, chatbots_table, orders_table
-
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 class ProductsHelper(object):

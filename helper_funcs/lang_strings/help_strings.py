@@ -164,7 +164,7 @@ def helpable_dict(bot):
     }
     # "channels", "donation_enable", "donation_payment", "donations_send_promotion",
     # "donations_edit_delete_results", "manage_button", "settings", "menu_description",
-    # "messages", "polls", "surveys_answer", "surveys_create", "user_mode"
+    # "messages", "surveys_answer", "surveys_create", "user_mode"
     chatbot = chatbots_table.find_one({"bot_id": bot.id})
 
     return lang_dicts[chatbot["lang"]]

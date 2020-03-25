@@ -1,6 +1,5 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
-import logging
 import telegram
 
 from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, \
@@ -11,13 +10,10 @@ from database import chatbots_table, products_table, db
 from helper_funcs.auth import initiate_chat_id
 from helper_funcs.helper import get_help, check_provider_token
 from helper_funcs.misc import delete_messages
+from logs import logger
 from modules.shop.admin_side.welcome import Welcome
 from modules.shop.helper.keyboards import back_btn
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-
-logger = logging.getLogger(__name__)
+from currency_converter import CurrencyConverter
 
 START, CHOOSING_ACTION, FINISH_ACTION, EDIT_PAYMENT, CHOOSING_EDIT_ACTION, \
     TYPING_TITLE, TYPING_DESCRIPTION, TYPING_CURRENCY, \
@@ -331,7 +327,6 @@ class EditPaymentHandler(object):
 
             update_dict["currency"] = txt
             context.user_data["currency"] = txt
-            from currency_converter import CurrencyConverter
             c = CurrencyConverter()
             converted = c.convert(1, chatbot["shop"]["currency"], txt)
             keyboard_markup = InlineKeyboardMarkup(
@@ -440,11 +435,6 @@ class EditPaymentHandler(object):
         context.user_data.clear()
 
         return ConversationHandler.END
-
-    @staticmethod
-    def error(update, context, error):
-        """Log Errors caused by Updates."""
-        logger.warning('Update "%s" caused error "%s"', update, error)
 
     def cancel(self, update, context):
         update.message.reply_text(

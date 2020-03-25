@@ -1,8 +1,6 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
 import datetime
-import logging
-import html
 
 from bson.objectid import ObjectId
 from haikunator import Haikunator
@@ -13,20 +11,15 @@ from telegram.ext import (MessageHandler, Filters, ConversationHandler,
                           CallbackQueryHandler, run_async)
 
 from helper_funcs.helper import get_help
-from helper_funcs.lang_strings.strings import emoji
-from helper_funcs.misc import delete_messages, lang_timestamp, user_mention, update_user_fields
+from helper_funcs.misc import delete_messages, update_user_fields
 from helper_funcs.pagination import Pagination
+from logs import logger
 from modules.users.users import UserTemplate
 from modules.users.message_helper import (
     MessageTemplate, send_not_deleted_message_content, add_to_content,
     send_deleted_message_content, AnswerToMessage)
 from database import (users_messages_to_admin_table,
                       user_categories_table, users_table)
-
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 delete_messages_menu_str = "What do you want to do?"
 no_messages_blink = "There are no messages"

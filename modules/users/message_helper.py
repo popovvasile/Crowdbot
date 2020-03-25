@@ -1,4 +1,3 @@
-import logging
 import html
 
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
@@ -8,11 +7,7 @@ from helper_funcs.misc import delete_messages
 from helper_funcs.lang_strings.strings import emoji
 from helper_funcs.misc import lang_timestamp, user_mention, get_obj
 from database import users_messages_to_admin_table
-
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-logger = logging.getLogger(__name__)
+from logs import logger
 
 
 class AnswerToMessage(object):

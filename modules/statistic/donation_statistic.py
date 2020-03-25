@@ -1,6 +1,5 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
-import logging
 from datetime import datetime, timedelta, time
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
@@ -8,14 +7,7 @@ from telegram.ext import ConversationHandler
 from database import donations_table, chatbots_table
 from helper_funcs.helper import get_help
 from helper_funcs.misc import delete_messages, lang_timestamp
-from helper_funcs.pagination import Pagination  # , set_page_key
-# from modules.statistic.statistic_main import back_to_statistic_main_menu
-
-
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO)
-logger = logging.getLogger(__name__)
+from helper_funcs.pagination import Pagination
 
 
 class DonationStatistic(object):
@@ -150,11 +142,6 @@ class DonationStatistic(object):
                         for donation in pagination.page_content()]))
             pagination.send_keyboard(update, context, back_button)
         return HISTORY
-
-    @staticmethod
-    def error(bot, update, error):
-        """Log Errors caused by Updates."""
-        logger.warning('Update "%s" caused error "%s"', update, error)
 
     def cancel(self, update, context):
         update.message.reply_text(

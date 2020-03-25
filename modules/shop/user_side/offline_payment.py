@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import logging
 import datetime
 from random import randint
 import html
@@ -12,12 +11,7 @@ from database import (orders_table, chatbots_table, carts_table, shop_customers_
                       products_table, users_table)
 from helper_funcs.misc import delete_messages
 from modules.shop.user_side.cart import Cart
-from modules.shop.components.order import UserOrder, Product, AdminOrder
-
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-logger = logging.getLogger(__name__)
+from modules.shop.components.order import UserOrder, AdminOrder
 
 
 ORDER_DESCRIPTION, ORDER_CONTACTS, ORDER_ADDRESS, CONFIRM_ORDER, \

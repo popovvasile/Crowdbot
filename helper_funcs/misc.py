@@ -1,4 +1,3 @@
-import logging
 from typing import List, Dict
 from uuid import uuid4
 
@@ -10,11 +9,6 @@ from bson.objectid import ObjectId
 
 from database import chatbots_table, users_table
 
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.INFO)
-
-LOGGER = logging.getLogger(__name__)
 LOAD = []
 NO_LOAD = ['translation', 'rss']
 

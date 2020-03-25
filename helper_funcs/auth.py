@@ -1,4 +1,3 @@
-import logging
 from typing import Optional
 from functools import wraps
 from datetime import datetime
@@ -6,13 +5,7 @@ from datetime import datetime
 from telegram import User, Bot, Update
 
 from database import users_table, chatbots_table, admin_passwords_table
-
-
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO)
-
-logger = logging.getLogger(__name__)
+from logs import logger
 
 
 def register_chat(update, context):

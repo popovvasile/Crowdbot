@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import logging
 from pprint import pprint
 
 from telegram.error import BadRequest, TelegramError
@@ -12,12 +11,7 @@ from database import custom_buttons_table
 from helper_funcs.auth import initiate_chat_id
 from helper_funcs.misc import (delete_messages, create_content_dict, send_content_dict,
                                content_dict_as_string)
-
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-logger = logging.getLogger(__name__)
-
+from logs import logger
 
 TYPING_BUTTON, TYPING_DESCRIPTION, DESCRIPTION_FINISH = range(3)
 CONFIRM_DELETE_BUTTON = 17

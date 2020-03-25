@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import logging
 
 from telegram.error import BadRequest
 from telegram.ext import MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
@@ -10,12 +9,7 @@ from telegram import (ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardM
 from database import custom_buttons_table
 from helper_funcs.helper import get_help
 from helper_funcs.misc import delete_messages
-
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-logger = logging.getLogger(__name__)
-
+from logs import logger
 
 CHOOSE_BUTTON = 1
 EDIT_FINISH = 1

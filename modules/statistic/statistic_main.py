@@ -1,18 +1,9 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
-import logging
-
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ConversationHandler, CallbackQueryHandler
 
 from helper_funcs.misc import delete_messages
-
-
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO)
-
-logger = logging.getLogger(__name__)
 
 
 # def statistic_main_menu(update, context):

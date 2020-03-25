@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import logging
-
 from telegram.error import TelegramError
 from telegram import (InlineKeyboardMarkup, InlineKeyboardButton,
                       ReplyKeyboardMarkup)
@@ -12,32 +10,23 @@ from database import channels_table
 from helper_funcs.helper import get_help
 from helper_funcs.misc import delete_messages
 
-
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-
 # TODO:
 #       before every send check that bot admin and can send message
 #       problem with delete messages - DELETE ALL MESSAGES BEFORE CURRENT
 #       back to Channels menu
 #       if there are only one channel don't ask to choose channel
 #       Markdown support in write a post
-#       When create new poll or survey -> send button is confused
+#       When create new survey -> send button is confused
 #       HOW TO DELETE ALL RANDOM MESSAGES SEND BY USER
 #       IF USER DELETE BOT FROM CHANNEL
-
+from logs import logger
 
 MY_CHANNELS, MANAGE_CHANNEL, ADD_CHANNEL, \
     CHOOSE_TO_REMOVE, REMOVE_CHANNEL, \
     CHOOSE_TO_SEND_POST, POST_TO_CHANNEL, MESSAGE_TO_USERS = range(8)
-CHOOSE_TO_SEND_POLL, CHOOSE_POLL_TO_SEND = range(2)
 CHOOSE_CHANNEL_TO_SEND_SURVEY, CHOOSE_SURVEY_TO_SEND = range(2)
 
 
-#     CHOOSE_TO_SEND_POLL, CHOOSE_POLL_TO_SEND,\
 #     CHOOSE_CHANNEL_TO_SEND_SURVEY, CHOOSE_SURVEY_TO_SEND = range(12)
 
 
@@ -210,9 +199,6 @@ class Channels(object):
                                   [InlineKeyboardButton(context.bot.lang_dict["send_survey_to_channel"],
                                                         callback_data="send_survey_to_channel_{}".format(
                                                             channel_username))],
-                                  [InlineKeyboardButton(context.bot.lang_dict["send_poll_to_channel"],
-                                                        callback_data="send_poll_to_channel_{}".format(
-                                                            channel_username))],
                                   [InlineKeyboardButton(context.bot.lang_dict["send_post_to_channel"],
                                                         callback_data='write_post_channel_{}'.format(
                                                             channel_username))],
@@ -263,9 +249,6 @@ class Channels(object):
             post_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(context.bot.lang_dict["send_post_to_channel"],
                                                                         callback_data="write_post_channel_{}".format(
                                                                             channel_username))],
-                                                  [InlineKeyboardButton(context.bot.lang_dict["send_poll_to_channel"],
-                                                                        callback_data="send_poll_to_channel_{}".format(
-                                                                            channel_username))],
                                                   [InlineKeyboardButton(context.bot.lang_dict["send_survey_to_channel"],
                                                                         callback_data="send_survey_to_channel_{}"
                                                                         .format(channel_username))],
@@ -279,12 +262,6 @@ class Channels(object):
             return ConversationHandler.END
         else:
             return ADD_CHANNEL
-
-    @staticmethod
-    def error(update, context, error):
-        """Log Errors caused by Updates."""
-        logger.warning('Update "%s" caused error "%s"', update, error)
-        # need to return ConversationHandler.END here?
 
     def back(self, update, context):
         delete_messages(update, context, True)
@@ -390,14 +367,6 @@ class SendPost(object):
                                  context.bot.lang_dict["send_message_9"],
                                  reply_markup=final_reply_markup)
         context.user_data.clear()
-        return ConversationHandler.END
-
-    def error(self, update, context, error):
-        """Log Errors caused by Updates."""
-        context.bot.send_message(update.message.chat_id,
-                                 "Command canceled")
-
-        logger.warning('Update "%s" caused error "%s"', update, error)
         return ConversationHandler.END
 
     def back(self, update, context):

@@ -1,18 +1,11 @@
-import logging
-
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ConversationHandler, CallbackQueryHandler
 from bson.objectid import ObjectId
 
-from helper_funcs.misc import delete_messages, get_obj
+from helper_funcs.misc import delete_messages
 from helper_funcs.pagination import Pagination
 from modules.shop.components.product import Product, MAX_TEMP_DESCRIPTION_LENGTH
-from database import products_table, carts_table, chatbots_table, categories_table, orders_table
-
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-logger = logging.getLogger(__name__)
+from database import products_table, carts_table, chatbots_table, categories_table
 
 
 class UserProductsHelper(object):

@@ -3,18 +3,11 @@
 from telegram import LabeledPrice, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import (MessageHandler, Filters, PreCheckoutQueryHandler,
                           ConversationHandler,  CallbackQueryHandler)
-import logging
 import datetime
-# Enable logging
 from database import donations_table, chatbots_table, user_mode_table
 from helper_funcs.auth import initiate_chat_id, if_admin
 from helper_funcs.helper import get_help
-
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-
-logger = logging.getLogger(__name__)
+from logs import logger
 
 EXECUTE_DONATION = 1
 
