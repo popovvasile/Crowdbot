@@ -2,6 +2,7 @@
 # # -*- coding: utf-8 -*-
 import datetime
 import logging
+import html
 
 from bson.objectid import ObjectId
 from haikunator import Haikunator
@@ -23,9 +24,8 @@ from database import (users_messages_to_admin_table,
                       user_categories_table, users_table)
 
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO)
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 delete_messages_menu_str = "What do you want to do?"

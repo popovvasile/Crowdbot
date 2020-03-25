@@ -3,8 +3,9 @@
 import logging
 import datetime
 from random import randint
+import html
 
-from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ParseMode
+from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ParseMode, KeyboardButton
 from telegram.ext import MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
 
 from database import (orders_table, chatbots_table, carts_table, shop_customers_contacts_table,
@@ -25,6 +26,68 @@ ORDER_DESCRIPTION, ORDER_CONTACTS, ORDER_ADDRESS, CONFIRM_ORDER, \
 
 class PurchaseBot(object):
     @staticmethod
+    def send_address_markup(update, context, invalid_address=False):
+        if (context.user_data["used_contacts"]
+                and len(context.user_data["used_contacts"]["addresses"])):
+            text = context.bot.lang_dict["tell_address"]
+            buttons = [
+                [InlineKeyboardButton(text=x,
+                                      callback_data=f"address/{x}")]
+                for x in context.user_data["used_contacts"]["addresses"]]
+        else:
+            text = context.bot.lang_dict["tell_address_short"]
+            buttons = []
+
+        if invalid_address:
+            text = context.bot.lang_dict["invalid_address"] + text
+
+        buttons.append([InlineKeyboardButton(
+            text=context.bot.lang_dict["back_button"],
+            callback_data="back_to_cart")])
+
+        context.user_data["to_delete"].append(
+            context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=text,
+                reply_markup=InlineKeyboardMarkup(buttons)))
+
+    @staticmethod
+    def send_number_markup(update, context, invalid_number=False):
+        if (context.user_data["used_contacts"]
+                and len(context.user_data["used_contacts"]["phone_numbers"])):
+            text = context.bot.lang_dict["tell_phone_number"]
+            buttons = [[InlineKeyboardButton(text=x, callback_data=f"phone_number/{x}")]
+                       for x in context.user_data["used_contacts"]["phone_numbers"]]
+        else:
+            text = context.bot.lang_dict["tell_phone_number_short"]
+            buttons = []
+
+        if invalid_number:
+            text = context.bot.lang_dict["invalid_number"] + text
+
+        buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                             callback_data="back_to_cart")])
+        context.user_data["to_delete"].append(
+            context.bot.send_message(chat_id=update.effective_chat.id,
+                                     text=text,
+                                     reply_markup=InlineKeyboardMarkup(buttons)))
+
+    @staticmethod
+    def validate_number(number):
+        if not 5 < len(number) < 25:
+            return False
+        number.replace(
+            "-", "").replace(
+            "(", "").replace(
+            ")", "").replace(
+            " ", "").replace(
+            "*", "")
+        if number.isdigit():
+            return True
+        else:
+            return False
+
+    @staticmethod
     def start_purchase(update, context):
         delete_messages(update, context, True)
         context.user_data["to_delete"].append(
@@ -38,7 +101,8 @@ class PurchaseBot(object):
             context.bot.send_message(
                 chat_id=update.callback_query.message.chat.id,
                 text=context.bot.lang_dict["add_order_comment"],
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton(
                          text=context.bot.lang_dict["shop_admin_continue_btn"],
                          callback_data="pass_order_comment")],
                     [InlineKeyboardButton(
@@ -47,61 +111,73 @@ class PurchaseBot(object):
                      ])))
         return ORDER_CONTACTS
 
-    @staticmethod
-    def ask_contacts(update, context):
+    def ask_contacts(self, update, context):
         delete_messages(update, context, True)
-        # TODO DESCRIPTION LENGTH VALIDATION
         if update.callback_query:
             context.user_data["order"]["user_comment"] = ""
+        elif len(update.message.text) > 445:
+            context.user_data["to_delete"].append(
+                context.bot.send_message(
+                    update.effective_chat.id,
+                    context.bot.lang_dict["order_comment_too_long"],
+                    reply_markup=InlineKeyboardMarkup([
+                        [InlineKeyboardButton(
+                             text=context.bot.lang_dict["shop_admin_continue_btn"],
+                             callback_data="pass_order_comment")],
+                        [InlineKeyboardButton(
+                             text=context.bot.lang_dict["back_button"],
+                             callback_data="back_to_cart")]
+                         ])))
+            return ORDER_CONTACTS
         else:
-            context.user_data["order"]["user_comment"] = update.message.text
+            context.user_data["order"]["user_comment"] = html.escape(update.message.text)
 
         context.user_data["used_contacts"] = (
             shop_customers_contacts_table.find_one(
                 {"bot_id": context.bot.id,
                  "user_id": update.effective_user.id}) or {})
-        # TODO SHARE PHONE NUMBER
-        if (context.user_data["used_contacts"]
+        # text, reply_markup = self.number_markup(context)
+        """if (context.user_data["used_contacts"]
                 and len(context.user_data["used_contacts"]["phone_numbers"])):
             text = context.bot.lang_dict["tell_phone_number"]
-            buttons = [
-                [InlineKeyboardButton(text=x,
-                                      callback_data=f"phone_number/{x}")]
-                for x in context.user_data["used_contacts"]["phone_numbers"]]
+            buttons = [[InlineKeyboardButton(text=x, callback_data=f"phone_number/{x}")]
+                       for x in context.user_data["used_contacts"]["phone_numbers"]]
         else:
             text = context.bot.lang_dict["tell_phone_number_short"]
             buttons = []
 
         buttons.append([InlineKeyboardButton(
                             text=context.bot.lang_dict["back_button"],
-                            callback_data="back_to_cart")])
-        context.user_data["to_delete"].append(
-            context.bot.send_message(
-                chat_id=update.effective_chat.id,
-                text=text,
-                reply_markup=InlineKeyboardMarkup(buttons)))
+                            callback_data="back_to_cart")])"""
+        # context.user_data["to_delete"].append(
+        #     context.bot.send_message(chat_id=update.effective_chat.id,
+        #                              text=text,
+        #                              reply_markup=reply_markup))
+        self.send_number_markup(update, context)
         return ORDER_ADDRESS
 
-    @staticmethod
-    def ask_address(update, context):
+    def ask_address(self, update, context):
         delete_messages(update, context, True)
-        # TODO PHONE NUMBER VALIDATION
         if update.callback_query:
             context.user_data["order"]["phone_number"] = (
                 update.callback_query.data.split("/")[1])
         else:
-            context.user_data["order"]["phone_number"] = update.message.text
-            # set it to check in the next step if there are no shipping
-            update.message.text = "phone"
+            if self.validate_number(update.message.text):
+                context.user_data["order"]["phone_number"] = update.message.text
+                # set it to check in the next step if there are no shipping
+                update.message.text = "phone"
+            else:
+                self.send_number_markup(update, context, True)
+                return ORDER_ADDRESS
 
         shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
-        # TODO SHARE GEO POSITION
+
         if shop["shipping"]:
-            if (context.user_data["used_contacts"]
+            """if (context.user_data["used_contacts"]
                     and len(context.user_data["used_contacts"]["addresses"])):
                 text = context.bot.lang_dict["tell_address"]
                 buttons = [
-                    [InlineKeyboardButton(text=x,
+                    [InlineKeyboardButton(text=original_text(x),
                                           callback_data=f"address/{x}")]
                     for x in context.user_data["used_contacts"]["addresses"]]
             else:
@@ -116,19 +192,23 @@ class PurchaseBot(object):
                 context.bot.send_message(
                     chat_id=update.effective_chat.id,
                     text=text,
-                    reply_markup=InlineKeyboardMarkup(buttons)))
+                    reply_markup=InlineKeyboardMarkup(buttons)))"""
+            self.send_address_markup(update, context)
             return CONFIRM_ORDER
         else:
-            return PurchaseBot.confirm_order(update, context)
+            return self.confirm_order(update, context)
 
-    @staticmethod
-    def confirm_order(update, context):
+    def confirm_order(self, update, context):
         delete_messages(update, context, True)
         if update.callback_query and "address" in update.callback_query.data:
             context.user_data["order"]["address"] = (
                 update.callback_query.data.split("/")[1])
         elif update.message and update.message.text != "phone":
-            context.user_data["order"]["address"] = update.message.text
+            if len(update.message.text) > 300:
+                self.send_address_markup(update, context, True)
+                return CONFIRM_ORDER
+            else:
+                context.user_data["order"]["address"] = html.escape(update.message.text)
         else:
             context.user_data["order"]["address"] = ""
         order_data = Cart().order_data(update, context)
@@ -185,7 +265,7 @@ class PurchaseBot(object):
         # Create order
         inserted_id = orders_table.insert_one(
             {**context.user_data["order"],
-             **{"article": randint(10000, 99999),
+             **{"article": randint(10000, 99999),  # TODO
                 "status": False,
                 "bot_id": context.bot.id,
                 "user_id": update.effective_user.id,

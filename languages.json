@@ -1,5 +1,14 @@
 {
     "ENG": {
+        "order_comment_too_long": "Your comment too big, please make it shorter.",
+        "share_number_btn": "Share Number",
+        "invalid_number": "Invalid phone number.\n",
+        "invalid_address": "Address is so long.\n",
+        "so_many_buttons": "There are already too many buttons",
+        "so_many_content": "Too much content already added",
+        "add_menu_buttons_str_11": "Great! Press '✅ Done' to finish",
+
+
         "add_admin_btn_str": "➕ Add admin",
         "add_admin_menu": "Forward this message to a new admin.\n This link will expire in one hour.",
         "add_already_exist_admin": "👌 The admin was already added",
@@ -355,7 +364,7 @@
         "product_on_sale_status": "✅ On Sale",
         "product_sold_status": "💸 Sold",
         "product_temp_part": "\n\nNot finished orders:\n",
-        "product_temp_part_2": "<b>Order ID:</b> <i>{}</i> \n{} x{}\n\n",
+        "product_temp_part_2": "<b>Order ID:</b> <i>{}</i> \n{} x{}\n",
         "product_unfinished_orders": "🕐 {} unfinished order(s)",
         "products": "Products",
         "products_categories_menu": "Choose",
@@ -478,7 +487,7 @@
         "shop_admin_edit_brand_menu": "\n_Edit brand_",
         "shop_admin_edit_btn": "🛠",
         "shop_admin_edit_menu": "*The order cannot be completed while there are sold goods.*\n❌ - _Remove the item from order_",
-        "shop_admin_edit_product_menu": "\n_Edit item_",
+        "shop_admin_edit_product_menu": "\n<i>Edit item</i>",
         "shop_admin_empty_order": "⚠️ Empty order",
         "shop_admin_exception_in_adding_product": "😕 An error accured. Return to the menu or contact the support team @crowdrobot_support",
         "shop_admin_files_adding": "Add any files about this product: documents, images or videos.\n<i>First file will be title file for the product</i>\nFiles 0/10",
@@ -1142,7 +1151,7 @@
         "shop_admin_edit_brand_menu": "\n_Редактируйте бренд_",
         "shop_admin_edit_btn": "🛠",
         "shop_admin_edit_menu": "*Заказ не может быть завершён, пока есть текущие продажи.*\n❌ - _Убрать товар из заказа_",
-        "shop_admin_edit_product_menu": "\nТут можно редактировать товар",
+        "shop_admin_edit_product_menu": "\n<i>Тут можно редактировать товар</i>",
         "shop_admin_empty_order": "⚠️ Пустой заказ",
         "shop_admin_exception_in_adding_product": "😕 Обнаружен сбой при обработке изображения. <b>Попробуй загрузить изображение завново</b> или обратись в поддержку:@crowdrobot_support",
         "shop_admin_files_adding": "Добавь любой медиафайл к описанию товара.\n<code>Первая фотография станет обложкой товара</code>\nДобавлено файлов 0/10",
