@@ -14,14 +14,14 @@ from helper_funcs.misc import dismiss
 from helper_funcs.helper import (help_button, button_handler, get_help, WelcomeBot,
                                  back_from_button_handler, back_to_modules, error_callback)
 
-# # CHANNELS
+# CHANNELS
 # from modules.chanells.channels import (MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER,
 #                                        REMOVE_CHANNEL_HANDLER, SEND_POST_HANDLER, CHANELLS_MENU)
 # from modules.chanells.channels_polls_surveys_donate import (
 #     SEND_POLL_TO_CHANNEL_HANDLER, SEND_SURVEY_TO_CHANNEL_HANDLER,
 #     SEND_DONATION_TO_CHANNEL_HANDLER)
 #
-# # GROUPS
+# GROUPS
 # from modules.groups.groups import (
 #     MY_GROUPS_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER, ADD_GROUP_HANLDER,
 #     GROUPS_MENU)
@@ -76,7 +76,8 @@ from modules.surveys.surveys_create import (
 
 # PAYMENTS
 from modules.payments.payments_config import (
-    # EDIT_DONATION_HANDLER, PAYMENTS_CONFIG_KEYBOARD, CHANGE_DONATIONS_CONFIG, CONFIGS_DONATIONS_GENERAL,
+    # EDIT_DONATION_HANDLER, PAYMENTS_CONFIG_KEYBOARD, CHANGE_DONATIONS_CONFIG,
+    # CONFIGS_DONATIONS_GENERAL,
     CONFIGS_SHOP_GENERAL, CHANGE_SHOP_CONFIG, EDIT_SHOP_HANDLER)
 # from modules.donations.donation_enable_disable import (
 #     CREATE_DONATION_HANDLER, DONATIONS_MENU)
@@ -102,24 +103,20 @@ from modules.shop.admin_side.categories import (
 from modules.shop.admin_side.eshop_enable_disable import CREATE_SHOP_HANDLER
 
 # SHOP USER SIDE
-from modules.shop.user_side.offline_payment import OFFLINE_PURCHASE_HANDLER
-from modules.shop.user_side.online_payment import ONLINE_PURCHASE_HANDLER, HANDLE_SUCCES, \
-    HANDLE_PRECHECKOUT
+from modules.shop.user_side.order_creator import OFFLINE_PURCHASE_HANDLER
+from modules.shop.user_side.online_payment import HANDLE_SUCCES, HANDLE_PRECHECKOUT
 from modules.shop.user_side.products import (
-    USERS_PRODUCTS_LIST_HANDLER, ADD_TO_CART, REMOVE_FROM_CART,
-    PRODUCTS_CATEGORIES, BACK_TO_CATEGORIES, VIEW_PRODUCT,
-    BACK_TO_CUSTOMER_SHOP, SHOP_CONTACTS)
+    USERS_PRODUCTS_LIST_HANDLER, ADD_TO_CART, REMOVE_FROM_CART, PRODUCTS_CATEGORIES,
+    BACK_TO_CATEGORIES, VIEW_PRODUCT, BACK_TO_CUSTOMER_SHOP, SHOP_CONTACTS)
 from modules.shop.user_side.cart import (
-    CART, REMOVE_FROM_CART_LIST, CHANGE_QUANTITY, BACK_TO_CART, MAKE_ORDER,
-    VIEW_CART_PRODUCT)
+    CART, REMOVE_FROM_CART_LIST, CHANGE_QUANTITY, BACK_TO_CART, MAKE_ORDER, VIEW_CART_PRODUCT)
 from modules.shop.user_side.orders import (
-    USERS_ORDERS_LIST_HANDLER, USER_ORDER_ITEMS_PAGINATION,
-    BACK_TO_USER_ORDERS)
+    USERS_ORDERS_LIST_HANDLER, USER_ORDER_ITEMS_PAGINATION, BACK_TO_USER_ORDERS,
+    ORDER_PAYMENT_MENU)
 
 
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
                     level=logging.INFO)
-
 LOGGER = logging.getLogger(__name__)
 
 
@@ -164,7 +161,7 @@ def main(token, lang):
 
     #  SHOP USER SIDE
     dispatcher.add_handler(EDIT_SHOP_HANDLER)
-    dispatcher.add_handler(ONLINE_PURCHASE_HANDLER)
+    # dispatcher.add_handler(ONLINE_PURCHASE_HANDLER)
     dispatcher.add_handler(OFFLINE_PURCHASE_HANDLER)
     dispatcher.add_handler(BACK_TO_CART)
     dispatcher.add_handler(USERS_PRODUCTS_LIST_HANDLER)
@@ -181,6 +178,7 @@ def main(token, lang):
     dispatcher.add_handler(VIEW_PRODUCT)
     dispatcher.add_handler(BACK_TO_CUSTOMER_SHOP)
     dispatcher.add_handler(USER_ORDER_ITEMS_PAGINATION)
+    dispatcher.add_handler(ORDER_PAYMENT_MENU)
     dispatcher.add_handler(BACK_TO_USER_ORDERS)
     dispatcher.add_handler(SHOP_CONTACTS)
 
@@ -354,16 +352,16 @@ def main(token, lang):
 
     # rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), get_help)
     # dispatcher.add_handler(rex_help_handler)
-    rex_help_handler = MessageHandler(Filters.regex(re.compile(r"help", re.IGNORECASE))|
-                                      Filters.regex(re.compile(r"menu", re.IGNORECASE))|
-                                      Filters.regex(re.compile(r"hello", re.IGNORECASE))|
-                                      Filters.regex(re.compile(r"hi", re.IGNORECASE))|
-                                      Filters.regex(re.compile(r"але", re.IGNORECASE))|
-                                      Filters.regex(re.compile(r"меню", re.IGNORECASE))|
-                                      Filters.regex(re.compile(r"помощь", re.IGNORECASE)),
-                                      get_help)
-
-    dispatcher.add_handler(rex_help_handler)
+    # rex_help_handler = MessageHandler(Filters.regex(re.compile(r"help", re.IGNORECASE))|
+    #                                   Filters.regex(re.compile(r"menu", re.IGNORECASE))|
+    #                                   Filters.regex(re.compile(r"hello", re.IGNORECASE))|
+    #                                   Filters.regex(re.compile(r"hi", re.IGNORECASE))|
+    #                                   Filters.regex(re.compile(r"але", re.IGNORECASE))|
+    #                                   Filters.regex(re.compile(r"меню", re.IGNORECASE))|
+    #                                   Filters.regex(re.compile(r"помощь", re.IGNORECASE)),
+    #                                   get_help)
+    #
+    # dispatcher.add_handler(rex_help_handler)
     LOGGER.info("Using long polling.")
     # updater.start_webhook(listen='0.0.0.0',
     #                       port=port,

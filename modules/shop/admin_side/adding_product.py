@@ -1,4 +1,5 @@
 import logging
+import html
 
 from telegram import InlineKeyboardButton, Update, InlineKeyboardMarkup
 from telegram.ext import (ConversationHandler, CallbackQueryHandler,
@@ -45,7 +46,7 @@ class AddingProductHandler(object):
         else:
             context.user_data["to_delete"].append(context.bot.send_message(
                 chat_id=update.message.chat_id,
-                text=context.bot.lang_name["shop_admin_name_too_long"],
+                text=context.bot.lang_dict["shop_admin_name_too_long"],
                 reply_markup=InlineKeyboardMarkup([
                              [back_btn("back_to_main_menu_btn", context)]])))
             return SET_TITLE
@@ -225,17 +226,17 @@ class AddingProductHandler(object):
                 > MAX_TEMP_DESCRIPTION_LENGTH):
             description = context.bot.lang_dict["add_product_description_above"]
         else:
-            description = context.user_data["new_product"].description
+            description = html.escape(context.user_data["new_product"].description, quote=False)
 
         context.user_data["new_product"].send_full_template(
             update, context,
             context.bot.lang_dict["shop_admin_product_description"].format(
                 currency=currency,
-                name=context.user_data["new_product"].name,
+                name=html.escape(context.user_data["new_product"].name, quote=False),
                 price=context.user_data["new_product"].price,
                 discount_price=context.user_data["new_product"].discount_price,
                 quantity=context.user_data["new_product"].quantity,
-                category=category,
+                category=html.escape(category, quote=False),
                 # description=context.user_data["new_product"].description),
                 description=description),
             keyboards(context)["confirm_add_product"])

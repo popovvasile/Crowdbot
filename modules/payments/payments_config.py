@@ -416,7 +416,7 @@ class EditPaymentHandler(object):
                 {"bot_id": context.bot.id},
                 {"$mul": {"price": converted,
                           "discount_price": converted}})
-            all_products = products_table.find({})
+            all_products = products_table.find({"bot_id": context.bot.id})
             # stupid solution, couldn't find anything inside
             # the pymongo framework which would make it easy
             # old solution below (does not work)
@@ -483,7 +483,7 @@ EDIT_SHOP_HANDLER = ConversationHandler(
     },
 
     fallbacks=[
-        CallbackQueryHandler(callback=EnableDisableShopDonations.config_shop,
+        CallbackQueryHandler(callback=EnableDisableShopDonations().config_shop,
                              pattern=r"shop_config"),
         CallbackQueryHandler(callback=Welcome().back_to_main_menu,
                              pattern=r"back_to_main_menu_btn"),

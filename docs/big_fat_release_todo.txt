@@ -1,3 +1,13 @@
+TODO
+    	* при добавлении товара цены с точкой плохо работают
+    		+ * ФЛОУ ОНЛАЙН - (см. карту флоу)
+    	* Enable disable shop(disable for user_mode as well(if)) - check for send_help
+		[DONE] 1) Убрать пункт онлайн/оффлайн шоп при создании шопа.
+		[DONE] 2) Добавить в настройки способ оплаты: безналичный расчёт.(Появляется кнопка изменить токен)
+        * при 0 товаров всё равно показывать кнопку Shop для юзеров
+
+
+
 --SHOP  -- status, in_trash, on_sale
 	[DONE] + * После создания шопа - не показывать кнопку бек, а сразу в меню переводить
 	[DONE] + * Убрать discount price с добавления товара
@@ -10,30 +20,17 @@
 	[DONE] + * Указание цены товара(при добавлении и редактировании) Payments- can't pay less them 1$ and more then Max amount
 		https://core.telegram.org/bots/payments#supported-currencies
 	[DONE] * Discount price обработка()
-	+ * Offline/online order creation data validation:
+	[DONE] + * Offline/online order creation data validation:
 	[DONE]	DESCRIPTION LENGTH VALIDATION
-		SHARE PHONE NUMBER
-		PHONE NUMBER
+	[DONE]	PHONE NUMBER
 	* при добавлении товара цены с точкой плохо работают
-	* error callback - вызывается странно(shop trash(orders), catalog)
-	* регекс который выводит в главное меню при рандомном тексте - убиваeт кнопку если она находилась в state(мб потому что не указана в fallbacks)
-
+	[DONE] регекс который выводит в главное меню при рандомном тексте - убиваeт кнопку если она находилась в state(мб потому что не указана в fallbacks)
 	[DONE] * Если нет товаров в категории - не показывать категорию юзерам
 	[DONE] + * Если вообще нет товаров - blink(о отм что нет товара) когда нажимаешь catalog - there is no shop
-
 	[DONE] Picture must be smaller
-	Messages (5 messaegs, 2 new)
-	Blink on new messages
-	BUG: answer not only once to messages, but also let the possibility to write more messages
-	One block for messages and the entire bot
-	Unread message is not read- it must appear on the very bottom
-	Make difference between shop settings and bot settings
-	To contacts and address must be added more info- multiple messages
     [DONE] Remove all the strings from hard-code and move them to languages.json, especially the shop
- 	+ * В Full template заказа убрать пагинацию и сделать кнопку Items - которая будет показывать товары с заказа
-	+ * В Full template и Short template заказа - при слишком большом тексте(Items) - обрывать текст и показывать три точки
-	+ * В Short template товара - при слишком большом тексте(Not finished orders) - обрывать текст и показывать три точки
-	+ * В Редактировании категории товара если только одна категория - blink и всё
+	[DONE] + * В Full template и Short template заказа - при слишком большом тексте(Items) - обрывать текст и показывать три точки
+	[DONE] + * В Short template товара - при слишком большом тексте(Not finished orders) - обрывать текст и показывать три точки
 	+ * ФЛОУ ОНЛАЙН - (см. карту флоу)
 		[DONE] 1) Убрать пункт онлайн/оффлайн шоп при создании шопа.
 		[DONE] 2) Добавить в настройки способ оплаты: безналичный расчёт.(Появляется кнопка изменить токен)
@@ -49,8 +46,8 @@
 
 
 STRINGS
-    * Убрать самое первое сообщение в главном меню
-    Your answer - провести линию - добавить в json - ? выглядит так се
+    [DONE] * Убрать самое первое сообщение в главном меню
+    ? Your answer - провести линию - добавить в json - ? выглядит так се
     [DONE] * Убрать слово "Назад" со всех back кнопок
     * Карточка заказа у админа: выделить название, сделать артикул меньше
     * Придумать строку для тестового платежа
@@ -75,7 +72,7 @@ STRINGS
 --MESSAGES
 	[DONE] + * Убрать анонимные сообщения
 	[DONE] + * Убрать пока ноутификешены о новых сообщениях(send_message)
-	+ * When user click "Open" and "Hide" in message notification - it works bad and for admin as well
+	[DONE] + * When user click "Open" and "Hide" in message notification - it works bad and for admin as well
 	[DONE] + * Когда отправляем сообщения(юзеру или всем) - try/except for BadRequest
 	[DONE] + * УБРАТЬ КНОПКУ send message to donators
 	- * Messages history
@@ -115,9 +112,9 @@ STRINGS
             * Поменять реплай маркап на инлайн маркап в ЭДИТ БАТТОН
 
 	* Валидация:
-	    - максимальное количество кнопок
+	[DONE]    - максимальное количество кнопок
 	    - длинна имени кнопки
-	    - количество закрепляемого контента
+	[DONE]    - количество закрепляемого контента
 
 
 --MENUS +++++++++++
@@ -141,7 +138,7 @@ STRINGS
 	* проверить и проработать функции helper_funcs.helper, errors callbacks, Protect all /start, backs, get_help, help_button and so on with user_data.clear() function call
 	* сделать одну back_to_modules_<nameOfModule> функцию
 	* Удалить все лишние строки с languages(используя парсинг кода)
-    	* changed tokens and 2 bot instances running handlers(with notifications to BotFather and with token change feature)
+    * changed tokens and 2 bot instances running handlers(with notifications to BotFather and with token change feature)
    	* Cython implementation
 	* Получаемые сообщения множаться.
 

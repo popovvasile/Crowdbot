@@ -342,7 +342,7 @@ def content_string(content, context):
             str_for_text = content_dict['text'][:20]
             if len(content_dict['text']) > 20:
                 str_for_text += "..."
-            string += f"• <code>{html.escape(str_for_text)}</code>\n"
+            string += f"• <code>{html.escape(str_for_text, quote=False)}</code>\n"
 
         if "photo_file" in content_dict:
             string += context.bot.lang_dict["photo_file"]

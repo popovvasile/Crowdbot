@@ -1,6 +1,8 @@
 import logging
 from datetime import datetime
 from uuid import uuid4
+from pprint import pprint
+import html
 
 from bson.objectid import ObjectId
 from telegram.error import BadRequest
@@ -141,9 +143,8 @@ class Product(object):
             if len(self.description) > MAX_TEMP_DESCRIPTION_LENGTH:
                 context.user_data["to_delete"].append(
                     context.bot.send_message(update.effective_chat.id,
-                                             self.description))
-                reply_to_message_id = (
-                    context.user_data["to_delete"][-1].message_id)
+                                             self.description, quote=False))
+                reply_to_message_id = context.user_data["to_delete"][-1].message_id
             context.user_data["to_delete"].append(
                 context.bot.send_message(
                     chat_id=update.effective_chat.id,
@@ -157,9 +158,8 @@ class Product(object):
                 if len(self.description) > MAX_CAPTION_LENGTH:
                     self.send_content(update.effective_chat.id,
                                       context, self.content[0],
-                                      caption=self.name)
-                    reply_to_message_id = (
-                        context.user_data["to_delete"][-1].message_id)
+                                      caption=html.escape(self.name, quote=False))
+                    reply_to_message_id = context.user_data["to_delete"][-1].message_id
                     context.user_data["to_delete"].append(
                         context.bot.send_message(
                             update.effective_chat.id,
@@ -175,9 +175,8 @@ class Product(object):
                 else:
                     self.send_content(update.effective_chat.id,
                                       context, self.content[0],
-                                      caption=self.description)
-                    reply_to_message_id = (
-                        context.user_data["to_delete"][-1].message_id)
+                                      caption=html.escape(self.description, quote=False))
+                    reply_to_message_id = context.user_data["to_delete"][-1].message_id
                     context.user_data["to_delete"].append(
                         context.bot.send_message(
                             update.effective_chat.id,
@@ -223,15 +222,15 @@ class Product(object):
                     self.send_content(update.effective_chat.id,
                                       self.context, content_dict)
 
-            reply_to_message_id = (
-                context.user_data["to_delete"][-len(self.content)].message_id)
+            reply_to_message_id = context.user_data["to_delete"][-len(self.content)].message_id
 
             if len(self.description) > MAX_TEMP_DESCRIPTION_LENGTH:
                 context.user_data["to_delete"].append(
                     context.bot.send_message(
                         chat_id=update.effective_chat.id,
-                        text=self.description,
-                        reply_to_message_id=reply_to_message_id))
+                        text=html.escape(self.description, quote=False),
+                        reply_to_message_id=reply_to_message_id,
+                        parse_mode=ParseMode.HTML))
             context.user_data["to_delete"].append(
                 context.bot.send_message(
                     chat_id=update.effective_chat.id,

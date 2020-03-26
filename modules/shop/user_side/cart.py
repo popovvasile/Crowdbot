@@ -1,5 +1,6 @@
 import logging
 from pprint import pprint
+import html
 
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ConversationHandler, CallbackQueryHandler
@@ -45,14 +46,15 @@ class CartHelper(object):
                               * cart_item["quantity"])
             # print(item_price)
             order_price += item_price
-            template += (
-                "{} - {}\n"
-                "x{} - {} {}\n\n").format(
-                cart_item["product"]["_id"],
-                cart_item["product"]["name"],
-                cart_item["quantity"],
-                item_price,
-                shop["currency"])
+            if len(template) < 3800:
+                template += (
+                    "{}\nx{} {} {}\n\n").format(
+                    html.escape(cart_item["product"]["name"], quote=False),
+                    cart_item["quantity"],
+                    item_price,
+                    shop["currency"])
+            elif not template.endswith("..."):
+                template += "..."
         template += context.bot.lang_dict["order_create_end"].format(order_price, shop['currency'])
         # Save order data. Need to check order data on each step??
         order = dict()
@@ -133,8 +135,8 @@ class CartHelper(object):
 
         template = context.bot.lang_dict["cart_item_template"].format(
                 str(cart_item["product"].get("_id")),
-                cart_item["product"]["name"],
-                category_name,
+                html.escape(cart_item["product"]["name"], quote=False),
+                html.escape(category_name, quote=False),
                 float(cart_item["product"]["price"]) * cart_item["quantity"],
                 currency)
         if not cart_item["product"].get("unlimited"):
@@ -163,14 +165,14 @@ class CartHelper(object):
 
         template = context.bot.lang_dict["full_cart_item_template"].format(
                 str(cart_item["product"].get("_id")),
-                cart_item["product"]["name"],
-                category_name,
+                html.escape(cart_item["product"]["name"], quote=False),
+                html.escape(category_name, quote=False),
                 float(cart_item["product"]["price"]) * cart_item["quantity"],
                 currency)
         if (len(cart_item["product"]["description"])
                 < MAX_TEMP_DESCRIPTION_LENGTH):
             template += context.bot.lang_dict["description_field"].format(
-                cart_item["product"]["description"])
+                html.escape(cart_item["product"]["description"], quote=False))
 
         if not cart_item["product"].get("unlimited"):
             template += context.bot.lang_dict["in_stock_field"].format(
@@ -386,17 +388,21 @@ class Cart(CartHelper):
             return self.back_to_cart(update, context)
         context.user_data["order"] = order_data["order"]
         # Create reply markup
-        buttons = []
-        if order_data["shop"]["shop_type"] == "offline":
-            buttons.append(
-                [InlineKeyboardButton(
-                    text=context.bot.lang_dict["offline_buy"],
-                    callback_data=f"offline_buy")])
-        elif order_data["shop"]["shop_type"] == "online":
-            buttons.append(
-                [InlineKeyboardButton(
-                    text=context.bot.lang_dict["online_buy"],
-                    callback_data=f"online_buy")])
+        buttons = list()
+        # if order_data["shop"]["shop_type"] == "offline":
+        #     buttons.append(
+        #         [InlineKeyboardButton(
+        #             text=context.bot.lang_dict["offline_buy"],
+        #             callback_data=f"offline_buy")])
+        # elif order_data["shop"]["shop_type"] == "online":
+        #     buttons.append(
+        #         [InlineKeyboardButton(
+        #             text=context.bot.lang_dict["online_buy"],
+        #             callback_data=f"online_buy")])
+        buttons.append(
+            [InlineKeyboardButton(
+                text=context.bot.lang_dict["buy_btn"],
+                callback_data="create_order")])
         buttons.append(
             [InlineKeyboardButton(
                 text=context.bot.lang_dict["back_button"],

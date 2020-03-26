@@ -37,8 +37,9 @@ def help_strings(context, update):
                                   callback_data="trash")],
             [InlineKeyboardButton(text=context.bot.lang_dict["configure_button"],
                                   callback_data="shop_config")],
-            [InlineKeyboardButton(text=context.bot.lang_dict["user_mode_module"],
-                                  callback_data="turn_user_mode_on")]]
+            # [InlineKeyboardButton(text=context.bot.lang_dict["user_mode_module"],
+            #                       callback_data="turn_user_mode_on")]
+        ]
     elif "shop" in chatbot:
         admins_keyboard = [[InlineKeyboardButton(text=context.bot.lang_dict["allow_shop_button"],
                                                  callback_data="change_shop_config")]]

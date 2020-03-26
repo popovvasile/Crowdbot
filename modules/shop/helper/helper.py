@@ -2,6 +2,12 @@ from telegram import ParseMode
 from telegram.error import BadRequest
 
 
+# def currencies_emoji():
+#     currencies_emoji = {
+#         ""
+#     }
+
+
 def clear_user_data(context):
     to_del = context.user_data.get('to_delete', list())
     context.user_data.clear()

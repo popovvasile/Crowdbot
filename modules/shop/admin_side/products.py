@@ -1,10 +1,12 @@
 import logging
+import html
 
 from price_parser import Price
 from telegram import Update, ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (ConversationHandler, CallbackQueryHandler,
                           CallbackContext, MessageHandler, Filters)
 
+from bson import ObjectId
 from helper_funcs.pagination import Pagination
 from helper_funcs.misc import delete_messages, content_dict_as_string
 from modules.shop.helper.helper import clear_user_data
@@ -83,9 +85,9 @@ class ProductsHelper(object):
 
         template = context.bot.lang_dict["shop_admin_product_template"].format(
             product_obj.article,
-            product_obj.name,
+            html.escape(product_obj.name, quote=False),
             product_obj.status_str,
-            product_obj.category["name"],
+            html.escape(product_obj.category["name"], quote=False),
             product_obj.price,
             shop["currency"],
             product_obj.discount_price,
@@ -133,14 +135,14 @@ class ProductsHelper(object):
         return context.bot.lang_dict["shop_admin_full_product_template"].format(
             product_obj.status_str,
             product_obj.id_,
-            product_obj.name,
-            product_obj.category["name"],
+            html.escape(product_obj.name, quote=False),
+            html.escape(product_obj.category["name"], quote=False),
             product_obj.price,
             shop["currency"],
             product_obj.discount_price,
             shop["currency"],
             quantity,
-            description)
+            html.escape(description, quote=False))
 
     @staticmethod
     def status_str(product_obj, new_orders):
@@ -259,7 +261,8 @@ class ProductsHandler(ProductsHelper):
 
     def finish_description(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        context.user_data["product"].update({"description": update.message.text})
+        context.user_data["product"].update(
+            {"description": update.message.text})
         return self.edit(update, context)
 
     def name(self, update: Update, context: CallbackContext, msg=None):
@@ -280,7 +283,8 @@ class ProductsHandler(ProductsHelper):
         delete_messages(update, context, True)
         if len(update.message.text) > 1000:
             return self.name(update, context, msg=True)
-        context.user_data["product"].update({"name": update.message.text})
+        context.user_data["product"].update(
+            {"name": update.message.text})
         return self.edit(update, context)
 
     def price(self, update: Update, context: CallbackContext):
@@ -435,7 +439,8 @@ class ProductsHandler(ProductsHelper):
                 [InlineKeyboardButton(text=i["name"],
                                       callback_data=f"category_{i['_id']}")
                  for i in category_list],
-                [back_btn("back_to_main_menu_btn", context)])
+                [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                      callback_data="back_to_edit")])
 
             text = (self.admin_short_template(context, context.user_data["product"])
                     + "\n\n"
@@ -444,22 +449,21 @@ class ProductsHandler(ProductsHelper):
             context.user_data["product"].send_short_template(
                 update, context, text=text, reply_markup=keyboard)
         else:
-            buttons = [[
-                InlineKeyboardButton(
-                    text=context.bot.lang_dict["back_button"],
-                    callback_data="back_to_main_menu")]]
-            reply_markup = InlineKeyboardMarkup(buttons)
             context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
                 text=context.bot.lang_dict["add_product_didnt_set_category"],
-                reply_markup=reply_markup)
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton(
+                        text=context.bot.lang_dict["back_button"],
+                        callback_data="back_to_edit")]
+                ]))
         return CATEGORY
 
     def finish_category(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         if update.callback_query:
             context.user_data["product"].update(
-                {"category_id": update.callback_query.data.replace("category_", "")})
+                {"category_id": ObjectId(update.callback_query.data.replace("category_", ""))})
         else:
             if update.message:
                 category_id = categories_table.insert_one({
