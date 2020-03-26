@@ -14,9 +14,9 @@ TODO
 	[DONE] + * при удалении категории кроме товаров чекнуть NEW заказы и если они есть - запретить удаление категории пока не закроются все NEW заказы
 	[DONE] + * С первого раза не переключается на онлайн
 	[DONE] + * Уменьшить цену тестового инвойса до минимума(см. ссылку) и вставить мини гайд(гифка) в текст
-		https://core.telegram.org/bots/payments#supported-currencies
+		    https://core.telegram.org/bots/payments#supported-currencies
 	[DONE] + * Указание цены товара(при добавлении и редактировании) Payments- can't pay less them 1$ and more then Max amount
-		https://core.telegram.org/bots/payments#supported-currencies
+		    https://core.telegram.org/bots/payments#supported-currencies
 	[DONE] * Discount price обработка()
 	[DONE] + * Offline/online order creation data validation:
 	[DONE]	DESCRIPTION LENGTH VALIDATION
@@ -29,7 +29,7 @@ TODO
     [DONE] Remove all the strings from hard-code and move them to languages.json, especially the shop
 	[DONE] + * В Full template и Short template заказа - при слишком большом тексте(Items) - обрывать текст и показывать три точки
 	[DONE] + * В Short template товара - при слишком большом тексте(Not finished orders) - обрывать текст и показывать три точки
-	+ * ФЛОУ ОНЛАЙН - (см. карту флоу)
+	[DONE] + * ФЛОУ ОНЛАЙН - (см. карту флоу)
 		[DONE] 1) Убрать пункт онлайн/оффлайн шоп при создании шопа.
 		[DONE] 2) Добавить в настройки способ оплаты: безналичный расчёт.(Появляется кнопка изменить токен)
 	- * Поиск товара и заказа по id
@@ -117,14 +117,14 @@ STRINGS
 
 --MENUS +++++++++++
 	[DONE]+ * Кнопки удаления сообщений в messages сделать отдельную менюшку с этими 3мя кнопка удаления
-	+ * Убираем донаты, а именно
+	[DONE] + * Убираем донаты, а именно
 		[DONE]- убираем "Configure payments" с настройки бота
-		- В основном меню вместо кнопки Shop and Payments
+	[DONE]	- В основном меню вместо кнопки Shop and Payments
 	[DONE]+ * Убираем статистику донатов, и переносим кнопку User Statistic в настройки
 	[DONE]+ * МЕНЮ ЮЗЕРА
-		1)ЕСЛИ ШОП не подключен - кнопка "send messages" в один ряд, потом кастомные
-		2) ЕСЛИ ПОДКЛЮЧЕН 	 - кнопка "send message", "shop", потом кастомные
-		3) КНОПКА ADMIN MODE всегда внизу
+	[DONE]	1)ЕСЛИ ШОП не подключен - кнопка "send messages" в один ряд, потом кастомные
+	[DONE]	2) ЕСЛИ ПОДКЛЮЧЕН 	 - кнопка "send message", "shop", потом кастомные
+	[DONE]	3) КНОПКА ADMIN MODE всегда внизу
 	[DONE] + * Сделать все меню в один столбик
 	[DONE]+ * Перенести юзер вью в главное меню. Убрать юзер вью из кнопок
 	* Стандартное приветсвие

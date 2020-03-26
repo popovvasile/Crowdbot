@@ -158,8 +158,11 @@ class AddingProductHandler(object):
         delete_messages(update, context, True)
         currency = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]["currency"]
         currency_limits = currency_limits_dict[currency]
+        print("first", currency_limits["min"])
+        # print("sec", int(update.message.text))
+        print("third", currency_limits["max"])
         try:
-            assert currency_limits["min"] < int(update.message.text) < currency_limits["max"]
+            assert currency_limits["min"] < int(float(update.message.text)) < currency_limits["max"]
         except (ValueError, AssertionError):
             context.user_data["to_delete"].append(context.bot.send_message(
                 chat_id=update.message.chat_id,
