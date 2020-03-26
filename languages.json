@@ -15,7 +15,13 @@
         "pay_button": "Pay",
         "no_order_blink": "There are no such order",
         "order_canceled_blink": "Order canceled",
-
+        "notification_btn_str": "Notifications",
+        "order_notification": " Order Notification",
+        "message_notification": " Message Notification",
+        "order_notification_on_blink": "Order notifications will come",
+        "order_notification_off_blink": "Order notifications will no longer arrive",
+        "messages_notification_on_blink": "Messages notifications will come",
+        "messages_notification_off_blink": "Messages notifications will no longer arrive",
 
         "add_admin_btn_str": "➕ Add admin",
         "add_admin_menu": "Forward ⬆ ️this ⬆️ message to admins.\nThe button will be valid for one hour.\nOne link - For one Admin\nDon't send it to unauthorized persons!",

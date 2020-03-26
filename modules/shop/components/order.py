@@ -60,7 +60,7 @@ class Order(object):
 
     @property
     def items(self):
-        return [OrderItem(self.context, order_item)
+        return [OrderItem(self.context, order_item, self.currency)
                 for order_item in self.items_json]
 
     @property
@@ -74,15 +74,15 @@ class Order(object):
 
     # todo refactor for long order items texts
     def str_order_items(self, currency=None):
-        if not currency:
-            currency = chatbots_table.find_one(
-                {"bot_id": self.context.bot.id})["shop"]["currency"]
+        # if not currency:
+        #     currency = chatbots_table.find_one(
+        #         {"bot_id": self.context.bot.id})["shop"]["currency"]
         text = "\n".join(
             ["<code>{}</code>\nx{} - <code>{}</code> {}".format(
                 html.escape(item.name, quote=False),
                 item.order_quantity,
                 item.price,
-                currency)
+                self.currency)
              # + (item.item_emoji if not self.status else "")
              for item in self.items])
         if len(text) > 550:
@@ -126,8 +126,8 @@ class AdminOrder(Order):
                 self.phone_number,
                 html.escape(self.user_comment, quote=False),
                 self.total_price,
-                currency,
-                self.str_order_items(currency)))
+                self.currency,
+                self.str_order_items()))
         return template
 
     # @property
@@ -187,7 +187,7 @@ class AdminOrder(Order):
         pagination = Pagination(
             self.items_json, page=context.user_data["item_page"])
         for item in pagination.page_content():
-            OrderItem(self.context, item).send_template(
+            OrderItem(self.context, item, self.currency).send_template(
                 update, context, reply_markup=item_reply_markup)
         pagination.send_keyboard(update, context,
                                  page_prefix="admin_order_item_pagination")
@@ -246,7 +246,7 @@ class UserOrder(Order):
         pagination = Pagination(
             self.items_json, page=context.user_data["item_page"])
         for item in pagination.page_content():
-            OrderItem(self.context, item).send_template(
+            OrderItem(self.context, item, self.currency).send_template(
                 update, context, reply_markup=item_reply_markup)
         pagination.send_keyboard(update, context,
                                  page_prefix="user_order_item_pagination")
@@ -263,11 +263,11 @@ class OrderItem(Product):
     """For showing and check orders items.
     Works for both user and admin side"""
 
-    def __init__(self, context, order_item):
+    def __init__(self, context, order_item, currency):
         # change order_item["product_id"] to order_item["product"]
         # and item data will be taken from order document.
         # Items data that was on the order creation moment
-        super(OrderItem, self).__init__(context, order_item["product_id"])
+        super(OrderItem, self).__init__(context, order_item["product"])
         # Units of item that customer ordered
         self.order_quantity = order_item.get("quantity")
         # Check if the product exist, ready for sale, and quantity is right
@@ -277,6 +277,7 @@ class OrderItem(Product):
         #     and (self.unlimited or (self.order_quantity <= self.quantity)))
         # price of the item
         self.item_price = self.price * self.order_quantity
+        self.currency = currency
 
     @property
     def item_exist(self):
@@ -285,8 +286,8 @@ class OrderItem(Product):
                 and (self.unlimited or (self.order_quantity <= self.quantity)))
 
     def send_template(self, update, context, reply_markup=None):
-        currency = chatbots_table.find_one(
-            {"bot_id": self.context.bot.id})["shop"]["currency"]
+        # currency = chatbots_table.find_one(
+        #     {"bot_id": self.context.bot.id})["shop"]["currency"]
 
         text = self.context.bot.lang_dict["order_item_template"].format(
             self.article,
@@ -294,7 +295,7 @@ class OrderItem(Product):
             html.escape(self.category["name"], quote=False),
             self.order_quantity,
             self.item_price,
-            currency)
+            self.currency)
         self.send_short_template(update, context, text, reply_markup)
 
     # @property

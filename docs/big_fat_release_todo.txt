@@ -1,11 +1,9 @@
 TODO
     	* при добавлении товара цены с точкой плохо работают
     		+ * ФЛОУ ОНЛАЙН - (см. карту флоу)
-    	* Enable disable shop(disable for user_mode as well(if)) - check for send_help
+    	[DONE] Enable disable shop(disable for user_mode as well(if)) - check for send_help
 		[DONE] 1) Убрать пункт онлайн/оффлайн шоп при создании шопа.
 		[DONE] 2) Добавить в настройки способ оплаты: безналичный расчёт.(Появляется кнопка изменить токен)
-        * при 0 товаров всё равно показывать кнопку Shop для юзеров
-
 
 
 --SHOP  -- status, in_trash, on_sale
@@ -141,6 +139,7 @@ STRINGS
     * changed tokens and 2 bot instances running handlers(with notifications to BotFather and with token change feature)
    	* Cython implementation
 	* Получаемые сообщения множаться.
+	/start - не удаляет сообщения(to_delete)
 
 
 --PRODUCTION
@@ -169,6 +168,7 @@ STRINGS
 
 	* Полностью проверить Users
 	* Проверить работу бота с отписчиками и удалёнными аккаунтамиы
+	* Изменение валюты не влияет на заказы(проверить отображение в всех шаблонах)
 
 
 * One code style for whole project - lil rules :)

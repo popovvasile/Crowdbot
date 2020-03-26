@@ -40,6 +40,7 @@ from modules.settings.settings import (
 #     BUTTON_ADD_FINISH_HANDLER, back_from_edit_button_handler)
 from modules.settings.user_mode import USER_MODE_OFF, USER_MODE_ON
 from modules.settings.admins import ADMINS_LIST_HANDLER
+from modules.settings.notification import NOTIFICATION_MENU, NOTIFICATION_EDIT
 # from modules.donations.donation_payment import (DONATE_HANDLER, HANDLE_SUCCES,
 #                                                 HANDLE_PRECHECKOUT)
 
@@ -253,6 +254,8 @@ def main(token, lang):
     # ADMINS
     dispatcher.add_handler(ADMINS_LIST_HANDLER)
     # dispatcher.add_handler(ADD_ADMIN_HANDLER)
+    dispatcher.add_handler(NOTIFICATION_MENU)
+    dispatcher.add_handler(NOTIFICATION_EDIT)
 
     # DONATIONS
     # dispatcher.add_handler(CREATE_DONATION_HANDLER)

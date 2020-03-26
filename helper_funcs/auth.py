@@ -22,7 +22,7 @@ def register_chat(update, context):
     user = users_table.find_one({"user_id": user_id,
                                  "bot_id": context.bot.id})
     superuser = chatbots_table.find_one({"bot_id": context.bot.id})["superuser"]
-    if user_id == superuser:
+    if not user and user_id == superuser:
         users_table.update({"user_id": user_id,
                             "bot_id": context.bot.id},
                            {'bot_id': context.bot.id,
@@ -30,14 +30,14 @@ def register_chat(update, context):
                             "user_id": user_id,
                             "username": update.effective_user.username,
                             "full_name": update.effective_user.full_name,
-                            # "mention_markdown": update.effective_user.mention_markdown(),
-                            # "mention_html": update.effective_user.mention_html(),
                             'registered': True,
                             "is_admin": True,
                             "superuser": True,
                             "timestamp": datetime.now(),
                             "regular_messages_blocked": False,
                             "anonim_messages_blocked": False,
+                            "order_notification": True,
+                            "messages_notification": True,
                             "blocked": False,
                             "unsubscribed": False,
                             "tags": ["#all", "#user", "#admin"]
@@ -48,14 +48,14 @@ def register_chat(update, context):
                             "user_id": user_id,
                             "username": update.effective_user.username,
                             "full_name": update.effective_user.full_name,
-                            # "mention_markdown": update.effective_user.mention_markdown(),
-                            # "mention_html": update.effective_user.mention_html(),
                             "timestamp": datetime.now(),
                             'registered': False,
                             "is_admin": False,
                             "superuser": False,
                             "regular_messages_blocked": False,
                             "anonim_messages_blocked": False,
+                            "order_notification": True,
+                            "messages_notification": True,
                             "blocked": False,
                             "unsubscribed": False,
                             "tags": ["#all", "#user"]})
@@ -102,6 +102,8 @@ def register_admin(update, context):
                 "is_admin": True,
                 "regular_messages_blocked": False,
                 "anonim_messages_blocked": False,
+                "order_notification": True,
+                "messages_notification": True,
                 "superuser": False,
                 "blocked": False,
                 "unsubscribed": False,

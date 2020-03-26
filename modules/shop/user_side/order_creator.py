@@ -281,17 +281,20 @@ class PurchaseBot(object):
         # Send notification about new order to all admins
         order = AdminOrder(context, inserted_id)
         for admin in users_table.find({"bot_id": context.bot.id, "is_admin": True}):
-            # Create notification text and send it.
-            text = context.bot.lang_dict["new_order_notification"].format(
-                order.article, order.user_mention)
-
-            context.bot.send_message(chat_id=admin["chat_id"],
-                                     text=text,
-                                     reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
-                                         text=context.bot.lang_dict["notification_close_btn"],
-                                         callback_data="dismiss"
-                                     )]]),
-                                     parse_mode=ParseMode.HTML)
+            if admin["order_notification"]:
+                # Create notification text and send it.
+                text = context.bot.lang_dict["new_order_notification"].format(
+                    order.article, order.user_mention)
+                try:
+                    context.bot.send_message(chat_id=admin["chat_id"],
+                                             text=text,
+                                             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
+                                                 text=context.bot.lang_dict["notification_close_btn"],
+                                                 callback_data="dismiss"
+                                             )]]),
+                                             parse_mode=ParseMode.HTML)
+                except:
+                    continue
         final_text = context.bot.lang_dict["order_success"]
         if shop["shop_type"] == "online":
             final_text += context.bot.lang_dict["order_success_online"]
