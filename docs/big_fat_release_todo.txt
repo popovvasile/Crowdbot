@@ -1,3 +1,11 @@
+TODO
+    	* при добавлении товара цены с точкой плохо работают
+    		+ * ФЛОУ ОНЛАЙН - (см. карту флоу)
+    	[DONE] Enable disable shop(disable for user_mode as well(if)) - check for send_help
+		[DONE] 1) Убрать пункт онлайн/оффлайн шоп при создании шопа.
+		[DONE] 2) Добавить в настройки способ оплаты: безналичный расчёт.(Появляется кнопка изменить токен)
+
+
 --SHOP  -- status, in_trash, on_sale
 	[DONE] + * После создания шопа - не показывать кнопку бек, а сразу в меню переводить
 	[DONE] + * Убрать discount price с добавления товара
@@ -6,35 +14,22 @@
 	[DONE] + * при удалении категории кроме товаров чекнуть NEW заказы и если они есть - запретить удаление категории пока не закроются все NEW заказы
 	[DONE] + * С первого раза не переключается на онлайн
 	[DONE] + * Уменьшить цену тестового инвойса до минимума(см. ссылку) и вставить мини гайд(гифка) в текст
-		https://core.telegram.org/bots/payments#supported-currencies
+		    https://core.telegram.org/bots/payments#supported-currencies
 	[DONE] + * Указание цены товара(при добавлении и редактировании) Payments- can't pay less them 1$ and more then Max amount
-		https://core.telegram.org/bots/payments#supported-currencies
+		    https://core.telegram.org/bots/payments#supported-currencies
 	[DONE] * Discount price обработка()
-	+ * Offline/online order creation data validation:
+	[DONE] + * Offline/online order creation data validation:
 	[DONE]	DESCRIPTION LENGTH VALIDATION
-		SHARE PHONE NUMBER
-		PHONE NUMBER
+	[DONE]	PHONE NUMBER
 	* при добавлении товара цены с точкой плохо работают
-	* error callback - вызывается странно(shop trash(orders), catalog)
-	* регекс который выводит в главное меню при рандомном тексте - убиваeт кнопку если она находилась в state(мб потому что не указана в fallbacks)
-
+	[DONE] регекс который выводит в главное меню при рандомном тексте - убиваeт кнопку если она находилась в state(мб потому что не указана в fallbacks)
 	[DONE] * Если нет товаров в категории - не показывать категорию юзерам
 	[DONE] + * Если вообще нет товаров - blink(о отм что нет товара) когда нажимаешь catalog - there is no shop
-
 	[DONE] Picture must be smaller
-	Messages (5 messaegs, 2 new)
-	Blink on new messages
-	BUG: answer not only once to messages, but also let the possibility to write more messages
-	One block for messages and the entire bot
-	Unread message is not read- it must appear on the very bottom
-	Make difference between shop settings and bot settings
-	To contacts and address must be added more info- multiple messages
     [DONE] Remove all the strings from hard-code and move them to languages.json, especially the shop
- 	+ * В Full template заказа убрать пагинацию и сделать кнопку Items - которая будет показывать товары с заказа
-	+ * В Full template и Short template заказа - при слишком большом тексте(Items) - обрывать текст и показывать три точки
-	+ * В Short template товара - при слишком большом тексте(Not finished orders) - обрывать текст и показывать три точки
-	+ * В Редактировании категории товара если только одна категория - blink и всё
-	+ * ФЛОУ ОНЛАЙН - (см. карту флоу)
+	[DONE] + * В Full template и Short template заказа - при слишком большом тексте(Items) - обрывать текст и показывать три точки
+	[DONE] + * В Short template товара - при слишком большом тексте(Not finished orders) - обрывать текст и показывать три точки
+	[DONE] + * ФЛОУ ОНЛАЙН - (см. карту флоу)
 		[DONE] 1) Убрать пункт онлайн/оффлайн шоп при создании шопа.
 		[DONE] 2) Добавить в настройки способ оплаты: безналичный расчёт.(Появляется кнопка изменить токен)
 	- * Поиск товара и заказа по id
@@ -49,8 +44,8 @@
 
 
 STRINGS
-    * Убрать самое первое сообщение в главном меню
-    Your answer - провести линию - добавить в json - ? выглядит так се
+    [DONE] * Убрать самое первое сообщение в главном меню
+    ? Your answer - провести линию - добавить в json - ? выглядит так се
     [DONE] * Убрать слово "Назад" со всех back кнопок
     * Карточка заказа у админа: выделить название, сделать артикул меньше
     * Придумать строку для тестового платежа
@@ -75,7 +70,7 @@ STRINGS
 --MESSAGES
 	[DONE] + * Убрать анонимные сообщения
 	[DONE] + * Убрать пока ноутификешены о новых сообщениях(send_message)
-	+ * When user click "Open" and "Hide" in message notification - it works bad and for admin as well
+	[DONE] + * When user click "Open" and "Hide" in message notification - it works bad and for admin as well
 	[DONE] + * Когда отправляем сообщения(юзеру или всем) - try/except for BadRequest
 	[DONE] + * УБРАТЬ КНОПКУ send message to donators
 	- * Messages history
@@ -115,21 +110,21 @@ STRINGS
             * Поменять реплай маркап на инлайн маркап в ЭДИТ БАТТОН
 
 	* Валидация:
-	    - максимальное количество кнопок
+	[DONE]    - максимальное количество кнопок
 	    - длинна имени кнопки
-	    - количество закрепляемого контента
+	[DONE]    - количество закрепляемого контента
 
 
 --MENUS +++++++++++
 	[DONE]+ * Кнопки удаления сообщений в messages сделать отдельную менюшку с этими 3мя кнопка удаления
-	+ * Убираем донаты, а именно
+	[DONE] + * Убираем донаты, а именно
 		[DONE]- убираем "Configure payments" с настройки бота
-		- В основном меню вместо кнопки Shop and Payments
+	[DONE]	- В основном меню вместо кнопки Shop and Payments
 	[DONE]+ * Убираем статистику донатов, и переносим кнопку User Statistic в настройки
 	[DONE]+ * МЕНЮ ЮЗЕРА
-		1)ЕСЛИ ШОП не подключен - кнопка "send messages" в один ряд, потом кастомные
-		2) ЕСЛИ ПОДКЛЮЧЕН 	 - кнопка "send message", "shop", потом кастомные
-		3) КНОПКА ADMIN MODE всегда внизу
+	[DONE]	1)ЕСЛИ ШОП не подключен - кнопка "send messages" в один ряд, потом кастомные
+	[DONE]	2) ЕСЛИ ПОДКЛЮЧЕН 	 - кнопка "send message", "shop", потом кастомные
+	[DONE]	3) КНОПКА ADMIN MODE всегда внизу
 	[DONE] + * Сделать все меню в один столбик
 	[DONE]+ * Перенести юзер вью в главное меню. Убрать юзер вью из кнопок
 	* Стандартное приветсвие
@@ -141,9 +136,10 @@ STRINGS
 	* проверить и проработать функции helper_funcs.helper, errors callbacks, Protect all /start, backs, get_help, help_button and so on with user_data.clear() function call
 	* сделать одну back_to_modules_<nameOfModule> функцию
 	* Удалить все лишние строки с languages(используя парсинг кода)
-    	* changed tokens and 2 bot instances running handlers(with notifications to BotFather and with token change feature)
+    * changed tokens and 2 bot instances running handlers(with notifications to BotFather and with token change feature)
    	* Cython implementation
 	* Получаемые сообщения множаться.
+	/start - не удаляет сообщения(to_delete)
 
 
 --PRODUCTION
@@ -172,6 +168,7 @@ STRINGS
 
 	* Полностью проверить Users
 	* Проверить работу бота с отписчиками и удалёнными аккаунтамиы
+	* Изменение валюты не влияет на заказы(проверить отображение в всех шаблонах)
 
 
 * One code style for whole project - lil rules :)

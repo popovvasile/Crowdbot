@@ -1,3 +1,6 @@
+from pprint import pprint
+import html
+
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ConversationHandler, CallbackQueryHandler
 from bson.objectid import ObjectId
@@ -70,18 +73,18 @@ class UserProductsHelper(object):
         if product.get("discount_price") > 0:
             template = context.bot.lang_dict["short_user_product_temp"].format(
                 product.get("article"),
-                product["name"],
-                category,
+                html.escape(product["name"], quote=False),
+                html.escape(category, quote=False),
                 product["discount_price"], currency,
                 product["price"], currency,
-                description)
+                html.escape(description, quote=False))
         else:
             template = context.bot.lang_dict["short_user_product_temp_2"].format(
                 str(product.get("_id")),
-                product["name"],
-                category,
+                html.escape(product["name"], quote=False),
+                html.escape(category, quote=False),
                 product["price"], currency,
-                description)
+                html.escape(description, quote=False))
 
         if not product["unlimited"]:
             template += context.bot.lang_dict["quantity_field"].format(product['quantity'])
@@ -113,19 +116,20 @@ class UserProductsHelper(object):
         if product.get("discount_price") > 0:
             template = context.bot.lang_dict["full_user_product_temp"].format(
                 str(product.get("_id")),
-                product["name"],
-                category,
+                html.escape(product["name"], quote=False),
+                html.escape(category, quote=False),
                 product["discount_price"], currency,
                 product["price"], currency)
         else:
             template = context.bot.lang_dict["full_user_product_temp_2"].format(
                 str(product.get("_id")),
-                product["name"],
-                category,
+                html.escape(product["name"], quote=False),
+                html.escape(category, quote=False),
                 product["price"], currency)
 
         if len(product["description"]) < MAX_TEMP_DESCRIPTION_LENGTH:
-            template += context.bot.lang_dict["description_field"].format(product["description"])
+            template += context.bot.lang_dict["description_field"].format(
+                html.escape(product["description"], quote=False))
 
         if not product["unlimited"]:
             template += context.bot.lang_dict["quantity_field"].format(product['quantity'])
@@ -138,18 +142,25 @@ class UserProductsHelper(object):
 
 class UserProductsHandler(UserProductsHelper):
     def categories_menu(self, update, context):
-
         delete_messages(update, context, True)
-        categories_list_ids = [x["category_id"]
-                               for x in products_table.find({"bot_id": context.bot.id})]
+        filters = {"$or": [
+            {"in_trash": False,
+             "bot_id": context.bot.id,
+             'unlimited': True},
+            {"in_trash": False,
+             "bot_id": context.bot.id,
+             "quantity": {"$gt": 0}}
+        ]}
+        categories_list_ids = [x["category_id"] for x in products_table.find(filters)]
         categories_list = [categories_table.find_one({"_id": x})
                            for x in set(categories_list_ids)]
-        categories_buttons = [
-            [InlineKeyboardButton(text=x["name"],
-                                  callback_data=f"catalog/{x['_id']}")]
-            for x in categories_list]
 
-        if categories_buttons:
+        if categories_list:
+            categories_buttons = [
+                [InlineKeyboardButton(text=x["name"],
+                                      callback_data=f"catalog/{x['_id']}")]
+                for x in categories_list]
+
             categories_reply_markup = InlineKeyboardMarkup(
                 categories_buttons
                 + [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
@@ -178,16 +189,6 @@ class UserProductsHandler(UserProductsHelper):
             context.user_data["category_id"] = ObjectId(
                 update.callback_query.data.split("/")[1])
 
-        # filters = {
-        #     "in_trash": False,
-        #     "sold": False,
-        #     "bot_id": context.bot.id,
-        #     "$or": [{'unlimited': True}, {"quantity": {"$gt": 0}}]
-        # }
-
-        # if context.user_data.get("category_id"):
-        #     filters["category_id"] = context.user_data["category_id"]
-
         filters = {"$or": [
             {"in_trash": False,
              "bot_id": context.bot.id,
@@ -198,12 +199,9 @@ class UserProductsHandler(UserProductsHelper):
         ]}
 
         if context.user_data.get("category_id"):
-            filters["$or"][0]["category_id"] = (
-                context.user_data["category_id"])
-            filters["$or"][1]["category_id"] = (
-                context.user_data["category_id"])
-        all_products = products_table.find(
-            filters).sort([["last_modify_timestamp", -1]])
+            filters["$or"][0]["category_id"] = context.user_data["category_id"]
+            filters["$or"][1]["category_id"] = context.user_data["category_id"]
+        all_products = products_table.find(filters).sort([["last_modify_timestamp", -1]])
         self.send_products_layout(update, context, all_products)
         return ConversationHandler.END
 

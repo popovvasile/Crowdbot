@@ -1,11 +1,13 @@
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import ConversationHandler, CallbackQueryHandler
+from telegram.ext import (ConversationHandler, CallbackQueryHandler, MessageHandler,
+                          PreCheckoutQueryHandler, Filters)
 from bson.objectid import ObjectId
 
 from helper_funcs.helper import get_help, back_to_modules
 from helper_funcs.misc import delete_messages, get_obj
 from helper_funcs.pagination import Pagination
 from modules.shop.components.order import UserOrder
+from modules.shop.user_side.online_payment import OnlinePayment
 from modules.shop.user_side.cart import CartHelper
 from database import (products_table, carts_table, chatbots_table,
                       categories_table, orders_table)
@@ -52,18 +54,23 @@ class UserOrdersHandler(object):
         if orders.count():
             # Create page content and send it
             pagination = Pagination(orders, page=context.user_data["page"])
-
+            shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
             for order in pagination.content:
-                reply_markup = InlineKeyboardMarkup([
+                order_buttons = [
                     [InlineKeyboardButton(
                         text=context.bot.lang_dict["user_order_items_btn"],
-                        callback_data=f"order_items/{order['_id']}")]])
+                        callback_data=f"order_items/{order['_id']}")]]
+                if not order["in_trash"] and not order["paid"] and shop["shop_type"] == "online":
+                    order_buttons.append(
+                        [InlineKeyboardButton(
+                            text=context.bot.lang_dict["pay_button"],
+                            callback_data=f"order_payment_menu/{order['_id']}")])
                 context.user_data["to_delete"].append(
                     context.bot.send_message(
                         chat_id=update.effective_chat.id,
                         text=UserOrder(context, order).template,
                         parse_mode=ParseMode.HTML,
-                        reply_markup=reply_markup))
+                        reply_markup=InlineKeyboardMarkup(order_buttons)))
             # Send main buttons
             pagination.send_keyboard(update, context,
                                      page_prefix="user_orders_pagination",
@@ -99,9 +106,31 @@ class UserOrdersHandler(object):
             ]))
         return ConversationHandler.END
 
+    def order_payment_menu(self, update, context):
+        delete_messages(update, context, True)
+        order_id = ObjectId(update.callback_query.data.split("/")[1])
+        order = UserOrder(context, order_id)
+        if not order.id_:
+            update.callback_query.answer(context.bot.lang_dict["no_order"])
+            return self.back_to_orders(update, context)
+        if order.in_trash:
+            update.callback_query.answer(context.bot.lang_dict["order_canceled_blink"])
+            return self.back_to_orders(update, context)
+        OnlinePayment().send_invoice(update, context, order)
+        context.user_data["to_delete"].append(
+            context.bot.send_message(
+                update.effective_chat.id,
+                context.bot.lang_dict["order_success_online"],
+                parse_mode=ParseMode.HTML,
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                          callback_data="back_to_user_orders")]])
+            ))
+        return ConversationHandler.END
+
     def back_to_orders(self, update, context):
         delete_messages(update, context, True)
-        page = context.user_data["page"]
+        page = context.user_data.get("page", 1)
         context.user_data.clear()
         context.user_data["page"] = page
         return self.orders(update, context)
@@ -115,6 +144,10 @@ USERS_ORDERS_LIST_HANDLER = CallbackQueryHandler(
 USER_ORDER_ITEMS_PAGINATION = CallbackQueryHandler(
     pattern=r"^(order_items|user_order_item_pagination)",
     callback=UserOrdersHandler().order_items)
+
+ORDER_PAYMENT_MENU = CallbackQueryHandler(
+    pattern=r"order_payment_menu",
+    callback=UserOrdersHandler().order_payment_menu)
 
 BACK_TO_USER_ORDERS = CallbackQueryHandler(
     pattern="back_to_user_orders",

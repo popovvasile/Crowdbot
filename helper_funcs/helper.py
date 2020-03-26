@@ -46,7 +46,8 @@ def send_visitor_help(bot, chat_id, text):
     product_list_of_dicts = products_table.find({
         "bot_id": bot.id})
     buttons = list()
-    if product_list_of_dicts.count() != 0:
+    if (product_list_of_dicts.count() != 0
+            and chatbots_table.find_one({"bot_id": bot.id})["shop_enabled"]):
         buttons = [InlineKeyboardButton(text=bot.lang_dict["shop"],
                                         callback_data="help_module(shop)")]
 
@@ -78,7 +79,8 @@ def send_admin_user_mode(bot, chat_id, text):
                                            callback_data="send_message_to_admin")]]
     product_list_of_dicts = products_table.find({
         "bot_id": bot.id})
-    if product_list_of_dicts.count() != 0:
+    if (product_list_of_dicts.count() != 0
+            and chatbots_table.find_one({"bot_id": bot.id})["shop_enabled"]):
         first_buttons += [[InlineKeyboardButton(text=bot.lang_dict["shop"],
                                                 callback_data="help_module(shop)")]]
 
