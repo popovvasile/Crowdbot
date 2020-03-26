@@ -1,5 +1,3 @@
-import logging
-
 from bson import ObjectId
 from telegram import InlineKeyboardButton, Update, InlineKeyboardMarkup
 from telegram.ext import (ConversationHandler, CallbackQueryHandler,
@@ -9,11 +7,6 @@ from modules.shop.admin_side.welcome import Welcome
 from helper_funcs.misc import delete_messages
 from database import categories_table, products_table, orders_table
 from modules.shop.helper.keyboards import (back_btn)
-
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 START_ADD_CATEGORY, SET_CATEGORY, RENAME_CATEGORY = range(3)

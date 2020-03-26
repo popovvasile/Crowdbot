@@ -6,7 +6,6 @@ from flask import Flask, request, Response, make_response
 import requests
 from pymongo import MongoClient
 
-
 app = Flask(__name__)
 client = MongoClient('localhost', 27017)
 
@@ -161,18 +160,19 @@ def on_delete():
     return resp
 
 
-# ADMIN MANAGE ENDPOINTS AND ONE PUT METHOD FOR BOTS
-'''
 @app.route('/crowdbot', methods=['PUT'])
 def crowdbot_on_put():  # TODO
     crowdbot_doc = request.get_json()["params"]
-    chatbot = requests.get(url="https://api.telegram.org/"
-                               "bot{}/getMe".format(crowdbot_doc["token"]))
-    crowdbot_doc["bot_id"] = chatbot.json()['result']['id']
+    chatbot = crowdbot_bots_table.find_one({"bot_id": crowdbot_doc["bot_id"]})
+    chatbot.update(crowdbot_doc)
     crowdbot_bots_table.update_one(
-        {"bot_id": crowdbot_doc["bot_id"]}, crowdbot_doc)
+        {"token": crowdbot_doc["token"]}, chatbot)
     resp = Response({"ok": True}, status=200, mimetype='application/json')
     return resp
+
+# ADMIN MANAGE ENDPOINTS AND ONE PUT METHOD FOR BOTS
+'''
+
 
 
 @app.route('/crowdbot/admin', methods=['POST'])

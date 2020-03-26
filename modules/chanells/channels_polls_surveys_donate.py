@@ -1,125 +1,15 @@
-import ast
-
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import ConversationHandler, CallbackQueryHandler, MessageHandler, Filters, RegexHandler
-from database import polls_table, surveys_table, chatbots_table, channels_table
+from database import surveys_table, chatbots_table, channels_table
 from helper_funcs.auth import initiate_chat_id
 from helper_funcs.helper import get_help
-
-import logging
-
-from modules.pollbot.polls import PollBot
+from logs import logger
 
 MY_CHANNELS, MANAGE_CHANNEL, ADD_CHANNEL, \
 CHOOSE_TO_REMOVE, REMOVE_CHANNEL, \
 CHOOSE_TO_SEND_POST, POST_TO_CHANNEL, MESSAGE_TO_USERS = range(8)
 
-CHOOSE_CHANNEL_TO_SEND_POLL, CHOOSE_POLL_TO_SEND = range(2)
 CHOOSE_CHANNEL_TO_SEND_SURVEY, CHOOSE_SURVEY_TO_SEND = range(2)
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-
-# Post on channel -> Send a Poll -> no polls. wanna create one?(yes, back) ->
-#         -> creating poll -> poll was created(send on channel, back) -> are u sure to send? -> send to channel
-
-
-# for sending polls to channels
-
-class SendPoll(object):
-    def handle_send_poll(self, update, context):
-        if update.callback_query:
-            context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                                       message_id=update.callback_query.message.message_id)
-            channel_username = update.callback_query.data.replace("send_poll_to_channel_", "")
-            update_data = update.callback_query
-            if channel_username == "send_poll_to_channel":
-                channels_markup = [channel['channel_username'] for
-                                   channel in channels_table.find({'bot_id': context.bot.id})]
-                context.bot.send_message(update.callback_query.message.chat.id,
-                                         "Choose a channel that you want to send",
-                                         reply_markup=ReplyKeyboardMarkup([channels_markup]))
-                return CHOOSE_CHANNEL_TO_SEND_POLL
-        else:
-            channel_username = update.message.text
-            update_data = update
-
-        create_buttons = [
-            [InlineKeyboardButton(text=context.bot.lang_dict["create_button_str"], callback_data="create_poll"),
-             InlineKeyboardButton(text=context.bot.lang_dict["back_button"], callback_data="help_back")]]
-        create_markup = InlineKeyboardMarkup(
-            create_buttons)
-        back_keyboard = \
-            InlineKeyboardMarkup([[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                                        callback_data="help_back")]])
-
-        polls_list_of_dicts = polls_table.find({"bot_id": context.bot.id})
-        if polls_list_of_dicts.count() == 0:
-            context.bot.send_message(update_data.message.chat.id,
-                                     context.bot.lang_dict["polls_str_8"],
-                                     reply_markup=create_markup)
-            return ConversationHandler.END
-        else:
-            context.user_data['channel'] = channel_username
-            polls_list_of_dicts = polls_table.find({"bot_id": context.bot.id})
-            if polls_list_of_dicts.count() != 0:
-                command_list = [command['title'] for command in polls_list_of_dicts]
-                context.bot.send_message(update_data.message.chat.id,
-                                         context.bot.lang_dict["polls_str_9"], reply_markup=back_keyboard)
-                reply_keyboard = [command_list]
-                context.bot.send_message(update_data.message.chat.id,
-                                         context.bot.lang_dict["polls_str_10"],
-                                         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
-                return CHOOSE_POLL_TO_SEND
-            else:
-                context.bot.send_message(update_data.message.chat.id,
-                                         context.bot.lang_dict["polls_str_8"],
-                                         reply_markup=create_markup)
-                return ConversationHandler.END
-
-    def handle_send_title(self, update, context):  # TODO save more poll instances
-        chat_id, txt = initiate_chat_id(update)
-        poll_name = txt
-        context.user_data["poll_name_to_send"] = poll_name
-        poll = polls_table.find_one({'title': poll_name})
-        poll['options'] = ast.literal_eval(poll['options'])
-        poll['meta'] = ast.literal_eval(poll['meta'])
-
-        context.bot.send_message(context.user_data['channel'], PollBot().assemble_message_text(poll),
-                                 reply_markup=PollBot().assemble_inline_keyboard(poll, True),
-                                 parse_mode='Markdown'
-                                 )
-
-        context.bot.send_message(chat_id, context.bot.lang_dict["polls_str_12"], reply_markup=ReplyKeyboardRemove())
-
-        create_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                                callback_data="help_module(channels_groups)")]]
-        create_markup = InlineKeyboardMarkup(create_buttons)
-        context.bot.send_message(update.message.chat.id, context.bot.lang_dict["back_text"],
-                                 reply_markup=create_markup)
-        return ConversationHandler.END
-
-    def cancel(self, update, context):
-        update.message.reply_text(
-            "Command is cancelled =("
-        )
-        get_help(update, context)
-
-        return ConversationHandler.END
-
-    def back(self, update, context):
-        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                                   message_id=update.callback_query.message.message_id)
-        get_help(update, context)
-        return ConversationHandler.END
-
-    # Error handler
-    def error(self, update, context, error):
-        """Log Errors caused by Updates."""
-        logger.warning('Update "%s" caused error "%s"', update, error)
-        return
-
 
 # for sending surveys to channels
 
@@ -198,15 +88,11 @@ class SendSurvey(object):
         get_help(update, context)
         return ConversationHandler.END
 
-    @staticmethod
-    def error(update, context, error):
-        """Log Errors caused by Updates."""
-        logger.warning('Update "%s" caused error "%s"', update, error)
+
 
 
 DONATION_TO_USERS = 1
 CHOOSE_CHANNEL_TO_SEND_DONATION = 23
-CHOOSE_POLL_TO_SEND_DONATION = 34
 
 
 class SendDonationToChannel(object):
@@ -360,27 +246,6 @@ class SendDonationToChannel(object):
         get_help(update, context)
         return ConversationHandler.END
 
-    @staticmethod
-    def error(update, context, error):
-        """Log Errors caused by Updates."""
-        logger.warning('Update "%s" caused error "%s"', update, error)
-
-
-# There are already 'send_survey_to_users' pattern handler - mb use it
-SEND_POLL_TO_CHANNEL_HANDLER = ConversationHandler(
-    entry_points=[
-        CallbackQueryHandler(SendPoll().handle_send_poll, pattern=r"send_poll_to_channel"), ],
-    states={
-
-        CHOOSE_POLL_TO_SEND: [MessageHandler(Filters.text, SendPoll().handle_send_title), ],
-        CHOOSE_CHANNEL_TO_SEND_POLL: [
-            MessageHandler(Filters.text, SendPoll().handle_send_poll), ],
-    },
-    fallbacks=[CallbackQueryHandler(callback=SendPoll().back, pattern=r"help_back"),
-               CallbackQueryHandler(callback=SendPoll().back, pattern=r"help_module"),
-               MessageHandler(Filters.regex('^Back$'), SendPoll().back),
-               ]
-)
 
 SEND_SURVEY_TO_CHANNEL_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(SendSurvey().handle_send_survey,

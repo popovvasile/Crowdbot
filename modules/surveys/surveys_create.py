@@ -2,16 +2,11 @@
 # # -*- coding: utf-8 -*-
 from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import (MessageHandler, Filters, ConversationHandler, CallbackQueryHandler)
-import logging
 
 from database import surveys_table, users_table
 from helper_funcs.auth import initiate_chat_id
 from helper_funcs.helper import get_help
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-
-logger = logging.getLogger(__name__)
+from logs import logger
 
 CHOOSING_TITLE, CHOOSING_QUESTIONS = range(2)
 CHOOSING = 89

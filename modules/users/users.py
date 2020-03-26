@@ -1,8 +1,5 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
-import datetime
-import logging
-
 from bson.objectid import ObjectId
 from telegram.error import BadRequest, Unauthorized, TelegramError
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
@@ -12,16 +9,13 @@ from helper_funcs.helper import get_help, back_to_modules
 from helper_funcs.pagination import Pagination
 from helper_funcs.misc import (delete_messages, lang_timestamp, get_obj, user_mention,
                                update_user_fields)
+from logs import logger
 from modules.statistic.donation_statistic import DonationStatistic
 from modules.users.message_helper import (MessageTemplate, send_deleted_message_content,
                                           AnswerToMessage, send_not_deleted_message_content,
                                           add_to_content)
 from database import users_table, donations_table, users_messages_to_admin_table
 
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 # STRINGS
 # open_btn_str = "Open"

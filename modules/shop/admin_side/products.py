@@ -16,11 +16,6 @@ from modules.shop.admin_side.welcome import Welcome
 from database import products_table, categories_table, chatbots_table, orders_table
 
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-
 class ProductsHelper(object):
     # TODO put this logic to the components/product -> class AdminProduct
     """All "short" templates must be passed to send_short_template() method.

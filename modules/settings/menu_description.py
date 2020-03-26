@@ -1,18 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import logging
-
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (MessageHandler, Filters, ConversationHandler, CallbackQueryHandler)
 
 from database import chatbots_table
 from helper_funcs.helper import get_help, back_to_modules
 from helper_funcs.misc import delete_messages
-
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 MESSAGE = 1

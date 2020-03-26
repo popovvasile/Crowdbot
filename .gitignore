@@ -2,10 +2,10 @@
 z/
 __pycache__/
 modules/sql/__pycache__/
-modules/pollbot/__pycache__/
 modules/helper_funcs/__pycache__/
 modules/__pycache__/
 modules/__pycache__/*
+logs/
 *.py[cod]
 *$py.class
 files/

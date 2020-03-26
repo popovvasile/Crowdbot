@@ -1,5 +1,3 @@
-import logging
-
 from telegram import ParseMode, Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ConversationHandler, CallbackQueryHandler, CallbackContext
 
@@ -10,11 +8,6 @@ from modules.shop.admin_side.products import ProductsHandler
 from modules.shop.admin_side.orders import OrdersHandler
 from database import products_table, orders_table
 from helper_funcs.misc import delete_messages
-
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 class TrashHandler(Welcome):

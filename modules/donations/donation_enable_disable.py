@@ -1,18 +1,12 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
-import logging
-
 from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (MessageHandler, Filters, ConversationHandler, CallbackQueryHandler)
 
 from database import chatbots_table
 from helper_funcs.auth import initiate_chat_id
 from helper_funcs.helper import get_help, check_provider_token
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-
-logger = logging.getLogger(__name__)
+from logs import logger
 
 TYPING_TOKEN, TYPING_DESCRIPTION, DONATION_FINISH = range(3)
 

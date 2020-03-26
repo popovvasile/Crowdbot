@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime
 from uuid import uuid4
 from pprint import pprint
@@ -12,12 +11,6 @@ from telegram import (ParseMode, InputMediaPhoto)
 from helper_funcs.misc import get_obj
 from modules.shop.helper.helper import send_media_arr
 from database import products_table, categories_table, orders_table
-
-
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 """If product description length bigger than this integer

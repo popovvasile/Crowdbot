@@ -1,16 +1,10 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
-import logging
-
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ConversationHandler, CallbackQueryHandler
 
 from database import user_mode_table
-
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-logger = logging.getLogger(__name__)
+from logs import logger
 
 
 class UserMode(object):

@@ -1,19 +1,14 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
-import logging
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import (MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
 from database import user_categories_table, donations_table
 from helper_funcs.helper import get_help
-
+from logs import logger
 
 TOPIC,SEND_ANONIM, MESSAGE = range(3)
 CHOOSE_CATEGORY, MESSAGE_TO_USERS = range(2)
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 class SendMessageToDonators(object):

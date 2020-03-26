@@ -1,0 +1,4 @@
+1)user creates a shop- 7 days count
+2)2 days before that- send notification
+3)stop the bot if not paid
+4)allow to pay more than one month

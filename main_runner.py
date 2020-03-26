@@ -10,6 +10,7 @@ import telegram.ext as tg
 from telegram import Bot
 from telegram.ext import CommandHandler, CallbackQueryHandler, MessageHandler, Filters
 
+from logs import logger
 from helper_funcs.misc import dismiss
 from helper_funcs.helper import (help_button, button_handler, get_help, WelcomeBot,
                                  back_from_button_handler, back_to_modules, error_callback)
@@ -83,12 +84,7 @@ from modules.payments.payments_config import (
 # from modules.donations.donation_enable_disable import (
 #     CREATE_DONATION_HANDLER, DONATIONS_MENU)
 
-# POLLS
-from modules.pollbot.polls import (
-    POLL_HANDLER, SEND_POLLS_HANDLER, BUTTON_HANDLER, DELETE_POLLS_HANDLER,
-    POLLS_RESULTS_HANDLER, POLLS_MENU, POLLS_SEND_MENU)
-from modules.donations.donation_send_promotion import (
-    SEND_DONATION_TO_USERS_HANDLER)
+
 
 # SHOP ADMIN SIDE
 from modules.shop.admin_side.welcome import (
@@ -116,15 +112,21 @@ from modules.shop.user_side.orders import (
     ORDER_PAYMENT_MENU)
 
 
-logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-                    level=logging.INFO)
-LOGGER = logging.getLogger(__name__)
 
 
 def main(token, lang):
+
     # https://github.com/python-telegram-bot/python-telegram-bot/issues/787
     req = request.Request(con_pool_size=8)
     bot_obj = Bot(token=token, request=req)
+    filename = 'logs/{}.log'.format(bot_obj.name)
+    open(filename, "w+")
+    hdlr = logging.FileHandler(filename)
+    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+    hdlr.setFormatter(formatter)
+    logger.addHandler(hdlr)
+    logger.setLevel(logging.INFO)
+
     with open('languages.json') as f:
         lang_dicts = json.load(f)
     if lang == "ENG":

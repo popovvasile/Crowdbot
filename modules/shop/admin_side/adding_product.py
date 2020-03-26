@@ -1,6 +1,5 @@
 import logging
 import html
-
 from telegram import InlineKeyboardButton, Update, InlineKeyboardMarkup
 from telegram.ext import (ConversationHandler, CallbackQueryHandler,
                           CallbackContext, Filters, MessageHandler)
@@ -12,11 +11,6 @@ from helper_funcs.misc import delete_messages
 from price_parser import Price
 from database import categories_table, chatbots_table
 from modules.shop.helper.keyboards import keyboards, back_btn, create_keyboard
-
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 START_ADD_PRODUCT, ONLINE_PAYMENT, \

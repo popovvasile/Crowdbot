@@ -6,14 +6,10 @@ from database import groups_table
 from telegram.error import TelegramError
 from helper_funcs.helper import get_help
 
-import logging
-
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 # database schema
+from logs import logger
+
 group_table_scheme = {
     'bot_id': int,
     'group_name': str,
@@ -23,12 +19,7 @@ group_table_scheme = {
 MY_GROUPS, MANAGE_GROUP, ADD_GROUP, \
 CHOOSE_TO_REMOVE, REMOVE_GROUP, \
 CHOOSE_TO_SEND_POST, POST_TO_GROUP, MESSAGE_TO_USERS = range(8)
-CHOOSE_TO_SEND_POLL, CHOOSE_POLL_TO_SEND = range(2)
 CHOOSE_GROUP_TO_SEND_SURVEY, CHOOSE_SURVEY_TO_SEND = range(2)
-
-
-#     CHOOSE_TO_SEND_POLL, CHOOSE_POLL_TO_SEND,\
-#     CHOOSE_GROUP_TO_SEND_SURVEY, CHOOSE_SURVEY_TO_SEND = range(12)
 
 
 def delete_messages(update, context):
@@ -84,9 +75,6 @@ class Groups(object):
                                   [InlineKeyboardButton(context.bot.lang_dict["send_survey_to_group"],
                                                         callback_data="send_survey_to_group_{}".format(
                                                             group_id))],
-                                  [InlineKeyboardButton(context.bot.lang_dict["send_poll_to_group"],
-                                                        callback_data="send_poll_to_group_{}".format(
-                                                            group_id))],
                                   [InlineKeyboardButton(context.bot.lang_dict["send_post_to_group"],
                                                         callback_data='write_post_group_{}'.format(
                                                             group_id))],
@@ -124,12 +112,6 @@ class Groups(object):
                                              text=context.bot.lang_dict["back_button"],
                                              callback_data="help_module(channels_groups)")]])
                                          ))
-
-    @staticmethod
-    def error(update, context, error):
-        """Log Errors caused by Updates."""
-        logger.warning('Update "%s" caused error "%s"', update, error)
-        # need to return ConversationHandler.END here?
 
     def back(self, update, context):
         delete_messages(update, context)
@@ -243,14 +225,6 @@ class SendPost(object):
         context.user_data.clear()
         return ConversationHandler.END
 
-    def error(self, update, context, error):
-        """Log Errors caused by Updates."""
-        context.bot.send_message(update.message.chat_id,
-                                 "Command canceled")
-
-        logger.warning('Update "%s" caused error "%s"', update, error)
-        return ConversationHandler.END
-
     def back(self, update, context):
         delete_messages(update, context)
         get_help(update, context)
@@ -263,7 +237,8 @@ class AddGroup(object):
                                    message_id=update.callback_query.message.message_id)
         buttons = list()
         buttons.append(
-            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"], callback_data="help_module(channels_groups)")]
+            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                  callback_data="help_module(channels_groups)")]
         )
         reply_markup = InlineKeyboardMarkup(
             buttons)
@@ -279,14 +254,9 @@ ADD_GROUP_HANLDER = CallbackQueryHandler(callback=AddGroup().add_group, pattern=
 GROUPS_MENU = CallbackQueryHandler(callback=groups_menu, pattern="groups")
 MY_GROUPS_HANDLER = CallbackQueryHandler(callback=Groups().group, pattern=r"group")
 
-
-
-
-
 REMOVE_GROUP_HANDLER = CallbackQueryHandler(Groups().finish_remove,
                                             pattern=r"remove_group")
-# POST_ON_GROUP_HANDLER = CallbackQueryHandler(Groups().post_on_group,
-#                                                pattern=r"post_on_group")
+
 
 SEND_POST_TO_GROUP_HANDLER = ConversationHandler(
     entry_points=[CallbackQueryHandler(SendPost().send_message, pattern=r"write_post_group")],

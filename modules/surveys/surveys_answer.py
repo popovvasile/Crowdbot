@@ -1,16 +1,10 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
-import logging
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (MessageHandler, Filters, ConversationHandler, CallbackQueryHandler, )
 from helper_funcs.helper import get_help
 from database import surveys_table
-
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-
-logger = logging.getLogger(__name__)
+from logs import logger
 
 CHOOSING_SURVEY, ANSWERING = range(2)
 

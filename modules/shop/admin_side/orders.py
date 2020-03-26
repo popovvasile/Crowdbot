@@ -1,5 +1,3 @@
-import logging
-
 from bson.objectid import ObjectId
 from telegram import (Update, ParseMode, InlineKeyboardButton, InlineKeyboardMarkup)
 from telegram.ext import (ConversationHandler, CallbackQueryHandler, CallbackContext)
@@ -11,15 +9,7 @@ from modules.shop.helper.helper import clear_user_data
 from modules.shop.components.order import AdminOrder
 from modules.shop.components.product import Product
 from modules.shop.admin_side.welcome import Welcome
-# todo bad import
-# from modules.users.users import UsersHandler
-
-from database import orders_table, products_table, users_table
-
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-logger = logging.getLogger(__name__)
+from database import orders_table, products_table
 
 
 class OrdersHandlerHelper(object):

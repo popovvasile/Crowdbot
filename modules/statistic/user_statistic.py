@@ -1,22 +1,13 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
 import datetime
-import logging
 from datetime import datetime, timedelta, time
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 from telegram.ext import ConversationHandler, CallbackQueryHandler
 
 from helper_funcs.misc import lang_timestamp
-from database import (users_table, donations_table, chatbots_table,
-                      channels_table, users_messages_to_admin_table)
-
-
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO)
-
-logger = logging.getLogger(__name__)
+from database import users_table, chatbots_table
 
 
 class UsersStatistic(object):
@@ -97,9 +88,6 @@ class UsersStatistic(object):
                    callback_data="back_to_module_settings")]
             ]),
             parse_mode=ParseMode.MARKDOWN),
-        # CHANNELS STATISTIC
-        # if channels_table.find({"bot_id": context.bot.id}):
-        #     pass
         return ConversationHandler.END
 
 

@@ -1,4 +1,3 @@
-import logging
 import re
 from urllib3.exceptions import HTTPError
 
@@ -8,11 +7,12 @@ from telegram.error import (BadRequest, TimedOut, NetworkError, TelegramError,
                             ChatMigrated)
 
 from helper_funcs.lang_strings.help_strings import help_strings, helpable_dict
-from helper_funcs.misc import paginate_modules, LOGGER, delete_messages, send_content_dict
+from helper_funcs.misc import paginate_modules, delete_messages, send_content_dict
 from helper_funcs.auth import (if_admin, initiate_chat_id,
                                register_chat, register_admin)
 from database import (custom_buttons_table, users_table, chatbots_table,
                       user_mode_table, products_table, groups_table)
+from logs import logger
 
 HELP_STRINGS = """
 {}
@@ -174,7 +174,7 @@ def error_callback(update, context):
     except TelegramError:
         print("TeelgramError")
     except Exception as e:
-        logging.error(e.__repr__())
+        logger.error(e.__repr__())
         context.bot.send_message(update.effective_message.chat.id,
                                  context.bot.lang_dict["error_occurred"],
                                  reply_markup=InlineKeyboardMarkup(
@@ -241,7 +241,7 @@ def button_handler(update, context):
         elif excp.message == "Message can't be deleted":
             pass
         else:
-            LOGGER.exception("Exception in help buttons. %s", str(query.data))
+            logger.exception("Exception in help buttons. %s", str(query.data))
     context.bot.send_message(chat_id=update.callback_query.message.chat_id,
                              text=context.bot.lang_dict["back_button"],
                              reply_markup=InlineKeyboardMarkup(buttons))
