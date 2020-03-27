@@ -24,6 +24,8 @@ TODO FUTURE
 	* To contacts and address must be added more info- multiple messages
 	* SHARE PHONE NUMBER
 	 + * В Full template заказа убрать пагинацию и сделать кнопку Items - которая будет показывать товары с заказа
+    * Где ожидается текст - если текст начинается / - не работает(когда вводишь имя товара например)
+
 
 -TODO-FEATURES USER SIDE
     * Отмена заказа
