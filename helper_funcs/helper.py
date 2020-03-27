@@ -41,6 +41,7 @@ def send_visitor_help(bot, chat_id, text):
     #                                     callback_data='pay_donation'), ]
     #
     # else:
+    """
     first_buttons = [[InlineKeyboardButton(bot.lang_dict["send_message_1"],
                                            callback_data="send_message_to_admin")]]
     product_list_of_dicts = products_table.find({
@@ -64,17 +65,16 @@ def send_visitor_help(bot, chat_id, text):
     else:
         pairs = list(zip(buttons[::2], buttons[1::2])) + [(buttons[-1],)]
     pairs = first_buttons + pairs
-
+    """
+    pairs = user_main_menu_creator(bot)
     bot.send_message(chat_id=chat_id,
                      text=text,
                      parse_mode=ParseMode.MARKDOWN,
-                     reply_markup=InlineKeyboardMarkup(
-                         pairs
-                     ))
+                     reply_markup=InlineKeyboardMarkup(pairs))
 
 
 def send_admin_user_mode(bot, chat_id, text):
-
+    """
     first_buttons = [[InlineKeyboardButton(bot.lang_dict["send_message_1"],
                                            callback_data="send_message_to_admin")]]
     product_list_of_dicts = products_table.find({
@@ -98,12 +98,68 @@ def send_admin_user_mode(bot, chat_id, text):
         pairs = list(zip(buttons[::2], buttons[1::2])) + [(buttons[-1],)]
     pairs = first_buttons + pairs + [[InlineKeyboardButton(text="ADMIN MODE",
                                                            callback_data="turn_user_mode_off")]]
+    """
+    pairs = (user_main_menu_creator(bot)
+             + [[InlineKeyboardButton(text="ADMIN MODE",
+                                      callback_data="turn_user_mode_off")]])
     bot.send_message(chat_id=chat_id,
                      text=text,
                      parse_mode=ParseMode.MARKDOWN,
-                     reply_markup=InlineKeyboardMarkup(
-                         pairs
-                     ))
+                     reply_markup=InlineKeyboardMarkup(pairs))
+
+
+def user_main_menu_creator(bot):
+    first_buttons = [[InlineKeyboardButton(bot.lang_dict["send_message_1"],
+                                           callback_data="send_message_to_admin")]]
+    product_list_of_dicts = products_table.find({
+        "bot_id": bot.id})
+    if (  # product_list_of_dicts.count() != 0 and
+            chatbots_table.find_one({"bot_id": bot.id})["shop_enabled"]):
+        first_buttons += [[InlineKeyboardButton(text=bot.lang_dict["shop"],
+                                                callback_data="help_module(shop)")]]
+
+    buttons = [InlineKeyboardButton(button["button"],
+                                    callback_data="button_{}".
+                                    format(button["button"].replace(" ", "").lower()))
+               for button in custom_buttons_table.find({"bot_id": bot.id, "link_button": False})]
+
+    buttons += [InlineKeyboardButton(button["button"], url=button["link"])
+                for button in custom_buttons_table.find({"bot_id": bot.id, "link_button": True})]
+
+    if len(buttons) % 2 == 0:
+        pairs = list(zip(buttons[::2], buttons[1::2]))
+    else:
+        pairs = list(zip(buttons[::2], buttons[1::2])) + [(buttons[-1],)]
+    return first_buttons + pairs
+
+
+def greeting_creator(update, context, chatbot):
+    # todo Fuck it - need to do better
+    # Creating welcome message
+    if chatbot:
+        current_user_mode = user_mode_table.find_one(
+            {"bot_id": context.bot.id,
+             "user_id": update.effective_user.id}) or {}
+        is_admin = if_admin(update=update, context=context.bot)
+        if chatbot.get("welcomeMessage"):
+            if is_admin:
+                if current_user_mode.get("user_mode"):
+                    welcome_message = chatbot['welcomeMessage']
+                else:
+                    welcome_message = context.bot.lang_dict["welcome"]
+            else:
+                welcome_message = chatbot['welcomeMessage']
+        else:
+            if is_admin:
+                if current_user_mode.get("user_mode"):
+                    welcome_message = context.bot.lang_dict["default_greeting"]
+                else:
+                    welcome_message = context.bot.lang_dict["welcome"]
+            else:
+                welcome_message = context.bot.lang_dict["default_greeting"]
+    else:
+        welcome_message = context.bot.lang_dict["default_greeting"]
+    return welcome_message
 
 
 def check_provider_token(currency, provider_token, update, context):
@@ -347,16 +403,21 @@ def help_button(update, context):
     back_match = re.match(r"help_back", query.data)
     back_button_match = re.match(r"back_from_button", query.data)
     chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
-    if chatbot:
-        if 'welcomeMessage' in chatbot:
-            if if_admin(update=update, context=context.bot):
-                welcome_message = context.bot.lang_dict["welcome"]
-            else:
-                welcome_message = chatbot['welcomeMessage']
-        else:
-            welcome_message = "Hello"
-    else:
-        welcome_message = "Hello"
+
+    # Old creating welcome message
+    # if chatbot:
+    #     if 'welcomeMessage' in chatbot:
+    #         if if_admin(update=update, context=context.bot):
+    #             welcome_message = context.bot.lang_dict["welcome"]
+    #         else:
+    #             welcome_message = chatbot['welcomeMessage']
+    #     else:
+    #         welcome_message = "Hello"
+    # else:
+    #     welcome_message = "Hello"
+
+    welcome_message = greeting_creator(update, context, chatbot)
+
     try:
         if mod_match:
 
@@ -453,17 +514,21 @@ def get_help(update, context):
     current_user_mode = user_mode_table.find_one({"bot_id": context.bot.id,
                                                   "user_id": update.effective_user.id})
 
-    if chatbot:
-        if 'welcomeMessage' in chatbot:
-            if if_admin(update=update, context=context.bot):
-                welcome_message = context.bot.lang_dict["welcome"]
+    # Old creating welcome message
+    # if chatbot:
+    #     if 'welcomeMessage' in chatbot:
+    #         if if_admin(update=update, context=context.bot):
+    #             welcome_message = context.bot.lang_dict["welcome"]
                 # TODO change to multlilingual
-            else:
-                welcome_message = chatbot['welcomeMessage']
-        else:
-            welcome_message = "Hello"
-    else:
-        welcome_message = "Hello"
+            # else:
+            #     welcome_message = chatbot['welcomeMessage']
+        # else:
+        #     welcome_message = "Hello"
+    # else:
+    #     welcome_message = "Hello"
+
+    welcome_message = greeting_creator(update, context, chatbot)
+
     if if_admin(update, context):
         if current_user_mode:
             if current_user_mode.get("user_mode") is True:
@@ -475,6 +540,7 @@ def get_help(update, context):
             user_mode_table.insert({"bot_id": context.bot.id,
                                     "user_id": update.effective_user.id,
                                     "user_mode": False})
+            welcome_message = greeting_creator(update, context, chatbot)
             send_admin_help(context.bot, chat.id, HELP_STRINGS.format(welcome_message))
     else:
         send_visitor_help(context.bot, chat.id, HELP_STRINGS.format(welcome_message))

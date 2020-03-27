@@ -106,8 +106,8 @@ def register_admin(update, context):
 
         context.bot.send_message(
             chat_id=update.effective_chat.id,
-            # TODO STRINGS
-            text=context.bot.lang_dict["hello_new_admin"])
+            text=context.bot.lang_dict["hello_new_admin"].format(
+                update.effective_user.full_name))
 
         logger.info(f"New admin {update.effective_user.full_name} "
                     f"on bot {context.bot.first_name}:{context.bot.id}")
@@ -134,10 +134,11 @@ def initiate_chat_id(update):
 
 
 def if_admin(update, context):
-    if update.message:
-        user_id = update.message.from_user.id
-    else:
-        user_id = update.callback_query.from_user.id
+    # if update.message:
+    #     user_id = update.message.from_user.id
+    # else:
+    #     user_id = update.callback_query.from_user.id
+    user_id = update.effective_user.id
     superuser = chatbots_table.find_one({"bot_id": context.bot.id})["superuser"]
     if user_id == superuser:
         return True

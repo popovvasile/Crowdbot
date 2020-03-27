@@ -2,7 +2,7 @@
     "ENG": {
         "invalid_button_name": "Button name so long, make it shorter\n",
         "shop_admin_number_not_integer": "Product quantity must be displayed as an positive integer",
-
+        "default_greeting": "Hello",
 
         "order_comment_too_long": "Your comment too big, please make it shorter.",
         "share_number_btn": "Share Number",
@@ -694,7 +694,7 @@
     "RUS": {
         "invalid_button_name": "Button name so long, make it shorter\n",
         "shop_admin_number_not_integer": "Product quantity must be displayed as an positive integer",
-
+        "default_greeting": "Здравствуйте",
 
         "order_comment_too_long": "Your comment too big, please make it shorter.",
         "share_number_btn": "Share Number",
