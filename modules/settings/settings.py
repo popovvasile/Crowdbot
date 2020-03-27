@@ -153,6 +153,14 @@ class AddCommands(object):
         reply_markup = InlineKeyboardMarkup(reply_buttons)
 
         chat_id, txt = initiate_chat_id(update)
+        if len(txt) > 128:
+            delete_messages(update, context, True)
+            context.user_data["to_delete"].append(
+                context.bot.send_message(update.effective_chat.id,
+                                         text=context.bot.lang_dict["invalid_button_name"]
+                                         + context.bot.lang_dict["add_menu_buttons_str_1_1"],
+                                         reply_markup=InlineKeyboardMarkup(reply_buttons)))
+            return TYPING_BUTTON
         button_list = custom_buttons_table.find({"bot_id": context.bot.id,
                                                  "button": txt})
         if not button_list.count():
@@ -270,6 +278,14 @@ class AddLinkButton(object):
                                                callback_data="cancel_button_creation")]]
         reply_markup = InlineKeyboardMarkup(reply_buttons)
         chat_id, txt = initiate_chat_id(update)
+        if len(txt) > 128:
+            delete_messages(update, context, True)
+            context.user_data["to_delete"].append(
+                context.bot.send_message(update.effective_chat.id,
+                                         text=context.bot.lang_dict["invalid_button_name"]
+                                         + context.bot.lang_dict["add_menu_buttons_str_1_1"],
+                                         reply_markup=reply_markup))
+            return TYPING_LINK
         button_list = custom_buttons_table.find({"bot_id": context.bot.id,
                                                  "button": txt})
         if not button_list.count():

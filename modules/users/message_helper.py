@@ -40,10 +40,11 @@ class AnswerToMessage(object):
             [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                   callback_data=self.back_button)]
         ])
-        context.bot.send_message(
-            chat_id=update.callback_query.message.chat_id,
-            text=context.bot.lang_dict["send_message_3"],
-            reply_markup=reply_markup)
+        context.user_data["to_delete"].append(
+            context.bot.send_message(
+                chat_id=update.callback_query.message.chat_id,
+                text=context.bot.lang_dict["send_message_3"],
+                reply_markup=reply_markup))
         return self.STATE
 
     def received_message(self, update, context):
@@ -84,7 +85,8 @@ class AnswerToMessage(object):
             [InlineKeyboardButton(
                 text=context.bot.lang_dict["show_btn"],
                 callback_data="subscriber_open_message_true/"
-                              + str(context.user_data["answer_to"]["_id"]))]])
+                              + str(context.user_data["answer_to"]["_id"]))]
+        ])
 
         context.bot.send_message(
             chat_id=context.user_data["answer_to"]["chat_id"],

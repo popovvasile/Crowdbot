@@ -118,7 +118,7 @@ class AdminHandler(object):
             context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
                 text=context.bot.lang_dict["admins_layout_title"].format(all_admins.count()),
-                parse_mode=ParseMode.MARKDOWN))
+                parse_mode=ParseMode.HTML))
         buttons = [
             [InlineKeyboardButton(
                 text=context.bot.lang_dict["add_admin_btn_str"],
