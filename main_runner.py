@@ -367,7 +367,7 @@ def main(token, lang):
     #                                   get_help)
     #
     # dispatcher.add_handler(rex_help_handler)
-    LOGGER.info("Using long polling.")
+    logger.info("Using long polling.")
     # updater.start_webhook(listen='0.0.0.0',
     #                       port=port,
     #                       url_path=token,

@@ -1,6 +1,7 @@
 from typing import Optional
 from functools import wraps
 from datetime import datetime
+from pprint import pprint
 
 from telegram import User, Bot, Update
 
@@ -12,12 +13,13 @@ def register_chat(update, context):
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
 
-    user = users_table.find_one({"user_id": user_id,
-                                 "bot_id": context.bot.id})
+    user = users_table.find_one({"user_id": user_id, "bot_id": context.bot.id})
     superuser = chatbots_table.find_one({"bot_id": context.bot.id})["superuser"]
-    if not user and user_id == superuser:
+    # todo quick solution - do better
+    if user_id == superuser:
         users_table.update({"user_id": user_id,
-                            "bot_id": context.bot.id},
+                            "bot_id": context.bot.id,
+                            "registered": False},
                            {'bot_id': context.bot.id,
                             "chat_id": chat_id,
                             "user_id": user_id,
@@ -33,8 +35,7 @@ def register_chat(update, context):
                             "messages_notification": True,
                             "blocked": False,
                             "unsubscribed": False,
-                            "tags": ["#all", "#user", "#admin"]
-                            }, upsert=True)
+                            "tags": ["#all", "#user", "#admin"]})
     elif not user:
         users_table.insert({'bot_id': context.bot.id,
                             "chat_id": chat_id,
@@ -52,7 +53,8 @@ def register_chat(update, context):
                             "blocked": False,
                             "unsubscribed": False,
                             "tags": ["#all", "#user"]})
-    elif user["unsubscribed"]:
+    user = users_table.find_one({"user_id": user_id, "bot_id": context.bot.id})
+    if user["unsubscribed"]:
         users_table.update_one({"user_id": user_id, "bot_id": context.bot.id},
                                {"$set": {"unsubscribed": False}})
 

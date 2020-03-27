@@ -60,10 +60,10 @@ class ProductsHelper(object):
              "items.product_id": product_obj.id_})
 
         # Quantity string
-        if product_obj.unlimited is True:
-            quantity = "Unlimited"
-        else:
-            quantity = product_obj.quantity
+        # if product_obj.unlimited is True:
+        #     quantity = "Unlimited"
+        # else:
+        #     quantity = product_obj.quantity
 
         # Admin product status string.
         # Product was deleted
@@ -83,11 +83,8 @@ class ProductsHelper(object):
             html.escape(product_obj.name, quote=False),
             product_obj.status_str,
             html.escape(product_obj.category["name"], quote=False),
-            product_obj.price,
-            shop["currency"],
-            product_obj.discount_price,
-            shop["currency"],
-            quantity)
+            product_obj.price_as_str(shop["currency"]),
+            product_obj.quantity_str)
 
         orders_string = ""
         if new_orders.count():
@@ -116,10 +113,10 @@ class ProductsHelper(object):
         """Admin full text representation of the product"""
         shop = chatbots_table.find_one(
             {"bot_id": context.bot.id})["shop"]
-        if product_obj.unlimited is True:
-            quantity = context.bot.lang_dict["unlimited"]
-        else:
-            quantity = product_obj.quantity
+        # if product_obj.unlimited is True:
+        #     quantity = context.bot.lang_dict["unlimited"]
+        # else:
+        #     quantity = product_obj.quantity
         # If description is long send_full_template method
         # will send description as separate message
         if len(product_obj.description) > MAX_TEMP_DESCRIPTION_LENGTH:
@@ -132,11 +129,8 @@ class ProductsHelper(object):
             product_obj.id_,
             html.escape(product_obj.name, quote=False),
             html.escape(product_obj.category["name"], quote=False),
-            product_obj.price,
-            shop["currency"],
-            product_obj.discount_price,
-            shop["currency"],
-            quantity,
+            product_obj.price_as_str(),
+            product_obj.quantity_str,
             html.escape(description, quote=False))
 
     @staticmethod
@@ -285,7 +279,7 @@ class ProductsHandler(ProductsHelper):
     def price(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         text = (self.admin_short_template(context, context.user_data["product"])
-                + "\n"
+                + "\n\n"
                 + context.bot.lang_dict["shop_admin_set_price"])
         context.user_data["product"].send_short_template(
             update, context,
@@ -294,24 +288,42 @@ class ProductsHandler(ProductsHelper):
 
     def finish_price(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        try:
-            price = float(
-                format(Price.fromstring(update.message.text).amount, '.2f'))
-        except ValueError:
-            context.bot.send_message(
-                chat_id=update.callback_query.message.chat_id,
-                text=context.bot.lang_dict["add_product_wrong_floating point number"],
-                reply_markup=back_kb(
-                    "back_to_main_menu", context=context))
+        price_request = context.user_data["product"].create_price(update, context)
+        if price_request["ok"]:
+            context.user_data["product"].update({"price": price_request["price"]})
+            # Remove discount price if new price smaller than discount
+            if context.user_data["product"].discount_price > price_request["price"]:
+                context.user_data["product"].update({"discount_price": 0})
+            return self.edit(update, context)
+        else:
+            text = (self.admin_short_template(context, context.user_data["product"])
+                    + "\n\n"
+                    + price_request["error_message"]
+                    + "\n\n"
+                    + context.bot.lang_dict["shop_admin_set_price"])
+            context.user_data["product"].send_short_template(
+                update, context,
+                text=text, reply_markup=keyboards(context)["back_to_edit"])
             return PRICE
-
-        context.user_data["product"].update({"price": price})
-        return self.edit(update, context)
+        # if self.discount_price
+        # try:
+        #     price = float(
+        #         format(Price.fromstring(update.message.text).amount, '.2f'))
+        # except ValueError:
+        #     context.bot.send_message(
+        #         chat_id=update.callback_query.message.chat_id,
+        #         text=context.bot.lang_dict["add_product_wrong_floating_point_number"],
+        #         reply_markup=back_kb(
+        #             "back_to_main_menu", context=context))
+        #     return PRICE
+        #
+        # context.user_data["product"].update({"price": price})
+        # return self.edit(update, context)
 
     def discount_price(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         text = (self.admin_short_template(context, context.user_data["product"])
-                + "\n"
+                + "\n\n"
                 + context.bot.lang_dict["shop_admin_set_discount_price"])
         context.user_data["product"].send_short_template(
             update, context,
@@ -320,23 +332,45 @@ class ProductsHandler(ProductsHelper):
 
     def finish_discount_price(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        try:
-            discount_price = float(
-                format(Price.fromstring(update.message.text).amount, '.2f'))
-        except ValueError:
-            context.bot.send_message(
-                chat_id=update.callback_query.message.chat_id,
-                text=context.bot.lang_dict["add_product_wrong_floating point number"],
-                reply_markup=back_kb("back_to_main_menu", context=context))
-            return DISCOUNT_PRICE
-        if discount_price >= context.user_data["product"].price:
-            context.user_data["product"].send_full_template(
-                update, context,
-                context.bot.lang_dict["shop_admin_discount_bigger_than_price"],
-                keyboards(context)["back_to_main_menu_keyboard"])
-            return DISCOUNT_PRICE
-        context.user_data["product"].update({"discount_price": discount_price})
-        return self.edit(update, context)
+        price_request = context.user_data["product"].create_price(update, context)
+        if price_request["ok"]:
+            if price_request["price"] >= context.user_data["product"].price:
+                text = (self.admin_short_template(context, context.user_data["product"])
+                        + "\n\n"
+                        + context.bot.lang_dict["shop_admin_discount_bigger_than_price"]
+                        + "\n\n"
+                        + context.bot.lang_dict["shop_admin_set_discount_price"])
+            else:
+                context.user_data["product"].update({"discount_price": price_request["price"]})
+                return self.edit(update, context)
+        else:
+            text = (self.admin_short_template(context, context.user_data["product"])
+                    + "\n\n"
+                    + price_request["error_message"]
+                    + "\n\n"
+                    + context.bot.lang_dict["shop_admin_set_discount_price"])
+        context.user_data["product"].send_short_template(
+            update, context,
+            text=text, reply_markup=keyboards(context)["back_to_edit"])
+        return DISCOUNT_PRICE
+
+        # try:
+        #     discount_price = float(
+        #         format(Price.fromstring(update.message.text).amount, '.2f'))
+        # except ValueError:
+        #     context.bot.send_message(
+        #         chat_id=update.callback_query.message.chat_id,
+        #         text=context.bot.lang_dict["add_product_wrong_floating point number"],
+        #         reply_markup=back_kb("back_to_main_menu", context=context))
+        #     return DISCOUNT_PRICE
+        # if discount_price >= context.user_data["product"].price:
+        #     context.user_data["product"].send_full_template(
+        #         update, context,
+        #         context.bot.lang_dict["shop_admin_discount_bigger_than_price"],
+        #         keyboards(context)["back_to_main_menu_keyboard"])
+        #     return DISCOUNT_PRICE
+        # context.user_data["product"].update({"discount_price": discount_price})
+        # return self.edit(update, context)
 
     def content_menu(self, update, context):
         delete_messages(update, context, True)
@@ -502,6 +536,56 @@ class ProductsHandler(ProductsHelper):
                 + "\n\n"
                 + context.bot.lang_dict["shop_admin_set_quantity"])
 
+        context.user_data["product"].send_short_template(
+            update, context,
+            text=text, reply_markup=self.edit_quantity_markup(context))
+        return SET_QUANTITY
+
+    def finish_quantity(self, update: Update, context: CallbackContext):
+        delete_messages(update, context, True)
+        if update.message:
+            quantity_request = context.user_data["product"].create_quantity(
+                update, context)
+            if quantity_request["ok"]:
+                context.user_data["product"].update(
+                    {"quantity": quantity_request["quantity"],
+                     "unlimited": False})
+            else:
+                text = (self.admin_short_template(context, context.user_data["product"])
+                        + "\n\n"
+                        + quantity_request["error_message"]
+                        + "\n\n"
+                        + context.bot.lang_dict["shop_admin_set_quantity"])
+                context.user_data["product"].send_short_template(
+                    update, context,
+                    text=text, reply_markup=self.edit_quantity_markup(context))
+                return SET_QUANTITY
+        elif update.callback_query.data == "quantity_unlimited":
+            context.user_data["product"].update(
+                {"quantity": 0, "unlimited": True})
+
+        # context.user_data["new_product"].send_full_template(
+        #     update, context, context.bot.lang_dict["shop_admin_write_your_price"],
+        #     keyboards(context)["back_to_main_menu_keyboard"])
+        return self.edit(update, context)
+
+        # if update.message:
+        #     if int(update.message.text) < 10**7:
+        #         context.user_data["product"].update(
+        #             {"quantity": int(update.message.text),
+        #              "unlimited": False})
+        #     else:
+        #         context.user_data["product"].update(
+        #             {"quantity": 0,
+        #              "unlimited": True})
+        # elif update.callback_query.data == 'quantity_unlimited':
+        #     context.user_data["product"].update(
+        #         {"quantity": 0,
+        #          "unlimited": True})
+        # return self.edit(update, context)
+
+    @staticmethod
+    def edit_quantity_markup(context):
         reply_markup = InlineKeyboardMarkup([
             [InlineKeyboardButton(
                 text=context.bot.lang_dict["shop_admin_set_unlimited"],
@@ -509,34 +593,13 @@ class ProductsHandler(ProductsHelper):
             [InlineKeyboardButton(
                 text=context.bot.lang_dict["back_button"],
                 callback_data="back_to_edit")]])
-
-        context.user_data["product"].send_short_template(
-            update, context, text=text, reply_markup=reply_markup)
-        return SET_QUANTITY
-
-    def finish_quantity(self, update: Update, context: CallbackContext):
-        delete_messages(update, context, True)
-        if update.message:
-            if int(update.message.text) < 10**7:
-                context.user_data["product"].update(
-                    {"quantity": int(update.message.text),
-                     "unlimited": False})
-            else:
-                context.user_data["product"].update(
-                    {"quantity": 0,
-                     "unlimited": True})
-        elif update.callback_query.data == 'quantity_unlimited':
-            context.user_data["product"].update(
-                {"quantity": 0,
-                 "unlimited": True})
-        return self.edit(update, context)
+        return reply_markup
 
     def back_to_products(self, update: Update, context: CallbackContext):
         page = context.user_data.get("page")
         delete_messages(update, context)
         clear_user_data(context)
         context.user_data["page"] = page
-
         return self.products(update, context)
 
 
@@ -569,17 +632,19 @@ PRODUCTS_HANDLER = ConversationHandler(
                CallbackQueryHandler(ProductsHandler().category,
                                     pattern="change_category"),
                CallbackQueryHandler(ProductsHandler().content_menu,
-                                    pattern="content_menu"),
-               ],
+                                    pattern="content_menu")],
 
-        CONFIRM_TO_TRASH: [CallbackQueryHandler(
-            ProductsHandler().finish_to_trash,
-            pattern=r"finish_to_trash")],
-        CATEGORY: [MessageHandler(Filters.text,
-                                  ProductsHandler().finish_category),
-                   CallbackQueryHandler(
-                       ProductsHandler().finish_category,
-                       pattern=r"category_")],
+        CONFIRM_TO_TRASH: [
+            CallbackQueryHandler(ProductsHandler().finish_to_trash,
+                                 pattern=r"finish_to_trash")],
+
+        CATEGORY: [
+            MessageHandler(
+                Filters.text,
+                ProductsHandler().finish_category),
+            CallbackQueryHandler(
+                ProductsHandler().finish_category,
+                pattern=r"category_")],
 
         CONTENT_MENU: [
             CallbackQueryHandler(
@@ -589,13 +654,9 @@ PRODUCTS_HANDLER = ConversationHandler(
                 pattern=r"remove_from_content",
                 callback=ProductsHandler().finish_remove_from_content)],
 
-        # todo not Filters.all - there are no text, sticker, and video note
         ADDING_CONTENT: [
             MessageHandler(Filters.all,
                            ProductsHandler().open_content_handler)],
-
-        # IMAGES: [MessageHandler(Filters.photo,
-        #                         ProductsHandler().finish_images)],
 
         DESCRIPTION: [MessageHandler(Filters.text,
                                      ProductsHandler().finish_description)],
@@ -603,27 +664,38 @@ PRODUCTS_HANDLER = ConversationHandler(
         NAME: [MessageHandler(Filters.text,
                               ProductsHandler().finish_name)],
 
+        # todo 3 regexes vs just Filters.text (it looks like everything works anyway)
         PRICE: [MessageHandler(Filters.regex(r'(\d+\.\d{1,2})|(\d+\,\d{1,2})'),
                                ProductsHandler().finish_price),
                 MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
                                ProductsHandler().finish_price),
                 MessageHandler(Filters.regex(r"^((?!@).)*$"),
-                               ProductsHandler().price)
-                ],
+                               ProductsHandler().finish_price)],
 
+        # todo 3 regexes vs just Filters.text (it looks like everything works anyway)
         DISCOUNT_PRICE: [
             MessageHandler(Filters.regex(r'(\d+\.\d{1,2})|(\d+\,\d{1,2})'),
                            ProductsHandler().finish_discount_price),
             MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
                            ProductsHandler().finish_discount_price),
             MessageHandler(Filters.regex(r"^((?!@).)*$"),
-                           ProductsHandler().discount_price)
+                           ProductsHandler().finish_discount_price)
         ],
 
-        SET_QUANTITY: [MessageHandler(Filters.regex("^[0-9]+$"),
-                                      ProductsHandler().finish_quantity),
+        # todo 3 regexes vs just Filters.text (it looks like everything works anyway)
+        SET_QUANTITY: [  # MessageHandler(Filters.regex("^[0-9]+$"),
+                       #                  ProductsHandler().finish_quantity),
+                       # CallbackQueryHandler(ProductsHandler().finish_quantity,
+                       #                      pattern=r'quantity_unlimited')
                        CallbackQueryHandler(ProductsHandler().finish_quantity,
-                                            pattern=r'quantity_unlimited')],
+                                            pattern=r"quantity_unlimited"),
+                       MessageHandler(Filters.regex(r'(\d+\.\d{1,2})|(\d+\,\d{1,2})'),
+                                      ProductsHandler().finish_quantity),
+                       MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
+                                      ProductsHandler().finish_quantity),
+                       MessageHandler(Filters.regex(r"^((?!@).)*$"),
+                                      ProductsHandler().finish_quantity),
+        ],
     },
     fallbacks=[CallbackQueryHandler(Welcome.back_to_main_menu,
                                     pattern=r"back_to_main_menu"),

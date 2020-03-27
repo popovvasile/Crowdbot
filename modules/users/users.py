@@ -618,25 +618,32 @@ class SendMessageToUser(object):
 
         reply_markup = InlineKeyboardMarkup([
             [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                  callback_data="back_to_open_user")]
+                                  callback_data="cancel_creating_message")]
         ])
-        context.bot.send_message(
-            chat_id=update.callback_query.message.chat_id,
-            text=context.bot.lang_dict["send_message_3"],
-            reply_markup=reply_markup)
+        context.user_data["to_delete"].append(
+            context.bot.send_message(
+                chat_id=update.callback_query.message.chat_id,
+                text=context.bot.lang_dict["send_message_3"],
+                reply_markup=reply_markup))
         return MESSAGE_TO_USER
 
     def received_message(self, update, context):
+        delete_messages(update, context)
+        if not context.user_data.get("user_input"):
+            context.user_data["user_input"] = list()
+        context.user_data["user_input"].append(update.effective_message)
+        # TODO REFACTOR - use one content_dict structure for the whole project
         add_to_content(update, context)
         reply_markup = InlineKeyboardMarkup([
             [InlineKeyboardButton(text=context.bot.lang_dict["done_button"],
                                   callback_data="send_message_finish")],
             [InlineKeyboardButton(text=context.bot.lang_dict["cancel_button"],
-                                  callback_data="back_to_open_user")]
+                                  callback_data="cancel_creating_message")]
         ])
-        context.bot.send_message(chat_id=update.message.chat_id,
-                                 text=context.bot.lang_dict["send_message_4"],
-                                 reply_markup=reply_markup)
+        context.user_data["to_delete"].append(
+            context.bot.send_message(chat_id=update.message.chat_id,
+                                     text=context.bot.lang_dict["send_message_4"],
+                                     reply_markup=reply_markup))
         return MESSAGE_TO_USER
 
     def send_message_finish(self, update, context):
@@ -648,12 +655,17 @@ class SendMessageToUser(object):
                 content=context.user_data["content"])
         except:
             update.callback_query.answer(context.bot.lang_dict["smth_gone_wrong_blink"])
-            return UsersHandler().back_to_open_user(update, context)
+            return self.cancel_creating_message(update, context)
         logger.info("Admin {} on bot {}:{} sent a message to the user".format(
             update.effective_user.first_name,
             context.bot.first_name, context.bot.id))
         # TODO STRINGS
         update.callback_query.answer("Message sent")
+        return UsersHandler().back_to_open_user(update, context)
+
+    def cancel_creating_message(self, update, context):
+        if context.user_data.get("user_input"):
+            context.user_data["to_delete"].extend(context.user_data["user_input"])
         return UsersHandler().back_to_open_user(update, context)
 
 
@@ -902,7 +914,10 @@ SEND_MESSAGE_TO_USER_HANDLER = ConversationHandler(
             callback=UsersHandler().back_to_users),
         CallbackQueryHandler(
             pattern="back_to_open_user",
-            callback=UsersHandler().back_to_open_user)]
+            callback=UsersHandler().back_to_open_user),
+        CallbackQueryHandler(
+            pattern="cancel_creating_message",
+            callback=SendMessageToUser().cancel_creating_message)]
 )
 
 

@@ -7,11 +7,12 @@ from bson.objectid import ObjectId
 from telegram.error import BadRequest
 from telegram.constants import MAX_CAPTION_LENGTH
 from telegram import (ParseMode, InputMediaPhoto)
+from price_parser import Price
 
+from helper_funcs.helper import currency_limits_dict
 from helper_funcs.misc import get_obj
 from modules.shop.helper.helper import send_media_arr
-from database import products_table, categories_table, orders_table
-
+from database import products_table, categories_table, orders_table, chatbots_table
 
 """If product description length bigger than this integer
 description will be sends as separate message
@@ -71,6 +72,22 @@ class Product(object):
         return f"\n\n• Files {len(self.content)}/10"
 
     @property
+    def quantity_str(self):
+        if self.unlimited:
+            return self.context.bot.lang_dict["unlimited"]
+        else:
+            return str(self.quantity)
+
+    def price_as_str(self, currency=None):
+        if not currency:
+            currency = chatbots_table.find_one(
+                {"bot_id": self.context.bot.id})["shop"]["currency"]
+        if self.discount_price:
+            return f"💥 <s>{self.price}</s> <b><u>{self.discount_price} {currency}</u></b>"
+        else:
+            return f"<b><u>{self.price} {currency}</u></b>"
+
+    @property
     def status_str(self):
         new_orders = orders_table.find(
             {"bot_id": self.context.bot.id,
@@ -91,6 +108,55 @@ class Product(object):
         else:
             status = self.context.bot.lang_dict["product_sold_status"]
         return status
+
+    @staticmethod
+    def create_price(update, context):
+        """Text in update required"""
+        currency = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]["currency"]
+        currency_limits = currency_limits_dict[currency]
+        result = dict()
+        try:
+            assert currency_limits["min"] < float(update.message.text) < currency_limits["max"]
+        except AssertionError:
+            result["ok"] = False
+            result["error_message"] = context.bot.lang_dict["shop_admin_price_wrong"].format(
+                    currency_limits["min"], currency, currency_limits["max"], currency)
+            return result
+        except ValueError:
+            result["ok"] = False
+            result["error_message"] = (
+                context.bot.lang_dict["add_product_wrong_floating_point_number"])
+            return result
+        # todo maybe don't check price string length?
+        #  coz we check price for max float before and then we can just round price
+        if len(update.message.text) <= len(str(currency_limits["max"])):
+            result["ok"] = True
+            result["price"] = float(
+                format(Price.fromstring(update.message.text,
+                                        decimal_separator=".").amount, '.2f'))
+        else:
+            result["ok"] = False
+            result["error_message"] = context.bot.lang_dict["shop_admin_price_too_big"]
+        return result
+
+    @staticmethod
+    def create_quantity(update, context):
+        """Text in update required"""
+        result = dict()
+        try:
+            assert int(float(update.message.text)) > 0
+        except (AssertionError, ValueError):
+            result["ok"] = False
+            result["error_message"] = context.bot.lang_dict["shop_admin_number_wrong"]
+            return result
+
+        if len(update.message.text) <= 10:
+            result["ok"] = True
+            result["quantity"] = int(float(update.message.text))
+        else:
+            result["ok"] = False
+            result["error_message"] = context.bot.lang_dict["shop_admin_quantity_too_big"]
+        return result
 
     def send_short_template(self, update, context,
                             text=None, reply_markup=None):
