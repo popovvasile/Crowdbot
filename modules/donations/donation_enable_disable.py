@@ -88,7 +88,7 @@ class CreateDonationHandler(object):
         reply_markup = InlineKeyboardMarkup(
             buttons)
         chat_id, txt = initiate_chat_id(update)
-        if check_provider_token(provider_token=txt, update=update, context=context):
+        if check_provider_token(provider_token=txt, update=update, context=context)[0]:
 
             context.user_data['payment_token'] = txt
 

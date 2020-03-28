@@ -163,7 +163,7 @@ def greeting_creator(update, context, chatbot):
 
 
 def check_provider_token(currency, provider_token, update, context):
-    prices = [LabeledPrice("TEST", 100)]
+    prices = [LabeledPrice("TEST", 100000)]
     if "to_delete" not in context.user_data:
         context.user_data["to_delete"] = []
 
@@ -181,10 +181,13 @@ def check_provider_token(currency, provider_token, update, context):
                                     ))
 
     except Exception as e:
-        print(e)
-        return False
+        if str(e) == "Payment_provider_invalid":
+            error = "The payment provider was not recognised or its token was invalid"
+        else:
+            error = e
+        return (False, str(error))
     delete_messages(update, context, True)
-    return True
+    return (True, "All good")
 
 
 # for test purposes

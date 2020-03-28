@@ -219,7 +219,7 @@
         "donations_edit_str_11": "🗑 The payment is deleted",
         "donations_edit_str_12": "Enter a new token of your payment system",
         "donations_edit_str_13": "✅ New token updated!",
-        "donations_edit_str_14": "Wrong token. Check it and send it again. \n It may be incompatible with your current currency. Try to change it.",
+        "donations_edit_str_14": "Wrong token. Check it and send it again. \nCause: {} \nIt may be incompatible with your current currency. Try to change it.",
         "donations_edit_str_2": "What to do with the payment? Or press '🔙 ",
         "donations_edit_str_3": "Yes, I'm sure.",
         "donations_edit_str_4": "No, cancel",
