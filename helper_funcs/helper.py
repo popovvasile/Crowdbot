@@ -1,4 +1,5 @@
 import re
+import html
 from urllib3.exceptions import HTTPError
 
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, LabeledPrice
@@ -28,7 +29,7 @@ def send_admin_help(bot, chat_id, text, keyboard=None):
                                      callback_data="turn_user_mode_on")]])
     bot.send_message(chat_id=chat_id,
                      text=text,
-                     parse_mode=ParseMode.MARKDOWN,
+                     parse_mode=ParseMode.HTML,
                      reply_markup=keyboard)
 
 
@@ -69,7 +70,7 @@ def send_visitor_help(bot, chat_id, text):
     pairs = user_main_menu_creator(bot)
     bot.send_message(chat_id=chat_id,
                      text=text,
-                     parse_mode=ParseMode.MARKDOWN,
+                     parse_mode=ParseMode.HTML,
                      reply_markup=InlineKeyboardMarkup(pairs))
 
 
@@ -104,7 +105,7 @@ def send_admin_user_mode(bot, chat_id, text):
                                       callback_data="turn_user_mode_off")]])
     bot.send_message(chat_id=chat_id,
                      text=text,
-                     parse_mode=ParseMode.MARKDOWN,
+                     parse_mode=ParseMode.HTML,
                      reply_markup=InlineKeyboardMarkup(pairs))
 
 
@@ -159,7 +160,7 @@ def greeting_creator(update, context, chatbot):
                 welcome_message = context.bot.lang_dict["default_greeting"]
     else:
         welcome_message = context.bot.lang_dict["default_greeting"]
-    return welcome_message
+    return html.escape(welcome_message, quote=False)
 
 
 def check_provider_token(currency, provider_token, update, context):

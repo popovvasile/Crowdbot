@@ -1,7 +1,9 @@
 --SHOP  -- status, in_trash, on_sale
     [Done] * Валидация на количество контента в сообщении(в ответе)
     [Done] * Валидация данных при изменении приветсвия(реагировало на фотку)
+
     [Done] * Убрать из валидации цены проверку на длину строки
+
     [DONE] * Buttons - html escape(name, content) and so on
     [DONE] * telegram.error.BadRequest: Button_data_invalid (длина callback_data кнопки)
 
