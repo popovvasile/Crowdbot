@@ -16,9 +16,9 @@ from modules.shop.helper.keyboards import back_btn
 from currency_converter import CurrencyConverter
 
 START, CHOOSING_ACTION, FINISH_ACTION, EDIT_PAYMENT, CHOOSING_EDIT_ACTION, \
-TYPING_TITLE, TYPING_DESCRIPTION, TYPING_CURRENCY, \
-TYPING_TOKEN, TYPING_TOKEN_FINISH, EDIT_FINISH, \
-DOUBLE_CHECK_DELETE, DELETE_FINISH, CURRENCY_FINISH = range(14)
+    TYPING_TITLE, TYPING_DESCRIPTION, TYPING_CURRENCY, \
+    TYPING_TOKEN, TYPING_TOKEN_FINISH, EDIT_FINISH, \
+    DOUBLE_CHECK_DELETE, DELETE_FINISH, CURRENCY_FINISH = range(14)
 
 
 class EnableDisableShopDonations(object):
@@ -326,7 +326,7 @@ class EditPaymentHandler(object):
             check = check_provider_token(provider_token=chatbot["shop"]["payment_token"],
                                          update=update,
                                          context=context, currency=txt)
-            if check[0]:
+            if check[0] or chatbot["shop"]["shop_type"] == "offline":
                 update_dict["currency"] = txt
                 context.user_data["currency"] = txt
                 c = CurrencyConverter()
