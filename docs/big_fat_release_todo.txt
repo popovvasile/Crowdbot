@@ -1,15 +1,27 @@
 --SHOP  -- status, in_trash, on_sale
+    [Vasile]
     * ValueError: KZT is not a supported currency
     * ValueError: UAH is not a supported currency
-    * Address validation in admin setting shop
     * Погрешность при смене валюты может выставить цену минимальней чем минимальный возможный платёж
+    * поставить allow_reentry - ConversationHandler
+    * File "/root/test_yura/crowdrobot/modules/payments/payments_config.py", line 326, in handle_edit_finish
+            KeyError: 'payment_token'
+    * Error Callback Доделать нормально, с логами
+    * Currency Exchange converter fix
+
+    [Yuriy]
     * в trash показывает чужие товары
-    * html баг в заказах(вроде и в админ части и в юзер части)
-    * не показывает Article в магазине юзер часть
+    * Address validation in admin setting shop
+    * Unauthorized (bot was blocked by the user/deactivated) когда отвечаешь отписчику/удалённому(в ответах)
     * Баги в Удалении категории(Если есть товара который есть в новых заказах) и вообще в целом работа с товаром
-    * Сделать Inline клавиатуру в валюте, Добавить туда гривны, белорус рубли
+    * В Full template и Short template заказа - при слишком большом тексте(Items)
+            - HTML BUG обрывать текст и показывать три точки
+	* В Short template товара - при слишком большом тексте(Not finished orders)
+	        - HTML BUG обрывать текст и показывать три точки
 
 
+
+    [Done] * не показывает Article в магазине юзер часть
     [Done] * Валидация на количество контента в сообщении(в ответе)
     [Done] * Валидация данных при изменении приветсвия(реагировало на фотку)
     [Done] * Убрать из валидации цены проверку на длину строки
@@ -18,7 +30,6 @@
     [DONE] Одинаковые имена категории
     [DONE] * Поправить юзер шаблоны(discount)
 
-    % * Error Callback если вызывается - отключает кнопку в меню в котором была ошибка
     % * Ошибки с токенами оплаты(Яндекс касса и тд)
         - не принимает некоторые токены(
             например выбрана валюта RUB и при этом не принимает токен Яндекс кассы)
@@ -48,8 +59,6 @@
 	[DONE] + * Если вообще нет товаров - blink(о отм что нет товара) когда нажимаешь catalog - there is no shop
 	[DONE] Picture must be smaller
     [DONE] Remove all the strings from hard-code and move them to languages.json, especially the shop
-	[DONE] + * В Full template и Short template заказа - при слишком большом тексте(Items) - обрывать текст и показывать три точки
-	[DONE] + * В Short template товара - при слишком большом тексте(Not finished orders) - обрывать текст и показывать три точки
 	[DONE] + * ФЛОУ ОНЛАЙН - (см. карту флоу)
 	[DONE]      1) Убрать пункт онлайн/оффлайн шоп при создании шопа.
 	[DONE]      2) Добавить в настройки способ оплаты: безналичный расчёт.(Появляется кнопка изменить токен)
@@ -79,6 +88,7 @@ STRINGS
 	* Убрать пресс БЭК-стрингз везде
 	* В темплейте сообщения если один и тот же тип файла повторяется - показывать число
 	* просто блинк когда с каталога переходишь в пустую корзину
+	* Сделать Inline клавиатуру в валюте, Добавить туда гривны, белорус рубли
 
 --BACK BUTTONS
     [DONE] back from change greeting - fix
@@ -177,7 +187,6 @@ STRINGS
 
 
 --TESTING
-	+ * Проверить Все NEW и DONE заказы считаются по цене которая была на момент заказа
 	+ * test shop(and other part of the bot) with Markdown and HTML tags in messages
 	+ * ПРОВЕРИТЬ РУССКИЙ ТЕКСТ(Подсчитать количество "{}" в русских строках - и пофиксить русские строки)
 	* test shop(and other part of the bot) with big texts, many items in orders, many content and so on
@@ -193,6 +202,8 @@ STRINGS
 	* Изменение валюты не влияет на заказы(проверить отображение в всех шаблонах)
 	* Проверить что discount работает(заказы онлайн/офлайн)
     * Проверить пагинацию в поиске юзеров
+    * Проверить Все NEW и DONE заказы считаются по цене которая была на момент заказа
+        (проверить что discount price учитывается)
 
 * One code style for whole project - lil rules :)
 	* max 100 symbols on one line
