@@ -176,10 +176,9 @@ class AdminOrder(Order):
         context.user_data["to_delete"].append(
             context.bot.send_message(
                 chat_id=update.effective_chat.id,
-                text=html.escape(self.template + "\n\n" + text, quote=False),
+                text=self.template + "\n\n" + text,
                 reply_markup=reply_markup,
-                parse_mode=ParseMode.HTML
-            ))
+                parse_mode=ParseMode.HTML))
 
     def send_full_template(self, update, context, text="", reply_markup=None,
                            item_reply_markup=None):
