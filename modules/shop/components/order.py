@@ -178,8 +178,7 @@ class AdminOrder(Order):
                 chat_id=update.effective_chat.id,
                 text=self.template + "\n\n" + text,
                 reply_markup=reply_markup,
-                parse_mode=ParseMode.HTML
-            ))
+                parse_mode=ParseMode.HTML))
 
     def send_full_template(self, update, context, text="", reply_markup=None,
                            item_reply_markup=None):

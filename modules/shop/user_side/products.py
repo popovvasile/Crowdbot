@@ -72,7 +72,7 @@ class UserProductsHelper(object):
             {"_id": product["category_id"]})["name"]
         # if product.get("discount_price") > 0:
         template = context.bot.lang_dict["short_user_product_temp"].format(
-            product.get("article"),
+            str(product.get("_id")),
             html.escape(product["name"], quote=False),
             html.escape(category, quote=False),
             cls.price_as_str(product, context, currency),

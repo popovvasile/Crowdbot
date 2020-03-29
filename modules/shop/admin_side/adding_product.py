@@ -6,7 +6,8 @@ from telegram.ext import (ConversationHandler, CallbackQueryHandler,
 
 from modules.shop.admin_side.welcome import Welcome
 from modules.shop.admin_side.categories import validate_category_name, MAX_CATEGORIES_COUNT
-from modules.shop.components.product import Product, MAX_TEMP_DESCRIPTION_LENGTH
+from modules.shop.components.product import (Product, MAX_TEMP_DESCRIPTION_LENGTH,
+                                             MAX_PRODUCT_NAME_LENGTH)
 from modules.shop.helper.keyboards import keyboards, back_btn, create_keyboard
 from helper_funcs.misc import delete_messages
 from database import categories_table, chatbots_table
@@ -34,7 +35,7 @@ class AddingProductHandler(object):
 
     def set_title(self, update: Update, context: CallbackContext):
         context.user_data["new_product"] = Product(context)
-        if len(update.message.text) <= 30:
+        if len(update.message.text) <= MAX_PRODUCT_NAME_LENGTH:
             context.user_data["new_product"].name = update.message.text
         else:
             context.user_data["to_delete"].append(context.bot.send_message(
@@ -55,7 +56,6 @@ class AddingProductHandler(object):
             context.user_data["new_product"].send_full_template(
                 update, context,
                 context.bot.lang_dict["shop_admin_set_category"], keyboard)
-
         else:
             buttons = [
                 [InlineKeyboardButton(
@@ -355,8 +355,9 @@ ADD_PRODUCT_HANDLER = ConversationHandler(
         FINISH_ADDING: [
             CallbackQueryHandler(AddingProductHandler().finish_adding,
                                  pattern=r"confirm_product"),
-            MessageHandler(Filters.all,
-                           callback=AddingProductHandler().finish_adding)]
+            # MessageHandler(Filters.all,
+            #                callback=AddingProductHandler().finish_adding)
+        ]
     },
 
     fallbacks=[CallbackQueryHandler(Welcome().back_to_main_menu,
