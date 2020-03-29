@@ -338,7 +338,7 @@ class EditPaymentHandler(object):
                 url += chatbot["shop"]["currency"]
 
                 # Making our request
-                converted = float(requests.get(url).json()[txt])
+                converted = float(requests.get(url).json()["conversion_rates"][txt])
 
                 keyboard_markup = InlineKeyboardMarkup(
                     [[InlineKeyboardButton(text=context.bot.lang_dict["yes"],
@@ -350,7 +350,7 @@ class EditPaymentHandler(object):
                 context.user_data["to_delete"].append(update.message.reply_text(
                     context.bot.lang_dict["payments_currency_change"].format(
                         chatbot["shop"]["currency"], txt, chatbot["shop"]["currency"],
-                        str(round(converted * 1, 2)), txt
+                        str(round(converted * 100, 2)), txt
                     ), reply_markup=keyboard_markup))
                 context.user_data["converted"] = converted
                 return CURRENCY_FINISH

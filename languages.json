@@ -336,7 +336,7 @@
         "payments_config_text_donations_enabled": "Donations have been enabled for your users. Enter the configurations to set up a greeting message for those who want to donate for you",
         "payments_config_text_shop_disabled": "❌ The shop has been disabled on this bot",
         "payments_config_text_shop_enabled": "✅ Your shop has been created. Enter the settings to  add your first product",
-        "payments_currency_change": "All prices will be converted from {} to {}\nThe current exchange rate is 1{}={}{}?\nAre you sure that you want to proceed?",
+        "payments_currency_change": "All prices will be converted from {} to {}\nThe current exchange rate is 100{}={}{}?\nAre you sure that you want to proceed?",
         "payments_currency_has_changed": "Your currency has been changed",
         "payments_current_description": "Your current shop description is: \n'{}'",
         "payments_current_payments": "Your current currency is {}",
