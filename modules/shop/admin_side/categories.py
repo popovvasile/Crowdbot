@@ -1,5 +1,7 @@
+import html
+
 from bson import ObjectId
-from telegram import InlineKeyboardButton, Update, InlineKeyboardMarkup
+from telegram import InlineKeyboardButton, Update, InlineKeyboardMarkup, ParseMode
 from telegram.ext import (ConversationHandler, CallbackQueryHandler,
                           CallbackContext, Filters, MessageHandler)
 
@@ -11,6 +13,25 @@ from modules.shop.helper.keyboards import (back_btn)
 
 START_ADD_CATEGORY, SET_CATEGORY, RENAME_CATEGORY = range(3)
 DELETE_CATEGORY_CONFIRM = 1
+
+# CONSTANTS
+MAX_CATEGORY_NAME_LENGTH = 50
+MAX_CATEGORIES_COUNT = 5
+
+
+def validate_category_name(name, context):
+    result = dict()
+    if len(name) > MAX_CATEGORY_NAME_LENGTH:
+        result["ok"] = False
+        result["error_message"] = context.bot.lang_dict["shop_admin_category_too_long"]
+    elif categories_table.find_one({"bot_id": context.bot.id, "name": name}):
+        result["ok"] = False
+        result["error_message"] = context.bot.lang_dict["category_name_exist"].format(
+            html.escape(name, quote=False))
+    else:
+        result["ok"] = True
+        result["name"] = name
+    return result
 
 
 class ProductCategoryHandler(object):
@@ -28,7 +49,7 @@ class ProductCategoryHandler(object):
         )
 
         context.user_data["to_delete"] = [context.bot.send_message(
-            chat_id=update.callback_query.message.chat_id,
+            chat_id=update.effective_chat.id,
             text=context.bot.lang_dict["products_categories_menu"],
             reply_markup=keyboard)]
 
@@ -44,9 +65,8 @@ class ProductCategoryHandler(object):
             [InlineKeyboardButton(context.bot.lang_dict["delete_button_str"],
                                   callback_data="delete_shop_category/{}".format(category_id))],
 
-            [back_btn("back_to_main_menu", context)],
-        ]
-        )
+            [back_btn("back_to_admin_categories", context)],
+        ])
 
         context.user_data["to_delete"] = [context.bot.send_message(
             chat_id=update.callback_query.message.chat_id,
@@ -140,79 +160,125 @@ class ProductCategoryHandler(object):
         delete_messages(update, context, True)
         context.user_data["category_id"] = update.callback_query.data.replace(
                                                 "edit_name_shop_category/", "")
-        keyboard = InlineKeyboardMarkup([
-            [back_btn("back_to_main_menu", context)],
-        ]
-        )
-
-        context.user_data["to_delete"] = [context.bot.send_message(
-            chat_id=update.callback_query.message.chat_id,
-            text=context.bot.lang_dict["write_new_category"],
-            reply_markup=keyboard)]
-
+        keyboard = InlineKeyboardMarkup([[back_btn("back_to_admin_categories", context)]])
+        context.user_data["to_delete"].append(
+            context.bot.send_message(
+                chat_id=update.callback_query.message.chat_id,
+                text=context.bot.lang_dict["write_new_category"],
+                reply_markup=keyboard))
         return RENAME_CATEGORY
 
     def rename_category_finish(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        keyboard = InlineKeyboardMarkup([
-            [back_btn("back_to_main_menu", context)],
-        ]
-        )
-        categories_table.update({"bot_id": context.bot.id,
-                                 "_id": ObjectId(context.user_data["category_id"])},
-                                {"bot_id": context.bot.id,
-                                 "_id": ObjectId(context.user_data["category_id"]),
-                                 "name": update.message.text})
-        context.user_data["to_delete"] = [context.bot.send_message(
-            chat_id=update.message.chat_id,
-            text=context.bot.lang_dict["shop_category_changed_name"],
-            reply_markup=keyboard)]
-
-        return ConversationHandler.END
+        keyboard = InlineKeyboardMarkup([[back_btn("back_to_admin_categories", context)]])
+        name_request = validate_category_name(update.message.text, context)
+        if name_request["ok"]:
+            categories_table.update_one({"_id": ObjectId(context.user_data["category_id"])},
+                                        {"$set": {"name": name_request["name"]}})
+            context.user_data["to_delete"].append(
+                context.bot.send_message(
+                    chat_id=update.message.chat_id,
+                    text=context.bot.lang_dict["shop_category_changed_name"],
+                    reply_markup=keyboard))
+            return ConversationHandler.END
+        else:
+            context.user_data["to_delete"].append(
+                context.bot.send_message(
+                    chat_id=update.effective_chat.id,
+                    text=name_request["error_message"],
+                    reply_markup=keyboard,
+                    parse_mode=ParseMode.HTML))
+            return RENAME_CATEGORY
 
     def add_category(self, update: Update, context: CallbackContext):
-        delete_messages(update, context, True)
         category_list = categories_table.find({"bot_id": context.bot.id})
+        if category_list.count() >= MAX_CATEGORIES_COUNT:
+            update.callback_query.answer(context.bot.lang_dict["too_much_categories_blink"])
+            return ConversationHandler.END
+        delete_messages(update, context, True)
         keyboard = InlineKeyboardMarkup(
             [[InlineKeyboardButton(text=i["name"],
-                                   callback_data="nigga_dont_touch_me")] for i in category_list] +
-            [[back_btn("back_to_main_menu", context)]]
+                                   # callback_data="nigga_dont_touch_me"
+                                   callback_data=f"edit_category/{i['_id']}")]
+             for i in category_list]
+            + [[back_btn("back_to_admin_categories", context)]]
         )
 
-        context.user_data["to_delete"] = [context.bot.send_message(
-            chat_id=update.callback_query.message.chat_id,
-            text=context.bot.lang_dict["shop_category_add_new"],
-            reply_markup=keyboard)]
+        context.user_data["to_delete"].append(
+            context.bot.send_message(
+                chat_id=update.callback_query.message.chat_id,
+                text=context.bot.lang_dict["shop_category_add_new"],
+                reply_markup=keyboard))
 
         return START_ADD_CATEGORY
 
     def set_category(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
+        # name_request = validate_category_name(update.message.text, context)
+        # if name_request["ok"]:
+        #     categories_table.update_one({"_id": ObjectId(context.user_data["category_id"])},
+        #                                 {"$set": {"name": name_request["name"]}})
+        #     context.user_data["to_delete"].append(
+        #         context.bot.send_message(
+        #             chat_id=update.message.chat_id,
+        #             text=context.bot.lang_dict["shop_category_changed_name"],
+        #             reply_markup=keyboard))
+        #     return ConversationHandler.END
+        # else:
+        #     context.user_data["to_delete"].append(
+        #         context.bot.send_message(
+        #             chat_id=update.effective_chat.id,
+        #             text=name_request["error_message"],
+        #             reply_markup=keyboard,
+        #             parse_mode=ParseMode.HTML))
+        #     return RENAME_CATEGORY
+
         if update.message:
-            categories_table.insert_one({
-                "name": update.message.text,
-                "query_name": update.message.text,
-                "bot_id": context.bot.id
-            })
+            final_text = context.bot.lang_dict["shop_category_add_or_continue"]
+            name_request = validate_category_name(update.message.text, context)
+            if name_request["ok"]:
+                categories_table.insert_one({
+                    "name": name_request["name"],
+                    "query_name": name_request["name"],
+                    "bot_id": context.bot.id
+                })
+            else:
+                final_text = name_request["error_message"]
+
             category_list = categories_table.find({"bot_id": context.bot.id})
-            keyboard = InlineKeyboardMarkup([
-                [InlineKeyboardButton(text=i["name"],
-                                      callback_data=f"edit_category/{i['_id']}")
-                 for i in category_list],
-                [back_btn("back_to_main_menu", context)],
-                [InlineKeyboardButton(context.bot.lang_dict["shop_admin_continue_btn"],
-                                      callback_data="continue")]]
+            if category_list.count() >= MAX_CATEGORIES_COUNT:
+                return self.back_to_categories_menu(update, context)
+            # keyboard = InlineKeyboardMarkup([
+            #     [InlineKeyboardButton(text=i["name"],
+            #                           callback_data=f"edit_category/{i['_id']}")
+            #      for i in category_list],
+            #     [back_btn("back_to_main_menu", context)],
+            #     [InlineKeyboardButton(context.bot.lang_dict["shop_admin_continue_btn"],
+            #                           callback_data="continue")]]
+            # )
+            keyboard = InlineKeyboardMarkup(
+                [[InlineKeyboardButton(text=i["name"],
+                                       callback_data=f"edit_category/{i['_id']}")]
+                 for i in category_list]
+                + [[back_btn("back_to_admin_categories", context)]]
+                # + [[InlineKeyboardButton(context.bot.lang_dict["shop_admin_continue_btn"],
+                #                          callback_data="continue")]]
             )
             context.user_data["to_delete"].append(context.bot.send_message(
                 chat_id=update.message.chat_id,
-                text=context.bot.lang_dict["shop_category_add_or_continue"],
+                text=final_text,
                 reply_markup=keyboard))
         return START_ADD_CATEGORY
 
-    def confirm_adding(self, update: Update, context: CallbackContext):
+    # def confirm_adding(self, update: Update, context: CallbackContext):
+    #     delete_messages(update, context, True)
+    #     return Welcome().back_to_main_menu(
+    #         update, context, context.bot.lang_dict["shop_admin_adding_category_finished"])
+
+    def back_to_categories_menu(self, update, context):
         delete_messages(update, context, True)
-        return Welcome().back_to_main_menu(
-            update, context, context.bot.lang_dict["shop_admin_adding_category_finished"])
+        context.user_data.clear()
+        return self.menu(update, context)
 
 
 CATEGORIES_HANDLER = CallbackQueryHandler(ProductCategoryHandler().edit_category_menu,
@@ -229,6 +295,8 @@ RENAME_CATEGORY_HANDLER = ConversationHandler(
     },
 
     fallbacks=[
+        CallbackQueryHandler(ProductCategoryHandler().back_to_categories_menu,
+                             pattern="back_to_admin_categories"),
         CallbackQueryHandler(Welcome().back_to_main_menu,
                              pattern=r"back_to_main_menu"),
     ]
@@ -250,13 +318,22 @@ ADD_CATEGORY_HANDLER = ConversationHandler(
 
     states={  # TODO fix add category
         START_ADD_CATEGORY: [
-            CallbackQueryHandler(ProductCategoryHandler().confirm_adding,
-                                 pattern="continue"),
+            # CallbackQueryHandler(ProductCategoryHandler().confirm_adding,
+            #                      pattern="continue"),
             MessageHandler(Filters.text, ProductCategoryHandler().set_category)],
     },
 
     fallbacks=[
+        CallbackQueryHandler(ProductCategoryHandler().back_to_categories_menu,
+                             pattern="back_to_admin_categories"),
+        CallbackQueryHandler(ProductCategoryHandler().edit_category_menu,
+                                                  pattern=r"edit_category"),
         CallbackQueryHandler(Welcome().back_to_main_menu,
                              pattern=r"back_to_main_menu"),
     ]
 )
+
+
+BACK_TO_CATEGORIES_MENU = CallbackQueryHandler(
+    pattern="back_to_admin_categories",
+    callback=ProductCategoryHandler().back_to_categories_menu)

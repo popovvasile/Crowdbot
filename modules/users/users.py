@@ -13,7 +13,7 @@ from logs import logger
 from modules.statistic.donation_statistic import DonationStatistic
 from modules.users.message_helper import (MessageTemplate, send_deleted_message_content,
                                           AnswerToMessage, send_not_deleted_message_content,
-                                          add_to_content)
+                                          add_to_content, SenderHelper)
 from database import users_table, donations_table, users_messages_to_admin_table
 
 
@@ -628,23 +628,32 @@ class SendMessageToUser(object):
         return MESSAGE_TO_USER
 
     def received_message(self, update, context):
-        delete_messages(update, context)
-        if not context.user_data.get("user_input"):
-            context.user_data["user_input"] = list()
-        context.user_data["user_input"].append(update.effective_message)
         # TODO REFACTOR - use one content_dict structure for the whole project
-        add_to_content(update, context)
         reply_markup = InlineKeyboardMarkup([
             [InlineKeyboardButton(text=context.bot.lang_dict["done_button"],
                                   callback_data="send_message_finish")],
             [InlineKeyboardButton(text=context.bot.lang_dict["cancel_button"],
                                   callback_data="cancel_creating_message")]
         ])
-        context.user_data["to_delete"].append(
-            context.bot.send_message(chat_id=update.message.chat_id,
-                                     text=context.bot.lang_dict["send_message_4"],
-                                     reply_markup=reply_markup))
-        return MESSAGE_TO_USER
+        return SenderHelper().help_receive(update, context, reply_markup, MESSAGE_TO_USER)
+
+        # delete_messages(update, context)
+        # if not context.user_data.get("user_input"):
+        #     context.user_data["user_input"] = list()
+        # context.user_data["user_input"].append(update.effective_message)
+        # TODO REFACTOR - use one content_dict structure for the whole project
+        # add_to_content(update, context)
+        # reply_markup = InlineKeyboardMarkup([
+        #     [InlineKeyboardButton(text=context.bot.lang_dict["done_button"],
+        #                           callback_data="send_message_finish")],
+        #     [InlineKeyboardButton(text=context.bot.lang_dict["cancel_button"],
+        #                           callback_data="cancel_creating_message")]
+        # ])
+        # context.user_data["to_delete"].append(
+        #     context.bot.send_message(chat_id=update.message.chat_id,
+        #                              text=context.bot.lang_dict["send_message_4"],
+        #                              reply_markup=reply_markup))
+        # return MESSAGE_TO_USER
 
     def send_message_finish(self, update, context):
         try:

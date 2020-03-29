@@ -69,7 +69,7 @@ class Product(object):
 
     @property
     def files_str(self):
-        return f"\n\n• Files {len(self.content)}/10"
+        return self.context.bot.lang_dict["files_counter"].format(len(self.content))
 
     @property
     def quantity_str(self):
@@ -127,16 +127,22 @@ class Product(object):
             result["error_message"] = (
                 context.bot.lang_dict["add_product_wrong_floating_point_number"])
             return result
+
+        result["ok"] = True
+        result["price"] = float(
+            format(Price.fromstring(update.message.text,
+                                    decimal_separator=".").amount, '.2f'))
+
         # todo maybe don't check price string length?
         #  coz we check price for max float before and then we can just round price
-        if len(update.message.text) <= len(str(currency_limits["max"])):
-            result["ok"] = True
-            result["price"] = float(
-                format(Price.fromstring(update.message.text,
-                                        decimal_separator=".").amount, '.2f'))
-        else:
-            result["ok"] = False
-            result["error_message"] = context.bot.lang_dict["shop_admin_price_too_big"]
+        # if len(update.message.text) <= len(str(currency_limits["max"])):
+        #     result["ok"] = True
+        #     result["price"] = float(
+        #         format(Price.fromstring(update.message.text,
+        #                                 decimal_separator=".").amount, '.2f'))
+        # else:
+        #     result["ok"] = False
+        #     result["error_message"] = context.bot.lang_dict["shop_admin_price_too_big"]
         return result
 
     @staticmethod
@@ -170,8 +176,8 @@ class Product(object):
                 self.send_content(
                     update.effective_chat.id, context, self.content[0],
                     caption=text, reply_markup=reply_markup,
-                    parse_mode=ParseMode.HTML
-                )
+                    parse_mode=ParseMode.HTML)
+
             else:
                 context.user_data["to_delete"].append(
                     context.bot.send_message(chat_id=update.effective_chat.id,
@@ -191,7 +197,7 @@ class Product(object):
     def send_full_template(self, update, context,
                            text=None, reply_markup=None):
         """Send full representation of the product.
-        Must pass only full templates to this method
+        text: full template of the product
 
         Works for the both user and admin side.
         All templates, strings and keyboard must be passed as arguments

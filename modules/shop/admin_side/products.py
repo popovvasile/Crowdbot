@@ -13,6 +13,7 @@ from modules.shop.helper.helper import clear_user_data
 from modules.shop.helper.keyboards import keyboards, back_kb, back_btn, create_keyboard
 from modules.shop.components.product import Product, MAX_TEMP_DESCRIPTION_LENGTH
 from modules.shop.admin_side.welcome import Welcome
+from modules.shop.admin_side.categories import validate_category_name, MAX_CATEGORIES_COUNT
 from database import products_table, categories_table, chatbots_table, orders_table
 
 
@@ -460,7 +461,7 @@ class ProductsHandler(ProductsHelper):
             ]))
         return ADDING_CONTENT
 
-    def category(self, update: Update, context: CallbackContext):
+    def category(self, update: Update, context: CallbackContext, extra_text=""):
         delete_messages(update, context, True)
         category_list = categories_table.find({"bot_id": context.bot.id})
         if category_list.count() > 0:
@@ -474,12 +475,14 @@ class ProductsHandler(ProductsHelper):
             text = (self.admin_short_template(context, context.user_data["product"])
                     + "\n\n"
                     + context.bot.lang_dict["shop_admin_set_category"])
+            if extra_text:
+                text += extra_text
 
             context.user_data["product"].send_short_template(
                 update, context, text=text, reply_markup=keyboard)
         else:
             context.bot.send_message(
-                chat_id=update.callback_query.message.chat_id,
+                chat_id=update.effective_chat.id,
                 text=context.bot.lang_dict["add_product_didnt_set_category"],
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton(
@@ -495,11 +498,23 @@ class ProductsHandler(ProductsHelper):
                 {"category_id": ObjectId(update.callback_query.data.replace("category_", ""))})
         else:
             if update.message:
-                category_id = categories_table.insert_one({
-                    "name": update.message.text,
-                    "query_name": update.message.text,
-                    "bot_id": context.bot.id}).inserted_id
-                context.user_data["product"].update({"category": category_id})
+                categories = categories_table.find({"bot_id": context.bot.id})
+                if categories.count() >= MAX_CATEGORIES_COUNT:
+                    return self.category(
+                        update, context,
+                        extra_text="\n" + context.bot.lang_dict["too_much_categories_blink"])
+                else:
+                    name_request = validate_category_name(update.message.text, context)
+                    if name_request["ok"]:
+                        category_id = categories_table.insert_one({
+                            "name": name_request["name"],
+                            "query_name": name_request["name"],
+                            "bot_id": context.bot.id}).inserted_id
+                        context.user_data["product"].update({"category_id": category_id})
+                        return self.edit(update, context)
+                    else:
+                        return self.category(update, context,
+                                             extra_text="\n" + name_request["error_message"])
         return self.edit(update, context)
 
     def confirm_to_trash(self, update: Update, context: CallbackContext):

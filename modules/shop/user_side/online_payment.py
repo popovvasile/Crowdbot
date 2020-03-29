@@ -3,6 +3,7 @@
 import datetime
 from random import randint
 
+from telegram.error import BadRequest
 from telegram import LabeledPrice, InlineKeyboardMarkup, InlineKeyboardButton, ParseMode
 from telegram.ext import (MessageHandler, Filters, PreCheckoutQueryHandler,
                           ConversationHandler, CallbackQueryHandler)
@@ -32,15 +33,25 @@ class OnlinePayment(object):
         payload = "Purchase"
         start_parameter = "shop-payment"  # TODO change in production
         prices = [LabeledPrice(title, int(float(order.total_price) * 100))]
-        context.user_data["to_delete"].append(
-            context.bot.sendInvoice(update.effective_chat.id,
-                                    title,
-                                    description,
-                                    payload,
-                                    shop["payment_token"],
-                                    start_parameter,
-                                    order.currency,
-                                    prices))
+        print(int(float(order.total_price) * 100))
+        try:
+            context.user_data["to_delete"].append(
+                context.bot.sendInvoice(update.effective_chat.id,
+                                        title,
+                                        description,
+                                        payload,
+                                        shop["payment_token"],
+                                        start_parameter,
+                                        order.currency,
+                                        prices))
+        except BadRequest as exception:
+            logger.info(f"Sending invoice excseption -> {exception}. "
+                        f"User {update.effective_user.full_name} on bot {context.bot.username}")
+            context.user_data["to_delete"].append(
+                context.bot.send_message(
+                    update.effective_chat.id,
+                    context.bot.lang_dict["payment_not_available"],
+                    parse_mode=ParseMode.HTML))
         logger.info("User {} on bot {} requested a purchase".format(
             update.effective_user.first_name, context.bot.first_name))
 
