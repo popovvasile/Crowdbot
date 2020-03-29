@@ -111,7 +111,7 @@ class UserOrdersHandler(object):
         order_id = ObjectId(update.callback_query.data.split("/")[1])
         order = UserOrder(context, order_id)
         if not order.id_:
-            update.callback_query.answer(context.bot.lang_dict["no_order"])
+            update.callback_query.answer(context.bot.lang_dict["no_order_blink"])
             return self.back_to_orders(update, context)
         if order.in_trash:
             update.callback_query.answer(context.bot.lang_dict["order_canceled_blink"])
