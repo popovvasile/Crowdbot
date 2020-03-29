@@ -8,10 +8,10 @@
             KeyError: 'payment_token'
     [DONE] Error Callback Доделать нормально, с логами
     [DONE] Currency Exchange converter fix
+    * Address validation in admin setting shop
 
     [Yuriy]
-    * в trash показывает чужие товары
-    * Address validation in admin setting shop
+    [DONE] * в trash показывает чужие товары
     * Unauthorized (bot was blocked by the user/deactivated) когда отвечаешь отписчику/удалённому(в ответах)
     * Баги в Удалении категории(Если есть товара который есть в новых заказах) и вообще в целом работа с товаром
     * В Full template и Short template заказа - при слишком большом тексте(Items)

@@ -6,10 +6,10 @@ from telegram.ext import (ConversationHandler, CallbackQueryHandler,
 
 from modules.shop.admin_side.welcome import Welcome
 from modules.shop.admin_side.categories import validate_category_name, MAX_CATEGORIES_COUNT
-from modules.shop.components.product import (Product, MAX_TEMP_DESCRIPTION_LENGTH,
-                                             MAX_PRODUCT_NAME_LENGTH)
+from modules.shop.components.product import Product
 from modules.shop.helper.keyboards import keyboards, back_btn, create_keyboard
 from helper_funcs.misc import delete_messages
+from helper_funcs.constants import MAX_TEMP_DESCRIPTION_LENGTH, MAX_PRODUCT_NAME_LENGTH
 from database import categories_table, chatbots_table
 
 

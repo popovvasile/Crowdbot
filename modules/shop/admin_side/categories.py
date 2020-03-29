@@ -7,16 +7,13 @@ from telegram.ext import (ConversationHandler, CallbackQueryHandler,
 
 from modules.shop.admin_side.welcome import Welcome
 from helper_funcs.misc import delete_messages
+from helper_funcs.constants import MAX_CATEGORY_NAME_LENGTH, MAX_CATEGORIES_COUNT
 from database import categories_table, products_table, orders_table
 from modules.shop.helper.keyboards import (back_btn)
 
 
 START_ADD_CATEGORY, SET_CATEGORY, RENAME_CATEGORY = range(3)
 DELETE_CATEGORY_CONFIRM = 1
-
-# CONSTANTS
-MAX_CATEGORY_NAME_LENGTH = 50
-MAX_CATEGORIES_COUNT = 5
 
 
 def validate_category_name(name, context):

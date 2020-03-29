@@ -12,18 +12,15 @@ from database import custom_buttons_table
 from helper_funcs.auth import initiate_chat_id
 from helper_funcs.misc import (delete_messages, create_content_dict, send_content_dict,
                                content_dict_as_string)
+from helper_funcs.constants import MAX_BUTTON_NAME_LENGTH, MAX_BUTTON_CONTENT_COUNT
 from logs import logger
+
 
 TYPING_BUTTON, TYPING_DESCRIPTION, DESCRIPTION_FINISH = range(3)
 CONFIRM_DELETE_BUTTON = 17
 TYPING_LINK, TYPING_BUTTON_FINISH = range(2)
 ENTER_NEW_NAME = 1
 CONTENT_MENU, ADDING_CONTENT, ENTER_NEW_LINK = range(3)
-
-
-# CONSTANTS
-MAX_BUTTON_NAME_LENGTH = 50
-MAX_BUTTON_CONTENT_COUNT = 10
 
 
 def buttons_menu(update, context):

@@ -41,7 +41,8 @@ class TrashHandler(Welcome):
         if not context.user_data.get("page"):
             context.user_data["page"] = 1
 
-        all_orders = orders_table.find({"in_trash": True}).sort([["_id", 1]])
+        all_orders = orders_table.find({"in_trash": True,
+                                        "bot_id": context.bot.id}).sort([["_id", 1]])
         return OrdersHandler().orders_layout(update, context, all_orders, ORDERS)
 
     # def restore_order(self, update: Update, context: CallbackContext):
@@ -61,7 +62,8 @@ class TrashHandler(Welcome):
         if not context.user_data.get("page"):
             context.user_data["page"] = 1
 
-        all_products = products_table.find({"in_trash": True}).sort([["_id", 1]])
+        all_products = products_table.find({"in_trash": True,
+                                            "bot_id": context.bot.id}).sort([["_id", 1]])
         return ProductsHandler().products_layout(update, context, all_products, PRODUCTS)
 
     def restore_product(self, update: Update, context: CallbackContext):

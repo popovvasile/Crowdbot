@@ -10,6 +10,7 @@ from telegram.ext import MessageHandler, Filters, ConversationHandler, CallbackQ
 from database import (orders_table, chatbots_table, carts_table, shop_customers_contacts_table,
                       products_table, users_table)
 from helper_funcs.misc import delete_messages
+from helper_funcs.constants import MIN_ADDRESS_LENGTH, MAX_ADDRESS_LENGTH
 from modules.shop.user_side.cart import Cart
 from modules.shop.user_side.online_payment import OnlinePayment
 from modules.shop.components.order import UserOrder, Product, AdminOrder
@@ -161,10 +162,10 @@ class PurchaseBot(object):
         if update.callback_query and "address" in update.callback_query.data:
             context.user_data["order"]["address"] = (update.callback_query.data.split("/")[1])
         elif update.message and update.message.text != "phone":
-            if len(update.message.text) < 5:
+            if len(update.message.text) < MIN_ADDRESS_LENGTH:
                 self.send_address_markup(update, context, context.bot.lang_dict["short_address"])
                 return CONFIRM_ORDER
-            elif len(update.message.text) > 300:
+            elif len(update.message.text) > MAX_ADDRESS_LENGTH:
                 self.send_address_markup(update, context, context.bot.lang_dict["long_address"])
                 return CONFIRM_ORDER
             else:
