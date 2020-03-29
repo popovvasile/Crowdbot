@@ -171,6 +171,8 @@ def check_provider_token(currency, provider_token, update, context):
         update_data = update.callback_query
     else:
         update_data = update
+    print(provider_token)
+    print(currency)
     try:
         context.user_data["to_delete"].append(
             context.bot.sendInvoice(update_data.message.chat_id,
@@ -181,6 +183,7 @@ def check_provider_token(currency, provider_token, update, context):
                                     ))
 
     except Exception as e:
+        print(e.message)
         if str(e) == "Payment_provider_invalid":
             error = "The payment provider was not recognised or its token was invalid"
         else:

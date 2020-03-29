@@ -323,24 +323,33 @@ class EditPaymentHandler(object):
         if context.user_data["action"] == "address":
             update_dict["address"] = txt
         if context.user_data["action"] == "currency":
-            update_dict["currency"] = txt
-            context.user_data["currency"] = txt
-            c = CurrencyConverter()
-            converted = c.convert(1, chatbot["shop"]["currency"], txt)
-            keyboard_markup = InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text=context.bot.lang_dict["yes"],
-                                       callback_data="change_currency_finish_YES")],
-                 [InlineKeyboardButton(text=context.bot.lang_dict["no"],
-                                       callback_data="change_currency_finish_NO")],
-                 [back_btn("shop_config", context=context)]])
+            check = check_provider_token(provider_token=chatbot["shop"]["payment_token"],
+                                         update=update,
+                                         context=context, currency=txt)
+            if check[0]:
+                update_dict["currency"] = txt
+                context.user_data["currency"] = txt
+                c = CurrencyConverter()
+                converted = c.convert(1, chatbot["shop"]["currency"], txt)
+                keyboard_markup = InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(text=context.bot.lang_dict["yes"],
+                                           callback_data="change_currency_finish_YES")],
+                     [InlineKeyboardButton(text=context.bot.lang_dict["no"],
+                                           callback_data="change_currency_finish_NO")],
+                     [back_btn("shop_config", context=context)]])
 
-            context.user_data["to_delete"].append(update.message.reply_text(
-                context.bot.lang_dict["payments_currency_change"].format(
-                    chatbot["shop"]["currency"], txt, chatbot["shop"]["currency"],
-                    str(round(converted * 1, 2)), txt
-                ), reply_markup=keyboard_markup))
-            context.user_data["converted"] = converted
-            return CURRENCY_FINISH
+                context.user_data["to_delete"].append(update.message.reply_text(
+                    context.bot.lang_dict["payments_currency_change"].format(
+                        chatbot["shop"]["currency"], txt, chatbot["shop"]["currency"],
+                        str(round(converted * 1, 2)), txt
+                    ), reply_markup=keyboard_markup))
+                context.user_data["converted"] = converted
+                return CURRENCY_FINISH
+            else:
+                context.user_data["to_delete"].append(update.message.reply_text(
+                    context.bot.lang_dict["donations_edit_str_14"].format(check[1]),
+                    reply_markup=finish_markup))
+                return EDIT_FINISH
 
         if context.user_data["action"] == "payment_token":
             update_dict["payment_token"] = txt
