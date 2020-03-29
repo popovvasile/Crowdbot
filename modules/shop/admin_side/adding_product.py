@@ -4,13 +4,12 @@ from telegram import InlineKeyboardButton, Update, InlineKeyboardMarkup
 from telegram.ext import (ConversationHandler, CallbackQueryHandler,
                           CallbackContext, Filters, MessageHandler)
 
-from helper_funcs.helper import currency_limits_dict
 from modules.shop.admin_side.welcome import Welcome
+from modules.shop.admin_side.categories import validate_category_name, MAX_CATEGORIES_COUNT
 from modules.shop.components.product import Product, MAX_TEMP_DESCRIPTION_LENGTH
-from helper_funcs.misc import delete_messages
-from price_parser import Price
-from database import categories_table, chatbots_table
 from modules.shop.helper.keyboards import keyboards, back_btn, create_keyboard
+from helper_funcs.misc import delete_messages
+from database import categories_table, chatbots_table
 
 
 (START_ADD_PRODUCT, ONLINE_PAYMENT,
@@ -72,34 +71,46 @@ class AddingProductHandler(object):
     def set_category(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         if update.message:
-            if len(update.message.text) <= 30:
-                categories_table.insert_one({
-                    "name": update.message.text,
-                    "query_name": update.message.text,
-                    "bot_id": context.bot.id
-                })
+            final_text = context.bot.lang_dict["shop_admin_set_category"]
+            category_list = categories_table.find({"bot_id": context.bot.id})
+
+            name_request = validate_category_name(update.message.text, context)
+            if name_request["ok"]:
+                if category_list.count() >= MAX_CATEGORIES_COUNT:
+                    final_text = context.bot.lang_dict["too_much_categories_blink"]
+
+                else:
+                    categories_table.insert_one({
+                        "name": name_request["name"],
+                        "query_name": name_request["name"],
+                        "bot_id": context.bot.id
+                    })
+                    category_list = categories_table.find({"bot_id": context.bot.id})
+                reply_markup = create_keyboard(
+                    [InlineKeyboardButton(
+                        text=i["name"],
+                        callback_data=f"choose_category/{i['_id']}")
+                        for i in category_list],
+                    [back_btn("back_to_main_menu_btn", context)])
             else:
-                context.user_data["to_delete"].append(context.bot.send_message(
-                    chat_id=update.message.chat_id,
-                    text=context.bot.lang_name["shop_admin_category_too_long"],
-                    reply_markup=InlineKeyboardMarkup([
-                                 [back_btn("back_to_main_menu_btn", context)]])))
-                return SET_CATEGORY
+                # category_list = categories_table.find({"bot_id": context.bot.id})
+                final_text = name_request["error_message"]
+                if category_list.count() > 0:
+                    reply_markup = create_keyboard(
+                        [InlineKeyboardButton(
+                            text=i["name"],
+                            callback_data=f"choose_category/{i['_id']}")
+                            for i in category_list],
+                        [back_btn("back_to_main_menu_btn", context)])
+                else:
+                    reply_markup = InlineKeyboardMarkup([
+                        [back_btn("back_to_main_menu_btn", context)]])
 
-        category_list = categories_table.find({"bot_id": context.bot.id})
-
-        if category_list.count() > 0:
-            keyboard = create_keyboard(
-                [InlineKeyboardButton(
-                    text=i["name"],
-                    callback_data=f"choose_category/{i['_id']}")
-                    for i in category_list],
-                [back_btn("back_to_main_menu_btn", context)])
             context.user_data["new_product"].send_full_template(
                 update, context,
-                context.bot.lang_dict["shop_admin_set_category"],
-                keyboard)
-        return SET_CATEGORY
+                final_text,
+                reply_markup)
+            return SET_CATEGORY
 
     def ask_quantity(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)

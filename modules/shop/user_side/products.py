@@ -52,8 +52,8 @@ class UserProductsHelper(object):
                     callback_data=f"view_product_from_catalog/{product['_id']}")])
         return InlineKeyboardMarkup(buttons)
 
-    @staticmethod
-    def short_product_template(cart, product, currency, context):
+    @classmethod
+    def short_product_template(cls, cart, product, currency, context):
         """Short customer text representation of the product.
 
         :param product: mongo document of the product
@@ -70,21 +70,20 @@ class UserProductsHelper(object):
 
         category = categories_table.find_one(
             {"_id": product["category_id"]})["name"]
-        if product.get("discount_price") > 0:
-            template = context.bot.lang_dict["short_user_product_temp"].format(
-                product.get("article"),
-                html.escape(product["name"], quote=False),
-                html.escape(category, quote=False),
-                product["discount_price"], currency,
-                product["price"], currency,
-                html.escape(description, quote=False))
-        else:
-            template = context.bot.lang_dict["short_user_product_temp_2"].format(
-                str(product.get("_id")),
-                html.escape(product["name"], quote=False),
-                html.escape(category, quote=False),
-                product["price"], currency,
-                html.escape(description, quote=False))
+        # if product.get("discount_price") > 0:
+        template = context.bot.lang_dict["short_user_product_temp"].format(
+            product.get("article"),
+            html.escape(product["name"], quote=False),
+            html.escape(category, quote=False),
+            cls.price_as_str(product, context, currency),
+            html.escape(description, quote=False))
+        # else:
+        #     template = context.bot.lang_dict["short_user_product_temp_2"].format(
+        #         str(product.get("_id")),
+        #         html.escape(product["name"], quote=False),
+        #         html.escape(category, quote=False),
+        #         product["price"], currency,
+        #         html.escape(description, quote=False))
 
         if not product["unlimited"]:
             template += context.bot.lang_dict["quantity_field"].format(product['quantity'])
@@ -99,8 +98,8 @@ class UserProductsHelper(object):
 
         return template
 
-    @staticmethod
-    def full_product_template(cart, product, currency, context):
+    @classmethod
+    def full_product_template(cls, cart, product, currency, context):
         """Full customer text representation of the product.
 
         :param product: mongo document of the product
@@ -113,19 +112,18 @@ class UserProductsHelper(object):
         category = categories_table.find_one(
             {"_id": product["category_id"]})["name"]
 
-        if product.get("discount_price") > 0:
-            template = context.bot.lang_dict["full_user_product_temp"].format(
-                str(product.get("_id")),
-                html.escape(product["name"], quote=False),
-                html.escape(category, quote=False),
-                product["discount_price"], currency,
-                product["price"], currency)
-        else:
-            template = context.bot.lang_dict["full_user_product_temp_2"].format(
-                str(product.get("_id")),
-                html.escape(product["name"], quote=False),
-                html.escape(category, quote=False),
-                product["price"], currency)
+        # if product.get("discount_price") > 0:
+        template = context.bot.lang_dict["full_user_product_temp"].format(
+            str(product.get("_id")),
+            html.escape(product["name"], quote=False),
+            html.escape(category, quote=False),
+            cls.price_as_str(product, context, currency))
+        # else:
+        #     template = context.bot.lang_dict["full_user_product_temp_2"].format(
+        #         str(product.get("_id")),
+        #         html.escape(product["name"], quote=False),
+        #         html.escape(category, quote=False),
+        #         product["price"], currency)
 
         if len(product["description"]) < MAX_TEMP_DESCRIPTION_LENGTH:
             template += context.bot.lang_dict["description_field"].format(
@@ -138,6 +136,18 @@ class UserProductsHelper(object):
                for cart_product in cart.get("products", list())):
             template += context.bot.lang_dict["product_already_in_cart"]
         return template
+
+    @classmethod
+    def price_as_str(cls, product, context, currency=None):
+        # todo repeating - create "components" logic for user side
+        if not currency:
+            currency = chatbots_table.find_one(
+                {"bot_id": context.bot.id})["shop"]["currency"]
+        if product['discount_price']:
+            return (f"💥 <s>{product['price']}</s> "
+                    f"<b><u>{product['discount_price']} {currency}</u></b>")
+        else:
+            return f"<b><u>{product['price']} {currency}</u></b>"
 
 
 class UserProductsHandler(UserProductsHelper):
@@ -244,6 +254,13 @@ class UserProductsHandler(UserProductsHelper):
                                      page_prefix="user_products_pagination",
                                      buttons=buttons)
         else:
+            buttons = [[
+                InlineKeyboardButton(
+                    text=context.bot.lang_dict["buy_btn"],
+                    callback_data="cart")],
+                [InlineKeyboardButton(
+                    text=context.bot.lang_dict["back_button"],
+                    callback_data="back_to_module_shop")]]
             context.user_data["to_delete"].append(
                 context.bot.send_message(
                     chat_id=update.effective_chat.id,

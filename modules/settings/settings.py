@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import html
 from pprint import pprint
 
 from telegram.error import BadRequest, TelegramError
@@ -18,6 +19,11 @@ CONFIRM_DELETE_BUTTON = 17
 TYPING_LINK, TYPING_BUTTON_FINISH = range(2)
 ENTER_NEW_NAME = 1
 CONTENT_MENU, ADDING_CONTENT, ENTER_NEW_LINK = range(3)
+
+
+# CONSTANTS
+MAX_BUTTON_NAME_LENGTH = 50
+MAX_BUTTON_CONTENT_COUNT = 10
 
 
 def buttons_menu(update, context):
@@ -153,7 +159,7 @@ class AddCommands(object):
         reply_markup = InlineKeyboardMarkup(reply_buttons)
 
         chat_id, txt = initiate_chat_id(update)
-        if len(txt) > 128:
+        if len(txt) > MAX_BUTTON_NAME_LEN:
             delete_messages(update, context, True)
             context.user_data["to_delete"].append(
                 context.bot.send_message(update.effective_chat.id,
@@ -192,7 +198,7 @@ class AddCommands(object):
             context.user_data["new_button"]["content"] = list()
         content_dict = create_content_dict(update)
         if content_dict:
-            if len(context.user_data["new_button"]["content"]) < 5:
+            if len(context.user_data["new_button"]["content"]) < MAX_BUTTON_CONTENT_COUNT:
                 context.user_data["new_button"]["content"].append(content_dict)
                 context.user_data["user_input"].append(update.message)
             else:
@@ -218,7 +224,7 @@ class AddCommands(object):
                      - len(context.user_data["new_button"]["content"]))
         reply_to = context.user_data["user_input"][msg_index].message_id
 
-        if len(context.user_data["new_button"]["content"]) < 5:
+        if len(context.user_data["new_button"]["content"]) < MAX_BUTTON_CONTENT_COUNT:
             string = context.bot.lang_dict["add_menu_buttons_str_4"]
         else:
             string = context.bot.lang_dict["add_menu_buttons_str_11"]
@@ -278,7 +284,7 @@ class AddLinkButton(object):
                                                callback_data="cancel_button_creation")]]
         reply_markup = InlineKeyboardMarkup(reply_buttons)
         chat_id, txt = initiate_chat_id(update)
-        if len(txt) > 128:
+        if len(txt) > MAX_BUTTON_NAME_LEN:
             delete_messages(update, context, True)
             context.user_data["to_delete"].append(
                 context.bot.send_message(update.effective_chat.id,
@@ -344,11 +350,12 @@ class DeleteButton(object):
                                                callback_data="back_to_one_button_menu")]]
         reply_markup = InlineKeyboardMarkup(reply_buttons)
         context.user_data["to_delete"].append(
-            context.bot.send_message(update.effective_chat.id,
-                                     text=context.bot.lang_dict["confirm_button_delete"].format(
-                                         context.user_data["button"]["button"]),
-                                     parse_mode=ParseMode.HTML,
-                                     reply_markup=reply_markup))
+            context.bot.send_message(
+                update.effective_chat.id,
+                text=context.bot.lang_dict["confirm_button_delete"].format(
+                    html.escape(context.user_data["button"]["button"], quote=False)),
+                parse_mode=ParseMode.HTML,
+                reply_markup=reply_markup))
         return CONFIRM_DELETE_BUTTON
 
     def delete_button_finish(self, update, context):
@@ -415,7 +422,7 @@ class EditButtonHandler(object):
                     f"{content_dict['id']}")]
             ])
             send_content_dict(update.effective_chat.id, context, content_dict,
-                              reply_markup=reply_markup)
+                              reply_markup=reply_markup, parse_mode=None)
 
         reply_buttons = [
             [InlineKeyboardButton(
@@ -427,7 +434,7 @@ class EditButtonHandler(object):
         context.user_data["to_delete"].append(
             context.bot.send_message(
                 update.effective_chat.id,
-                text=context.user_data["button"]["button"]
+                text=html.escape(context.user_data["button"]["button"], quote=False)
                 + "\n\n"
                 + context.bot.lang_dict["add_product_to_delete_click"],
                 parse_mode=ParseMode.HTML,
@@ -451,13 +458,14 @@ class EditButtonHandler(object):
         return CONTENT_MENU
 
     def start_adding_content(self, update, context):
-        delete_messages(update, context, True)
-        # All users input messages will be deleted at the end or when back
-        context.user_data["user_input"] = list()
-        if len(context.user_data["button"]["content"]) >= 20:
+        if len(context.user_data["button"]["content"]) >= MAX_BUTTON_CONTENT_COUNT:
             update.callback_query.answer(context.bot.lang_dict["add_product_10_files"])
             return CONTENT_MENU
-        text = (context.user_data["button"]["button"]
+        delete_messages(update, context, True)
+        # All users input messages will be deleted at the end or when back
+        if not context.user_data.get("user_input"):
+            context.user_data["user_input"] = list()
+        text = (html.escape(context.user_data["button"]["button"], quote=False)
                 + "\n\n"
                 + context.bot.lang_dict["add_product_add_files"])
         context.user_data["to_delete"].append(
@@ -475,7 +483,7 @@ class EditButtonHandler(object):
     def open_content_handler(self, update, context):
         delete_messages(update, context)
         context.user_data["user_input"].append(update.message)
-        if len(context.user_data["button"]["content"]) < 20:
+        if len(context.user_data["button"]["content"]) < MAX_BUTTON_CONTENT_COUNT:
             content_dict = create_content_dict(update)
             if content_dict:
                 button = custom_buttons_table.find_and_modify(
@@ -493,7 +501,7 @@ class EditButtonHandler(object):
         else:
             return self.content_menu(update, context)
         text = (context.bot.lang_dict["file_added_to"].format(
-                    context.user_data["button"]["button"])
+                    html.escape(context.user_data["button"]["button"], quote=False))
                 + "\n\n"
                 + context.bot.lang_dict["add_product_add_files"])
 

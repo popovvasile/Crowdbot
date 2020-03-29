@@ -1,6 +1,6 @@
 import html
 
-from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, TelegramError
 from bson.objectid import ObjectId
 
 from helper_funcs.misc import delete_messages
@@ -10,7 +10,61 @@ from database import users_messages_to_admin_table
 from logs import logger
 
 
-class AnswerToMessage(object):
+class SenderHelper(object):
+    @staticmethod
+    def help_receive(update, context, reply_markup, state):
+        """Help to create message for sending"""
+        delete_messages(update, context)
+        final_text = context.bot.lang_dict["send_message_4"]
+        if "content" not in context.user_data:
+            context.user_data["content"] = list()
+        if "user_input" not in context.user_data:
+            context.user_data["user_input"] = list()
+        context.user_data["user_input"].append(update.message)
+        if len(context.user_data["content"]) < 10:
+            add_to_content(update, context)
+        else:
+            final_text = (context.bot.lang_dict["add_menu_buttons_str_11"])
+            # context.user_data["to_delete"].append(
+            #     context.bot.send_message(update.effective_chat.id,
+            #                              context.bot.lang_dict["so_many_content"]))
+            try:
+                context.bot.delete_message(update.effective_chat.id,
+                                           update.effective_message.message_id)
+            except TelegramError:
+                pass
+
+        if len(context.user_data["user_input"]) == 10:
+            final_text = (context.bot.lang_dict["add_menu_buttons_str_11"])
+        elif len(context.user_data["user_input"]) > 10:
+            final_text = (context.bot.lang_dict["so_many_content"]
+                          + context.bot.lang_dict["add_menu_buttons_str_11"])
+
+        # reply_markup = InlineKeyboardMarkup([
+        #     [InlineKeyboardButton(
+        #         text="Done",
+        #         callback_data="send_message_finish")],
+        #     [InlineKeyboardButton(
+        #         text="Cancel",
+        #         callback_data="cancel_message_creating")]
+        # ])
+
+        msg_index = (len(context.user_data["user_input"])
+                     - len(context.user_data["content"]))
+        reply_to = context.user_data["user_input"][msg_index].message_id
+
+        context.user_data["to_delete"].append(
+            context.bot.send_message(
+                chat_id=update.message.chat_id,
+                text=final_text
+                + context.bot.lang_dict["files_counter"].format(
+                    len(context.user_data['content'])),
+                reply_markup=reply_markup,
+                reply_to_message_id=reply_to))
+        return state
+
+
+class AnswerToMessage(SenderHelper):
     """Handle answer to message from inbox and from users list
 
     The only difference is back button, state(it can be the same int)
@@ -48,29 +102,37 @@ class AnswerToMessage(object):
         return self.STATE
 
     def received_message(self, update, context):
-        if update.callback_query:
-            delete_messages(update, context, True)
-        else:
-            delete_messages(update, context)
-        add_to_content(update, context)
-        if not context.user_data.get("final_delete"):
-            context.user_data["final_delete"] = list()
-        context.user_data["final_delete"].append(update.message)
         reply_markup = InlineKeyboardMarkup([
             [InlineKeyboardButton(text=context.bot.lang_dict["done_button"],
                                   callback_data="send_message_finish")],
             [InlineKeyboardButton(text=context.bot.lang_dict["cancel_button"],
                                   callback_data=self.back_button)]
         ])
-        context.user_data["to_delete"].append(
-            context.bot.send_message(
-                chat_id=update.message.chat_id,
-                text=context.bot.lang_dict["send_message_4"],
-                reply_markup=reply_markup))
-        return self.STATE
+        return self.help_receive(update, context, reply_markup, self.STATE)
+        # if update.callback_query:
+        #     delete_messages(update, context, True)
+        # else:
+        #     delete_messages(update, context)
+        # add_to_content(update, context)
+        # if not context.user_data.get("final_delete"):
+        #     context.user_data["final_delete"] = list()
+        # context.user_data["final_delete"].append(update.message)
+        # reply_markup = InlineKeyboardMarkup([
+        #     [InlineKeyboardButton(text=context.bot.lang_dict["done_button"],
+        #                           callback_data="send_message_finish")],
+        #     [InlineKeyboardButton(text=context.bot.lang_dict["cancel_button"],
+        #                           callback_data=self.back_button)]
+        # ])
+        # context.user_data["to_delete"].append(
+        #     context.bot.send_message(
+        #         chat_id=update.message.chat_id,
+        #         text=context.bot.lang_dict["send_message_4"],
+        #         reply_markup=reply_markup))
+        # return self.STATE
 
     def send_message_finish(self, update, context):
-        context.user_data["to_delete"].extend(context.user_data["final_delete"])
+        # context.user_data["to_delete"].extend(context.user_data["final_delete"])
+        context.user_data["to_delete"].extend(context.user_data["user_input"])
         users_messages_to_admin_table.update_one(
             {"_id": context.user_data["answer_to"]["_id"]},
             {"$set": {"answer_content": context.user_data["content"],
@@ -181,49 +243,47 @@ def add_to_content(update, context):
     """Adds message to the user_data 'content' key"""
 
     if "content" not in context.user_data:
-        context.user_data["content"] = []
+        context.user_data["content"] = list()
 
+    content_dict = {}
     if update.message.text:
-        context.user_data["content"].append({"text": update.message.text})
+        content_dict = {"text": update.message.text}
 
     elif update.message.photo:
         photo_file = update.message.photo[-1].get_file().file_id
-        context.user_data["content"].append({"photo_file": photo_file})
+        content_dict = {"photo_file": photo_file}
 
     elif update.message.audio:
         audio_file = update.message.audio.get_file().file_id
-        context.user_data["content"].append(
-            {"audio_file": audio_file, "name": update.message.audio.title})
+        content_dict = {"audio_file": audio_file, "name": update.message.audio.title}
 
     elif update.message.voice:
         voice_file = update.message.voice.get_file().file_id
-        context.user_data["content"].append({"voice_file": voice_file})
+        content_dict = {"voice_file": voice_file}
 
     elif update.message.document:
         document_file = update.message.document.get_file().file_id
-        context.user_data["content"].append(
-            {"document_file": document_file,
-             "name": update.message.document.file_name})
+        content_dict = {"document_file": document_file,
+                        "name": update.message.document.file_name}
 
     elif update.message.video:
         video_file = update.message.video.get_file().file_id
-        context.user_data["content"].append({"video_file": video_file})
+        content_dict = {"video_file": video_file}
 
     elif update.message.video_note:
         video_note_file = update.message.video_note.get_file().file_id
-        context.user_data["content"].append(
-            {"video_note_file": video_note_file})
+        content_dict = {"video_note_file": video_note_file}
 
     elif update.message.animation:
         animation_file = update.message.animation.get_file().file_id
-        context.user_data["content"].append(
-            {"animation_file": animation_file})
+        content_dict = {"animation_file": animation_file}
 
     elif update.message.sticker:
         sticker_file = update.message.sticker.get_file().file_id
-        context.user_data["content"].append(
-            {"sticker_file": sticker_file,
-             "name": update.message.sticker.emoji})
+        content_dict = {"sticker_file": sticker_file,
+                        "name": update.message.sticker.emoji}
+    if content_dict:
+        context.user_data["content"].append(content_dict)
 
 
 class MessageTemplate(object):

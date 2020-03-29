@@ -178,11 +178,14 @@ class AdminHandler(object):
              "password": password,
              "timestamp": datetime.now()})
         # Message that must be forwarded to admin.
+        # print(context.bot.get_me().mention_html())
         context.user_data['to_delete'].append(
             context.bot.send_message(
                 chat_id=update.effective_chat.id,
                 text=context.bot.lang_dict["admin_invite"].format(
-                    context.bot.get_me().mention_html()),
+                    # context.bot.get_me().mention_html()
+                    f'<a href="t.me/{context.bot.username}">{context.bot.name}</a>'
+                ),
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton(
                         text=context.bot.lang_dict["admin_invite_btn"],
