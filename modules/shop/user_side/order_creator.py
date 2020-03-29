@@ -305,6 +305,7 @@ class PurchaseBot(object):
 
 
 OFFLINE_PURCHASE_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[CallbackQueryHandler(callback=PurchaseBot().start_purchase,
                                        pattern=r'create_order')],
     states={

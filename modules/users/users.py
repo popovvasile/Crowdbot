@@ -794,6 +794,7 @@ OPEN_USER_HANDLER = CallbackQueryHandler(
     callback=UsersHandler().open_user)
 
 SEARCH_USER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[
         CallbackQueryHandler(pattern="search_user",
                              callback=UsersHandler().search_user)],
@@ -850,6 +851,7 @@ VIEW_USER_MESSAGE = CallbackQueryHandler(
 
 """DELETE ONE USER MESSAGE"""
 DELETE_USER_MESSAGE_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[
         CallbackQueryHandler(
             pattern="confirm_delete_user_message",
@@ -879,6 +881,7 @@ answer_to_message = AnswerToMessage(
     final_callback=SeeUserMessage().back_to_view_message)
 
 ANSWER_TO_MESSAGE_FROM_USER_LIST_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[
         CallbackQueryHandler(
             pattern=r"answer_to_user_message",
@@ -902,6 +905,7 @@ ANSWER_TO_MESSAGE_FROM_USER_LIST_HANDLER = ConversationHandler(
 
 """SEND MESSAGE TO USER"""
 SEND_MESSAGE_TO_USER_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[
         CallbackQueryHandler(
             pattern=r"send_message_to_user",

@@ -1,13 +1,13 @@
 --SHOP  -- status, in_trash, on_sale
     [Vasile]
-    * ValueError: KZT is not a supported currency
-    * ValueError: UAH is not a supported currency
-    * Погрешность при смене валюты может выставить цену минимальней чем минимальный возможный платёж
-    * поставить allow_reentry - ConversationHandler
-    * File "/root/test_yura/crowdrobot/modules/payments/payments_config.py", line 326, in handle_edit_finish
+    [DONE] ValueError: KZT is not a supported currency
+    [DONE] ValueError: UAH is not a supported currency
+    [DONE] Погрешность при смене валюты может выставить цену минимальней чем минимальный возможный платёж
+    [DONE] поставить allow_reentry - ConversationHandler
+    [DONE] File "/root/test_yura/crowdrobot/modules/payments/payments_config.py", line 326, in handle_edit_finish
             KeyError: 'payment_token'
-    * Error Callback Доделать нормально, с логами
-    * Currency Exchange converter fix
+    [DONE] Error Callback Доделать нормально, с логами
+    [DONE] Currency Exchange converter fix
 
     [Yuriy]
     * в trash показывает чужие товары

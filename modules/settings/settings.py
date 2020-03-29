@@ -582,6 +582,7 @@ CREATE_BUTTON_CHOOSE = CallbackQueryHandler(callback=AddButtons().start,
 
 """ADDING LINK BUTTON"""
 LINK_BUTTON_ADD_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[CallbackQueryHandler(callback=AddLinkButton().start,
                                        pattern=r"create_link_button")],
 
@@ -604,6 +605,7 @@ LINK_BUTTON_ADD_HANDLER = ConversationHandler(
 
 """ADD CONTENT BUTTON"""
 BUTTON_ADD_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[
         CallbackQueryHandler(callback=AddCommands().start,
                              pattern=r"create_simple_button")
@@ -632,6 +634,7 @@ BUTTON_ADD_HANDLER = ConversationHandler(
 )
 
 DELETE_BUTTON_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[
         CallbackQueryHandler(callback=DeleteButton().confirm_delete_button,
                              pattern=r"delete_button")
@@ -649,6 +652,7 @@ DELETE_BUTTON_HANDLER = ConversationHandler(
 
 
 CHANGE_BUTTON_NAME_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[
         CallbackQueryHandler(callback=ChangeButtonName().start,
                              pattern="change_button_name")
@@ -666,6 +670,7 @@ CHANGE_BUTTON_NAME_HANDLER = ConversationHandler(
 
 
 EDIT_BUTTON_CONTENT_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[CallbackQueryHandler(callback=EditButtonHandler().content_menu,
                                        pattern="edit_button_content")],
     states={
@@ -689,6 +694,7 @@ EDIT_BUTTON_CONTENT_HANDLER = ConversationHandler(
 )
 
 EDIT_BUTTON_LINK_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[CallbackQueryHandler(callback=EditButtonHandler().start_edit_link,
                                        pattern="edit_button_link")],
     states={

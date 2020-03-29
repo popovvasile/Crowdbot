@@ -294,6 +294,7 @@ ORDERS, CONFIRM_TO_PROCESS, CONFIRM_TO_DONE, \
 
 
 ORDERS_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[CallbackQueryHandler(OrdersHandler().orders,
                                        pattern=r"orders")],
     states={

@@ -177,6 +177,7 @@ class SendMessageToDonators(object):
 
 
 SEND_MESSAGE_TO_DONATORS_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[CallbackQueryHandler(pattern="send_message_to_donators",
                                        callback=SendMessageToDonators().send_message)],
 

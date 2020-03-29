@@ -1061,6 +1061,7 @@ MESSAGES_MENU = CallbackQueryHandler(
 
 
 SEND_MESSAGE_TO_ADMIN_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[
         CallbackQueryHandler(
             pattern="send_message_to_admin",
@@ -1100,6 +1101,7 @@ HIDE_MESSAGE_HANDLER = CallbackQueryHandler(
 
 """SENDING MESSAGES TO ALL SUBSCRIBERS"""
 SEND_MESSAGE_TO_USERS_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[
         CallbackQueryHandler(
             pattern="send_message_to_all_users",
@@ -1150,6 +1152,7 @@ DELETE_MESSAGES_MENU_HANDLER = CallbackQueryHandler(
     callback=DeleteMessage().delete_messages_menu)
 
 DELETE_MESSAGES_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[
         # CallbackQueryHandler(
         #     pattern="del_messages_menu",
@@ -1204,6 +1207,7 @@ answer_to_message = AnswerToMessage(
     final_callback=SeeMessageToAdmin().back_to_view_message)
 
 ANSWER_TO_MESSAGE_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[
         CallbackQueryHandler(
             pattern=r"answer_to_message",

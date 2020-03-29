@@ -190,6 +190,7 @@ class SendMessageToAdminsOnly(object):
 
 
 SEND_MESSAGE_ONLY_TO_ADMINS_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[CallbackQueryHandler(pattern="send_message_only_to_admins",
                                        callback=SendMessageToAdminsOnly().send_message)],
 

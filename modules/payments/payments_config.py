@@ -10,7 +10,7 @@ from telegram.ext import (MessageHandler, Filters, ConversationHandler, Callback
 
 from database import chatbots_table, products_table, db
 from helper_funcs.auth import initiate_chat_id
-from helper_funcs.helper import get_help, check_provider_token
+from helper_funcs.helper import get_help, check_provider_token, currency_limits_dict
 from helper_funcs.misc import delete_messages
 from logs import logger
 from modules.shop.admin_side.welcome import Welcome
@@ -430,12 +430,21 @@ class EditPaymentHandler(object):
             # stupid solution, couldn't find anything inside
             # the pymongo framework which would make it easy
             # old solution below (does not work)
+            currency = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]["currency"]
+            currency_limits = currency_limits_dict[currency]
             for prod in all_products:
+                try:
+                    assert currency_limits["min"] < float(prod["price"]) < currency_limits[
+                        "max"]
+                except AssertionError:
+                    if float(prod["price"]) > currency_limits["max"]:
+                        prod["price"] = currency_limits["max"]
+                    else:
+                        prod["price"] = currency_limits["min"]
                 products_table.update_one(
                     {"_id": prod["_id"]},
                     {"$set": {"price": round(prod["price"], 2),
                               "discount_price": round(prod["discount_price"], 2)}})
-
             delete_messages(update, context)
             update.callback_query.message.reply_text(
                 context.bot.lang_dict["payments_currency_has_changed"],
@@ -465,6 +474,7 @@ class EditPaymentHandler(object):
 
 
 EDIT_SHOP_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[
         CallbackQueryHandler(callback=EditPaymentHandler().handle_edit_action_finish,
                              pattern=r'edit_change_')

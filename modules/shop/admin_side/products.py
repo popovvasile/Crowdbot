@@ -625,6 +625,7 @@ class ProductsHandler(ProductsHelper):
  CONFIRM_ADD_SIZES, CONTENT_MENU, ADDING_CONTENT) = range(17)
 
 PRODUCTS_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[CallbackQueryHandler(ProductsHandler().products,
                                        pattern=r"products")],
     states={

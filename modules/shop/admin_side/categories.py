@@ -287,6 +287,7 @@ CATEGORIES_HANDLER = CallbackQueryHandler(ProductCategoryHandler().edit_category
 EDIT_CATEGORIES_HANDLER = CallbackQueryHandler(ProductCategoryHandler().menu,
                                                pattern=r"categories")
 RENAME_CATEGORY_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[CallbackQueryHandler(ProductCategoryHandler().rename_category,
                                        pattern=r"edit_name_shop_category")],
 
@@ -303,6 +304,7 @@ RENAME_CATEGORY_HANDLER = ConversationHandler(
     ]
 )
 DELETE_CATEGORY_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[CallbackQueryHandler(ProductCategoryHandler().delete_category,
                                        pattern=r"delete_shop_category")],
     states={DELETE_CATEGORY_CONFIRM: [
@@ -314,6 +316,7 @@ DELETE_CATEGORY_HANDLER = ConversationHandler(
                              pattern=r"back_to_main_menu"),
     ])
 ADD_CATEGORY_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[CallbackQueryHandler(ProductCategoryHandler().add_category,
                                        pattern=r"add_shop_category")],
 

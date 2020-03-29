@@ -75,6 +75,7 @@ class EditBotDescription(object):
 
 
 EDIT_BOT_DESCRIPTION_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[CallbackQueryHandler(pattern="edit_bot_description",
                                        callback=EditBotDescription().send_message)],
 

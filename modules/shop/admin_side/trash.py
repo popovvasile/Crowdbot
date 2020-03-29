@@ -104,6 +104,7 @@ TRASH_START = CallbackQueryHandler(TrashHandler().start_trash,
 
 
 ORDERS_TRASH = ConversationHandler(
+    allow_reentry=True,
     entry_points=[CallbackQueryHandler(TrashHandler().orders,
                                        pattern=r"trashed_orders")],
     states={
@@ -118,6 +119,7 @@ ORDERS_TRASH = ConversationHandler(
 
 
 PRODUCTS_TRASH = ConversationHandler(
+    allow_reentry=True,
     entry_points=[CallbackQueryHandler(TrashHandler().products,
                                        pattern=r"trashed_products")],
     states={

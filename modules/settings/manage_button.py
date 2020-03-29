@@ -412,6 +412,7 @@ class DeleteButtonContent(object):
 
 # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
 BUTTON_EDIT_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[CallbackQueryHandler(callback=ButtonEdit().start,
                                        pattern=r"edit_button")],
 
@@ -427,6 +428,7 @@ BUTTON_EDIT_HANDLER = ConversationHandler(
 )
 
 BUTTON_EDIT_FINISH_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[CallbackQueryHandler(callback=ButtonEdit().edit_button,
                                        pattern=r"b_")],
 
@@ -444,6 +446,7 @@ BUTTON_EDIT_FINISH_HANDLER = ConversationHandler(
     ]
 )
 BUTTON_ADD_FINISH_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[CallbackQueryHandler(callback=AddButtonContent().add_content_button,
                                        pattern=r"add_content")],
 

@@ -303,6 +303,7 @@ ADMINS, CONFIRM_DELETE_ADMIN, ADD_ADMINS = range(3)
 
 
 ADMINS_LIST_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[CallbackQueryHandler(pattern="admins",
                                        callback=AdminHandler().admins)],
 

@@ -297,6 +297,7 @@ class AddingProductHandler(object):
 
 
 ADD_PRODUCT_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[CallbackQueryHandler(AddingProductHandler().start,
                                        pattern=r"add_product")],
 

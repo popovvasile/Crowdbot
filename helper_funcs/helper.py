@@ -196,6 +196,7 @@ def check_provider_token(currency, provider_token, update, context):
 
 # for test purposes
 def error_callback(update, context):
+    delete_messages(update, context)
     try:
         """back_buttons = InlineKeyboardMarkup(
                         [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
@@ -249,7 +250,7 @@ def error_callback(update, context):
                                      [[InlineKeyboardButton(
                                          text=context.bot.lang_dict["back_button"],
                                          callback_data="help_back")]]))
-    # return ConversationHandler.END
+        return ConversationHandler.END
 
 
 def button_handler(update, context):

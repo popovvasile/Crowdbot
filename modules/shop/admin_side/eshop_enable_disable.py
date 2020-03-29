@@ -171,6 +171,7 @@ class CreateShopHandler(object):
 
 
 CREATE_SHOP_HANDLER = ConversationHandler(
+    allow_reentry=True,
     entry_points=[CallbackQueryHandler(callback=CreateShopHandler().start_create_shop,
                                        pattern=r'allow_shop'),
                   ],
