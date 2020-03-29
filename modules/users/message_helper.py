@@ -1,5 +1,6 @@
 import html
 
+from telegram.error import Unauthorized
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, TelegramError
 from bson.objectid import ObjectId
 
@@ -149,13 +150,14 @@ class AnswerToMessage(SenderHelper):
                 callback_data="subscriber_open_message_true/"
                               + str(context.user_data["answer_to"]["_id"]))]
         ])
-
+        # try:
         context.bot.send_message(
             chat_id=context.user_data["answer_to"]["chat_id"],
             text=user_message_temp,
             reply_markup=reply_markup,
             parse_mode=ParseMode.HTML)
-
+        # except Unauthorized:
+        #     pass
         logger.info("Admin {} on bot {}:{} sent a message to the user".format(
             update.effective_user.first_name,
             context.bot.first_name, context.bot.id))
