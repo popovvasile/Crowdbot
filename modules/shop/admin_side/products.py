@@ -611,7 +611,7 @@ class ProductsHandler(ProductsHelper):
         return reply_markup
 
     def back_to_products(self, update: Update, context: CallbackContext):
-        page = context.user_data.get("page")
+        page = context.user_data.get("page", 1)
         delete_messages(update, context)
         clear_user_data(context)
         context.user_data["page"] = page
