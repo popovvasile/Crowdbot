@@ -19,6 +19,7 @@ description will be sends as separate message
 
 User side also use this constant at the templates"""
 MAX_TEMP_DESCRIPTION_LENGTH = 150
+MAX_PRODUCT_NAME_LENGTH = 100
 
 
 class Product(object):

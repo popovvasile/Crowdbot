@@ -11,7 +11,8 @@ from helper_funcs.pagination import Pagination
 from helper_funcs.misc import delete_messages, content_dict_as_string
 from modules.shop.helper.helper import clear_user_data
 from modules.shop.helper.keyboards import keyboards, back_kb, back_btn, create_keyboard
-from modules.shop.components.product import Product, MAX_TEMP_DESCRIPTION_LENGTH
+from modules.shop.components.product import (Product, MAX_TEMP_DESCRIPTION_LENGTH,
+                                             MAX_PRODUCT_NAME_LENGTH)
 from modules.shop.admin_side.welcome import Welcome
 from modules.shop.admin_side.categories import validate_category_name, MAX_CATEGORIES_COUNT
 from database import products_table, categories_table, chatbots_table, orders_table
@@ -271,7 +272,7 @@ class ProductsHandler(ProductsHelper):
 
     def finish_name(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        if len(update.message.text) > 1000:
+        if len(update.message.text) > MAX_PRODUCT_NAME_LENGTH:
             return self.name(update, context, msg=True)
         context.user_data["product"].update(
             {"name": update.message.text})
