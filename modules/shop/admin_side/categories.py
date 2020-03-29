@@ -267,7 +267,8 @@ class ProductCategoryHandler(object):
             context.user_data["to_delete"].append(context.bot.send_message(
                 chat_id=update.message.chat_id,
                 text=final_text,
-                reply_markup=keyboard))
+                reply_markup=keyboard,
+                parse_mode=ParseMode.HTML))
         return START_ADD_CATEGORY
 
     # def confirm_adding(self, update: Update, context: CallbackContext):

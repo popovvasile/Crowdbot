@@ -1,4 +1,10 @@
 --SHOP  -- status, in_trash, on_sale
+    * ValueError: KZT is not a supported currency
+    * ValueError: UAH is not a supported currency
+    * Address validation in admin setting shop
+    * Погрешность при смене валюты может выставить цену минимальней чем минимальный возможный платёж
+    *
+
     [Done] * Валидация на количество контента в сообщении(в ответе)
     [Done] * Валидация данных при изменении приветсвия(реагировало на фотку)
 
