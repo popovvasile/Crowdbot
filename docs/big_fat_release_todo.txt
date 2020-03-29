@@ -1,23 +1,27 @@
 --SHOP  -- status, in_trash, on_sale
+    [Vasile]
     * ValueError: KZT is not a supported currency
     * ValueError: UAH is not a supported currency
-    * Address validation in admin setting shop
     * Погрешность при смене валюты может выставить цену минимальней чем минимальный возможный платёж
-    * в trash показывает чужие товары
-    * html баг в заказах(вроде и в админ части и в юзер части)
-    [Done] * не показывает Article в магазине юзер часть
-    * В Full template и Short template заказа - при слишком большом тексте(Items)
-            - HTML BUG обрывать текст и показывать три точки
-	* В Short template товара - при слишком большом тексте(Not finished orders)
-	        - HTML BUGобрывать текст и показывать три точки
-    * Баги в Удалении категории(Если есть товара который есть в новых заказах) и вообще в целом работа с товаром
-    * Unauthorized (bot was blocked by the user/deactivated) когда отвечаешь отписчику/удалённому(в ответах)
     * поставить allow_reentry - ConversationHandler
     * File "/root/test_yura/crowdrobot/modules/payments/payments_config.py", line 326, in handle_edit_finish
             KeyError: 'payment_token'
     * Error Callback Доделать нормально, с логами
     * Currency Exchange converter fix
 
+    [Yuriy]
+    * в trash показывает чужие товары
+    * Address validation in admin setting shop
+    * Unauthorized (bot was blocked by the user/deactivated) когда отвечаешь отписчику/удалённому(в ответах)
+    * Баги в Удалении категории(Если есть товара который есть в новых заказах) и вообще в целом работа с товаром
+    * В Full template и Short template заказа - при слишком большом тексте(Items)
+            - HTML BUG обрывать текст и показывать три точки
+	* В Short template товара - при слишком большом тексте(Not finished orders)
+	        - HTML BUG обрывать текст и показывать три точки
+
+
+
+    [Done] * не показывает Article в магазине юзер часть
     [Done] * Валидация на количество контента в сообщении(в ответе)
     [Done] * Валидация данных при изменении приветсвия(реагировало на фотку)
     [Done] * Убрать из валидации цены проверку на длину строки
