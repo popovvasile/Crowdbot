@@ -81,7 +81,7 @@ class Order(object):
             ["<code>{}</code>\nx{} - <code>{}</code> {}".format(
                 html.escape(item.name, quote=False),
                 item.order_quantity,
-                item.price,
+                item.item_price,
                 self.currency)
              # + (item.item_emoji if not self.status else "")
              for item in self.items])
@@ -276,7 +276,13 @@ class OrderItem(Product):
         #     and self.on_sale
         #     and (self.unlimited or (self.order_quantity <= self.quantity)))
         # price of the item
-        self.item_price = self.price * self.order_quantity
+        # print(self.name)
+        # print(self.discount_price)
+        # print(self.price)
+        if self.discount_price:
+            self.item_price = self.discount_price * self.order_quantity
+        else:
+            self.item_price = self.price * self.order_quantity
         self.currency = currency
 
     @property

@@ -104,8 +104,8 @@ class CartHelper(object):
         cart_item["product"] = product
         return cart_item
 
-    @staticmethod
-    def short_cart_item_template(cart_item, currency, context) -> str:
+    @classmethod
+    def short_cart_item_template(cls, cart_item, currency, context) -> str:
         """Short text representation of the cart item.
 
         :param cart_item: {
@@ -131,8 +131,7 @@ class CartHelper(object):
                 str(cart_item["product"].get("_id")),
                 html.escape(cart_item["product"]["name"], quote=False),
                 html.escape(category_name, quote=False),
-                float(cart_item["product"]["price"]) * cart_item["quantity"],
-                currency)
+                cls.price_as_str(cart_item, context, currency))
         if not cart_item["product"].get("unlimited"):
             template += context.bot.lang_dict["in_stock_field"].format(
                 cart_item['product']['quantity'])
@@ -140,8 +139,8 @@ class CartHelper(object):
             cart_item['quantity'])
         return template
 
-    @staticmethod
-    def full_cart_item_template(cart_item, currency, context) -> str:
+    @classmethod
+    def full_cart_item_template(cls, cart_item, currency, context) -> str:
         """Full text representation of the cart item.
 
         :param cart_item: {
@@ -161,8 +160,7 @@ class CartHelper(object):
                 str(cart_item["product"].get("_id")),
                 html.escape(cart_item["product"]["name"], quote=False),
                 html.escape(category_name, quote=False),
-                float(cart_item["product"]["price"]) * cart_item["quantity"],
-                currency)
+                cls.price_as_str(cart_item, context, currency))
         if (len(cart_item["product"]["description"])
                 < MAX_TEMP_DESCRIPTION_LENGTH):
             template += context.bot.lang_dict["description_field"].format(
@@ -210,6 +208,22 @@ class CartHelper(object):
                        if content_len else ""),
                     callback_data=f"view_cart_product/{cart_item['product_id']}")])
         return InlineKeyboardMarkup(product_buttons)
+
+    @classmethod
+    def price_as_str(cls, cart_item, context, currency=None):
+        # todo repeating - quick solution, create "components" logic for user side
+        if not currency:
+            currency = chatbots_table.find_one(
+                {"bot_id": context.bot.id})["shop"]["currency"]
+        price = float(format((cart_item["product"]["price"]) * cart_item["quantity"], '.2f'))
+
+        if cart_item["product"]['discount_price']:
+            discount_price = float(
+                format((cart_item["product"]["discount_price"]) * cart_item["quantity"], '.2f'))
+            return (f"💥 <s>{price}</s> "
+                    f"<b><u>{discount_price} {currency}</u></b>")
+        else:
+            return f"<b><u>{price} {currency}</u></b>"
 
 
 class Cart(CartHelper):
