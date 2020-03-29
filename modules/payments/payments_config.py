@@ -1,5 +1,7 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
+import PyCurrency_Converter
+import requests
 import telegram
 
 from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, \
@@ -16,9 +18,9 @@ from modules.shop.helper.keyboards import back_btn
 from currency_converter import CurrencyConverter
 
 START, CHOOSING_ACTION, FINISH_ACTION, EDIT_PAYMENT, CHOOSING_EDIT_ACTION, \
-    TYPING_TITLE, TYPING_DESCRIPTION, TYPING_CURRENCY, \
-    TYPING_TOKEN, TYPING_TOKEN_FINISH, EDIT_FINISH, \
-    DOUBLE_CHECK_DELETE, DELETE_FINISH, CURRENCY_FINISH = range(14)
+TYPING_TITLE, TYPING_DESCRIPTION, TYPING_CURRENCY, \
+TYPING_TOKEN, TYPING_TOKEN_FINISH, EDIT_FINISH, \
+DOUBLE_CHECK_DELETE, DELETE_FINISH, CURRENCY_FINISH = range(14)
 
 
 class EnableDisableShopDonations(object):
@@ -323,14 +325,21 @@ class EditPaymentHandler(object):
         if context.user_data["action"] == "address":
             update_dict["address"] = txt
         if context.user_data["action"] == "currency":
-            check = check_provider_token(provider_token=chatbot["shop"]["payment_token"],
-                                         update=update,
-                                         context=context, currency=txt)
-            if check[0] or chatbot["shop"]["shop_type"] == "offline":
+            if chatbot["shop"]["shop_type"] == "offline":
+                check = check_provider_token(provider_token=chatbot["shop"]["payment_token"],
+                                             update=update, context=context, currency=txt)
+            else:
+                check = (True, "All good")
+            if check[0]:
                 update_dict["currency"] = txt
                 context.user_data["currency"] = txt
-                c = CurrencyConverter()
-                converted = c.convert(1, chatbot["shop"]["currency"], txt)
+
+                url = 'https://prime.exchangerate-api.com/v5/d50bf30b0f53baa26ac17d80/latest/'
+                url += chatbot["shop"]["currency"]
+
+                # Making our request
+                converted = float(requests.get(url).json()[txt])
+
                 keyboard_markup = InlineKeyboardMarkup(
                     [[InlineKeyboardButton(text=context.bot.lang_dict["yes"],
                                            callback_data="change_currency_finish_YES")],
