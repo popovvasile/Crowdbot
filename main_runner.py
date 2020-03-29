@@ -130,9 +130,6 @@ def main(token, lang):
         Bot.lang_dict = lang_dicts["RUS"]
     updater = tg.Updater(use_context=True, bot=bot_obj)
     dispatcher = updater.dispatcher
-    # os.environ['SHOP_PRODUCTION'] is True --- returns False, dunno why
-    if os.environ['SHOP_PRODUCTION'] == "1":
-        dispatcher.add_error_handler(error_callback)
     start_handler = CommandHandler("start", WelcomeBot().start)
     help_handler = CommandHandler("help", get_help)
     # product_handler_han = CallbackQueryHandler(
@@ -156,6 +153,7 @@ def main(token, lang):
     dispatcher.add_handler(dismiss_handler)
     # TODO priority is very important!!!!!!!!!!!!!!!!!!!!
     dispatcher.add_handler(EDIT_BOT_DESCRIPTION_HANDLER)
+
 
     #  SHOP USER SIDE
     dispatcher.add_handler(EDIT_SHOP_HANDLER)
@@ -351,6 +349,10 @@ def main(token, lang):
     dispatcher.add_handler(BACK_TO_MAIN_MENU_HANDLER)
 
     dispatcher.add_handler(help_callback_handler)
+
+    # os.environ['SHOP_PRODUCTION'] is True --- returns False, dunno why
+    if os.environ['SHOP_PRODUCTION'] == "1":
+        dispatcher.add_error_handler(error_callback)
 
     # rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), get_help)
     # dispatcher.add_handler(rex_help_handler)

@@ -197,38 +197,42 @@ def check_provider_token(currency, provider_token, update, context):
 # for test purposes
 def error_callback(update, context):
     try:
-        back_buttons = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                   callback_data="help_back")]
-             ])
-        # print(error)
-        if update.effective_message.chat_id > 0:
-            if hasattr(update, 'callback_query'):
-                context.bot.send_message(update.effective_message.chat_id,
-                                         context.bot.lang_dict["error_occurred"],
-                                         reply_markup=back_buttons)
-            elif hasattr(update, 'message'):
-                context.bot.send_message(update.effective_message.chat.id,
-                                         context.bot.lang_dict["error_occurred"],
-                                         reply_markup=back_buttons)
+        """back_buttons = InlineKeyboardMarkup(
+                        [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                               callback_data="help_back")]
+                         ])
+            # print(error)
+            if update.effective_message.chat_id > 0:
+                if hasattr(update, 'callback_query'):
+                    context.bot.send_message(update.effective_message.chat_id,
+                                             context.bot.lang_dict["error_occurred"],
+                                             reply_markup=back_buttons)
+                elif hasattr(update, 'message'):
+                    context.bot.send_message(update.effective_message.chat.id,
+                                             context.bot.lang_dict["error_occurred"],
+                                             reply_markup=back_buttons)
 
-            return
-        else:
-            return
+                return
+            else:
+                return"""
+        raise context.error
 
+    # Unauthorized
     except ConnectionError as err:
         print("ConnectionError")
         print(err)
+
     except TimedOut as err:
         print("TimedOut")
         print(err)
 
-        # handle slow connection problems
+    # handle slow connection problems
     except (HTTPError, BadRequest):
         print("HTTPError")
 
     except NetworkError:
         print("Neworkerror")
+
     # handle other connection problems
     except ChatMigrated as e:
         # the chat_id of a group has changed, use e.new_chat_id instead
@@ -236,6 +240,7 @@ def error_callback(update, context):
 
     except TelegramError:
         print("TeelgramError")
+
     except Exception as e:
         logger.error(e.__repr__())
         context.bot.send_message(update.effective_message.chat.id,
@@ -244,6 +249,7 @@ def error_callback(update, context):
                                      [[InlineKeyboardButton(
                                          text=context.bot.lang_dict["back_button"],
                                          callback_data="help_back")]]))
+    # return ConversationHandler.END
 
 
 def button_handler(update, context):
