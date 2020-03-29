@@ -1,17 +1,22 @@
 {
     "ENG": {
+        "category_name_exist": "<b>{}</b> category already exist.\nPlease write a category name",
+        "too_much_categories_blink": "Too much categories",
+
+
         "invalid_button_name": "Button name so long, make it shorter\n",
         "shop_admin_number_not_integer": "Product quantity must be displayed as an positive integer",
         "default_greeting": "Hello",
-
+        "files_counter": "\n\n• Files {}/10",
         "order_comment_too_long": "Your comment too big, please make it shorter.",
         "share_number_btn": "Share Number",
         "invalid_number": "Invalid phone number.\n",
         "long_address": "Address is so long.\n",
         "short_address": "Address is so short.\n",
         "so_many_buttons": "There are already too many buttons",
-        "so_many_content": "Too much content already added",
-        "add_menu_buttons_str_11": "Great! Press '✅ Done' to finish",
+        "so_many_content": "Too much content already added\n",
+        "add_menu_buttons_str_11": "Press '✅ Done' to finish",
+        "add_menu_button_str_12": "",
         "order_success_online": "\nYou can pay the order ⬆️",
         "paid_status_true": "\n\uD83D\uDCB0 <code>Paid</code>",
         "paid_status_false": "\n<code>Not paid</code>",
@@ -703,7 +708,7 @@
         "short_address": "Address is so short.\n",
         "so_many_buttons": "There are already too many buttons",
         "so_many_content": "Too much content already added",
-        "add_menu_buttons_str_11": "Great! Press '✅ Done' to finish",
+        "add_menu_buttons_str_11": "Press '✅ Done' to finish",
         "order_success_online": "\nYou can pay the order ⬆️",
         "paid_status_true": "\n\uD83D\uDCB0 <code>Paid</code>",
         "paid_status_false": "\n<code>Not paid</code>",

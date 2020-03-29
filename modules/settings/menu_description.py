@@ -79,7 +79,7 @@ EDIT_BOT_DESCRIPTION_HANDLER = ConversationHandler(
                                        callback=EditBotDescription().send_message)],
 
     states={
-        MESSAGE: [MessageHandler(Filters.all, EditBotDescription().received_message)],
+        MESSAGE: [MessageHandler(Filters.text, EditBotDescription().received_message)],
 
     },
 

@@ -244,6 +244,13 @@ class UserProductsHandler(UserProductsHelper):
                                      page_prefix="user_products_pagination",
                                      buttons=buttons)
         else:
+            buttons = [[
+                InlineKeyboardButton(
+                    text=context.bot.lang_dict["buy_btn"],
+                    callback_data="cart")],
+                [InlineKeyboardButton(
+                    text=context.bot.lang_dict["back_button"],
+                    callback_data="back_to_module_shop")]]
             context.user_data["to_delete"].append(
                 context.bot.send_message(
                     chat_id=update.effective_chat.id,

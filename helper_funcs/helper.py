@@ -247,6 +247,7 @@ def button_handler(update, context):
                                      callback_data="back_from_button")]]
     context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                message_id=update.callback_query.message.message_id)
+    button_info = dict()
     try:
         button_info = custom_buttons_table.find_one(
             {"bot_id": context.bot.id, "button_lower": button_callback_data.replace("button_", "")}
@@ -299,7 +300,8 @@ def button_handler(update, context):
         else:
             logger.exception("Exception in help buttons. %s", str(query.data))
     context.bot.send_message(chat_id=update.callback_query.message.chat_id,
-                             text=context.bot.lang_dict["back_button"],
+                             text=button_info.get("button")
+                             or context.bot.lang_dict["back_button"],
                              reply_markup=InlineKeyboardMarkup(buttons))
 
 

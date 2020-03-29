@@ -84,8 +84,6 @@ from modules.payments.payments_config import (
 # from modules.donations.donation_enable_disable import (
 #     CREATE_DONATION_HANDLER, DONATIONS_MENU)
 
-
-
 # SHOP ADMIN SIDE
 from modules.shop.admin_side.welcome import (
     START_SHOP_HANDLER, BACK_TO_MAIN_MENU_HANDLER, Welcome)
@@ -96,7 +94,7 @@ from modules.shop.admin_side.trash import (TRASH_START, ORDERS_TRASH,
                                            PRODUCTS_TRASH)
 from modules.shop.admin_side.categories import (
     ADD_CATEGORY_HANDLER, CATEGORIES_HANDLER, EDIT_CATEGORIES_HANDLER,
-    RENAME_CATEGORY_HANDLER, DELETE_CATEGORY_HANDLER)
+    RENAME_CATEGORY_HANDLER, DELETE_CATEGORY_HANDLER, BACK_TO_CATEGORIES_MENU)
 from modules.shop.admin_side.eshop_enable_disable import CREATE_SHOP_HANDLER
 
 # SHOP USER SIDE
@@ -112,10 +110,7 @@ from modules.shop.user_side.orders import (
     ORDER_PAYMENT_MENU)
 
 
-
-
 def main(token, lang):
-
     # https://github.com/python-telegram-bot/python-telegram-bot/issues/787
     req = request.Request(con_pool_size=8)
     bot_obj = Bot(token=token, request=req)
@@ -204,8 +199,10 @@ def main(token, lang):
     dispatcher.add_handler(RENAME_CATEGORY_HANDLER)
     dispatcher.add_handler(RENAME_CATEGORY_HANDLER)
     dispatcher.add_handler(DELETE_CATEGORY_HANDLER)
+    dispatcher.add_handler(BACK_TO_CATEGORIES_MENU)
     dispatcher.add_handler(HANDLE_SUCCES)
     dispatcher.add_handler(HANDLE_PRECHECKOUT)
+
     # BUTTONS
     dispatcher.add_handler(ONE_BUTTON_MENU)
     dispatcher.add_handler(CHANGE_BUTTON_NAME_HANDLER)
