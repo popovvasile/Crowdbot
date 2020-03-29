@@ -419,10 +419,10 @@ class ProductsHandler(ProductsHelper):
         return CONTENT_MENU
 
     def start_adding_content(self, update: Update, context: CallbackContext):
-        delete_messages(update, context, True)
         if len(context.user_data["product"].content) >= 10:
             update.callback_query.answer(context.bot.lang_dict["add_product_10_files"])
             return CONTENT_MENU
+        delete_messages(update, context, True)
         text = (self.admin_short_template(context, context.user_data["product"])
                 + "\n\n"
                 + context.bot.lang_dict["add_product_add_files"]
@@ -611,7 +611,7 @@ class ProductsHandler(ProductsHelper):
         return reply_markup
 
     def back_to_products(self, update: Update, context: CallbackContext):
-        page = context.user_data.get("page")
+        page = context.user_data.get("page", 1)
         delete_messages(update, context)
         clear_user_data(context)
         context.user_data["page"] = page

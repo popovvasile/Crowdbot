@@ -159,7 +159,7 @@ class AddCommands(object):
         reply_markup = InlineKeyboardMarkup(reply_buttons)
 
         chat_id, txt = initiate_chat_id(update)
-        if len(txt) > MAX_BUTTON_NAME_LEN:
+        if len(txt) > MAX_BUTTON_NAME_LENGTH:
             delete_messages(update, context, True)
             context.user_data["to_delete"].append(
                 context.bot.send_message(update.effective_chat.id,
@@ -284,7 +284,7 @@ class AddLinkButton(object):
                                                callback_data="cancel_button_creation")]]
         reply_markup = InlineKeyboardMarkup(reply_buttons)
         chat_id, txt = initiate_chat_id(update)
-        if len(txt) > MAX_BUTTON_NAME_LEN:
+        if len(txt) > MAX_BUTTON_NAME_LENGTH:
             delete_messages(update, context, True)
             context.user_data["to_delete"].append(
                 context.bot.send_message(update.effective_chat.id,

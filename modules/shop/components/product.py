@@ -122,7 +122,7 @@ class Product(object):
             result["error_message"] = context.bot.lang_dict["shop_admin_price_wrong"].format(
                     currency_limits["min"], currency, currency_limits["max"], currency)
             return result
-        except ValueError:
+        except (ValueError, OverflowError):
             result["ok"] = False
             result["error_message"] = (
                 context.bot.lang_dict["add_product_wrong_floating_point_number"])
@@ -151,7 +151,7 @@ class Product(object):
         result = dict()
         try:
             assert int(float(update.message.text)) > 0
-        except (AssertionError, ValueError):
+        except (AssertionError, ValueError, OverflowError):
             result["ok"] = False
             result["error_message"] = context.bot.lang_dict["shop_admin_number_wrong"]
             return result
