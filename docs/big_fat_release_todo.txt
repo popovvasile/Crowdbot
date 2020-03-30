@@ -1,37 +1,32 @@
 --SHOP  -- status, in_trash, on_sale
     [Vasile]
+        * Валидация цены баг - нижнее подчеркивание
+        * Убрать заголовки в пагинацию как в инбоксе
+            - Item list
+            - Order list(Написать норм заголовок)
+            - Orders list user
+        * В под меню редактирования убрать вместо трех \n - сделать два и выделить всё жирным
+        * Увеличить длительность блинков
+            https://python-telegram-bot.readthedocs.io/en/stable/telegram.bot.html#telegram.Bot.answer_callback_query
+        * Убрать с карточки заказа комментарий если его нет
+        * ВСе шаблоны по схеме и ноутификацию
+            * пояснения регуляром
+            * <i> - поля, <b> инпуты
+        * все машинки и ручки между полем и инпутом
+        * в Order item поменять Category и name местами
 
     [Yuriy]
-
-
     * Address validation in admin setting shop
-    * Проверить Delete Messages
-    * Валидация цены баг - нижнее подчеркивание
-
     * Баги в Удалении категории(Если есть товара который есть в новых заказах) и вообще в целом работа с товаром
     * Cancel order -        # TODO - ADD CATEGORY IF IT DOESN'T EXIST
     * Trash - restore order # TODO - ADD CATEGORY IF IT DOESN'T EXIST
-
     * В Full template и Short template заказа - при слишком большом тексте(Items)
             - HTML BUG обрывать текст и показывать три точки
 	* В Short template товара - при слишком большом тексте(Not finished orders) ПО 3 ШТ
 	        - HTML BUG обрывать текст и показывать три точки
 
 
-    * Убрать заголовки пагинации
-        - Item list
-        - Order list(Написать норм заголовок)
-        - Orders list user
-    * В под меню редактирования убрать вместо трех \n - сделать два и выделить всё жирным
-    * Увеличить длительность блинков
-        https://python-telegram-bot.readthedocs.io/en/stable/telegram.bot.html#telegram.Bot.answer_callback_query
-    * Убрать с карточки заказа комментарий если его нет
-    * ВСе шаблоны по схеме и ноутификацию
-        * пояснения регуляром
-        * <i> - поля, <b> инпуты
-    * все машинки и ручки между полем и инпутом
-    * в Order item поменять Category и name местами
-
+    * Проверить Delete Messages
     [DONE] ValueError: KZT is not a supported currency
     [DONE] ValueError: UAH is not a supported currency
     [DONE] Погрешность при смене валюты может выставить цену минимальней чем минимальный возможный платёж
