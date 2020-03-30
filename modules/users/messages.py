@@ -849,28 +849,28 @@ class SeeMessageToAdmin(object):
                  callback_data="delete_message/"
                                + str(context.user_data["message"]["_id"])))
 
-        if context.user_data["message"]["anonim"]:
-            if user_sender["anonim_messages_blocked"]:
-                buttons.append([InlineKeyboardButton(
-                    text=context.bot.lang_dict["unblock_messages_button"],
-                    callback_data="unblock_anonim_messaging_"
-                                  + str(user_sender["user_id"]))])
-            else:
-                buttons.append([InlineKeyboardButton(
-                    text=context.bot.lang_dict["block_messages_button"],
-                    callback_data="block_anonim_messaging_"
-                                  + str(user_sender["user_id"]))])
-        else:
-            if user_sender["regular_messages_blocked"]:
-                buttons.append([InlineKeyboardButton(
-                    text=context.bot.lang_dict["unblock_messages_button"],
-                    callback_data=f"from_inbox_unblock_messages_"
-                                  + str(user_sender['user_id']))])
-            else:
-                buttons.append([InlineKeyboardButton(
-                    text=context.bot.lang_dict["block_messages_button"],
-                    callback_data=f"from_inbox_block_messages_"
-                                  + str(user_sender['user_id']))])
+        # if context.user_data["message"]["anonim"]:
+        #     if user_sender["anonim_messages_blocked"]:
+        #         buttons.append([InlineKeyboardButton(
+        #             text=context.bot.lang_dict["unblock_messages_button"],
+        #             callback_data="unblock_anonim_messaging_"
+        #                           + str(user_sender["user_id"]))])
+        #     else:
+        #         buttons.append([InlineKeyboardButton(
+        #             text=context.bot.lang_dict["block_messages_button"],
+        #             callback_data="block_anonim_messaging_"
+        #                           + str(user_sender["user_id"]))])
+        # else:
+        #     if user_sender["regular_messages_blocked"]:
+        #         buttons.append([InlineKeyboardButton(
+        #             text=context.bot.lang_dict["unblock_messages_button"],
+        #             callback_data=f"from_inbox_unblock_messages_"
+        #                           + str(user_sender['user_id']))])
+        #     else:
+        #         buttons.append([InlineKeyboardButton(
+        #             text=context.bot.lang_dict["block_messages_button"],
+        #             callback_data=f"from_inbox_block_messages_"
+        #                           + str(user_sender['user_id']))])
         # Back button.
         buttons.append([InlineKeyboardButton(
             text=context.bot.lang_dict["back_button"],
