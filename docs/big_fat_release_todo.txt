@@ -13,12 +13,13 @@
 
     [Yuriy]
     [DONE] * в trash показывает чужие товары
-    * Unauthorized (bot was blocked by the user/deactivated) когда отвечаешь отписчику/удалённому(в ответах)
+    [DONE] * Unauthorized (bot was blocked by the user/deactivated) когда отвечаешь отписчику/удалённому(в ответах)
     * Баги в Удалении категории(Если есть товара который есть в новых заказах) и вообще в целом работа с товаром
     * В Full template и Short template заказа - при слишком большом тексте(Items)
             - HTML BUG обрывать текст и показывать три точки
 	* В Short template товара - при слишком большом тексте(Not finished orders)
 	        - HTML BUG обрывать текст и показывать три точки
+    * Cancel order -                 # TODO - ADD CATEGORY IF IT DOESN'T EXIST
 
 
 
@@ -90,6 +91,8 @@ STRINGS
 	* В темплейте сообщения если один и тот же тип файла повторяется - показывать число
 	* просто блинк когда с каталога переходишь в пустую корзину
 	* Сделать Inline клавиатуру в валюте, Добавить туда гривны, белорус рубли
+
+	Сайт саппорт бот без тире, плтёж-юот с тире
 
 --BACK BUTTONS
     [DONE] back from change greeting - fix
