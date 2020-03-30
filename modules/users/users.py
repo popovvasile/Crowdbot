@@ -43,8 +43,8 @@ class UsersHandler(object):
                                            "unsubscribed": False}
             context.user_data["filters_buttons"] = [
                 [InlineKeyboardButton(context.bot.lang_dict["show_banned_btn"],
-                                      callback_data="show_banned")],
-                [InlineKeyboardButton(context.bot.lang_dict["show_unbanned_btn"],
+                                      callback_data="show_banned"),
+                InlineKeyboardButton(context.bot.lang_dict["show_unbanned_btn"],
                                       callback_data="show_unbanned")]]
 
         elif update.callback_query.data == "show_banned":
@@ -56,8 +56,8 @@ class UsersHandler(object):
                                            "unsubscribed": False}
             context.user_data["filters_buttons"] = [
                 [InlineKeyboardButton(context.bot.lang_dict["show_all_users_btn"],
-                                      callback_data="show_all")],
-                [InlineKeyboardButton(context.bot.lang_dict["show_unbanned_btn"],
+                                      callback_data="show_all"),
+                InlineKeyboardButton(context.bot.lang_dict["show_unbanned_btn"],
                                       callback_data="show_unbanned")]]
 
         elif update.callback_query.data == "show_unbanned":
@@ -69,8 +69,8 @@ class UsersHandler(object):
                                            "unsubscribed": False}
             context.user_data["filters_buttons"] = [
                 [InlineKeyboardButton(context.bot.lang_dict["show_all_users_btn"],
-                                      callback_data="show_all")],
-                [InlineKeyboardButton(text=context.bot.lang_dict["show_banned_btn"],
+                                      callback_data="show_all"),
+                InlineKeyboardButton(text=context.bot.lang_dict["show_banned_btn"],
                                       callback_data="show_banned")]]
         if not context.user_data.get("page"):
             context.user_data["page"] = 1
@@ -153,6 +153,11 @@ class UsersHandler(object):
                 # todo change name callback
                 [InlineKeyboardButton(context.bot.lang_dict["send_msg_to_user"],
                                       callback_data=f"send_message_to_user/{user['chat_id']}")])
+            # if message:
+            user_buttons.append(
+                [InlineKeyboardButton(context.bot.lang_dict["user_messages"],
+                                      callback_data=f"user_messages_{user['user_id']}")])
+
             if user["blocked"]:
                 user_buttons.append(
                     [InlineKeyboardButton(context.bot.lang_dict["unblock_user"],
@@ -162,18 +167,15 @@ class UsersHandler(object):
                     [InlineKeyboardButton(context.bot.lang_dict["block_user"],
                                           callback_data=f"block_user_{user['_id']}")])
 
-                if user["regular_messages_blocked"]:
-                    user_buttons.append(
-                        [InlineKeyboardButton(context.bot.lang_dict["unblock_messages_button"],
-                                              callback_data=f"unblock_messages_{user['_id']}")])
-                else:
-                    user_buttons.append(
-                        [InlineKeyboardButton(context.bot.lang_dict["block_messages_button"],
-                                              callback_data=f"block_messages_{user['_id']}")])
-            # if message:
-            user_buttons.append(
-                [InlineKeyboardButton(context.bot.lang_dict["user_messages"],
-                                      callback_data=f"user_messages_{user['user_id']}")])
+                # if user["regular_messages_blocked"]:
+                #     user_buttons.append(
+                #         [InlineKeyboardButton(context.bot.lang_dict["unblock_messages_button"],
+                #                               callback_data=f"unblock_messages_{user['_id']}")])
+                # else:
+                #     user_buttons.append(
+                #         [InlineKeyboardButton(context.bot.lang_dict["block_messages_button"],
+                #                               callback_data=f"block_messages_{user['_id']}")])
+
         if extra_buttons:
             user_buttons.extend(extra_buttons)
         return InlineKeyboardMarkup(user_buttons)

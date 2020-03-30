@@ -208,8 +208,9 @@ class ProductsHandler(ProductsHelper):
             # TODO fix NoneType when creating the Product object
 
         text = (self.admin_full_template(context, context.user_data["product"])
-                + "\n"
-                + context.bot.lang_dict["shop_admin_edit_product_menu"])
+                # + "\n"
+                # + context.bot.lang_dict["shop_admin_edit_product_menu"]
+                )
         reply_markup = InlineKeyboardMarkup([
             [InlineKeyboardButton(
                 context.bot.lang_dict["shop_admin_set_discount_btn"],
