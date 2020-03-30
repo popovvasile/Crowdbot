@@ -134,12 +134,6 @@ class AnswerToMessage(SenderHelper):
     def send_message_finish(self, update, context):
         # context.user_data["to_delete"].extend(context.user_data["final_delete"])
         context.user_data["to_delete"].extend(context.user_data["user_input"])
-        users_messages_to_admin_table.update_one(
-            {"_id": context.user_data["answer_to"]["_id"]},
-            {"$set": {"answer_content": context.user_data["content"],
-                      # "answer_string": answer_string
-                      }})
-        # TODO STRINGS
         user_message_temp = context.bot.lang_dict["user_answer_notification"].format(
             content_string(context.user_data['answer_to']['content'], context),
             content_string(context.user_data['content'], context))
@@ -150,19 +144,26 @@ class AnswerToMessage(SenderHelper):
                 callback_data="subscriber_open_message_true/"
                               + str(context.user_data["answer_to"]["_id"]))]
         ])
-        # try:
-        context.bot.send_message(
-            chat_id=context.user_data["answer_to"]["chat_id"],
-            text=user_message_temp,
-            reply_markup=reply_markup,
-            parse_mode=ParseMode.HTML)
-        # except Unauthorized:
-        #     pass
-        logger.info("Admin {} on bot {}:{} sent a message to the user".format(
-            update.effective_user.first_name,
-            context.bot.first_name, context.bot.id))
-        # TODO STRINGS
-        update.callback_query.answer("Message sent")
+        try:
+            context.bot.send_message(
+                chat_id=context.user_data["answer_to"]["chat_id"],
+                text=user_message_temp,
+                reply_markup=reply_markup,
+                parse_mode=ParseMode.HTML)
+
+            users_messages_to_admin_table.update_one(
+                {"_id": context.user_data["answer_to"]["_id"]},
+                {"$set": {"answer_content": context.user_data["content"],
+                          # "answer_string": answer_string
+                          }})
+            logger.info("Admin {} on bot {}:{} sent an  answer to the user".format(
+                update.effective_user.first_name,
+                context.bot.first_name, context.bot.id))
+            update.callback_query.answer(context.bot.lang_dict["message_sent_blink"])
+
+        except Unauthorized:
+            update.callback_query.answer(context.bot.lang_dict["user_unauthorized"])
+
         return self.final_callback(update, context)
 
 

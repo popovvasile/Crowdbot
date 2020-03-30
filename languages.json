@@ -3,6 +3,8 @@
         "category_name_exist": "<b>{}</b> category already exist.\nPlease write a category name",
         "too_much_categories_blink": "Too much categories",
         "payment_not_available": "Payment not available\n",
+        "message_sent_blink": "Message sent",
+        "user_unauthorized": "\uD83D\uDCA2 Account no longer exists or user blocked bot",
 
 
         "invalid_button_name": "Button name so long, make it shorter\n",

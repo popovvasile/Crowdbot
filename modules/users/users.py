@@ -662,14 +662,14 @@ class SendMessageToUser(object):
                 # TODO NO CHAT_ID HERE
                 chat_id=context.user_data["chat_id"],
                 content=context.user_data["content"])
-        except:
-            update.callback_query.answer(context.bot.lang_dict["smth_gone_wrong_blink"])
+        except Unauthorized:
+            update.callback_query.answer(context.bot.lang_dict["user_unauthorized"])
             return self.cancel_creating_message(update, context)
         logger.info("Admin {} on bot {}:{} sent a message to the user".format(
             update.effective_user.first_name,
             context.bot.first_name, context.bot.id))
         # TODO STRINGS
-        update.callback_query.answer("Message sent")
+        update.callback_query.answer(context.bot.lang_dict["message_sent_blink"])
         return UsersHandler().back_to_open_user(update, context)
 
     def cancel_creating_message(self, update, context):

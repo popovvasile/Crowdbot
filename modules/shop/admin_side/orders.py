@@ -190,6 +190,7 @@ class OrdersHandler(OrdersHandlerHelper):
         if update.callback_query.data.startswith("cancel_order"):
             order_id = ObjectId(update.callback_query.data.split("/")[1])
             context.user_data["order"] = AdminOrder(context, order_id)
+
         context.user_data["order"].send_full_template(
             update, context,
             context.bot.lang_dict["shop_admin_confirm_cancel"],
@@ -207,6 +208,7 @@ class OrdersHandler(OrdersHandlerHelper):
             product = products_table.find_one({"_id": item["product_id"]})
             # if there are no product document - create it
             if not product:
+                # TODO - ADD CATEGORY IF IT DOESN'T EXIST
                 product = Product(context, item["product"])
                 if not product.unlimited:
                     product.quantity = item["quantity"]
