@@ -325,7 +325,7 @@ class EditPaymentHandler(object):
         if context.user_data["action"] == "address":
             update_dict["address"] = txt
         if context.user_data["action"] == "currency":
-            if chatbot["shop"]["shop_type"] == "offline":
+            if chatbot["shop"]["shop_type"] == "online":
                 check = check_provider_token(provider_token=chatbot["shop"]["payment_token"],
                                              update=update, context=context, currency=txt)
             else:

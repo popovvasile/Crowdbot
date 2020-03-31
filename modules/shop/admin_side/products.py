@@ -170,14 +170,8 @@ class ProductsHandler(ProductsHelper):
     @classmethod
     def products_layout(cls, update, context, all_products, state):
         """This Method works for the admin item list and for the item trash"""
-        # Send Title
-        title = context.bot.lang_dict["shop_admin_products_title"].format(
-            all_products.count())
-        context.user_data['to_delete'].append(
-            context.bot.send_message(
-                chat_id=update.callback_query.message.chat_id,
-                text=title,
-                parse_mode=ParseMode.HTML))
+        # Send Title..
+
         buttons = [[InlineKeyboardButton(context.bot.lang_dict["back_button"],
                                          callback_data="back_to_main_menu")]]
         if all_products.count() == 0:
@@ -196,6 +190,13 @@ class ProductsHandler(ProductsHelper):
                     update, context,
                     text=cls.admin_short_template(context, prod_obj),
                     reply_markup=cls.product_keyboard(context, prod_obj))
+            title = context.bot.lang_dict["shop_admin_products_title"].format(
+                all_products.count())
+            context.user_data['to_delete'].append(
+                context.bot.send_message(
+                    chat_id=update.callback_query.message.chat_id,
+                    text=title,
+                    parse_mode=ParseMode.HTML))
             pagination.send_keyboard(update, context, buttons,
                                      page_prefix="item_list_pagination")
         return state
@@ -244,7 +245,6 @@ class ProductsHandler(ProductsHelper):
     def description(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         text = (self.admin_short_template(context, context.user_data["product"])
-                + "\n"
                 + context.bot.lang_dict["shop_admin_set_description"])
         context.user_data["product"].send_short_template(
             update, context,
@@ -260,7 +260,6 @@ class ProductsHandler(ProductsHelper):
     def name(self, update: Update, context: CallbackContext, msg=None):
         delete_messages(update, context, True)
         text = (self.admin_short_template(context, context.user_data["product"])
-                + "\n\n"
                 + context.bot.lang_dict["shop_admin_change_name"])
         context.user_data["product"].send_short_template(
             update, context,
@@ -282,7 +281,6 @@ class ProductsHandler(ProductsHelper):
     def price(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         text = (self.admin_short_template(context, context.user_data["product"])
-                + "\n\n"
                 + context.bot.lang_dict["shop_admin_set_price"])
         context.user_data["product"].send_short_template(
             update, context,
@@ -326,7 +324,6 @@ class ProductsHandler(ProductsHelper):
     def discount_price(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         text = (self.admin_short_template(context, context.user_data["product"])
-                + "\n\n"
                 + context.bot.lang_dict["shop_admin_set_discount_price"])
         context.user_data["product"].send_short_template(
             update, context,
@@ -395,7 +392,6 @@ class ProductsHandler(ProductsHelper):
                 text=context.bot.lang_dict["shop_admin_back_btn"],
                 callback_data="back_to_edit")]]
         text = (self.admin_short_template(context, context.user_data["product"])
-                + "\n\n"
                 + context.bot.lang_dict["add_product_to_delete_click"])
         context.user_data["to_delete"].append(
             context.bot.send_message(
@@ -426,7 +422,6 @@ class ProductsHandler(ProductsHelper):
             return CONTENT_MENU
         delete_messages(update, context, True)
         text = (self.admin_short_template(context, context.user_data["product"])
-                + "\n\n"
                 + context.bot.lang_dict["add_product_add_files"]
                 + context.user_data['product'].files_str)
 
@@ -550,7 +545,6 @@ class ProductsHandler(ProductsHelper):
     def quantity(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         text = (self.admin_short_template(context, context.user_data["product"])
-                + "\n\n"
                 + context.bot.lang_dict["shop_admin_set_quantity"])
 
         context.user_data["product"].send_short_template(

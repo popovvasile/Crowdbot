@@ -813,10 +813,6 @@ class SeeMessageToAdmin(object):
                 users_messages_to_admin_table.update_one(
                     {"_id": message_id}, {"$set": {"is_new": False}})
 
-        user_sender = users_table.find_one(
-            {"user_id": context.user_data["message"]["user_id"],
-             "bot_id": context.bot.id})
-
         # Send user message content
         context.user_data["to_delete"].append(
             context.bot.send_message(chat_id=update.effective_chat.id,
