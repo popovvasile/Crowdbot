@@ -5,14 +5,16 @@ from telegram.ext import (MessageHandler, Filters, ConversationHandler, Callback
 
 from database import chatbots_table
 from helper_funcs.auth import initiate_chat_id
+from helper_funcs.constants import MIN_ADDRESS_LENGTH, MAX_ADDRESS_LENGTH
 from helper_funcs.helper import get_help
 from helper_funcs.misc import delete_messages
 from logs import logger
 from modules.shop.admin_side.welcome import Welcome
+from modules.shop.helper.keyboards import currency_markup
 
 
-ASK_TOKEN, TYPING_TOKEN, TYPING_DESCRIPTION, \
-    TYPING_SHOP_ADDRESS, SHOP_FINISH, CHOOSING_PICK_UP_OR_DELIVERY = range(6)
+(ASK_TOKEN, TYPING_TOKEN, TYPING_DESCRIPTION,
+ TYPING_SHOP_ADDRESS, SHOP_FINISH, CHOOSING_PICK_UP_OR_DELIVERY) = range(6)
 
 
 def eshop_menu(update, context):  # TODO add shop config button
@@ -108,16 +110,30 @@ class CreateShopHandler(object):
 
     def handle_address(self, update, context):
         delete_messages(update, context, True)
-
         chat_id, txt = initiate_chat_id(update)
-        context.user_data["address"] = txt
         reply_markup = InlineKeyboardMarkup(
             [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                    callback_data="help_module(shop)")]])
-        context.user_data["to_delete"].append(context.bot.send_message(update.message.chat_id,
-                                                                       context.bot.lang_dict[
-                                                                           "create_shop_str_6"],
-                                                                       reply_markup=reply_markup))
+        if len(txt) < MIN_ADDRESS_LENGTH:
+            context.user_data["to_delete"].append(
+                context.bot.send_message(update.effective_chat.id,
+                                         context.bot.lang_dict["short_address"]
+                                         + context.bot.lang_dict["create_shop_str_9"],
+                                         reply_markup=reply_markup))
+            return TYPING_SHOP_ADDRESS
+        elif len(txt) > MAX_ADDRESS_LENGTH:
+            context.user_data["to_delete"].append(
+                context.bot.send_message(update.effective_chat.id,
+                                         context.bot.lang_dict["long_address"]
+                                         + context.bot.lang_dict["create_shop_str_9"],
+                                         reply_markup=reply_markup))
+            return TYPING_SHOP_ADDRESS
+
+        context.user_data["address"] = txt
+        context.user_data["to_delete"].append(
+            context.bot.send_message(update.effective_chat.id,
+                                     context.bot.lang_dict["create_shop_str_6"],
+                                     reply_markup=reply_markup))
         return TYPING_DESCRIPTION
 
     def handle_description(self, update, context):
@@ -125,20 +141,21 @@ class CreateShopHandler(object):
 
         chat_id, txt = initiate_chat_id(update)
         context.user_data["description"] = txt
-        currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["KZT", "UAH", "RON", "PLN"]]
+        # currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["KZT", "UAH", "RON", "PLN"]]
+
         context.user_data["to_delete"].append(update.message.reply_text(
             context.bot.lang_dict["create_shop_str_7"],
-            reply_markup=ReplyKeyboardMarkup(currency_keyboard,
-                                             one_time_keyboard=True)))
-
+            # reply_markup=ReplyKeyboardMarkup(currency_keyboard,
+            #                                  one_time_keyboard=True))
+            reply_markup=currency_markup()))
         return SHOP_FINISH
 
     def handle_shop_finish(self, update, context):
-        chat_id, txt = initiate_chat_id(update)
-        currency = txt
-        context.user_data["currency"] = currency
+        # chat_id, txt = initiate_chat_id(update)
+        # currency = txt
+        context.user_data["currency"] = update.callback_query.data.split("/")[1]
 
-        context.bot.send_message(chat_id,
+        context.bot.send_message(update.effective_chat.id,
                                  context.bot.lang_dict["create_shop_str_8"])
 
         chatbot = chatbots_table.find_one({"bot_id": context.bot.id}) or {}
@@ -184,8 +201,11 @@ CREATE_SHOP_HANDLER = ConversationHandler(
                                              CreateShopHandler().handle_address)],
         TYPING_DESCRIPTION: [MessageHandler(Filters.text,
                                             CreateShopHandler().handle_description)],
-        SHOP_FINISH: [MessageHandler(Filters.text,
-                                     CreateShopHandler().handle_shop_finish)],
+        SHOP_FINISH: [  # MessageHandler(Filters.text,
+                        #              CreateShopHandler().handle_shop_finish)
+                        CallbackQueryHandler(pattern=r"currency",
+                                             callback=CreateShopHandler().handle_shop_finish)
+                      ],
     },
 
     fallbacks=[CallbackQueryHandler(callback=CreateShopHandler().back, pattern=r"help_back"),

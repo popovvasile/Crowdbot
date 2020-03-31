@@ -4,7 +4,8 @@
         * Убрать заголовки в пагинацию как в инбоксе
             - Item list
             - Order list(Написать норм заголовок)
-            - Orders list user
+            - Orders list user side
+            - Users and Message - User list
         * В под меню редактирования убрать вместо трех \n - сделать два и выделить всё жирным
         * Увеличить длительность блинков
             https://python-telegram-bot.readthedocs.io/en/stable/telegram.bot.html#telegram.Bot.answer_callback_query
@@ -16,23 +17,29 @@
         * в Order item поменять Category и name местами
 
     [Yuriy]
-    * Address validation in admin setting shop
-    * Баги в Удалении категории(Если есть товара который есть в новых заказах) и вообще в целом работа с товаром
     * Cancel order -        # TODO - ADD CATEGORY IF IT DOESN'T EXIST
-    * Trash - restore order # TODO - ADD CATEGORY IF IT DOESN'T EXIST
-    * В Full template и Short template заказа - при слишком большом тексте(Items)
+    * currency - reply markup text bug
+    [DONE] * Баги в Удалении категории(Если есть товара который есть в новых заказах) и вообще в целом работа с товаром
+    [DONE] * Trash - restore order # TODO - ADD CATEGORY IF IT DOESN'T EXIST
+    [DONE] * Проверить Users and Messages - Delete Messages
+    [DONE] * Address validation in admin setting shop and when creating shop
+    [DONE] * В Full template и Short template заказа - при слишком большом тексте(Items)
             - HTML BUG обрывать текст и показывать три точки
-	* В Short template товара - при слишком большом тексте(Not finished orders) ПО 3 ШТ
+	[DONE] * В Short template товара - при слишком большом тексте(Not finished orders) ПО 3 ШТ
 	        - HTML BUG обрывать текст и показывать три точки
 
 
-    * Проверить Delete Messages
+
+
+
+
+    [DONE] * File "/root/test_yura/crowdrobot/modules/payments/payments_config.py", line 326, in handle_edit_finish
+            KeyError: 'payment_token'
     [DONE] ValueError: KZT is not a supported currency
     [DONE] ValueError: UAH is not a supported currency
     [DONE] Погрешность при смене валюты может выставить цену минимальней чем минимальный возможный платёж
     [DONE] поставить allow_reentry - ConversationHandler
-    [DONE] File "/root/test_yura/crowdrobot/modules/payments/payments_config.py", line 326, in handle_edit_finish
-            KeyError: 'payment_token'
+
     [DONE] Error Callback Доделать нормально, с логами
     [DONE] Currency Exchange converter fix
     [DONE] * в trash показывает чужие товары
@@ -121,19 +128,20 @@ STRINGS
 	[DONE] + * When user click "Open" and "Hide" in message notification - it works bad and for admin as well
 	[DONE] + * Когда отправляем сообщения(юзеру или всем) - try/except for BadRequest
 	[DONE] + * УБРАТЬ КНОПКУ send message to donators
+    [DONE] * Добавить фичю вкл/выкл в настройки бота
 	- * Messages history
    	- * send message to users - do check and delay and threads
 	- * добавить кнопку send message to customers
 		(если не подключен шоп - предложить создать)
 		(если нет покупателей) - об этом сообщается
-	- * Добавить фичю вкл/выкл в настройки бота
 
 --USERS
 	[DONE] + * под юзером в списке юзеров создать одну кнопку которая будет выводить на карточку юзера со всеми фичами связаными с юзером
 	* и добавить в магаз эту фичу
 	[DONE] + * Когда отправляем сообщения(юзеру или всем) - try/except for BadRequest
 	- * Юрцу чекнуть что происходит - Обработка юзеров которые заблочили бота или удалили аккаунт(в заказах шопа, в списке юзеров)
-		имя и username ансабов не обновляется в списке юзеров * handling admins that leave the bot
+		имя и username ансабов не обновляется в списке юзеров
+    * handling admins that leave the bot
 	[DONE] * Поиса юзеров(User search problems)
 
 
@@ -192,7 +200,7 @@ STRINGS
 
 --PRODUCTION
 	* Application factory  (production vs local)
-	* NGINX for the website
+	[DONE] * NGINX for the website
 
 
 --BOTFATHER
@@ -205,20 +213,15 @@ STRINGS
 	+ * test shop(and other part of the bot) with Markdown and HTML tags in messages
 	+ * ПРОВЕРИТЬ РУССКИЙ ТЕКСТ(Подсчитать количество "{}" в русских строках - и пофиксить русские строки)
 	* test shop(and other part of the bot) with big texts, many items in orders, many content and so on
-
-	- * Баг когда отвечаешь на сообщение
-	  	File "demo-bot/modules/users/users.py", line 573, in send_message_finish
-	  	chat_id=context.user_data["chat_id"],
-	  	KeyError: 'chat_id'
 	+ * Check messages length in templates and captions - to avoid exceptions
         	https://python-telegram-bot.readthedocs.io/en/stable/telegram.constants.html
-
-	* Проверить работу бота с отписчиками и удалёнными аккаунтамиы
-	* Изменение валюты не влияет на заказы(проверить отображение в всех шаблонах)
-	* Проверить что discount работает(заказы онлайн/офлайн)
     * Проверить пагинацию в поиске юзеров
-    * Проверить Все NEW и DONE заказы считаются по цене которая была на момент заказа
-        (проверить что discount price учитывается)
+
+	[DONE] * Проверить работу бота с отписчиками и удалёнными аккаунтамиы
+	[DONE] * Изменение валюты не влияет на заказы(проверить отображение в всех шаблонах)
+	[DONE] * Проверить что discount работает(заказы онлайн/офлайн)
+    [DONE] * Проверить Все NEW и DONE заказы считаются по цене которая была на момент заказа
+    [DONE]    (проверить что discount price учитывается)
 
 * One code style for whole project - lil rules :)
 	* max 100 symbols on one line

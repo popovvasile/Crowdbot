@@ -87,12 +87,12 @@ class ProductsHelper(object):
             html.escape(product_obj.category["name"], quote=False),
             product_obj.price_as_str(shop["currency"]),
             product_obj.quantity_str)
-
+        # TODO - refactor need to do better - Product class
         orders_string = ""
         if new_orders.count():
             # How many items wait for the customers now
             orders_string += context.bot.lang_dict["product_temp_part"]
-            for order in new_orders:
+            for order in new_orders[:3]:
                 product_items_count = next(
                     item for item in order["items"]
                     if item["product_id"] == product_obj.id_)["quantity"]
@@ -105,8 +105,8 @@ class ProductsHelper(object):
                 orders_string += (
                     context.bot.lang_dict["product_temp_part_2"].format(
                         order["_id"], emoji, product_items_count))
-            if len(orders_string) > 550:
-                orders_string = orders_string[:550] + "..."
+            if new_orders.count() > 3:
+                orders_string = orders_string[:-1] + "..."
             template += orders_string
         return template
 
