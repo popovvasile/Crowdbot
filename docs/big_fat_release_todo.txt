@@ -1,3 +1,7 @@
+СПИСОК ШАБЛОНОВ
+- shop_admin_product_description
+
+
 --SHOP  -- status, in_trash, on_sale
     [Vasile]
         [DONE] Валидация цены баг - нижнее подчеркивание
@@ -70,6 +74,7 @@ Make sure that the customer exactly refused the purchase</i>
 * Delete Item - markdown
 
     [Yuriy]
+    * fix forward link rus
     * Cancel order -        # TODO - ADD CATEGORY IF IT DOESN'T EXIST
     * currency - reply markup text bug
     [DONE] * Баги в Удалении категории(Если есть товара который есть в новых заказах) и вообще в целом работа с товаром
