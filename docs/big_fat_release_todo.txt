@@ -52,9 +52,22 @@ Delivery to 🚚 Goerzallee 135
     remove temporary
 
 *Your orders- down
-*
 
 
+Order article: 5e8350693022b1276b04b210
+Delivery to [car]🚚 <b>Goerzallee 135</b>
+Not paid
+Order price: <u><b>21.9 EUR</b></U>
+Your phone number: 004915734178943   --- REMOVE YOUR everywhere
+Your comment:    --- remove if there is no comment
+
+<i>Cancel the order??
+Order completed.
+Cancellation of this order will return the items to the shelves of the store and move the order to New.
+Make sure that the customer exactly refused the purchase</i>
+
+
+* Delete Item - markdown
 
     [Yuriy]
     * Cancel order -        # TODO - ADD CATEGORY IF IT DOESN'T EXIST
