@@ -1,4 +1,6 @@
 TODO FUTURE
+    * БАГИ когда несколько админинов одновременно меняют состояние документов в базе данных(в сообщениях, заказах, товары)
+        походу по этой теме 1000 + 1 багов - например один человек удаляет категорию в это время кто-то восстанавливает товар из корзины и тп...
     * update channels, groups and users username's
     * maybe add dynamic changes using edit
     * when delete in inbox - don't delete all telegram messages and don't show it again.
