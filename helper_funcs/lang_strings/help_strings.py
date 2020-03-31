@@ -71,7 +71,7 @@ def help_strings(context, update):
     help_dict["shop"] = dict(
         mod_name=string_d_str["add_product_button"],
         admin_keyboard=admins_keyboard,
-        admin_help=string_d_str["add_menu_buttons_help"],
+        admin_help=string_d_str["shop_admin_start_message"],
         visitor_help=shop.get("description", ""),
         visitor_keyboard=user_keyboard_shop)
 

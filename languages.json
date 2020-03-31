@@ -3,8 +3,6 @@
         "category_name_exist": "<b>{}</b> category already exist.\nPlease write a category name",
         "too_much_categories_blink": "Too much categories",
         "payment_not_available": "Payment not available\n",
-
-
         "invalid_button_name": "Button name so long, make it shorter\n",
         "shop_admin_number_not_integer": "Product quantity must be displayed as an positive integer",
         "default_greeting": "Hello",

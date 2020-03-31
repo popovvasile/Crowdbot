@@ -124,9 +124,7 @@ class Product(object):
             return result
 
         result["ok"] = True
-        result["price"] = float(
-            format(Price.fromstring(update.message.text,
-                                    decimal_separator=".").amount, '.2f'))
+        result["price"] = float(format(float(update.message.text), '.2f'))
 
         # todo maybe don't check price string length?
         #  coz we check price for max float before and then we can just round price
