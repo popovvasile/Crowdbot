@@ -77,7 +77,8 @@ class PurchaseBot(object):
             "(", "").replace(
             ")", "").replace(
             " ", "").replace(
-            "*", "")
+            "*", "").replace(
+            "+", "")
         if number.isdigit():
             return True
         else:
@@ -86,12 +87,12 @@ class PurchaseBot(object):
     @staticmethod
     def start_purchase(update, context):
         delete_messages(update, context, True)
-        context.user_data["to_delete"].append(
-            context.bot.send_message(
-                chat_id=update.callback_query.message.chat.id,
-                text=context.bot.lang_dict["to_pay"].format(
-                    str(context.user_data["order"]["total_price"]),
-                    str(context.user_data["order"]["currency"]))))
+        # context.user_data["to_delete"].append(
+        #     context.bot.send_message(
+        #         chat_id=update.callback_query.message.chat.id,
+        #         text=context.bot.lang_dict["to_pay"].format(
+        #             str(context.user_data["order"]["total_price"]),
+        #             str(context.user_data["order"]["currency"]))))
 
         context.user_data["to_delete"].append(
             context.bot.send_message(

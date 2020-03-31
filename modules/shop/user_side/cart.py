@@ -42,7 +42,7 @@ class CartHelper(object):
             order_price += item_price
             if len(template) < 3800:
                 template += (
-                    "{}\nx{} {} {}\n\n").format(
+                    "<b>{}</b>\n<i>x{}</i> - <b>{} {}</b>\n\n").format(
                     html.escape(cart_item["product"]["name"], quote=False),
                     cart_item["quantity"],
                     item_price,

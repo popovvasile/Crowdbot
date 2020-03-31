@@ -76,31 +76,33 @@ class ProductCategoryHandler(object):
         delete_messages(update, context, True)
         category_id = update.callback_query.data.replace("delete_shop_category/", "")
         products = products_table.find({"bot_id": context.bot.id,
-                                        "category_id": ObjectId(category_id)})
-        orders = orders_table.find({"bot_id": context.bot.id,
-                                    "category_id": ObjectId(category_id),
-                                    "status": False,
-                                    "in_trash": False})
+                                        "category_id": ObjectId(category_id),
+                                        "in_trash": False})
+        new_orders = orders_table.find(
+            {"bot_id": context.bot.id,
+             "items": {"$elemMatch": {"product.category_id": ObjectId(category_id)}},
+             "status": False,
+             "in_trash": False})
         all_orders = orders_table.find({"bot_id": context.bot.id,
                                        "category_id": ObjectId(category_id)})
         category = categories_table.find_one({"bot_id": context.bot.id,
                                               "_id": ObjectId(category_id)})
-        if orders.count() > 0:
+        if new_orders.count():
             context.user_data["category_id"] = category_id
             keyboard = InlineKeyboardMarkup([
-                [InlineKeyboardButton(context.bot.lang_dict["yes"],
-                                      callback_data="del_cat_confirm")],
-                [InlineKeyboardButton(context.bot.lang_dict["no"],
-                                      callback_data="back_to_main_menu")]])
+                # [InlineKeyboardButton(context.bot.lang_dict["yes"],
+                #                       callback_data="del_cat_confirm")],
+                [InlineKeyboardButton(context.bot.lang_dict["back_button"],
+                                      callback_data="back_to_admin_categories")]])
             context.user_data["to_delete"] = [context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
                 text=context.bot.lang_dict["shop_orders_cannot_be_deleted"].format(
-                    category["name"], str(orders.count())),
+                    category["name"], str(new_orders.count())),
                 reply_markup=keyboard)]
-            self.menu(update, context)
+            # self.menu(update, context)
             return ConversationHandler.END
 
-        if products.count() > 0:
+        if products.count():
             context.user_data["category_id"] = category_id
             keyboard = InlineKeyboardMarkup([
                 [InlineKeyboardButton(context.bot.lang_dict["yes"],
@@ -309,6 +311,9 @@ DELETE_CATEGORY_HANDLER = ConversationHandler(
                              pattern="del_cat_confirm"),
     ]},
     fallbacks=[
+        CallbackQueryHandler(
+            pattern="back_to_admin_categories",
+            callback=ProductCategoryHandler().back_to_categories_menu),
         CallbackQueryHandler(Welcome().back_to_main_menu,
                              pattern=r"back_to_main_menu"),
     ])

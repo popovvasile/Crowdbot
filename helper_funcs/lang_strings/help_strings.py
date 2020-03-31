@@ -27,12 +27,12 @@ def help_strings(context, update):
         admins_keyboard = [
             [InlineKeyboardButton(context.bot.lang_dict["shop_admin_add_product_btn"],
                                   callback_data="add_product")],
-            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_categories_btn"],
-                                  callback_data="categories")],
             [InlineKeyboardButton(orders_btn_text,
                                   callback_data="orders")],
             [InlineKeyboardButton(context.bot.lang_dict["shop_admin_products_btn"],
                                   callback_data="products")],
+            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_categories_btn"],
+                                  callback_data="categories")],
             [InlineKeyboardButton(context.bot.lang_dict["shop_admin_trash_btn"],
                                   callback_data="trash")],
             [InlineKeyboardButton(text=context.bot.lang_dict["configure_button"],
@@ -132,14 +132,15 @@ def helpable_dict(bot):
     admin_rus = OrderedDict()
 
     admin_rus[f"✉️ Пользователи и Сообщения {new_messages_str}"] = "users"
+    admin_rus["💰 Магазин"] = "shop"
     admin_rus["🛠 Настройки бота"] = "settings"
-    admin_rus["Магазин и платежи"] = "shop"
 
     admin_eng = OrderedDict()
 
     admin_eng[f"✉️ Users & Messages {new_messages_str}"] = "users"
-    admin_eng["🛠 Bot and Menu Settings"] = "settings"
-    admin_eng["💰 Shop and Payments"] = "shop"
+    admin_eng["💰 Shop"] = "shop"
+    admin_eng["🛠 Settings"] = "settings"
+
 
     lang_dicts = {"ENG": dict(
         ALL_MODULES=[],

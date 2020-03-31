@@ -78,7 +78,7 @@ class Order(object):
         #     currency = chatbots_table.find_one(
         #         {"bot_id": self.context.bot.id})["shop"]["currency"]
         text = "\n".join(
-            ["<code>{}</code>\nx{} - <code>{}</code> {}".format(
+            ["<b>{}</b>\n<i>x{}</i> - <b>{} {}</b>".format(
                 html.escape(item.name, quote=False),
                 item.order_quantity,
                 item.item_price,
