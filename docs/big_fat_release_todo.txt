@@ -14,6 +14,46 @@
             * <i> - поля, <b> инпуты
         * все машинки и ручки между полем и инпутом
         * в Order item поменять Category и name местами
+   * Settings change help text
+   * Edit link instead of edit
+   * List points (where red !) in create button
+   * Change greeting- back must be to settings, delete all messages - none left
+   * Admins- <i> ---- <b> kartochki, total admins down  <code>number</code>
+   * You have been invited as an administrator to @CrowdHomeTestBot (http://t.me/CrowdHomeTestBot)
+    <i>Never forward this message to other persons.</i>
+   * Dlete admin  <i> ----  <b>
+   * ✅ Your shop has been created. Enter the settings to  add your first product ----- WIth DISMIS
+    * <i>Your current shop description is: </i>
+        <b>'TEST'</b>
+    *  <i>Current currency</i> is <b>RUB</b>  +ENTER+ everything in one message + remove Back text +
+    * All prices will be converted from RUB to USD - remove
+    * <b>Write us a message.</b>
+    * Send message read html, not markdown
+    * send message- sent messages are not deleted
+    * Catalog items - fix as in the admin
+    * Current page dissapears if only one page
+    * Total items down and no "edit product" - make as current page
+    * Buy- Category above Name - everywhere in user and admin
+    * Your quantity ===> quantity
+    * <i>You can send any kind of files,
+            voice and video messages, stickers and links</i>
+    * Phone validation - support for spaces and +
+    * Users order:
+    Your order ☝️
+    [ADD ENTER]
+Phone Number: 004915734178943
+Delivery to 🚚 Goerzallee 135
+
+
+      The current exchange rate is <b>100RUB</b>=<b>1.26USD</b>?
+      Are you sure that you want to proceed?
+
+    remove temporary
+
+*Your orders- down
+*
+
+
 
     [Yuriy]
     * Address validation in admin setting shop
@@ -24,7 +64,6 @@
             - HTML BUG обрывать текст и показывать три точки
 	* В Short template товара - при слишком большом тексте(Not finished orders) ПО 3 ШТ
 	        - HTML BUG обрывать текст и показывать три точки
-
 
     * Проверить Delete Messages
     [DONE] ValueError: KZT is not a supported currency
