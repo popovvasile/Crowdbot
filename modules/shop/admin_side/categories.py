@@ -108,7 +108,7 @@ class ProductCategoryHandler(object):
                 [InlineKeyboardButton(context.bot.lang_dict["yes"],
                                       callback_data="del_cat_confirm")],
                 [InlineKeyboardButton(context.bot.lang_dict["no"],
-                                      callback_data="back_to_main_menu")]])
+                                      callback_data="back_to_admin_categories")]])
             context.user_data["to_delete"] = [context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
                 text=context.bot.lang_dict["shop_category_will_be_deleted"].format(
@@ -118,16 +118,16 @@ class ProductCategoryHandler(object):
             return DELETE_CATEGORY_CONFIRM
 
         else:
-            keyboard = InlineKeyboardMarkup([
-                [back_btn("back_to_main_menu", context)]])
-            # TODO discuss with team- I think orders and
-            #  products must be deleted forever if there is no category
+            keyboard = InlineKeyboardMarkup([[back_btn("back_to_admin_categories", context)]])
             categories_table.delete_one({"bot_id": context.bot.id,
                                          "_id": ObjectId(category_id)})
+            # It means all orders and products in trash
+            # that associated with category will be deleted
             products_table.delete_many({"bot_id": context.bot.id,
                                         "category_id": ObjectId(category_id)})
-            orders_table.delete_many({"bot_id": context.bot.id,
-                                      "category_id": ObjectId(category_id)})
+            orders_table.delete_many(
+                {"bot_id": context.bot.id,
+                 "items": {"$elemMatch": {"product.category_id": ObjectId(category_id)}}})
 
             context.user_data["to_delete"] = [context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
@@ -145,9 +145,8 @@ class ProductCategoryHandler(object):
                                      "_id": ObjectId(category_id)})
         products_table.delete_many({"bot_id": context.bot.id,
                                     "category_id": ObjectId(category_id)})
-        keyboard = InlineKeyboardMarkup([
-            [back_btn("back_to_main_menu", context)]])
 
+        keyboard = InlineKeyboardMarkup([[back_btn("back_to_main_menu", context)]])
         context.user_data["to_delete"] = [context.bot.send_message(
             chat_id=update.callback_query.message.chat_id,
             text=context.bot.lang_dict["category_deleted"].format(category["name"]),

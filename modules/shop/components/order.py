@@ -84,9 +84,9 @@ class Order(object):
                 item.item_price,
                 self.currency)
              # + (item.item_emoji if not self.status else "")
-             for item in self.items])
-        if len(text) > 550:
-            text = text[:550] + "..."
+             for item in self.items[:3]])
+        if len(self.items) > 3:
+            text += "\n..."
         return text
 
     def update(self, json):

@@ -606,6 +606,7 @@ class SendMessageToUsers(object):
         return ConversationHandler.END
 
 
+# TODO refactor - do it better
 class DeleteMessage(object):
     def delete_messages_menu(self, update, context):
         delete_messages(update, context, True)
@@ -649,7 +650,7 @@ class DeleteMessage(object):
 
             buttons = [[InlineKeyboardButton(
                             text=context.bot.lang_dict["yes"],
-                            callback_data="delete_messages/" + message_id)]]
+                            callback_data="finish_delete_messages/" + message_id)]]
             if any(x in message_id for x in ["all", "week", "month"]):
                 buttons[0].append(
                     InlineKeyboardButton(
@@ -721,12 +722,13 @@ class DeleteMessage(object):
                 {"$set": {"deleted": True}})
 
         else:
-            message_id = ObjectId(context.user_data["message_id"].split("/")[1])
+            message_id = ObjectId(context.user_data["message_id"])
             users_messages_to_admin_table.update_one(
                 {"_id": message_id},
                 {"$set": {"deleted": True}})
             update.callback_query.answer(success_delete_blink)
             return SeeMessageToAdmin().back_to_inbox(update, context)
+
         if not users_messages_to_admin_table.find(
                 {"bot_id": context.bot.id, "deleted": False}).count():
             update.callback_query.answer(no_messages_blink)
@@ -842,7 +844,7 @@ class SeeMessageToAdmin(object):
 
         buttons[0].append(InlineKeyboardButton(
                  text=context.bot.lang_dict["delete_button_str"],
-                 callback_data="delete_message/"
+                 callback_data="delete_message_"
                                + str(context.user_data["message"]["_id"])))
 
         # if context.user_data["message"]["anonim"]:
@@ -1166,7 +1168,7 @@ DELETE_MESSAGES_HANDLER = ConversationHandler(
 
         DOUBLE_CHECK: [
             CallbackQueryHandler(
-                pattern=r"delete_messages",
+                pattern=r"finish_delete_messages",
                 callback=DeleteMessage().delete_message_double_check),
             CallbackQueryHandler(
                 pattern="back_to_del_messages_menu",

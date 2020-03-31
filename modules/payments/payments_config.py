@@ -3,24 +3,25 @@
 import PyCurrency_Converter
 import requests
 import telegram
+from telegram import (ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup,
+                      ReplyKeyboardRemove)
+from telegram.ext import MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
 
-from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, \
-    ReplyKeyboardRemove
-from telegram.ext import (MessageHandler, Filters, ConversationHandler, CallbackQueryHandler)
-
+from helper_funcs.constants import MIN_ADDRESS_LENGTH, MAX_ADDRESS_LENGTH
+from logs import logger
 from database import chatbots_table, products_table, db
 from helper_funcs.auth import initiate_chat_id
 from helper_funcs.helper import get_help, check_provider_token, currency_limits_dict
 from helper_funcs.misc import delete_messages
-from logs import logger
 from modules.shop.admin_side.welcome import Welcome
 from modules.shop.helper.keyboards import back_btn
 from currency_converter import CurrencyConverter
 
-START, CHOOSING_ACTION, FINISH_ACTION, EDIT_PAYMENT, CHOOSING_EDIT_ACTION, \
-TYPING_TITLE, TYPING_DESCRIPTION, TYPING_CURRENCY, \
-TYPING_TOKEN, TYPING_TOKEN_FINISH, EDIT_FINISH, \
-DOUBLE_CHECK_DELETE, DELETE_FINISH, CURRENCY_FINISH = range(14)
+
+(START, CHOOSING_ACTION, FINISH_ACTION, EDIT_PAYMENT, CHOOSING_EDIT_ACTION,
+ TYPING_TITLE, TYPING_DESCRIPTION, TYPING_CURRENCY,
+ TYPING_TOKEN, TYPING_TOKEN_FINISH, EDIT_FINISH,
+ DOUBLE_CHECK_DELETE, DELETE_FINISH, CURRENCY_FINISH) = range(14)
 
 
 class EnableDisableShopDonations(object):
@@ -252,15 +253,13 @@ class EditPaymentHandler(object):
                                                          one_time_keyboard=True)))
             elif "address" in data:
                 context.user_data["action"] = "address"
+                text = context.bot.lang_dict["create_shop_str_9"]
                 if "address" in chatbot["shop"]:
-                    context.user_data["to_delete"].append(update.message.reply_text(
-                        context.bot.lang_dict["payments_change_address"]
-                            .format(chatbot["shop"]["address"]),
-                        reply_markup=reply_markup))
+                    text += "\n" + context.bot.lang_dict["payments_change_address"].format(
+                        chatbot["shop"]["address"])
 
-                context.user_data["to_delete"].append(update.message.reply_text(
-                    context.bot.lang_dict["create_shop_str_9"],
-                    reply_markup=reply_markup))
+                context.user_data["to_delete"].append(
+                    update.message.reply_text(text, reply_markup=reply_markup))
 
             elif "payment_token" in data:
                 context.user_data["action"] = "payment_token"
@@ -323,6 +322,20 @@ class EditPaymentHandler(object):
         if context.user_data["action"] == "description":
             update_dict["description"] = txt
         if context.user_data["action"] == "address":
+            if len(txt) < MIN_ADDRESS_LENGTH:
+                context.user_data["to_delete"].append(
+                    context.bot.send_message(update.effective_chat.id,
+                                             context.bot.lang_dict["short_address"]
+                                             + context.bot.lang_dict["create_shop_str_9"],
+                                             reply_markup=finish_markup))
+                return EDIT_FINISH
+            elif len(txt) > MAX_ADDRESS_LENGTH:
+                context.user_data["to_delete"].append(
+                    context.bot.send_message(update.effective_chat.id,
+                                             context.bot.lang_dict["long_address"]
+                                             + context.bot.lang_dict["create_shop_str_9"],
+                                             reply_markup=finish_markup))
+                return EDIT_FINISH
             update_dict["address"] = txt
         if context.user_data["action"] == "currency":
             if chatbot["shop"]["shop_type"] == "online":

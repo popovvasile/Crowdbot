@@ -43,6 +43,21 @@ def start_keyboard(orders_quantity, context):
     return InlineKeyboardMarkup(keyboard)
 
 
+def currency_markup():
+    # [["RUB", "USD", "EUR", "GBP"], ["KZT", "UAH", "RON", "PLN"]]
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton(text="RUB", callback_data="currency/RUB"),
+         InlineKeyboardButton(text="USD", callback_data="currency/USD"),
+         InlineKeyboardButton(text="EUR", callback_data="currency/EUR"),
+         InlineKeyboardButton(text="GBP", callback_data="currency/GBP")],
+
+        [InlineKeyboardButton(text="KZT", callback_data="currency/KZT"),
+         InlineKeyboardButton(text="UAH", callback_data="currency/UAH"),
+         InlineKeyboardButton(text="RON", callback_data="currency/RON"),
+         InlineKeyboardButton(text="PLN", callback_data="currency/PLN")]
+    ])
+
+
 def create_keyboard(buttons, extra_buttons):
     pairs = list(zip(buttons[::2], buttons[1::2]))
     if len(buttons) % 2 == 1:
@@ -84,12 +99,6 @@ def keyboards(context):
                                   callback_data="continue"),
              back_btn("back_to_main_menu_btn", context=context)]
         ]),
-        # confirm_to_process=InlineKeyboardMarkup(
-        #     [[InlineKeyboardButton(context.bot.lang_dict["shop_admin_to_process_yes"],
-        #     callback_data="finish_to_process"),
-        #       InlineKeyboardButton(context.bot.lang_dict["shop_admin_back_btn"],
-        #       callback_data="back_to_orders")]]
-        # ),
         confirm_to_done=InlineKeyboardMarkup([
             [InlineKeyboardButton(context.bot.lang_dict["shop_admin_to_done_yes"],
                                   callback_data="finish_to_done")],
@@ -104,11 +113,6 @@ def keyboards(context):
                                   callback_data="finish_to_trash"),
              back_btn("back_to_orders_btn", context=context)]
         ]),
-        # confirm_to_trash_product=InlineKeyboardMarkup([
-        #     [InlineKeyboardButton(context.bot.lang_dict["shop_admin_to_trash_yes"],
-        #                           callback_data="finish_to_trash"),
-        #      back_btn("back_to_products_btn", context=context)]
-        # ]),
         confirm_cancel=InlineKeyboardMarkup([
             [InlineKeyboardButton(context.bot.lang_dict["shop_admin_cancel_yes"],
                                   callback_data="finish_cancel"),
@@ -118,35 +122,5 @@ def keyboards(context):
             [InlineKeyboardButton(context.bot.lang_dict["shop_admin_add_product_btn"],
                                   callback_data="add_to_order")],
             [back_btn("back_to_orders_btn", context=context)]
-        ]),
-        # trash_main=InlineKeyboardMarkup([
-        #     [InlineKeyboardButton(context.bot.lang_dict["shop_admin_orders_btn"],
-        #                           callback_data="trashed_orders")],
-        #     [InlineKeyboardButton(context.bot.lang_dict["shop_admin_products_btn"],
-        #                           callback_data="trashed_products")],
-        #     [back_btn("back_to_main_menu_btn", context=context)]
-        # ]),
-        # edit_product=InlineKeyboardMarkup([
-        #     [InlineKeyboardButton(context.bot.lang_dict["shop_admin_set_discount_btn"],
-        #                           callback_data='change_discount'),
-        #      InlineKeyboardButton(context.bot.lang_dict["shop_admin_set_price_btn"],
-        #                           callback_data="change_price")],
-        #     [InlineKeyboardButton(context.bot.lang_dict["shop_admin_set_description_btn"],
-        #                           callback_data="change_description"),
-        #      InlineKeyboardButton(context.bot.lang_dict["shop_admin_set_name_btn"],
-        #                           callback_data="change_name")],
-        #     [InlineKeyboardButton(context.bot.lang_dict["shop_admin_set_images_btn"],
-        #                           callback_data="change_images"),
-        #      InlineKeyboardButton(context.bot.lang_dict["shop_admin_set_category_btn"],
-        #                           callback_data="change_category")],
-        #     [InlineKeyboardButton(context.bot.lang_dict["shop_admin_set_quantity_btn"],
-        #                           callback_data="change_quantity")],
-        #     [back_btn("back_to_products_btn", context=context)]
-        # ]),
-        # edit_quantity=InlineKeyboardMarkup([
-        #     [InlineKeyboardButton(context.bot.lang_dict["shop_admin_set_unlimited"],
-        #                           callback_data='quantity_unlimited')],
-        #     [back_btn("back_to_products_btn", context=context)]
-        # ])
-    )
+        ]))
     return keyboards
