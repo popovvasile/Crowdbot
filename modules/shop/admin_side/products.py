@@ -107,6 +107,8 @@ class ProductsHelper(object):
                         order["_id"], emoji, product_items_count))
             if new_orders.count() > 3:
                 orders_string = orders_string[:-1] + "..."
+            else:
+                orders_string = orders_string[:-2]
             template += orders_string
         return template
 
@@ -427,6 +429,7 @@ class ProductsHandler(ProductsHelper):
             return CONTENT_MENU
         delete_messages(update, context, True)
         text = (self.admin_short_template(context, context.user_data["product"])
+                + "\n\n"
                 + context.bot.lang_dict["add_product_add_files"]
                 + context.user_data['product'].files_str)
 
