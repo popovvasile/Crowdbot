@@ -20,7 +20,7 @@ from logs import logger
 HELP_STRINGS = """
 {}
 """
-
+currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["KZT", "UAH", "RON", "PLN"]]
 
 # do not async
 def send_admin_help(bot, chat_id, text, keyboard=None):

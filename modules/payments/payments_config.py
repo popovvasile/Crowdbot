@@ -9,13 +9,13 @@ from telegram.ext import MessageHandler, Filters, ConversationHandler, CallbackQ
 
 from helper_funcs.constants import MIN_ADDRESS_LENGTH, MAX_ADDRESS_LENGTH
 from logs import logger
-from database import chatbots_table, products_table, db
+from database import chatbots_table, products_table
 from helper_funcs.auth import initiate_chat_id
-from helper_funcs.helper import get_help, check_provider_token, currency_limits_dict
+from helper_funcs.helper import (get_help, check_provider_token,
+                                 currency_limits_dict, currency_keyboard)
 from helper_funcs.misc import delete_messages
 from modules.shop.admin_side.welcome import Welcome
 from modules.shop.helper.keyboards import back_btn
-from currency_converter import CurrencyConverter
 
 
 (START, CHOOSING_ACTION, FINISH_ACTION, EDIT_PAYMENT, CHOOSING_EDIT_ACTION,
@@ -204,7 +204,6 @@ class EditPaymentHandler(object):
                 context.bot.send_message(chat_id, context.bot.lang_dict["great_text"],
                                          reply_markup=ReplyKeyboardRemove())
 
-                currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["KZT", "UAH", "RON", "PLN"]]
                 update.message.reply_text(context.bot.lang_dict["donations_edit_str_9"],
                                           reply_markup=ReplyKeyboardMarkup(currency_keyboard,
                                                                            one_time_keyboard=True))
@@ -245,7 +244,6 @@ class EditPaymentHandler(object):
                             .format(chatbot["shop"]["currency"]),
                         reply_markup=reply_markup))
 
-                currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["KZT", "UAH", "RON", "PLN"]]
                 context.user_data["to_delete"].append(
                     update.message.reply_text(
                         context.bot.lang_dict["donations_edit_str_9"],

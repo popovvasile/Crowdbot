@@ -50,6 +50,8 @@ def delete_messages(update, context, message_from_update=False):
             context.user_data['to_delete'] = list()
         else:
             context.user_data['to_delete'] = list()
+    else:
+        context.user_data['to_delete'] = list()
 
 
 # def html_format(text):

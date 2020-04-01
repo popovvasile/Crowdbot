@@ -1,7 +1,5 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
-from uuid import uuid4
-from threading import Thread
 from datetime import datetime
 import secrets
 import string
