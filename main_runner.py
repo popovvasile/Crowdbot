@@ -120,7 +120,7 @@ def main(token, lang):
     formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
     hdlr.setFormatter(formatter)
     logger.addHandler(hdlr)
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.ERROR)
 
     with open('languages.json') as f:
         lang_dicts = json.load(f)
