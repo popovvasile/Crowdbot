@@ -40,7 +40,7 @@ class AddingProductHandler(object):
         else:
             context.user_data["to_delete"].append(context.bot.send_message(
                 chat_id=update.message.chat_id,
-                text=context.bot.lang_dict["shop_admin_name_too_long"],
+                text=context.bot.lang_dict["shop_admin_name_length_error"],
                 reply_markup=InlineKeyboardMarkup([
                              [back_btn("back_to_main_menu_btn", context)]])))
             return SET_TITLE
@@ -55,7 +55,7 @@ class AddingProductHandler(object):
                 [back_btn("back_to_main_menu_btn", context)])
             context.user_data["new_product"].send_full_template(
                 update, context,
-                context.bot.lang_dict["shop_admin_set_category"], keyboard)
+                context.bot.lang_dict["shop_admin_set_category_add_product"], keyboard)
         else:
             buttons = [
                 [InlineKeyboardButton(
@@ -71,7 +71,7 @@ class AddingProductHandler(object):
     def set_category(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         if update.message:
-            final_text = context.bot.lang_dict["shop_admin_set_category"]
+            final_text = context.bot.lang_dict["shop_admin_set_category_add_product"]
             category_list = categories_table.find({"bot_id": context.bot.id})
 
             name_request = validate_category_name(update.message.text, context)
@@ -256,7 +256,7 @@ class AddingProductHandler(object):
             text=text,
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton(
-                    context.bot.lang_dict["shop_admin_continue_btn"],
+                    context.bot.lang_dict["continue_btn"],
                     callback_data="continue"),
                     back_btn("back_to_main_menu_btn", context=context)]
             ]))

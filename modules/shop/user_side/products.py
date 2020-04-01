@@ -34,7 +34,7 @@ class UserProductsHelper(object):
                for cart_product in cart.get("products", list())):
             buttons.append(
                 [InlineKeyboardButton(
-                    text=context.bot.lang_dict["remove_from_cart_btn"],
+                    text=context.bot.lang_dict["remove_button_str"],
                     callback_data=f"remove_from_cart/{product['_id']}")])
         else:
             buttons.append(
@@ -112,18 +112,11 @@ class UserProductsHelper(object):
         category = categories_table.find_one(
             {"_id": product["category_id"]})["name"]
 
-        # if product.get("discount_price") > 0:
         template = context.bot.lang_dict["full_user_product_temp"].format(
             str(product.get("_id")),
             html.escape(product["name"], quote=False),
             html.escape(category, quote=False),
             cls.price_as_str(product, context, currency))
-        # else:
-        #     template = context.bot.lang_dict["full_user_product_temp_2"].format(
-        #         str(product.get("_id")),
-        #         html.escape(product["name"], quote=False),
-        #         html.escape(category, quote=False),
-        #         product["price"], currency)
 
         if len(product["description"]) < MAX_TEMP_DESCRIPTION_LENGTH:
             template += context.bot.lang_dict["description_field"].format(

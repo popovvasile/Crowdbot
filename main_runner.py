@@ -31,7 +31,7 @@ from helper_funcs.helper import (help_button, button_handler, get_help, WelcomeB
 
 # SETTINGS
 from modules.settings.menu_description import EDIT_BOT_DESCRIPTION_HANDLER
-from modules.settings.settings import (
+from modules.settings.button_manage import (
     BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER, LINK_BUTTON_ADD_HANDLER,
     CREATE_BUTTON_CHOOSE, BUTTONS_MENU, ONE_BUTTON_MENU, BACK_TO_BUTTONS_MENU,
     BACK_TO_ONE_BUTTON_MENU, CHANGE_BUTTON_NAME_HANDLER, EDIT_BUTTON_CONTENT_HANDLER,

@@ -132,7 +132,8 @@ class ProductCategoryHandler(object):
             context.user_data["to_delete"] = [context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
                 text=context.bot.lang_dict["category_deleted"].format(category["name"]),
-                reply_markup=keyboard)]
+                reply_markup=keyboard,
+                parse_mode=ParseMode.HTML)]
 
             return ConversationHandler.END
 
@@ -150,7 +151,8 @@ class ProductCategoryHandler(object):
         context.user_data["to_delete"] = [context.bot.send_message(
             chat_id=update.callback_query.message.chat_id,
             text=context.bot.lang_dict["category_deleted"].format(category["name"]),
-            reply_markup=keyboard)]
+            reply_markup=keyboard,
+            parse_mode=ParseMode.HTML)]
 
         return ConversationHandler.END
 
@@ -251,7 +253,7 @@ class ProductCategoryHandler(object):
             #                           callback_data=f"edit_category/{i['_id']}")
             #      for i in category_list],
             #     [back_btn("back_to_main_menu", context)],
-            #     [InlineKeyboardButton(context.bot.lang_dict["shop_admin_continue_btn"],
+            #     [InlineKeyboardButton(context.bot.lang_dict["continue_btn"],
             #                           callback_data="continue")]]
             # )
             keyboard = InlineKeyboardMarkup(
@@ -259,7 +261,7 @@ class ProductCategoryHandler(object):
                                        callback_data=f"edit_category/{i['_id']}")]
                  for i in category_list]
                 + [[back_btn("back_to_admin_categories", context)]]
-                # + [[InlineKeyboardButton(context.bot.lang_dict["shop_admin_continue_btn"],
+                # + [[InlineKeyboardButton(context.bot.lang_dict["continue_btn"],
                 #                          callback_data="continue")]]
             )
             context.user_data["to_delete"].append(context.bot.send_message(

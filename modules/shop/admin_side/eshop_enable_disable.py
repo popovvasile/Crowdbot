@@ -27,7 +27,7 @@ def eshop_menu(update, context):  # TODO add shop config button
         admin_keyboard += [
             [InlineKeyboardButton(text=string_d_str["products"],
                                   callback_data="products")],
-            [InlineKeyboardButton(text=string_d_str["add_product_button"],
+            [InlineKeyboardButton(text=string_d_str["shop_admin_add_product_btn"],
                                   callback_data="create_product")],
             [InlineKeyboardButton(text=string_d_str["edit_product"],
                                   callback_data="edit_product")],

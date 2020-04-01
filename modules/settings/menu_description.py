@@ -30,7 +30,7 @@ MESSAGE_TO_USERS = 1
 
     def received_message(self, update, context):
         context.bot.send_message(update.message.chat_id,
-                                 context.bot.lang_dict["edit_button_str_2"])
+                                 context.bot.lang_dict["done_button"])
 
         old_bot = chatbots_table.find_one({"bot_id": context.bot.id})
         old_bot['lang'] = update.message.text
@@ -60,7 +60,7 @@ class EditBotDescription(object):
 
     def received_message(self, update, context):
         context.bot.send_message(update.message.chat_id,
-                                 context.bot.lang_dict["edit_button_str_2"])
+                                 context.bot.lang_dict["done_button"])
 
         chatbots_table.update_one({"bot_id": context.bot.id},
                                   {"$set": {"welcomeMessage": update.message.text}})

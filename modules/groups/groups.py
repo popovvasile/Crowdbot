@@ -78,7 +78,7 @@ class Groups(object):
                                   [InlineKeyboardButton(context.bot.lang_dict["send_post_to_group"],
                                                         callback_data='write_post_group_{}'.format(
                                                             group_id))],
-                                  [InlineKeyboardButton(context.bot.lang_dict["remove_button"],
+                                  [InlineKeyboardButton(context.bot.lang_dict["remove_button_str"],
                                                         callback_data='remove_group_{}'.format(
                                                             group_id))],
                                   [InlineKeyboardButton(context.bot.lang_dict["back_button"],

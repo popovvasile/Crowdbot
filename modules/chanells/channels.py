@@ -202,7 +202,7 @@ class Channels(object):
                                   [InlineKeyboardButton(context.bot.lang_dict["send_post_to_channel"],
                                                         callback_data='write_post_channel_{}'.format(
                                                             channel_username))],
-                                  [InlineKeyboardButton(context.bot.lang_dict["remove_button"],
+                                  [InlineKeyboardButton(context.bot.lang_dict["remove_button_str"],
                                                         callback_data='remove_channel_{}'.format(
                                                             channel_username))],
                                   [InlineKeyboardButton(context.bot.lang_dict["back_button"],

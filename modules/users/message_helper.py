@@ -5,7 +5,6 @@ from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, Tele
 from bson.objectid import ObjectId
 
 from helper_funcs.misc import delete_messages
-from helper_funcs.lang_strings.strings import emoji
 from helper_funcs.misc import lang_timestamp, user_mention, get_obj
 from database import users_messages_to_admin_table
 from logs import logger
@@ -313,7 +312,7 @@ class MessageTemplate(object):
             self.user_mention = user.mention_html()
         # If message is new - add emoji near it
         if message_obj["is_new"]:
-            self.title_emoji = emoji['new'] + "\n"
+            self.title_emoji = "🆕" + "\n"
         else:
             self.title_emoji = ""
 

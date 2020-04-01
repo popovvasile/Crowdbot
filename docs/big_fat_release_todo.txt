@@ -72,6 +72,7 @@ Make sure that the customer exactly refused the purchase</i>
     * PRICE round in user side works strage
 
     [Yuriy]
+    * fix forward link rus
     * Cancel order -        # TODO - ADD CATEGORY IF IT DOESN'T EXIST
     [DONE] * Баги в Удалении категории(Если есть товара который есть в новых заказах) и вообще в целом работа с товаром
     [DONE] * Trash - restore order # TODO - ADD CATEGORY IF IT DOESN'T EXIST
@@ -149,7 +150,7 @@ STRINGS
     [DONE] * Убрать слово "Назад" со всех back кнопок
     * Придумать строку для тестового платежа
     * Убрать пресс БЭК-стрингз везде
-    * add_product_add_files - два стригса для товаров и кнопок
+    [DONE] * add_product_add_files - два стригса для товаров и кнопок
     * в админ инвайте сообщения убрать два текста и оставить один
     * сделать большие шаблоны с параметрами
     * Карточка заказа у админа: выделить название, сделать артикул меньше

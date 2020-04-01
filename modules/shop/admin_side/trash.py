@@ -21,7 +21,7 @@ class TrashHandler(Welcome):
                 context.bot.lang_dict["shop_admin_products_btn"],
                 callback_data="trashed_products")],
             [InlineKeyboardButton(
-                context.bot.lang_dict["shop_admin_back_btn"],
+                context.bot.lang_dict["back_button"],
                 callback_data="back_to_main_menu_btn")]
         ])
         context.user_data["to_delete"].append(

@@ -25,10 +25,11 @@ CONTENT_MENU, ADDING_CONTENT, ENTER_NEW_LINK = range(3)
 
 def buttons_menu(update, context):
     delete_messages(update, context, True)
+    custom_buttons = custom_buttons_table.find(
+        {"bot_id": context.bot.id}).sort([["link_button", 1]])
     reply_buttons = [InlineKeyboardButton(button["button"],
                                           callback_data=f"one_button_menu/{button['_id']}")
-                     for button in custom_buttons_table.find(
-                        {"bot_id": context.bot.id}).sort([["link_button", 1]])]
+                     for button in custom_buttons]
     # todo use one button pagination function for users main menu and for admins buttons menu
     if len(reply_buttons) % 2 == 0:
         pairs = list(zip(reply_buttons[::2], reply_buttons[1::2]))
@@ -99,6 +100,7 @@ def back_to_one_button_menu(update, context):
 
 
 def validate_link(update, context):
+    # TODO Link length validation
     try:
         message = context.bot.send_message(
             update.effective_chat.id,
@@ -426,7 +428,7 @@ class EditButtonHandler(object):
                 text=context.bot.lang_dict["add_product_add_content"],
                 callback_data="add_new_content")],
             [InlineKeyboardButton(
-                text=context.bot.lang_dict["shop_admin_back_btn"],
+                text=context.bot.lang_dict["back_button"],
                 callback_data="back_to_one_button_menu")]]
         context.user_data["to_delete"].append(
             context.bot.send_message(
@@ -464,7 +466,7 @@ class EditButtonHandler(object):
             context.user_data["user_input"] = list()
         text = (html.escape(context.user_data["button"]["button"], quote=False)
                 + "\n\n"
-                + context.bot.lang_dict["add_product_add_files"])
+                + context.bot.lang_dict["add_button_add_files"])
         context.user_data["to_delete"].append(
             context.bot.send_message(
                 update.effective_chat.id,
@@ -500,7 +502,7 @@ class EditButtonHandler(object):
         text = (context.bot.lang_dict["file_added_to"].format(
                     html.escape(context.user_data["button"]["button"], quote=False))
                 + "\n\n"
-                + context.bot.lang_dict["add_product_add_files"])
+                + context.bot.lang_dict["add_button_add_files"])
 
         context.user_data["to_delete"].append(
             context.bot.send_message(

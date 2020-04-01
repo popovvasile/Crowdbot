@@ -210,9 +210,10 @@ class UserOrder(Order):
             self.str_status,
             self.total_price,
             self.currency,
-            self.phone_number,
-            html.escape(self.user_comment, quote=False))
-        # TODO if comment
+            self.phone_number)
+        if self.user_comment:
+            template += self.context.bot.lang_dict["comment_field"].format(
+                html.escape(self.user_comment, quote=False))
         template += "\n\n" + self.str_order_items()
         return template
 
