@@ -1,5 +1,6 @@
 --SHOP  -- status, in_trash, on_sale
     [Vasile]
+    Привет, Vasi новый админ! + add dismiss
         [DONE] Валидация цены баг - нижнее подчеркивание
         * Убрать заголовки в пагинацию как в инбоксе
             - Item list
@@ -65,13 +66,13 @@ Your comment:    --- remove if there is no comment
 Order completed.
 Cancellation of this order will return the items to the shelves of the store and move the order to New.
 Make sure that the customer exactly refused the purchase</i>
-
-
 * Delete Item - markdown
+
+    * currency - reply markup text bug  [VASEA]
+    * PRICE round in user side works strage
 
     [Yuriy]
     * Cancel order -        # TODO - ADD CATEGORY IF IT DOESN'T EXIST
-    * currency - reply markup text bug
     [DONE] * Баги в Удалении категории(Если есть товара который есть в новых заказах) и вообще в целом работа с товаром
     [DONE] * Trash - restore order # TODO - ADD CATEGORY IF IT DOESN'T EXIST
     [DONE] * Проверить Users and Messages - Delete Messages

@@ -1,11 +1,13 @@
 import re
 import html
+import sys
+
 from urllib3.exceptions import HTTPError
 
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, LabeledPrice
 from telegram.ext import ConversationHandler
 from telegram.error import (BadRequest, TimedOut, NetworkError, TelegramError,
-                            ChatMigrated)
+                            ChatMigrated, Unauthorized)
 
 from helper_funcs.lang_strings.help_strings import help_strings, helpable_dict
 from helper_funcs.misc import paginate_modules, delete_messages, send_content_dict
@@ -218,7 +220,10 @@ def error_callback(update, context):
                 return"""
         raise context.error
 
-    # Unauthorized
+    #
+    except Unauthorized:
+        sys.exit()
+
     except ConnectionError as err:
         print("ConnectionError")
         print(err)
@@ -404,6 +409,7 @@ def back_to_modules(update, context):
 #                    "User view": ""}
 
 def help_button(update, context):
+    int("fuck")
     if users_table.find_one({"user_id": update.effective_user.id, "bot_id": context.bot.id}).get(
             "blocked", False):
         update.effective_message.reply_text(context.bot.lang_dict["blocked_user"])
