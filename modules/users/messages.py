@@ -10,7 +10,7 @@ from telegram import (InlineKeyboardButton, InlineKeyboardMarkup,
 from telegram.ext import (MessageHandler, Filters, ConversationHandler,
                           CallbackQueryHandler, run_async)
 
-from helper_funcs.helper import get_help
+from helper_funcs.helper import get_help, dismiss_button
 from helper_funcs.misc import delete_messages, update_user_fields
 from helper_funcs.pagination import Pagination
 from logs import logger
@@ -340,12 +340,7 @@ class SendMessageToAdmin(SenderHelper):
                 text = ("<b>New Message</b> "
                         + MessageTemplate(context.user_data["new_message"],
                                           context).super_short_temp())
-                reply_markup = InlineKeyboardMarkup([
-                    [InlineKeyboardButton(
-                        text=context.bot.lang_dict["notification_close_btn"],
-                        callback_data="dismiss"
-                    )]
-                ])
+                reply_markup = dismiss_button(context)
                 try:
                     context.bot.send_message(chat_id=admin["chat_id"],
                                              text=text,
