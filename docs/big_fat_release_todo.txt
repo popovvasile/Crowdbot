@@ -238,10 +238,12 @@ STRINGS
 --SYSTEM +++++++++++
 	* Узнать за Timed Out Error в ботах
 	* Перепроверить везде to_delete()
-	* проверить и проработать функции helper_funcs.helper, errors callbacks, Protect all /start, backs, get_help, help_button and so on with user_data.clear() function call
+	* проверить и проработать функции helper_funcs.helper, errors callbacks,
+	Protect all /start, backs, get_help, help_button and so on with user_data.clear() function call
 	* сделать одну back_to_modules_<nameOfModule> функцию
 	* Удалить все лишние строки с languages(используя парсинг кода)
-    * changed tokens and 2 bot instances running handlers(with notifications to BotFather and with token change feature)
+    [DONE] changed tokens and 2 bot instances running handlers(with notifications to BotFather and
+    with token change feature)
    	* Cython implementation
 	* Получаемые сообщения множаться.
 	/start - не удаляет сообщения(to_delete)

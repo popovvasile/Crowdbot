@@ -3,7 +3,7 @@ from functools import wraps
 from datetime import datetime
 from pprint import pprint
 
-from telegram import User, Bot, Update
+from telegram import User, Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup
 
 from database import users_table, chatbots_table, admin_passwords_table
 from logs import logger
@@ -103,11 +103,17 @@ def register_admin(update, context):
                 "blocked": False,
                 "unsubscribed": False,
                 "tags": ["#all", "#user", "#admin"]}}, upsert=True)
-
+        reply_markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton(
+                text=context.bot.lang_dict["notification_close_btn"],
+                callback_data="dismiss"
+            )]
+        ])
         context.bot.send_message(
             chat_id=update.effective_chat.id,
             text=context.bot.lang_dict["hello_new_admin"].format(
-                update.effective_user.full_name))
+                update.effective_user.full_name),
+            reply_markup=reply_markup)
 
         logger.info(f"New admin {update.effective_user.full_name} "
                     f"on bot {context.bot.first_name}:{context.bot.id}")
