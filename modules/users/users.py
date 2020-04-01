@@ -17,15 +17,6 @@ from modules.users.message_helper import (MessageTemplate, send_deleted_message_
 from database import users_table, donations_table, users_messages_to_admin_table
 
 
-# STRINGS
-# open_btn_str = "Open"
-# no_user_str = "There are no such user"
-# search_user_str = "Send username or name"
-# name_or_username_wrong_length = "Name is so long\nSend username or name"
-# it_may_take_time = "⌛️ The search may take some time."
-# user_not_found = "There are no such user\nSend another username or name"
-
-
 class UsersHandler(object):
     def users(self, update, context):
         delete_messages(update, context, True)
@@ -44,7 +35,7 @@ class UsersHandler(object):
             context.user_data["filters_buttons"] = [
                 [InlineKeyboardButton(context.bot.lang_dict["show_banned_btn"],
                                       callback_data="show_banned"),
-                InlineKeyboardButton(context.bot.lang_dict["show_unbanned_btn"],
+                 InlineKeyboardButton(context.bot.lang_dict["show_unbanned_btn"],
                                       callback_data="show_unbanned")]]
 
         elif update.callback_query.data == "show_banned":
@@ -57,7 +48,7 @@ class UsersHandler(object):
             context.user_data["filters_buttons"] = [
                 [InlineKeyboardButton(context.bot.lang_dict["show_all_users_btn"],
                                       callback_data="show_all"),
-                InlineKeyboardButton(context.bot.lang_dict["show_unbanned_btn"],
+                 InlineKeyboardButton(context.bot.lang_dict["show_unbanned_btn"],
                                       callback_data="show_unbanned")]]
 
         elif update.callback_query.data == "show_unbanned":
@@ -70,7 +61,7 @@ class UsersHandler(object):
             context.user_data["filters_buttons"] = [
                 [InlineKeyboardButton(context.bot.lang_dict["show_all_users_btn"],
                                       callback_data="show_all"),
-                InlineKeyboardButton(text=context.bot.lang_dict["show_banned_btn"],
+                 InlineKeyboardButton(text=context.bot.lang_dict["show_banned_btn"],
                                       callback_data="show_banned")]]
         if not context.user_data.get("page"):
             context.user_data["page"] = 1
@@ -259,7 +250,8 @@ class UsersHandler(object):
                         context.bot.send_message(
                             update.effective_chat.id,
                             context.bot.lang_dict["user_not_found"],
-                            reply_markup=reply_markup))
+                            reply_markup=reply_markup,
+                            parse_mode=ParseMode.HTML))
                     return START_SEARCH_USER
 
     def send_found_users(self, update, context):

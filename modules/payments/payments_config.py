@@ -74,7 +74,7 @@ class EnableDisableShopDonations(object):
         try:
             context.bot.delete_message(chat_id=update_data.message.chat_id,
                                        message_id=update_data.message.message_id)
-        except telegram.error.BadRequest:
+        except (telegram.error.BadRequest, telegram.error.TelegramError):
             pass
         chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
 
@@ -133,8 +133,9 @@ class EnableDisableShopDonations(object):
         chatbot["shop_enabled"] = not (chatbot["shop_enabled"])
         chatbots_table.update({"bot_id": context.bot.id}, chatbot)
         if chatbot["shop_enabled"]:
-            context.bot.send_message(update.callback_query.message.chat.id,
-                                     context.bot.lang_dict["payments_config_text_shop_enabled"])
+            context.user_data["to_delete"].append(
+                context.bot.send_message(update.callback_query.message.chat.id,
+                                         context.bot.lang_dict["payments_config_text_shop_enabled"]))
             self.config_shop(update, context)
         else:
             context.bot.send_message(update.callback_query.message.chat.id,

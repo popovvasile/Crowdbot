@@ -131,14 +131,14 @@ def helpable_dict(bot):
                         if new_messages_count else "")
     admin_rus = OrderedDict()
 
-    admin_rus[f"✉️ Пользователи и Сообщения {new_messages_str}"] = "users"
     admin_rus["💰 Магазин"] = "shop"
+    admin_rus[f"✉️ Пользователи и Сообщения {new_messages_str}"] = "users"
     admin_rus["⚙ Настройки бота"] = "settings"
 
     admin_eng = OrderedDict()
 
-    admin_eng[f"✉️ Users & Messages {new_messages_str}"] = "users"
     admin_eng["💰 Shop"] = "shop"
+    admin_eng[f"✉️ Users & Messages {new_messages_str}"] = "users"
     admin_eng["⚙ Settings"] = "settings"
 
 

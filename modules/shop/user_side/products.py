@@ -348,8 +348,11 @@ class UserProductsHandler(UserProductsHelper):
 
     def back_to_products(self, update, context):
         delete_messages(update, context, True)
-        page = context.user_data["page"]
-        category_id = context.user_data.get("category_id")
+        page = context.user_data.get("page", 1)
+        try:
+            category_id = context.user_data["category_id"]
+        except KeyError:
+            return self.back_to_categories(update, context)
         context.user_data.clear()
         context.user_data["page"] = page
         context.user_data["category_id"] = category_id
