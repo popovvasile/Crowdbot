@@ -41,11 +41,12 @@ class UserOrdersHandler(object):
 
     def send_orders_layout(self, update, context, orders):
         # Title
-        context.user_data['to_delete'].append(
-            context.bot.send_message(
-                chat_id=update.callback_query.message.chat_id,
-                text=context.bot.lang_dict["user_orders_title"].format(orders.count()),
-                parse_mode=ParseMode.HTML))
+        # context.user_data['to_delete'].append(
+        #     context.bot.send_message(
+        #         chat_id=update.callback_query.message.chat_id,
+        #         text=context.bot.lang_dict["user_orders_title"].format(orders.count()),
+        #         parse_mode=ParseMode.HTML))
+
         # Orders list buttons
         buttons = [[InlineKeyboardButton(
             text=context.bot.lang_dict["back_button"],
@@ -74,6 +75,7 @@ class UserOrdersHandler(object):
             # Send main buttons
             pagination.send_keyboard(update, context,
                                      page_prefix="user_orders_pagination",
+                                     text=context.bot.lang_dict["user_orders_title"].format(orders.count()),
                                      buttons=buttons)
         else:
             context.user_data["to_delete"].append(

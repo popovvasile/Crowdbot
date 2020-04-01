@@ -124,7 +124,7 @@ class ProductsHelper(object):
         # If description is long send_full_template method
         # will send description as separate message
         if len(product_obj.description) > MAX_TEMP_DESCRIPTION_LENGTH:
-            description = context.bot.lang_dict["shop_admin_description_above"]
+            description = context.bot.lang_dict["add_product_description_above"]
         else:
             description = product_obj.description
 
@@ -192,12 +192,11 @@ class ProductsHandler(ProductsHelper):
                     update, context,
                     text=cls.admin_short_template(context, prod_obj),
                     reply_markup=cls.product_keyboard(context, prod_obj))
-            title = context.bot.lang_dict["shop_admin_products_title"].format(
-                all_products.count())
             context.user_data['to_delete'].append(
                 context.bot.send_message(
                     chat_id=update.callback_query.message.chat_id,
-                    text=title,
+                    text=context.bot.lang_dict["shop_admin_products_title"].format(
+                        all_products.count()),
                     parse_mode=ParseMode.HTML))
             pagination.send_keyboard(update, context, buttons,
                                      page_prefix="item_list_pagination")
@@ -210,10 +209,7 @@ class ProductsHandler(ProductsHelper):
             context.user_data["product"] = Product(context, product_id)
             # TODO fix NoneType when creating the Product object
 
-        text = (self.admin_full_template(context, context.user_data["product"])
-                # + "\n"
-                # + context.bot.lang_dict["shop_admin_edit_product_menu"]
-                )
+        text = self.admin_full_template(context, context.user_data["product"])
         reply_markup = InlineKeyboardMarkup([
             [InlineKeyboardButton(
                 context.bot.lang_dict["shop_admin_set_discount_btn"],
@@ -395,7 +391,7 @@ class ProductsHandler(ProductsHelper):
                 text=context.bot.lang_dict["add_product_add_content"],
                 callback_data="add_new_content")],
             [InlineKeyboardButton(
-                text=context.bot.lang_dict["shop_admin_back_btn"],
+                text=context.bot.lang_dict["back_button"],
                 callback_data="back_to_edit")]]
         text = (self.admin_short_template(context, context.user_data["product"])
                 + "\n\n"

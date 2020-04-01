@@ -90,10 +90,10 @@ class UsersHandler(object):
             title_str = "not_banned_users_title"
         else:
             title_str = "users_layout_title"
-        context.user_data['to_delete'].append(
-            context.bot.send_message(update.callback_query.message.chat_id,
-                                     text=context.bot.lang_dict[title_str].format(users.count()),
-                                     parse_mode=ParseMode.HTML))
+        # context.user_data['to_delete'].append(
+        #     context.bot.send_message(update.callback_query.message.chat_id,
+        #                              text=context.bot.lang_dict[title_str].format(users.count()),
+        #                              parse_mode=ParseMode.HTML))
         # Keyboard with user list filters buttons
         main_buttons = (context.user_data["filters_buttons"]
                         + [[InlineKeyboardButton(context.bot.lang_dict["search_btn"],
@@ -122,6 +122,7 @@ class UsersHandler(object):
             # Send pagination navigation keyboard.
             pagination.send_keyboard(update, context,
                                      page_prefix="users_list_pagination",
+                                     text=context.bot.lang_dict[title_str].format(users.count()),
                                      buttons=main_buttons)
 
     def open_user(self, update, context):
@@ -251,13 +252,6 @@ class UsersHandler(object):
                 except TelegramError:
                     pass
                 if result:
-                    # Send title for user list.
-                    context.user_data['to_delete'].append(
-                        context.bot.send_message(
-                            update.effective_chat.id,
-                            text=context.bot.lang_dict["users_layout_title"].format(
-                                users.count()),
-                            parse_mode=ParseMode.HTML))
                     context.user_data["found_users"] = result
                     return self.send_found_users(update, context)
                 else:
@@ -294,7 +288,9 @@ class UsersHandler(object):
         # Send pagination navigation keyboard.
         pagination.send_keyboard(update, context,
                                  page_prefix="user_search_pagination",
-                                 buttons=reply_buttons)
+                                 buttons=reply_buttons,
+                                 text=context.bot.lang_dict["users_layout_title"].format(
+                                     pagination.total_items))
         return FOUND_USERS
 
     def clear_and_reset_user_data(self, context):

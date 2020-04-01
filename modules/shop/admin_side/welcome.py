@@ -1,4 +1,4 @@
-from telegram import Update
+from telegram import Update, ParseMode
 from telegram.ext import ConversationHandler, CallbackQueryHandler, CallbackContext
 
 from modules.shop.helper.helper import clear_user_data
@@ -15,7 +15,8 @@ class Welcome(object):
             context.user_data["to_delete"].append(
                 context.bot.send_message(
                     update.effective_chat.id,
-                    context.user_data["msg_to_send"]))
+                    context.user_data["msg_to_send"],
+                    parse_mode=ParseMode.HTML))
 
         orders_quantity = {
             "new_orders_quantity":

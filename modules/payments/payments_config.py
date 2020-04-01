@@ -4,7 +4,7 @@ import PyCurrency_Converter
 import requests
 import telegram
 from telegram import (ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup,
-                      ReplyKeyboardRemove)
+                      ReplyKeyboardRemove, ParseMode)
 from telegram.ext import MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
 
 from helper_funcs.constants import MIN_ADDRESS_LENGTH, MAX_ADDRESS_LENGTH
@@ -362,9 +362,9 @@ class EditPaymentHandler(object):
 
                 context.user_data["to_delete"].append(update.message.reply_text(
                     context.bot.lang_dict["payments_currency_change"].format(
-                        chatbot["shop"]["currency"], txt, chatbot["shop"]["currency"],
-                        str(round(converted * 100, 2)), txt
-                    ), reply_markup=keyboard_markup))
+                        chatbot["shop"]["currency"], str(round(converted * 100, 2)), txt),
+                    reply_markup=keyboard_markup,
+                    parse_mode=ParseMode.HTML))
                 context.user_data["converted"] = converted
                 return CURRENCY_FINISH
             else:

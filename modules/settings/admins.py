@@ -1,7 +1,5 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
-from uuid import uuid4
-from threading import Thread
 from datetime import datetime
 import secrets
 import string
@@ -78,27 +76,6 @@ class Admin:
                                  "is_admin": True,
                                  "superuser": False}).sort([["_id", -1]])
 
-    """@staticmethod
-    def add_new_admins(context):
-        for admin in context.user_data["new_admins"]:
-            admin["bot_id"] = context.bot.id
-            admin["is_admin"] = True
-            admin["registered"] = False
-            admin["password"] = str(uuid4())[:10]
-            admin["superuser"] = False
-            if "user_id" in admin:
-                users_table.update({"user_id": admin["user_id"],
-                                    "bot_id": context.bot.id},
-                                   admin, upsert=True)
-            elif "email" in admin:
-                users_table.update({"email": admin["email"],
-                                    "bot_id": context.bot.id},
-                                   admin, upsert=True)
-            else:
-                users_table.save(admin)
-        Thread(target=SMTPMailer().send_registration_msgs,
-               args=(context, context.user_data['new_admins'])).start()"""
-
 
 class AdminHandler(object):
     def admins(self, update, context):
@@ -114,11 +91,11 @@ class AdminHandler(object):
 
     def send_admins_layout(self, update, context):
         all_admins = Admin.get_all(context)
-        context.user_data['to_delete'].append(
-            context.bot.send_message(
-                chat_id=update.callback_query.message.chat_id,
-                text=context.bot.lang_dict["admins_layout_title"].format(all_admins.count()),
-                parse_mode=ParseMode.HTML))
+        # context.user_data['to_delete'].append(
+        #     context.bot.send_message(
+        #         chat_id=update.callback_query.message.chat_id,
+        #         text=context.bot.lang_dict["admins_layout_title"].format(all_admins.count()),
+        #         parse_mode=ParseMode.HTML))
         buttons = [
             [InlineKeyboardButton(
                 text=context.bot.lang_dict["add_admin_btn_str"],
@@ -139,7 +116,9 @@ class AdminHandler(object):
                 Admin(context, admin).send_template(update)
             pagination.send_keyboard(
                 update, context,
-                page_prefix="admins_list_pagination", buttons=buttons)
+                page_prefix="admins_list_pagination",
+                text=context.bot.lang_dict["admins_layout_title"].format(all_admins.count()),
+                buttons=buttons)
 
     def confirm_delete_admin(self, update, context):
         delete_messages(update, context, True)
@@ -205,86 +184,6 @@ class AdminHandler(object):
             ))
         return ADD_ADMINS
 
-    """    
-    def start_add_admins(self, update, context):
-        delete_messages(update, context, True)
-        context.user_data["new_admins"] = list()
-        context.user_data['to_delete'].append(
-            context.bot.send_message(
-                chat_id=update.effective_chat.id,
-                text=context.bot.lang_dict["enter_new_admin_email"],
-                reply_markup=InlineKeyboardMarkup([
-                    [InlineKeyboardButton(
-                        text=context.bot.lang_dict["back_button"],
-                        callback_data="back_to_admin_list")]
-                ])))
-        return ADD_ADMINS
-
-    def continue_add_admins(self, update, context):
-        delete_messages(update, context, True)
-        reply_markup = InlineKeyboardMarkup([
-            [InlineKeyboardButton(text=context.bot.lang_dict["add_button"],
-                                  callback_data="finish_add_admins"),
-             InlineKeyboardButton(
-                 text=context.bot.lang_dict["back_button"],
-                 callback_data="back_to_admin_list")]
-            if context.user_data["new_admins"]
-            else [InlineKeyboardButton(
-                text=context.bot.lang_dict["back_button"],
-                callback_data="back_to_admin_list")]])
-
-        # https://pypi.org/project/validate_email/
-        is_valid = validate_email(update.message.text)
-        if is_valid:
-            if (not any(admin["email"] == update.message.text
-                        for admin in context.user_data["new_admins"])
-                    and not users_table.find_one(
-                        {"bot_id": context.bot.id,
-                         "is_admin": True,
-                         "email": update.message.text})):
-                context.user_data["new_admins"].append(
-                    {"email": update.message.text})
-                kb = InlineKeyboardMarkup([
-                    [InlineKeyboardButton(
-                        text=context.bot.lang_dict["add_button"],
-                        callback_data="finish_add_admins"),
-                     InlineKeyboardButton(
-                         text=context.bot.lang_dict["back_button"],
-                         callback_data="back_to_admin_list")]])
-                text = emails_layout(
-                    context, context.bot.lang_dict["next_email_request"])
-                context.user_data["to_delete"].append(
-                    context.bot.send_message(update.effective_chat.id,
-                                             text, reply_markup=kb,
-                                             parse_mode=ParseMode.MARKDOWN))
-            else:
-                text = emails_layout(
-                    context,
-                    context.bot.lang_dict["add_already_exist_admin"].format(
-                        update.message.text) +
-                    context.bot.lang_dict["next_email_request"])
-
-                context.user_data["to_delete"].append(
-                    context.bot.send_message(update.effective_chat.id,
-                                             text, reply_markup=reply_markup,
-                                             parse_mode=ParseMode.MARKDOWN))
-        else:
-            context.user_data["to_delete"].append(
-                context.bot.send_message(
-                    update.effective_chat.id,
-                    emails_layout(context, 
-                                  context.bot.lang_dict["wrong_email"]),
-                    reply_markup=reply_markup))
-        return ADD_ADMINS
-
-    def finish_add_admins(self, update, context):
-        # delete_messages(update, context, True)
-        Admin.add_new_admins(context)
-        update.callback_query.answer(context.bot.lang_dict["admins_added_blink"])
-        # update.callback_query.data = "help_module(settings)"
-        return self.back_to_admins_list(update, context)
-    """
-
     def back_to_admins_list(self, update, context):
         delete_messages(update, context, True)
         page = context.user_data.get("page")
@@ -337,25 +236,3 @@ ADMINS_LIST_HANDLER = ConversationHandler(
         CallbackQueryHandler(pattern=r"back_to_admin_list",
                              callback=AdminHandler().back_to_admins_list)]
 )
-
-"""ADD_ADMIN_HANDLER = ConversationHandler(
-    entry_points=[
-        CallbackQueryHandler(pattern="start_add_admins",
-                             callback=AdminHandler().start_add_admins)],
-
-    states={
-        ADD_ADMINS: [
-            MessageHandler(callback=AdminHandler().continue_add_admins,
-                           filters=Filters.text),
-            CallbackQueryHandler(AdminHandler().finish_add_admins,
-                                 pattern=r"finish_add_admins")]
-    },
-
-    fallbacks=[
-        CallbackQueryHandler(pattern=r"help_module",
-                             callback=AdminHandler().back),
-        CallbackQueryHandler(pattern=r"back_to_admin_list",
-                             callback=AdminHandler().back_to_admins_list)
-    ]
-)
-"""

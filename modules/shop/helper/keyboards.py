@@ -68,7 +68,7 @@ def create_keyboard(buttons, extra_buttons):
 
 def back_btn(callback_data: str, context):
     return InlineKeyboardButton(
-        context.bot.lang_dict["shop_admin_back_btn"], callback_data=callback_data)
+        context.bot.lang_dict["back_button"], callback_data=callback_data)
 
 
 def back_kb(callback_data: str, context):
@@ -95,12 +95,12 @@ def keyboards(context):
                                   callback_data="confirm_product")]
         ]),
         continue_back_kb=InlineKeyboardMarkup([
-            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_continue_btn"],
+            [InlineKeyboardButton(context.bot.lang_dict["continue_btn"],
                                   callback_data="continue"),
              back_btn("back_to_main_menu_btn", context=context)]
         ]),
         confirm_to_done=InlineKeyboardMarkup([
-            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_to_done_yes"],
+            [InlineKeyboardButton(context.bot.lang_dict["done_button"],
                                   callback_data="finish_to_done")],
             # [InlineKeyboardButton(context.bot.lang_dict["shop_admin_add_product_btn"],
             #                       callback_data="add_product_to_order")],
@@ -114,7 +114,7 @@ def keyboards(context):
              back_btn("back_to_orders_btn", context=context)]
         ]),
         confirm_cancel=InlineKeyboardMarkup([
-            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_cancel_yes"],
+            [InlineKeyboardButton(context.bot.lang_dict["cancel_button"],
                                   callback_data="finish_cancel"),
              back_btn("back_to_orders_btn", context=context)]
         ]),

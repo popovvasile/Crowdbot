@@ -125,17 +125,6 @@ class Product(object):
 
         result["ok"] = True
         result["price"] = float(format(float(update.message.text), '.2f'))
-
-        # todo maybe don't check price string length?
-        #  coz we check price for max float before and then we can just round price
-        # if len(update.message.text) <= len(str(currency_limits["max"])):
-        #     result["ok"] = True
-        #     result["price"] = float(
-        #         format(Price.fromstring(update.message.text,
-        #                                 decimal_separator=".").amount, '.2f'))
-        # else:
-        #     result["ok"] = False
-        #     result["error_message"] = context.bot.lang_dict["shop_admin_price_too_big"]
         return result
 
     @staticmethod

@@ -49,6 +49,7 @@ class PurchaseBot(object):
 
     @staticmethod
     def send_number_markup(update, context, invalid_number=False):
+        # todo "share_number_btn": "Share Number",
         if (context.user_data["used_contacts"]
                 and len(context.user_data["used_contacts"]["phone_numbers"])):
             text = context.bot.lang_dict["tell_phone_number"]
@@ -100,7 +101,7 @@ class PurchaseBot(object):
                 text=context.bot.lang_dict["add_order_comment"],
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton(
-                         text=context.bot.lang_dict["shop_admin_continue_btn"],
+                         text=context.bot.lang_dict["continue_btn"],
                          callback_data="pass_order_comment")],
                     [InlineKeyboardButton(
                          text=context.bot.lang_dict["back_button"],
@@ -119,7 +120,7 @@ class PurchaseBot(object):
                     context.bot.lang_dict["order_comment_too_long"],
                     reply_markup=InlineKeyboardMarkup([
                         [InlineKeyboardButton(
-                             text=context.bot.lang_dict["shop_admin_continue_btn"],
+                             text=context.bot.lang_dict["continue_btn"],
                              callback_data="pass_order_comment")],
                         [InlineKeyboardButton(
                              text=context.bot.lang_dict["back_button"],

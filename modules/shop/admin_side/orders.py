@@ -28,7 +28,7 @@ class OrdersHandlerHelper(object):
             if len(order.items):
                 kb[0].append(
                     InlineKeyboardButton(
-                        text=context.bot.lang_dict["shop_admin_to_done_btn"],
+                        text=context.bot.lang_dict["done_button_short"],
                         callback_data=f"to_done/{order.id_}"))
 
             # kb[0].append(
@@ -52,7 +52,7 @@ class OrdersHandlerHelper(object):
         #         callback_data=f"admin_order_items/{order.id_}"))
         kb[0].append(
             InlineKeyboardButton(
-                text=context.bot.lang_dict["shop_admin_cancel_btn"],
+                text=context.bot.lang_dict["cancel_button"],
                 callback_data=f"cancel_order/{order.id_}"))
         return InlineKeyboardMarkup(kb)
 
@@ -100,8 +100,10 @@ class OrdersHandler(OrdersHandlerHelper):
 
             pagination.send_keyboard(
                 update, context,
-                [[back_btn("back_to_main_menu", context=context)]],
-                "admin_order_list_pagination")
+                text=context.bot.lang_dict["user_orders_title"].format(
+                    all_orders.count()),
+                buttons=[[back_btn("back_to_main_menu", context=context)]],
+                page_prefix="admin_order_list_pagination")
         return state
 
     # def order_items(self, update, context):
@@ -219,7 +221,7 @@ class OrdersHandler(OrdersHandlerHelper):
                     {"_id": item["product_id"]},
                     {"$inc": {"quantity": item["quantity"]}})
         update.callback_query.answer(
-            context.bot.lang_dict["shop_admin_order_canceled_blink"])
+            context.bot.lang_dict["order_canceled_blink"])
         return self.back_to_orders(update, context)
 
     """def edit(self, update: Update, context: CallbackContext):
