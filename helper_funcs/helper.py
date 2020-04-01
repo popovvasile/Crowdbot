@@ -1,11 +1,13 @@
 import re
 import html
+import sys
+
 from urllib3.exceptions import HTTPError
 
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, LabeledPrice
 from telegram.ext import ConversationHandler
 from telegram.error import (BadRequest, TimedOut, NetworkError, TelegramError,
-                            ChatMigrated)
+                            ChatMigrated, Unauthorized)
 
 from helper_funcs.lang_strings.help_strings import help_strings, helpable_dict
 from helper_funcs.misc import paginate_modules, delete_messages, send_content_dict
@@ -18,7 +20,7 @@ from logs import logger
 HELP_STRINGS = """
 {}
 """
-
+currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["KZT", "UAH", "RON", "PLN"]]
 
 # do not async
 def send_admin_help(bot, chat_id, text, keyboard=None):
@@ -218,7 +220,10 @@ def error_callback(update, context):
                 return"""
         raise context.error
 
-    # Unauthorized
+    #
+    except Unauthorized:
+        sys.exit()
+
     except ConnectionError as err:
         print("ConnectionError")
         print(err)

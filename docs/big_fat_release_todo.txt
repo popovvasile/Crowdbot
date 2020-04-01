@@ -1,5 +1,6 @@
 --SHOP  -- status, in_trash, on_sale
     [Vasile]
+    Привет, Vasi новый админ! + add dismiss
         [DONE] Валидация цены баг - нижнее подчеркивание
         * Убрать заголовки в пагинацию как в инбоксе
             - Item list
@@ -65,14 +66,14 @@ Your comment:    --- remove if there is no comment
 Order completed.
 Cancellation of this order will return the items to the shelves of the store and move the order to New.
 Make sure that the customer exactly refused the purchase</i>
-
-
 * Delete Item - markdown
+
+    * currency - reply markup text bug  [VASEA]
+    * PRICE round in user side works strage
 
     [Yuriy]
     * fix forward link rus
     * Cancel order -        # TODO - ADD CATEGORY IF IT DOESN'T EXIST
-    * currency - reply markup text bug
     [DONE] * Баги в Удалении категории(Если есть товара который есть в новых заказах) и вообще в целом работа с товаром
     [DONE] * Trash - restore order # TODO - ADD CATEGORY IF IT DOESN'T EXIST
     [DONE] * Проверить Users and Messages - Delete Messages
@@ -238,10 +239,12 @@ STRINGS
 --SYSTEM +++++++++++
 	* Узнать за Timed Out Error в ботах
 	* Перепроверить везде to_delete()
-	* проверить и проработать функции helper_funcs.helper, errors callbacks, Protect all /start, backs, get_help, help_button and so on with user_data.clear() function call
+	* проверить и проработать функции helper_funcs.helper, errors callbacks,
+	Protect all /start, backs, get_help, help_button and so on with user_data.clear() function call
 	* сделать одну back_to_modules_<nameOfModule> функцию
 	* Удалить все лишние строки с languages(используя парсинг кода)
-    * changed tokens and 2 bot instances running handlers(with notifications to BotFather and with token change feature)
+    [DONE] changed tokens and 2 bot instances running handlers(with notifications to BotFather and
+    with token change feature)
    	* Cython implementation
 	* Получаемые сообщения множаться.
 	/start - не удаляет сообщения(to_delete)

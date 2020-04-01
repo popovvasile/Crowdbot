@@ -1,7 +1,6 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
 import datetime
-from threading import Thread
 
 from bson.objectid import ObjectId
 from haikunator import Haikunator
@@ -510,13 +509,8 @@ class SendMessageToUsers(object):
         #         reply_markup=final_reply_markup))
         # return MESSAGE_TO_USERS
 
-    # @run_async
     @run_async
     def send_message_finish(self, update, context):
-        # TODO Refactoring - threads
-        # Thread(target=self.send_to_all_users,
-        #        args=(context.user_data['processed_bot']['_id'],
-        #              context.user_data['request']['admins'])).start()
 
         users = users_table.find({"bot_id": context.bot.id,
                                   "blocked": False,

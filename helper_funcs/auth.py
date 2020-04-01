@@ -103,7 +103,12 @@ def register_admin(update, context):
                 "blocked": False,
                 "unsubscribed": False,
                 "tags": ["#all", "#user", "#admin"]}}, upsert=True)
-
+        reply_markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton(
+                text=context.bot.lang_dict["notification_close_btn"],
+                callback_data="dismiss"
+            )]
+        ])
         context.bot.send_message(
             chat_id=update.effective_chat.id,
             text=context.bot.lang_dict["hello_new_admin"].format(

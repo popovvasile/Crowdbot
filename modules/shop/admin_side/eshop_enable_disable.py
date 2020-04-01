@@ -141,8 +141,6 @@ class CreateShopHandler(object):
 
         chat_id, txt = initiate_chat_id(update)
         context.user_data["description"] = txt
-        # currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["KZT", "UAH", "RON", "PLN"]]
-
         context.user_data["to_delete"].append(update.message.reply_text(
             context.bot.lang_dict["create_shop_str_7"],
             # reply_markup=ReplyKeyboardMarkup(currency_keyboard,
