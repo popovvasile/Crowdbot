@@ -72,6 +72,8 @@ class PurchaseBot(object):
 
     @staticmethod
     def validate_number(number):
+        if not number.startswith('+') or not number.startswith('00'):
+            number = "+" + number
         if not 5 < len(number) < 25:
             return False
         try:
