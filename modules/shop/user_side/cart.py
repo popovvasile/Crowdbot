@@ -265,11 +265,11 @@ class Cart(CartHelper):
 
     def send_cart_products_layout(self, update, context, cart_products):
         # Title
-        context.user_data['to_delete'].append(
-            context.bot.send_message(
-                chat_id=update.callback_query.message.chat_id,
-                text=context.bot.lang_dict["shop_admin_products_title"].format(len(cart_products)),
-                parse_mode=ParseMode.HTML))
+        # context.user_data['to_delete'].append(
+        #     context.bot.send_message(
+        #         chat_id=update.callback_query.message.chat_id,
+        #         text=context.bot.lang_dict["shop_admin_products_title"].format(len(cart_products)),
+        #         parse_mode=ParseMode.HTML))
         # Products list buttons
         buttons = [[InlineKeyboardButton(
                         text=context.bot.lang_dict["back_button"],
@@ -299,9 +299,12 @@ class Cart(CartHelper):
                 product_obj.send_short_template(
                     update, context, text=template, reply_markup=reply_markup)
             # Send main buttons
-            pagination.send_keyboard(update, context,
-                                     page_prefix="user_cart_pagination",
-                                     buttons=buttons)
+            pagination.send_keyboard(
+                update, context,
+                buttons=buttons,
+                page_prefix="user_cart_pagination",
+                text=context.bot.lang_dict["shop_admin_products_title"].format(
+                    len(cart_products)))
         else:
             context.user_data["to_delete"].append(
                 context.bot.send_message(
