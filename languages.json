@@ -184,15 +184,9 @@
         "buy_btn": "\uD83D\uDECD Buy",
         "cart_changed_notification": "Some products has been removed from cart because that was deleted or sold.\nCheck your cart and try again.",
         "cart_empty_blink": "🛒 Your cart is empty",
-<<<<<<< HEAD
         "cart_item_template": "<i>Article:</i> <b>{}</b>\n<i>Name:</i> <b>{}</b>\n<i>Category:</i> <b>{}</b>\n<i>Price:</i> {}",
         "full_cart_item_template": "<i>Article:</i> <b>{}</b>\n<i>Name:</i> <b>{}</b>\n<i>Category:</i> <b>{}</b>\n<i>Price:</i> {}",
         "cart_quantity_field": "\n<i>Your quantity:</i> <b>{}</b>",
-=======
-        "cart_item_template": "<i>Article:</i>      <b>{}</b>\n<i>Name:</i>       <b>{}</b>\n<i>Category:</i>   <b>{}</b>\n<i>Price:</i>        {}",
-        "full_cart_item_template": "<i>Article:</i>      <b>{}</b>\n<i>Name:</i>      <b>{}</b>\n<i>Category:</i>   <b>{}</b>\n<i>Price:</i> {}",
-        "cart_quantity_field": "\n<i>Quantity: </i> <b>{}</b>",
->>>>>>> b7487d4ce00b70b6ac3e0e6325670fa06755ab4a
         "cart_view_help": " ({} files)",
         "comment_field": "\n<i>Comment:</i> <b>{}</b>",
         "user_order_temp": "\n<i>Order ID:</i> <b>{}</b>\n<i>Status:</i> {}\n<i>Order price:</i> <b>{} {}</b>\n<i>Phone number:</i> <b>{}</b>",
