@@ -54,9 +54,7 @@ Make sure that the customer exactly refused the purchase</i>
 
     * currency - reply markup text bug  [VASEA]
     * PRICE round in user side works strage
-
-    [Yuriy]
-    * fix forward link rus
+    * fix admin invite forward link rus
     * Cancel order -        # TODO - ADD CATEGORY IF IT DOESN'T EXIST
     [DONE] * Баги в Удалении категории(Если есть товара который есть в новых заказах) и вообще в целом работа с товаром
     [DONE] * Trash - restore order # TODO - ADD CATEGORY IF IT DOESN'T EXIST

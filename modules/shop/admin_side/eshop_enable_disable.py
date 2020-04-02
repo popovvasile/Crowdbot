@@ -152,16 +152,12 @@ class CreateShopHandler(object):
         # chat_id, txt = initiate_chat_id(update)
         # currency = txt
         context.user_data["currency"] = update.callback_query.data.split("/")[1]
-
-        context.bot.send_message(update.effective_chat.id,
-                                 context.bot.lang_dict["create_shop_str_8"])
-
         chatbot = chatbots_table.find_one({"bot_id": context.bot.id}) or {}
-
         context.user_data.pop("to_delete", None)
         chatbot["shop_enabled"] = True
         chatbot["shop"] = context.user_data
         chatbots_table.update_one({"bot_id": context.bot.id}, {'$set': chatbot}, upsert=True)
+        update.callback_query.answer(context.bot.lang_dict["create_shop_str_8"])
         logger.info("Admin {} on bot {}:{} added a shop config".format(
             update.effective_user.first_name, context.bot.first_name, context.bot.id))
         delete_messages(update, context)
