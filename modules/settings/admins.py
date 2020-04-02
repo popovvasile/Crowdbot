@@ -162,8 +162,10 @@ class AdminHandler(object):
             context.bot.send_message(
                 chat_id=update.effective_chat.id,
                 text=context.bot.lang_dict["admin_invite"].format(
-                    context.bot.get_me().mention_html()
-                    # f'<a href="t.me/{context.bot.username}">{context.bot.name}</a>'
+                    # context.bot.get_me().mention_html()
+                    f'<a href="t.me/{context.bot.username}">{context.bot.name}</a>'
+                    # f'<a href="{context.bot.get_me().link}">{context.bot.name}</a>'
+
                 ),
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton(

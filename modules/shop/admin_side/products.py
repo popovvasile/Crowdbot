@@ -192,14 +192,11 @@ class ProductsHandler(ProductsHelper):
                     update, context,
                     text=cls.admin_short_template(context, prod_obj),
                     reply_markup=cls.product_keyboard(context, prod_obj))
-            context.user_data['to_delete'].append(
-                context.bot.send_message(
-                    chat_id=update.callback_query.message.chat_id,
-                    text=context.bot.lang_dict["shop_admin_products_title"].format(
-                        all_products.count()),
-                    parse_mode=ParseMode.HTML))
-            pagination.send_keyboard(update, context, buttons,
-                                     page_prefix="item_list_pagination")
+            pagination.send_keyboard(
+                update, context, buttons,
+                page_prefix="item_list_pagination",
+                text=context.bot.lang_dict["shop_admin_products_title"].format(
+                    all_products.count()))
         return state
 
     def edit(self, update: Update, context: CallbackContext):
