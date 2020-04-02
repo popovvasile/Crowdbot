@@ -4,7 +4,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (MessageHandler, Filters, ConversationHandler, CallbackQueryHandler)
 
 from database import chatbots_table
-from helper_funcs.helper import get_help, back_to_modules
+from helper_funcs.helper import get_help, back_to_modules, dismiss_button
 from helper_funcs.misc import delete_messages
 
 
@@ -60,7 +60,8 @@ class EditBotDescription(object):
 
     def received_message(self, update, context):
         context.bot.send_message(update.message.chat_id,
-                                 context.bot.lang_dict["done_button"])
+                                 context.bot.lang_dict["done_button"],
+                                 reply_markup=dismiss_button(context))
 
         chatbots_table.update_one({"bot_id": context.bot.id},
                                   {"$set": {"welcomeMessage": update.message.text}})

@@ -33,24 +33,8 @@
     * Send message read html, not markdown
     * send message- sent messages are not deleted
     * Catalog items - fix as in the admin
-    * Current page dissapears if only one page
     * Total items down and no "edit product" - make as current page
     * Buy- Category above Name - everywhere in user and admin
-    * Your quantity ===> quantity
-    * <i>You can send any kind of files,
-            voice and video messages, stickers and links</i>
-    * Phone validation - support for spaces and +
-    * Users order:
-    Your order ☝️
-    [ADD ENTER]
-Phone Number: 004915734178943
-Delivery to 🚚 Goerzallee 135
-
-
-      The current exchange rate is <b>100RUB</b>=<b>1.26USD</b>?
-      Are you sure that you want to proceed?
-
-    remove temporary
 
 *Your orders- down
 

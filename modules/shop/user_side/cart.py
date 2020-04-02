@@ -33,11 +33,11 @@ class CartHelper(object):
         for cart_item in cart_items:
             pprint(cart_item)
             if cart_item["product"].get("discount_price"):
-                item_price = (float(cart_item["product"]["discount_price"])
-                              * cart_item["quantity"])
+                item_price = (round(float(cart_item["product"]["discount_price"])
+                              * cart_item["quantity"], 2))
             else:
-                item_price = (float(cart_item["product"]["price"])
-                              * cart_item["quantity"])
+                item_price = (round(float(cart_item["product"]["price"])
+                              * cart_item["quantity"], 2))
             # print(item_price)
             order_price += item_price
             if len(template) < 3800:

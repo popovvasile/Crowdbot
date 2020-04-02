@@ -73,7 +73,7 @@
         "new_order_notification": "🆕 <b>New Order</b>\n<i>Order ID:</i> <b>{}</b>\n<i>From:</i> {}",
         "order_item_template": "<i>Article:</i>    <b>{}</b>\n<i>Category:</i> <b>{}</b>\n<i>Name:</i> <b>{}</b>\n<i>x{}</i> - <b>{} {}</b>",
         "order_status_canceled": "❌ <b>Canceled</b>",
-        "payments_change_address": "Your current address is {}.",
+        "payments_change_address": "Current address is {}.",
         "payments_config_text": "Here you can configure your payments settings",
         "payments_config_text_donations_disabled": "❌ Donations have been disabled on this bot",
         "payments_config_text_donations_enabled": "Donations have been enabled for your users. Enter the configurations to set up a greeting message for those who want to donate for you",
@@ -82,7 +82,7 @@
         "payments_currency_change": "The current exchange rate is <b>100{}={}{}</b>?\n\nAre you sure that you want to proceed?",
         "payments_currency_has_changed": "Your currency has been changed",
         "payments_current_description": "{}",
-        "payments_current_payments": "Your current currency is {}",
+        "payments_current_payments": "Current currency is {}",
         "product_deleted_status": "<b>\uD83D\uDDD1 Deleted</b>",
         "product_on_sale_status": "✅ On Sale",
         "product_sold_status": "💸 Sold",
@@ -92,7 +92,7 @@
         "products": "Products",
         "products_categories_menu": "Choose",
         "quantity_field": "\n<i>Quantity:</i> <b>{}</b>",
-        "self-delivery": "<b>Change to self-delivery</b>",
+        "self-delivery": "\uD83D\uDE9A Change to self-delivery",
         "shop_admin_add_category_btn": "➕ Add category",
         "shop_admin_adding_category_finished": "\uD83E\uDD18 <b>Product category successfully added</b>",
         "shop_admin_adding_product_finished": "\uD83E\uDD18 <b>Product successfully added</b>",
@@ -184,9 +184,15 @@
         "buy_btn": "\uD83D\uDECD Buy",
         "cart_changed_notification": "Some products has been removed from cart because that was deleted or sold.\nCheck your cart and try again.",
         "cart_empty_blink": "🛒 Your cart is empty",
+<<<<<<< HEAD
         "cart_item_template": "<i>Article:</i> <b>{}</b>\n<i>Name:</i> <b>{}</b>\n<i>Category:</i> <b>{}</b>\n<i>Price:</i> {}",
         "full_cart_item_template": "<i>Article:</i> <b>{}</b>\n<i>Name:</i> <b>{}</b>\n<i>Category:</i> <b>{}</b>\n<i>Price:</i> {}",
         "cart_quantity_field": "\n<i>Your quantity:</i> <b>{}</b>",
+=======
+        "cart_item_template": "<i>Article:</i>      <b>{}</b>\n<i>Name:</i>       <b>{}</b>\n<i>Category:</i>   <b>{}</b>\n<i>Price:</i>        {}",
+        "full_cart_item_template": "<i>Article:</i>      <b>{}</b>\n<i>Name:</i>      <b>{}</b>\n<i>Category:</i>   <b>{}</b>\n<i>Price:</i> {}",
+        "cart_quantity_field": "\n<i>Quantity: </i> <b>{}</b>",
+>>>>>>> b7487d4ce00b70b6ac3e0e6325670fa06755ab4a
         "cart_view_help": " ({} files)",
         "comment_field": "\n<i>Comment:</i> <b>{}</b>",
         "user_order_temp": "\n<i>Order ID:</i> <b>{}</b>\n<i>Status:</i> {}\n<i>Order price:</i> <b>{} {}</b>\n<i>Phone number:</i> <b>{}</b>",
@@ -284,7 +290,7 @@
         "confirm_delete_admin_str": "<i>Are you sure you want to remove the admin?</i>",
         "hello_new_admin": "Hello, {}.",
         "no_admins_str": "You are the only administrator",
-        "registered_admin_temp": "{}\n<b>Start:</b> <code>{}</code>",
+        "registered_admin_temp": "{}\n<i>Start date:</i> <b>{}</b>",
         "registration_link_not_active": "Registration link is no longer active. \nAsk admins for the new one",
 
 
@@ -777,7 +783,7 @@
         "confirm_delete_admin_str": "<i>Уверен, что хочешь удалить админа?</i>",
         "hello_new_admin": "Привет, {}.",
         "no_admins_str": "Вы единственный администратор",
-        "registered_admin_temp": "{}\n<b>Добавлен:</b> <code>{}</code>",
+        "registered_admin_temp": "{}\n<i>Добавлен: </i> <b>{}</b>",
         "registration_link_not_active": "Ссылка для регистрации истекла. \nПопроси администратора создать новую.",
 
 

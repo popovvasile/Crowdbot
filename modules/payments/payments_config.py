@@ -12,7 +12,7 @@ from logs import logger
 from database import chatbots_table, products_table
 from helper_funcs.auth import initiate_chat_id
 from helper_funcs.helper import (get_help, check_provider_token,
-                                 currency_limits_dict, currency_keyboard)
+                                 currency_limits_dict, currency_keyboard, dismiss_button)
 from helper_funcs.misc import delete_messages
 from modules.shop.admin_side.welcome import Welcome
 from modules.shop.helper.keyboards import back_btn
@@ -133,9 +133,15 @@ class EnableDisableShopDonations(object):
         chatbot["shop_enabled"] = not (chatbot["shop_enabled"])
         chatbots_table.update({"bot_id": context.bot.id}, chatbot)
         if chatbot["shop_enabled"]:
+<<<<<<< HEAD
             context.user_data["to_delete"].append(
                 context.bot.send_message(update.callback_query.message.chat.id,
                                          context.bot.lang_dict["payments_config_text_shop_enabled"]))
+=======
+            context.bot.send_message(update.callback_query.message.chat.id,
+                                     context.bot.lang_dict["payments_config_text_shop_enabled"],
+                                     reply_markup=dismiss_button(context))
+>>>>>>> b7487d4ce00b70b6ac3e0e6325670fa06755ab4a
             self.config_shop(update, context)
         else:
             context.bot.send_message(update.callback_query.message.chat.id,
