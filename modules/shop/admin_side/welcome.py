@@ -1,6 +1,7 @@
 from telegram import Update, ParseMode
 from telegram.ext import ConversationHandler, CallbackQueryHandler, CallbackContext
 
+from helper_funcs.helper import dismiss_button
 from modules.shop.helper.helper import clear_user_data
 from modules.shop.helper.keyboards import start_keyboard
 from database import orders_table
@@ -16,7 +17,9 @@ class Welcome(object):
                 context.bot.send_message(
                     update.effective_chat.id,
                     context.user_data["msg_to_send"],
-                    parse_mode=ParseMode.HTML))
+                    parse_mode=ParseMode.HTML,
+                    reply_markup=dismiss_button(context))
+                    )
 
         orders_quantity = {
             "new_orders_quantity":

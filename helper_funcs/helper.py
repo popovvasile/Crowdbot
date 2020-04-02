@@ -22,6 +22,14 @@ HELP_STRINGS = """
 """
 currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["KZT", "UAH", "RON", "PLN"]]
 
+
+def dismiss_button(context):
+    dismis_button = InlineKeyboardMarkup(
+        [[InlineKeyboardButton(text=context.bot.lang_dict["notification_close_btn"],
+                               callback_data="dismiss")]])
+    return dismis_button
+
+
 # do not async
 def send_admin_help(bot, chat_id, text, keyboard=None):
     if not keyboard:
