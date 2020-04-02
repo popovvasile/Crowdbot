@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from telegram.error import TelegramError
 from telegram import (InlineKeyboardMarkup, InlineKeyboardButton,
-                      ReplyKeyboardMarkup)
+                      ReplyKeyboardMarkup, ParseMode)
 from telegram.ext import (ConversationHandler, CallbackQueryHandler,
                           MessageHandler, Filters, RegexHandler)
 
@@ -321,7 +321,8 @@ class SendPost(object):
         context.user_data['to_delete'].append(
             context.bot.send_message(update.message.chat_id,
                                      context.bot.lang_dict["send_message_4"],
-                                     reply_markup=final_reply_markup))
+                                     reply_markup=final_reply_markup,
+                                     parse_mode=ParseMode.HTML))
         return MESSAGE_TO_USERS
 
     def send_post_finish(self, update, context):

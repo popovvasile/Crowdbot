@@ -60,7 +60,8 @@ class SenderHelper(object):
                 + context.bot.lang_dict["files_counter"].format(
                     len(context.user_data['content'])),
                 reply_markup=reply_markup,
-                reply_to_message_id=reply_to))
+                reply_to_message_id=reply_to,
+                parse_mode=ParseMode.HTML))
         return state
 
 
@@ -317,7 +318,7 @@ class MessageTemplate(object):
             self.title_emoji = ""
 
     def super_short_temp(self):
-        return self.title_emoji + self.context.bot.lang_dict["from"] + self.user_mention
+        return "\n" + self.context.bot.lang_dict["from"] + self.user_mention
 
     def short_temp(self):
         return (self.title_emoji
@@ -401,7 +402,7 @@ def content_string(content, context):
             str_for_text = content_dict['text'][:20]
             if len(content_dict['text']) > 20:
                 str_for_text += "..."
-            string += f"• <code>{html.escape(str_for_text, quote=False)}</code>\n"
+            string += f"• {html.escape(str_for_text, quote=False)}\n"
 
         if "photo_file" in content_dict:
             string += context.bot.lang_dict["photo_file"]

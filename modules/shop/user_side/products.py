@@ -210,12 +210,12 @@ class UserProductsHandler(UserProductsHelper):
 
     def send_products_layout(self, update, context, all_products):
         # Title
-        context.user_data['to_delete'].append(
-            context.bot.send_message(
-                chat_id=update.callback_query.message.chat_id,
-                text=context.bot.lang_dict[
-                    "shop_admin_products_title"].format(all_products.count()),
-                parse_mode=ParseMode.HTML))
+        # context.user_data['to_delete'].append(
+        #     context.bot.send_message(
+        #         chat_id=update.callback_query.message.chat_id,
+        #         text=context.bot.lang_dict[
+        #             "shop_admin_products_title"].format(all_products.count()),
+        #         parse_mode=ParseMode.HTML))
         # Products list buttons
         buttons = [[InlineKeyboardButton(
             text=context.bot.lang_dict["buy_btn"],
@@ -243,9 +243,12 @@ class UserProductsHandler(UserProductsHelper):
                     update, context, text=template, reply_markup=reply_markup)
 
             # Send main buttons
-            pagination.send_keyboard(update, context,
-                                     page_prefix="user_products_pagination",
-                                     buttons=buttons)
+            pagination.send_keyboard(
+                update, context,
+                page_prefix="user_products_pagination",
+                text=context.bot.lang_dict["shop_admin_products_title"].format(
+                    all_products.count()),
+                buttons=buttons)
         else:
             buttons = [[
                 InlineKeyboardButton(
@@ -348,8 +351,11 @@ class UserProductsHandler(UserProductsHelper):
 
     def back_to_products(self, update, context):
         delete_messages(update, context, True)
-        page = context.user_data["page"]
-        category_id = context.user_data.get("category_id")
+        page = context.user_data.get("page", 1)
+        try:
+            category_id = context.user_data["category_id"]
+        except KeyError:
+            return self.back_to_categories(update, context)
         context.user_data.clear()
         context.user_data["page"] = page
         context.user_data["category_id"] = category_id

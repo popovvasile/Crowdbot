@@ -113,21 +113,34 @@ class AdminOrder(Order):
 
     @property
     def template(self):
-        currency = chatbots_table.find_one(
-            {"bot_id": self.context.bot.id})["shop"]["currency"]
+        template = "\n" + self.context.bot.lang_dict["shop_admin_order_temp_1"].format(
+            self.str_status,
+            self.article,
+            self.creation_timestamp,
+            self.user_mention,
+            self.phone_number)
 
-        template = (
-            "\n" + self.context.bot.lang_dict["shop_admin_order_temp"].format(
-                self.str_status,
-                self.article,
-                self.creation_timestamp,
+        if self.user_comment:
+            template += self.context.bot.lang_dict["comment_field"].format(
+                html.escape(self.user_comment, quote=False))
+
+        template += self.context.bot.lang_dict["shop_admin_order_temp_2"].format(
+            self.total_price,
+            self.currency,
+            self.str_order_items())
+        # template = (
+        #     "\n" + self.context.bot.lang_dict["shop_admin_order_temp"].format(
+        #         self.str_status,
+        #         self.article,
+        #         self.creation_timestamp,
                 # self.str_product_status,
-                self.user_mention,
-                self.phone_number,
-                html.escape(self.user_comment, quote=False),
-                self.total_price,
-                self.currency,
-                self.str_order_items()))
+                # self.user_mention,
+                # self.phone_number,
+                # html.escape(self.user_comment, quote=False),
+                # self.total_price,
+                # self.currency,
+                # self.str_order_items()))
+
         return template
 
     # @property
@@ -230,7 +243,7 @@ class UserOrder(Order):
             return string
         if self.shipping:
             # string = self.context.bot.lang_dict["order_on_way_to"].format(self.address)
-            string = "🚚 " + html.escape(self.address, quote=False)
+            string = "🚚 " + f"<b>{html.escape(self.address, quote=False)}</b>"
         else:
             string = self.context.bot.lang_dict["order_wait_on"].format(
                 html.escape(shop['address'], quote=False))

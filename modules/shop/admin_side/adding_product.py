@@ -1,6 +1,6 @@
 import html
 
-from telegram import InlineKeyboardButton, Update, InlineKeyboardMarkup
+from telegram import InlineKeyboardButton, Update, InlineKeyboardMarkup, ParseMode
 from telegram.ext import (ConversationHandler, CallbackQueryHandler,
                           CallbackContext, Filters, MessageHandler)
 
@@ -195,7 +195,8 @@ class AddingProductHandler(object):
                 chat_id=update.message.chat_id,
                 text=price_request["error_message"],
                 reply_markup=InlineKeyboardMarkup([
-                    [back_btn("back_to_main_menu_btn", context)]])))
+                    [back_btn("back_to_main_menu_btn", context)]]),
+                parse_mode=ParseMode.HTML))
             return SET_PRICE
 
     """currency = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]["currency"]

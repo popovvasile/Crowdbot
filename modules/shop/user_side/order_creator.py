@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import datetime
-from random import randint
 import html
 
+import phonenumbers as phonenumbers
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ParseMode
 from telegram.ext import MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
 
 from database import (orders_table, chatbots_table, carts_table, shop_customers_contacts_table,
                       products_table, users_table)
+from helper_funcs.helper import dismiss_button
 from helper_funcs.misc import delete_messages
 from helper_funcs.constants import MIN_ADDRESS_LENGTH, MAX_ADDRESS_LENGTH
 from modules.shop.user_side.cart import Cart
@@ -73,16 +74,10 @@ class PurchaseBot(object):
     def validate_number(number):
         if not 5 < len(number) < 25:
             return False
-        number.replace(
-            "-", "").replace(
-            "(", "").replace(
-            ")", "").replace(
-            " ", "").replace(
-            "*", "").replace(
-            "+", "")
-        if number.isdigit():
-            return True
-        else:
+        try:
+            z = phonenumbers.parse(number, region=None, _check_region=False)
+            return phonenumbers.is_valid_number(z)
+        except phonenumbers.phonenumberutil.NumberParseException:
             return False
 
     @staticmethod
@@ -285,10 +280,7 @@ class PurchaseBot(object):
                 try:
                     context.bot.send_message(chat_id=admin["chat_id"],
                                              text=text,
-                                             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
-                                                 text=context.bot.lang_dict["notification_close_btn"],
-                                                 callback_data="dismiss"
-                                             )]]),
+                                             reply_markup=dismiss_button(context),
                                              parse_mode=ParseMode.HTML)
                 except:
                     continue

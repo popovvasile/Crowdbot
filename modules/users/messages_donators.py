@@ -1,6 +1,6 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove, ParseMode
 from telegram.ext import (MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
 from database import user_categories_table, donations_table
@@ -98,7 +98,8 @@ class SendMessageToDonators(object):
         )
         context.bot.send_message(update.message.chat_id,
                          context.bot.lang_dict["send_message_4"],
-                         reply_markup=final_reply_markup)
+                         reply_markup=final_reply_markup,
+                                     parse_mode=ParseMode.HTML)
 
         return MESSAGE_TO_USERS
 

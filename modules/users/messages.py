@@ -10,7 +10,7 @@ from telegram import (InlineKeyboardButton, InlineKeyboardMarkup,
 from telegram.ext import (MessageHandler, Filters, ConversationHandler,
                           CallbackQueryHandler, run_async)
 
-from helper_funcs.helper import get_help
+from helper_funcs.helper import get_help, dismiss_button
 from helper_funcs.misc import delete_messages, update_user_fields
 from helper_funcs.pagination import Pagination
 from logs import logger
@@ -39,7 +39,7 @@ def messages_menu(update, context):
                               callback_data="inbox_message")],
         [InlineKeyboardButton(text=string_d_str["send_message_button_1"],
                               callback_data="send_message_to_all_users")],
-        [InlineKeyboardButton(text="Delete messages",
+        [InlineKeyboardButton(text=string_d_str["delete_messages_btn"],
                               callback_data="del_messages_menu")],
         # [InlineKeyboardButton(text=string_d_str["send_message_button_5"],
         #                       callback_data="send_message_to_donators")],
@@ -232,7 +232,8 @@ class SendMessageToAdmin(SenderHelper):
                 context.bot.send_message(
                     chat_id=update.callback_query.message.chat_id,
                     text=context.bot.lang_dict["send_message_from_user_to_admin_text"],
-                    reply_markup=reply_markup))
+                    reply_markup=reply_markup,
+                    parse_mode=ParseMode.HTML))
         return MESSAGE
 
     # def send_topic(self, update, context):
@@ -253,10 +254,10 @@ class SendMessageToAdmin(SenderHelper):
     def received_message(self, update, context):
         reply_markup = InlineKeyboardMarkup([
             [InlineKeyboardButton(
-                text="Done",
+                text=context.bot.lang_dict["done_button"],
                 callback_data="send_message_finish")],
             [InlineKeyboardButton(
-                text="Cancel",
+                text=context.bot.lang_dict["cancel_button"],
                 callback_data="cancel_message_creating")]
         ])
         return SenderHelper().help_receive(update, context, reply_markup, MESSAGE)
@@ -337,15 +338,10 @@ class SendMessageToAdmin(SenderHelper):
         for admin in users_table.find({"bot_id": context.bot.id, "is_admin": True}):
             if admin.get("messages_notification"):
                 # Create notification text and send it.
-                text = ("<b>New Message</b> "
+                text = (context.bot.lang_dict["admin_new_message_notification_title"]
                         + MessageTemplate(context.user_data["new_message"],
                                           context).super_short_temp())
-                reply_markup = InlineKeyboardMarkup([
-                    [InlineKeyboardButton(
-                        text=context.bot.lang_dict["notification_close_btn"],
-                        callback_data="dismiss"
-                    )]
-                ])
+                reply_markup = dismiss_button(context)
                 try:
                     context.bot.send_message(chat_id=admin["chat_id"],
                                              text=text,
