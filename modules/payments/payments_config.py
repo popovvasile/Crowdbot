@@ -1,6 +1,5 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
-import PyCurrency_Converter
 import requests
 import telegram
 from telegram import (ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup,

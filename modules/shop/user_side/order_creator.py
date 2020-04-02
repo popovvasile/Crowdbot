@@ -74,8 +74,11 @@ class PurchaseBot(object):
     def validate_number(number):
         if not 5 < len(number) < 25:
             return False
-        z = phonenumbers.parse(number, None)
-        return phonenumbers.is_valid_number(z)
+        try:
+            z = phonenumbers.parse(number, region=None, _check_region=False)
+            return phonenumbers.is_valid_number(z)
+        except phonenumbers.phonenumberutil.NumberParseException:
+            return False
 
     @staticmethod
     def start_purchase(update, context):
