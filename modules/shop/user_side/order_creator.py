@@ -328,5 +328,8 @@ OFFLINE_PURCHASE_HANDLER = ConversationHandler(
                                  callback=PurchaseBot().order_finish)]
     },
     fallbacks=[CallbackQueryHandler(Cart().back_to_cart,
-                                    pattern="back_to_cart")]
+                                    pattern="back_to_cart"),
+               CallbackQueryHandler(Cart().back_to_cart,
+                                    pattern=r"help_back"),
+               ]
 )

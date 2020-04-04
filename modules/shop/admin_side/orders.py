@@ -351,6 +351,8 @@ ORDERS_HANDLER = ConversationHandler(
                                     pattern=r"back_to_orders"),
                CallbackQueryHandler(Welcome().back_to_main_menu,
                                     pattern=r"back_to_main_menu"),
+               CallbackQueryHandler(Welcome().back_to_main_menu,
+                                    pattern=r"help_back"),
                # CallbackQueryHandler(UsersHandler().open_user,
                #                      pattern="open_user")
                ]

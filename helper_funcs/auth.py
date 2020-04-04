@@ -90,7 +90,6 @@ def register_admin(update, context):
                 'bot_id': context.bot.id,
                 "chat_id": update.effective_chat.id,
                 "user_id": update.effective_user.id,
-                "email": "No emails for now",
                 "username": update.effective_user.username,
                 "full_name": update.effective_user.full_name,
                 "timestamp": datetime.now(),

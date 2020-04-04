@@ -20,6 +20,7 @@
         "remove_button_str": "❌",
         "continue_btn": "➡ Сontinue️",
         "users_help_admin": "Here is the list of your users and messages.",
+        "return_to_menu": "You can enter the bot menu by clicking the button.",
 
 
         "----------------------------------------------------------------SHOP_ADMIN_SIDE": "----------------------------------------------------------------",
@@ -515,6 +516,7 @@
         "remove_button_str": "❌",
         "continue_btn": "➡️ Продолжить",
         "users_help_admin": "Тут сообщения и список пользователей.",
+        "return_to_menu": "Ты можешь вернуться к меню нажав на кнопку.",
 
 
         "----------------------------------------------------------------SHOP_ADMIN_SIDE": "----------------------------------------------------------------",

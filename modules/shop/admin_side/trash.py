@@ -98,7 +98,10 @@ ORDERS, WHOLESALE_ORDERS, PRODUCTS = range(3)
 fallbacks = [CallbackQueryHandler(TrashHandler().back_to_main_menu,
                                   pattern=r"back_to_main_menu"),
              CallbackQueryHandler(TrashHandler().start_trash,
-                                  pattern=r"back_to_trash")]
+                                  pattern=r"back_to_trash"),
+             CallbackQueryHandler(Welcome().back_to_main_menu,
+                                  pattern=r"help_back"),
+             ]
 
 
 TRASH_START = CallbackQueryHandler(TrashHandler().start_trash,
