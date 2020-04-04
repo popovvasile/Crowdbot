@@ -383,8 +383,9 @@ class ChangeButtonName(object):
             context.bot.send_message(
                 update.callback_query.message.chat.id,
                 text=context.bot.lang_dict["new_button_name"].format(
-                    context.user_data["button"]["button"]),
-                reply_markup=reply_markup))
+                    html.escape(context.user_data["button"]["button"], quote=False)),
+                reply_markup=reply_markup,
+                parse_mode=ParseMode.HTML))
         return ENTER_NEW_NAME
 
     def finish_new_name(self, update, context):

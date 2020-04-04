@@ -240,7 +240,7 @@ class ProductsHandler(ProductsHelper):
     def description(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         text = (self.admin_short_template(context, context.user_data["product"])
-                + "\n"
+                + "\n\n"
                 + context.bot.lang_dict["shop_admin_set_description"])
         context.user_data["product"].send_short_template(
             update, context,

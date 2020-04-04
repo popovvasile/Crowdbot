@@ -1,5 +1,7 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
+from pprint import pprint
+
 from bson.objectid import ObjectId
 from telegram.error import BadRequest, Unauthorized, TelegramError
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
@@ -232,9 +234,10 @@ class UsersHandler(object):
                 for user in users:
                     # Update user names and check if the user block the bot
                     update_user_fields(context, user)
+                    pprint(user)
                     # Check username and full name for the pattern
                     if (not user["unsubscribed"]
-                            and (pattern in user["username"]
+                            and (pattern in (user["username"] or "")
                                  or pattern in user["full_name"])):
                         result.append(user)
                 # Delete "wait" notification

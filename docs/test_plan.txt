@@ -3,6 +3,22 @@
     * test shop(and other part of the bot) with big texts, many items in orders, many content and so on
     * test shop(and other part of the bot) with Markdown and HTML tags in messages
     * test shop product description (caption description)
+    * Check messages length in templates and captions - to avoid exceptions
+        https://python-telegram-bot.readthedocs.io/en/stable/telegram.constants.html
+
+--TESTING
+	+ * test shop(and other part of the bot) with Markdown and HTML tags in messages
+	+ * ПРОВЕРИТЬ РУССКИЙ ТЕКСТ(Подсчитать количество "{}" в русских строках - и пофиксить русские строки)
+	* test shop(and other part of the bot) with big texts, many items in orders, many content and so on
+	+ * Check messages length in templates and captions - to avoid exceptions
+        	https://python-telegram-bot.readthedocs.io/en/stable/telegram.constants.html
+    * Проверить пагинацию в поиске юзеров
+
+	[DONE] * Проверить работу бота с отписчиками и удалёнными аккаунтамиы
+	[DONE] * Изменение валюты не влияет на заказы(проверить отображение в всех шаблонах)
+	[DONE] * Проверить что discount работает(заказы онлайн/офлайн)
+    [DONE] * Проверить Все NEW и DONE заказы считаются по цене которая была на момент заказа
+    [DONE]    (проверить что discount price учитывается)
 
 Список юзеров
 	[DONE] бан/разбан
