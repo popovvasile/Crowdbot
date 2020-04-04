@@ -93,7 +93,6 @@ class AddingProductHandler(object):
                         for i in category_list],
                     [back_btn("back_to_main_menu_btn", context)])
             else:
-                # category_list = categories_table.find({"bot_id": context.bot.id})
                 final_text = name_request["error_message"]
                 if category_list.count() > 0:
                     reply_markup = create_keyboard(
@@ -144,33 +143,7 @@ class AddingProductHandler(object):
                             callback_data="unlimited")],
                         [back_btn("back_to_main_menu_btn", context)]])))
                 return SET_QUANTITY
-            # try:
-            #     assert int(update.message.text) > 0
-            # except AssertionError:
-            #     context.user_data["to_delete"].append(context.bot.send_message(
-            #         chat_id=update.message.chat_id,
-            #         text=context.bot.lang_dict["shop_admin_number_wrong"],
-            #         reply_markup=InlineKeyboardMarkup([
-            #             [back_btn("back_to_main_menu_btn", context)]])))
-            #     return SET_QUANTITY
-            # except ValueError:
-            #     context.user_data["to_delete"].append(context.bot.send_message(
-            #         chat_id=update.message.chat_id,
-            #         text=context.bot.lang_dict["shop_admin_number_not_integer"],
-            #         reply_markup=InlineKeyboardMarkup([
-            #             [back_btn("back_to_main_menu_btn", context)]])))
-            #     return SET_QUANTITY
-            # if len(update.message.text) <= 10:
-            #     context.user_data["new_product"].quantity = int(
-            #         format(Price.fromstring(update.message.text).amount))
-            #     context.user_data["new_product"].unlimited = False
-            # else:
-            #     context.user_data["to_delete"].append(context.bot.send_message(
-            #         chat_id=update.message.chat_id,
-            #         text=context.bot.lang_dict["shop_admin_quantity_too_big"],
-            #         reply_markup=InlineKeyboardMarkup([
-            #                      [back_btn("back_to_main_menu_btn", context)]])))
-            #     return SET_QUANTITY
+
         elif update.callback_query.data == "unlimited":
             context.user_data["new_product"].quantity = 0
             context.user_data["new_product"].unlimited = True
@@ -198,42 +171,6 @@ class AddingProductHandler(object):
                     [back_btn("back_to_main_menu_btn", context)]]),
                 parse_mode=ParseMode.HTML))
             return SET_PRICE
-
-    """currency = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]["currency"]
-        currency_limits = currency_limits_dict[currency]
-        try:
-            assert currency_limits["min"] < float(update.message.text) < currency_limits["max"]
-        except AssertionError:
-            context.user_data["to_delete"].append(context.bot.send_message(
-                chat_id=update.message.chat_id,
-                text=context.bot.lang_dict["shop_admin_price_wrong"].format(
-                    currency_limits["min"], currency, currency_limits["max"], currency),
-                reply_markup=InlineKeyboardMarkup([
-                    [back_btn("back_to_main_menu_btn", context)]])))
-            return ASK_DESCRIPTION
-        except ValueError:
-            context.user_data["to_delete"].append(context.bot.send_message(
-                chat_id=update.message.chat_id,
-                text=context.bot.lang_dict["add_product_wrong_floating_point_number"],
-                reply_markup=InlineKeyboardMarkup([
-                    [back_btn("back_to_main_menu_btn", context)]])))
-            return ASK_DESCRIPTION
-        if len(update.message.text) <= len(str(currency_limits["max"])):
-            context.user_data["new_product"].price = float(
-                format(Price.fromstring(update.message.text).amount, '.2f'))
-            context.user_data["new_product"].discount_price = 0
-        else:
-            context.user_data["to_delete"].append(context.bot.send_message(
-                chat_id=update.message.chat_id,
-                text=context.bot.lang_dict["shop_admin_price_too_big"],
-                reply_markup=InlineKeyboardMarkup([
-                             [back_btn("back_to_main_menu_btn", context)]])))
-            return ASK_DESCRIPTION
-
-        context.user_data["new_product"].send_full_template(
-            update, context, context.bot.lang_dict["add_product_description"],
-            keyboards(context)["back_to_main_menu_keyboard"])
-        return SET_DESCRIPTION"""
 
     def set_description(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
@@ -320,8 +257,6 @@ ADD_PRODUCT_HANDLER = ConversationHandler(
                                       AddingProductHandler().ask_price),
                        MessageHandler(Filters.regex(r"^((?!@).)*$"),
                                       AddingProductHandler().ask_price),
-                       # MessageHandler(Filters.text,
-                       #                AddingProductHandler().ask_price),
                        ],
 
         # todo 3 regexes vs just Filters.text(it looks like everything works anyway)
@@ -331,18 +266,9 @@ ADD_PRODUCT_HANDLER = ConversationHandler(
                                    AddingProductHandler().ask_description),
                     MessageHandler(Filters.regex(r"^((?!@).)*$"),
                                    AddingProductHandler().ask_description)
-                    # MessageHandler(Filters.text,
-                    #                AddingProductHandler().ask_description)
+
                     ],
 
-        # ASK_DESCRIPTION: [
-        #     MessageHandler(Filters.regex(r'(\d+\.\d{1,2})|(\d+\,\d{1,2})'),
-        #                    AddingProductHandler().ask_description),
-        #     MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
-        #                    AddingProductHandler().ask_description),
-        #     MessageHandler(Filters.regex(r"^((?!@).)*$"),
-        #                    AddingProductHandler().ask_price)
-        # ],
 
         SET_DESCRIPTION: [
             MessageHandler(Filters.text,
@@ -356,12 +282,12 @@ ADD_PRODUCT_HANDLER = ConversationHandler(
         ],
         FINISH_ADDING: [
             CallbackQueryHandler(AddingProductHandler().finish_adding,
-                                 pattern=r"confirm_product"),
-            # MessageHandler(Filters.all,
-            #                callback=AddingProductHandler().finish_adding)
+                                 pattern=r"confirm_product")
         ]
     },
 
     fallbacks=[CallbackQueryHandler(Welcome().back_to_main_menu,
-                                    pattern=r"back_to_main_menu")]
+                                    pattern=r"back_to_main_menu"),
+               CallbackQueryHandler(Welcome().back_to_main_menu,
+                                    pattern=r"help_back")]
 )

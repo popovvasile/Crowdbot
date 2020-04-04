@@ -1,16 +1,14 @@
-import logging
 import html
+from bson import ObjectId
 
-from price_parser import Price
 from telegram import Update, ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (ConversationHandler, CallbackQueryHandler,
                           CallbackContext, MessageHandler, Filters)
 
-from bson import ObjectId
 from helper_funcs.pagination import Pagination
 from helper_funcs.misc import delete_messages, content_dict_as_string
 from modules.shop.helper.helper import clear_user_data
-from modules.shop.helper.keyboards import keyboards, back_kb, back_btn, create_keyboard
+from modules.shop.helper.keyboards import keyboards, create_keyboard
 from modules.shop.components.product import (Product, MAX_TEMP_DESCRIPTION_LENGTH,
                                              MAX_PRODUCT_NAME_LENGTH)
 from modules.shop.admin_side.welcome import Welcome
@@ -61,25 +59,6 @@ class ProductsHelper(object):
              "in_trash": False,
              "items.product_id": product_obj.id_})
 
-        # Quantity string
-        # if product_obj.unlimited is True:
-        #     quantity = "Unlimited"
-        # else:
-        #     quantity = product_obj.quantity
-
-        # Admin product status string.
-        # Product was deleted
-        # if product_obj.in_trash:
-        #     status = "🗑 Deleted"
-        # At least on item of the product on sale
-        # elif product_obj.on_sale:
-        #     status = "✅ On Sale"
-        # Product not on sale because it is in the NEW order
-        # elif new_orders.count():
-        #     status = f"🕐 {new_orders.count()} unfinished order(s)"
-        # else:
-        #     status = "💸 Sold"
-
         template = context.bot.lang_dict["shop_admin_product_template"].format(
             product_obj.article,
             html.escape(product_obj.name, quote=False),
@@ -115,14 +94,7 @@ class ProductsHelper(object):
     @staticmethod
     def admin_full_template(context, product_obj: Product) -> str:
         """Admin full text representation of the product"""
-        shop = chatbots_table.find_one(
-            {"bot_id": context.bot.id})["shop"]
-        # if product_obj.unlimited is True:
-        #     quantity = context.bot.lang_dict["unlimited"]
-        # else:
-        #     quantity = product_obj.quantity
-        # If description is long send_full_template method
-        # will send description as separate message
+
         if len(product_obj.description) > MAX_TEMP_DESCRIPTION_LENGTH:
             description = context.bot.lang_dict["add_product_description_above"]
         else:
@@ -151,6 +123,7 @@ class ProductsHelper(object):
             status = f"🕐 {new_orders.count()} unfinished order(s)"
         else:
             status = "💸 Sold"
+        return status
 
 
 class ProductsHandler(ProductsHelper):
@@ -304,20 +277,6 @@ class ProductsHandler(ProductsHelper):
                 update, context,
                 text=text, reply_markup=keyboards(context)["back_to_edit"])
             return PRICE
-        # if self.discount_price
-        # try:
-        #     price = float(
-        #         format(Price.fromstring(update.message.text).amount, '.2f'))
-        # except ValueError:
-        #     context.bot.send_message(
-        #         chat_id=update.callback_query.message.chat_id,
-        #         text=context.bot.lang_dict["add_product_wrong_floating_point_number"],
-        #         reply_markup=back_kb(
-        #             "back_to_main_menu", context=context))
-        #     return PRICE
-        #
-        # context.user_data["product"].update({"price": price})
-        # return self.edit(update, context)
 
     def discount_price(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
@@ -352,24 +311,6 @@ class ProductsHandler(ProductsHelper):
             update, context,
             text=text, reply_markup=keyboards(context)["back_to_edit"])
         return DISCOUNT_PRICE
-
-        # try:
-        #     discount_price = float(
-        #         format(Price.fromstring(update.message.text).amount, '.2f'))
-        # except ValueError:
-        #     context.bot.send_message(
-        #         chat_id=update.callback_query.message.chat_id,
-        #         text=context.bot.lang_dict["add_product_wrong_floating point number"],
-        #         reply_markup=back_kb("back_to_main_menu", context=context))
-        #     return DISCOUNT_PRICE
-        # if discount_price >= context.user_data["product"].price:
-        #     context.user_data["product"].send_full_template(
-        #         update, context,
-        #         context.bot.lang_dict["shop_admin_discount_bigger_than_price"],
-        #         keyboards(context)["back_to_main_menu_keyboard"])
-        #     return DISCOUNT_PRICE
-        # context.user_data["product"].update({"discount_price": discount_price})
-        # return self.edit(update, context)
 
     def content_menu(self, update, context):
         delete_messages(update, context, True)
@@ -577,25 +518,8 @@ class ProductsHandler(ProductsHelper):
             context.user_data["product"].update(
                 {"quantity": 0, "unlimited": True})
 
-        # context.user_data["new_product"].send_full_template(
-        #     update, context, context.bot.lang_dict["shop_admin_write_your_price"],
-        #     keyboards(context)["back_to_main_menu_keyboard"])
         return self.edit(update, context)
 
-        # if update.message:
-        #     if int(update.message.text) < 10**7:
-        #         context.user_data["product"].update(
-        #             {"quantity": int(update.message.text),
-        #              "unlimited": False})
-        #     else:
-        #         context.user_data["product"].update(
-        #             {"quantity": 0,
-        #              "unlimited": True})
-        # elif update.callback_query.data == 'quantity_unlimited':
-        #     context.user_data["product"].update(
-        #         {"quantity": 0,
-        #          "unlimited": True})
-        # return self.edit(update, context)
 
     @staticmethod
     def edit_quantity_markup(context):
@@ -670,7 +594,10 @@ PRODUCTS_HANDLER = ConversationHandler(
 
         ADDING_CONTENT: [
             MessageHandler(Filters.all,
-                           ProductsHandler().open_content_handler)],
+                           ProductsHandler().open_content_handler),
+            MessageHandler(Filters.regex(r"^((?!@).)*$"),
+                           ProductsHandler().open_content_handler),
+        ],
 
         DESCRIPTION: [MessageHandler(Filters.text,
                                      ProductsHandler().finish_description)],
@@ -697,10 +624,7 @@ PRODUCTS_HANDLER = ConversationHandler(
         ],
 
         # todo 3 regexes vs just Filters.text (it looks like everything works anyway)
-        SET_QUANTITY: [  # MessageHandler(Filters.regex("^[0-9]+$"),
-                       #                  ProductsHandler().finish_quantity),
-                       # CallbackQueryHandler(ProductsHandler().finish_quantity,
-                       #                      pattern=r'quantity_unlimited')
+        SET_QUANTITY: [
                        CallbackQueryHandler(ProductsHandler().finish_quantity,
                                             pattern=r"quantity_unlimited"),
                        MessageHandler(Filters.regex(r'(\d+\.\d{1,2})|(\d+\,\d{1,2})'),
@@ -713,8 +637,10 @@ PRODUCTS_HANDLER = ConversationHandler(
     },
     fallbacks=[CallbackQueryHandler(Welcome.back_to_main_menu,
                                     pattern=r"back_to_main_menu"),
+               CallbackQueryHandler(Welcome.back_to_main_menu,
+                                    pattern=r"help_back"),
                CallbackQueryHandler(ProductsHandler().back_to_products,
-                                    pattern="back_to_products"),
+                                    pattern=r"back_to_products"),
                CallbackQueryHandler(ProductsHandler().edit,
                                     pattern=r"back_to_edit"),
                CallbackQueryHandler(ProductsHandler().content_menu,

@@ -21,7 +21,6 @@ class FakeUsers:
                 "bot_id": self.bot_id,
                 "chat_id": 321858998,
                 "user_id": 321858998,
-                "email": profile["mail"],
                 "username": profile["username"],
                 "full_name": profile["name"],
                 # "mention_markdown": f"[{profile['name']}](tg://user?id=321858998)",
@@ -38,7 +37,6 @@ class FakeUsers:
     def not_registered_admins(self):
         for i in range(20):
             users_table.insert_one({"bot_id": self.bot_id,
-                                    "email": self.fake.email(),
                                     "is_admin": True,
                                     "password": "2b8c3ff7-4",
                                     "registered": False,

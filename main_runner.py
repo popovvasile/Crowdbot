@@ -13,7 +13,8 @@ from telegram.ext import CommandHandler, CallbackQueryHandler, MessageHandler, F
 from logs import logger
 from helper_funcs.misc import dismiss
 from helper_funcs.helper import (help_button, button_handler, get_help, WelcomeBot,
-                                 back_from_button_handler, back_to_modules, error_callback)
+                                 back_from_button_handler, back_to_modules, error_callback,
+                                 return_to_menu)
 
 # CHANNELS
 # from modules.chanells.channels import (MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER,
@@ -350,22 +351,13 @@ def main(token, lang):
 
     dispatcher.add_handler(help_callback_handler)
 
-    # os.environ['SHOP_PRODUCTION'] is True --- returns False, dunno why
     if os.environ['SHOP_PRODUCTION'] == "1":
         dispatcher.add_error_handler(error_callback)
 
-    # rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), get_help)
-    # dispatcher.add_handler(rex_help_handler)
-    # rex_help_handler = MessageHandler(Filters.regex(re.compile(r"help", re.IGNORECASE))|
-    #                                   Filters.regex(re.compile(r"menu", re.IGNORECASE))|
-    #                                   Filters.regex(re.compile(r"hello", re.IGNORECASE))|
-    #                                   Filters.regex(re.compile(r"hi", re.IGNORECASE))|
-    #                                   Filters.regex(re.compile(r"але", re.IGNORECASE))|
-    #                                   Filters.regex(re.compile(r"меню", re.IGNORECASE))|
-    #                                   Filters.regex(re.compile(r"помощь", re.IGNORECASE)),
-    #                                   get_help)
-    #
-    # dispatcher.add_handler(rex_help_handler)
+    rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), return_to_menu)
+    # TODO create another function
+    # TODO add "active" to all current bots
+    dispatcher.add_handler(rex_help_handler)
     logger.info("Using long polling.")
     # updater.start_webhook(listen='0.0.0.0',
     #                       port=port,

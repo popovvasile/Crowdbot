@@ -195,11 +195,8 @@ CREATE_SHOP_HANDLER = ConversationHandler(
                                              CreateShopHandler().handle_address)],
         TYPING_DESCRIPTION: [MessageHandler(Filters.text,
                                             CreateShopHandler().handle_description)],
-        SHOP_FINISH: [  # MessageHandler(Filters.text,
-                        #              CreateShopHandler().handle_shop_finish)
-                        CallbackQueryHandler(pattern=r"currency",
-                                             callback=CreateShopHandler().handle_shop_finish)
-                      ],
+        SHOP_FINISH: [CallbackQueryHandler(pattern=r"currency",
+                                           callback=CreateShopHandler().handle_shop_finish)],
     },
 
     fallbacks=[CallbackQueryHandler(callback=CreateShopHandler().back, pattern=r"help_back"),

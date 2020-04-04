@@ -90,8 +90,6 @@ class ProductCategoryHandler(object):
         if new_orders.count():
             context.user_data["category_id"] = category_id
             keyboard = InlineKeyboardMarkup([
-                # [InlineKeyboardButton(context.bot.lang_dict["yes"],
-                #                       callback_data="del_cat_confirm")],
                 [InlineKeyboardButton(context.bot.lang_dict["back_button"],
                                       callback_data="back_to_admin_categories")]])
             context.user_data["to_delete"] = [context.bot.send_message(
@@ -214,25 +212,6 @@ class ProductCategoryHandler(object):
 
     def set_category(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        # name_request = validate_category_name(update.message.text, context)
-        # if name_request["ok"]:
-        #     categories_table.update_one({"_id": ObjectId(context.user_data["category_id"])},
-        #                                 {"$set": {"name": name_request["name"]}})
-        #     context.user_data["to_delete"].append(
-        #         context.bot.send_message(
-        #             chat_id=update.message.chat_id,
-        #             text=context.bot.lang_dict["shop_category_changed_name"],
-        #             reply_markup=keyboard))
-        #     return ConversationHandler.END
-        # else:
-        #     context.user_data["to_delete"].append(
-        #         context.bot.send_message(
-        #             chat_id=update.effective_chat.id,
-        #             text=name_request["error_message"],
-        #             reply_markup=keyboard,
-        #             parse_mode=ParseMode.HTML))
-        #     return RENAME_CATEGORY
-
         if update.message:
             final_text = context.bot.lang_dict["shop_category_add_or_continue"]
             name_request = validate_category_name(update.message.text, context)
@@ -248,21 +227,11 @@ class ProductCategoryHandler(object):
             category_list = categories_table.find({"bot_id": context.bot.id})
             if category_list.count() >= MAX_CATEGORIES_COUNT:
                 return self.back_to_categories_menu(update, context)
-            # keyboard = InlineKeyboardMarkup([
-            #     [InlineKeyboardButton(text=i["name"],
-            #                           callback_data=f"edit_category/{i['_id']}")
-            #      for i in category_list],
-            #     [back_btn("back_to_main_menu", context)],
-            #     [InlineKeyboardButton(context.bot.lang_dict["continue_btn"],
-            #                           callback_data="continue")]]
-            # )
             keyboard = InlineKeyboardMarkup(
                 [[InlineKeyboardButton(text=i["name"],
                                        callback_data=f"edit_category/{i['_id']}")]
                  for i in category_list]
                 + [[back_btn("back_to_admin_categories", context)]]
-                # + [[InlineKeyboardButton(context.bot.lang_dict["continue_btn"],
-                #                          callback_data="continue")]]
             )
             context.user_data["to_delete"].append(context.bot.send_message(
                 chat_id=update.message.chat_id,
@@ -270,11 +239,6 @@ class ProductCategoryHandler(object):
                 reply_markup=keyboard,
                 parse_mode=ParseMode.HTML))
         return START_ADD_CATEGORY
-
-    # def confirm_adding(self, update: Update, context: CallbackContext):
-    #     delete_messages(update, context, True)
-    #     return Welcome().back_to_main_menu(
-    #         update, context, context.bot.lang_dict["shop_admin_adding_category_finished"])
 
     def back_to_categories_menu(self, update, context):
         delete_messages(update, context, True)
@@ -290,7 +254,6 @@ RENAME_CATEGORY_HANDLER = ConversationHandler(
     allow_reentry=True,
     entry_points=[CallbackQueryHandler(ProductCategoryHandler().rename_category,
                                        pattern=r"edit_name_shop_category")],
-
     states={
         RENAME_CATEGORY: [
             MessageHandler(Filters.text, ProductCategoryHandler().rename_category_finish)],
@@ -325,8 +288,6 @@ ADD_CATEGORY_HANDLER = ConversationHandler(
 
     states={  # TODO fix add category
         START_ADD_CATEGORY: [
-            # CallbackQueryHandler(ProductCategoryHandler().confirm_adding,
-            #                      pattern="continue"),
             MessageHandler(Filters.text, ProductCategoryHandler().set_category)],
     },
 
@@ -334,9 +295,11 @@ ADD_CATEGORY_HANDLER = ConversationHandler(
         CallbackQueryHandler(ProductCategoryHandler().back_to_categories_menu,
                              pattern="back_to_admin_categories"),
         CallbackQueryHandler(ProductCategoryHandler().edit_category_menu,
-                                                  pattern=r"edit_category"),
+                             pattern=r"edit_category"),
         CallbackQueryHandler(Welcome().back_to_main_menu,
                              pattern=r"back_to_main_menu"),
+        CallbackQueryHandler(Welcome().back_to_main_menu,
+                             pattern=r"help_back"),
     ]
 )
 

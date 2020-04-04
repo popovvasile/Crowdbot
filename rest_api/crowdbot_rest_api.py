@@ -112,6 +112,7 @@ def crowdbot_on_post():
         chatbot["bot_id"] = telegram_check["result"]["id"]
         chatbot["username"] = telegram_check["result"]["username"]
         chatbot["name"] = telegram_check["result"]["first_name"]
+        chatbot["active"] = True
         chatbot["shop_enabled"] = False
         chatbot["donations_enabled"] = False
         chatbot["creation_timestamp"] = datetime.now()
@@ -125,10 +126,6 @@ def crowdbot_on_post():
             admin["superuser"] = admin.get("user_id") == chatbot["superuser"]
             if "user_id" in admin:
                 users_table.update({"user_id": admin["user_id"],
-                                    "bot_id": chatbot["bot_id"]},
-                                   admin, upsert=True)
-            elif "email" in admin:
-                users_table.update({"email": admin["email"],
                                     "bot_id": chatbot["bot_id"]},
                                    admin, upsert=True)
             else:
@@ -178,7 +175,7 @@ def crowdbot_on_put():  # TODO
 @app.route('/crowdbot/admin', methods=['POST'])
 def admin_on_post():
     # {"token": str,
-    #  "admins": [{"email": doc["email"],
+    #  "admins": [{
     #              "password": doc["password"],
     #              "active": doc["active"]}]
     #   }
