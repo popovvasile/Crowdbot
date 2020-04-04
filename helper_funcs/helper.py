@@ -29,7 +29,11 @@ def return_to_menu(update, context):
                              reply_markup=InlineKeyboardMarkup(
                                  [[InlineKeyboardButton(
                                      text=context.bot.lang_dict["menu_button"],
-                                     callback_data="help_back")]]))
+                                     callback_data="help_back")],
+                                     [InlineKeyboardButton(
+                                         text=context.bot.lang_dict["notification_close_btn"],
+                                         callback_data="dismiss")]
+                                 ]))
 
 
 def dismiss_button(context):
