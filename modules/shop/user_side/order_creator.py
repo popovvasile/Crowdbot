@@ -68,7 +68,8 @@ class PurchaseBot(object):
         context.user_data["to_delete"].append(
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text=text,
-                                     reply_markup=InlineKeyboardMarkup(buttons)))
+                                     reply_markup=InlineKeyboardMarkup(buttons),
+                                     parse_mode=ParseMode.HTML))
 
     @staticmethod
     def validate_number(number):

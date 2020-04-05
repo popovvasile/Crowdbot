@@ -67,7 +67,7 @@ def send_visitor_help(bot, chat_id, text):
 def send_admin_user_mode(bot, chat_id, text):
 
     pairs = (user_main_menu_creator(bot)
-             + [[InlineKeyboardButton(text="ADMIN MODE",
+             + [[InlineKeyboardButton(text=bot.lang_dict["admin_mode"],
                                       callback_data="turn_user_mode_off")]])
     bot.send_message(chat_id=chat_id,
                      text=text,

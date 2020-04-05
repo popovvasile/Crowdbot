@@ -364,8 +364,8 @@ class UserProductsHandler(UserProductsHelper):
 
     def move_to_cart(self, update, context):
         cart = carts_table.find_one({"user_id": update.effective_user.id,
-                                     "bot_id": context.bot.id})
-        if len(cart["products"]):
+                                     "bot_id": context.bot.id}) or {}
+        if len(cart.get("products", list())):
             delete_messages(update, context, True)
             context.user_data.clear()
             return Cart().cart(update, context)

@@ -21,10 +21,6 @@ from modules.users.message_helper import (
 from database import (users_messages_to_admin_table,
                       user_categories_table, users_table)
 
-delete_messages_menu_str = "What do you want to do?"
-no_messages_blink = "There are no messages"
-success_delete_blink = "Message deleted"
-
 
 def messages_menu(update, context):
     delete_messages(update, context, True)
@@ -622,11 +618,11 @@ class DeleteMessage(object):
         if messages.count():
             context.user_data["to_delete"].append(
                 context.bot.send_message(update.effective_chat.id,
-                                         text=delete_messages_menu_str,
+                                         text=context.bot.lang_dict["delete_messages_menu_str"],
                                          reply_markup=InlineKeyboardMarkup(delete_buttons)))
             return ConversationHandler.END
         else:
-            update.callback_query.answer(no_messages_blink)
+            update.callback_query.answer(context.bot.lang_dict["no_messages_blink"])
             return back_to_messages_menu(update, context)
 
     def delete_message(self, update, context):
@@ -716,12 +712,12 @@ class DeleteMessage(object):
             users_messages_to_admin_table.update_one(
                 {"_id": message_id},
                 {"$set": {"deleted": True}})
-            update.callback_query.answer(success_delete_blink)
+            update.callback_query.answer(context.bot.lang_dict["success_delete_blink"])
             return SeeMessageToAdmin().back_to_inbox(update, context)
 
         if not users_messages_to_admin_table.find(
                 {"bot_id": context.bot.id, "deleted": False}).count():
-            update.callback_query.answer(no_messages_blink)
+            update.callback_query.answer(context.bot.lang_dict["no_messages_blink"])
             return back_to_messages_menu(update, context)
         else:
             return self.back_to_del_messages_menu(update, context)
