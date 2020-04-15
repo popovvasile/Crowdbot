@@ -175,7 +175,8 @@ class AddCommands(object):
                     update.effective_chat.id,
                     context.bot.lang_dict["add_menu_buttons_str_2"],
                     reply_markup=reply_markup,
-                    reply_to_message_id=context.user_data["user_input"][-1].message_id))
+                    reply_to_message_id=context.user_data["user_input"][-1].message_id,
+                    parse_mode=ParseMode.HTML))
             return TYPING_DESCRIPTION
         else:
             context.user_data["to_delete"].append(

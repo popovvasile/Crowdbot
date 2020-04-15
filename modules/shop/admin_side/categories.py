@@ -111,10 +111,9 @@ class ProductCategoryHandler(object):
                 chat_id=update.callback_query.message.chat_id,
                 text=context.bot.lang_dict["shop_category_will_be_deleted"].format(
                     category["name"], str(products.count()), str(all_orders.count())),
-                reply_markup=keyboard)]
-
+                reply_markup=keyboard,
+                parse_mode=ParseMode.HTML)]
             return DELETE_CATEGORY_CONFIRM
-
         else:
             keyboard = InlineKeyboardMarkup([[back_btn("back_to_admin_categories", context)]])
             categories_table.delete_one({"bot_id": context.bot.id,
