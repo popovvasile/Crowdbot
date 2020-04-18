@@ -6,6 +6,7 @@ from telegram.ext import CallbackContext
 from telegram.error import TelegramError, Unauthorized
 from babel.dates import format_datetime
 from bson.objectid import ObjectId
+from telegram.utils.promise import Promise
 
 from database import chatbots_table, users_table
 
@@ -31,6 +32,8 @@ def delete_messages(update, context, message_from_update=False):
     if context.user_data:
         if 'to_delete' in context.user_data:
             for msg in context.user_data['to_delete']:
+                if type(msg) is Promise:
+                    msg = msg.result()
                 if type(msg) is list:
                     for ms in msg:
                         try:
@@ -47,6 +50,7 @@ def delete_messages(update, context, message_from_update=False):
                                     update.effective_chat.id, msg.message_id)
                         except TelegramError:
                             continue
+
             context.user_data['to_delete'] = list()
         else:
             context.user_data['to_delete'] = list()

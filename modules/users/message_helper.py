@@ -1,13 +1,13 @@
 import html
-
+from logs import logger
 from telegram.error import Unauthorized
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, TelegramError
+from telegram.ext import messagequeue as mq
 from bson.objectid import ObjectId
 
 from helper_funcs.misc import delete_messages
-from helper_funcs.misc import lang_timestamp, user_mention, get_obj
+from helper_funcs.misc import lang_timestamp, get_obj
 from database import users_messages_to_admin_table
-from logs import logger
 
 
 class SenderHelper(object):
@@ -25,9 +25,6 @@ class SenderHelper(object):
             add_to_content(update, context)
         else:
             final_text = (context.bot.lang_dict["add_menu_buttons_str_11"])
-            # context.user_data["to_delete"].append(
-            #     context.bot.send_message(update.effective_chat.id,
-            #                              context.bot.lang_dict["so_many_content"]))
             try:
                 context.bot.delete_message(update.effective_chat.id,
                                            update.effective_message.message_id)
@@ -39,15 +36,6 @@ class SenderHelper(object):
         elif len(context.user_data["user_input"]) > 10:
             final_text = (context.bot.lang_dict["so_many_content"]
                           + context.bot.lang_dict["add_menu_buttons_str_11"])
-
-        # reply_markup = InlineKeyboardMarkup([
-        #     [InlineKeyboardButton(
-        #         text="Done",
-        #         callback_data="send_message_finish")],
-        #     [InlineKeyboardButton(
-        #         text="Cancel",
-        #         callback_data="cancel_message_creating")]
-        # ])
 
         msg_index = (len(context.user_data["user_input"])
                      - len(context.user_data["content"]))
@@ -87,8 +75,7 @@ class AnswerToMessage(SenderHelper):
 
         message = users_messages_to_admin_table.find_one(
             {"_id": ObjectId(update.callback_query.data.split("/")[1])})
-        # context.user_data["chat_id"] = message["chat_id"]
-        # context.user_data["message_id"] = message["_id"]
+
         context.user_data["answer_to"] = message
 
         reply_markup = InlineKeyboardMarkup([
@@ -110,26 +97,6 @@ class AnswerToMessage(SenderHelper):
                                   callback_data=self.back_button)]
         ])
         return self.help_receive(update, context, reply_markup, self.STATE)
-        # if update.callback_query:
-        #     delete_messages(update, context, True)
-        # else:
-        #     delete_messages(update, context)
-        # add_to_content(update, context)
-        # if not context.user_data.get("final_delete"):
-        #     context.user_data["final_delete"] = list()
-        # context.user_data["final_delete"].append(update.message)
-        # reply_markup = InlineKeyboardMarkup([
-        #     [InlineKeyboardButton(text=context.bot.lang_dict["done_button"],
-        #                           callback_data="send_message_finish")],
-        #     [InlineKeyboardButton(text=context.bot.lang_dict["cancel_button"],
-        #                           callback_data=self.back_button)]
-        # ])
-        # context.user_data["to_delete"].append(
-        #     context.bot.send_message(
-        #         chat_id=update.message.chat_id,
-        #         text=context.bot.lang_dict["send_message_4"],
-        #         reply_markup=reply_markup))
-        # return self.STATE
 
     def send_message_finish(self, update, context):
         # context.user_data["to_delete"].extend(context.user_data["final_delete"])
@@ -167,7 +134,8 @@ class AnswerToMessage(SenderHelper):
         return self.final_callback(update, context)
 
 
-def send_deleted_message_content(context, content, chat_id,
+@mq.queuedmessage
+def send_deleted_message_content(context, content, chat_id, update,
                                  delete_key_name="to_delete"):
     """Sends content and add message to the 'to_delete' list"""
 
@@ -209,9 +177,15 @@ def send_deleted_message_content(context, content, chat_id,
             context.user_data[delete_key_name].append(
                 context.bot.send_sticker(chat_id,
                                          content_dict["sticker_file"]))
+        if "poll_file" in content_dict:
+            poll = content_dict["poll_file"]
+            context.bot.forward_message(chat_id=chat_id,  # the poll should not be deleted
+                                        from_chat_id=update.effective_chat.id,
+                                        message_id=poll.id)
 
 
-def send_not_deleted_message_content(context, content, chat_id):
+@mq.queuedmessage
+def send_not_deleted_message_content(context, content, chat_id, update):
     """Sends content without adding message to the 'to_delete' list"""
 
     for content_dict in content:
@@ -240,6 +214,12 @@ def send_not_deleted_message_content(context, content, chat_id):
                                        content_dict["animation_file"])
         if "sticker_file" in content_dict:
             context.bot.send_sticker(chat_id, content_dict["sticker_file"])
+
+        if "poll_file" in content_dict:
+            poll = content_dict["poll_file"]
+            context.bot.forward_message(chat_id=chat_id,  # the poll should not be deleted
+                                        from_chat_id=update.effective_chat.id,
+                                        message_id=poll.id)
 
 
 def add_to_content(update, context):
@@ -285,6 +265,11 @@ def add_to_content(update, context):
         sticker_file = update.message.sticker.get_file().file_id
         content_dict = {"sticker_file": sticker_file,
                         "name": update.message.sticker.emoji}
+    elif update.message.poll:  # todo idea --- double forward- first to our crowdbot account and
+        # from there to the users
+        poll_file = update.message
+        content_dict = {"poll_file": poll_file}
+
     if content_dict:
         context.user_data["content"].append(content_dict)
 
@@ -352,46 +337,6 @@ class MessageTemplate(object):
                 reply_markup=reply_markup,
                 parse_mode=ParseMode.HTML))
 
-    # def template(self, context, short=False):
-        # Get chat member to get user information
-        # because database data can be incorrect
-        # user = context.bot.get_chat_member(self.chat_id, self.user_id).user
-        # Create user html mention
-        # if self.anonim:
-        #     _user_mention = f"<code>{self.user_full_name}</code>"
-        # elif user.username:
-        #     _user_mention = user_mention(user.username, user.full_name)
-        # else:
-        #     _user_mention = user.mention_html()
-
-        # If message is new - add emoji near it
-        # title_emoji = ""
-        # if self.is_new:
-        #     title_emoji = emoji['new'] + "\n"
-        # if short:
-        #     template = (title_emoji
-        #                 + context.bot.lang_dict["short_message_temp"].format(
-        #                     _user_mention,
-        #                     lang_timestamp(context, self.timestamp)))
-        # else:
-        #     template = (title_emoji
-        #                 + context.bot.lang_dict["message_temp"].format(
-        #                     _user_mention,
-        #                     lang_timestamp(context, self.timestamp),
-        #                     content_string(self.content)))
-        #     if self.answer_content:
-        #         template += context.bot.lang_dict["answer_field"].format(
-        #             content_string(self.answer_content))
-        # return template
-
-    # def send(self, chat_id, context, reply_markup, text="", short=False):
-    #     context.user_data["to_delete"].append(
-    #         context.bot.send_message(
-    #             chat_id=chat_id,
-    #             text=self.template(context, short) + "\n\n" + text,
-    #             reply_markup=reply_markup,
-    #             parse_mode=ParseMode.HTML))
-
 
 # TODO STRINGS
 def content_string(content, context):
@@ -423,4 +368,6 @@ def content_string(content, context):
 
         if "animation_file" in content_dict:
             string += context.bot.lang_dict["animation_file"]
+        if "poll_file" in content_dict:
+            string += context.bot.lang_dict["poll_file"]
     return string[:-1]
