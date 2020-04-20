@@ -2,7 +2,7 @@ from typing import List, Dict
 from uuid import uuid4
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
-from telegram.ext import CallbackContext
+from telegram.ext import CallbackContext, run_async
 from telegram.error import TelegramError, Unauthorized
 from babel.dates import format_datetime
 from bson.objectid import ObjectId
@@ -14,6 +14,7 @@ LOAD = []
 NO_LOAD = ['translation', 'rss']
 
 
+@run_async
 def dismiss(update, context):
     try:
         context.bot.delete_message(update.effective_chat.id,
@@ -22,6 +23,7 @@ def dismiss(update, context):
         pass
 
 
+# @run_async  === never run it async
 def delete_messages(update, context, message_from_update=False):
     if message_from_update:
         try:
@@ -82,6 +84,7 @@ def lang_timestamp(bot_lang: (CallbackContext, str), timestamp,
     return format_datetime(timestamp, pattern, locale=lang_keys[bot_lang])
 
 
+@run_async
 # May raise Exception and bson.errors.InvalidId
 def get_obj(table, obj: (ObjectId, dict, str)):
     if not obj:
@@ -95,7 +98,7 @@ def get_obj(table, obj: (ObjectId, dict, str)):
     else:
         raise Exception
 
-
+@run_async
 def user_mention(username, string):
     """Users that have blocked the bot or never start it
     can't be shown as the url mention using "tg://user?id=".
@@ -136,7 +139,7 @@ def update_user_fields(context, user):
         users_table.update_one({"_id": user["_id"]},
                                {"$set": new_user_fields})
 
-
+@run_async
 def create_content_dict(update):
     """Creates content_dict from update.
     # todo use this function for all content_dict (messages, shop products, buttons)
@@ -156,45 +159,45 @@ def create_content_dict(update):
                         "type": "photo_file",
                         "id": str(uuid4())}
 
-    elif update.message.audio:
+    if update.message.audio:
         audio_file = update.message.audio.get_file().file_id
         content_dict = {"file_id": audio_file,
                         "type": "audio_file",
                         "id": str(uuid4()),
                         "name": update.message.audio.title}
 
-    elif update.message.voice:
+    if update.message.voice:
         voice_file = update.message.voice.get_file().file_id
         content_dict = {"file_id": voice_file,
                         "type": "voice_file",
                         "id": str(uuid4())}
 
-    elif update.message.document:
+    if update.message.document:
         document_file = update.message.document.get_file().file_id
         content_dict = {"file_id": document_file,
                         "type": "document_file",
                         "id": str(uuid4()),
                         "name": update.message.document.file_name}
 
-    elif update.message.video:
+    if update.message.video:
         video_file = update.message.video.get_file().file_id
         content_dict = {"file_id": video_file,
                         "type": "video_file",
                         "id": str(uuid4())}
 
-    elif update.message.animation:
+    if update.message.animation:
         animation_file = update.message.animation.get_file().file_id
         content_dict = {"file_id": animation_file,
                         "type": "animation_file",
                         "id": str(uuid4())}
 
-    elif update.message.video_note:
+    if update.message.video_note:
         video_note_file = update.message.video_note.get_file().file_id
         content_dict = {"file_id": video_note_file,
                         "type": "video_note_file",
                         "id": str(uuid4())}
 
-    elif update.message.sticker:
+    if update.message.sticker:
         sticker_file = update.message.sticker.get_file().file_id
         content_dict = {"file_id": sticker_file,
                         "type": "sticker_file",
@@ -202,7 +205,7 @@ def create_content_dict(update):
                         "name": update.message.sticker.emoji}
     return content_dict
 
-
+@run_async
 def send_content_dict(chat_id, context, content_dict,
                       caption=None, parse_mode=ParseMode.HTML, reply_markup=None):
     # todo use this function for all content_dict (shop products, buttons)
@@ -285,7 +288,7 @@ def send_content_dict(chat_id, context, content_dict,
                                      content_dict["file_id"],
                                      reply_markup=reply_markup))
 
-
+@run_async
 def content_dict_as_string(content_dict, context):
     string = ""
     if not content_dict:

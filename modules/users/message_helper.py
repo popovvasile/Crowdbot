@@ -2,7 +2,6 @@ import html
 from logs import logger
 from telegram.error import Unauthorized
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, TelegramError
-from telegram.ext import messagequeue as mq
 from bson.objectid import ObjectId
 
 from helper_funcs.misc import delete_messages
@@ -134,7 +133,6 @@ class AnswerToMessage(SenderHelper):
         return self.final_callback(update, context)
 
 
-@mq.queuedmessage
 def send_deleted_message_content(context, content, chat_id, update,
                                  delete_key_name="to_delete"):
     """Sends content and add message to the 'to_delete' list"""
@@ -184,7 +182,6 @@ def send_deleted_message_content(context, content, chat_id, update,
                                         message_id=poll.id)
 
 
-@mq.queuedmessage
 def send_not_deleted_message_content(context, content, chat_id, update):
     """Sends content without adding message to the 'to_delete' list"""
 

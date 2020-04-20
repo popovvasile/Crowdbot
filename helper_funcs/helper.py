@@ -5,7 +5,7 @@ import sys
 from urllib3.exceptions import HTTPError
 
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, LabeledPrice
-from telegram.ext import ConversationHandler
+from telegram.ext import ConversationHandler, run_async
 from telegram.error import (BadRequest, TimedOut, NetworkError, TelegramError,
                             ChatMigrated, Unauthorized)
 
@@ -23,6 +23,7 @@ HELP_STRINGS = """
 currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["KZT", "UAH", "RON", "PLN"]]
 
 
+@run_async
 def return_to_menu(update, context):
     context.bot.send_message(update.effective_message.chat.id,
                              context.bot.lang_dict["return_to_menu"],
@@ -35,7 +36,7 @@ def return_to_menu(update, context):
                                          callback_data="dismiss")]
                                  ]))
 
-
+@run_async
 def dismiss_button(context):
     dismis_button = InlineKeyboardMarkup(
         [[InlineKeyboardButton(text=context.bot.lang_dict["notification_close_btn"],
@@ -78,10 +79,8 @@ def send_admin_user_mode(bot, chat_id, text):
 def user_main_menu_creator(bot):
     first_buttons = [[InlineKeyboardButton(bot.lang_dict["send_message_1"],
                                            callback_data="send_message_to_admin")]]
-    product_list_of_dicts = products_table.find({
-        "bot_id": bot.id})
-    if (  # product_list_of_dicts.count() != 0 and
-            chatbots_table.find_one({"bot_id": bot.id})["shop_enabled"]):
+
+    if chatbots_table.find_one({"bot_id": bot.id})["shop_enabled"]:
         first_buttons += [[InlineKeyboardButton(text=bot.lang_dict["shop"],
                                                 callback_data="help_module(shop)")]]
 
@@ -257,6 +256,7 @@ def back_to_modules(update, context):
     return help_button(update, context)
 
 
+@run_async
 def help_button(update, context):
     if users_table.find_one({"user_id": update.effective_user.id, "bot_id": context.bot.id}).get(
             "blocked", False):
@@ -348,6 +348,7 @@ def help_button(update, context):
             logger.exception("Exception in help buttons. %s", str(query.data))
 
 
+@run_async
 def get_help(update, context):
     try:
         delete_messages(update, context)
@@ -388,6 +389,7 @@ def on_stupid_strings(update, context):
 
 class WelcomeBot(object):
     @staticmethod
+    @run_async
     def start(update, context):
         chat_id, txt = initiate_chat_id(update)
         if chat_id < 0:

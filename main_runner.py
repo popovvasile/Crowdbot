@@ -3,12 +3,9 @@
 import json
 import logging
 import os
-import re
 
 import telegram
-from telegram.utils import request
 import telegram.ext as tg
-from telegram import Bot
 from telegram.ext import CommandHandler, CallbackQueryHandler, MessageHandler, Filters
 from telegram.utils.request import Request
 
