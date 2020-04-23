@@ -1,6 +1,6 @@
 # PRODUCT CATEGORIES
 MAX_CATEGORY_NAME_LENGTH = 50
-MAX_CATEGORIES_COUNT = 5
+MAX_CATEGORIES_COUNT = 20
 
 # If product description length bigger than this integer
 # description will be sends as separate message

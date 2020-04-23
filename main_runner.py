@@ -105,7 +105,7 @@ from modules.shop.user_side.order_creator import OFFLINE_PURCHASE_HANDLER
 from modules.shop.user_side.online_payment import HANDLE_SUCCES, HANDLE_PRECHECKOUT
 from modules.shop.user_side.products import (
     USERS_PRODUCTS_LIST_HANDLER, ADD_TO_CART, REMOVE_FROM_CART, PRODUCTS_CATEGORIES,
-    BACK_TO_CATEGORIES, VIEW_PRODUCT, BACK_TO_CUSTOMER_SHOP, SHOP_CONTACTS)
+    BACK_TO_CATEGORIES, VIEW_PRODUCT, BACK_TO_CUSTOMER_SHOP, SHOP_CONTACTS, MOVE_TO_CART)
 from modules.shop.user_side.cart import (
     CART, REMOVE_FROM_CART_LIST, CHANGE_QUANTITY, BACK_TO_CART, MAKE_ORDER, VIEW_CART_PRODUCT)
 from modules.shop.user_side.orders import (
@@ -115,7 +115,7 @@ from telegram.ext import messagequeue as mq
 
 
 class MQBot(telegram.bot.Bot):
-    '''A subclass of Bot which delegates send method handling to MQ'''
+    """A subclass of Bot which delegates send method handling to MQ"""
     def __init__(self, *args, is_queued_def=True, mqueue=None, **kwargs):
         super(MQBot, self).__init__(*args, **kwargs)
         # below 2 attributes should be provided for decorator usage
@@ -130,8 +130,8 @@ class MQBot(telegram.bot.Bot):
 
     @mq.queuedmessage
     def send_message(self, *args, **kwargs):
-        '''Wrapped method would accept new `queued` and `isgroup`
-        OPTIONAL arguments'''
+        """Wrapped method would accept new `queued` and `isgroup`
+        OPTIONAL arguments"""
         return super(MQBot, self).send_message(*args, **kwargs)
 
 
@@ -140,6 +140,7 @@ def main(token, lang):
     q = mq.MessageQueue(all_burst_limit=25, all_time_limit_ms=1200)
     request = Request(con_pool_size=8)
     bot_obj = MQBot(token, request=request, mqueue=q)
+
     filename = 'logs/{}.log'.format(bot_obj.name)
     open(filename, "w+")
     hdlr = logging.FileHandler(filename)
@@ -188,7 +189,6 @@ def main(token, lang):
     # TODO priority is very important!!!!!!!!!!!!!!!!!!!!
     dispatcher.add_handler(EDIT_BOT_DESCRIPTION_HANDLER)
 
-
     #  SHOP USER SIDE
     dispatcher.add_handler(EDIT_SHOP_HANDLER)
     # dispatcher.add_handler(ONLINE_PURCHASE_HANDLER)
@@ -206,6 +206,7 @@ def main(token, lang):
     dispatcher.add_handler(USERS_ORDERS_LIST_HANDLER)
     dispatcher.add_handler(VIEW_CART_PRODUCT)
     dispatcher.add_handler(VIEW_PRODUCT)
+    dispatcher.add_handler(MOVE_TO_CART)
     dispatcher.add_handler(BACK_TO_CUSTOMER_SHOP)
     dispatcher.add_handler(USER_ORDER_ITEMS_PAGINATION)
     dispatcher.add_handler(ORDER_PAYMENT_MENU)

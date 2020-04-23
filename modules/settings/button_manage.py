@@ -175,7 +175,8 @@ class AddCommands(object):
                     update.effective_chat.id,
                     context.bot.lang_dict["add_menu_buttons_str_2"],
                     reply_markup=reply_markup,
-                    reply_to_message_id=context.user_data["user_input"][-1].message_id))
+                    reply_to_message_id=context.user_data["user_input"][-1].message_id,
+                    parse_mode=ParseMode.HTML))
             return TYPING_DESCRIPTION
         else:
             context.user_data["to_delete"].append(
@@ -383,8 +384,9 @@ class ChangeButtonName(object):
             context.bot.send_message(
                 update.callback_query.message.chat.id,
                 text=context.bot.lang_dict["new_button_name"].format(
-                    context.user_data["button"]["button"]),
-                reply_markup=reply_markup))
+                    html.escape(context.user_data["button"]["button"], quote=False)),
+                reply_markup=reply_markup,
+                parse_mode=ParseMode.HTML))
         return ENTER_NEW_NAME
 
     def finish_new_name(self, update, context):
