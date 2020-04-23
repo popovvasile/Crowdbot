@@ -3,12 +3,11 @@
 import json
 import logging
 import os
-import re
 
-from telegram.utils import request
+import telegram
 import telegram.ext as tg
-from telegram import Bot
 from telegram.ext import CommandHandler, CallbackQueryHandler, MessageHandler, Filters
+from telegram.utils.request import Request
 
 from logs import logger
 from helper_funcs.misc import dismiss
@@ -109,12 +108,35 @@ from modules.shop.user_side.cart import (
 from modules.shop.user_side.orders import (
     USERS_ORDERS_LIST_HANDLER, USER_ORDER_ITEMS_PAGINATION, BACK_TO_USER_ORDERS,
     ORDER_PAYMENT_MENU)
+from telegram.ext import messagequeue as mq
+
+
+class MQBot(telegram.bot.Bot):
+    '''A subclass of Bot which delegates send method handling to MQ'''
+    def __init__(self, *args, is_queued_def=True, mqueue=None, **kwargs):
+        super(MQBot, self).__init__(*args, **kwargs)
+        # below 2 attributes should be provided for decorator usage
+        self._is_messages_queued_default = is_queued_def
+        self._msg_queue = mqueue or mq.MessageQueue()
+
+    def __del__(self):
+        try:
+            self._msg_queue.stop()
+        except:
+            pass
+
+    @mq.queuedmessage
+    def send_message(self, *args, **kwargs):
+        '''Wrapped method would accept new `queued` and `isgroup`
+        OPTIONAL arguments'''
+        return super(MQBot, self).send_message(*args, **kwargs)
 
 
 def main(token, lang):
     # https://github.com/python-telegram-bot/python-telegram-bot/issues/787
-    req = request.Request(con_pool_size=8)
-    bot_obj = Bot(token=token, request=req)
+    q = mq.MessageQueue(all_burst_limit=25, all_time_limit_ms=1200)
+    request = Request(con_pool_size=8)
+    bot_obj = MQBot(token, request=request, mqueue=q)
     filename = 'logs/{}.log'.format(bot_obj.name)
     open(filename, "w+")
     hdlr = logging.FileHandler(filename)
@@ -126,9 +148,9 @@ def main(token, lang):
     with open('languages.json') as f:
         lang_dicts = json.load(f)
     if lang == "ENG":
-        Bot.lang_dict = lang_dicts["ENG"]
+        bot_obj.lang_dict = lang_dicts["ENG"]
     else:
-        Bot.lang_dict = lang_dicts["RUS"]
+        bot_obj.lang_dict = lang_dicts["RUS"]
     updater = tg.Updater(use_context=True, bot=bot_obj)
     dispatcher = updater.dispatcher
     start_handler = CommandHandler("start", WelcomeBot().start)
@@ -347,14 +369,18 @@ def main(token, lang):
     dispatcher.add_handler(back_to_modules_handler)
 
     dispatcher.add_handler(CallbackQueryHandler(Welcome.back_to_main_menu,
-                                                pattern=r"back_"))
+                                                pattern=r"_back"))
+
     dispatcher.add_handler(BACK_TO_MAIN_MENU_HANDLER)
 
     dispatcher.add_handler(help_callback_handler)
 
     if os.environ['SHOP_PRODUCTION'] == "1":
         dispatcher.add_error_handler(error_callback)
-
+    dispatcher.add_handler(CallbackQueryHandler(get_help,
+                                                pattern=r"back"))
+    dispatcher.add_handler(CallbackQueryHandler(get_help,
+                                                pattern=r"cancel"))
     rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), return_to_menu)
     # TODO create another function
     # TODO add "active" to all current bots

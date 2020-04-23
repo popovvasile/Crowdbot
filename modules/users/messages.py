@@ -1,6 +1,7 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
 import datetime
+import time
 
 from bson.objectid import ObjectId
 from haikunator import Haikunator
@@ -8,7 +9,7 @@ from telegram.error import TelegramError
 from telegram import (InlineKeyboardButton, InlineKeyboardMarkup,
                       ReplyKeyboardMarkup, ReplyKeyboardRemove, ParseMode)
 from telegram.ext import (MessageHandler, Filters, ConversationHandler,
-                          CallbackQueryHandler, run_async)
+                          CallbackQueryHandler)
 
 from helper_funcs.helper import get_help, dismiss_button
 from helper_funcs.misc import delete_messages, update_user_fields
@@ -37,8 +38,6 @@ def messages_menu(update, context):
                               callback_data="send_message_to_all_users")],
         [InlineKeyboardButton(text=string_d_str["delete_messages_btn"],
                               callback_data="del_messages_menu")],
-        # [InlineKeyboardButton(text=string_d_str["send_message_button_5"],
-        #                       callback_data="send_message_to_donators")],
         [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                               callback_data="help_module(users)")]
     ])
@@ -52,134 +51,6 @@ def back_to_messages_menu(update, context):
     delete_messages(update, context, True)
     context.user_data.clear()
     return messages_menu(update, context)
-
-
-# class AddMessageCategory(object):
-#
-#     def add_category(self, update, context):
-#         buttons = list()
-#         buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-#                                              callback_data="help_module(users)")])
-#         reply_markup = InlineKeyboardMarkup(
-#             buttons)
-#         bot.delete_message(chat_id=update.callback_query.message.chat_id,
-#                            message_id=update.callback_query.message.message_id)
-#         bot.send_message(update.callback_query.message.chat_id,
-#                          context.bot.lang_dict["send_message_14"], reply_markup=reply_markup)
-#
-#         return TOPIC
-#
-#     def add_category_finish(self, update, context):
-#         categories_table.update({"category": update.message.text},
-#                                 {"$set": {"category": update.message.text}},
-#                                 upsert=True)
-#         buttons = list()
-#         buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-#                                              callback_data="help_module(users)")])
-#         reply_markup = InlineKeyboardMarkup(
-#             buttons)
-#         bot.send_message(update.message.chat_id,
-#                          context.bot.lang_dict["send_message_15"],
-#                          reply_markup=reply_markup)
-#         return ConversationHandler.END
-#
-#
-# class MessageCategory(object):
-#
-#     def show_category(self, update, context):
-#         buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-#                                          callback_data="help_module(users)"),
-#                     InlineKeyboardButton(text=context.bot.lang_dict["add_message_category"],
-#                                          callback_data="add_message_category"),
-#                     ]]
-#         reply_markup = InlineKeyboardMarkup(
-#             buttons)
-#         bot.send_message(update.callback_query.message.chat_id,
-#                          context.bot.lang_dict["send_message_16"], reply_markup=reply_markup)
-#
-#         bot.delete_message(chat_id=update.callback_query.message.chat_id,
-#                            message_id=update.callback_query.message.message_id)
-#         categories = categories_table.find()
-#         for category in categories:
-#             delete_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["delete_button_str"],
-#                                                     callback_data="delete_category_{}"
-#                                                     .format(category["category"]))]]
-#             delete_markup = InlineKeyboardMarkup(
-#                 delete_buttons)
-#             bot.send_message(update.callback_query.message.chat_id, category["category"],
-#                              reply_markup=delete_markup)
-#
-#         return ConversationHandler.END
-#
-#
-# class DeleteMessageCategory(object):
-#
-#     def delete_category(self, update, context):
-#         bot.delete_message(chat_id=update.callback_query.message.chat_id,
-#                            message_id=update.callback_query.message.message_id)
-#         buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-#                                          callback_data="help_module(users)")]]
-#         reply_markup = InlineKeyboardMarkup(
-#             buttons)
-#         categories_table.delete_one({"category": update.callback_query.data.replace("delete_category_", "")})
-#
-#         bot.send_message(update.callback_query.message.chat_id,
-#                          context.bot.lang_dict["send_message_17"], reply_markup=reply_markup)
-#
-#         return ConversationHandler.END
-
-'''class SenderHelper(object):
-    @staticmethod
-    def help_receive(update, context, reply_markup, state):
-        """Help to create message for sending"""
-        delete_messages(update, context)
-        final_text = context.bot.lang_dict["send_message_4"]
-        if "content" not in context.user_data:
-            context.user_data["content"] = list()
-        if "user_input" not in context.user_data:
-            context.user_data["user_input"] = list()
-        context.user_data["user_input"].append(update.message)
-        if len(context.user_data["content"]) < 10:
-            add_to_content(update, context)
-        else:
-            final_text = (context.bot.lang_dict["add_menu_buttons_str_11"])
-            # context.user_data["to_delete"].append(
-            #     context.bot.send_message(update.effective_chat.id,
-            #                              context.bot.lang_dict["so_many_content"]))
-            try:
-                context.bot.delete_message(update.effective_chat.id,
-                                           update.effective_message.message_id)
-            except TelegramError:
-                pass
-
-        if len(context.user_data["user_input"]) == 10:
-            final_text = (context.bot.lang_dict["add_menu_buttons_str_11"])
-        elif len(context.user_data["user_input"]) > 10:
-            final_text = (context.bot.lang_dict["so_many_content"]
-                          + context.bot.lang_dict["add_menu_buttons_str_11"])
-
-        # reply_markup = InlineKeyboardMarkup([
-        #     [InlineKeyboardButton(
-        #         text="Done",
-        #         callback_data="send_message_finish")],
-        #     [InlineKeyboardButton(
-        #         text="Cancel",
-        #         callback_data="cancel_message_creating")]
-        # ])
-
-        msg_index = (len(context.user_data["user_input"])
-                     - len(context.user_data["content"]))
-        reply_to = context.user_data["user_input"][msg_index].message_id
-
-        context.user_data["to_delete"].append(
-            context.bot.send_message(
-                chat_id=update.message.chat_id,
-                text=final_text
-                + context.bot.lang_dict["files_counter"].format(
-                    len(context.user_data['content'])),
-                reply_markup=reply_markup,
-                reply_to_message_id=reply_to))
-        return state'''
 
 
 class SendMessageToAdmin(SenderHelper):
@@ -232,21 +103,6 @@ class SendMessageToAdmin(SenderHelper):
                     parse_mode=ParseMode.HTML))
         return MESSAGE
 
-    # def send_topic(self, update, context):
-    #     bot.send_message(update.message.chat_id,
-    #                      random.choice(context.bot.lang_dict["polls_affirmations"]),
-    #                      reply_markup=ReplyKeyboardRemove())
-    #     user_data["topic"] = update.message.text
-    #     buttons = list()
-    #     buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-    #                                          callback_data="help_back")])
-    #     reply_markup = InlineKeyboardMarkup(
-    #         buttons)
-    #     bot.send_message(update.message.chat_id,
-    #                      context.bot.lang_dict["send_message_1"], reply_markup=reply_markup)
-    #
-    #     return MESSAGE
-
     def received_message(self, update, context):
         reply_markup = InlineKeyboardMarkup([
             [InlineKeyboardButton(
@@ -257,54 +113,6 @@ class SendMessageToAdmin(SenderHelper):
                 callback_data="cancel_message_creating")]
         ])
         return SenderHelper().help_receive(update, context, reply_markup, MESSAGE)
-    """delete_messages(update, context)
-        final_text = context.bot.lang_dict["send_message_4"]
-        if "content" not in context.user_data:
-            context.user_data["content"] = list()
-        if "user_input" not in context.user_data:
-            context.user_data["user_input"] = list()
-        context.user_data["user_input"].append(update.message)
-        if len(context.user_data["content"]) < 10:
-            add_to_content(update, context)
-        else:
-            final_text = (context.bot.lang_dict["add_menu_buttons_str_11"])
-            # context.user_data["to_delete"].append(
-            #     context.bot.send_message(update.effective_chat.id,
-            #                              context.bot.lang_dict["so_many_content"]))
-            try:
-                context.bot.delete_message(update.effective_chat.id,
-                                           update.effective_message.message_id)
-            except TelegramError:
-                pass
-
-        if len(context.user_data["user_input"]) == 10:
-            final_text = (context.bot.lang_dict["add_menu_buttons_str_11"])
-        elif len(context.user_data["user_input"]) > 10:
-            final_text = (context.bot.lang_dict["so_many_content"]
-                          + context.bot.lang_dict["add_menu_buttons_str_11"])
-
-        reply_markup = InlineKeyboardMarkup([
-            [InlineKeyboardButton(
-                text="Done",
-                callback_data="send_message_finish")],
-            [InlineKeyboardButton(
-                text="Cancel",
-                callback_data="cancel_message_creating")]
-        ])
-
-        msg_index = (len(context.user_data["user_input"])
-                     - len(context.user_data["content"]))
-        reply_to = context.user_data["user_input"][msg_index].message_id
-
-        context.user_data["to_delete"].append(
-            context.bot.send_message(
-                chat_id=update.message.chat_id,
-                text=final_text
-                + context.bot.lang_dict["files_counter"].format(
-                    len(context.user_data['content'])),
-                reply_markup=reply_markup,
-                reply_to_message_id=reply_to))
-        return MESSAGE"""
 
     # @run_async
     def send_message_finish(self, update, context):
@@ -352,22 +160,6 @@ class SendMessageToAdmin(SenderHelper):
             context.bot.id))
         return self.back(update, context)
 
-    # def send_message_cancel(self, update, context):
-    #     context.bot.delete_message(
-    #        chat_id=update.callback_query.message.chat_id,
-    #         message_id=update.callback_query.message.message_id)
-    #     buttons = list()
-    #     buttons.append([InlineKeyboardButton(
-    #                         text=context.bot.lang_dict["back_button"],
-    #                         callback_data="help_back")])
-    #     final_reply_markup = InlineKeyboardMarkup(buttons)
-    #     context.bot.send_message(
-    #         chat_id=update.callback_query.message.chat_id,
-    #         text=context.bot.lang_dict["send_message_9"],
-    #         reply_markup=final_reply_markup)
-    #     context.user_data.clear()
-    #     return ConversationHandler.END
-
     def cancel_message_creating(self, update, context):
         if "user_input" in context.user_data:
             context.user_data["to_delete"].extend(context.user_data["user_input"])
@@ -388,46 +180,13 @@ class SendMessageToUsers(object):
                             text=context.bot.lang_dict["back_button"],
                             callback_data="cancel_creating_message")])
         reply_markup = InlineKeyboardMarkup(buttons)
-        # context.bot.delete_message(
-        #     chat_id=update.callback_query.message.chat_id,
-        #     message_id=update.callback_query.message.message_id)
-        # categories = user_categories_table.find()
-        # if categories.count() > 0:
-        #     context.bot.send_message(
-        #         chat_id=update.callback_query.message.chat_id,
-        #         text=context.bot.lang_dict["back_text"],
-        #         reply_markup=reply_markup)
-        #     categories_list = ["All"] + [x["category"] for x in categories]
-        #     category_markup = ReplyKeyboardMarkup([categories_list])
-        #
-        #     context.bot.send_message(
-        #         chat_id=update.callback_query.message.chat_id,
-        #         text=context.bot.lang_dict["send_message_1_1"],
-        #         reply_markup=category_markup)
-        #     return CHOOSE_CATEGORY
-        # else:
+
         context.user_data["to_delete"].append(
             context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
                 text=context.bot.lang_dict["send_message_to_users_text"],
                 reply_markup=reply_markup))
         return MESSAGE_TO_USERS
-
-    # def choose_question(self, update, context):
-    #     context.user_data["user_category"] = update.message.text
-    #     buttons = list()
-    #     buttons.append([InlineKeyboardButton(
-    #                         text=context.bot.lang_dict["back_button"],
-    #                         callback_data="cancel_creating_message")])
-    #     reply_markup = InlineKeyboardMarkup(buttons)
-    #     TODO STRINGS
-        # context.bot.send_message(chat_id=update.message.chat_id,
-        #                          text="Cool",
-        #                          reply_markup=ReplyKeyboardRemove())
-        # context.bot.send_message(chat_id=update.message.chat_id,
-        #                          text=context.bot.lang_dict["send_message_1"],
-        #                          reply_markup=reply_markup)
-        # return MESSAGE_TO_USERS
 
     def received_message(self, update, context):
         # TODO REFACTOR - use one content_dict structure for the whole project
@@ -438,89 +197,13 @@ class SendMessageToUsers(object):
                                   callback_data="cancel_creating_message")]
         ])
         return SenderHelper().help_receive(update, context, reply_markup, MESSAGE_TO_USERS)
-    """delete_messages(update, context)
-        final_text = context.bot.lang_dict["send_message_4"]
-        if "content" not in context.user_data:
-            context.user_data["content"] = list()
-        if "user_input" not in context.user_data:
-            context.user_data["user_input"] = list()
-        context.user_data["user_input"].append(update.message)
-        if len(context.user_data["content"]) < 10:
-            add_to_content(update, context)
-        else:
-            final_text = (context.bot.lang_dict["add_menu_buttons_str_11"])
-            # context.user_data["to_delete"].append(
-            #     context.bot.send_message(update.effective_chat.id,
-            #                              context.bot.lang_dict["so_many_content"]))
-            try:
-                context.bot.delete_message(update.effective_chat.id,
-                                           update.effective_message.message_id)
-            except TelegramError:
-                pass
 
-        if len(context.user_data["user_input"]) == 10:
-            final_text = (context.bot.lang_dict["add_menu_buttons_str_11"])
-        elif len(context.user_data["user_input"]) > 10:
-            final_text = (context.bot.lang_dict["so_many_content"]
-                          + context.bot.lang_dict["add_menu_buttons_str_11"])
-
-        reply_markup = InlineKeyboardMarkup([
-            [InlineKeyboardButton(text=context.bot.lang_dict["done_button"],
-                                  callback_data="send_message_finish")],
-            [InlineKeyboardButton(text=context.bot.lang_dict["cancel_button"],
-                                  callback_data="cancel_creating_message")]
-        ])
-        msg_index = (len(context.user_data["user_input"])
-                     - len(context.user_data["content"]))
-        reply_to = context.user_data["user_input"][msg_index].message_id
-
-        context.user_data["to_delete"].append(
-            context.bot.send_message(
-                chat_id=update.message.chat_id,
-                text=final_text
-                + context.bot.lang_dict["files_counter"].format(
-                    len(context.user_data['content'])),
-                reply_markup=reply_markup,
-                reply_to_message_id=reply_to))"""
-
-        # delete_messages(update, context)
-        # if not context.user_data.get("user_input"):
-        #     context.user_data["user_input"] = list()
-        # context.user_data["user_input"].append(update.effective_message)
-        # add_to_content(update, context)
-        # final_reply_markup = InlineKeyboardMarkup([
-        #     [InlineKeyboardButton(text=context.bot.lang_dict["done_button"],
-        #                           callback_data="send_message_finish")],
-        #     [InlineKeyboardButton(text=context.bot.lang_dict["cancel_button"],
-        #                           callback_data="cancel_creating_message")]
-        # ])
-        # context.user_data["to_delete"].append(
-        #     context.bot.send_message(
-        #         chat_id=update.message.chat_id,
-        #         text=final_text,
-        #         reply_markup=final_reply_markup))
-        # return MESSAGE_TO_USERS
-
-    @run_async
     def send_message_finish(self, update, context):
 
         users = users_table.find({"bot_id": context.bot.id,
                                   "blocked": False,
                                   "unsubscribed": False})
-        # if "user_category" not in context.user_data:
-        #     users = users_table.find({"bot_id": context.bot.id,
-        #                               "blocked": False,
-        #                               "unsubscribed": False})
-        # elif context.user_data["user_category"] == "All":
-        #     users = users_table.find({"bot_id": context.bot.id,
-        #                               "blocked": False,
-        #                               "unsubscribed": False})
-        # else:
-        #     users = users_table.find(
-        #         {"bot_id": context.bot.id,
-        #          "user_category": context.user_data["user_category"],
-        #          "blocked": False,
-        #          "unsubscribed": False})
+        messages_menu(update, context)
         for user in users:
             update_user_fields(context, user)
             if (user["chat_id"] != update.callback_query.message.chat_id
@@ -529,60 +212,20 @@ class SendMessageToUsers(object):
                         send_not_deleted_message_content(
                             context,
                             chat_id=user["chat_id"],
-                            content=context.user_data["content"])
+                            content=context.user_data["content"],
+                            update=update)
                     except:
                         continue
-        # context.bot.delete_message(
-        #     chat_id=update.callback_query.message.chat_id,
-        #     message_id=update.callback_query.message.message_id)
-        # buttons = list()
-        # buttons.append([InlineKeyboardButton(
-        #     text=context.bot.lang_dict["back_button"],
-        #     callback_data="help_module(users)")])
 
-        # final_reply_markup = InlineKeyboardMarkup(buttons)
-        # context.bot.send_message(update.callback_query.message.chat_id,
-        #                          text=context.bot.lang_dict["send_message_5"],
-        #                          reply_markup=final_reply_markup)
         logger.info("Admin {} on bot {}:{} sent message to all users".format(
             update.effective_user.first_name, context.bot.first_name,
             context.bot.id))
-        return back_to_messages_menu(update, context)
-
-    # def send_to_all_users(self, update, context):
-    #     users = users_table.find({"bot_id": context.bot.id,
-    #                               "blocked": False,
-    #                               "unsubscribed": False})
-    #     for user in users:
-    #         update_user_fields(context, user)
-    #         if (user["chat_id"] != update.callback_query.message.chat_id
-    #                 and not user["unsubscribed"]):
-    #             try:
-    #                 send_not_deleted_message_content(
-    #                     context,
-    #                     chat_id=user["chat_id"],
-    #                     content=context.user_data["content"])
-    #             except:
-    #                 continue
+        return
 
     def cancel_creating_message(self, update, context):
         if context.user_data.get("user_input"):
             context.user_data["to_delete"].extend(context.user_data["user_input"])
         return back_to_messages_menu(update, context)
-    # def send_message_cancel(self, update, context):
-    #     context.bot.delete_message(
-    #         chat_id=update.callback_query.message.chat_id,
-    #         message_id=update.callback_query.message.message_id)
-    #     buttons = list()
-    #     buttons.append(
-    #         [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-    #                               callback_data="help_module(users)")])
-    #     final_reply_markup = InlineKeyboardMarkup(buttons)
-    #     context.bot.send_message(update.callback_query.message.chat_id,
-    #                              context.bot.lang_dict["send_message_9"],
-    #                              reply_markup=final_reply_markup)
-    #     context.user_data.clear()
-    #     return ConversationHandler.END
 
     def back(self, update, context):
         context.bot.delete_message(
@@ -598,7 +241,7 @@ class DeleteMessage(object):
         delete_messages(update, context, True)
         messages = users_messages_to_admin_table.find({"bot_id": context.bot.id,
                                                        "deleted": False})
-        delete_buttons = []
+        delete_buttons = list()
         delete_buttons.append(
             [InlineKeyboardButton(
                 text=context.bot.lang_dict["delete_button_str_all"],
@@ -656,44 +299,24 @@ class DeleteMessage(object):
             # TODO send a keyboard with callback
             #   depending on previous callback data
             return DOUBLE_CHECK
-            # else:
-            #     users_messages_to_admin_table.delete_one(
-            #         {"_id": ObjectId(message_id)})
-            #     context.bot.send_message(
-            #         chat_id=update.callback_query.message.chat_id,
-            #         text=context.bot.lang_dict["delete_message_str_1"],
-            #         reply_markup=reply_markup)
-            #     return ConversationHandler.END
+
         else:
             update.callback_query.answer("There are no messages yet")
             return back_to_messages_menu(update, context)
-            # context.bot.send_message(update.callback_query.message.chat_id,
-            #                          context.bot.lang_dict["send_message_6"],
-            #                          reply_markup=reply_markup)
-            # return ConversationHandler.END
 
     def delete_message_double_check(self, update, context):
         context.bot.delete_message(
             chat_id=update.callback_query.message.chat_id,
             message_id=update.callback_query.message.message_id)
 
-        # buttons = [[InlineKeyboardButton(
-        #                 text=context.bot.lang_dict["back_button"],
-        #                 callback_data="back_to_inbox")]]
-        # reply_markup = InlineKeyboardMarkup(buttons)
-
         if "all" in context.user_data["message_id"]:
             # delete all messages from the users
-            # users_messages_to_admin_table.delete_many(
-            #     {"bot_id": context.bot.id})
             users_messages_to_admin_table.update_many(
                 {"bot_id": context.bot.id}, {"$set": {"deleted": True}})
 
         elif "week" in context.user_data["message_id"]:
             # delete all messages from the users for last week
             time_past = datetime.datetime.now() - datetime.timedelta(days=7)
-            # users_messages_to_admin_table.delete_many(
-            #     {"bot_id": context.bot.id, "timestamp": {'$gt': time_past}})
             users_messages_to_admin_table.update_many(
                 {"bot_id": context.bot.id, "timestamp": {'$gt': time_past}},
                 {"$set": {"deleted": True}})
@@ -701,8 +324,6 @@ class DeleteMessage(object):
         elif "month" in context.user_data["message_id"]:
             # delete all messages from the users for last month
             time_past = datetime.datetime.now() - datetime.timedelta(days=30)
-            # users_messages_to_admin_table.delete_many(
-            #     {"bot_id": context.bot.id, "timestamp": {'$gt': time_past}})
             users_messages_to_admin_table.update_many(
                 {"bot_id": context.bot.id, "timestamp": {'$gt': time_past}},
                 {"$set": {"deleted": True}})
@@ -721,11 +342,6 @@ class DeleteMessage(object):
             return back_to_messages_menu(update, context)
         else:
             return self.back_to_del_messages_menu(update, context)
-        # context.bot.send_message(
-        #     chat_id=update.callback_query.message.chat_id,
-        #     text=context.bot.lang_dict["delete_message_str_1"],
-        #     reply_markup=reply_markup)
-        # return ConversationHandler.END
 
     def back_to_del_messages_menu(self, update, context):
         delete_messages(update, context, True)
@@ -748,19 +364,6 @@ class SeeMessageToAdmin(object):
             [InlineKeyboardButton(
                 text=context.bot.lang_dict["back_button"],
                 callback_data="messages_menu_back")])
-
-        """delete_buttons = buttons[:]
-        delete_buttons.append(
-            [InlineKeyboardButton(
-                text=context.bot.lang_dict["delete_button_str_all"],
-                callback_data="delete_message_all")])
-        delete_buttons.append(
-            [InlineKeyboardButton(
-                text=context.bot.lang_dict["delete_button_str_last_week"],
-                callback_data="delete_message_week"),
-             InlineKeyboardButton(
-                 text=context.bot.lang_dict["delete_button_str_last_month"],
-                 callback_data="delete_message_month")])"""
 
         messages = users_messages_to_admin_table.find(
             {"bot_id": context.bot.id, "deleted": False}).sort([["_id", -1]])
@@ -809,7 +412,8 @@ class SeeMessageToAdmin(object):
         send_deleted_message_content(
             context,
             chat_id=update.effective_user.id,
-            content=context.user_data["message"]["content"])
+            content=context.user_data["message"]["content"],
+            update=update)
         # If answer exist show it
         if context.user_data["message"]["answer_content"]:
             context.user_data["to_delete"].append(
@@ -819,7 +423,8 @@ class SeeMessageToAdmin(object):
             send_deleted_message_content(
                 context,
                 chat_id=update.effective_user.id,
-                content=context.user_data["message"]["answer_content"])
+                content=context.user_data["message"]["answer_content"],
+                update=update)
 
         buttons = [[]]
         if not context.user_data["message"]["answer_content"]:
@@ -833,28 +438,6 @@ class SeeMessageToAdmin(object):
                  callback_data="delete_message_"
                                + str(context.user_data["message"]["_id"])))
 
-        # if context.user_data["message"]["anonim"]:
-        #     if user_sender["anonim_messages_blocked"]:
-        #         buttons.append([InlineKeyboardButton(
-        #             text=context.bot.lang_dict["unblock_messages_button"],
-        #             callback_data="unblock_anonim_messaging_"
-        #                           + str(user_sender["user_id"]))])
-        #     else:
-        #         buttons.append([InlineKeyboardButton(
-        #             text=context.bot.lang_dict["block_messages_button"],
-        #             callback_data="block_anonim_messaging_"
-        #                           + str(user_sender["user_id"]))])
-        # else:
-        #     if user_sender["regular_messages_blocked"]:
-        #         buttons.append([InlineKeyboardButton(
-        #             text=context.bot.lang_dict["unblock_messages_button"],
-        #             callback_data=f"from_inbox_unblock_messages_"
-        #                           + str(user_sender['user_id']))])
-        #     else:
-        #         buttons.append([InlineKeyboardButton(
-        #             text=context.bot.lang_dict["block_messages_button"],
-        #             callback_data=f"from_inbox_block_messages_"
-        #                           + str(user_sender['user_id']))])
         # Back button.
         buttons.append([InlineKeyboardButton(
             text=context.bot.lang_dict["back_button"],
@@ -985,12 +568,6 @@ class SubscriberOpenMessage(object):
     def open(self, update, context):
         delete_messages(update, context)
         message_id = ObjectId(update.callback_query.data.split("/")[1])
-        # update.effective_message.edit_reply_markup(
-        #     reply_markup=InlineKeyboardMarkup([
-        #         [InlineKeyboardButton(
-        #             text="Show",
-        #             callback_data=f"subscriber_open_message_false/{message_id}")]
-        #     ]))
         message = users_messages_to_admin_table.find_one({"_id": message_id})
         if "open_delete" not in context.user_data:
             context.user_data["open_delete"] = list()
@@ -1002,7 +579,8 @@ class SubscriberOpenMessage(object):
         send_deleted_message_content(context,
                                      chat_id=update.effective_user.id,
                                      content=message["content"],
-                                     delete_key_name="open_delete")
+                                     delete_key_name="open_delete",
+                                     update=update)
         # Send admin answer content.
         # User can open message only if the answer exist
         context.user_data["open_delete"].append(
@@ -1012,7 +590,8 @@ class SubscriberOpenMessage(object):
         send_deleted_message_content(context,
                                      chat_id=update.effective_user.id,
                                      content=message["answer_content"],
-                                     delete_key_name="open_delete")
+                                     delete_key_name="open_delete",
+                                     update=update)
         # Back button
         reply_markup = InlineKeyboardMarkup([
             [InlineKeyboardButton(
@@ -1055,9 +634,7 @@ SEND_MESSAGE_TO_ADMIN_HANDLER = ConversationHandler(
         MESSAGE: [
             MessageHandler(
                 filters=Filters.all,
-                callback=SendMessageToAdmin().received_message)],
-        # TOPIC: [MessageHandler(Filters.all, SendMessageToAdmin().send_topic), ]
-        # SEND_ANONIM: [MessageHandler(Filters.all, SendMessageToAdmin().send_anonim), ]
+                callback=SendMessageToAdmin().received_message)]
     },
 
     fallbacks=[
@@ -1092,10 +669,6 @@ SEND_MESSAGE_TO_USERS_HANDLER = ConversationHandler(
             callback=SendMessageToUsers().send_message)],
 
     states={
-        # CHOOSE_CATEGORY: [
-        #     MessageHandler(
-        #         filters=Filters.all,
-        #         callback=SendMessageToUsers().choose_question)],
 
         MESSAGE_TO_USERS: [
             MessageHandler(
@@ -1114,12 +687,6 @@ SEND_MESSAGE_TO_USERS_HANDLER = ConversationHandler(
         CallbackQueryHandler(
             pattern="cancel_creating_message",
             callback=SendMessageToUsers().cancel_creating_message)
-        # CallbackQueryHandler(
-        #     pattern=r"help_module",
-        #     callback=SendMessageToUsers().send_message_cancel),
-        # CallbackQueryHandler(
-        #     pattern=r"help_back",
-        #     callback=SendMessageToUsers().send_message_cancel)
         ]
 )
 
@@ -1138,20 +705,12 @@ DELETE_MESSAGES_MENU_HANDLER = CallbackQueryHandler(
 DELETE_MESSAGES_HANDLER = ConversationHandler(
     allow_reentry=True,
     entry_points=[
-        # CallbackQueryHandler(
-        #     pattern="del_messages_menu",
-        #     callback=DeleteMessage().delete_messages_menu)
         CallbackQueryHandler(
             pattern="delete_message",
             callback=DeleteMessage().delete_message)
     ],
 
     states={
-        # DELETE_MESSAGES_MENU: [
-        #     CallbackQueryHandler(
-        #                 pattern="delete_message",
-        #                 callback=DeleteMessage().delete_message)],
-
         DOUBLE_CHECK: [
             CallbackQueryHandler(
                 pattern=r"finish_delete_messages",
@@ -1170,10 +729,6 @@ DELETE_MESSAGES_HANDLER = ConversationHandler(
         CallbackQueryHandler(
             pattern="back_to_view_inbox_message",
             callback=SeeMessageToAdmin().back_to_view_message)
-
-        # CallbackQueryHandler(
-        #     pattern="help_back",
-        #     callback=SendMessageToUsers().send_message_cancel)
     ]
 )
 
@@ -1254,24 +809,3 @@ BACK_TO_INBOX = CallbackQueryHandler(
 BACK_TO_MESSAGES_MENU = CallbackQueryHandler(
     pattern="messages_menu_back",
     callback=back_to_messages_menu)
-
-
-# MESSAGE_CATEGORY_HANDLER = CallbackQueryHandler(pattern="show_message_categories",
-#                                                 callback=MessageCategory().show_category)
-# DELETE_MESSAGE_CATEGORY_HANDLER = CallbackQueryHandler(pattern="delete_category_",
-#                                                        callback=DeleteMessageCategory().delete_category)
-# ADD_MESSAGE_CATEGORY_HANDLER = ConversationHandler(
-#     entry_points=[CallbackQueryHandler(pattern="add_message_category",
-#                                        callback=AddMessageCategory().add_category)],
-#
-#     states={
-#         TOPIC: [MessageHandler(Filters.all, AddMessageCategory().add_category_finish)],
-#     },
-#
-#     fallbacks=[
-#         CallbackQueryHandler(callback=SendMessageToUsers().back,
-#                              pattern=r"help_module"),
-#         CallbackQueryHandler(callback=SendMessageToUsers().back,
-#                              pattern=r"help_back"),
-#     ]
-# )
