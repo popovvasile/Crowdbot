@@ -112,7 +112,7 @@ from telegram.ext import messagequeue as mq
 
 
 class MQBot(telegram.bot.Bot):
-    '''A subclass of Bot which delegates send method handling to MQ'''
+    """A subclass of Bot which delegates send method handling to MQ"""
     def __init__(self, *args, is_queued_def=True, mqueue=None, **kwargs):
         super(MQBot, self).__init__(*args, **kwargs)
         # below 2 attributes should be provided for decorator usage
@@ -127,8 +127,8 @@ class MQBot(telegram.bot.Bot):
 
     @mq.queuedmessage
     def send_message(self, *args, **kwargs):
-        '''Wrapped method would accept new `queued` and `isgroup`
-        OPTIONAL arguments'''
+        """Wrapped method would accept new `queued` and `isgroup`
+        OPTIONAL arguments"""
         return super(MQBot, self).send_message(*args, **kwargs)
 
 
@@ -137,6 +137,7 @@ def main(token, lang):
     q = mq.MessageQueue(all_burst_limit=25, all_time_limit_ms=1200)
     request = Request(con_pool_size=8)
     bot_obj = MQBot(token, request=request, mqueue=q)
+
     filename = 'logs/{}.log'.format(bot_obj.name)
     open(filename, "w+")
     hdlr = logging.FileHandler(filename)
@@ -151,6 +152,7 @@ def main(token, lang):
         bot_obj.lang_dict = lang_dicts["ENG"]
     else:
         bot_obj.lang_dict = lang_dicts["RUS"]
+
     updater = tg.Updater(use_context=True, bot=bot_obj)
     dispatcher = updater.dispatcher
     start_handler = CommandHandler("start", WelcomeBot().start)
@@ -176,7 +178,6 @@ def main(token, lang):
     dispatcher.add_handler(dismiss_handler)
     # TODO priority is very important!!!!!!!!!!!!!!!!!!!!
     dispatcher.add_handler(EDIT_BOT_DESCRIPTION_HANDLER)
-
 
     #  SHOP USER SIDE
     dispatcher.add_handler(EDIT_SHOP_HANDLER)
