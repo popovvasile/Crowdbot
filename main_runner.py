@@ -32,7 +32,7 @@ from helper_funcs.helper import (help_button, button_handler, get_help, WelcomeB
 #     SEND_POLL_TO_GROUP_HANDLER, SEND_SURVEY_TO_GROUP_HANDLER, SEND_DONATION_TO_GROUP_HANDLER)
 
 # SETTINGS
-from modules.settings.language_switch import LANG_MENU
+from modules.settings.language_switch import LANG_MENU, SET_LANG
 from modules.settings.menu_description import EDIT_BOT_DESCRIPTION_HANDLER
 from modules.settings.button_manage import (
     BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER, LINK_BUTTON_ADD_HANDLER,
