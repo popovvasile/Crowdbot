@@ -41,7 +41,7 @@ def eshop_menu(update, context):  # TODO add shop config button
 
     elif "shop" in chatbot:
         admin_keyboard.append(
-            [InlineKeyboardButton(text=context.bot.lang_dict["allow_shop_button"],
+            [InlineKeyboardButton(text=context.bot.lang_dict["turn_shop_on"],
                                   callback_data="change_shop_config")]),
     else:
         admin_keyboard.append(

@@ -30,7 +30,7 @@ def start_keyboard(orders_quantity, context):
             [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                   callback_data="help_back")]]
     elif "shop" in chatbot:
-        keyboard = [[InlineKeyboardButton(text=context.bot.lang_dict["allow_shop_button"],
+        keyboard = [[InlineKeyboardButton(text=context.bot.lang_dict["turn_shop_on"],
                                           callback_data="change_shop_config")],
 
                     [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
@@ -90,9 +90,9 @@ def keyboards(context):
             [back_btn("back_to_brands_btn", context=context)]
         ]),
         confirm_add_product=InlineKeyboardMarkup([
-            [back_btn("back_to_main_menu_btn", context=context)],
             [InlineKeyboardButton(context.bot.lang_dict["shop_admin_confirm_btn"],
-                                  callback_data="confirm_product")]
+                                  callback_data="confirm_product")],
+            [back_btn("back_to_main_menu_btn", context=context)]
         ]),
         continue_back_kb=InlineKeyboardMarkup([
             [InlineKeyboardButton(context.bot.lang_dict["continue_btn"],
