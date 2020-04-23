@@ -1,7 +1,7 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
 from bson.objectid import ObjectId
-from telegram.error import BadRequest, Unauthorized, TelegramError
+from telegram.error import Unauthorized, TelegramError
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 from telegram.ext import MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
 
@@ -13,7 +13,7 @@ from logs import logger
 from modules.statistic.donation_statistic import DonationStatistic
 from modules.users.message_helper import (MessageTemplate, send_deleted_message_content,
                                           AnswerToMessage, send_not_deleted_message_content,
-                                          add_to_content, SenderHelper)
+                                          SenderHelper)
 from database import users_table, donations_table, users_messages_to_admin_table
 
 

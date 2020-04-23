@@ -118,7 +118,7 @@ class SendMessageToAdmin(SenderHelper):
         ])
         return SenderHelper().help_receive(update, context, reply_markup, MESSAGE)
 
-    # @run_async
+    # 
     def send_message_finish(self, update, context):
         # Save new message to database.
         update.callback_query.answer("Message was sent")

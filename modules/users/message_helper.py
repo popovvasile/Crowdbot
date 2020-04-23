@@ -216,7 +216,7 @@ def send_not_deleted_message_content(context, content, chat_id, update):
             poll = content_dict["poll_file"]
             context.bot.forward_message(chat_id=chat_id,  # the poll should not be deleted
                                         from_chat_id=update.effective_chat.id,
-                                        message_id=poll.id)
+                                        message_id=poll.message_id)
 
 
 def add_to_content(update, context):

@@ -1,13 +1,11 @@
 from datetime import datetime
 from uuid import uuid4
-from pprint import pprint
 import html
 
 from bson.objectid import ObjectId
 from telegram.error import BadRequest
 from telegram.constants import MAX_CAPTION_LENGTH
 from telegram import (ParseMode, InputMediaPhoto)
-from price_parser import Price
 
 from helper_funcs.helper import currency_limits_dict
 from helper_funcs.misc import get_obj

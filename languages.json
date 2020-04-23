@@ -288,7 +288,10 @@
         "no_admins_str": "You are the only administrator",
         "registered_admin_temp": "{}\n<i>Start date:</i> <b>{}</b>",
         "registration_link_not_active": "Registration link is no longer active. \nAsk admins for the new one",
-
+        "lang_menu_button": "Change the language",
+        "language_menu": "Here you can change the bot's language",
+        "en": "English",
+        "ru": "Russian",
 
         "----------------------------------------------------------------MESSAGES_MANAGEMENT": "----------------------------------------------------------------",
         "message_sent_blink": "Message sent",
@@ -785,7 +788,10 @@
         "no_admins_str": "Вы единственный администратор",
         "registered_admin_temp": "{}\n<i>Добавлен: </i> <b>{}</b>",
         "registration_link_not_active": "Ссылка для регистрации истекла. \nПопроси администратора создать новую.",
-
+        "lang_menu_button": "Поменять язык",
+        "language_menu": "Здесь вы можете поменять язык",
+        "en": "Английский",
+        "ru": "Русский",
 
         "----------------------------------------------------------------MESSAGES_MANAGEMENT": "----------------------------------------------------------------",
         "message_sent_blink": "Сообщение отправлено.",

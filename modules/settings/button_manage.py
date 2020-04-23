@@ -108,7 +108,7 @@ def validate_link(update, context):
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("_",
                                       url=update.message.text)]
-            ]))
+            ])).result()
         context.bot.delete_message(update.effective_chat.id,
                                    message.message_id)
         return update.message.text
