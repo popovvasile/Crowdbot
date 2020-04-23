@@ -71,7 +71,8 @@ class CreateShopHandler(object):
             context.user_data["to_delete"] = []
         if update.message:
             context.user_data["new_product"].description = update.message.text
-        delete_messages(update, context, True)
+        delete_list = context.user_data["to_delete"]
+        delete_list.append(update.message)
         context.user_data["shop_type"] = "offline"
         reply_markup = [
             [InlineKeyboardButton(text=context.bot.lang_dict["shop_creation_delivery"],
@@ -88,7 +89,8 @@ class CreateShopHandler(object):
         return CHOOSING_PICK_UP_OR_DELIVERY
 
     def handle_type(self, update, context):
-        delete_messages(update, context, True)
+        delete_list = context.user_data["to_delete"]
+        delete_list.append(update.message)
 
         reply_markup = InlineKeyboardMarkup(
             [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
@@ -109,7 +111,8 @@ class CreateShopHandler(object):
             return TYPING_SHOP_ADDRESS
 
     def handle_address(self, update, context):
-        delete_messages(update, context, True)
+        delete_list = context.user_data["to_delete"]
+        delete_list.append(update.message)
         chat_id, txt = initiate_chat_id(update)
         reply_markup = InlineKeyboardMarkup(
             [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
@@ -137,7 +140,8 @@ class CreateShopHandler(object):
         return TYPING_DESCRIPTION
 
     def handle_description(self, update, context):
-        delete_messages(update, context, True)
+        delete_list = context.user_data["to_delete"]
+        delete_list.append(update.message)
 
         chat_id, txt = initiate_chat_id(update)
         context.user_data["description"] = txt

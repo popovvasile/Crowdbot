@@ -78,6 +78,8 @@ def help_strings(context, update):
     help_dict["settings"] = dict(
         mod_name=string_d_str["add_menu_module_button"],
         admin_keyboard=[
+            [InlineKeyboardButton(text=string_d_str["lang_menu_button"],
+                                  callback_data="langmenu")],
             [InlineKeyboardButton(text=string_d_str["edit_menu_text"],
                                   callback_data="edit_bot_description")],
             [InlineKeyboardButton(text=string_d_str["menu_buttons_settings"],

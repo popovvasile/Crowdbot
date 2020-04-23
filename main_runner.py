@@ -6,7 +6,9 @@ import os
 
 import telegram
 import telegram.ext as tg
-from telegram.ext import CommandHandler, CallbackQueryHandler, MessageHandler, Filters
+from telegram import Bot
+from telegram.ext import CommandHandler, CallbackQueryHandler, MessageHandler, Filters, \
+    PicklePersistence
 from telegram.utils.request import Request
 
 from logs import logger
@@ -30,6 +32,7 @@ from helper_funcs.helper import (help_button, button_handler, get_help, WelcomeB
 #     SEND_POLL_TO_GROUP_HANDLER, SEND_SURVEY_TO_GROUP_HANDLER, SEND_DONATION_TO_GROUP_HANDLER)
 
 # SETTINGS
+from modules.settings.language_switch import LANG_MENU
 from modules.settings.menu_description import EDIT_BOT_DESCRIPTION_HANDLER
 from modules.settings.button_manage import (
     BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER, LINK_BUTTON_ADD_HANDLER,
@@ -152,8 +155,15 @@ def main(token, lang):
         bot_obj.lang_dict = lang_dicts["ENG"]
     else:
         bot_obj.lang_dict = lang_dicts["RUS"]
-
-    updater = tg.Updater(use_context=True, bot=bot_obj)
+    my_persistence = PicklePersistence(filename='persistence.bin')
+    # https://github.com/python-telegram-bot/python-telegram-bot/issues/1864
+    updater = tg.Updater(use_context=True, bot=bot_obj,
+                         workers=100, persistence=my_persistence)
+    # todo try to add async to
+    # every function one by one
+    # If you’re using @ run_async you cannot  rely on adding custom
+    # attributes  to telegram.ext.CallbackContext. See its docs for more info.
+    # https://python-telegram-bot.readthedocs.io/en/stable/telegram.ext.dispatcher.html?highlight=run_async%20#telegram.ext.Dispatcher.run_async
     dispatcher = updater.dispatcher
     start_handler = CommandHandler("start", WelcomeBot().start)
     help_handler = CommandHandler("help", get_help)
@@ -242,7 +252,8 @@ def main(token, lang):
     # dispatcher.add_handler(BUTTON_ADD_FINISH_HANDLER)
     dispatcher.add_handler(BACK_TO_BUTTONS_MENU)
     dispatcher.add_handler(BACK_TO_ONE_BUTTON_MENU)
-
+    dispatcher.add_handler(LANG_MENU)
+    dispatcher.add_handler(SET_LANG)
     # USER MODE
     dispatcher.add_handler(USER_MODE_ON)
     dispatcher.add_handler(USER_MODE_OFF)

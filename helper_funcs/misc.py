@@ -1,8 +1,8 @@
 from typing import List, Dict
 from uuid import uuid4
 
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
-from telegram.ext import CallbackContext, run_async
+from telegram import InlineKeyboardButton, ParseMode
+from telegram.ext import CallbackContext
 from telegram.error import TelegramError, Unauthorized
 from babel.dates import format_datetime
 from bson.objectid import ObjectId
@@ -14,7 +14,6 @@ LOAD = []
 NO_LOAD = ['translation', 'rss']
 
 
-@run_async
 def dismiss(update, context):
     try:
         context.bot.delete_message(update.effective_chat.id,
@@ -23,7 +22,7 @@ def dismiss(update, context):
         pass
 
 
-# @run_async  === never run it async
+#   === never run it async
 def delete_messages(update, context, message_from_update=False):
     if message_from_update:
         try:
@@ -84,9 +83,10 @@ def lang_timestamp(bot_lang: (CallbackContext, str), timestamp,
     return format_datetime(timestamp, pattern, locale=lang_keys[bot_lang])
 
 
-@run_async
 # May raise Exception and bson.errors.InvalidId
 def get_obj(table, obj: (ObjectId, dict, str)):
+    # if type(obj) is Promise:
+    #     obj = obj.result()
     if not obj:
         return {}
     if type(obj) is dict:
@@ -98,7 +98,7 @@ def get_obj(table, obj: (ObjectId, dict, str)):
     else:
         raise Exception
 
-@run_async
+
 def user_mention(username, string):
     """Users that have blocked the bot or never start it
     can't be shown as the url mention using "tg://user?id=".
@@ -139,7 +139,7 @@ def update_user_fields(context, user):
         users_table.update_one({"_id": user["_id"]},
                                {"$set": new_user_fields})
 
-@run_async
+
 def create_content_dict(update):
     """Creates content_dict from update.
     # todo use this function for all content_dict (messages, shop products, buttons)
@@ -205,7 +205,7 @@ def create_content_dict(update):
                         "name": update.message.sticker.emoji}
     return content_dict
 
-@run_async
+
 def send_content_dict(chat_id, context, content_dict,
                       caption=None, parse_mode=ParseMode.HTML, reply_markup=None):
     # todo use this function for all content_dict (shop products, buttons)
@@ -288,7 +288,7 @@ def send_content_dict(chat_id, context, content_dict,
                                      content_dict["file_id"],
                                      reply_markup=reply_markup))
 
-@run_async
+
 def content_dict_as_string(content_dict, context):
     string = ""
     if not content_dict:
