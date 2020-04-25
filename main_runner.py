@@ -33,7 +33,7 @@ from helper_funcs.helper import (help_button, button_handler, get_help, WelcomeB
 
 # SETTINGS
 from modules.settings.language_switch import LANG_MENU, SET_LANG
-from modules.settings.menu_description import EDIT_BOT_DESCRIPTION_HANDLER
+from modules.settings.menu_description import EDIT_BOT_DESCRIPTION_HANDLER, EDIT_PICTURE_HANDLER
 from modules.settings.button_manage import (
     BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER, LINK_BUTTON_ADD_HANDLER,
     CREATE_BUTTON_CHOOSE, BUTTONS_MENU, ONE_BUTTON_MENU, BACK_TO_BUTTONS_MENU,
@@ -134,11 +134,39 @@ class MQBot(telegram.bot.Bot):
         OPTIONAL arguments"""
         return super(MQBot, self).send_message(*args, **kwargs)
 
+    @mq.queuedmessage
+    def send_audio(self, *args, **kwargs):
+        return super(MQBot, self).send_audio(*args, **kwargs)
+
+    @mq.queuedmessage
+    def send_voice(self, *args, **kwargs):
+        return super(MQBot, self).send_voice(*args, **kwargs)
+
+    @mq.queuedmessage
+    def send_video(self, *args, **kwargs):
+        return super(MQBot, self).send_video(*args, **kwargs)
+
+    @mq.queuedmessage
+    def send_document(self, *args, **kwargs):
+        return super(MQBot, self).send_document(*args, **kwargs)
+
+    @mq.queuedmessage
+    def send_photo(self, *args, **kwargs):
+        return super(MQBot, self).send_photo(*args, **kwargs)
+
+    @mq.queuedmessage
+    def send_animation(self, *args, **kwargs):
+        return super(MQBot, self).send_animation(*args, **kwargs)
+
+    @mq.queuedmessage
+    def send_sticker(self, *args, **kwargs):
+        return super(MQBot, self).send_sticker(*args, **kwargs)
+
 
 def main(token, lang):
     # https://github.com/python-telegram-bot/python-telegram-bot/issues/787
     q = mq.MessageQueue(all_burst_limit=25, all_time_limit_ms=1200)
-    request = Request(con_pool_size=8)
+    request = Request(con_pool_size=104)
     bot_obj = MQBot(token, request=request, mqueue=q)
 
     filename = 'logs/{}.log'.format(bot_obj.name)
@@ -158,7 +186,9 @@ def main(token, lang):
     my_persistence = PicklePersistence(filename='persistence.bin')
     # https://github.com/python-telegram-bot/python-telegram-bot/issues/1864
     updater = tg.Updater(use_context=True, bot=bot_obj,
-                         workers=100, persistence=my_persistence)
+                         workers=100,
+                         # persistence=my_persistence
+                         )
     # todo try to add async to
     # every function one by one
     # If you’re using @ run_async you cannot  rely on adding custom
@@ -188,6 +218,7 @@ def main(token, lang):
     dispatcher.add_handler(dismiss_handler)
     # TODO priority is very important!!!!!!!!!!!!!!!!!!!!
     dispatcher.add_handler(EDIT_BOT_DESCRIPTION_HANDLER)
+    dispatcher.add_handler(EDIT_PICTURE_HANDLER)
 
     #  SHOP USER SIDE
     dispatcher.add_handler(EDIT_SHOP_HANDLER)

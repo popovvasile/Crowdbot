@@ -33,8 +33,8 @@ def multiple_bot_daemon():  # todo if token wrong- don't start it and notify
                     my_process[doc["token"]] = new_process
 
         for process_key in list(my_process):  # stop the unused tokens
-            list_of_tokens = [d['token'] for d in crowdbot_bots_table.find({"active": True}) if
-                              'token' in d]
+            list_of_tokens = [d['token'] for d in crowdbot_bots_table.find({"active": True})
+                              if 'token' in d]
             if process_key not in list_of_tokens:
                 my_process[process_key].terminate()
                 my_process.pop(process_key, None)

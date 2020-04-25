@@ -179,6 +179,7 @@ class UsersHandler(object):
             update.callback_query.answer(context.bot.lang_dict["no_users_str"])
             return self.back_to_users(update, context)
 
+    # TODO !! Other Users can't use but while this method searching for users. WTF?
     def do_search(self, update, context):
         delete_messages(update, context, True)
         reply_buttons = [[InlineKeyboardButton(context.bot.lang_dict["back_button"],
@@ -208,9 +209,11 @@ class UsersHandler(object):
                     context.bot.send_message(update.effective_chat.id,
                                              text=context.bot.lang_dict["no_users_str"],
                                              reply_markup=reply_markup))
+                return ConversationHandler.END
             else:
                 # Ask to "wait" notification
-                notification_msg = context.bot.send_message(
+                # TODO This back button - doesn't work while searching users
+                notification_promise = context.bot.send_message(
                     update.effective_chat.id,
                     context.bot.lang_dict["it_may_take_time"],
                     reply_markup=reply_markup)
@@ -219,7 +222,7 @@ class UsersHandler(object):
                 for user in users:
                     # Update user names and check if the user block the bot
                     update_user_fields(context, user)
-                    pprint(user)
+                    # pprint(user)
                     # Check username and full name for the pattern
                     if (not user["unsubscribed"]
                             and (pattern in (user["username"] or "")
@@ -227,9 +230,12 @@ class UsersHandler(object):
                         result.append(user)
                 # Delete "wait" notification
                 try:
-                    notification_msg.delete()
+                    notification_msg = notification_promise.result()
+                    if notification_msg:
+                        notification_msg.delete()
                 except TelegramError:
                     pass
+
                 if result:
                     context.user_data["found_users"] = result
                     return self.send_found_users(update, context)

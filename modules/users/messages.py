@@ -2,14 +2,16 @@
 # # -*- coding: utf-8 -*-
 import datetime
 import time
+from multiprocessing import Process
+import requests
+from threading import Thread
 
 from bson.objectid import ObjectId
 from haikunator import Haikunator
 from telegram.error import TelegramError
-from telegram import (InlineKeyboardButton, InlineKeyboardMarkup,
-                      ReplyKeyboardMarkup, ReplyKeyboardRemove, ParseMode)
-from telegram.ext import (MessageHandler, Filters, ConversationHandler,
-                          CallbackQueryHandler)
+from telegram.utils.promise import Promise
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
+from telegram.ext import MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
 
 from helper_funcs.helper import get_help, dismiss_button
 from helper_funcs.misc import delete_messages, update_user_fields
@@ -19,8 +21,7 @@ from modules.users.users import UserTemplate
 from modules.users.message_helper import (
     MessageTemplate, send_not_deleted_message_content, add_to_content,
     send_deleted_message_content, AnswerToMessage, SenderHelper)
-from database import (users_messages_to_admin_table,
-                      user_categories_table, users_table)
+from database import users_messages_to_admin_table, users_table, chatbots_table
 
 
 def messages_menu(update, context):
@@ -114,7 +115,6 @@ class SendMessageToAdmin(SenderHelper):
         ])
         return SenderHelper().help_receive(update, context, reply_markup, MESSAGE)
 
-    # 
     def send_message_finish(self, update, context):
         # Save new message to database.
         update.callback_query.answer("Message was sent")
@@ -138,6 +138,7 @@ class SendMessageToAdmin(SenderHelper):
             datetime.datetime.now().replace(microsecond=0))
 
         users_messages_to_admin_table.insert(context.user_data["new_message"])
+        # TODO - async admin notifications
         # Send notification about new message to all admins
         for admin in users_table.find({"bot_id": context.bot.id, "is_admin": True}):
             if admin.get("messages_notification"):
@@ -174,7 +175,7 @@ class SendMessageToAdmin(SenderHelper):
 
 class SendMessageToUsers(object):
     def send_message(self, update, context):
-        delete_messages(update,context, True)
+        delete_messages(update, context, True)
         buttons = list()
         buttons.append([InlineKeyboardButton(
                             text=context.bot.lang_dict["back_button"],
@@ -199,28 +200,145 @@ class SendMessageToUsers(object):
         return SenderHelper().help_receive(update, context, reply_markup, MESSAGE_TO_USERS)
 
     def send_message_finish(self, update, context):
+        """Old Version"""
+        # users = users_table.find({"bot_id": context.bot.id,
+        #                           "blocked": False,
+        #                           "unsubscribed": False})
+        # for user in users:
+        #     update_user_fields(context, user)
+        #     if (user["chat_id"] != update.callback_query.message.chat_id and
+        #             not user["unsubscribed"]):
+        #             try:
+        #                 send_not_deleted_message_content(
+        #                     context,
+        #                     chat_id=user["chat_id"],
+        #                     content=context.user_data["content"],
+        #                     update=update)
+        #             except:
+        #                 continue
 
+        """Processing Version"""
+        # new_process = Process(target=SendMessageToUsers().mailing,
+        #                       args=(update, context))
+        # new_process.start()
+        # new_process.join()
+
+        """Threading Version"""
+        Thread(target=SendMessageToUsers.mailing,
+               args=(update, context, context.user_data["content"])).start()
+
+        logger.info("Admin {} on bot {}:{} sent message to all users".format(
+            update.effective_user.first_name, context.bot.first_name, context.bot.id))
+        return back_to_messages_menu(update, context)
+
+    @staticmethod
+    def mailing(update, context, content):
         users = users_table.find({"bot_id": context.bot.id,
                                   "blocked": False,
                                   "unsubscribed": False})
-        messages_menu(update, context)
+        chat_bot = chatbots_table.find_one({"bot_id": context.bot.id})   # or {}
         for user in users:
             update_user_fields(context, user)
-            if (user["chat_id"] != update.callback_query.message.chat_id
-                    and not user["unsubscribed"]):
-                    try:
-                        send_not_deleted_message_content(
-                            context,
-                            chat_id=user["chat_id"],
-                            content=context.user_data["content"],
-                            update=update)
-                    except:
-                        continue
+            if (  # user["chat_id"] != update.callback_query.message.chat_id and
+                    not user["unsubscribed"]):
+                """MQBot methods for sending content"""
+                # telegram.error.RetryAfter: Flood control exceeded. Retry in 9 seconds
+                # telegram.error.TimedOut: Timed out
+                # telegram.vendor.ptb_urllib3.urllib3.exceptions.ReadTimeoutError:
+                # socket.timeout: The read operation timed out
 
-        logger.info("Admin {} on bot {}:{} sent message to all users".format(
-            update.effective_user.first_name, context.bot.first_name,
-            context.bot.id))
-        return
+                # send_not_deleted_message_content(
+                #     context,
+                #     chat_id=user["chat_id"],
+                #     content=content,
+                #     update=update)
+
+                """Requests for sending content"""
+                # TODO try except
+                for content_dict in content:
+                    if "text" in content_dict:
+                        requests.get(
+                            "https://api.telegram.org/bot{}/sendMessage".format(chat_bot["token"]),
+                            params={"chat_id": user["chat_id"],
+                                    "text": content_dict["text"]})
+
+                    if "audio_file" in content_dict:
+                        # context.bot.send_audio(chat_id, content_dict["audio_file"])
+                        requests.get(
+                            "https://api.telegram.org/bot{}/sendAudio".format(chat_bot["token"]),
+                            params={"chat_id": user["chat_id"],
+                                    "audio": content_dict["audio_file"]})
+
+                    if "voice_file" in content_dict:
+                        # context.bot.send_voice(chat_id, content_dict["voice_file"])
+                        requests.get(
+                            "https://api.telegram.org/bot{}/sendVoice".format(chat_bot["token"]),
+                            params={"chat_id": user["chat_id"],
+                                    "voice": content_dict["voice_file"]})
+
+                    if "video_file" in content_dict:
+                        # context.bot.send_video(chat_id, content_dict["video_file"])
+                        requests.get(
+                            "https://api.telegram.org/bot{}/sendVideo".format(chat_bot["token"]),
+                            params={"chat_id": user["chat_id"],
+                                    "video": content_dict["video_file"]})
+
+                    if "video_note_file" in content_dict:
+                        # context.bot.send_video_note(chat_id, content_dict["video_note_file"])
+                        requests.get(
+                            "https://api.telegram.org/bot{}/sendVideoNote".format(
+                                chat_bot["token"]),
+                            params={"chat_id": user["chat_id"],
+                                    "video_note": content_dict["video_note_file"]})
+
+                    if "document_file" in content_dict:
+                        if (".png" in content_dict["document_file"] or
+                                ".jpg" in content_dict["document_file"]):
+                            # context.bot.send_photo(chat_id, content_dict["document_file"])
+                            requests.get(
+                                "https://api.telegram.org/bot{}/sendPhoto".format(
+                                    chat_bot["token"]),
+                                params={"chat_id": user["chat_id"],
+                                        "photo": content_dict["document_file"]})
+                        else:
+                            # context.bot.send_document(chat_id, content_dict["document_file"])
+                            requests.get(
+                                "https://api.telegram.org/bot{}/sendDocument".format(
+                                    chat_bot["token"]),
+                                params={"chat_id": user["chat_id"],
+                                        "document": content_dict["document_file"]})
+
+                    if "photo_file" in content_dict:
+                        # context.bot.send_photo(chat_id, content_dict["photo_file"])
+                        requests.get(
+                            "https://api.telegram.org/bot{}/sendPhoto".format(chat_bot["token"]),
+                            params={"chat_id": user["chat_id"],
+                                    "photo": content_dict["photo_file"]})
+
+                    if "animation_file" in content_dict:
+                        # context.bot.send_animation(chat_id, content_dict["animation_file"])
+                        requests.get(
+                            "https://api.telegram.org/bot{}/sendAnimation".format(
+                                chat_bot["token"]),
+                            params={"chat_id": user["chat_id"],
+                                    "animation": content_dict["animation_file"]})
+
+                    if "sticker_file" in content_dict:
+                        # context.bot.send_sticker(chat_id, content_dict["sticker_file"])
+                        requests.get(
+                            "https://api.telegram.org/bot{}/sendSticker".format(
+                                chat_bot["token"]),
+                            params={"chat_id": user["chat_id"],
+                                    "sticker": content_dict["sticker_file"]})
+
+                    if "poll_file" in content_dict:
+                        poll = content_dict["poll_file"]
+                        context.bot.forward_message(chat_id=user["chat_id"],
+                                                    # the poll should not be deleted
+                                                    from_chat_id=update.effective_chat.id,
+                                                    message_id=poll.message_id)
+
+        return True
 
     def cancel_creating_message(self, update, context):
         if context.user_data.get("user_input"):
@@ -350,27 +468,76 @@ class DeleteMessage(object):
 
 
 class SeeMessageToAdmin(object):
-    def see_messages(self, update, context):
+    def inbox(self, update, context):
         delete_messages(update, context, True)
         # Set current page integer in user_data.
         if update.callback_query.data.startswith("inbox_pagination_"):
             context.user_data["page"] = int(
                 update.callback_query.data.replace("inbox_pagination_", ""))
+        # If one of the filters buttons clicked - set new filters for query
+        if update.callback_query.data == 'inbox_message':
+            context.user_data['page'] = 1
+            context.user_data["filter"] = {"bot_id": context.bot.id,
+                                           "deleted": False,
+                                           "is_new": True}
+
+        elif update.callback_query.data == "show_unread_messages":
+            context.user_data['page'] = 1
+            context.user_data["filter"] = {"bot_id": context.bot.id,
+                                           "deleted": False,
+                                           "is_new": True}
+
+        elif update.callback_query.data == "show_read_messages":
+            context.user_data['page'] = 1
+            context.user_data["filter"] = {"bot_id": context.bot.id,
+                                           "deleted": False,
+                                           "is_new": False}
+
         if not context.user_data.get("page"):
             context.user_data["page"] = 1
+        # Send page with messages.
+        self.send_messages_layout(update, context)
+        return ConversationHandler.END
 
-        buttons = list()
-        buttons.append(
+    def send_messages_layout(self, update, context):
+        # Get messages with filters from user_data.
+        messages = users_messages_to_admin_table.find(
+            context.user_data["filter"]).sort([["_id", -1]])
+        # get title string for inbox list.
+        if context.user_data["filter"].get("is_new") is True:
+            title_str = "unread_messages_title"
+        elif context.user_data["filter"].get("is_new") is False:
+            title_str = "read_messages_title"
+        else:
+            title_str = "message_count_str"
+        title = context.bot.lang_dict[title_str].format(messages.count())
+
+        # Keyboard with messages list filters buttons
+        new_messages = users_messages_to_admin_table.find(
+            {"bot_id": context.bot.id,
+             "deleted": False,
+             "is_new": True}).sort([["_id", -1]])
+        old_messages = users_messages_to_admin_table.find(
+            {"bot_id": context.bot.id,
+             "deleted": False,
+             "is_new": False}).sort([["_id", -1]])
+
+        main_buttons = [
+            [InlineKeyboardButton(
+                text=context.bot.lang_dict["show_unread_messages"].format(new_messages.count()),
+                callback_data="show_unread_messages"),
+             InlineKeyboardButton(
+                 text=context.bot.lang_dict["show_read_messages"].format(old_messages.count()),
+                 callback_data="show_read_messages")],
             [InlineKeyboardButton(
                 text=context.bot.lang_dict["back_button"],
-                callback_data="messages_menu_back")])
-
-        messages = users_messages_to_admin_table.find(
-            {"bot_id": context.bot.id, "deleted": False}).sort([["_id", -1]])
-
+                callback_data="messages_menu_back")]
+        ]
         if messages.count():
+            # Create Pagination instance for showing page content and pages
             pagination = Pagination(messages, context.user_data["page"])
             for message in pagination.content:
+                # Buttons for message.
                 message_buttons = InlineKeyboardMarkup([
                     [InlineKeyboardButton(
                         text=context.bot.lang_dict["view_message_str"],
@@ -379,18 +546,17 @@ class SeeMessageToAdmin(object):
                 # Send message template.
                 MessageTemplate(message, context).send(
                     update.effective_chat.id, reply_markup=message_buttons)
-
+            # Send pagination navigation keyboard.
             pagination.send_keyboard(
                 update, context,
-                buttons=buttons, page_prefix="inbox_pagination",
-                text=context.bot.lang_dict["message_count_str"].format(
-                    messages.count()))
+                buttons=main_buttons, page_prefix="inbox_pagination", text=title)
         else:
+            # If no messages just send back button.
             context.bot.send_message(
                 chat_id=update.callback_query.message.chat_id,
-                text=context.bot.lang_dict["send_message_6"],
-                reply_markup=InlineKeyboardMarkup(buttons))
-        return ConversationHandler.END
+                text=context.bot.lang_dict["send_message_6"] + title,
+                reply_markup=InlineKeyboardMarkup(main_buttons),
+                parse_mode=ParseMode.HTML)
 
     def view_message(self, update, context):
         delete_messages(update, context, True)
@@ -537,13 +703,15 @@ class SeeMessageToAdmin(object):
         delete_messages(update, context, True)
         try:
             message = context.user_data["message"]
-            page = context.user_data["page"]
+            inbox_filter = context.user_data["filter"]
+            page = context.user_data.get("page", 1)
         except KeyError:
             context.user_data.clear()
             return get_help(update, context)
 
         context.user_data.clear()
         message = users_messages_to_admin_table.find_one({"_id": message["_id"]})
+        context.user_data["filter"] = inbox_filter
         context.user_data["page"] = page
         if message:
             context.user_data["message"] = message
@@ -556,11 +724,17 @@ class SeeMessageToAdmin(object):
         All backs to the messages list(inbox) must be done through this method
         """
         delete_messages(update, context, True)
-        page = context.user_data.get("page", 1)
+        try:
+            page = context.user_data.get("page", 1)
+            inbox_filter = context.user_data["filter"]
+        except KeyError:
+            context.user_data.clear()
+            return get_help(update, context)
 
         context.user_data.clear()
         context.user_data["page"] = page
-        return self.see_messages(update, context)
+        context.user_data["filter"] = inbox_filter
+        return self.inbox(update, context)
 
 
 class SubscriberOpenMessage(object):
@@ -574,7 +748,7 @@ class SubscriberOpenMessage(object):
         # Send user message content
         context.user_data["open_delete"].append(
             context.bot.send_message(chat_id=update.effective_chat.id,
-                                     text="<b>Your Message:</b>",
+                                     text=context.bot.lang_dict["your_message_title"],
                                      parse_mode=ParseMode.HTML))
         send_deleted_message_content(context,
                                      chat_id=update.effective_user.id,
@@ -585,7 +759,7 @@ class SubscriberOpenMessage(object):
         # User can open message only if the answer exist
         context.user_data["open_delete"].append(
             context.bot.send_message(chat_id=update.effective_chat.id,
-                                     text="<b>Answer:</b>",
+                                     text=context.bot.lang_dict["answer_title"],
                                      parse_mode=ParseMode.HTML))
         send_deleted_message_content(context,
                                      chat_id=update.effective_user.id,
@@ -595,7 +769,7 @@ class SubscriberOpenMessage(object):
         # Back button
         reply_markup = InlineKeyboardMarkup([
             [InlineKeyboardButton(
-                text="Hide",
+                text=context.bot.lang_dict["hide_btn"],
                 callback_data="hide_answer")]])
         context.user_data["open_delete"].append(
             context.bot.send_message(chat_id=update.effective_chat.id,
@@ -605,6 +779,10 @@ class SubscriberOpenMessage(object):
 
     def hide_answer(self, update, context):
         for msg in context.user_data.get('open_delete', list()):
+            if type(msg) is Promise:
+                msg = msg.result()
+            if not msg:
+                continue
             try:
                 context.bot.delete_message(update.effective_chat.id,
                                            msg.message_id)
@@ -693,8 +871,8 @@ SEND_MESSAGE_TO_USERS_HANDLER = ConversationHandler(
 
 """INBOX"""
 SEE_MESSAGES_HANDLER = CallbackQueryHandler(
-    pattern="^(inbox_message|inbox_pagination)",
-    callback=SeeMessageToAdmin().see_messages)
+    pattern="^(inbox_message|inbox_pagination|show_unread_messages|show_read_messages)",
+    callback=SeeMessageToAdmin().inbox)
 
 
 """DELETE 'WEEK' 'MONTH' 'ALL' MESSAGES"""

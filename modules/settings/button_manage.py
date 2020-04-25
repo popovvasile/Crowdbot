@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import html
 from pprint import pprint
+import time
 
 from telegram.error import BadRequest, TelegramError
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
@@ -102,16 +103,19 @@ def back_to_one_button_menu(update, context):
 def validate_link(update, context):
     # TODO Link length validation
     try:
-        message = context.bot.send_message(
+        promise = context.bot.send_message(
             update.effective_chat.id,
             text="_",
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("_",
                                       url=update.message.text)]
-            ])).result()
-        context.bot.delete_message(update.effective_chat.id,
-                                   message.message_id)
-        return update.message.text
+            ]))
+        if promise.result():
+            context.bot.delete_message(update.effective_chat.id,
+                                       promise.result().message_id)
+            return update.message.text
+        else:
+            return ""
     except BadRequest:
         return ""
 
@@ -524,6 +528,7 @@ class EditButtonHandler(object):
         reply_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                callback_data="cancel_link_edit")]]
         reply_markup = InlineKeyboardMarkup(reply_buttons)
+        # todo message length fix - if link too long
         context.user_data["to_delete"].append(
             context.bot.send_message(
                 update.effective_chat.id,

@@ -271,6 +271,40 @@ def add_to_content(update, context):
         context.user_data["content"].append(content_dict)
 
 
+def content_string(content, context):
+    """Makes message content as string for the message template"""
+    string = ""
+    for content_dict in content:
+        if "text" in content_dict:
+            str_for_text = content_dict['text'][:20]
+            if len(content_dict['text']) > 20:
+                str_for_text += "..."
+            string += f"• {html.escape(str_for_text, quote=False)}\n"
+
+        if "photo_file" in content_dict:
+            string += context.bot.lang_dict["photo_file"]
+
+        if "voice_file" in content_dict:
+            string += context.bot.lang_dict["voice_file"]
+
+        if ("audio_file" in content_dict or
+                "document_file" in content_dict or
+                "sticker_file" in content_dict):
+            string += f"• {content_dict['name']}\n"
+
+        if "video_file" in content_dict:
+            string += context.bot.lang_dict["video_file"]
+
+        if "video_note_file" in content_dict:
+            string += context.bot.lang_dict["video_note_file"]
+
+        if "animation_file" in content_dict:
+            string += context.bot.lang_dict["animation_file"]
+        if "poll_file" in content_dict:
+            string += context.bot.lang_dict["poll_file"]
+    return string[:-1]
+
+
 class MessageTemplate(object):
     def __init__(self, obj: (ObjectId, dict, str), context):
         self.context = context
@@ -314,9 +348,13 @@ class MessageTemplate(object):
                         self.user_mention,
                         lang_timestamp(self.context, self.timestamp),
                         content_string(self.content, self.context)))
+
         if self.answer_content:
-            template += self.context.bot.lang_dict["answer_field"].format(
-                content_string(self.answer_content, self.context))
+            answer = content_string(self.answer_content, self.context)
+        else:
+            answer = "🚫"  # emoji here
+        template += self.context.bot.lang_dict["answer_field"].format(answer)
+
         return template
 
     def send(self, chat_id, temp="full", reply_markup=None, text=""):
@@ -333,38 +371,3 @@ class MessageTemplate(object):
                 text=template + "\n\n" + text,
                 reply_markup=reply_markup,
                 parse_mode=ParseMode.HTML))
-
-
-# TODO STRINGS
-def content_string(content, context):
-    """Makes message content as string for the message template"""
-    string = ""
-    for content_dict in content:
-        if "text" in content_dict:
-            str_for_text = content_dict['text'][:20]
-            if len(content_dict['text']) > 20:
-                str_for_text += "..."
-            string += f"• {html.escape(str_for_text, quote=False)}\n"
-
-        if "photo_file" in content_dict:
-            string += context.bot.lang_dict["photo_file"]
-
-        if "voice_file" in content_dict:
-            string += context.bot.lang_dict["voice_file"]
-
-        if ("audio_file" in content_dict or
-                "document_file" in content_dict or
-                "sticker_file" in content_dict):
-            string += f"• {content_dict['name']}\n"
-
-        if "video_file" in content_dict:
-            string += context.bot.lang_dict["video_file"]
-
-        if "video_note_file" in content_dict:
-            string += context.bot.lang_dict["video_note_file"]
-
-        if "animation_file" in content_dict:
-            string += context.bot.lang_dict["animation_file"]
-        if "poll_file" in content_dict:
-            string += context.bot.lang_dict["poll_file"]
-    return string[:-1]

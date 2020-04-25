@@ -257,7 +257,6 @@ def back_to_modules(update, context):
     return help_button(update, context)
 
 
-
 def help_button(update, context):
     if users_table.find_one({"user_id": update.effective_user.id, "bot_id": context.bot.id}).get(
             "blocked", False):
@@ -318,12 +317,11 @@ def help_button(update, context):
                                          paginate_modules(HELPABLE, "help", context.bot.id)))
 
         elif back_match or back_button_match:
-            context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                                       message_id=update.callback_query.message.message_id)
-            delete_messages(update, context)
+            # context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
+            #                            message_id=update.callback_query.message.message_id)
+            delete_messages(update, context, True)
             get_help(update, context)
             return ConversationHandler.END
-
 
         else:
             query.message.reply_text(text=HELP_STRINGS.format(welcome_message),
@@ -347,7 +345,6 @@ def help_button(update, context):
             pass
         else:
             logger.exception("Exception in help buttons. %s", str(query.data))
-
 
 
 def get_help(update, context):
@@ -390,7 +387,6 @@ def on_stupid_strings(update, context):
 
 class WelcomeBot(object):
     @staticmethod
-    
     def start(update, context):
         chat_id, txt = initiate_chat_id(update)
         if chat_id < 0:
