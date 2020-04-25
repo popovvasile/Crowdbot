@@ -8,6 +8,7 @@ from telegram.error import BadRequest, TelegramError
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 from telegram.ext import MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
 from bson.objectid import ObjectId
+from telegram.utils.promise import Promise
 
 from database import custom_buttons_table
 from helper_funcs.auth import initiate_chat_id
@@ -103,16 +104,18 @@ def back_to_one_button_menu(update, context):
 def validate_link(update, context):
     # TODO Link length validation
     try:
-        promise = context.bot.send_message(
+        message = context.bot.send_message(
             update.effective_chat.id,
             text="_",
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("_",
                                       url=update.message.text)]
             ]))
-        if promise.result():
+        if type(message) is Promise:
+            message = message.result()
+        if message:
             context.bot.delete_message(update.effective_chat.id,
-                                       promise.result().message_id)
+                                       message.message_id)
             return update.message.text
         else:
             return ""

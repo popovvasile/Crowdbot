@@ -263,28 +263,24 @@ class SendMessageToUsers(object):
                                     "text": content_dict["text"]})
 
                     if "audio_file" in content_dict:
-                        # context.bot.send_audio(chat_id, content_dict["audio_file"])
                         requests.get(
                             "https://api.telegram.org/bot{}/sendAudio".format(chat_bot["token"]),
                             params={"chat_id": user["chat_id"],
                                     "audio": content_dict["audio_file"]})
 
                     if "voice_file" in content_dict:
-                        # context.bot.send_voice(chat_id, content_dict["voice_file"])
                         requests.get(
                             "https://api.telegram.org/bot{}/sendVoice".format(chat_bot["token"]),
                             params={"chat_id": user["chat_id"],
                                     "voice": content_dict["voice_file"]})
 
                     if "video_file" in content_dict:
-                        # context.bot.send_video(chat_id, content_dict["video_file"])
                         requests.get(
                             "https://api.telegram.org/bot{}/sendVideo".format(chat_bot["token"]),
                             params={"chat_id": user["chat_id"],
                                     "video": content_dict["video_file"]})
 
                     if "video_note_file" in content_dict:
-                        # context.bot.send_video_note(chat_id, content_dict["video_note_file"])
                         requests.get(
                             "https://api.telegram.org/bot{}/sendVideoNote".format(
                                 chat_bot["token"]),
@@ -294,14 +290,12 @@ class SendMessageToUsers(object):
                     if "document_file" in content_dict:
                         if (".png" in content_dict["document_file"] or
                                 ".jpg" in content_dict["document_file"]):
-                            # context.bot.send_photo(chat_id, content_dict["document_file"])
                             requests.get(
                                 "https://api.telegram.org/bot{}/sendPhoto".format(
                                     chat_bot["token"]),
                                 params={"chat_id": user["chat_id"],
                                         "photo": content_dict["document_file"]})
                         else:
-                            # context.bot.send_document(chat_id, content_dict["document_file"])
                             requests.get(
                                 "https://api.telegram.org/bot{}/sendDocument".format(
                                     chat_bot["token"]),
@@ -309,14 +303,12 @@ class SendMessageToUsers(object):
                                         "document": content_dict["document_file"]})
 
                     if "photo_file" in content_dict:
-                        # context.bot.send_photo(chat_id, content_dict["photo_file"])
                         requests.get(
                             "https://api.telegram.org/bot{}/sendPhoto".format(chat_bot["token"]),
                             params={"chat_id": user["chat_id"],
                                     "photo": content_dict["photo_file"]})
 
                     if "animation_file" in content_dict:
-                        # context.bot.send_animation(chat_id, content_dict["animation_file"])
                         requests.get(
                             "https://api.telegram.org/bot{}/sendAnimation".format(
                                 chat_bot["token"]),
@@ -324,7 +316,6 @@ class SendMessageToUsers(object):
                                     "animation": content_dict["animation_file"]})
 
                     if "sticker_file" in content_dict:
-                        # context.bot.send_sticker(chat_id, content_dict["sticker_file"])
                         requests.get(
                             "https://api.telegram.org/bot{}/sendSticker".format(
                                 chat_bot["token"]),

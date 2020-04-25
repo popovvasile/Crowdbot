@@ -6,6 +6,7 @@ from bson.objectid import ObjectId
 from telegram.error import Unauthorized, TelegramError
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 from telegram.ext import MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
+from telegram.utils.promise import Promise
 
 from helper_funcs.helper import get_help, back_to_modules
 from helper_funcs.pagination import Pagination
@@ -213,7 +214,7 @@ class UsersHandler(object):
             else:
                 # Ask to "wait" notification
                 # TODO This back button - doesn't work while searching users
-                notification_promise = context.bot.send_message(
+                notification_msg = context.bot.send_message(
                     update.effective_chat.id,
                     context.bot.lang_dict["it_may_take_time"],
                     reply_markup=reply_markup)
@@ -230,7 +231,8 @@ class UsersHandler(object):
                         result.append(user)
                 # Delete "wait" notification
                 try:
-                    notification_msg = notification_promise.result()
+                    if type(notification_msg) is Promise:
+                        notification_msg = notification_msg.result()
                     if notification_msg:
                         notification_msg.delete()
                 except TelegramError:
