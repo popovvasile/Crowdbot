@@ -40,9 +40,11 @@ TODO FUTURE
         - https://python-telegram-bot.readthedocs.io/en/stable/telegram.html#passport
     * во время оформления offline заказа показывать все введённые поля
     * чекнуть что происходит - Обработка юзеров которые заблочили бота или удалили аккаунт(в заказах шопа, в списке юзеров)
-    * В каждом списке где есть пагинация - вернуть title (как было в прошлом) и сделать что бы pagination сообщение делало реплай на title
+    * В каждом списке где есть пагинация - вернуть title(или "Текущая страница") (как было в прошлом) и сделать что бы pagination сообщение делало реплай на title
             (это позволит юзером быстро переходить на вверх по списку при такой же информативности)
     * polls on user side
+    * Mailing history
+    * отложенные посты
 
 -TODO-FEATURES USER SIDE
     * Отмена заказа
@@ -72,3 +74,8 @@ TODO FUTURE
     * e-bay auction
     * PROMO CODE
     * Редактирование заказа
+
+
+
+[DONE]
+* !!! telegram.error.BadRequest: File is too big -> 50 mb

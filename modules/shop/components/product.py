@@ -296,39 +296,39 @@ class Product(object):
         """
         content_dict = {}
         if update.message.photo:
-            photo_file = update.message.photo[-1].get_file().file_id
+            photo_file = update.message.photo[-1].file_id
             content_dict = {"file_id": photo_file,
                             "type": "photo_file",
                             "id": str(uuid4())}
 
         elif update.message.audio:
-            audio_file = update.message.audio.get_file().file_id
+            audio_file = update.message.audio.file_id
             content_dict = {"file_id": audio_file,
                             "type": "audio_file",
                             "name": update.message.audio.title,
                             "id": str(uuid4())}
 
         elif update.message.voice:
-            voice_file = update.message.voice.get_file().file_id
+            voice_file = update.message.voice.file_id
             content_dict = {"file_id": voice_file,
                             "type": "voice_file",
                             "id": str(uuid4())}
 
         elif update.message.document:
-            document_file = update.message.document.get_file().file_id
+            document_file = update.message.document.file_id
             content_dict = {"file_id": document_file,
                             "type": "document_file",
                             "name": update.message.document.file_name,
                             "id": str(uuid4())}
 
         elif update.message.video:
-            video_file = update.message.video.get_file().file_id
+            video_file = update.message.video.file_id
             content_dict = {"file_id": video_file,
                             "type": "video_file",
                             "id": str(uuid4())}
 
         elif update.message.animation:
-            animation_file = update.message.animation.get_file().file_id
+            animation_file = update.message.animation.file_id
             content_dict = {"file_id": animation_file,
                             "type": "animation_file",
                             "id": str(uuid4())}

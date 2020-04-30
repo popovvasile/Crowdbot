@@ -2,9 +2,9 @@ import re
 import html
 import sys
 from pickle import PicklingError
-
 from urllib3.exceptions import HTTPError
 
+from bson.objectid import ObjectId
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, LabeledPrice
 from telegram.ext import ConversationHandler
 from telegram.error import (BadRequest, TimedOut, NetworkError, TelegramError,
@@ -18,9 +18,11 @@ from database import (custom_buttons_table, users_table, chatbots_table,
                       user_mode_table, products_table, groups_table)
 from logs import logger
 
+
 HELP_STRINGS = """
 {}
 """
+
 currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["KZT", "UAH", "RON", "PLN"]]
 
 
@@ -85,8 +87,7 @@ def user_main_menu_creator(bot):
                                                 callback_data="help_module(shop)")]]
 
     buttons = [InlineKeyboardButton(button["button"],
-                                    callback_data="button_{}".
-                                    format(button["button"].replace(" ", "").lower()))
+                                    callback_data="button_{}".format(button["_id"]))
                for button in custom_buttons_table.find({"bot_id": bot.id, "link_button": False})]
 
     buttons += [InlineKeyboardButton(button["button"], url=button["link"])
@@ -216,8 +217,7 @@ def button_handler(update, context):
     button_info = dict()
     try:
         button_info = custom_buttons_table.find_one(
-            {"bot_id": context.bot.id, "button_lower": button_callback_data.replace("button_", "")}
-        )
+            {"_id": ObjectId(button_callback_data.replace("button_", ""))})
         for content_dict in button_info["content"]:
             send_content_dict(query.message.chat.id, context, content_dict)
 

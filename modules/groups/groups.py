@@ -146,27 +146,27 @@ class SendPost(object):
             context.user_data["content"].append({"text": update.message.text})
 
         elif update.message.photo:
-            photo_file = update.message.photo[-1].get_file().file_id
+            photo_file = update.message.photo[-1].file_id
             context.user_data["content"].append({"photo_file": photo_file})
 
         elif update.message.audio:
-            audio_file = update.message.audio.get_file().file_id
+            audio_file = update.message.audio.file_id
             context.user_data["content"].append({"audio_file": audio_file})
 
         elif update.message.voice:
-            voice_file = update.message.voice.get_file().file_id
+            voice_file = update.message.voice.file_id
             context.user_data["content"].append({"audio_file": voice_file})
 
         elif update.message.document:
-            document_file = update.message.document.get_file().file_id
+            document_file = update.message.document.file_id
             context.user_data["content"].append({"document_file": document_file})
 
         elif update.message.video:
-            video_file = update.message.video.get_file().file_id
+            video_file = update.message.video.file_id
             context.user_data["content"].append({"video_file": video_file})
 
         elif update.message.video_note:
-            video_note_file = update.message.audio.get_file().file_id
+            video_note_file = update.message.audio.file_id
             context.user_data["content"].append({"video_file": video_note_file})
 
         final_reply_markup = InlineKeyboardMarkup(

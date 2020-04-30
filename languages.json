@@ -782,7 +782,7 @@
         "delete_button": "\uD83D\uDDD1 Удалить",
         "edit_button_button": "✏️ Изменить контент",
         "file_added_to": "Файл добавлен в {}",
-        "new_button_name": "Введи новое название для <b>{}</b>.",
+        "new_button_name": "Введи новое название для <b>{}</b>",
         "no_button_blink": "Кнопки больше нет",
         "simple_button_str": "Кнопка с контентом",
         "wrong_http_url": "Неправильная ссылка. Пришли мне другую.",

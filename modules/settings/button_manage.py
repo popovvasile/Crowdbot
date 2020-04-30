@@ -13,7 +13,7 @@ from telegram.utils.promise import Promise
 from database import custom_buttons_table
 from helper_funcs.auth import initiate_chat_id
 from helper_funcs.misc import (delete_messages, create_content_dict, send_content_dict,
-                               content_dict_as_string)
+                               content_dict_as_string, get_promise_msg)
 from helper_funcs.constants import MAX_BUTTON_NAME_LENGTH, MAX_BUTTON_CONTENT_COUNT
 from logs import logger
 
@@ -111,8 +111,7 @@ def validate_link(update, context):
                 [InlineKeyboardButton("_",
                                       url=update.message.text)]
             ]))
-        if type(message) is Promise:
-            message = message.result()
+        message = get_promise_msg(message)
         if message:
             context.bot.delete_message(update.effective_chat.id,
                                        message.message_id)
@@ -261,9 +260,9 @@ class AddCommands(object):
         update.callback_query.answer(
             context.bot.lang_dict["add_menu_buttons_str_5"].format(
                 context.user_data["new_button"]["button"]))
-        return self.cancel_button_creation(update, context)
+        return self.finish_button_creation(update, context)
 
-    def cancel_button_creation(self, update, context):
+    def finish_button_creation(self, update, context):
         if context.user_data["user_input"]:
             context.user_data["to_delete"].extend(context.user_data["user_input"])
         return back_to_buttons_menu(update, context)
@@ -345,7 +344,7 @@ class AddLinkButton(object):
                 context.bot.first_name,
                 context.bot.id,
                 context.user_data["new_button"]["button"]))
-            return AddCommands().cancel_button_creation(update, context)
+            return AddCommands().finish_button_creation(update, context)
 
 
 class DeleteButton(object):
@@ -399,6 +398,19 @@ class ChangeButtonName(object):
     def finish_new_name(self, update, context):
         delete_messages(update, context)
         context.user_data["user_input"].append(update.message)
+        reply_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                               callback_data="back_to_one_button_menu")]]
+        reply_markup = InlineKeyboardMarkup(reply_buttons)
+
+        if len(update.message.text) > MAX_BUTTON_NAME_LENGTH:
+            delete_messages(update, context, True)
+            context.user_data["to_delete"].append(
+                context.bot.send_message(update.effective_chat.id,
+                                         text=context.bot.lang_dict["invalid_button_name"]
+                                         + context.bot.lang_dict["add_menu_buttons_str_1_1"],
+                                         reply_markup=reply_markup))
+            return ENTER_NEW_NAME
+
         button_list = custom_buttons_table.find({"bot_id": context.bot.id,
                                                  "button": update.message.text})
         if not button_list.count():
@@ -406,17 +418,19 @@ class ChangeButtonName(object):
                 {"_id": context.user_data["button"]["_id"]},
                 {"$set": {"button": update.message.text,
                           "button_lower": update.message.text.replace(" ", "").lower()}})
-            return back_to_one_button_menu(update, context)
+            return self.finish_change_name(update, context)
         else:
-            reply_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                                   callback_data="back_to_one_button_menu")]]
-            reply_markup = InlineKeyboardMarkup(reply_buttons)
             context.user_data["to_delete"].append(
                 update.message.reply_text(
                     context.bot.lang_dict["add_menu_buttons_str_3"],
                     reply_markup=reply_markup,
                     reply_to_message_id=context.user_data["user_input"][-1].message_id))
             return ENTER_NEW_NAME
+
+    def finish_change_name(self, update, context):
+        if context.user_data["user_input"]:
+            context.user_data["to_delete"].extend(context.user_data["user_input"])
+        return back_to_one_button_menu(update, context)
 
 
 class EditButtonHandler(object):
@@ -603,7 +617,7 @@ LINK_BUTTON_ADD_HANDLER = ConversationHandler(
     },
 
     fallbacks=[
-        CallbackQueryHandler(callback=AddCommands().cancel_button_creation,
+        CallbackQueryHandler(callback=AddCommands().finish_button_creation,
                              pattern="cancel_button_creation")
         # CallbackQueryHandler(callback=AddCommands().back,
         #                      pattern=r"help_module"),
@@ -637,7 +651,7 @@ BUTTON_ADD_HANDLER = ConversationHandler(
                              pattern="back_to_buttons_menu"),
         # CallbackQueryHandler(callback=AddCommands().back,
         #                      pattern=r"help_module"),
-        CallbackQueryHandler(callback=AddCommands().cancel_button_creation,
+        CallbackQueryHandler(callback=AddCommands().finish_button_creation,
                              pattern="cancel_button_creation")
     ]
 )
@@ -673,7 +687,7 @@ CHANGE_BUTTON_NAME_HANDLER = ConversationHandler(
                            callback=ChangeButtonName().finish_new_name)]
         },
 
-    fallbacks=[CallbackQueryHandler(callback=back_to_one_button_menu,
+    fallbacks=[CallbackQueryHandler(callback=ChangeButtonName().finish_change_name,
                                     pattern=r"back_to_one_button_menu")]
 )
 

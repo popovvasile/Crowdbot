@@ -131,7 +131,10 @@ class MQBot(telegram.bot.Bot):
     @mq.queuedmessage
     def send_message(self, *args, **kwargs):
         """Wrapped method would accept new `queued` and `isgroup`
-        OPTIONAL arguments"""
+        OPTIONAL arguments
+
+        @mq.queuedmessage is a decorator to be used with :attr:`telegram.Bot` send* methods.
+        """
         return super(MQBot, self).send_message(*args, **kwargs)
 
     @mq.queuedmessage
@@ -165,10 +168,11 @@ class MQBot(telegram.bot.Bot):
 
 def main(token, lang):
     # https://github.com/python-telegram-bot/python-telegram-bot/issues/787
-    # q = mq.MessageQueue(all_burst_limit=25, all_time_limit_ms=1200)
     request = Request(con_pool_size=104)
+    # q = mq.MessageQueue(all_burst_limit=25, all_time_limit_ms=1200)
     # bot_obj = MQBot(token, request=request, mqueue=q)
     bot_obj = Bot(token, request=request)
+
     filename = 'logs/{}.log'.format(bot_obj.name)
     open(filename, "w+")
     hdlr = logging.FileHandler(filename)

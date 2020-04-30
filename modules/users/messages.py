@@ -14,13 +14,13 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 from telegram.ext import MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
 
 from helper_funcs.helper import get_help, dismiss_button
-from helper_funcs.misc import delete_messages, update_user_fields
+from helper_funcs.misc import delete_messages, update_user_fields, get_promise_msg
 from helper_funcs.pagination import Pagination
 from logs import logger
 from modules.users.users import UserTemplate
 from modules.users.message_helper import (
     MessageTemplate, send_not_deleted_message_content, add_to_content,
-    send_deleted_message_content, AnswerToMessage, SenderHelper)
+    send_deleted_message_content, AnswerToMessage, SenderHelper, send_request_content_dict)
 from database import users_messages_to_admin_table, users_table, chatbots_table
 
 
@@ -239,24 +239,27 @@ class SendMessageToUsers(object):
         chat_bot = chatbots_table.find_one({"bot_id": context.bot.id})   # or {}
         for user in users:
             update_user_fields(context, user)
-            if (  # user["chat_id"] != update.callback_query.message.chat_id and
+            if (user["chat_id"] != update.callback_query.message.chat_id and
                     not user["unsubscribed"]):
                 """MQBot methods for sending content"""
                 # telegram.error.RetryAfter: Flood control exceeded. Retry in 9 seconds
                 # telegram.error.TimedOut: Timed out
                 # telegram.vendor.ptb_urllib3.urllib3.exceptions.ReadTimeoutError:
                 # socket.timeout: The read operation timed out
-
+                # try:
                 # send_not_deleted_message_content(
                 #     context,
                 #     chat_id=user["chat_id"],
                 #     content=content,
                 #     update=update)
-
+                # except:
+                #     continue
                 """Requests for sending content"""
                 # TODO try except
                 for content_dict in content:
-                    if "text" in content_dict:
+                    send_request_content_dict(update, context, user["chat_id"],
+                                              chat_bot["token"], content_dict)
+                    """if "text" in content_dict:
                         requests.get(
                             "https://api.telegram.org/bot{}/sendMessage".format(chat_bot["token"]),
                             params={"chat_id": user["chat_id"],
@@ -327,8 +330,7 @@ class SendMessageToUsers(object):
                         context.bot.forward_message(chat_id=user["chat_id"],
                                                     # the poll should not be deleted
                                                     from_chat_id=update.effective_chat.id,
-                                                    message_id=poll.message_id)
-
+                                                    message_id=poll.message_id)"""
         return True
 
     def cancel_creating_message(self, update, context):
@@ -770,8 +772,7 @@ class SubscriberOpenMessage(object):
 
     def hide_answer(self, update, context):
         for msg in context.user_data.get('open_delete', list()):
-            if type(msg) is Promise:
-                msg = msg.result()
+            msg = get_promise_msg(msg)
             if not msg:
                 continue
             try:

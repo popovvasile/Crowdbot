@@ -11,7 +11,7 @@ from telegram.utils.promise import Promise
 from helper_funcs.helper import get_help, back_to_modules
 from helper_funcs.pagination import Pagination
 from helper_funcs.misc import (delete_messages, lang_timestamp, get_obj, user_mention,
-                               update_user_fields)
+                               update_user_fields, get_promise_msg)
 from logs import logger
 from modules.statistic.donation_statistic import DonationStatistic
 from modules.users.message_helper import (MessageTemplate, send_deleted_message_content,
@@ -232,7 +232,7 @@ class UsersHandler(object):
                 # Delete "wait" notification
                 try:
                     if type(notification_msg) is Promise:
-                        notification_msg = notification_msg.result()
+                        notification_msg = get_promise_msg(notification_msg)
                     if notification_msg:
                         notification_msg.delete()
                 except TelegramError:
@@ -286,15 +286,17 @@ class UsersHandler(object):
         page = context.user_data["page"]
         filter_ = context.user_data["filter"]
         filters_buttons = context.user_data["filters_buttons"]
+        # to_delete = context.user_data["to_delete"]
         context.user_data.clear()
+        # context.user_data["to_delete"] = to_delete
         context.user_data["page"] = page
         context.user_data["filter"] = filter_
         context.user_data["filters_buttons"] = filters_buttons
 
     def back_to_users(self, update, context):
         """All backs to user list must be done through this method"""
-        delete_messages(update, context, True)
         try:
+            delete_messages(update, context, True)
             self.clear_and_reset_user_data(context)
             return self.users(update, context)
         except KeyError:
