@@ -158,8 +158,9 @@ class OrdersHandler(OrdersHandlerHelper):
     #     return self.back_to_orders(update, context)
 
     def confirm_to_done(self, update: Update, context: CallbackContext):
-        delete_list = context.user_data["to_delete"]
-        delete_list.append(update.message)
+        # delete_list = context.user_data["to_delete"]
+        # delete_list.append(update.message)
+        delete_messages(update, context, True)
         if update.callback_query.data.startswith("admin_order_item_pagination"):
             context.user_data["item_page"] = int(
                 update.callback_query.data.replace("admin_order_item_pagination_", ""))
@@ -183,8 +184,9 @@ class OrdersHandler(OrdersHandlerHelper):
         return self.back_to_orders(update, context)
 
     def confirm_cancel_order(self, update: Update, context: CallbackContext):
-        delete_list = context.user_data["to_delete"]
-        delete_list.append(update.message)
+        # delete_list = context.user_data["to_delete"]
+        # delete_list.append(update.message)
+        delete_messages(update, context, True)
         # Set current page integer in the user_data.
         if update.callback_query.data.startswith("admin_order_item_pagination"):
             context.user_data["item_page"] = int(
@@ -195,10 +197,13 @@ class OrdersHandler(OrdersHandlerHelper):
             order_id = ObjectId(update.callback_query.data.split("/")[1])
             context.user_data["order"] = AdminOrder(context, order_id)
 
+        if context.user_data["order"].status:
+            confirm_text = context.bot.lang_dict["shop_admin_confirm_cancel"]
+        else:
+            confirm_text = context.bot.lang_dict["shop_admin_confirm_new_cancel"]
+
         context.user_data["order"].send_full_template(
-            update, context,
-            context.bot.lang_dict["shop_admin_confirm_cancel"],
-            keyboards(context)["confirm_cancel"])
+            update, context, confirm_text, keyboards(context)["confirm_cancel"])
         return CONFIRM_CANCEL
 
     def finish_cancel(self, update: Update, context: CallbackContext):
@@ -294,9 +299,8 @@ class OrdersHandler(OrdersHandlerHelper):
         return self.orders(update, context)
 
 
-ORDERS, CONFIRM_TO_PROCESS, CONFIRM_TO_DONE, \
-    CONFIRM_CANCEL, CONFIRM_TO_TRASH, EDIT, \
-    CHOOSE_PRODUCT = range(7)
+(ORDERS, CONFIRM_TO_PROCESS, CONFIRM_TO_DONE,
+ CONFIRM_CANCEL, CONFIRM_TO_TRASH, EDIT, CHOOSE_PRODUCT) = range(7)
 
 
 ORDERS_HANDLER = ConversationHandler(

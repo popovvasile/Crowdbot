@@ -8,7 +8,7 @@ from telegram.constants import MAX_CAPTION_LENGTH
 from telegram import (ParseMode, InputMediaPhoto)
 
 from helper_funcs.helper import currency_limits_dict
-from helper_funcs.misc import get_obj
+from helper_funcs.misc import get_obj, get_promise_msg
 from helper_funcs.constants import MAX_TEMP_DESCRIPTION_LENGTH, MAX_PRODUCT_NAME_LENGTH
 from modules.shop.helper.helper import send_media_arr
 from database import products_table, categories_table, orders_table, chatbots_table
@@ -189,7 +189,8 @@ class Product(object):
                 context.user_data["to_delete"].append(
                     context.bot.send_message(update.effective_chat.id,
                                              self.description, quote=False))
-                reply_to_message_id = context.user_data["to_delete"][-1].message_id
+                reply_to_message_id = get_promise_msg(
+                    context.user_data["to_delete"][-1]).message_id
             context.user_data["to_delete"].append(
                 context.bot.send_message(
                     chat_id=update.effective_chat.id,
@@ -204,7 +205,8 @@ class Product(object):
                     self.send_content(update.effective_chat.id,
                                       context, self.content[0],
                                       caption=html.escape(self.name, quote=False))
-                    reply_to_message_id = context.user_data["to_delete"][-1].message_id
+                    reply_to_message_id = get_promise_msg(
+                        context.user_data["to_delete"][-1]).message_id
                     context.user_data["to_delete"].append(
                         context.bot.send_message(
                             update.effective_chat.id,
@@ -221,7 +223,8 @@ class Product(object):
                     self.send_content(update.effective_chat.id,
                                       context, self.content[0],
                                       caption=html.escape(self.description, quote=False))
-                    reply_to_message_id = context.user_data["to_delete"][-1].message_id
+                    reply_to_message_id = get_promise_msg(
+                        context.user_data["to_delete"][-1]).message_id
                     context.user_data["to_delete"].append(
                         context.bot.send_message(
                             update.effective_chat.id,
@@ -267,7 +270,8 @@ class Product(object):
                     self.send_content(update.effective_chat.id,
                                       self.context, content_dict)
 
-            reply_to_message_id = context.user_data["to_delete"][-len(self.content)].message_id
+            reply_to_message_id = get_promise_msg(
+                context.user_data["to_delete"][-len(self.content)]).message_id
 
             if len(self.description) > MAX_TEMP_DESCRIPTION_LENGTH:
                 context.user_data["to_delete"].append(

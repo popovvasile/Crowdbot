@@ -258,7 +258,9 @@ def back_to_modules(update, context):
 
 
 def help_button(update, context):
-    if users_table.find_one({"user_id": update.effective_user.id, "bot_id": context.bot.id}).get(
+    # todo AttributeError: 'NoneType' object has no attribute 'get'
+    if users_table.find_one({"user_id": update.effective_user.id,
+                             "bot_id": context.bot.id}).get(
             "blocked", False):
         update.effective_message.reply_text(context.bot.lang_dict["blocked_user"])
         return ConversationHandler.END

@@ -3,14 +3,18 @@
 import json
 import logging
 import os
+import sys
 
 import telegram
 import telegram.ext as tg
-from telegram import Bot
-from telegram.ext import CommandHandler, CallbackQueryHandler, MessageHandler, Filters, \
-    PicklePersistence
+from telegram.error import Unauthorized
+from telegram.ext import messagequeue as mq
+from telegram.ext import (CommandHandler, CallbackQueryHandler, MessageHandler, Filters,
+                          PicklePersistence)
 from telegram.utils.request import Request
+from telegram import Bot
 
+from database import chatbots_table
 from logs import logger
 from helper_funcs.misc import dismiss
 from helper_funcs.helper import (help_button, button_handler, get_help, WelcomeBot,
@@ -111,7 +115,6 @@ from modules.shop.user_side.cart import (
 from modules.shop.user_side.orders import (
     USERS_ORDERS_LIST_HANDLER, USER_ORDER_ITEMS_PAGINATION, BACK_TO_USER_ORDERS,
     ORDER_PAYMENT_MENU)
-from telegram.ext import messagequeue as mq
 
 
 class MQBot(telegram.bot.Bot):
@@ -166,12 +169,25 @@ class MQBot(telegram.bot.Bot):
         return super(MQBot, self).send_sticker(*args, **kwargs)
 
 
+def catch_unauthorized(func):
+    def wrapper(token, lang):
+        try:
+            return func(token, lang)
+        except Unauthorized:
+            # TODO maybe delete other db data here and maybe need to change alive_checker a bit?
+            chatbots_table.update({"token": token},
+                                  {"$set": {"active": False}})
+            sys.exit()
+    return wrapper
+
+
+@catch_unauthorized
 def main(token, lang):
     # https://github.com/python-telegram-bot/python-telegram-bot/issues/787
     request = Request(con_pool_size=104)
-    # q = mq.MessageQueue(all_burst_limit=25, all_time_limit_ms=1200)
-    # bot_obj = MQBot(token, request=request, mqueue=q)
-    bot_obj = Bot(token, request=request)
+    q = mq.MessageQueue(all_burst_limit=25, all_time_limit_ms=1200)
+    bot_obj = MQBot(token, request=request, mqueue=q)
+    # bot_obj = Bot(token, request=request)
 
     filename = 'logs/{}.log'.format(bot_obj.name)
     open(filename, "w+")

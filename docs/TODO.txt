@@ -22,9 +22,9 @@
 
 
     BOT_FATHER
-        * Сделать юзеру возможность легче начать работу с ботом(кнопка с переходом в бот с командой /start)
+        [DONE] * Сделать юзеру возможность легче начать работу с ботом(кнопка с переходом в бот с командой /start)
         * Сделать что бы кнопка бек всегда работала
-        * Добавлено меню которое реагирует на текст и помогает выйти в главное меню
+        [DONE] * Добавлено меню которое реагирует на текст и помогает выйти в главное меню
 
 
 --BUGS
@@ -33,9 +33,15 @@
     * PRICE round in user side works strage
     * fix rus admin invite(no forward button)
     * Если у пользователя нет username - в базе данных в поле username может быть None - и в некоторых местах мы работаем с этим полем как с строкой - Exception
-    * Фотка отображается большой в списке юзеров - если у пользователя нет описание(if not user_bio: show without image)
+    * Фотка отображается большой в списке юзеров() - если у пользователя нет описание(if not user_bio: show without image)
     * В статистике не показываются ансабы, и те же ансабы остаются в статистике(проверить корректность работы)
     * поиску юзеров пизда
+    * JobQueee на отписчиков
+    * Редактирование сообщений в рассылках
+    * убрать валидацию телефонов
+    * /report в ботфазере - ему плохо
+    * shop_admin_confirm_new_cancel - кастомная строка если отменяешь новый заказ
+    * Нагрузочный тест
 
 --MAIN TODO
     * если в магазине одна категория товаров показывать сразу товары этой категории при клике на «Каталог» или даже менять кнопку каталог на кнопку этой категории
@@ -49,22 +55,6 @@
 	- * Добавить кнопки фильтров в заказы(новые, выполненные)
 	- * Добавление товара: убрать шаг с двойным подтверждением нового товара. Добавлять строки в описание товара при добавлении новой инфы о товаре.
 	- * В корзине, ордерс. Добавить кнопку: очистить корзину(Спорно из за проверки _id товаров)
-
-
-   * Edit link instead of edit
-   * List points (where red !) in create button
-   * Admins- <i> ---- <b> kartochki, total admins down  <code>number</code>
-   * Dlete admin  <i> ----  <b>
-   * <i>Your current shop description is: </i> - Описание шопа может быть размером в 4096 символов
-       <b>'TEST'</b>
-    *  <i>Current currency</i> is <b>RUB</b>  +ENTER+ everything in one message + remove Back text +
-    * All prices will be converted from RUB to USD - remove
-    * Send message read html, not markdown
-    * send message- sent messages are not deleted
-    * Catalog items - fix as in the admin
-    * Buy- Category above Name - everywhere in user and admin
-    * Your orders- down
-    * Delete Item - markdown
 
 
 --PREMIUM

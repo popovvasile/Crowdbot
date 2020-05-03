@@ -45,6 +45,9 @@ TODO FUTURE
     * polls on user side
     * Mailing history
     * отложенные посты
+    * в ботфазере фича "Остановить/Возобновить" для ботов
+    * TOKEN hashing, and improve bot_father connect(don't send tokens every time and don't use it on bot_father side)
+    * Фича по Переименованию кнопок "Магазин", "Сообщение"
 
 -TODO-FEATURES USER SIDE
     * Отмена заказа

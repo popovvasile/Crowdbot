@@ -295,8 +295,8 @@ class UsersHandler(object):
 
     def back_to_users(self, update, context):
         """All backs to user list must be done through this method"""
+        delete_messages(update, context, True)
         try:
-            delete_messages(update, context, True)
             self.clear_and_reset_user_data(context)
             return self.users(update, context)
         except KeyError:
