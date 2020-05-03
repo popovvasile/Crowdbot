@@ -212,34 +212,13 @@ class UsersHandler(object):
                                              reply_markup=reply_markup))
                 return ConversationHandler.END
             else:
-                # Ask to "wait" notification
-                # TODO This back button - doesn't work while searching users
-                notification_msg = context.bot.send_message(
-                    update.effective_chat.id,
-                    context.bot.lang_dict["it_may_take_time"],
-                    reply_markup=reply_markup)
-                result = list()
-                # Loop over all users and find matches.
-                for user in users:
-                    # Update user names and check if the user block the bot
-                    update_user_fields(context, user)
-                    # pprint(user)
-                    # Check username and full name for the pattern
-                    if (not user["unsubscribed"]
-                            and (pattern in (user["username"] or "")
-                                 or pattern in user["full_name"])):
-                        result.append(user)
-                # Delete "wait" notification
-                try:
-                    if type(notification_msg) is Promise:
-                        notification_msg = get_promise_msg(notification_msg)
-                    if notification_msg:
-                        notification_msg.delete()
-                except TelegramError:
-                    pass
+                result = users_table.find(
+                    {"$or": [{"username": {"$regex": pattern, "$options": "i"}},
+                             {"full_name": {"$regex": pattern, "$options": "i"}}]
+                     })
 
-                if result:
-                    context.user_data["found_users"] = result
+                if result.count():
+                    context.user_data["found_users"] = list(result)
                     return self.send_found_users(update, context)
                 else:
                     context.user_data["to_delete"].append(
@@ -255,21 +234,24 @@ class UsersHandler(object):
         # Set current page integer in user_data.
         if (update.callback_query
                 and update.callback_query.data.startswith("user_search_pagination")):
-            context.user_data["page"] = int(
+            context.user_data["search_page"] = int(
                 update.callback_query.data.replace("user_search_pagination_", ""))
-        if not context.user_data.get("page"):
-            context.user_data["page"] = 1
+        if not context.user_data.get("search_page"):
+            context.user_data["search_page"] = 1
 
         # Create Pagination instance for showing page content and pages
         pagination = Pagination(context.user_data["found_users"],
-                                page=context.user_data["page"])
+                                page=context.user_data["search_page"])
         # Loop over users on given page and send users templates.
         for user in pagination.content:
+            # Update user names and check if the user block the bot
+            update_user_fields(context, user)
             # Send template with keyboard.
             reply_markup = InlineKeyboardMarkup([
                 [InlineKeyboardButton(context.bot.lang_dict["open_btn_str"],
                                       callback_data=f"open_user/{user['_id']}")]
             ])
+
             UserTemplate(user).send(update, context, reply_markup=reply_markup)
         reply_buttons = [[InlineKeyboardButton(context.bot.lang_dict["back_button"],
                                                callback_data="back_to_users_list")]]
