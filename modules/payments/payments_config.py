@@ -206,8 +206,7 @@ class EditPaymentHandler(object):
                                          reply_markup=ReplyKeyboardRemove())
 
                 update.message.reply_text(context.bot.lang_dict["donations_edit_str_9"],
-                                          reply_markup=ReplyKeyboardMarkup(currency_keyboard,
-                                                                           one_time_keyboard=True))
+                                          reply_markup=InlineKeyboardMarkup(currency_keyboard))
                 # payment_token_button
             elif "payment_token" in data:
                 context.user_data["action"] = "payment_token"
@@ -248,8 +247,7 @@ class EditPaymentHandler(object):
                 context.user_data["to_delete"].append(
                     update.message.reply_text(
                         context.bot.lang_dict["donations_edit_str_9"],
-                        reply_markup=ReplyKeyboardMarkup(currency_keyboard,
-                                                         one_time_keyboard=True)))
+                        reply_markup=InlineKeyboardMarkup(currency_keyboard)))
             elif "address" in data:
                 context.user_data["action"] = "address"
                 text = context.bot.lang_dict["create_shop_str_9"]
@@ -337,20 +335,22 @@ class EditPaymentHandler(object):
                 return EDIT_FINISH
             update_dict["address"] = txt
         if context.user_data["action"] == "currency":
+            currency = update.callback_query.data.replace("currency_", "")
             if chatbot["shop"]["shop_type"] == "online":
                 check = check_provider_token(provider_token=chatbot["shop"]["payment_token"],
-                                             update=update, context=context, currency=txt)
+                                             update=update, context=context,
+                                             currency=currency)
             else:
                 check = (True, "All good")
             if check[0]:
-                update_dict["currency"] = txt
-                context.user_data["currency"] = txt
+                update_dict["currency"] = currency
+                context.user_data["currency"] = currency
 
                 url = 'https://prime.exchangerate-api.com/v5/d50bf30b0f53baa26ac17d80/latest/'
                 url += chatbot["shop"]["currency"]
 
                 # Making our request
-                converted = float(requests.get(url).json()["conversion_rates"][txt])
+                converted = float(requests.get(url).json()["conversion_rates"][currency])
 
                 keyboard_markup = InlineKeyboardMarkup(
                     [[InlineKeyboardButton(text=context.bot.lang_dict["yes"],
@@ -359,9 +359,9 @@ class EditPaymentHandler(object):
                                            callback_data="change_currency_finish_NO")],
                      [back_btn("shop_config", context=context)]])
 
-                context.user_data["to_delete"].append(update.message.reply_text(
+                context.user_data["to_delete"].append(update.callback_query.message.reply_text(
                     context.bot.lang_dict["payments_currency_change"].format(
-                        chatbot["shop"]["currency"], str(round(converted * 100, 2)), txt),
+                        chatbot["shop"]["currency"], str(round(converted * 100, 2)), currency),
                     reply_markup=keyboard_markup,
                     parse_mode=ParseMode.HTML))
                 context.user_data["converted"] = converted
@@ -498,6 +498,8 @@ EDIT_SHOP_HANDLER = ConversationHandler(
                                  pattern=r"back_to_main_menu_btn"),
             CallbackQueryHandler(callback=Welcome().back_to_main_menu, pattern=r"help_back"),
             CallbackQueryHandler(callback=Welcome().back_to_main_menu, pattern=r"help_module"),
+            CallbackQueryHandler(callback=EditPaymentHandler().handle_edit_finish,
+                                 pattern=r"currency_"),
             MessageHandler(Filters.text, EditPaymentHandler().handle_edit_finish)
         ],
         CURRENCY_FINISH: [

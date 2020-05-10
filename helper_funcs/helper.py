@@ -22,8 +22,25 @@ from logs import logger
 HELP_STRINGS = """
 {}
 """
+currency_keyboard = [[InlineKeyboardButton(text="USD",
+                     callback_data="currency_USD"),
+InlineKeyboardButton(text="RUB",
+                     callback_data="currency_RUB"),
+InlineKeyboardButton(text="EUR",
+                     callback_data="currency_EUR")],
+[InlineKeyboardButton(text="GBP",
+                     callback_data="currency_GBP"),
+InlineKeyboardButton(text="KZT",
+                     callback_data="currency_KZT"),
+InlineKeyboardButton(text="UAH",
+                     callback_data="currency_UAH")],
+[InlineKeyboardButton(text="RON",
+                     callback_data="currency_RON"),
+InlineKeyboardButton(text="PLN",
+                     callback_data="currency_PLN")]]
 
-currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["KZT", "UAH", "RON", "PLN"]]
+
+# currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["KZT", "UAH", "RON", "PLN"]]
 
 
 def return_to_menu(update, context):

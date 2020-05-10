@@ -15,6 +15,7 @@ from telegram.utils.request import Request
 from telegram import Bot
 
 from database import chatbots_table
+from helper_funcs.unsubscribers_checker import update_user_unsubs
 from logs import logger
 from helper_funcs.misc import dismiss
 from helper_funcs.helper import (help_button, button_handler, get_help, WelcomeBot,
@@ -209,6 +210,8 @@ def main(token, lang):
                          workers=100,
                          # persistence=my_persistence
                          )
+    job = updater.job_queue
+    job.run_repeating(update_user_unsubs, interval=3600*24, first=0)
     # todo try to add async to
     # every function one by one
     # If you’re using @ run_async you cannot  rely on adding custom

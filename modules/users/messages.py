@@ -1,5 +1,5 @@
-# #!/usr/bin/env python
-# # -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import datetime
 import time
 from multiprocessing import Process
@@ -241,96 +241,12 @@ class SendMessageToUsers(object):
             update_user_fields(context, user)
             if (user["chat_id"] != update.callback_query.message.chat_id and
                     not user["unsubscribed"]):
-                """MQBot methods for sending content"""
-                # telegram.error.RetryAfter: Flood control exceeded. Retry in 9 seconds
-                # telegram.error.TimedOut: Timed out
-                # telegram.vendor.ptb_urllib3.urllib3.exceptions.ReadTimeoutError:
-                # socket.timeout: The read operation timed out
-                # try:
-                # send_not_deleted_message_content(
-                #     context,
-                #     chat_id=user["chat_id"],
-                #     content=content,
-                #     update=update)
-                # except:
-                #     continue
                 """Requests for sending content"""
                 # TODO try except
                 for content_dict in content:
                     send_request_content_dict(update, context, user["chat_id"],
                                               chat_bot["token"], content_dict)
-                    """if "text" in content_dict:
-                        requests.get(
-                            "https://api.telegram.org/bot{}/sendMessage".format(chat_bot["token"]),
-                            params={"chat_id": user["chat_id"],
-                                    "text": content_dict["text"]})
 
-                    if "audio_file" in content_dict:
-                        requests.get(
-                            "https://api.telegram.org/bot{}/sendAudio".format(chat_bot["token"]),
-                            params={"chat_id": user["chat_id"],
-                                    "audio": content_dict["audio_file"]})
-
-                    if "voice_file" in content_dict:
-                        requests.get(
-                            "https://api.telegram.org/bot{}/sendVoice".format(chat_bot["token"]),
-                            params={"chat_id": user["chat_id"],
-                                    "voice": content_dict["voice_file"]})
-
-                    if "video_file" in content_dict:
-                        requests.get(
-                            "https://api.telegram.org/bot{}/sendVideo".format(chat_bot["token"]),
-                            params={"chat_id": user["chat_id"],
-                                    "video": content_dict["video_file"]})
-
-                    if "video_note_file" in content_dict:
-                        requests.get(
-                            "https://api.telegram.org/bot{}/sendVideoNote".format(
-                                chat_bot["token"]),
-                            params={"chat_id": user["chat_id"],
-                                    "video_note": content_dict["video_note_file"]})
-
-                    if "document_file" in content_dict:
-                        if (".png" in content_dict["document_file"] or
-                                ".jpg" in content_dict["document_file"]):
-                            requests.get(
-                                "https://api.telegram.org/bot{}/sendPhoto".format(
-                                    chat_bot["token"]),
-                                params={"chat_id": user["chat_id"],
-                                        "photo": content_dict["document_file"]})
-                        else:
-                            requests.get(
-                                "https://api.telegram.org/bot{}/sendDocument".format(
-                                    chat_bot["token"]),
-                                params={"chat_id": user["chat_id"],
-                                        "document": content_dict["document_file"]})
-
-                    if "photo_file" in content_dict:
-                        requests.get(
-                            "https://api.telegram.org/bot{}/sendPhoto".format(chat_bot["token"]),
-                            params={"chat_id": user["chat_id"],
-                                    "photo": content_dict["photo_file"]})
-
-                    if "animation_file" in content_dict:
-                        requests.get(
-                            "https://api.telegram.org/bot{}/sendAnimation".format(
-                                chat_bot["token"]),
-                            params={"chat_id": user["chat_id"],
-                                    "animation": content_dict["animation_file"]})
-
-                    if "sticker_file" in content_dict:
-                        requests.get(
-                            "https://api.telegram.org/bot{}/sendSticker".format(
-                                chat_bot["token"]),
-                            params={"chat_id": user["chat_id"],
-                                    "sticker": content_dict["sticker_file"]})
-
-                    if "poll_file" in content_dict:
-                        poll = content_dict["poll_file"]
-                        context.bot.forward_message(chat_id=user["chat_id"],
-                                                    # the poll should not be deleted
-                                                    from_chat_id=update.effective_chat.id,
-                                                    message_id=poll.message_id)"""
         return True
 
     def cancel_creating_message(self, update, context):

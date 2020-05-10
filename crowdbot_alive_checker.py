@@ -12,7 +12,7 @@ crowdbot_bots_table = crowdbot_db["crowdbot_chatbots"]
 
 def multiple_bot_daemon():  # todo if token wrong- don't start it and notify
     my_process = {}
-    print(crowdbot_bots_table.find().count())
+    print(crowdbot_bots_table.count_documents({"active": True}))
     while True:
         # Crowdbot
         for doc in crowdbot_bots_table.find({"active": True}):

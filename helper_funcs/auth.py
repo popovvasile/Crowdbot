@@ -119,12 +119,16 @@ def register_admin(update, context):
 
 
 def initiate_chat_id(update):
+
     chat_id = update.effective_chat.id
-    txt = ""
-    if update.message.text:
-        txt = txt + update.message.text
-    elif update.message.caption:
-        txt = txt + update.message.caption
+    if update.message:
+        txt = ""
+        if update.message.text:
+            txt = txt + update.message.text
+        elif update.message.caption:
+            txt = txt + update.message.caption
+    else:
+        txt=None
     return chat_id, txt
 
 

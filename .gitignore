@@ -125,3 +125,4 @@ dmypy.json
 =======
 .pyre/
 
+/modules/paid_content/
