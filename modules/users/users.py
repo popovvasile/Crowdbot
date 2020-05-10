@@ -180,7 +180,6 @@ class UsersHandler(object):
             update.callback_query.answer(context.bot.lang_dict["no_users_str"])
             return self.back_to_users(update, context)
 
-    # TODO !! Other Users can't use but while this method searching for users. WTF?
     def do_search(self, update, context):
         delete_messages(update, context, True)
         reply_buttons = [[InlineKeyboardButton(context.bot.lang_dict["back_button"],
@@ -598,20 +597,20 @@ class SendMessageToUser(object):
         return SenderHelper().help_receive(update, context, reply_markup, MESSAGE_TO_USER)
 
     def send_message_finish(self, update, context):
-        try:
-            send_not_deleted_message_content(
-                context,
-                # TODO NO CHAT_ID HERE
-                chat_id=context.user_data["chat_id"],
-                content=context.user_data["content"],
-                update=update
-                )
-        except Unauthorized:
-            update.callback_query.answer(context.bot.lang_dict["user_unauthorized"])
-            return self.cancel_creating_message(update, context)
-        logger.info("Admin {} on bot {}:{} sent a message to the user".format(
-            update.effective_user.first_name,
-            context.bot.first_name, context.bot.id))
+        # try:
+        send_not_deleted_message_content(
+            context,
+            # TODO NO CHAT_ID HERE
+            chat_id=context.user_data["chat_id"],
+            content=context.user_data["content"],
+            update=update
+            )
+        # except Unauthorized:
+        #     update.callback_query.answer(context.bot.lang_dict["user_unauthorized"])
+        #     return self.cancel_creating_message(update, context)
+        # logger.info("Admin {} on bot {}:{} sent a message to the user".format(
+        #     update.effective_user.first_name,
+        #     context.bot.first_name, context.bot.id))
         # TODO STRINGS
         update.callback_query.answer(context.bot.lang_dict["message_sent_blink"])
         return UsersHandler().back_to_open_user(update, context)
