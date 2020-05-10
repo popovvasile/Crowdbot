@@ -1,5 +1,7 @@
 import re
 import html
+from datetime import datetime
+
 import sys
 from pickle import PicklingError
 from urllib3.exceptions import HTTPError
@@ -185,7 +187,9 @@ def error_callback(update, context):
 
     except Unauthorized:
         chatbots_table.update({"bot_id": context.bot.id},
-                              {"$set": {"active": False}})
+                              {"$set": {"active": False,
+                                        # "deactivation_time": datetime.now()
+                                        }})
         sys.exit()
 
     except ConnectionError as err:

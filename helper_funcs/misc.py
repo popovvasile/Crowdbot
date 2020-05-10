@@ -27,8 +27,9 @@ def dismiss(update, context):
 
 #   === never run it async
 def delete_messages(update, context, message_from_update=False):
-    Thread(target=async_delete,
-           args=(update, context, context.user_data.copy(), message_from_update)).start()
+    if context and context.user_data:
+        Thread(target=async_delete,
+               args=(update, context, context.user_data.copy(), message_from_update)).start()
     context.user_data['to_delete'] = list()
     """if message_from_update:
         try:
