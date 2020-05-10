@@ -118,6 +118,8 @@ STRINGS
 	* imports(first build-in, then dependencies, then project imports)
 	* use "update.effective_chat.id" to pass chat_id
 	* use "" for strings not ''
+	* update_callback_query after each inline button press
+	* use <strong> and <em>, not <b> and <i>
 
 --NOTES
     # 410694247 - Tranzzo,

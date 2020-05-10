@@ -17,12 +17,6 @@ donations_table = crowdbot_db['donations_table']
 users_table = crowdbot_db['users']
 
 
-# TODO
-#       /crowdbot  [GET, POST, DELETE]
-#       /crowdbots -> [GET]
-#       /user_bots -> [GET]
-
-
 def format_for_response(chatbot):
     """Adds additional fields to chatbot dict."""
     active_users = users_table.find({"bot_id": chatbot["bot_id"],
@@ -59,10 +53,8 @@ def convert_types(obj):
 @app.route("/user_bots/<int:user_id>", methods=["GET"])
 def user_bots(user_id):
     """Get bots by user_id. Only for admins."""
-    return make_response((
-        {"result": list(map(format_for_response,
-                            crowdbot_bots_table.find({"superuser": user_id})))
-         }, 200))
+    result = list(map(format_for_response, crowdbot_bots_table.find({"superuser": user_id})))
+    return make_response(({"result": result}, 200))
 
 
 # todo pagination
@@ -70,26 +62,18 @@ def user_bots(user_id):
 def get_all_bots():
     """Get all bots"""
     # TODO Very bad - make pagination. So slow
-    return make_response((
-        {"result": list(map(format_for_response, crowdbot_bots_table.find()))}, 200))
+    result = list(map(format_for_response, crowdbot_bots_table.find()))
+    return make_response(({"result": result}, 200))
 
 
-@app.route("/crowdbot/<string:token>", methods=["GET"])
-def crowdbot_on_get(token):
-    """Get bot by token."""
-    telegram_check = requests.get(url=f"https://api.telegram.org/"
-                                      f"bot{token}/getMe").json()
-    if not telegram_check.get("ok"):
-        resp = ({"message": "Token Error",
-                 "result": telegram_check}, telegram_check["error_code"])
+@app.route("/crowdbot/<int:bot_id>", methods=["GET"])
+def crowdbot_on_get(bot_id):
+    """Get bot by bot_id"""
+    chatbot = crowdbot_bots_table.find_one({"bot_id": bot_id})
+    if chatbot:
+        resp = ({"message": "Bot Exist", "result": format_for_response(chatbot)}, 200)
     else:
-        chatbot = crowdbot_bots_table.find_one({"bot_id": telegram_check["result"]["id"]})
-        if chatbot:
-            resp = ({"message": "Bot Exist",
-                     "result": format_for_response(chatbot)}, 200)
-        else:
-            resp = ({"message": "Bot Does Not Exist",
-                     "result": telegram_check}, 404)
+        resp = ({"message": "Bot Does Not Exist"}, 404)
     return make_response(resp)
 
 
@@ -107,10 +91,10 @@ def crowdbot_on_post():
                             "superuser": int},
                     "admins": list}}
     """
+    # todo check for not active tokens
     doc = request.get_json()["params"]
-    print(doc)
-    telegram_check = requests.get(f"https://api.telegram.org/bot"
-                                  f"{doc['bot']['token']}/getMe").json()
+    telegram_check = requests.get(
+        f"https://api.telegram.org/bot{doc['bot']['token']}/getMe").json()
     if telegram_check["ok"]:
         chatbot = doc["bot"]
         chatbot["bot_id"] = telegram_check["result"]["id"]
@@ -137,7 +121,7 @@ def crowdbot_on_post():
             else:
                 users_table.save(admin)
         telegram_check["result"] = format_for_response(chatbot)
-        return make_response((telegram_check, 200))
+        return make_response((telegram_check, 201))
     else:
         return make_response((telegram_check, telegram_check["error_code"]))
 
@@ -145,28 +129,9 @@ def crowdbot_on_post():
 @app.route('/crowdbot', methods=['DELETE'])
 def on_delete():
     doc = request.args
-    """Don't need to do request coz token can be already edited or removed.
-    instead use bot_id"""
-    # chatbot_id = requests.get(url="https://api.telegram.org/"
-    #                               "bot{}/getMe".format(doc["token"])).json()
-    # chatbot_id = chatbot_id["result"]["id"]
-
-    chatbot_id = doc["bot_id"]
-
-    # crowdbot_db["users"].delete_many({"bot_id": chatbot_id})
-    # crowdbot_db["crowdbot_chatbots"].delete_many({"bot_id": chatbot_id})
-    # crowdbot_db['donations_table'].delete_many({"bot_id": chatbot_id})
-    # crowdbot_db['setpoll_instances'].delete_many({"bot_id": chatbot_id})
-    # crowdbot_db['setpolls'].delete_many({"bot_id": chatbot_id})
-    # crowdbot_db['tags'].delete_many({"bot_id": chatbot_id})
-    # crowdbot_db["surveys"].delete_many({"bot_id": chatbot_id})
-    # crowdbot_db["custom_commands"].delete_many({"bot_id": chatbot_id})
-    # crowdbot_db['payments_requests_table'].delete_many({"bot_id": chatbot_id})
-    # crowdbot_db['payments_table'].delete_many({"bot_id": chatbot_id})
-    # crowdbot_db["chats"].delete_many({"bot_id": chatbot_id})
-
+    chatbot_id = int(doc["bot_id"])
+    # todo don't delete data to control processes - and maybe remove from prod. db
     crowdbot_db["crowdbot_chatbots"].delete_many({"bot_id": chatbot_id})
-    # todo maybe don't delete some data for "restoring feature"
     crowdbot_db["custom_buttons"].delete_many({"bot_id": chatbot_id})
     crowdbot_db["admin_passwords"].delete_many({"bot_id": chatbot_id})
     crowdbot_db["users"].delete_many({"bot_id": chatbot_id})
@@ -184,57 +149,20 @@ def on_delete():
     return resp
 
 
-@app.route('/crowdbot', methods=['PUT'])
-def crowdbot_on_put():  # TODO
-    crowdbot_doc = request.get_json()["params"]
-    chatbot = crowdbot_bots_table.find_one({"bot_id": crowdbot_doc["bot_id"]})
-    chatbot.update(crowdbot_doc)
-    crowdbot_bots_table.update_one({"token": crowdbot_doc["token"]}, chatbot)
-    resp = Response({"ok": True}, status=200, mimetype='application/json')
-    return resp
-
-
-# ADMIN MANAGE ENDPOINTS AND ONE PUT METHOD FOR BOTS
-'''
-
-
-
-@app.route('/crowdbot/admin', methods=['POST'])
-def admin_on_post():
-    # {"token": str,
-    #  "admins": [{
-    #              "password": doc["password"],
-    #              "active": doc["active"]}]
-    #   }
-    doc = request.get_json()  # {token: bot.token, email: chat.changeRequest.payload}
-    """Handles POST requests"""
-    chatbot = requests.get(url="https://api.telegram.org/bot{}/getMe".format(doc["token"])
-                           ).json()
-    chatbot_id = chatbot["result"]["id"]
-
-    for admin in doc['admins']:
-        users_table.insert_one({"bot_id": chatbot_id,
-                                "email": admin["email"],
-                                "password": admin["password"],
-                                "registered": False,
-                                "is_admin": True,
-        })
-
-    resp = Response({}, status=200, mimetype='application/json')
-    return resp
-
-
-@app.route('/crowdbot/admin', methods=['DELETE'])
-def admin_on_delete():
-    doc = request.get_json()["params"]  # {token: bot.token, email: chat.changeRequest.payload}
-    chatbot = requests.get(url="https://api.telegram.org/bot{}/getMe".format(doc["token"])
-                           ).json()
-    chatbot_id = chatbot["result"]["id"]
-    users_table.delete_many({"bot_id": chatbot_id, "email": doc["email"]})
-    # resp.status = falcon.HTTP_200
-    resp = Response({}, status=200, mimetype='application/json')
-    return resp
-'''
+@app.route("/check_token/<string:token>", methods=["GET"])
+def check_token(token):
+    """Check token before bot creation"""
+    telegram_resp = requests.get(url=f"https://api.telegram.org/bot{token}/getMe").json()
+    if not telegram_resp.get("ok"):
+        resp = ({"message": "Token Error", "result": telegram_resp}, telegram_resp["error_code"])
+    else:
+        chatbot = crowdbot_bots_table.find_one({"bot_id": telegram_resp["result"]["id"],
+                                                "active": True})
+        if chatbot:
+            resp = ({"message": "Bot Exist", "result": format_for_response(chatbot)}, 403)
+        else:
+            resp = ({"message": "Token Valid", "result": telegram_resp}, 200)
+    return make_response(resp)
 
 
 if __name__ == '__main__':
