@@ -28,7 +28,7 @@ def start_keyboard(orders_quantity, context):
             # [InlineKeyboardButton(text=context.bot.lang_dict["user_mode_module"],
             #                       callback_data="turn_user_mode_on")],
             [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                  callback_data="help_back")]]
+                                  callback_data="help_module(shop)")]]
     elif "shop" in chatbot:
         keyboard = [[InlineKeyboardButton(text=context.bot.lang_dict["turn_shop_on"],
                                           callback_data="change_shop_config")],
@@ -43,7 +43,7 @@ def start_keyboard(orders_quantity, context):
     return InlineKeyboardMarkup(keyboard)
 
 
-def currency_markup():
+def currency_markup(context):
     # [["RUB", "USD", "EUR", "GBP"], ["KZT", "UAH", "RON", "PLN"]]
     return InlineKeyboardMarkup([
         [InlineKeyboardButton(text="RUB", callback_data="currency/RUB"),
@@ -54,7 +54,9 @@ def currency_markup():
         [InlineKeyboardButton(text="KZT", callback_data="currency/KZT"),
          InlineKeyboardButton(text="UAH", callback_data="currency/UAH"),
          InlineKeyboardButton(text="RON", callback_data="currency/RON"),
-         InlineKeyboardButton(text="PLN", callback_data="currency/PLN")]
+         InlineKeyboardButton(text="PLN", callback_data="currency/PLN")],
+        [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                              callback_data="help_module(shop)")]
     ])
 
 

@@ -3,7 +3,6 @@
 import json
 import logging
 import os
-from datetime import datetime
 
 import sys
 
@@ -14,7 +13,6 @@ from telegram.ext import messagequeue as mq
 from telegram.ext import (CommandHandler, CallbackQueryHandler, MessageHandler, Filters,
                           PicklePersistence)
 from telegram.utils.request import Request
-from telegram import Bot
 
 from database import chatbots_table
 from helper_funcs.unsubscribers_checker import update_user_unsubs
@@ -80,14 +78,8 @@ from modules.users.users import (
 from modules.statistic.user_statistic import USERS_STATISTIC_HANDLER
 # from modules.statistic.donation_statistic import DONATION_STATISTIC_HANDLER
 
-# SURVEYS
-from modules.surveys.surveys_answer import ANSWER_SURVEY_HANDLER
-from modules.surveys.surveys_create import (
-    DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_HANDLER, SEND_SURVEYS_HANDLER,
-    CREATE_SURVEY_HANDLER, SURVEYS_MENU, SEND_SURVEYS_MENU_HANDLER)
-
 # PAYMENTS
-from modules.payments.payments_config import (
+from modules.shop.admin_side.shop_config import (
     # EDIT_DONATION_HANDLER, PAYMENTS_CONFIG_KEYBOARD, CHANGE_DONATIONS_CONFIG,
     # CONFIGS_DONATIONS_GENERAL,
     CONFIGS_SHOP_GENERAL, CHANGE_SHOP_CONFIG, EDIT_SHOP_HANDLER)
@@ -390,15 +382,6 @@ def main(token, lang):
     dispatcher.add_handler(HIDE_MESSAGE_HANDLER)
     dispatcher.add_handler(BACK_TO_MESSAGES_MENU)
     dispatcher.add_handler(DELETE_MESSAGES_MENU_HANDLER)
-
-    # SURVEYS
-    dispatcher.add_handler(SURVEYS_MENU)
-    dispatcher.add_handler(ANSWER_SURVEY_HANDLER)
-    dispatcher.add_handler(SHOW_SURVEYS_HANDLER)
-    dispatcher.add_handler(SEND_SURVEYS_HANDLER)
-    dispatcher.add_handler(CREATE_SURVEY_HANDLER)
-    dispatcher.add_handler(DELETE_SURVEYS_HANDLER)
-    dispatcher.add_handler(SEND_SURVEYS_MENU_HANDLER)
 
     # POLLS
     # dispatcher.add_handler(POLLS_MENU)

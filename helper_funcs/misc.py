@@ -26,17 +26,17 @@ def dismiss(update, context):
 
 
 # never run it async
-def delete_messages(update, context, message_from_update=False):
+def delete_messages(update, context, message_from_update=True):
     # if context and context.user_data:
     try:
         Thread(target=async_delete,
                args=(update, context, context.user_data.copy(), message_from_update)).start()
     except Exception as exc:
-        print("Some exception in delete_message func", exc)
+        print("Warning: Some exception in delete_message func", exc)
     context.user_data['to_delete'] = list()
 
 
-def async_delete(update, context, user_data, message_from_update=False):
+def async_delete(update, context, user_data, message_from_update=True):
     if message_from_update:
         try:
             context.bot.delete_message(update.effective_chat.id,
@@ -64,44 +64,6 @@ def async_delete(update, context, user_data, message_from_update=False):
                                                            msg.message_id)
                         except TelegramError:
                             continue
-
-
-"""def async_delete(update, context, user_data, message_from_update=False):
-    if message_from_update:
-        try:
-            context.bot.delete_message(update.effective_chat.id,
-                                       update.effective_message.message_id)
-        except TelegramError:
-            pass
-    # todo use map
-    # https://book.pythontips.com/en/latest/map_filter.html
-    if user_data:
-        if 'to_delete' in user_data:
-            for msg in user_data['to_delete']:
-                msg = get_promise_msg(msg)
-                if type(msg) is list:
-                    for ms in msg:
-                        try:
-                            if ms.message_id != update.effective_message.message_id:
-                                context.bot.delete_message(
-                                    update.effective_chat.id, ms.message_id)
-                        except TelegramError:
-                            continue
-                else:
-                    if update.effective_message and msg:
-                        try:
-                            if msg.message_id != update.effective_message.message_id:
-                                context.bot.delete_message(
-                                    update.effective_chat.id, msg.message_id)
-                        except TelegramError:
-                            continue
-
-            # context.user_data['to_delete'] = list()
-        # else:
-        #     context.user_data['to_delete'] = list()
-    # else:
-    #     context.user_data['to_delete'] = list()"""
-
 
 # Regular old delete
 """
