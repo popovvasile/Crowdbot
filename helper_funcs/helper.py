@@ -10,7 +10,7 @@ from bson.objectid import ObjectId
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, LabeledPrice
 from telegram.ext import ConversationHandler
 from telegram.error import (BadRequest, TimedOut, NetworkError, TelegramError,
-                            ChatMigrated, Unauthorized)
+                            ChatMigrated, Unauthorized, Conflict)
 
 from helper_funcs.lang_strings.help_strings import help_strings, helpable_dict
 from helper_funcs.misc import paginate_modules, delete_messages, send_content_dict
@@ -186,11 +186,18 @@ def error_callback(update, context):
         raise context.error
 
     except Unauthorized:
+        print("Token revoked or bot deleted")
         chatbots_table.update({"bot_id": context.bot.id},
                               {"$set": {"active": False,
                                         # "deactivation_time": datetime.now()
                                         }})
         sys.exit()
+
+    # telegram.error.Conflict: Conflict: terminated by other getUpdatesrequest;
+    # make sure that only one bot instance is running
+    # What about this Exception? maybe send message to superuser?
+    # except Conflict as err:
+    #     print("Conflict", err)
 
     except ConnectionError as err:
         print("ConnectionError")
@@ -199,8 +206,10 @@ def error_callback(update, context):
     except TimedOut as err:
         print("TimedOut")
         print(err)
+
     except PicklingError:
         print("PicklingError")
+
     # handle slow connection problems
     except (HTTPError, BadRequest):
         print("HTTPError")
@@ -270,7 +279,7 @@ def back_to_modules(update, context):
 
     update.callback_query.data = "back_to_module_{here is the name of module}"
     """
-    delete_messages(update, context)
+    delete_messages(update, context, True)
     context.user_data.clear()
     # here can be exception if callback_query is None
     module_name = update.callback_query.data.replace("back_to_module_", "")

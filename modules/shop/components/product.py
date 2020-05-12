@@ -413,6 +413,7 @@ class Product(object):
                                            reply_markup=reply_markup))
 
     def update(self, json):
+        # todo findAndModify
         products_table.update_one({"_id": self._id}, {"$set": json})
         self.refresh()
 

@@ -90,13 +90,14 @@ class PurchaseBot(object):
     def validate_number(number):
         if not 5 < len(number) < 30:
             return False
-        number.replace(
+        number = number.replace(
             "-", "").replace(
             "(", "").replace(
             ")", "").replace(
             " ", "").replace(
             "*", "").replace(
             "+", "")
+        print("number", number)
         if not 5 < len(number) < 30:
             return False
         if number.isdigit():

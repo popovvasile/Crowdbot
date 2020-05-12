@@ -177,7 +177,6 @@ def catch_unauthorized(func):
         try:
             return func(token, lang)
         except Unauthorized:
-            # TODO maybe delete other db data here and maybe need to change alive_checker a bit?
             chatbots_table.update({"token": token},
                                   {"$set": {"active": False,
                                             # "deactivation_time": datetime.now()
@@ -186,7 +185,7 @@ def catch_unauthorized(func):
     return wrapper
 
 
-# @catch_unauthorized
+@catch_unauthorized
 def main(token, lang):
     # https://github.com/python-telegram-bot/python-telegram-bot/issues/787
     request = Request(con_pool_size=104)

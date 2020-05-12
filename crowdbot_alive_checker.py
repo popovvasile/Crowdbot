@@ -17,7 +17,7 @@ def multiple_bot_daemon():  # todo if token wrong- don't start it and notify
         # Crowdbot
         for doc in crowdbot_bots_table.find({"active": True}):
             # run all active tokens when the script is running
-            # "active" means that a bot did not experience an "Unauthorized" error (token not valid)
+            # "active" means that a bot didn't experience an "Unauthorized" error (token not valid)
             if doc["token"] not in list(my_process.keys()):
                 if doc["lang"] == "ENG":
                     print(doc["token"])
@@ -25,6 +25,7 @@ def multiple_bot_daemon():  # todo if token wrong- don't start it and notify
                                                              doc["lang"]), name=doc["token"])
                     new_process.start()
                     my_process[doc["token"]] = new_process
+
                 elif doc["lang"] == "RUS":
                     print(doc["token"])
                     new_process = Process(target=main, args=(doc["token"],

@@ -23,32 +23,32 @@ from database import categories_table, chatbots_table
 class AddingProductHandler(object):
     def start(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
-        delete_list=context.user_data["to_delete"]
-        delete_list.append(update.message)
+        # delete_list = context.user_data["to_delete"]
+        # delete_list.append(update.message)
         buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                          callback_data="back_to_main_menu")]]
         reply_markup = InlineKeyboardMarkup(buttons)
-        delete_list.append(context.bot.send_message(
+        context.user_data["to_delete"].append(context.bot.send_message(
             chat_id=update.effective_chat.id,
             text=context.bot.lang_dict["shop_admin_product_title"],
             reply_markup=reply_markup))
         return SET_TITLE
 
     def set_title(self, update: Update, context: CallbackContext):
-        delete_list = context.user_data["to_delete"]
-        delete_list.append(update.message)
-
+        # delete_list = context.user_data["to_delete"]
+        # delete_list.append(update.message)
         context.user_data["new_product"] = Product(context)
         if len(update.message.text) <= MAX_PRODUCT_NAME_LENGTH:
             context.user_data["new_product"].name = update.message.text
         else:
-            delete_list.append(context.bot.send_message(
+            context.user_data["to_delete"].append(context.bot.send_message(
                 chat_id=update.message.chat_id,
                 text=context.bot.lang_dict["shop_admin_name_length_error"],
                 reply_markup=InlineKeyboardMarkup([
                              [back_btn("back_to_main_menu_btn", context)]])))
             return SET_TITLE
-        # delete_messages(update, context, True)
+        delete_messages(update, context, True)
+
         category_list = categories_table.find({"bot_id": context.bot.id})
         if category_list.count() > 0:
             keyboard = create_keyboard(
@@ -66,16 +66,16 @@ class AddingProductHandler(object):
                     text=context.bot.lang_dict["back_button"],
                     callback_data="back_to_main_menu")]]
             reply_markup = InlineKeyboardMarkup(buttons)
-            delete_list.append(context.bot.send_message(
+            context.user_data["to_delete"].append(context.bot.send_message(
                 chat_id=update.message.chat_id,
                 text=context.bot.lang_dict["add_product_didnt_set_category"],
                 reply_markup=reply_markup))
         return SET_CATEGORY
 
     def set_category(self, update: Update, context: CallbackContext):
-        delete_list = context.user_data["to_delete"]
-        delete_list.append(update.message)
-        # delete_messages(update, context, True)
+        # delete_list = context.user_data["to_delete"]
+        # delete_list.append(update.message)
+        delete_messages(update, context, True)
         if update.message:
             final_text = context.bot.lang_dict["shop_admin_set_category_add_product"]
             category_list = categories_table.find({"bot_id": context.bot.id})
@@ -118,8 +118,9 @@ class AddingProductHandler(object):
             return SET_CATEGORY
 
     def ask_quantity(self, update: Update, context: CallbackContext):
-        delete_list = context.user_data["to_delete"]
-        delete_list.append(update.message)
+        delete_messages(update, context, True)
+        # delete_list = context.user_data["to_delete"]
+        # delete_list.append(update.message)
         if update.callback_query:
             context.user_data["new_product"].category_id = (
                 update.callback_query.data.split("/")[1])
@@ -133,8 +134,9 @@ class AddingProductHandler(object):
         return SET_QUANTITY
 
     def ask_price(self, update: Update, context: CallbackContext):
-        delete_list = context.user_data["to_delete"]
-        delete_list.append(update.message)
+        delete_messages(update, context, True)
+        # delete_list = context.user_data["to_delete"]
+        # delete_list.append(update.message)
         if update.message:
             quantity_request = context.user_data["new_product"].create_quantity(
                 update, context)
@@ -142,7 +144,7 @@ class AddingProductHandler(object):
                 context.user_data["new_product"].quantity = quantity_request["quantity"]
                 context.user_data["new_product"].unlimited = False
             else:
-                delete_list.append(context.bot.send_message(
+                context.user_data["to_delete"].append(context.bot.send_message(
                     chat_id=update.message.chat_id,
                     text=quantity_request["error_message"],
                     reply_markup=InlineKeyboardMarkup([
@@ -162,8 +164,9 @@ class AddingProductHandler(object):
         return SET_PRICE
 
     def ask_description(self, update: Update, context: CallbackContext):
-        delete_list = context.user_data["to_delete"]
-        delete_list.append(update.message)
+        delete_messages(update, context, True)
+        # delete_list = context.user_data["to_delete"]
+        # delete_list.append(update.message)
         price_request = context.user_data["new_product"].create_price(update, context)
         if price_request["ok"]:
             context.user_data["new_product"].price = price_request["price"]
@@ -173,7 +176,7 @@ class AddingProductHandler(object):
                 keyboards(context)["back_to_main_menu_keyboard"])
             return SET_DESCRIPTION
         else:
-            delete_list.append(context.bot.send_message(
+            context.user_data["to_delete"].append(context.bot.send_message(
                 chat_id=update.message.chat_id,
                 text=price_request["error_message"],
                 reply_markup=InlineKeyboardMarkup([
@@ -182,8 +185,9 @@ class AddingProductHandler(object):
             return SET_PRICE
 
     def set_description(self, update: Update, context: CallbackContext):
-        delete_list = context.user_data["to_delete"]
-        delete_list.append(update.message)
+        delete_messages(update, context, True)
+        # delete_list = context.user_data["to_delete"]
+        # delete_list.append(update.message)
         context.user_data["new_product"].description = update.message.text
         context.user_data["new_product"].send_full_template(
             update, context,
@@ -192,8 +196,9 @@ class AddingProductHandler(object):
         return ADDING_CONTENT
 
     def open_content_handler(self, update, context):
-        delete_list = context.user_data["to_delete"]
-        delete_list.append(update.message)
+        delete_messages(update, context, True)
+        # delete_list = context.user_data["to_delete"]
+        # delete_list.append(update.message)
         if len(context.user_data["new_product"].content) < 10:
             context.user_data["new_product"].add_content_dict(update)
             text = context.bot.lang_dict["shop_admin_send_more_photo"].format(

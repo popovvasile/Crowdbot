@@ -169,7 +169,7 @@ class CreateShopHandler(object):
         update.callback_query.answer(context.bot.lang_dict["create_shop_str_8"])
         logger.info("Admin {} on bot {}:{} added a shop config".format(
             update.effective_user.first_name, context.bot.first_name, context.bot.id))
-        delete_messages(update, context)
+        delete_messages(update, context, True)
         context.user_data.clear()
         Welcome.start(update, context)
         return ConversationHandler.END
