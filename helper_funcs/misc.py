@@ -26,7 +26,7 @@ def dismiss(update, context):
 
 
 #   === never run it async
-def delete_messages(update, context, message_from_update=False):
+def delete_messages(update, context, message_from_update=True):
     if context and context.user_data:
         Thread(target=async_delete,
                args=(update, context, context.user_data.copy(), message_from_update)).start()
@@ -66,7 +66,7 @@ def delete_messages(update, context, message_from_update=False):
         context.user_data['to_delete'] = list()"""
 
 
-def async_delete(update, context, user_data, message_from_update=False):
+def async_delete(update, context, user_data, message_from_update=True):
     if message_from_update:
         try:
             context.bot.delete_message(update.effective_chat.id,

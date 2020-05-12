@@ -1,21 +1,18 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 from multiprocessing import Process
-from pymongo import MongoClient
 import time
-from main_runner import main
 
-client = MongoClient('localhost', 27017)
-crowdbot_db = client['crowdbot_chatbots']
-crowdbot_bots_table = crowdbot_db["crowdbot_chatbots"]
+from database import chatbots_table
+from main_runner import main
 
 
 def multiple_bot_daemon():  # todo if token wrong- don't start it and notify
     my_process = {}
-    print(crowdbot_bots_table.count_documents({"active": True}))
+    print(chatbots_table.count_documents({"active": True}))
     while True:
         # Crowdbot
-        for doc in crowdbot_bots_table.find({"active": True}):
+        for doc in chatbots_table.find({"active": True}):
             # run all active tokens when the script is running
             # "active" means that a bot did not experience an "Unauthorized" error (token not valid)
             if doc["token"] not in list(my_process.keys()):
@@ -33,7 +30,7 @@ def multiple_bot_daemon():  # todo if token wrong- don't start it and notify
                     my_process[doc["token"]] = new_process
 
         for process_key in list(my_process):  # stop the unused tokens
-            list_of_tokens = [d['token'] for d in crowdbot_bots_table.find({"active": True})
+            list_of_tokens = [d['token'] for d in chatbots_table.find({"active": True})
                               if 'token' in d]
             if process_key not in list_of_tokens:
                 my_process[process_key].terminate()

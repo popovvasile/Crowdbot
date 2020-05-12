@@ -1,0 +1,27 @@
+#docker_compose with parameters
+#export SHOP_PRODUCTION=1
+#start python crowdrobot_alive_checker.py
+#start python rest_api/crowdbot_rest_api.py
+#cd botfather
+#start python -m botfather.runner
+# add in the code- if production is false, use a separate database
+# run the auto-tests before the whole thing
+
+version: '3'
+
+services:
+db:
+  image: postgres
+  environment:
+    - POSTGRES_DB=postgres
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASSWORD=postgres
+web:
+  build: .
+  command: python manage.py runserver 0.0.0.0:8000
+  volumes:
+    - .:/code
+  ports:
+    - "8000:8000"
+  depends_on:
+    - db
