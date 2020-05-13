@@ -213,8 +213,12 @@ class UsersHandler(object):
                 return ConversationHandler.END
             else:
                 result = users_table.find(
-                    {"$or": [{"username": {"$regex": pattern, "$options": "i"}},
-                             {"full_name": {"$regex": pattern, "$options": "i"}}]
+                    {"$or": [{"username": {"$regex": pattern, "$options": "i"},
+                              "bot_id": context.bot.id,
+                              "superuser": False},
+                             {"full_name": {"$regex": pattern, "$options": "i"},
+                              "bot_id": context.bot.id,
+                              "superuser": False}]
                      })
 
                 if result.count():

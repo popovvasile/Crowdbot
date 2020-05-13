@@ -1,5 +1,6 @@
 # #!/usr/bin/env python3
 # -*- coding: utf-8 -*
+import os
 from datetime import datetime
 from pprint import pprint
 
@@ -11,7 +12,11 @@ from pymongo import MongoClient
 app = Flask(__name__)
 client = MongoClient('localhost', 27017)
 
-crowdbot_db = client['crowdbot_chatbots']
+if os.environ['SHOP_PRODUCTION'] == "1":
+    crowdbot_db = client['crowdbot_chatbots']
+else:
+    crowdbot_db = client['crowdbot_chatbots_test']
+
 crowdbot_bots_table = crowdbot_db["crowdbot_chatbots"]
 donations_table = crowdbot_db['donations_table']
 users_table = crowdbot_db['users']

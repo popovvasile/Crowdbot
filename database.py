@@ -7,6 +7,7 @@ if os.environ['SHOP_PRODUCTION'] == "1":
     db = client['crowdbot_chatbots']
 else:
     db = client['crowdbot_chatbots_test']
+
 # Bot
 chatbots_table = db["crowdbot_chatbots"]
 custom_buttons_table = db["custom_buttons"]

@@ -15,9 +15,8 @@ from telegram.ext import (CommandHandler, CallbackQueryHandler, MessageHandler, 
 from telegram.utils.request import Request
 
 from database import chatbots_table
-from helper_funcs.unsubscribers_checker import update_user_unsubs
 from logs import logger
-from helper_funcs.misc import dismiss
+from helper_funcs.misc import dismiss, update_user_unsubs
 from helper_funcs.helper import (help_button, button_handler, get_help, WelcomeBot,
                                  back_from_button_handler, back_to_modules, error_callback,
                                  return_to_menu)
@@ -199,7 +198,7 @@ def main(token, lang):
         bot_obj.lang_dict = lang_dicts["ENG"]
     else:
         bot_obj.lang_dict = lang_dicts["RUS"]
-    my_persistence = PicklePersistence(filename='persistence.bin')
+    # my_persistence = PicklePersistence(filename='persistence.bin')
     # https://github.com/python-telegram-bot/python-telegram-bot/issues/1864
     updater = tg.Updater(use_context=True, bot=bot_obj,
                          workers=100,

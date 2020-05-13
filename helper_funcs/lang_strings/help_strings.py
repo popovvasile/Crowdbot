@@ -3,6 +3,7 @@ from collections import OrderedDict
 from telegram import InlineKeyboardButton
 
 from helper_funcs.auth import if_admin
+from modules.shop.helper.keyboards import start_keyboard
 from database import (chatbots_table, users_messages_to_admin_table,
                       user_mode_table, carts_table, orders_table)
 
@@ -10,64 +11,26 @@ from database import (chatbots_table, users_messages_to_admin_table,
 def help_strings(context, update):
     help_dict = OrderedDict()
     string_d_str = context.bot.lang_dict
-    orders_quantity = {
-        "new_orders_quantity":
-            orders_table.find({"bot_id": context.bot.id,
-                               "status": False,
-                               "in_trash": False}).count()}
-
-    chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
-
-    orders_btn_text = (
-            context.bot.lang_dict["shop_admin_orders_btn"] +
-            (f' ({orders_quantity["new_orders_quantity"]})'
-             if orders_quantity["new_orders_quantity"] != 0 else ""))
-
-    if chatbot.get("shop_enabled") is True:
-        admins_keyboard = [
-            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_add_product_btn"],
-                                  callback_data="add_product")],
-            [InlineKeyboardButton(orders_btn_text,
-                                  callback_data="orders")],
-            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_products_btn"],
-                                  callback_data="products")],
-            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_categories_btn"],
-                                  callback_data="categories")],
-            [InlineKeyboardButton(context.bot.lang_dict["shop_admin_trash_btn"],
-                                  callback_data="trash")],
-            [InlineKeyboardButton(text=context.bot.lang_dict["configure_button"],
-                                  callback_data="shop_config")],
-            # [InlineKeyboardButton(text=context.bot.lang_dict["user_mode_module"],
-            #                       callback_data="turn_user_mode_on")]
-        ]
-    elif "shop" in chatbot:
-        admins_keyboard = [[InlineKeyboardButton(text=context.bot.lang_dict["turn_shop_on"],
-                                                 callback_data="change_shop_config")]]
-    else:
-        admins_keyboard = [[InlineKeyboardButton(text=context.bot.lang_dict["allow_shop_button"],
-                                                 callback_data='allow_shop')]]
-
+    admins_keyboard = start_keyboard(context, back_button=False, as_list=True)
     shop = chatbots_table.find_one({"bot_id": context.bot.id}).get("shop", {})
     cart = carts_table.find_one({"bot_id": context.bot.id,
                                  "user_id": update.effective_user.id}) or {}
+    cart_button_text = context.bot.lang_dict["shop_cart"]
     cart_items_count = len(cart.get("products", list()))
-    # "shop_catalog": "Catalog",
-    # "shop_my_orders": "My Orders",
-    # "shop_cart": " Cart",
-    # "shop_contact_and_address": "Contacts&Address",
+    if cart_items_count:
+        cart_button_text += f" ({cart_items_count})"
+
     user_keyboard_shop = [
         [InlineKeyboardButton(text=context.bot.lang_dict["shop_catalog"],
                               callback_data="open_shop")],
         [InlineKeyboardButton(text=context.bot.lang_dict["shop_my_orders"],
                               callback_data="my_orders")],
-        [InlineKeyboardButton(text=context.bot.lang_dict["shop_cart"]
-                                   + (f" ({cart_items_count})"
-                                      if cart_items_count else ""),
+        [InlineKeyboardButton(text=cart_button_text,
                               callback_data="cart")]]
     if shop.get("shipping") is False:
-        user_keyboard_shop += [[
-            InlineKeyboardButton(text=context.bot.lang_dict["shop_contact_and_address"],
-                                 callback_data="contacts_shop")]]
+        user_keyboard_shop += [
+            [InlineKeyboardButton(text=context.bot.lang_dict["shop_contact_and_address"],
+                                  callback_data="contacts_shop")]]
     help_dict["shop"] = dict(
         mod_name=string_d_str["shop_admin_add_product_btn"],
         admin_keyboard=admins_keyboard,
@@ -96,25 +59,27 @@ def help_strings(context, update):
         admin_help=string_d_str["add_menu_buttons_help"]
     )
 
-    new_messages_count = users_messages_to_admin_table.find(
-        {"bot_id": context.bot.id,
-         "is_new": True,
-         "deleted": False}).count()
     current_user_mode = user_mode_table.find_one(
-        {"bot_id": context.bot.id, "user_id": update.effective_user.id})
+        {"bot_id": context.bot.id,
+         "user_id": update.effective_user.id})
     if if_admin(update, context) and not current_user_mode.get("user_mode"):
         messages_mode = string_d_str["users_module"]
     else:
         messages_mode = string_d_str["send_message_module_str"]
+
+    new_messages_count = users_messages_to_admin_table.find(
+        {"bot_id": context.bot.id,
+         "is_new": True,
+         "deleted": False}).count()
+    messages_button_text = string_d_str["messages"]
+    if new_messages_count:
+        messages_button_text += f" ({new_messages_count})"
     help_dict["users"] = dict(
         mod_name=messages_mode,
         admin_help=string_d_str["users_help_admin"],
-
         admin_keyboard=[
             # TODO Send messages ==> to users, to donators, to customers
-            [InlineKeyboardButton(text=string_d_str["messages"]
-                                       + (f" ({new_messages_count})"
-                                          if new_messages_count else ""),
+            [InlineKeyboardButton(text=messages_button_text,
                                   callback_data="admin_messages")],
             [InlineKeyboardButton(text=string_d_str["users_module"],
                                   callback_data="users_layout")]
@@ -144,7 +109,6 @@ def helpable_dict(bot):
     admin_eng["💰 Shop"] = "shop"
     admin_eng[f"✉️ Users & Messages {new_messages_str}"] = "users"
     admin_eng["⚙ Settings"] = "settings"
-
 
     lang_dicts = {"ENG": dict(
         ALL_MODULES=[],

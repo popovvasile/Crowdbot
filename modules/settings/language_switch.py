@@ -24,7 +24,7 @@ class SwitchLanguage(object):
         Dispatcher(bot=context.bot, update_queue=update).update_persistence()
         # change user language
         chatbots_table.update_one({'bot_id': context.bot.id},
-                               {'$set': {'lang': lang}})
+                                  {'$set': {'lang': lang}})
         # send main menu keyboard
         return get_help(update, context)
 
@@ -47,6 +47,7 @@ class SwitchLanguage(object):
 
 
 LANG_MENU = CallbackQueryHandler(callback=SwitchLanguage().lang_menu,
-                                pattern=r"langmenu")
+                                 pattern=r"langmenu")
+
 SET_LANG = CallbackQueryHandler(callback=SwitchLanguage().set_lang,
                                 pattern=r"language")

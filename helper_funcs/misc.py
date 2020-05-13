@@ -181,6 +181,24 @@ def update_user_fields(context, user):
                                {"$set": new_user_fields})
 
 
+def update_user_unsubs(context):
+    """Here is the problem:
+    in users_table can be user without 'chat_id' field(not registered superuser)
+    - coz there are old algorithm in API.
+    watch Trello -> 'Bug List'
+    need to change API and superuser authorization and then rewrite in this way:
+
+    users_list = users_table.find({"bot_id": context.bot.id})
+    map(lambda user: update_user_fields(context, user), users_list)
+    """
+    users_list = users_table.find({"bot_id": context.bot.id})
+    for user in users_list:
+        if user["superuser"] and not user["registered"]:
+            continue
+        else:
+            update_user_fields(context, user)
+
+
 def create_content_dict(update):
     """Creates content_dict from update.
     # todo use this function for all content_dict (messages, shop products, buttons)

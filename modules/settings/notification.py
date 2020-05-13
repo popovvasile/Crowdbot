@@ -52,7 +52,6 @@ class NotificationSetting(object):
         if not admin:
             get_help(update, context)
         else:
-            pprint(admin)
             context.user_data["to_delete"].append(
                 context.bot.send_message(
                     update.effective_chat.id,
