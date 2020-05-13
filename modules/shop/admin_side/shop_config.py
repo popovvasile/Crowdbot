@@ -157,7 +157,10 @@ class EditPaymentHandler(object):
         elif "payment_token" in data:
             context.user_data["action"] = "payment_token"
             context.user_data["to_delete"].append(update.message.reply_text(
-                context.bot.lang_dict["donations_edit_str_12"],
+                context.bot.lang_dict["payments_guide"]
+                + "\n\n"
+                + context.bot.lang_dict["donations_edit_str_12"],
+                parse_mode=ParseMode.HTML,
                 reply_markup=reply_markup))
         elif "shipping" in data:
             chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
@@ -192,6 +195,7 @@ class EditPaymentHandler(object):
                     context.bot.lang_dict["payments_guide"]
                     + "\n\n"
                     + context.bot.lang_dict["donations_edit_str_12"],
+                    parse_mode=ParseMode.HTML,
                     reply_markup=reply_markup))
             else:
                 chatbot["shop"].update({"shop_type": shoptype})

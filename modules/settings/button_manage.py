@@ -157,7 +157,7 @@ class AddCommands(object):
         return TYPING_BUTTON
 
     def button_handler(self, update, context):
-        delete_messages(update, context)
+        delete_messages(update, context, False)
         context.user_data["user_input"].append(update.message)
         reply_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                callback_data="cancel_button_creation")]]
@@ -193,7 +193,7 @@ class AddCommands(object):
             return TYPING_BUTTON
 
     def description_handler(self, update, context):
-        delete_messages(update, context)
+        delete_messages(update, context, False)
         reply_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["done_button"],
                                                callback_data="DONE")],
                          [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
@@ -284,7 +284,7 @@ class AddLinkButton(object):
         return TYPING_LINK
 
     def link_handler(self, update, context):
-        delete_messages(update, context)
+        delete_messages(update, context, False)
         context.user_data["user_input"].append(update.message)
         reply_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                callback_data="cancel_button_creation")]]
@@ -317,7 +317,7 @@ class AddLinkButton(object):
             return TYPING_LINK
 
     def button_finish(self, update, context):
-        delete_messages(update, context)
+        delete_messages(update, context, False)
         context.user_data["user_input"].append(update.message)
         link = validate_link(update, context)
         if not link:
@@ -396,7 +396,7 @@ class ChangeButtonName(object):
         return ENTER_NEW_NAME
 
     def finish_new_name(self, update, context):
-        delete_messages(update, context)
+        delete_messages(update, context, False)
         context.user_data["user_input"].append(update.message)
         reply_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                callback_data="back_to_one_button_menu")]]
@@ -503,7 +503,7 @@ class EditButtonHandler(object):
         return ADDING_CONTENT
 
     def open_content_handler(self, update, context):
-        delete_messages(update, context)
+        delete_messages(update, context, False)
         context.user_data["user_input"].append(update.message)
         if len(context.user_data["button"]["content"]) < MAX_BUTTON_CONTENT_COUNT:
             content_dict = create_content_dict(update)
@@ -557,7 +557,7 @@ class EditButtonHandler(object):
         return ENTER_NEW_LINK
 
     def finish_edit_link(self, update, context):
-        delete_messages(update, context)
+        delete_messages(update, context, False)
         context.user_data["user_input"].append(update.message)
         link = validate_link(update, context)
         if not link:

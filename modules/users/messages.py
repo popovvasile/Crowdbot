@@ -649,7 +649,7 @@ class SeeMessageToAdmin(object):
 class SubscriberOpenMessage(object):
     # TODO STRINGS
     def open(self, update, context):
-        delete_messages(update, context)
+        delete_messages(update, context, False)
         message_id = ObjectId(update.callback_query.data.split("/")[1])
         message = users_messages_to_admin_table.find_one({"_id": message_id})
         if "open_delete" not in context.user_data:

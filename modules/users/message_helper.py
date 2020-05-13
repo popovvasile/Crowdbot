@@ -17,7 +17,7 @@ class SenderHelper(object):
     @staticmethod
     def help_receive(update, context, reply_markup, state):
         """Help to create message for sending"""
-        delete_messages(update, context)
+        delete_messages(update, context, False)
         final_text = context.bot.lang_dict["send_message_4"]
         if "content" not in context.user_data:
             context.user_data["content"] = list()

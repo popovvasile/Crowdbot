@@ -15,7 +15,6 @@ from helper_funcs.misc import (delete_messages, lang_timestamp, get_obj, update_
 from helper_funcs.helper import back_from_button_handler
 
 
-
 class Admin:
     def __init__(self, context, obj: (ObjectId, dict, str)):
         self.context = context
@@ -182,7 +181,6 @@ class AdminHandler(object):
         return self.admins(update, context)
 
     def back(self, update, context):
-        # delete_messages(update, context)
         back_from_button_handler(update, context)
         context.user_data.clear()
         return ConversationHandler.END

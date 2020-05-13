@@ -424,7 +424,7 @@ class Product(object):
             product = get_obj(products_table, obj)
 
         self._id = product.get("_id")
-        self.article = product.get("article")
+        self.article = str(self._id)
         self.price = product.get("price")
         self.description = product.get("description", "")
         self.name = product.get("name")
