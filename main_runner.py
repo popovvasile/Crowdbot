@@ -8,6 +8,7 @@ import sys
 
 import telegram
 import telegram.ext as tg
+from telegram import Bot
 from telegram.error import Unauthorized
 from telegram.ext import messagequeue as mq
 from telegram.ext import (CommandHandler, CallbackQueryHandler, MessageHandler, Filters,
@@ -181,8 +182,8 @@ def main(token, lang):
     # https://github.com/python-telegram-bot/python-telegram-bot/issues/787
     request = Request(con_pool_size=104)
     q = mq.MessageQueue(all_burst_limit=25, all_time_limit_ms=1200)
-    bot_obj = MQBot(token, request=request, mqueue=q)
-    # bot_obj = Bot(token, request=request)
+    # bot_obj = MQBot(token, request=request, mqueue=q)
+    bot_obj = Bot(token, request=request)
 
     filename = 'logs/{}.log'.format(bot_obj.name)
     open(filename, "w+")
@@ -204,8 +205,8 @@ def main(token, lang):
                          workers=100,
                          # persistence=my_persistence
                          )
-    job = updater.job_queue
-    job.run_repeating(update_user_unsubs, interval=3600*24, first=0)
+    # job = updater.job_queue
+    # job.run_repeating(update_user_unsubs, interval=3600*24, first=0)
     # todo try to add async to
     # every function one by one
     # If you’re using @ run_async you cannot  rely on adding custom

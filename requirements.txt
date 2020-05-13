@@ -18,7 +18,7 @@ PyCurrency-Converter==1.0
 pymongo==3.8.0
 python-dateutil==2.8.1
 python-http-client==3.1.0
-python-telegram-bot==12.2.0
+python-telegram-bot==12.7.0
 pytz==2019.3
 ujson==2.0.3
 requests==2.22.0

@@ -188,6 +188,8 @@ class AddingProductHandler(object):
         delete_messages(update, context, True)
         # delete_list = context.user_data["to_delete"]
         # delete_list.append(update.message)
+        if "user_input" not in context.user_data:
+            context.user_data["user_input"] = list()
         context.user_data["new_product"].description = update.message.text
         context.user_data["new_product"].send_full_template(
             update, context,
@@ -195,8 +197,60 @@ class AddingProductHandler(object):
             keyboards(context)["back_to_main_menu_keyboard"])
         return ADDING_CONTENT
 
+    """
+    def description_handler(self, update, context):
+        delete_messages(update, context, False)
+        reply_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["done_button"],
+                                               callback_data="DONE")],
+                         [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                               callback_data="cancel_button_creation")]]
+        reply_markup = InlineKeyboardMarkup(reply_buttons)
+
+        if "content" not in context.user_data["new_button"]:
+            context.user_data["new_button"]["content"] = list()
+        content_dict = create_content_dict(update)
+        if content_dict:
+            if len(context.user_data["new_button"]["content"]) < MAX_BUTTON_CONTENT_COUNT:
+                context.user_data["new_button"]["content"].append(content_dict)
+                context.user_data["user_input"].append(update.message)
+            else:
+                context.user_data["to_delete"].append(
+                    context.bot.send_message(update.effective_chat.id,
+                                             context.bot.lang_dict["so_many_content"]))
+                try:
+                    context.bot.delete_message(update.effective_chat.id,
+                                               update.effective_message.message_id)
+                except TelegramError:
+                    pass
+        else:
+            context.user_data["to_delete"].append(
+                context.bot.send_message(update.effective_chat.id,
+                                         text=context.bot.lang_dict["content_error"],
+                                         parse_mode=ParseMode.HTML))
+            try:
+                context.bot.delete_message(update.effective_chat.id,
+                                           update.effective_message.message_id)
+            except TelegramError:
+                pass
+        msg_index = (len(context.user_data["user_input"])
+                     - len(context.user_data["new_button"]["content"]))
+        reply_to = context.user_data["user_input"][msg_index].message_id
+
+        if len(context.user_data["new_button"]["content"]) < MAX_BUTTON_CONTENT_COUNT:
+            string = context.bot.lang_dict["add_menu_buttons_str_4"]
+        else:
+            string = context.bot.lang_dict["add_menu_buttons_str_11"]
+
+        context.user_data["to_delete"].append(
+            context.bot.send_message(update.effective_chat.id,
+                                     string,
+                                     reply_markup=reply_markup,
+                                     reply_to_message_id=reply_to))
+        return TYPING_DESCRIPTION
+    """
+
     def open_content_handler(self, update, context):
-        delete_messages(update, context, True)
+        delete_messages(update, context)
         # delete_list = context.user_data["to_delete"]
         # delete_list.append(update.message)
         if len(context.user_data["new_product"].content) < 10:

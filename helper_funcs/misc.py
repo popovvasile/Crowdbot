@@ -32,7 +32,7 @@ def delete_messages(update, context, message_from_update=True):
         Thread(target=async_delete,
                args=(update, context, context.user_data.copy(), message_from_update)).start()
     except Exception as exc:
-        print("Warning: Some exception in delete_message func", exc)
+        print("Warning: Some exception in thread start in delete_message func", exc)
     context.user_data['to_delete'] = list()
 
 

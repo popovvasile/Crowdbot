@@ -182,6 +182,8 @@ def check_provider_token(currency, provider_token, update, context):
 # for test purposes
 def error_callback(update, context):
     delete_messages(update, context)
+    # print(context)
+    # print(context.user_data)
     try:
         raise context.error
 
@@ -381,7 +383,7 @@ def help_button(update, context):
 
 def get_help(update, context):
     try:
-        delete_messages(update, context)
+        delete_messages(update, context, False)
     except BadRequest:
         pass
     if users_table.find_one({"user_id": update.effective_user.id, "bot_id": context.bot.id}).get(
