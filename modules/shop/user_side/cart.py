@@ -254,22 +254,24 @@ class Cart(CartHelper):
             cart = carts_table.find_one({"user_id": update.effective_user.id,
                                          "bot_id": context.bot.id})
 
-        # Back to the shop menu if cart is empty
+        # Show blink if cart is empty
         if not len(cart["products"]):
             update.callback_query.answer(context.bot.lang_dict["cart_empty_blink"])
+            # return ConversationHandler.END
             update.callback_query.data = "back_to_module_shop"
             return back_to_modules(update, context)
+
         # Send page content
         self.send_cart_products_layout(update, context, cart["products"])
         return ConversationHandler.END
 
     def send_cart_products_layout(self, update, context, cart_products):
         # Title
-        context.user_data['to_delete'].append(
-            context.bot.send_message(
-                chat_id=update.callback_query.message.chat_id,
-                text=context.bot.lang_dict["shop_admin_products_title"].format(len(cart_products)),
-                parse_mode=ParseMode.HTML))
+        # context.user_data['to_delete'].append(
+        #     context.bot.send_message(
+        #         chat_id=update.callback_query.message.chat_id,
+        #         text=context.bot.lang_dict["shop_admin_products_title"].format(len(cart_products)),
+        #         parse_mode=ParseMode.HTML))
         # Products list buttons
         buttons = [[InlineKeyboardButton(
                         text=context.bot.lang_dict["back_button"],
@@ -299,9 +301,12 @@ class Cart(CartHelper):
                 product_obj.send_short_template(
                     update, context, text=template, reply_markup=reply_markup)
             # Send main buttons
-            pagination.send_keyboard(update, context,
-                                     page_prefix="user_cart_pagination",
-                                     buttons=buttons)
+            pagination.send_keyboard(
+                update, context,
+                buttons=buttons,
+                page_prefix="user_cart_pagination",
+                text=context.bot.lang_dict["shop_admin_products_title"].format(
+                    len(cart_products)))
         else:
             context.user_data["to_delete"].append(
                 context.bot.send_message(

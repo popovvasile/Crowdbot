@@ -15,15 +15,6 @@ from helper_funcs.misc import (delete_messages, lang_timestamp, get_obj, update_
 from helper_funcs.helper import back_from_button_handler
 
 
-# Make string for adding admins emails menu
-def emails_layout(context, text) -> str:
-    if len(context.user_data['new_admins']) > 0:
-        return (f"{text} \nAdmins:\n"
-                + '\n'.join([i['email']
-                             for i in context.user_data['new_admins']]))
-    return text
-
-
 class Admin:
     def __init__(self, context, obj: (ObjectId, dict, str)):
         self.context = context
@@ -52,11 +43,7 @@ class Admin:
             _user_mention = f'<a href="tg://user?id={self.user_id}">{self.full_name}</a>'
         return self.context.bot.lang_dict["registered_admin_temp"].format(
                 _user_mention, self.timestamp)
-        # return (
-        #     self.context.bot.lang_dict["registered_admin_temp"].format(
-        #         self.name, self.timestamp) if self.registered else
-        #     self.context.bot.lang_dict["not_registered_admin_temp"].format(
-        #         self.email))
+
 
     @property
     def reply_markup(self):
@@ -164,6 +151,8 @@ class AdminHandler(object):
                 text=context.bot.lang_dict["admin_invite"].format(
                     # context.bot.get_me().mention_html()
                     f'<a href="t.me/{context.bot.username}">{context.bot.name}</a>'
+                    # f'<a href="{context.bot.get_me().link}">{context.bot.name}</a>'
+
                 ),
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton(
@@ -192,7 +181,6 @@ class AdminHandler(object):
         return self.admins(update, context)
 
     def back(self, update, context):
-        # delete_messages(update, context)
         back_from_button_handler(update, context)
         context.user_data.clear()
         return ConversationHandler.END

@@ -18,19 +18,13 @@ class Welcome(object):
                     update.effective_chat.id,
                     context.user_data["msg_to_send"],
                     parse_mode=ParseMode.HTML,
-                    reply_markup=dismiss_button(context))
-                    )
+                    reply_markup=dismiss_button(context)))
 
-        orders_quantity = {
-            "new_orders_quantity":
-                orders_table.find({"bot_id": context.bot.id,
-                                   "status": False,
-                                   "in_trash": False}).count()}
         context.user_data["to_delete"].append(
             context.bot.send_message(
                 update.effective_chat.id,
                 context.bot.lang_dict["shop_admin_start_message"],
-                reply_markup=start_keyboard(orders_quantity, context)))
+                reply_markup=start_keyboard(context)))
         return ConversationHandler.END
 
     @staticmethod

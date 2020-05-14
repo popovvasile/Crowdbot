@@ -8,6 +8,7 @@ from bson.objectid import ObjectId
 from helper_funcs.misc import delete_messages
 from helper_funcs.pagination import Pagination
 from modules.shop.components.product import Product, MAX_TEMP_DESCRIPTION_LENGTH
+from modules.shop.user_side.cart import Cart
 from database import products_table, carts_table, chatbots_table, categories_table
 
 
@@ -210,16 +211,16 @@ class UserProductsHandler(UserProductsHelper):
 
     def send_products_layout(self, update, context, all_products):
         # Title
-        context.user_data['to_delete'].append(
-            context.bot.send_message(
-                chat_id=update.callback_query.message.chat_id,
-                text=context.bot.lang_dict[
-                    "shop_admin_products_title"].format(all_products.count()),
-                parse_mode=ParseMode.HTML))
+        # context.user_data['to_delete'].append(
+        #     context.bot.send_message(
+        #         chat_id=update.callback_query.message.chat_id,
+        #         text=context.bot.lang_dict[
+        #             "shop_admin_products_title"].format(all_products.count()),
+        #         parse_mode=ParseMode.HTML))
         # Products list buttons
         buttons = [[InlineKeyboardButton(
-            text=context.bot.lang_dict["buy_btn"],
-            callback_data="cart")],
+            text=context.bot.lang_dict["shop_cart"],
+            callback_data="move_to_cart")],
             [InlineKeyboardButton(
                 text=context.bot.lang_dict["back_button"],
                 callback_data="back_to_categories")]]
@@ -243,14 +244,17 @@ class UserProductsHandler(UserProductsHelper):
                     update, context, text=template, reply_markup=reply_markup)
 
             # Send main buttons
-            pagination.send_keyboard(update, context,
-                                     page_prefix="user_products_pagination",
-                                     buttons=buttons)
+            pagination.send_keyboard(
+                update, context,
+                page_prefix="user_products_pagination",
+                text=context.bot.lang_dict["shop_admin_products_title"].format(
+                    all_products.count()),
+                buttons=buttons)
         else:
             buttons = [[
                 InlineKeyboardButton(
-                    text=context.bot.lang_dict["buy_btn"],
-                    callback_data="cart")],
+                    text=context.bot.lang_dict["shop_cart"],
+                    callback_data="move_to_cart")],
                 [InlineKeyboardButton(
                     text=context.bot.lang_dict["back_button"],
                     callback_data="back_to_module_shop")]]
@@ -358,6 +362,17 @@ class UserProductsHandler(UserProductsHelper):
         context.user_data["category_id"] = category_id
         return self.products(update, context)
 
+    def move_to_cart(self, update, context):
+        cart = carts_table.find_one({"user_id": update.effective_user.id,
+                                     "bot_id": context.bot.id}) or {}
+        if len(cart.get("products", list())):
+            delete_messages(update, context, True)
+            context.user_data.clear()
+            return Cart().cart(update, context)
+        else:
+            update.callback_query.answer(context.bot.lang_dict["cart_empty_blink"])
+            return ConversationHandler.END
+
     def back_to_categories(self, update, context):
         delete_messages(update, context, True)
         context.user_data.clear()
@@ -385,6 +400,10 @@ VIEW_PRODUCT = CallbackQueryHandler(
     pattern=r"view_product_from_catalog",
     callback=UserProductsHandler().view_product)
 
+MOVE_TO_CART = CallbackQueryHandler(
+    pattern="move_to_cart",
+    callback=UserProductsHandler().move_to_cart)
+
 """BACKS"""
 BACK_TO_CATEGORIES = CallbackQueryHandler(
     pattern=r"back_to_categories",
@@ -395,4 +414,4 @@ BACK_TO_CUSTOMER_SHOP = CallbackQueryHandler(
     callback=UserProductsHandler().back_to_products)
 
 SHOP_CONTACTS = CallbackQueryHandler(pattern="contacts_shop",
-                                   callback=UserProductsHandler().shop_contacts)
+                                     callback=UserProductsHandler().shop_contacts)

@@ -107,7 +107,7 @@ class OrdersHandler(OrdersHandlerHelper):
         return state
 
     # def order_items(self, update, context):
-    #     delete_messages(update, context, True)
+    #     delete_list
     #     if update.callback_query.data.startswith("admin_order_items"):
     #         order_id = ObjectId(update.callback_query.data.split("/")[1])
     #         order = orders_table.find_one({"_id": order_id})
@@ -140,7 +140,7 @@ class OrdersHandler(OrdersHandlerHelper):
     #     return ConversationHandler.END
 
     # def confirm_to_trash(self, update: Update, context: CallbackContext):
-    #     delete_messages(update, context, True)
+    #     delete_list
     #     set_page_key(update, context, name="item_page", start_data={})
     #     order_id = update.callback_query.data.split("/")[1]
     #     context.user_data["order"] = Order(order_id)
@@ -152,12 +152,14 @@ class OrdersHandler(OrdersHandlerHelper):
 
     # def finish_to_trash(self, update: Update, context: CallbackContext):
     #     context.bot.send_chat_action(update.effective_chat.id, "typing")
-    #     delete_messages(update, context, True)
+    #     delete_list
     #     context.user_data["order"].update({"in_trash": True})
     #     update.callback_query.answer(context.bot.lang_dict["shop_admin_moved_to_trash_blink"])
     #     return self.back_to_orders(update, context)
 
     def confirm_to_done(self, update: Update, context: CallbackContext):
+        # delete_list = context.user_data["to_delete"]
+        # delete_list.append(update.message)
         delete_messages(update, context, True)
         if update.callback_query.data.startswith("admin_order_item_pagination"):
             context.user_data["item_page"] = int(
@@ -182,6 +184,8 @@ class OrdersHandler(OrdersHandlerHelper):
         return self.back_to_orders(update, context)
 
     def confirm_cancel_order(self, update: Update, context: CallbackContext):
+        # delete_list = context.user_data["to_delete"]
+        # delete_list.append(update.message)
         delete_messages(update, context, True)
         # Set current page integer in the user_data.
         if update.callback_query.data.startswith("admin_order_item_pagination"):
@@ -193,10 +197,13 @@ class OrdersHandler(OrdersHandlerHelper):
             order_id = ObjectId(update.callback_query.data.split("/")[1])
             context.user_data["order"] = AdminOrder(context, order_id)
 
+        if context.user_data["order"].status:
+            confirm_text = context.bot.lang_dict["shop_admin_confirm_cancel"]
+        else:
+            confirm_text = context.bot.lang_dict["shop_admin_confirm_new_cancel"]
+
         context.user_data["order"].send_full_template(
-            update, context,
-            context.bot.lang_dict["shop_admin_confirm_cancel"],
-            keyboards(context)["confirm_cancel"])
+            update, context, confirm_text, keyboards(context)["confirm_cancel"])
         return CONFIRM_CANCEL
 
     def finish_cancel(self, update: Update, context: CallbackContext):
@@ -225,7 +232,7 @@ class OrdersHandler(OrdersHandlerHelper):
         return self.back_to_orders(update, context)
 
     """def edit(self, update: Update, context: CallbackContext):
-        delete_messages(update, context, True)
+        delete_list
         # Set current page integer in the user_data.
         if update.callback_query.data.startswith(
                 "admin_order_item_pagination"):
@@ -248,7 +255,7 @@ class OrdersHandler(OrdersHandlerHelper):
         return EDIT
 
     def remove_item(self, update: Update, context: CallbackContext):
-        delete_messages(update, context, True)
+        delete_list
         item_id = update.callback_query.data.split("/")[1]
         context.user_data["order"].remove_item(item_id)
         update.callback_query.answer(
@@ -256,7 +263,7 @@ class OrdersHandler(OrdersHandlerHelper):
         return self.edit(update, context)
 
     def add_item(self, update: Update, context: CallbackContext):  # TODO
-        delete_messages(update, context, True)
+        delete_list
         # set_page_key(update, context, "choose_product_page")
         # resp = requests.get(
         #     f"{conf['API_URL']}/admin_products",
@@ -276,7 +283,7 @@ class OrdersHandler(OrdersHandlerHelper):
         return CHOOSE_PRODUCT
 
     def finish_adding_item(self, update: Update, context: CallbackContext):
-        delete_messages(update, context, True)
+        delete_list
         item_data = update.callback_query.data.split("/")
         item = dict(
             article=item_data[1],
@@ -292,9 +299,8 @@ class OrdersHandler(OrdersHandlerHelper):
         return self.orders(update, context)
 
 
-ORDERS, CONFIRM_TO_PROCESS, CONFIRM_TO_DONE, \
-    CONFIRM_CANCEL, CONFIRM_TO_TRASH, EDIT, \
-    CHOOSE_PRODUCT = range(7)
+(ORDERS, CONFIRM_TO_PROCESS, CONFIRM_TO_DONE,
+ CONFIRM_CANCEL, CONFIRM_TO_TRASH, EDIT, CHOOSE_PRODUCT) = range(7)
 
 
 ORDERS_HANDLER = ConversationHandler(
@@ -351,6 +357,8 @@ ORDERS_HANDLER = ConversationHandler(
                                     pattern=r"back_to_orders"),
                CallbackQueryHandler(Welcome().back_to_main_menu,
                                     pattern=r"back_to_main_menu"),
+               CallbackQueryHandler(Welcome().back_to_main_menu,
+                                    pattern=r"help_back"),
                # CallbackQueryHandler(UsersHandler().open_user,
                #                      pattern="open_user")
                ]

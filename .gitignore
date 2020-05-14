@@ -1,4 +1,5 @@
 # Byte-compiled / optimized / DLL files
+persistence.bin
 z/
 __pycache__/
 modules/sql/__pycache__/
@@ -124,3 +125,4 @@ dmypy.json
 =======
 .pyre/
 
+/modules/paid_content/
