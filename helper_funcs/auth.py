@@ -1,10 +1,4 @@
-from typing import Optional
-from functools import wraps
 from datetime import datetime
-from pprint import pprint
-
-from telegram import User, Bot, Update, InlineKeyboardMarkup, InlineKeyboardButton
-
 from database import users_table, chatbots_table, admin_passwords_table
 from helper_funcs import helper
 from logs import logger
@@ -125,12 +119,16 @@ def register_admin(update, context):
 
 
 def initiate_chat_id(update):
+
     chat_id = update.effective_chat.id
-    txt = ""
-    if update.message.text:
-        txt = txt + update.message.text
-    elif update.message.caption:
-        txt = txt + update.message.caption
+    if update.message:
+        txt = ""
+        if update.message.text:
+            txt = txt + update.message.text
+        elif update.message.caption:
+            txt = txt + update.message.caption
+    else:
+        txt=None
     return chat_id, txt
 
 
@@ -151,18 +149,3 @@ def if_admin(update, context):
             return False
     else:
         return False
-
-
-def user_admin(func):
-    @wraps(func)
-    def is_admin(update, context, *args, **kwargs):
-        user = update.effective_user  # type: Optional[User]
-        if user and if_admin(update, context.bot):
-            return func(context.bot, update, *args, **kwargs)
-
-        elif not user:
-            pass
-
-        else:
-            update.effective_message.reply_text(context.bot.lang_dict["not_admin"])
-    return is_admin

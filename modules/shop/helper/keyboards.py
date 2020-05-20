@@ -1,15 +1,16 @@
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 
-from database import chatbots_table
+from database import chatbots_table, orders_table
 
 
-def start_keyboard(orders_quantity, context):
+def start_keyboard(context, back_button=True, as_list=False):
     chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
-
-    orders_btn_text = (
-            context.bot.lang_dict["shop_admin_orders_btn"] +
-            (f' ({orders_quantity["new_orders_quantity"]})'
-             if orders_quantity["new_orders_quantity"] != 0 else ""))
+    new_orders_quantity = orders_table.find({"bot_id": context.bot.id,
+                                             "status": False,
+                                             "in_trash": False}).count()
+    orders_btn_text = context.bot.lang_dict["shop_admin_orders_btn"]
+    if new_orders_quantity:
+        orders_btn_text += f" ({new_orders_quantity})"
 
     if chatbot.get("shop_enabled") is True:
         keyboard = [
@@ -24,26 +25,20 @@ def start_keyboard(orders_quantity, context):
             [InlineKeyboardButton(context.bot.lang_dict["shop_admin_trash_btn"],
                                   callback_data="trash")],
             [InlineKeyboardButton(text=context.bot.lang_dict["configure_button"],
-                                  callback_data="shop_config")],
-            # [InlineKeyboardButton(text=context.bot.lang_dict["user_mode_module"],
-            #                       callback_data="turn_user_mode_on")],
-            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                  callback_data="help_back")]]
+                                  callback_data="shop_config")]]
     elif "shop" in chatbot:
         keyboard = [[InlineKeyboardButton(text=context.bot.lang_dict["turn_shop_on"],
-                                          callback_data="change_shop_config")],
-
-                    [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                          callback_data="help_module(shop)")]
-                    ]
+                                          callback_data="change_shop_config")]]
     else:
         keyboard = [[InlineKeyboardButton(text=context.bot.lang_dict["allow_shop_button"],
-                                          callback_data='allow_shop')],
-                    [InlineKeyboardButton(text="Back", callback_data="help_module(shop)")]]
-    return InlineKeyboardMarkup(keyboard)
+                                          callback_data='allow_shop')]]
+    if back_button:
+        keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                              callback_data="help_back")])
+    return keyboard if as_list else InlineKeyboardMarkup(keyboard)
 
 
-def currency_markup():
+def currency_markup(context):
     # [["RUB", "USD", "EUR", "GBP"], ["KZT", "UAH", "RON", "PLN"]]
     return InlineKeyboardMarkup([
         [InlineKeyboardButton(text="RUB", callback_data="currency/RUB"),
@@ -54,7 +49,9 @@ def currency_markup():
         [InlineKeyboardButton(text="KZT", callback_data="currency/KZT"),
          InlineKeyboardButton(text="UAH", callback_data="currency/UAH"),
          InlineKeyboardButton(text="RON", callback_data="currency/RON"),
-         InlineKeyboardButton(text="PLN", callback_data="currency/PLN")]
+         InlineKeyboardButton(text="PLN", callback_data="currency/PLN")],
+        [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                              callback_data="help_module(shop)")]
     ])
 
 

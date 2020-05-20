@@ -1,7 +1,3 @@
---WEBSITE:
-    * Поменять пример бота на русский в русской версии сайта
-
-
 --CURRENT TODO:
     СТРОКИ:
         [DONE] * Поменять эмодзик в кнопке "Каталог"
@@ -26,24 +22,30 @@
 
 
     BOT_FATHER
-        * Сделать юзеру возможность легче начать работу с ботом(кнопка с переходом в бот с командой /start)
-        * Сделать что бы кнопка бек всегда работала
-        * Добавлено меню которое реагирует на текст и помогает выйти в главное меню
+        [DONE] * Сделать юзеру возможность легче начать работу с ботом(кнопка с переходом в бот с командой /start)
+        [DONE] * Сделать что бы кнопка бек всегда работала
+        [DONE] * Добавлено меню которое реагирует на текст и помогает выйти в главное меню
 
 
 --BUGS
-    * currency - reply markup text bug(change Reply to Inline)
-    * Cancel order - TODO - ADD CATEGORY IF IT DOESN'T EXIST
-    * PRICE round in user side works strage
-    * fix rus admin invite(no forward button)
-    * Если у пользователя нет username - в базе данных в поле username может быть None - и в некоторых местах мы работаем с этим полем как с строкой - Exception
-    * Фотка отображается большой в списке юзеров - если у пользователя нет описание(if not user_bio: show without image)
-    * В статистике не показываются ансабы, и те же ансабы остаются в статистике
+    - * currency - reply markup text bug(change Reply to Inline)
+    - * Cancel order - TODO - ADD CATEGORY IF IT DOESN'T EXIST
+    - * PRICE round in user side works strage
+    - * fix rus admin invite(no forward button)
+    - * Если у пользователя нет username - в базе данных в поле username может быть None - и в некоторых местах мы работаем с этим полем как с строкой - Exception
+    - * Фотка отображается большой в списке юзеров() - если у пользователя нет описание(if not user_bio: show without image)
+    - * В статистике не показываются ансабы, и те же ансабы остаются в статистике(проверить корректность работы)
+    [DONE] * JobQueee на отписчиков
+    - * Редактирование сообщений в рассылках
+    [DONE] * убрать валидацию телефонов
+    [DONE] * /report в ботфазере - ему плохо
+    [DONE] * shop_admin_confirm_new_cancel - кастомная строка если отменяешь новый заказ
+    - * Нагрузочный тест
 
 --MAIN TODO
-    * если в магазине одна категория товаров показывать сразу товары этой категории при клике на «Каталог» или даже менять кнопку каталог на кнопку этой категории
-    * Кнопка переход в заказы с ноутификации о новом заказе
-    * отображение количества товаров в кнопке "Корзина" в user_side в товарах(
+    - * если в магазине одна категория товаров показывать сразу товары этой категории при клике на «Каталог» или даже менять кнопку каталог на кнопку этой категории
+    - * Кнопка переход в заказы с ноутификации о новом заказе
+    - * отображение количества товаров в кнопке "Корзина" в user_side в товарах(
         а так же что бы в этой кнопке динамически менялось строка количества при добавлении товара и удалении)
 	- * Поиск товара и заказа по id
 	- * Поменять реплай маркап на инлайн маркап в ЧЕНЧ КЬЮРЭНСИ.
@@ -52,22 +54,6 @@
 	- * Добавить кнопки фильтров в заказы(новые, выполненные)
 	- * Добавление товара: убрать шаг с двойным подтверждением нового товара. Добавлять строки в описание товара при добавлении новой инфы о товаре.
 	- * В корзине, ордерс. Добавить кнопку: очистить корзину(Спорно из за проверки _id товаров)
-
-
-   * Edit link instead of edit
-   * List points (where red !) in create button
-   * Admins- <i> ---- <b> kartochki, total admins down  <code>number</code>
-   * Dlete admin  <i> ----  <b>
-   * <i>Your current shop description is: </i> - Описание шопа может быть размером в 4096 символов
-       <b>'TEST'</b>
-    *  <i>Current currency</i> is <b>RUB</b>  +ENTER+ everything in one message + remove Back text +
-    * All prices will be converted from RUB to USD - remove
-    * Send message read html, not markdown
-    * send message- sent messages are not deleted
-    * Catalog items - fix as in the admin
-    * Buy- Category above Name - everywhere in user and admin
-    * Your orders- down
-    * Delete Item - markdown
 
 
 --PREMIUM
@@ -80,9 +66,9 @@
 STRINGS
     * в админ инвайте сообщения убрать два текста и оставить один
     * сделать большие шаблоны с параметрами
-    * сделать артикул меньше
-	* В темплейте сообщения если один и тот же тип файла повторяется - показывать число
-	* Сделать Inline клавиатуру в валюте, добавить белорус рубли
+    - * сделать артикул меньше
+	- * В темплейте сообщения если один и тот же тип файла повторяется - показывать число
+	- * Сделать Inline клавиатуру в валюте, добавить белорус рубли
 	1. Трэш----айтем лист----неверный бэк
 	3. Неверный бэк из делита категорий.
 	4. Меняешь греетинг и переводит в главное меню, а не в настройки
@@ -97,14 +83,14 @@ STRINGS
 
 
 --USERS
-	* добавить в заказы кнопку которая будет выводить на карточку юзера
-	* имя и username ансабов не обновляется в списке юзеров
-    * handling admins that leave the bot
+	- * добавить в заказы кнопку которая будет выводить на карточку юзера
+	- * имя и username ансабов не обновляется в списке юзеров
+    - * handling admins that leave the bot
 
 
 --SYSTEM
-	* Узнать за Timed Out Error в ботах
-	* Перепроверить везде to_delete()
+	- * Узнать за Timed Out Error в ботах
+	- * Перепроверить везде to_delete()
 	* проверить и проработать функции helper_funcs.helper, errors callbacks,
 	* Protect all /start, backs, get_help, help_button and so on with user_data.clear() function call
 	* сделать одну back_to_modules_<nameOfModule> функцию
@@ -130,6 +116,9 @@ STRINGS
 	* max 100 symbols on one line
 	* imports(first build-in, then dependencies, then project imports)
 	* use "update.effective_chat.id" to pass chat_id
+	* use "" for strings not ''
+	* update_callback_query after each inline button press
+	* use <strong> and <em>, not <b> and <i>
 
 --NOTES
     # 410694247 - Tranzzo,

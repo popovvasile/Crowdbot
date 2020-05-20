@@ -23,17 +23,20 @@ from database import categories_table, chatbots_table
 class AddingProductHandler(object):
     def start(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
+        # delete_list = context.user_data["to_delete"]
+        # delete_list.append(update.message)
         buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                          callback_data="back_to_main_menu")]]
         reply_markup = InlineKeyboardMarkup(buttons)
-        context.user_data["to_delete"].append(
-            context.user_data["to_delete"].append(context.bot.send_message(
-                chat_id=update.effective_chat.id,
-                text=context.bot.lang_dict["shop_admin_product_title"],
-                reply_markup=reply_markup)))
+        context.user_data["to_delete"].append(context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=context.bot.lang_dict["shop_admin_product_title"],
+            reply_markup=reply_markup))
         return SET_TITLE
 
     def set_title(self, update: Update, context: CallbackContext):
+        # delete_list = context.user_data["to_delete"]
+        # delete_list.append(update.message)
         context.user_data["new_product"] = Product(context)
         if len(update.message.text) <= MAX_PRODUCT_NAME_LENGTH:
             context.user_data["new_product"].name = update.message.text
@@ -45,6 +48,7 @@ class AddingProductHandler(object):
                              [back_btn("back_to_main_menu_btn", context)]])))
             return SET_TITLE
         delete_messages(update, context, True)
+
         category_list = categories_table.find({"bot_id": context.bot.id})
         if category_list.count() > 0:
             keyboard = create_keyboard(
@@ -69,6 +73,8 @@ class AddingProductHandler(object):
         return SET_CATEGORY
 
     def set_category(self, update: Update, context: CallbackContext):
+        # delete_list = context.user_data["to_delete"]
+        # delete_list.append(update.message)
         delete_messages(update, context, True)
         if update.message:
             final_text = context.bot.lang_dict["shop_admin_set_category_add_product"]
@@ -113,6 +119,8 @@ class AddingProductHandler(object):
 
     def ask_quantity(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
+        # delete_list = context.user_data["to_delete"]
+        # delete_list.append(update.message)
         if update.callback_query:
             context.user_data["new_product"].category_id = (
                 update.callback_query.data.split("/")[1])
@@ -127,6 +135,8 @@ class AddingProductHandler(object):
 
     def ask_price(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
+        # delete_list = context.user_data["to_delete"]
+        # delete_list.append(update.message)
         if update.message:
             quantity_request = context.user_data["new_product"].create_quantity(
                 update, context)
@@ -155,6 +165,8 @@ class AddingProductHandler(object):
 
     def ask_description(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
+        # delete_list = context.user_data["to_delete"]
+        # delete_list.append(update.message)
         price_request = context.user_data["new_product"].create_price(update, context)
         if price_request["ok"]:
             context.user_data["new_product"].price = price_request["price"]
@@ -174,6 +186,10 @@ class AddingProductHandler(object):
 
     def set_description(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
+        # delete_list = context.user_data["to_delete"]
+        # delete_list.append(update.message)
+        if "user_input" not in context.user_data:
+            context.user_data["user_input"] = list()
         context.user_data["new_product"].description = update.message.text
         context.user_data["new_product"].send_full_template(
             update, context,
@@ -181,8 +197,62 @@ class AddingProductHandler(object):
             keyboards(context)["back_to_main_menu_keyboard"])
         return ADDING_CONTENT
 
+    """
+    def description_handler(self, update, context):
+        delete_messages(update, context, False)
+        reply_buttons = [[InlineKeyboardButton(text=context.bot.lang_dict["done_button"],
+                                               callback_data="DONE")],
+                         [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                               callback_data="cancel_button_creation")]]
+        reply_markup = InlineKeyboardMarkup(reply_buttons)
+
+        if "content" not in context.user_data["new_button"]:
+            context.user_data["new_button"]["content"] = list()
+        content_dict = create_content_dict(update)
+        if content_dict:
+            if len(context.user_data["new_button"]["content"]) < MAX_BUTTON_CONTENT_COUNT:
+                context.user_data["new_button"]["content"].append(content_dict)
+                context.user_data["user_input"].append(update.message)
+            else:
+                context.user_data["to_delete"].append(
+                    context.bot.send_message(update.effective_chat.id,
+                                             context.bot.lang_dict["so_many_content"]))
+                try:
+                    context.bot.delete_message(update.effective_chat.id,
+                                               update.effective_message.message_id)
+                except TelegramError:
+                    pass
+        else:
+            context.user_data["to_delete"].append(
+                context.bot.send_message(update.effective_chat.id,
+                                         text=context.bot.lang_dict["content_error"],
+                                         parse_mode=ParseMode.HTML))
+            try:
+                context.bot.delete_message(update.effective_chat.id,
+                                           update.effective_message.message_id)
+            except TelegramError:
+                pass
+        msg_index = (len(context.user_data["user_input"])
+                     - len(context.user_data["new_button"]["content"]))
+        reply_to = context.user_data["user_input"][msg_index].message_id
+
+        if len(context.user_data["new_button"]["content"]) < MAX_BUTTON_CONTENT_COUNT:
+            string = context.bot.lang_dict["add_menu_buttons_str_4"]
+        else:
+            string = context.bot.lang_dict["add_menu_buttons_str_11"]
+
+        context.user_data["to_delete"].append(
+            context.bot.send_message(update.effective_chat.id,
+                                     string,
+                                     reply_markup=reply_markup,
+                                     reply_to_message_id=reply_to))
+        return TYPING_DESCRIPTION
+    """
+
     def open_content_handler(self, update, context):
-        delete_messages(update, context, True)
+        delete_messages(update, context)
+        # delete_list = context.user_data["to_delete"]
+        # delete_list.append(update.message)
         if len(context.user_data["new_product"].content) < 10:
             context.user_data["new_product"].add_content_dict(update)
             text = context.bot.lang_dict["shop_admin_send_more_photo"].format(
@@ -235,6 +305,7 @@ class AddingProductHandler(object):
 
 
 ADD_PRODUCT_HANDLER = ConversationHandler(
+    # persistent=True, name='ADD_PRODUCT_HANDLER'
     allow_reentry=True,
     entry_points=[CallbackQueryHandler(AddingProductHandler().start,
                                        pattern=r"add_product")],

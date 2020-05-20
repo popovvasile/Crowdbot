@@ -17,45 +17,6 @@ from modules.shop.helper.keyboards import currency_markup
  TYPING_SHOP_ADDRESS, SHOP_FINISH, CHOOSING_PICK_UP_OR_DELIVERY) = range(6)
 
 
-def eshop_menu(update, context):  # TODO add shop config button
-    string_d_str = context.bot.lang_dict
-    context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                               message_id=update.callback_query.message.message_id)
-    chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
-    admin_keyboard = []
-    if chatbot.get("shop_enabled") is True:
-        admin_keyboard += [
-            [InlineKeyboardButton(text=string_d_str["products"],
-                                  callback_data="products")],
-            [InlineKeyboardButton(text=string_d_str["shop_admin_add_product_btn"],
-                                  callback_data="create_product")],
-            [InlineKeyboardButton(text=string_d_str["edit_product"],
-                                  callback_data="edit_product")],
-            [InlineKeyboardButton(text=string_d_str["delete_product"],
-                                  callback_data="delete_product")],
-            [InlineKeyboardButton(text=context.bot.lang_dict["disable_shop_button"],
-                                  callback_data="change_shop_config")],
-            [InlineKeyboardButton(text=context.bot.lang_dict["configure_button"],
-                                  callback_data="shop_config")],
-        ]
-
-    elif "shop" in chatbot:
-        admin_keyboard.append(
-            [InlineKeyboardButton(text=context.bot.lang_dict["turn_shop_on"],
-                                  callback_data="change_shop_config")]),
-    else:
-        admin_keyboard.append(
-            [InlineKeyboardButton(text=context.bot.lang_dict["allow_shop_button"],
-                                  callback_data='allow_shop')]),
-
-    admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                                callback_data="help_module(shop)")])
-    context.bot.send_message(update.callback_query.message.chat.id,
-                             context.bot.lang_dict["shop"],
-                             reply_markup=InlineKeyboardMarkup(admin_keyboard))
-    return ConversationHandler.END
-
-
 class CreateShopHandler(object):
     @staticmethod
     def facts_to_str(context):
@@ -71,6 +32,8 @@ class CreateShopHandler(object):
             context.user_data["to_delete"] = []
         if update.message:
             context.user_data["new_product"].description = update.message.text
+        # delete_list = context.user_data["to_delete"]
+        # delete_list.append(update.message)
         delete_messages(update, context, True)
         context.user_data["shop_type"] = "offline"
         reply_markup = [
@@ -88,6 +51,8 @@ class CreateShopHandler(object):
         return CHOOSING_PICK_UP_OR_DELIVERY
 
     def handle_type(self, update, context):
+        # delete_list = context.user_data["to_delete"]
+        # delete_list.append(update.message)
         delete_messages(update, context, True)
 
         reply_markup = InlineKeyboardMarkup(
@@ -109,7 +74,10 @@ class CreateShopHandler(object):
             return TYPING_SHOP_ADDRESS
 
     def handle_address(self, update, context):
+        # delete_list = context.user_data["to_delete"]
+        # delete_list.append(update.message)
         delete_messages(update, context, True)
+
         chat_id, txt = initiate_chat_id(update)
         reply_markup = InlineKeyboardMarkup(
             [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
@@ -137,6 +105,8 @@ class CreateShopHandler(object):
         return TYPING_DESCRIPTION
 
     def handle_description(self, update, context):
+        # delete_list = context.user_data["to_delete"]
+        # delete_list.append(update.message)
         delete_messages(update, context, True)
 
         chat_id, txt = initiate_chat_id(update)
@@ -145,7 +115,7 @@ class CreateShopHandler(object):
             context.bot.lang_dict["create_shop_str_7"],
             # reply_markup=ReplyKeyboardMarkup(currency_keyboard,
             #                                  one_time_keyboard=True))
-            reply_markup=currency_markup()))
+            reply_markup=currency_markup(context)))
         return SHOP_FINISH
 
     def handle_shop_finish(self, update, context):
@@ -160,23 +130,19 @@ class CreateShopHandler(object):
         update.callback_query.answer(context.bot.lang_dict["create_shop_str_8"])
         logger.info("Admin {} on bot {}:{} added a shop config".format(
             update.effective_user.first_name, context.bot.first_name, context.bot.id))
-        delete_messages(update, context)
+        delete_messages(update, context, True)
         context.user_data.clear()
         Welcome.start(update, context)
         return ConversationHandler.END
 
     def cancel(self, update, context):
-
-        update.message.reply_text(
-            "Command is cancelled =("
-        )
+        update.message.reply_text("Command is cancelled =(")
         get_help(update, context)
         return ConversationHandler.END
 
     def back(self, update, context):
-
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                                   message_id=update.callback_query.message.message_id, )
+                                   message_id=update.callback_query.message.message_id)
         get_help(update, context)
         return ConversationHandler.END
 
@@ -204,4 +170,3 @@ CREATE_SHOP_HANDLER = ConversationHandler(
                MessageHandler(filters=Filters.command, callback=CreateShopHandler().back),
                ]
 )
-ESHOP_MENU = CallbackQueryHandler(callback=eshop_menu, pattern="shop_menu")
