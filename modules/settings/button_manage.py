@@ -329,7 +329,7 @@ class AddLinkButton(object):
                     context.bot.lang_dict["wrong_http_url"],
                     reply_markup=reply_markup,
                     reply_to_message_id=context.user_data["user_input"][-1].message_id))
-            return TYPING_LINK
+            return TYPING_BUTTON_FINISH
         else:
             context.user_data["new_button"]["button_lower"] = (
                 context.user_data["new_button"]['button'].replace(" ", "").lower())
