@@ -12,6 +12,7 @@ from bson.objectid import ObjectId
 from telegram.utils.promise import Promise
 
 from database import chatbots_table, users_table
+from logs import logger
 
 LOAD = []
 NO_LOAD = ['translation', 'rss']
@@ -33,7 +34,8 @@ def delete_messages(update, context, message_from_update=True):
                args=(update, context, context.user_data.copy(), message_from_update)).start()
     except Exception as exc:
         print("Warning: Some exception in thread start in delete_message func", exc)
-    context.user_data['to_delete'] = list()
+    if update:
+        context.user_data['to_delete'] = list()
 
 
 def async_delete(update, context, user_data, message_from_update=True):
@@ -182,21 +184,12 @@ def update_user_fields(context, user):
 
 
 def update_user_unsubs(context):
-    """Here is the problem:
-    in users_table can be user without 'chat_id' field(not registered superuser)
-    - coz there are old algorithm in API.
-    watch Trello -> 'Bug List'
-    need to change API and superuser authorization and then rewrite in this way:
-
-    users_list = users_table.find({"bot_id": context.bot.id})
-    map(lambda user: update_user_fields(context, user), users_list)
-    """
+    print(f"Start updating users for bot: {context.bot.first_name}")
     users_list = users_table.find({"bot_id": context.bot.id})
     for user in users_list:
-        if user["superuser"] and not user["registered"]:
-            continue
-        else:
-            update_user_fields(context, user)
+        update_user_fields(context, user)
+    print(f"Finish updating users for bot: {context.bot.first_name}. "
+          f"{users_list.count()} users checked")
 
 
 def create_content_dict(update):

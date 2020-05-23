@@ -205,8 +205,10 @@ def main(token, lang):
                          workers=100,
                          # persistence=my_persistence
                          )
-    # job = updater.job_queue
-    # job.run_repeating(update_user_unsubs, interval=3600*24, first=0)
+    # If we stop alive_checker by pressing ctrl+c and there are running job,
+    # bot process wouldn't stop. So need to use pkill -9 python
+    job = updater.job_queue
+    job.run_repeating(update_user_unsubs, interval=3600*24, first=0)
     # todo try to add async to
     # every function one by one
     # If you’re using @ run_async you cannot  rely on adding custom

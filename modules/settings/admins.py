@@ -44,7 +44,6 @@ class Admin:
         return self.context.bot.lang_dict["registered_admin_temp"].format(
                 _user_mention, self.timestamp)
 
-
     @property
     def reply_markup(self):
         reply_markup = [
