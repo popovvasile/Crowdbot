@@ -1,36 +1,38 @@
+import os
+
 from pymongo import MongoClient
 
 client = MongoClient('localhost', 27017)
-db = client['crowdbot_chatbots']
+if os.environ['SHOP_PRODUCTION'] == "1":
+    db = client['crowdbot_chatbots']
+else:
+    db = client['crowdbot_chatbots_test']
+
+# Bot
+chatbots_table = db["crowdbot_chatbots"]
+custom_buttons_table = db["custom_buttons"]
+admin_passwords_table = db["admin_passwords"]
+users_table = db["users"]
+user_mode_table = db["user_mode"]
+users_messages_to_admin_table = db["users_messages_to_admin_bot"]
+# Shop
+products_table = db["products"]
+carts_table = db["carts"]
+categories_table = db["categories"]
+shop_categories_table = db["shop_categories"]
+shop_customers_contacts_table = db["customers_contacts"]
+orders_table = db["orders"]
+# Not used for now
+mailing_history = db["mailing_history"]
+user_categories_table = db["user_categories"]
+channels_table = db["channels"]
 groups_table = db["groups_table"]
 donations_table = db['donations_table']
 surveys_table = db["surveys"]
-users_table = db["users"]
-custom_buttons_table = db["custom_buttons"]
-payments_requests_table = db['payments_requests_table']
-chatbots_table = db["crowdbot_chatbots"]
-admin_passwords_table = db["admin_passwords"]
-answers_table = db['answers']
-products_table = db["products"]
-carts_table = db["carts"]
-scam_reports_table = db["scam_reports"]
-user_mode_table = db["user_mode"]
-channels_table = db["channels"]
-categories_table = db["categories"]
-user_categories_table = db["user_categories"]
-orders_quantity_table = db["orders_quantity"]
-shop_categories_table = db["shop_categories"]
-shop_customers_contacts_table = db["customers_contacts"]
 DROPBOX_TOKEN = "xPAGp5mkaqgAAAAAAAABwK7yiygvq9ITgQj7j4KlBU8SYQ3WEmHCQnUxCIZUD-mR"
+# What is it?
+orders_quantity_table = db["orders_quantity"]
+answers_table = db['answers']
+scam_reports_table = db["scam_reports"]
+payments_requests_table = db['payments_requests_table']
 
-test_table = db["test_table"]
-
-# in bot_father.db
-
-users_messages_to_admin_table = db["users_messages_to_admin_bot"]
-# support_admins_table = db['support_admins']
-# bot_father_bots_table = db['bot_father_bots']
-# bot_father_users_table = db['bot_father_users']
-
-# Api Shop To Mongo Shop
-orders_table = db["orders"]

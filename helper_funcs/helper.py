@@ -1,13 +1,16 @@
 import re
 import html
-import sys
+from datetime import datetime
 
+import sys
+from pickle import PicklingError
 from urllib3.exceptions import HTTPError
 
+from bson.objectid import ObjectId
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, LabeledPrice
 from telegram.ext import ConversationHandler
 from telegram.error import (BadRequest, TimedOut, NetworkError, TelegramError,
-                            ChatMigrated, Unauthorized)
+                            ChatMigrated, Unauthorized, Conflict)
 
 from helper_funcs.lang_strings.help_strings import help_strings, helpable_dict
 from helper_funcs.misc import paginate_modules, delete_messages, send_content_dict
@@ -17,10 +20,29 @@ from database import (custom_buttons_table, users_table, chatbots_table,
                       user_mode_table, products_table, groups_table)
 from logs import logger
 
+
 HELP_STRINGS = """
 {}
 """
-currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["KZT", "UAH", "RON", "PLN"]]
+currency_keyboard = [[InlineKeyboardButton(text="USD",
+                     callback_data="currency_USD"),
+InlineKeyboardButton(text="RUB",
+                     callback_data="currency_RUB"),
+InlineKeyboardButton(text="EUR",
+                     callback_data="currency_EUR")],
+[InlineKeyboardButton(text="GBP",
+                     callback_data="currency_GBP"),
+InlineKeyboardButton(text="KZT",
+                     callback_data="currency_KZT"),
+InlineKeyboardButton(text="UAH",
+                     callback_data="currency_UAH")],
+[InlineKeyboardButton(text="RON",
+                     callback_data="currency_RON"),
+InlineKeyboardButton(text="PLN",
+                     callback_data="currency_PLN")]]
+
+
+# currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["KZT", "UAH", "RON", "PLN"]]
 
 
 def return_to_menu(update, context):
@@ -37,10 +59,10 @@ def return_to_menu(update, context):
 
 
 def dismiss_button(context):
-    dismis_button = InlineKeyboardMarkup(
+    dismissbutton = InlineKeyboardMarkup(
         [[InlineKeyboardButton(text=context.bot.lang_dict["notification_close_btn"],
                                callback_data="dismiss")]])
-    return dismis_button
+    return dismissbutton
 
 
 # do not async
@@ -67,7 +89,7 @@ def send_visitor_help(bot, chat_id, text):
 def send_admin_user_mode(bot, chat_id, text):
 
     pairs = (user_main_menu_creator(bot)
-             + [[InlineKeyboardButton(text="ADMIN MODE",
+             + [[InlineKeyboardButton(text=bot.lang_dict["admin_mode"],
                                       callback_data="turn_user_mode_off")]])
     bot.send_message(chat_id=chat_id,
                      text=text,
@@ -78,16 +100,13 @@ def send_admin_user_mode(bot, chat_id, text):
 def user_main_menu_creator(bot):
     first_buttons = [[InlineKeyboardButton(bot.lang_dict["send_message_1"],
                                            callback_data="send_message_to_admin")]]
-    product_list_of_dicts = products_table.find({
-        "bot_id": bot.id})
-    if (  # product_list_of_dicts.count() != 0 and
-            chatbots_table.find_one({"bot_id": bot.id})["shop_enabled"]):
+
+    if chatbots_table.find_one({"bot_id": bot.id})["shop_enabled"]:
         first_buttons += [[InlineKeyboardButton(text=bot.lang_dict["shop"],
                                                 callback_data="help_module(shop)")]]
 
     buttons = [InlineKeyboardButton(button["button"],
-                                    callback_data="button_{}".
-                                    format(button["button"].replace(" ", "").lower()))
+                                    callback_data="button_{}".format(button["_id"]))
                for button in custom_buttons_table.find({"bot_id": bot.id, "link_button": False})]
 
     buttons += [InlineKeyboardButton(button["button"], url=button["link"])
@@ -163,13 +182,24 @@ def check_provider_token(currency, provider_token, update, context):
 # for test purposes
 def error_callback(update, context):
     delete_messages(update, context)
+    # print(context)
+    # print(context.user_data)
     try:
         raise context.error
 
     except Unauthorized:
+        print("Token revoked or bot deleted")
         chatbots_table.update({"bot_id": context.bot.id},
-                              {"$set": {"active": False}})
+                              {"$set": {"active": False,
+                                        # "deactivation_time": datetime.now()
+                                        }})
         sys.exit()
+
+    # telegram.error.Conflict: Conflict: terminated by other getUpdatesrequest;
+    # make sure that only one bot instance is running
+    # What about this Exception? maybe send message to superuser?
+    # except Conflict as err:
+    #     print("Conflict", err)
 
     except ConnectionError as err:
         print("ConnectionError")
@@ -178,6 +208,9 @@ def error_callback(update, context):
     except TimedOut as err:
         print("TimedOut")
         print(err)
+
+    except PicklingError:
+        print("PicklingError")
 
     # handle slow connection problems
     except (HTTPError, BadRequest):
@@ -216,8 +249,7 @@ def button_handler(update, context):
     button_info = dict()
     try:
         button_info = custom_buttons_table.find_one(
-            {"bot_id": context.bot.id, "button_lower": button_callback_data.replace("button_", "")}
-        )
+            {"_id": ObjectId(button_callback_data.replace("button_", ""))})
         for content_dict in button_info["content"]:
             send_content_dict(query.message.chat.id, context, content_dict)
 
@@ -249,7 +281,7 @@ def back_to_modules(update, context):
 
     update.callback_query.data = "back_to_module_{here is the name of module}"
     """
-    delete_messages(update, context)
+    delete_messages(update, context, True)
     context.user_data.clear()
     # here can be exception if callback_query is None
     module_name = update.callback_query.data.replace("back_to_module_", "")
@@ -258,7 +290,9 @@ def back_to_modules(update, context):
 
 
 def help_button(update, context):
-    if users_table.find_one({"user_id": update.effective_user.id, "bot_id": context.bot.id}).get(
+    # todo AttributeError: 'NoneType' object has no attribute 'get'
+    if users_table.find_one({"user_id": update.effective_user.id,
+                             "bot_id": context.bot.id}).get(
             "blocked", False):
         update.effective_message.reply_text(context.bot.lang_dict["blocked_user"])
         return ConversationHandler.END
@@ -317,12 +351,11 @@ def help_button(update, context):
                                          paginate_modules(HELPABLE, "help", context.bot.id)))
 
         elif back_match or back_button_match:
-            context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                                       message_id=update.callback_query.message.message_id)
-            delete_messages(update, context)
+            # context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
+            #                            message_id=update.callback_query.message.message_id)
+            delete_messages(update, context, True)
             get_help(update, context)
             return ConversationHandler.END
-
 
         else:
             query.message.reply_text(text=HELP_STRINGS.format(welcome_message),
@@ -350,7 +383,7 @@ def help_button(update, context):
 
 def get_help(update, context):
     try:
-        delete_messages(update, context)
+        delete_messages(update, context, False)
     except BadRequest:
         pass
     if users_table.find_one({"user_id": update.effective_user.id, "bot_id": context.bot.id}).get(

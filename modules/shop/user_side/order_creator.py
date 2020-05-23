@@ -68,18 +68,41 @@ class PurchaseBot(object):
         context.user_data["to_delete"].append(
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text=text,
-                                     reply_markup=InlineKeyboardMarkup(buttons)))
+                                     reply_markup=InlineKeyboardMarkup(buttons),
+                                     parse_mode=ParseMode.HTML))
 
+    # Todo mb add to the settings "number validation type" switcher
+    """Numbers Validation"""
+    # @staticmethod
+    # def validate_number(number):
+    #     if not number.startswith('+') or not number.startswith('00'):
+    #         number = "+" + number
+    #     if not 5 < len(number) < 25:
+    #         return False
+    #     try:
+    #         z = phonenumbers.parse(number, region=None, _check_region=False)
+    #         return phonenumbers.is_valid_number(z)
+    #     except phonenumbers.phonenumberutil.NumberParseException:
+    #         return False
+
+    """Free style numbers Validation."""
     @staticmethod
     def validate_number(number):
-        if not number.startswith('+') or not number.startswith('00'):
-            number = "+" + number
-        if not 5 < len(number) < 25:
+        if not 5 < len(number) < 30:
             return False
-        try:
-            z = phonenumbers.parse(number, region=None, _check_region=False)
-            return phonenumbers.is_valid_number(z)
-        except phonenumbers.phonenumberutil.NumberParseException:
+        number = number.replace(
+            "-", "").replace(
+            "(", "").replace(
+            ")", "").replace(
+            " ", "").replace(
+            "*", "").replace(
+            "+", "")
+        print("number", number)
+        if not 5 < len(number) < 30:
+            return False
+        if number.isdigit():
+            return True
+        else:
             return False
 
     @staticmethod

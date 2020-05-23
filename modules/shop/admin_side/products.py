@@ -213,7 +213,7 @@ class ProductsHandler(ProductsHelper):
     def description(self, update: Update, context: CallbackContext):
         delete_messages(update, context, True)
         text = (self.admin_short_template(context, context.user_data["product"])
-                + "\n"
+                + "\n\n"
                 + context.bot.lang_dict["shop_admin_set_description"])
         context.user_data["product"].send_short_template(
             update, context,
@@ -283,9 +283,17 @@ class ProductsHandler(ProductsHelper):
         text = (self.admin_short_template(context, context.user_data["product"])
                 + "\n\n"
                 + context.bot.lang_dict["shop_admin_set_discount_price"])
+        reply_markup = []
+        if context.user_data["product"].discount_price:
+            reply_markup.append(
+                [InlineKeyboardButton(text=context.bot.lang_dict["remove_discount"],
+                                      callback_data="remove_discount")])
+        reply_markup.append(
+            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                  callback_data="back_to_edit")])
         context.user_data["product"].send_short_template(
             update, context,
-            text=text, reply_markup=keyboards(context)["back_to_edit"])
+            text=text, reply_markup=InlineKeyboardMarkup(reply_markup))
         return DISCOUNT_PRICE
 
     def finish_discount_price(self, update: Update, context: CallbackContext):
@@ -310,6 +318,23 @@ class ProductsHandler(ProductsHelper):
         context.user_data["product"].send_short_template(
             update, context,
             text=text, reply_markup=keyboards(context)["back_to_edit"])
+        return DISCOUNT_PRICE
+
+    def remove_discount(self, update, context):
+        context.user_data["product"].update({"discount_price": 0})
+        text = (self.admin_short_template(context, context.user_data["product"])
+                + "\n\n"
+                + context.bot.lang_dict["shop_admin_set_discount_price"])
+        reply_markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                  callback_data="back_to_edit")]])
+
+        if update.effective_message.caption:
+            update.effective_message.edit_caption(caption=text, parse_mode=ParseMode.HTML)
+        else:
+            update.effective_message.edit_text(text=text, parse_mode=ParseMode.HTML)
+        update.effective_message.edit_reply_markup(reply_markup=reply_markup)
+        update.callback_query.answer(text=context.bot.lang_dict["discount_removed_blink"])
         return DISCOUNT_PRICE
 
     def content_menu(self, update, context):
@@ -620,7 +645,9 @@ PRODUCTS_HANDLER = ConversationHandler(
             MessageHandler(Filters.regex(r'^[-+]?([1-9]\d*|0)$'),
                            ProductsHandler().finish_discount_price),
             MessageHandler(Filters.regex(r"^((?!@).)*$"),
-                           ProductsHandler().finish_discount_price)
+                           ProductsHandler().finish_discount_price),
+            CallbackQueryHandler(ProductsHandler().remove_discount,
+                                 pattern="remove_discount")
         ],
 
         # todo 3 regexes vs just Filters.text (it looks like everything works anyway)

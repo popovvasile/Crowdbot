@@ -3,15 +3,21 @@
 import json
 import logging
 import os
-import re
 
-from telegram.utils import request
+import sys
+
+import telegram
 import telegram.ext as tg
 from telegram import Bot
-from telegram.ext import CommandHandler, CallbackQueryHandler, MessageHandler, Filters
+from telegram.error import Unauthorized
+from telegram.ext import messagequeue as mq
+from telegram.ext import (CommandHandler, CallbackQueryHandler, MessageHandler, Filters,
+                          PicklePersistence)
+from telegram.utils.request import Request
 
+from database import chatbots_table
 from logs import logger
-from helper_funcs.misc import dismiss
+from helper_funcs.misc import dismiss, update_user_unsubs
 from helper_funcs.helper import (help_button, button_handler, get_help, WelcomeBot,
                                  back_from_button_handler, back_to_modules, error_callback,
                                  return_to_menu)
@@ -31,7 +37,8 @@ from helper_funcs.helper import (help_button, button_handler, get_help, WelcomeB
 #     SEND_POLL_TO_GROUP_HANDLER, SEND_SURVEY_TO_GROUP_HANDLER, SEND_DONATION_TO_GROUP_HANDLER)
 
 # SETTINGS
-from modules.settings.menu_description import EDIT_BOT_DESCRIPTION_HANDLER
+from modules.settings.language_switch import LANG_MENU, SET_LANG
+from modules.settings.menu_description import EDIT_BOT_DESCRIPTION_HANDLER, EDIT_PICTURE_HANDLER
 from modules.settings.button_manage import (
     BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER, LINK_BUTTON_ADD_HANDLER,
     CREATE_BUTTON_CHOOSE, BUTTONS_MENU, ONE_BUTTON_MENU, BACK_TO_BUTTONS_MENU,
@@ -71,14 +78,8 @@ from modules.users.users import (
 from modules.statistic.user_statistic import USERS_STATISTIC_HANDLER
 # from modules.statistic.donation_statistic import DONATION_STATISTIC_HANDLER
 
-# SURVEYS
-from modules.surveys.surveys_answer import ANSWER_SURVEY_HANDLER
-from modules.surveys.surveys_create import (
-    DELETE_SURVEYS_HANDLER, SHOW_SURVEYS_HANDLER, SEND_SURVEYS_HANDLER,
-    CREATE_SURVEY_HANDLER, SURVEYS_MENU, SEND_SURVEYS_MENU_HANDLER)
-
 # PAYMENTS
-from modules.payments.payments_config import (
+from modules.shop.admin_side.shop_config import (
     # EDIT_DONATION_HANDLER, PAYMENTS_CONFIG_KEYBOARD, CHANGE_DONATIONS_CONFIG,
     # CONFIGS_DONATIONS_GENERAL,
     CONFIGS_SHOP_GENERAL, CHANGE_SHOP_CONFIG, EDIT_SHOP_HANDLER)
@@ -103,7 +104,7 @@ from modules.shop.user_side.order_creator import OFFLINE_PURCHASE_HANDLER
 from modules.shop.user_side.online_payment import HANDLE_SUCCES, HANDLE_PRECHECKOUT
 from modules.shop.user_side.products import (
     USERS_PRODUCTS_LIST_HANDLER, ADD_TO_CART, REMOVE_FROM_CART, PRODUCTS_CATEGORIES,
-    BACK_TO_CATEGORIES, VIEW_PRODUCT, BACK_TO_CUSTOMER_SHOP, SHOP_CONTACTS)
+    BACK_TO_CATEGORIES, VIEW_PRODUCT, BACK_TO_CUSTOMER_SHOP, SHOP_CONTACTS, MOVE_TO_CART)
 from modules.shop.user_side.cart import (
     CART, REMOVE_FROM_CART_LIST, CHANGE_QUANTITY, BACK_TO_CART, MAKE_ORDER, VIEW_CART_PRODUCT)
 from modules.shop.user_side.orders import (
@@ -111,10 +112,79 @@ from modules.shop.user_side.orders import (
     ORDER_PAYMENT_MENU)
 
 
+class MQBot(telegram.bot.Bot):
+    """A subclass of Bot which delegates send method handling to MQ"""
+    def __init__(self, *args, is_queued_def=True, mqueue=None, **kwargs):
+        super(MQBot, self).__init__(*args, **kwargs)
+        # below 2 attributes should be provided for decorator usage
+        self._is_messages_queued_default = is_queued_def
+        self._msg_queue = mqueue or mq.MessageQueue()
+
+    def __del__(self):
+        try:
+            self._msg_queue.stop()
+        except:
+            pass
+
+    @mq.queuedmessage
+    def send_message(self, *args, **kwargs):
+        """Wrapped method would accept new `queued` and `isgroup`
+        OPTIONAL arguments
+
+        @mq.queuedmessage is a decorator to be used with :attr:`telegram.Bot` send* methods.
+        """
+        return super(MQBot, self).send_message(*args, **kwargs)
+
+    @mq.queuedmessage
+    def send_audio(self, *args, **kwargs):
+        return super(MQBot, self).send_audio(*args, **kwargs)
+
+    @mq.queuedmessage
+    def send_voice(self, *args, **kwargs):
+        return super(MQBot, self).send_voice(*args, **kwargs)
+
+    @mq.queuedmessage
+    def send_video(self, *args, **kwargs):
+        return super(MQBot, self).send_video(*args, **kwargs)
+
+    @mq.queuedmessage
+    def send_document(self, *args, **kwargs):
+        return super(MQBot, self).send_document(*args, **kwargs)
+
+    @mq.queuedmessage
+    def send_photo(self, *args, **kwargs):
+        return super(MQBot, self).send_photo(*args, **kwargs)
+
+    @mq.queuedmessage
+    def send_animation(self, *args, **kwargs):
+        return super(MQBot, self).send_animation(*args, **kwargs)
+
+    @mq.queuedmessage
+    def send_sticker(self, *args, **kwargs):
+        return super(MQBot, self).send_sticker(*args, **kwargs)
+
+
+def catch_unauthorized(func):
+    def wrapper(token, lang):
+        try:
+            return func(token, lang)
+        except Unauthorized:
+            chatbots_table.update({"token": token},
+                                  {"$set": {"active": False,
+                                            # "deactivation_time": datetime.now()
+                                            }})
+            sys.exit()
+    return wrapper
+
+
+@catch_unauthorized
 def main(token, lang):
     # https://github.com/python-telegram-bot/python-telegram-bot/issues/787
-    req = request.Request(con_pool_size=8)
-    bot_obj = Bot(token=token, request=req)
+    request = Request(con_pool_size=104)
+    q = mq.MessageQueue(all_burst_limit=25, all_time_limit_ms=1200)
+    # bot_obj = MQBot(token, request=request, mqueue=q)
+    bot_obj = Bot(token, request=request)
+
     filename = 'logs/{}.log'.format(bot_obj.name)
     open(filename, "w+")
     hdlr = logging.FileHandler(filename)
@@ -126,10 +196,22 @@ def main(token, lang):
     with open('languages.json') as f:
         lang_dicts = json.load(f)
     if lang == "ENG":
-        Bot.lang_dict = lang_dicts["ENG"]
+        bot_obj.lang_dict = lang_dicts["ENG"]
     else:
-        Bot.lang_dict = lang_dicts["RUS"]
-    updater = tg.Updater(use_context=True, bot=bot_obj)
+        bot_obj.lang_dict = lang_dicts["RUS"]
+    # my_persistence = PicklePersistence(filename='persistence.bin')
+    # https://github.com/python-telegram-bot/python-telegram-bot/issues/1864
+    updater = tg.Updater(use_context=True, bot=bot_obj,
+                         workers=100,
+                         # persistence=my_persistence
+                         )
+    # job = updater.job_queue
+    # job.run_repeating(update_user_unsubs, interval=3600*24, first=0)
+    # todo try to add async to
+    # every function one by one
+    # If you’re using @ run_async you cannot  rely on adding custom
+    # attributes  to telegram.ext.CallbackContext. See its docs for more info.
+    # https://python-telegram-bot.readthedocs.io/en/stable/telegram.ext.dispatcher.html?highlight=run_async%20#telegram.ext.Dispatcher.run_async
     dispatcher = updater.dispatcher
     start_handler = CommandHandler("start", WelcomeBot().start)
     help_handler = CommandHandler("help", get_help)
@@ -154,7 +236,7 @@ def main(token, lang):
     dispatcher.add_handler(dismiss_handler)
     # TODO priority is very important!!!!!!!!!!!!!!!!!!!!
     dispatcher.add_handler(EDIT_BOT_DESCRIPTION_HANDLER)
-
+    dispatcher.add_handler(EDIT_PICTURE_HANDLER)
 
     #  SHOP USER SIDE
     dispatcher.add_handler(EDIT_SHOP_HANDLER)
@@ -173,6 +255,7 @@ def main(token, lang):
     dispatcher.add_handler(USERS_ORDERS_LIST_HANDLER)
     dispatcher.add_handler(VIEW_CART_PRODUCT)
     dispatcher.add_handler(VIEW_PRODUCT)
+    dispatcher.add_handler(MOVE_TO_CART)
     dispatcher.add_handler(BACK_TO_CUSTOMER_SHOP)
     dispatcher.add_handler(USER_ORDER_ITEMS_PAGINATION)
     dispatcher.add_handler(ORDER_PAYMENT_MENU)
@@ -218,7 +301,8 @@ def main(token, lang):
     # dispatcher.add_handler(BUTTON_ADD_FINISH_HANDLER)
     dispatcher.add_handler(BACK_TO_BUTTONS_MENU)
     dispatcher.add_handler(BACK_TO_ONE_BUTTON_MENU)
-
+    dispatcher.add_handler(LANG_MENU)
+    dispatcher.add_handler(SET_LANG)
     # USER MODE
     dispatcher.add_handler(USER_MODE_ON)
     dispatcher.add_handler(USER_MODE_OFF)
@@ -299,15 +383,6 @@ def main(token, lang):
     dispatcher.add_handler(BACK_TO_MESSAGES_MENU)
     dispatcher.add_handler(DELETE_MESSAGES_MENU_HANDLER)
 
-    # SURVEYS
-    dispatcher.add_handler(SURVEYS_MENU)
-    dispatcher.add_handler(ANSWER_SURVEY_HANDLER)
-    dispatcher.add_handler(SHOW_SURVEYS_HANDLER)
-    dispatcher.add_handler(SEND_SURVEYS_HANDLER)
-    dispatcher.add_handler(CREATE_SURVEY_HANDLER)
-    dispatcher.add_handler(DELETE_SURVEYS_HANDLER)
-    dispatcher.add_handler(SEND_SURVEYS_MENU_HANDLER)
-
     # POLLS
     # dispatcher.add_handler(POLLS_MENU)
     # dispatcher.add_handler(POLL_HANDLER)
@@ -346,14 +421,18 @@ def main(token, lang):
     dispatcher.add_handler(back_to_modules_handler)
 
     dispatcher.add_handler(CallbackQueryHandler(Welcome.back_to_main_menu,
-                                                pattern=r"back_"))
+                                                pattern=r"_back"))
+
     dispatcher.add_handler(BACK_TO_MAIN_MENU_HANDLER)
 
     dispatcher.add_handler(help_callback_handler)
 
     if os.environ['SHOP_PRODUCTION'] == "1":
         dispatcher.add_error_handler(error_callback)
-
+    dispatcher.add_handler(CallbackQueryHandler(get_help,
+                                                pattern=r"back"))
+    dispatcher.add_handler(CallbackQueryHandler(get_help,
+                                                pattern=r"cancel"))
     rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), return_to_menu)
     # TODO create another function
     # TODO add "active" to all current bots
