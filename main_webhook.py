@@ -143,25 +143,26 @@ class MQBot(telegram.bot.Bot):
         return super(MQBot, self).send_sticker(*args, **kwargs)
 
 
-def catch_unauthorized(func):
-    def wrapper(token, lang):
-        try:
-            return func(token, lang)
-        except Unauthorized:
-            chatbots_table.update({"token": token},
-                                  {"$set": {"active": False,
-                                            # "deactivation_time": datetime.now()
-                                            }})
-            sys.exit()
-    return wrapper
-
-megadict = {}
-
-
+# def catch_unauthorized(func):
+#     def wrapper(token, lang):
+#         try:
+#             return func(token, lang)
+#         except Unauthorized:
+#             chatbots_table.update({"token": token},
+#                                   {"$set": {"active": False,
+#                                             # "deactivation_time": datetime.now()
+#                                             }})
+#             sys.exit()
+#     return wrapper
+#
+#
 # @catch_unauthorized
-def main():
+def create_dispatchers():
+    megadict = {}
     app = Flask(__name__)
-    for doc in chatbots_table.find({"active": True}):
+    for doc in chatbots_table.find({"active": True,
+                                    "wehook": False}):
+
         token = doc["token"]
         request = Request(con_pool_size=104)
         q = mq.MessageQueue(all_burst_limit=25, all_time_limit_ms=1200)
@@ -357,14 +358,24 @@ def main():
             "dispatcher": dispatcher,
             "bot": bot_obj
         }})
-        s = bot_obj.set_webhook(url='https://64.227.14.144:8443/' + token,
-                            certificate=open('cert.pem', 'rb'))
+        try:
+            s = bot_obj.set_webhook(url='https://64.227.14.144:8443/' + token,
+                                    certificate=open('cert.pem', 'rb'))
+            logger.info('webhook setup ok')
+        except Unauthorized:
+            chatbots_table.update({"token": doc["token"]},
+                                  {"$set": {"active": False,
+                                            # "deactivation_time": datetime.now()
+                                            }})
+            logger.info('webhook setup ok')
+            continue
         if s:
             print(s)
             logger.info('webhook setup ok')
         else:
             print(s)
             logger.info('webhook setup failed')
+            continue
 
         def webhook():
             if flask_req.headers.get('content-type') == 'application/json':
@@ -377,16 +388,18 @@ def main():
                          endpoint=token,
                          view_func=webhook,
                          methods=['POST'])
+
         time.sleep(0.1)  # To avoid flood and give the script time to start all bots, one by one
+    for token in megadict.values():
+        dp = token["dispatcher"]
+        thread = Thread(target=dp.start, name=dp.bot.username)
+        thread.start()
     return app
 
 
-webhook = main()
-for token in megadict.values():
-    dp = token["dispatcher"]
-    thread = Thread(target=dp.start, name=dp.bot.username)
-    thread.start()
-
-webhook.run(host='0.0.0.0',
-            port=8443,
-            ssl_context=('cert.pem', 'private.key'))
+# webhook = main()
+#
+#
+# webhook.run(host='0.0.0.0',
+#             port=8443,
+#             ssl_context=('cert.pem', 'private.key'))
