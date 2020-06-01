@@ -1,6 +1,6 @@
 #! /usr/bin/env sh
-set -e
-#cd ..
+#set -e
+cd ..
 source venv/bin/activate
 export SHOP_PRODUCTION=1
 export BOTFATHER_TOKEN=892372248:AAEM32Ye0ye4rTkyTuk5Z4minhsNKVhSQ-w

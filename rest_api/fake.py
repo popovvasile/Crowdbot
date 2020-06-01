@@ -1,15 +1,19 @@
 from datetime import datetime, timedelta
 from random import randint
 
+import requests
 from faker import Faker
 from bson import ObjectId
 
 from database import users_table, users_messages_to_admin_table
+from helper_funcs.constants import TESTING_TOKEN
 
 
 class FakeUsers:
     # def __init__(self):
-    bot_id = 771382519  # @test_user_crowd_bot
+    token = TESTING_TOKEN
+    telegram_resp = requests.get(url=f"https://api.telegram.org/bot{token}/getMe").json()
+    bot_id = telegram_resp["result"]["id"]  # @test_user_crowd_bot
     fake = Faker()
     user_ids = [305465575, 378826409, 573858793,
                 244356086, 620501777, 479438338]
