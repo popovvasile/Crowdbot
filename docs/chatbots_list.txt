@@ -19,7 +19,7 @@
 
 # TODO shop home testing
 @CrowdShopHomeBot      CrowdShopHome         764696691:AAE8_d6iTPGlnT7-N-Dl2Vi07MIl4o3YxSk
-@CrowdShopHomeTestBot  CrowdShopHomeTest     886394487:AAEvc7n1flBePQo1V3Bl6uWYj5LtMLGC2Zo
+@CrowdShopHomeTestBot  CrowdShopHomeTest     804642806:AAEJ_YHVzfbRUTG_mzKcxL2lcKZE9K6h2HY
 
 # TODO teambot home testing
 @SuperMarioRunBot  TeamCrowdFatherTest       502301506:AAGIuV3XCZuOrIhiCPhRdWXNK5ehWMueizI
