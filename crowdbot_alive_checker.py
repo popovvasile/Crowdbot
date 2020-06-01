@@ -5,10 +5,22 @@ import time
 
 from database import chatbots_table
 from main_runner import main
+from main_webhook import create_dispatchers
+
+
+def main_webhook():  # webhooks restart
+    app = create_dispatchers()
+
+    app.run(host='0.0.0.0',
+            port=8443,
+            ssl_context=('cert.pem', 'private.key'))
+#
+#
 
 
 def multiple_bot_daemon():  # todo if token wrong- don't start it and notify
     my_process = {}
+
     while True:
         # Crowdbot
         print(chatbots_table.count_documents({"active": True}))
@@ -42,4 +54,15 @@ def multiple_bot_daemon():  # todo if token wrong- don't start it and notify
 
 
 if __name__ == '__main__':
-    multiple_bot_daemon()
+
+    webhook_process = Process(target=main_webhook)
+    webhook_process.start()
+    alive_checker_process = Process(target=multiple_bot_daemon)
+    alive_checker_process.start()
+
+    time.sleep(86400)  # 24h
+    webhook_process.terminate()
+    if webhook_process.is_alive() is False:
+        webhook_process = Process(target=main_webhook)
+        webhook_process.start()
+        time.sleep(86400)

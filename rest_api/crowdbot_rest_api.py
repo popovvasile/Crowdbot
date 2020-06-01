@@ -106,6 +106,7 @@ def crowdbot_on_post():
         chatbot["username"] = telegram_check["result"]["username"]
         chatbot["name"] = telegram_check["result"]["first_name"]
         chatbot["active"] = True
+        chatbot["webhook"] = False
         chatbot["shop_enabled"] = False
         chatbot["donations_enabled"] = False
         chatbot["creation_timestamp"] = datetime.now()

@@ -362,6 +362,10 @@ def create_dispatchers():
             s = bot_obj.set_webhook(url='https://64.227.14.144:8443/' + token,
                                     certificate=open('cert.pem', 'rb'))
             logger.info('webhook setup ok')
+            chatbots_table.update({"token": doc["token"]},
+                                  {"$set": {"webhook": True,
+                                            # "deactivation_time": datetime.now()
+                                            }})
         except Unauthorized:
             chatbots_table.update({"token": doc["token"]},
                                   {"$set": {"active": False,
