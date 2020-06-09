@@ -68,7 +68,7 @@ def get_all_bots():
     """Get all bots"""
     # TODO Very bad - make pagination. So slow
     result = list(map(format_for_response, crowdbot_bots_table.find()))
-    pprint(result)
+    # pprint(result)
     return make_response(({"result": result}, 200))
 
 
