@@ -3,6 +3,7 @@ import os
 from pymongo import MongoClient
 
 client = MongoClient('localhost', 27017)
+
 if os.environ['SHOP_PRODUCTION'] == "1":
     db = client['crowdbot_chatbots']
 else:

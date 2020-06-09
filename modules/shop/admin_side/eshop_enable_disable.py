@@ -141,8 +141,8 @@ class CreateShopHandler(object):
         return ConversationHandler.END
 
     def back(self, update, context):
-        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                                   message_id=update.callback_query.message.message_id)
+        context.bot.delete_message(chat_id=update.effective_chat.id,
+                                   message_id=update.effective_message.message_id)
         get_help(update, context)
         return ConversationHandler.END
 

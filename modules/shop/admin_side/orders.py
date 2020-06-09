@@ -77,7 +77,7 @@ class OrdersHandler(OrdersHandlerHelper):
         # Title
         context.user_data['to_delete'].append(
             context.bot.send_message(
-                chat_id=update.callback_query.message.chat_id,
+                chat_id=update.effective_chat.id,
                 text=context.bot.lang_dict["shop_admin_orders_title"].format(
                     all_orders.count()),
                 parse_mode=ParseMode.HTML))

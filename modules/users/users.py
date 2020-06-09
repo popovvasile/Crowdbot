@@ -1,5 +1,6 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
+import html
 from pprint import pprint
 
 from bson.objectid import ObjectId
@@ -649,9 +650,10 @@ class UserTemplate(object):
     # todo add messages count
     def template(self, context):
         if self.username:
-            _user_mention = user_mention(self.username, self.full_name)
+            _user_mention = user_mention(self.username, html.escape(self.full_name, quote=False))
         else:
-            _user_mention = f'<a href="tg://user?id={self.user_id}">{self.full_name}</a>'
+            _user_mention = (f'<a href="tg://user?id={self.user_id}">'
+                             f'{html.escape(self.full_name, quote=False)}</a>')
 
         return (context.bot.lang_dict["user_temp"].format(
             _user_mention, lang_timestamp(context, self.timestamp))

@@ -36,7 +36,6 @@ class SwitchLanguage(object):
     @staticmethod
     def lang_menu(update, context):
         delete_messages(update, context)
-        pprint(context.bot.lang_dict)
         lang_keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton(text=context.bot.lang_dict['en'],
                                   callback_data='language/ENG')],
