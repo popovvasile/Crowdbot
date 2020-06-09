@@ -22,7 +22,7 @@ donations_table = crowdbot_db['donations_table']
 users_table = crowdbot_db['users']
 
 
-def format_for_response(chatbot):
+def format_for_response(chatbot: dict) -> dict:
     """Adds additional fields to chatbot dict."""
     active_users = users_table.find({"bot_id": chatbot["bot_id"],
                                      "is_admin": False,
@@ -44,7 +44,7 @@ def format_for_response(chatbot):
     return convert_types(chatbot)
 
 
-def convert_types(obj):
+def convert_types(obj: dict) -> dict:
     """Converts ObjectId and datetime fields in Mongo Document to string."""
     if obj.get("_id"):
         obj["_id"] = str(obj["_id"])

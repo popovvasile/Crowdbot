@@ -112,7 +112,7 @@ def lang_timestamp(bot_lang: (CallbackContext, str), timestamp,
                    pattern="d, MMM yyyy, hh:mm"):
     if timestamp is None:
         return ""
-    lang_keys = {"ENG": "en", "RUS": "ru"}
+    lang_keys = {"ENG": "en", "RUS": "ru", "DE": "de"}
     if isinstance(bot_lang, CallbackContext):
         bot_lang = chatbots_table.find_one({"bot_id": bot_lang.bot.id})["lang"]
     return format_datetime(timestamp, pattern, locale=lang_keys[bot_lang])

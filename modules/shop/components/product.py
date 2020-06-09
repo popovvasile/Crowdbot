@@ -76,9 +76,9 @@ class Product(object):
             currency = chatbots_table.find_one(
                 {"bot_id": self.context.bot.id})["shop"]["currency"]
         if self.discount_price:
-            return f"💥 <s>{self.price}</s> <b><u>{self.discount_price} {currency}</u></b>"
+            return f"💥 <s>{self.price}</s> <u>{self.discount_price} {currency}</u>"
         else:
-            return f"<b><u>{self.price} {currency}</u></b>"
+            return f"<u>{self.price} {currency}</u>"
 
     @property
     def status_str(self):

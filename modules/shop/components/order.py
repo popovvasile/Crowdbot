@@ -78,7 +78,7 @@ class Order(object):
         #     currency = chatbots_table.find_one(
         #         {"bot_id": self.context.bot.id})["shop"]["currency"]
         text = "\n".join(
-            ["<b>{}</b>\n<i>x{}</i> - <b>{} {}</b>".format(
+            ["{}\nx{} - <u>{} {}</u>".format(
                 html.escape(item.name, quote=False),
                 item.order_quantity,
                 item.item_price,
@@ -243,7 +243,7 @@ class UserOrder(Order):
             return string
         if self.shipping:
             # string = self.context.bot.lang_dict["order_on_way_to"].format(self.address)
-            string = "🚚 " + f"<b>{html.escape(self.address, quote=False)}</b>"
+            string = "🚚 " + f"{html.escape(self.address, quote=False)}"
         else:
             string = self.context.bot.lang_dict["order_wait_on"].format(
                 html.escape(shop['address'], quote=False))

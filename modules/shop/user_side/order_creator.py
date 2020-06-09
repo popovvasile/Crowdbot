@@ -97,7 +97,7 @@ class PurchaseBot(object):
             " ", "").replace(
             "*", "").replace(
             "+", "")
-        print("number", number)
+        # print("number", number)
         if not 5 < len(number) < 30:
             return False
         if number.isdigit():
