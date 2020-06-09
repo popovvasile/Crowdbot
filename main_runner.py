@@ -44,9 +44,6 @@ from modules.settings.button_manage import (
     CREATE_BUTTON_CHOOSE, BUTTONS_MENU, ONE_BUTTON_MENU, BACK_TO_BUTTONS_MENU,
     BACK_TO_ONE_BUTTON_MENU, CHANGE_BUTTON_NAME_HANDLER, EDIT_BUTTON_CONTENT_HANDLER,
     EDIT_BUTTON_LINK_HANDLER)
-# from modules.settings.manage_button import (
-#     BUTTON_EDIT_HANDLER, BUTTON_EDIT_FINISH_HANDLER, DELETE_CONTENT_HANDLER,
-#     BUTTON_ADD_FINISH_HANDLER, back_from_edit_button_handler)
 from modules.settings.user_mode import USER_MODE_OFF, USER_MODE_ON
 from modules.settings.admins import ADMINS_LIST_HANDLER
 from modules.settings.notification import NOTIFICATION_MENU, NOTIFICATION_EDIT
@@ -180,7 +177,7 @@ def catch_unauthorized(func):
 @catch_unauthorized
 def main(token, lang):
     # https://github.com/python-telegram-bot/python-telegram-bot/issues/787
-    request = Request(con_pool_size=104)
+    request = Request(con_pool_size=504)
     q = mq.MessageQueue(all_burst_limit=25, all_time_limit_ms=1200)
     # bot_obj = MQBot(token, request=request, mqueue=q)
     bot_obj = Bot(token, request=request)
@@ -197,14 +194,20 @@ def main(token, lang):
         lang_dicts = json.load(f)
     if lang == "ENG":
         bot_obj.lang_dict = lang_dicts["ENG"]
+    elif lang == "DE":
+        bot_obj.lang_dict = lang_dicts["DE"]
+    elif lang == "UKR":
+        bot_obj.lang_dict = lang_dicts["UKR"]
     else:
         bot_obj.lang_dict = lang_dicts["RUS"]
     # my_persistence = PicklePersistence(filename='persistence.bin')
     # https://github.com/python-telegram-bot/python-telegram-bot/issues/1864
     updater = tg.Updater(use_context=True, bot=bot_obj,
-                         workers=100,
+                         workers=500,
                          # persistence=my_persistence
                          )
+    # If we stop alive_checker by pressing ctrl+c and there are running job,
+    # bot process wouldn't stop. So need to use pkill -9 python
     # job = updater.job_queue
     # job.run_repeating(update_user_unsubs, interval=3600*24, first=0)
     # todo try to add async to
@@ -240,7 +243,6 @@ def main(token, lang):
 
     #  SHOP USER SIDE
     dispatcher.add_handler(EDIT_SHOP_HANDLER)
-    # dispatcher.add_handler(ONLINE_PURCHASE_HANDLER)
     dispatcher.add_handler(OFFLINE_PURCHASE_HANDLER)
     dispatcher.add_handler(BACK_TO_CART)
     dispatcher.add_handler(USERS_PRODUCTS_LIST_HANDLER)
@@ -274,7 +276,6 @@ def main(token, lang):
     dispatcher.add_handler(ORDERS_HANDLER)
     dispatcher.add_handler(PRODUCTS_HANDLER)
     dispatcher.add_handler(TRASH_START)
-    # dispatcher.add_handler(USERS_ORDERS_HANDLER)
     dispatcher.add_handler(ADD_CATEGORY_HANDLER)
     dispatcher.add_handler(CATEGORIES_HANDLER)
     dispatcher.add_handler(EDIT_CATEGORIES_HANDLER)
@@ -295,10 +296,6 @@ def main(token, lang):
     dispatcher.add_handler(LINK_BUTTON_ADD_HANDLER)
     dispatcher.add_handler(BUTTON_ADD_HANDLER)
     dispatcher.add_handler(DELETE_BUTTON_HANDLER)
-    # dispatcher.add_handler(BUTTON_EDIT_HANDLER)
-    # dispatcher.add_handler(BUTTON_EDIT_FINISH_HANDLER)
-    # dispatcher.add_handler(DELETE_CONTENT_HANDLER)
-    # dispatcher.add_handler(BUTTON_ADD_FINISH_HANDLER)
     dispatcher.add_handler(BACK_TO_BUTTONS_MENU)
     dispatcher.add_handler(BACK_TO_ONE_BUTTON_MENU)
     dispatcher.add_handler(LANG_MENU)
@@ -383,35 +380,6 @@ def main(token, lang):
     dispatcher.add_handler(BACK_TO_MESSAGES_MENU)
     dispatcher.add_handler(DELETE_MESSAGES_MENU_HANDLER)
 
-    # POLLS
-    # dispatcher.add_handler(POLLS_MENU)
-    # dispatcher.add_handler(POLL_HANDLER)
-    # dispatcher.add_handler(SEND_POLLS_HANDLER)
-    # dispatcher.add_handler(BUTTON_HANDLER)
-    # dispatcher.add_handler(DELETE_POLLS_HANDLER)
-    # dispatcher.add_handler(POLLS_RESULTS_HANDLER)
-    # dispatcher.add_handler(POLLS_SEND_MENU)
-
-    # GROUPS
-    # dispatcher.add_handler(GROUPS_MENU)
-    # dispatcher.add_handler(MY_GROUPS_HANDLER)
-    # dispatcher.add_handler(REMOVE_GROUP_HANDLER)
-    # dispatcher.add_handler(SEND_POST_TO_GROUP_HANDLER)
-    # dispatcher.add_handler(SEND_POLL_TO_GROUP_HANDLER)
-    # dispatcher.add_handler(SEND_SURVEY_TO_GROUP_HANDLER)
-    # dispatcher.add_handler(SEND_DONATION_TO_GROUP_HANDLER)
-    # dispatcher.add_handler(ADD_GROUP_HANLDER)
-
-    # CHANNELS
-    # dispatcher.add_handler(CHANELLS_MENU)
-    # dispatcher.add_handler(MY_CHANNELS_HANDLER)
-    # dispatcher.add_handler(ADD_CHANNEL_HANDLER)
-    # dispatcher.add_handler(REMOVE_CHANNEL_HANDLER)
-    # dispatcher.add_handler(SEND_POST_HANDLER)
-    # dispatcher.add_handler(SEND_POLL_TO_CHANNEL_HANDLER)
-    # dispatcher.add_handler(SEND_SURVEY_TO_CHANNEL_HANDLER)
-    # dispatcher.add_handler(SEND_DONATION_TO_CHANNEL_HANDLER)
-
     dispatcher.add_handler(custom_button_back_callback_handler)
     dispatcher.add_handler(custom_button_callback_handler)
     # dispatcher.add_handler(back_from_edit_button_handler)
@@ -438,15 +406,6 @@ def main(token, lang):
     # TODO add "active" to all current bots
     dispatcher.add_handler(rex_help_handler)
     logger.info("Using long polling.")
-    # updater.start_webhook(listen='0.0.0.0',
-    #                       port=port,
-    #                       url_path=token,
-    #                       key='private.key',
-    #                       cert='cert.pem',
-    #                       webhook_url='https://104.248.82.166:{}/'.format(port) + token)
     updater.start_polling(timeout=60, read_latency=60, clean=True, bootstrap_retries=5)
 
     updater.idle()
-#
-# if __name__ == '__main__':
-#     main("633257891:AAF26-vHNNVtMV8fnaZ6dkM2SxaFjl1pLbg", "ENG")

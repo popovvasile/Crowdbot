@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import json
+from pprint import pprint
+
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ConversationHandler, CallbackQueryHandler, Dispatcher
 
@@ -17,10 +19,13 @@ class SwitchLanguage(object):
         lang = update.callback_query.data.split('/')[1]
         with open('languages.json') as f:
             lang_dicts = json.load(f)
-        if lang == "ENG":
-            context.bot.lang_dict = lang_dicts["ENG"]
-        else:
+        if lang == "RUS":
             context.bot.lang_dict = lang_dicts["RUS"]
+        elif lang == "ENG":
+            context.bot.lang_dict = lang_dicts["ENG"]
+        elif lang == "DE":
+            context.bot.lang_dict = lang_dicts["DE"]
+
         Dispatcher(bot=context.bot, update_queue=update).update_persistence()
         # change user language
         chatbots_table.update_one({'bot_id': context.bot.id},
@@ -35,7 +40,9 @@ class SwitchLanguage(object):
             [InlineKeyboardButton(text=context.bot.lang_dict['en'],
                                   callback_data='language/ENG')],
             [InlineKeyboardButton(text=context.bot.lang_dict['ru'],
-                                  callback_data='language/RUS')]
+                                  callback_data='language/RUS')],
+            [InlineKeyboardButton(text=context.bot.lang_dict["de"],
+                                  callback_data='language/DE')]
         ])
         # send language keyboard
         context.user_data['to_delete'].append(

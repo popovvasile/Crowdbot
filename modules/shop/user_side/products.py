@@ -139,9 +139,9 @@ class UserProductsHelper(object):
                 {"bot_id": context.bot.id})["shop"]["currency"]
         if product['discount_price']:
             return (f"💥 <s>{product['price']}</s> "
-                    f"<b><u>{product['discount_price']} {currency}</u></b>")
+                    f"<u>{product['discount_price']} {currency}</u>")
         else:
-            return f"<b><u>{product['price']} {currency}</u></b>"
+            return f"<u>{product['price']} {currency}</u>"
 
 
 class UserProductsHandler(UserProductsHelper):

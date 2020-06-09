@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 from multiprocessing import Process
+from pprint import pprint
+
 import time
 
 from database import chatbots_table
@@ -25,6 +27,14 @@ def multiple_bot_daemon():  # todo if token wrong- don't start it and notify
 
                 elif doc["lang"] == "RUS":
                     print(doc["token"])
+                    new_process = Process(target=main, args=(doc["token"],
+                                                             doc["lang"]), name=doc["token"])
+                    new_process.start()
+                    my_process[doc["token"]] = new_process
+
+                elif doc["lang"] == "DE":
+                    print(doc["token"])
+                    pprint(doc)
                     new_process = Process(target=main, args=(doc["token"],
                                                              doc["lang"]), name=doc["token"])
                     new_process.start()

@@ -23,8 +23,8 @@ class SenderHelper(object):
             context.user_data["content"] = list()
         if "user_input" not in context.user_data:
             context.user_data["user_input"] = list()
-        context.user_data["user_input"].append(update.message)
         if len(context.user_data["content"]) < 10:
+            context.user_data["user_input"].append(update.message)
             add_to_content(update, context)
         else:
             final_text = (context.bot.lang_dict["add_menu_buttons_str_11"])

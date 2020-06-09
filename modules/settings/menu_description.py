@@ -20,7 +20,7 @@ class EditBotDescription(object):
                                              callback_data="back_to_module_settings")])
         reply_markup = InlineKeyboardMarkup(buttons)
         context.user_data["to_delete"].append(
-            context.bot.send_message(update.callback_query.message.chat.id,
+            context.bot.send_message(update.effective_chat.id,
                                      context.bot.lang_dict["edit_button_str_1"],
                                      reply_markup=reply_markup))
         return MESSAGE
@@ -36,8 +36,8 @@ class EditBotDescription(object):
         return ConversationHandler.END
 
     def back(self, update, context):
-        context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                                   message_id=update.callback_query.message.message_id)
+        context.bot.delete_message(chat_id=update.effective_chat.id,
+                                   message_id=update.effective_message.message_id)
         get_help(update, context)
         return ConversationHandler.END
 
@@ -51,7 +51,7 @@ class EditBotPicture(object):
                                              callback_data="back_to_module_settings")])
         reply_markup = InlineKeyboardMarkup(buttons)
         context.user_data["to_delete"].append(
-            context.bot.send_message(update.callback_query.message.chat.id,
+            context.bot.send_message(update.effective_chat.id,
                                      context.bot.lang_dict["edit_bot_pic_text"],
                                      reply_markup=reply_markup))
         return ConversationHandler.END

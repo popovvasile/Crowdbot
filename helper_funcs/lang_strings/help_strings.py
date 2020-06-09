@@ -98,30 +98,39 @@ def helpable_dict(bot):
     # Create unread messages string
     new_messages_str = (f" ({new_messages_count})"
                         if new_messages_count else "")
-    admin_rus = OrderedDict()
 
+    admin_rus = OrderedDict()
     admin_rus["💰 Магазин"] = "shop"
     admin_rus[f"✉️ Пользователи и Сообщения {new_messages_str}"] = "users"
     admin_rus["⚙ Настройки бота"] = "settings"
 
     admin_eng = OrderedDict()
-
     admin_eng["💰 Shop"] = "shop"
     admin_eng[f"✉️ Users & Messages {new_messages_str}"] = "users"
     admin_eng["⚙ Settings"] = "settings"
 
-    lang_dicts = {"ENG": dict(
-        ALL_MODULES=[],
-        ADMIN_HELPABLE=admin_eng,
-        ADMIN_USER_MODE={
-            "✉️ Message": "users",
-            "Admin view": "user_mode",
-            "Shop": "shop"},
-        VISITOR_HELPABLE={
-            "✉️ Message": "users",
-            "💰 Shop": "shop"},
+    admin_de = OrderedDict()
+    admin_de["💰 Shop"] = "shop"
+    admin_de[f"✉️ Benutzer & Nachrichten {new_messages_str}"] = "users"
+    admin_de["⚙️ Einstellungen"] = "settings"
 
-    ),
+    # admin_ukr = OrderedDict()
+    # admin_ukr["💰 Shop"] = "shop"
+    # admin_ukr[f"✉️ Users & Messages {new_messages_str}"] = "users"
+    # admin_ukr["⚙ Settings"] = "settings"
+
+    lang_dicts = {
+        "ENG": dict(
+            ALL_MODULES=[],
+            ADMIN_HELPABLE=admin_eng,
+            ADMIN_USER_MODE={
+                "✉️ Message": "users",
+                "Admin view": "user_mode",
+                "Shop": "shop"},
+            VISITOR_HELPABLE={
+                "✉️ Message": "users",
+                "💰 Shop": "shop"},
+        ),
         "RUS": dict(
             ALL_MODULES=[],
             ADMIN_HELPABLE=admin_rus,
@@ -133,6 +142,28 @@ def helpable_dict(bot):
                 "✉️ Сообщения": "users",
                 "Магазин": "shop_user_menu"},
         ),
+        "DE": dict(
+            ALL_MODULES=[],
+            ADMIN_HELPABLE=admin_de,
+            ADMIN_USER_MODE={
+                "✉️ Message": "users",
+                "Admin view": "user_mode",
+                "Shop": "shop"},
+            VISITOR_HELPABLE={
+                "✉️ Message": "users",
+                "💰 Shop": "shop"},
+        ),
+        # "UKR": dict(
+        #     ALL_MODULES=[],
+        #     ADMIN_HELPABLE=admin_ukr,
+        #     ADMIN_USER_MODE={
+        #         "✉️ Message": "users",
+        #         "Admin view": "user_mode",
+        #         "Shop": "shop"},
+        #     VISITOR_HELPABLE={
+        #         "✉️ Message": "users",
+        #         "💰 Shop": "shop"},
+        # )
     }
     # "channels", "donation_enable", "donation_payment", "donations_send_promotion",
     # "donations_edit_delete_results", "manage_button", "settings", "menu_description",

@@ -60,9 +60,9 @@ class ProductsHelper(object):
              "items.product_id": product_obj.id_})
 
         template = context.bot.lang_dict["shop_admin_product_template"].format(
+            product_obj.status_str,
             product_obj.article,
             html.escape(product_obj.name, quote=False),
-            product_obj.status_str,
             html.escape(product_obj.category["name"], quote=False),
             product_obj.price_as_str(shop["currency"]),
             product_obj.quantity_str)

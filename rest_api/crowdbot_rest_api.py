@@ -22,7 +22,7 @@ donations_table = crowdbot_db['donations_table']
 users_table = crowdbot_db['users']
 
 
-def format_for_response(chatbot):
+def format_for_response(chatbot: dict) -> dict:
     """Adds additional fields to chatbot dict."""
     active_users = users_table.find({"bot_id": chatbot["bot_id"],
                                      "is_admin": False,
@@ -44,7 +44,7 @@ def format_for_response(chatbot):
     return convert_types(chatbot)
 
 
-def convert_types(obj):
+def convert_types(obj: dict) -> dict:
     """Converts ObjectId and datetime fields in Mongo Document to string."""
     if obj.get("_id"):
         obj["_id"] = str(obj["_id"])
@@ -68,6 +68,7 @@ def get_all_bots():
     """Get all bots"""
     # TODO Very bad - make pagination. So slow
     result = list(map(format_for_response, crowdbot_bots_table.find()))
+    # pprint(result)
     return make_response(({"result": result}, 200))
 
 
@@ -90,11 +91,8 @@ def crowdbot_on_post():
     Request json must looks like:
 
         {"params": {"bot": {"token": str,
-                            "welcomeMessage": str,
-                            "buttons": list,
                             "lang": str,
-                            "superuser": int},
-                    "admins": list}}
+                            "superuser": int}}}
     """
     # todo check for not active tokens
     doc = request.get_json()["params"]
@@ -105,26 +103,28 @@ def crowdbot_on_post():
         chatbot["bot_id"] = telegram_check["result"]["id"]
         chatbot["username"] = telegram_check["result"]["username"]
         chatbot["name"] = telegram_check["result"]["first_name"]
+        chatbot["welcomeMessage"] = None
         chatbot["active"] = True
         chatbot["shop_enabled"] = False
-        chatbot["donations_enabled"] = False
+        # chatbot["donations_enabled"] = False
         chatbot["creation_timestamp"] = datetime.now()
         # todo "update_one" with "upsert"? mb check for the bot_id in db and delete if it exist
         crowdbot_bots_table.update_one({"bot_id": chatbot["bot_id"]},
                                        {"$set": chatbot}, upsert=True)
 
-        doc["admins"].append(dict(user_id=chatbot["superuser"]))
-        for admin in doc["admins"]:
-            admin["bot_id"] = chatbot["bot_id"]
-            admin["registered"] = False
-            admin["is_admin"] = True
-            admin["superuser"] = admin.get("user_id") == chatbot["superuser"]
-            if "user_id" in admin:
-                users_table.update({"user_id": admin["user_id"],
-                                    "bot_id": chatbot["bot_id"]},
-                                   admin, upsert=True)
-            else:
-                users_table.save(admin)
+        # doc["admins"].append(dict(user_id=chatbot["superuser"]))
+        # for admin in doc["admins"]:
+        #     admin["bot_id"] = chatbot["bot_id"]
+        #     admin["registered"] = False
+        #     admin["is_admin"] = True
+        #     admin["superuser"] = admin.get("user_id") == chatbot["superuser"]
+        #     if "user_id" in admin:
+        #         users_table.update({"user_id": admin["user_id"],
+        #                             "bot_id": chatbot["bot_id"]},
+        #                            admin, upsert=True)
+        #     else:
+        #         users_table.save(admin)
+
         telegram_check["result"] = format_for_response(chatbot)
         return make_response((telegram_check, 201))
     else:

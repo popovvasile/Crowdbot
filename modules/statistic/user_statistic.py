@@ -34,6 +34,10 @@ class UsersStatistic(object):
                                         "timestamp": {"$gt": month_ago_date}})
 
         today_str = lang_timestamp(bot_lang, today_date, "d MMM yyyy")
+
+        all_unsubs = users_table.find({"bot_id": context.bot.id,
+                                       "is_admin": False,
+                                       "unsubscribed": True})
         return {
             "quantity": {
                 "day": {"time_strings": today_str,
@@ -58,7 +62,9 @@ class UsersStatistic(object):
                              lang_timestamp(bot_lang,
                                             all_users[0]['timestamp']))
                             if all_users_count else (0, 0),
-                        "count": all_users_count}
+                        "count": all_users_count},
+
+                "unsubs": {"count": all_unsubs.count()}
             }}
 
     def show_statistic(self, update, context):
@@ -81,7 +87,8 @@ class UsersStatistic(object):
 
                 user_statistic["quantity"]["all"]["time_strings"][0],
                 user_statistic["quantity"]["all"]["time_strings"][1],
-                user_statistic["quantity"]["all"]["count"]),
+                user_statistic["quantity"]["all"]["count"],
+                user_statistic["quantity"]["unsubs"]["count"]),
             reply_markup=InlineKeyboardMarkup([
                [InlineKeyboardButton(
                    text=context.bot.lang_dict["back_button"],

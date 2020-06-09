@@ -134,7 +134,7 @@ class AddButtons(object):
                              [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                    callback_data="back_to_buttons_menu")]]
             context.user_data["to_delete"].append(
-                context.bot.send_message(chat_id=update.callback_query.message.chat_id,
+                context.bot.send_message(chat_id=update.effective_chat.id,
                                          text=context.bot.lang_dict["choose_button_type_text"],
                                          reply_markup=InlineKeyboardMarkup(reply_buttons)))
         else:
@@ -151,7 +151,7 @@ class AddCommands(object):
                                                callback_data="cancel_button_creation")]]
         reply_markup = InlineKeyboardMarkup(reply_buttons)
         context.user_data["to_delete"].append(
-            context.bot.send_message(update.callback_query.message.chat.id,
+            context.bot.send_message(update.effective_chat.id,
                                      text=context.bot.lang_dict["add_menu_buttons_str_1_1"],
                                      reply_markup=reply_markup))
         return TYPING_BUTTON
@@ -278,7 +278,7 @@ class AddLinkButton(object):
         reply_markup = InlineKeyboardMarkup(reply_buttons)
 
         context.user_data["to_delete"].append(
-            context.bot.send_message(update.callback_query.message.chat.id,
+            context.bot.send_message(update.effective_chat.id,
                                      context.bot.lang_dict["add_menu_buttons_str_1_1"],
                                      reply_markup=reply_markup))
         return TYPING_LINK
@@ -329,7 +329,7 @@ class AddLinkButton(object):
                     context.bot.lang_dict["wrong_http_url"],
                     reply_markup=reply_markup,
                     reply_to_message_id=context.user_data["user_input"][-1].message_id))
-            return TYPING_LINK
+            return TYPING_BUTTON_FINISH
         else:
             context.user_data["new_button"]["button_lower"] = (
                 context.user_data["new_button"]['button'].replace(" ", "").lower())

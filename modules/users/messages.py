@@ -117,7 +117,7 @@ class SendMessageToAdmin(SenderHelper):
 
     def send_message_finish(self, update, context):
         # Save new message to database.
-        update.callback_query.answer("Message was sent")
+        update.callback_query.answer(context.bot.lang_dict["message_sent_blink"])
 
         if context.user_data["new_message"].get("anonim"):
             context.user_data["new_message"]["user_full_name"] = (

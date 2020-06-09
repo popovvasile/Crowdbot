@@ -7,49 +7,50 @@ from logs import logger
 def register_chat(update, context):
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
+    bot_id = context.bot.id
 
-    user = users_table.find_one({"user_id": user_id, "bot_id": context.bot.id})
-    superuser = chatbots_table.find_one({"bot_id": context.bot.id})["superuser"]
-    # todo quick solution - do better
+    user = users_table.find_one({"user_id": user_id, "bot_id": bot_id})
+    superuser = chatbots_table.find_one({"bot_id": bot_id})["superuser"]
     if user_id == superuser:
-        users_table.update({"user_id": user_id,
-                            "bot_id": context.bot.id,
-                            "registered": False},
-                           {'bot_id': context.bot.id,
-                            "chat_id": chat_id,
-                            "user_id": user_id,
-                            "username": update.effective_user.username,
-                            "full_name": update.effective_user.full_name,
-                            'registered': True,
-                            "is_admin": True,
-                            "superuser": True,
-                            "timestamp": datetime.now(),
-                            "regular_messages_blocked": False,
-                            "anonim_messages_blocked": False,
-                            "order_notification": True,
-                            "messages_notification": True,
-                            "blocked": False,
-                            "unsubscribed": False,
-                            "tags": ["#all", "#user", "#admin"]})
+        users_table.update_one(
+            {"user_id": user_id, "bot_id": bot_id},
+            {"$set": {'bot_id': bot_id,
+                      "chat_id": chat_id,
+                      "user_id": user_id,
+                      "username": update.effective_user.username,
+                      "full_name": update.effective_user.full_name,
+                      # 'registered': True,
+                      "is_admin": True,
+                      "superuser": True,
+                      "timestamp": datetime.now(),
+                      "regular_messages_blocked": False,
+                      "anonim_messages_blocked": False,
+                      "order_notification": True,
+                      "messages_notification": True,
+                      "blocked": False,
+                      "unsubscribed": False,
+                      # "tags": ["#all", "#user", "#admin"]
+                      }}, upsert=True)
     elif not user:
-        users_table.insert({'bot_id': context.bot.id,
-                            "chat_id": chat_id,
-                            "user_id": user_id,
-                            "username": update.effective_user.username,
-                            "full_name": update.effective_user.full_name,
-                            "timestamp": datetime.now(),
-                            'registered': False,
-                            "is_admin": False,
-                            "superuser": False,
-                            "regular_messages_blocked": False,
-                            "anonim_messages_blocked": False,
-                            "order_notification": True,
-                            "messages_notification": True,
-                            "blocked": False,
-                            "unsubscribed": False,
-                            "tags": ["#all", "#user"]})
-    user = users_table.find_one({"user_id": user_id, "bot_id": context.bot.id})
-    if user["unsubscribed"]:
+        users_table.insert_one(
+            {'bot_id': bot_id,
+             "chat_id": chat_id,
+             "user_id": user_id,
+             "username": update.effective_user.username,
+             "full_name": update.effective_user.full_name,
+             "timestamp": datetime.now(),
+             # 'registered': False,
+             "is_admin": False,
+             "superuser": False,
+             "regular_messages_blocked": False,
+             "anonim_messages_blocked": False,
+             "order_notification": True,
+             "messages_notification": True,
+             "blocked": False,
+             "unsubscribed": False,
+             # "tags": ["#all", "#user"]
+             })
+    elif user["unsubscribed"]:
         users_table.update_one({"user_id": user_id, "bot_id": context.bot.id},
                                {"$set": {"unsubscribed": False}})
 
@@ -57,8 +58,7 @@ def register_chat(update, context):
 def register_admin(update, context):
     """Registers user as an administrator"""
     # Delete all expired passwords
-    for admin_password in admin_passwords_table.find(
-            {"bot_id": context.bot.id}):
+    for admin_password in admin_passwords_table.find({"bot_id": context.bot.id}):
         if (datetime.today() - admin_password["timestamp"]).total_seconds() > 3600:
             admin_passwords_table.delete_one({"_id": admin_password["_id"]})
     # Check if the user already admin if so - just back
@@ -87,7 +87,7 @@ def register_admin(update, context):
                 "username": update.effective_user.username,
                 "full_name": update.effective_user.full_name,
                 "timestamp": datetime.now(),
-                'registered': True,
+                # 'registered': True,
                 "is_admin": True,
                 "regular_messages_blocked": False,
                 "anonim_messages_blocked": False,
@@ -96,7 +96,8 @@ def register_admin(update, context):
                 "superuser": False,
                 "blocked": False,
                 "unsubscribed": False,
-                "tags": ["#all", "#user", "#admin"]}}, upsert=True)
+                # "tags": ["#all", "#user", "#admin"]
+            }}, upsert=True)
 
         context.bot.send_message(
             chat_id=update.effective_chat.id,
@@ -133,6 +134,7 @@ def initiate_chat_id(update):
 
 
 def if_admin(update, context):
+    # todo maybe just check is_admin field?
     # if update.message:
     #     user_id = update.message.from_user.id
     # else:
@@ -143,7 +145,8 @@ def if_admin(update, context):
         return True
     admin_chat = users_table.find_one({'user_id': user_id, "bot_id": context.bot.id})
     if admin_chat is not None:
-        if admin_chat["registered"] and admin_chat["is_admin"]:
+        if (  # admin_chat["registered"] and
+                admin_chat["is_admin"]):
             return True
         else:
             return False
