@@ -290,12 +290,14 @@ def back_to_modules(update, context):
 
 
 def help_button(update, context):
-    # todo AttributeError: 'NoneType' object has no attribute 'get'
-    if users_table.find_one({"user_id": update.effective_user.id,
-                             "bot_id": context.bot.id}).get(
-            "blocked", False):
+    user = users_table.find_one({"user_id": update.effective_user.id,
+                                 "bot_id": context.bot.id})
+    if not user:
+        register_chat(update, context)
+    elif user.get("blocked", False):
         update.effective_message.reply_text(context.bot.lang_dict["blocked_user"])
         return ConversationHandler.END
+
     if if_admin(update=update, context=context.bot):
         HELPABLE = helpable_dict(context.bot)["ADMIN_HELPABLE"]
     else:
@@ -386,12 +388,12 @@ def get_help(update, context):
         delete_messages(update, context, False)
     except BadRequest:
         pass
+    register_chat(update, context)
     if users_table.find_one({"user_id": update.effective_user.id, "bot_id": context.bot.id}).get(
             "blocked", False):
         update.effective_message.reply_text(context.bot.lang_dict["you_have_been_blocked"])
         return ConversationHandler.END
     chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
-    register_chat(update, context)
     chat = update.effective_chat
     current_user_mode = user_mode_table.find_one({"bot_id": context.bot.id,
                                                   "user_id": update.effective_user.id})
