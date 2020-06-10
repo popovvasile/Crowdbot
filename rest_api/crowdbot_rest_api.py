@@ -24,6 +24,7 @@ users_table = crowdbot_db['users']
 
 def format_for_response(chatbot: dict) -> dict:
     """Adds additional fields to chatbot dict."""
+    # TODO use "from bson.json_util import dumps, loads"
     active_users = users_table.find({"bot_id": chatbot["bot_id"],
                                      "is_admin": False,
                                      "blocked": False,

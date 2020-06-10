@@ -11,7 +11,51 @@ def register_chat(update, context):
 
     user = users_table.find_one({"user_id": user_id, "bot_id": bot_id})
     superuser = chatbots_table.find_one({"bot_id": bot_id})["superuser"]
-    if user_id == superuser:
+
+    if not user:
+        if user_id == superuser:
+            users_table.update_one(
+                {"user_id": user_id, "bot_id": bot_id},
+                {"$set": {'bot_id': bot_id,
+                          "chat_id": chat_id,
+                          "user_id": user_id,
+                          "username": update.effective_user.username,
+                          "full_name": update.effective_user.full_name,
+                          # 'registered': True,
+                          "is_admin": True,
+                          "superuser": True,
+                          "timestamp": datetime.now(),
+                          "regular_messages_blocked": False,
+                          "anonim_messages_blocked": False,
+                          "order_notification": True,
+                          "messages_notification": True,
+                          "blocked": False,
+                          "unsubscribed": False,
+                          # "tags": ["#all", "#user", "#admin"]
+                          }}, upsert=True)
+        else:
+            users_table.insert_one(
+                {'bot_id': bot_id,
+                 "chat_id": chat_id,
+                 "user_id": user_id,
+                 "username": update.effective_user.username,
+                 "full_name": update.effective_user.full_name,
+                 "timestamp": datetime.now(),
+                 # 'registered': False,
+                 "is_admin": False,
+                 "superuser": False,
+                 "regular_messages_blocked": False,
+                 "anonim_messages_blocked": False,
+                 "order_notification": True,
+                 "messages_notification": True,
+                 "blocked": False,
+                 "unsubscribed": False,
+                 # "tags": ["#all", "#user"]
+                 })
+    elif user["unsubscribed"]:
+        users_table.update_one({"user_id": user_id, "bot_id": context.bot.id},
+                               {"$set": {"unsubscribed": False}})
+    """if user_id == superuser:
         users_table.update_one(
             {"user_id": user_id, "bot_id": bot_id},
             {"$set": {'bot_id': bot_id,
@@ -52,7 +96,7 @@ def register_chat(update, context):
              })
     elif user["unsubscribed"]:
         users_table.update_one({"user_id": user_id, "bot_id": context.bot.id},
-                               {"$set": {"unsubscribed": False}})
+                               {"$set": {"unsubscribed": False}})"""
 
 
 def register_admin(update, context):
@@ -109,12 +153,10 @@ def register_admin(update, context):
                     f"on bot {context.bot.first_name}:{context.bot.id}")
         return True
     else:
-        logger.info(f"Admin authentication failed for "
-                    f"{update.effective_user.full_name} "
+        logger.info(f"Admin authentication failed for {update.effective_user.full_name} "
                     f"on bot {context.bot.first_name}:{context.bot.id}")
         context.bot.send_message(
             chat_id=update.effective_chat.id,
-            # TODO STRINGS
             text=context.bot.lang_dict["registration_link_not_active"])
         return False
 
@@ -152,3 +194,11 @@ def if_admin(update, context):
             return False
     else:
         return False
+
+
+def superuser_doc() -> dict:
+    pass
+
+
+def regular_user_doc() -> dict:
+    pass
