@@ -178,7 +178,7 @@ def catch_unauthorized(func):
 def main(token, lang):
     # https://github.com/python-telegram-bot/python-telegram-bot/issues/787
     request = Request(con_pool_size=30)
-    #q = mq.MessageQueue(all_burst_limit=25, all_time_limit_ms=1200)
+    # q = mq.MessageQueue(all_burst_limit=25, all_time_limit_ms=1200)
     # bot_obj = MQBot(token, request=request, mqueue=q)
     bot_obj = Bot(token, request=request)
 

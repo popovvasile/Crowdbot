@@ -347,7 +347,7 @@ class Cart(CartHelper):
                 {"bot_id": context.bot.id})["shop"]["currency"]
             template = self.short_cart_item_template(cart_item, currency, context)
 
-            if update.effective_message.caption_markdown:
+            if update.effective_message.caption_html:
                 update.effective_message.edit_caption(
                     caption=template, parse_mode=ParseMode.HTML)
             else:
