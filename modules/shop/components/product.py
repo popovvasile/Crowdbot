@@ -1,16 +1,14 @@
 from datetime import datetime
 from uuid import uuid4
-from pprint import pprint
 import html
 
 from bson.objectid import ObjectId
 from telegram.error import BadRequest
 from telegram.constants import MAX_CAPTION_LENGTH
 from telegram import (ParseMode, InputMediaPhoto)
-from price_parser import Price
 
 from helper_funcs.helper import currency_limits_dict
-from helper_funcs.misc import get_obj
+from helper_funcs.misc import get_obj, get_promise_msg
 from helper_funcs.constants import MAX_TEMP_DESCRIPTION_LENGTH, MAX_PRODUCT_NAME_LENGTH
 from modules.shop.helper.helper import send_media_arr
 from database import products_table, categories_table, orders_table, chatbots_table
@@ -78,9 +76,9 @@ class Product(object):
             currency = chatbots_table.find_one(
                 {"bot_id": self.context.bot.id})["shop"]["currency"]
         if self.discount_price:
-            return f"💥 <s>{self.price}</s> <b><u>{self.discount_price} {currency}</u></b>"
+            return f"💥 <s>{self.price}</s> <u>{self.discount_price} {currency}</u>"
         else:
-            return f"<b><u>{self.price} {currency}</u></b>"
+            return f"<u>{self.price} {currency}</u>"
 
     @property
     def status_str(self):
@@ -191,7 +189,8 @@ class Product(object):
                 context.user_data["to_delete"].append(
                     context.bot.send_message(update.effective_chat.id,
                                              self.description, quote=False))
-                reply_to_message_id = context.user_data["to_delete"][-1].message_id
+                reply_to_message_id = get_promise_msg(
+                    context.user_data["to_delete"][-1]).message_id
             context.user_data["to_delete"].append(
                 context.bot.send_message(
                     chat_id=update.effective_chat.id,
@@ -206,7 +205,8 @@ class Product(object):
                     self.send_content(update.effective_chat.id,
                                       context, self.content[0],
                                       caption=html.escape(self.name, quote=False))
-                    reply_to_message_id = context.user_data["to_delete"][-1].message_id
+                    reply_to_message_id = get_promise_msg(
+                        context.user_data["to_delete"][-1]).message_id
                     context.user_data["to_delete"].append(
                         context.bot.send_message(
                             update.effective_chat.id,
@@ -223,7 +223,8 @@ class Product(object):
                     self.send_content(update.effective_chat.id,
                                       context, self.content[0],
                                       caption=html.escape(self.description, quote=False))
-                    reply_to_message_id = context.user_data["to_delete"][-1].message_id
+                    reply_to_message_id = get_promise_msg(
+                        context.user_data["to_delete"][-1]).message_id
                     context.user_data["to_delete"].append(
                         context.bot.send_message(
                             update.effective_chat.id,
@@ -269,7 +270,8 @@ class Product(object):
                     self.send_content(update.effective_chat.id,
                                       self.context, content_dict)
 
-            reply_to_message_id = context.user_data["to_delete"][-len(self.content)].message_id
+            reply_to_message_id = get_promise_msg(
+                context.user_data["to_delete"][-len(self.content)]).message_id
 
             if len(self.description) > MAX_TEMP_DESCRIPTION_LENGTH:
                 context.user_data["to_delete"].append(
@@ -298,39 +300,39 @@ class Product(object):
         """
         content_dict = {}
         if update.message.photo:
-            photo_file = update.message.photo[-1].get_file().file_id
+            photo_file = update.message.photo[-1].file_id
             content_dict = {"file_id": photo_file,
                             "type": "photo_file",
                             "id": str(uuid4())}
 
         elif update.message.audio:
-            audio_file = update.message.audio.get_file().file_id
+            audio_file = update.message.audio.file_id
             content_dict = {"file_id": audio_file,
                             "type": "audio_file",
                             "name": update.message.audio.title,
                             "id": str(uuid4())}
 
         elif update.message.voice:
-            voice_file = update.message.voice.get_file().file_id
+            voice_file = update.message.voice.file_id
             content_dict = {"file_id": voice_file,
                             "type": "voice_file",
                             "id": str(uuid4())}
 
         elif update.message.document:
-            document_file = update.message.document.get_file().file_id
+            document_file = update.message.document.file_id
             content_dict = {"file_id": document_file,
                             "type": "document_file",
                             "name": update.message.document.file_name,
                             "id": str(uuid4())}
 
         elif update.message.video:
-            video_file = update.message.video.get_file().file_id
+            video_file = update.message.video.file_id
             content_dict = {"file_id": video_file,
                             "type": "video_file",
                             "id": str(uuid4())}
 
         elif update.message.animation:
-            animation_file = update.message.animation.get_file().file_id
+            animation_file = update.message.animation.file_id
             content_dict = {"file_id": animation_file,
                             "type": "animation_file",
                             "id": str(uuid4())}
@@ -411,6 +413,7 @@ class Product(object):
                                            reply_markup=reply_markup))
 
     def update(self, json):
+        # todo findAndModify
         products_table.update_one({"_id": self._id}, {"$set": json})
         self.refresh()
 
@@ -421,7 +424,7 @@ class Product(object):
             product = get_obj(products_table, obj)
 
         self._id = product.get("_id")
-        self.article = product.get("article")
+        self.article = str(self._id)
         self.price = product.get("price")
         self.description = product.get("description", "")
         self.name = product.get("name")

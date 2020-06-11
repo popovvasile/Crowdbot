@@ -1,19 +1,23 @@
 # #!/usr/bin/env python
 # # -*- coding: utf-8 -*-
+import html
+from pprint import pprint
+
 from bson.objectid import ObjectId
-from telegram.error import BadRequest, Unauthorized, TelegramError
+from telegram.error import Unauthorized, TelegramError
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 from telegram.ext import MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
+from telegram.utils.promise import Promise
 
 from helper_funcs.helper import get_help, back_to_modules
 from helper_funcs.pagination import Pagination
 from helper_funcs.misc import (delete_messages, lang_timestamp, get_obj, user_mention,
-                               update_user_fields)
+                               update_user_fields, get_promise_msg)
 from logs import logger
 from modules.statistic.donation_statistic import DonationStatistic
 from modules.users.message_helper import (MessageTemplate, send_deleted_message_content,
                                           AnswerToMessage, send_not_deleted_message_content,
-                                          add_to_content, SenderHelper)
+                                          SenderHelper)
 from database import users_table, donations_table, users_messages_to_admin_table
 
 
@@ -131,12 +135,6 @@ class UsersHandler(object):
         return ConversationHandler.END
 
     def user_markup(self, context, user, extra_buttons=None):
-        # Check that there are at least one message from user.
-        # message = users_messages_to_admin_table.find_one(
-        #     {"bot_id": context.bot.id,
-        #      "user_id": user["user_id"],
-        #      "anonim": False,
-        #      "deleted": False})
         # Creating keyboard for user.
         user_buttons = []
         # TODO STRINGS
@@ -158,15 +156,6 @@ class UsersHandler(object):
                 user_buttons.append(
                     [InlineKeyboardButton(context.bot.lang_dict["block_user"],
                                           callback_data=f"block_user_{user['_id']}")])
-
-                # if user["regular_messages_blocked"]:
-                #     user_buttons.append(
-                #         [InlineKeyboardButton(context.bot.lang_dict["unblock_messages_button"],
-                #                               callback_data=f"unblock_messages_{user['_id']}")])
-                # else:
-                #     user_buttons.append(
-                #         [InlineKeyboardButton(context.bot.lang_dict["block_messages_button"],
-                #                               callback_data=f"block_messages_{user['_id']}")])
 
         if extra_buttons:
             user_buttons.extend(extra_buttons)
@@ -192,6 +181,7 @@ class UsersHandler(object):
             update.callback_query.answer(context.bot.lang_dict["no_users_str"])
             return self.back_to_users(update, context)
 
+    # TODO !! Other Users can't use but while this method searching for users. WTF?
     def do_search(self, update, context):
         delete_messages(update, context, True)
         reply_buttons = [[InlineKeyboardButton(context.bot.lang_dict["back_button"],
@@ -221,29 +211,19 @@ class UsersHandler(object):
                     context.bot.send_message(update.effective_chat.id,
                                              text=context.bot.lang_dict["no_users_str"],
                                              reply_markup=reply_markup))
+                return ConversationHandler.END
             else:
-                # Ask to "wait" notification
-                notification_msg = context.bot.send_message(
-                    update.effective_chat.id,
-                    context.bot.lang_dict["it_may_take_time"],
-                    reply_markup=reply_markup)
-                result = list()
-                # Loop over all users and find matches.
-                for user in users:
-                    # Update user names and check if the user block the bot
-                    update_user_fields(context, user)
-                    # Check username and full name for the pattern
-                    if (not user["unsubscribed"]
-                            and (pattern in user["username"]
-                                 or pattern in user["full_name"])):
-                        result.append(user)
-                # Delete "wait" notification
-                try:
-                    notification_msg.delete()
-                except TelegramError:
-                    pass
-                if result:
-                    context.user_data["found_users"] = result
+                result = users_table.find(
+                    {"$or": [{"username": {"$regex": pattern, "$options": "i"},
+                              "bot_id": context.bot.id,
+                              "superuser": False},
+                             {"full_name": {"$regex": pattern, "$options": "i"},
+                              "bot_id": context.bot.id,
+                              "superuser": False}]
+                     })
+
+                if result.count():
+                    context.user_data["found_users"] = list(result)
                     return self.send_found_users(update, context)
                 else:
                     context.user_data["to_delete"].append(
@@ -259,21 +239,24 @@ class UsersHandler(object):
         # Set current page integer in user_data.
         if (update.callback_query
                 and update.callback_query.data.startswith("user_search_pagination")):
-            context.user_data["page"] = int(
+            context.user_data["search_page"] = int(
                 update.callback_query.data.replace("user_search_pagination_", ""))
-        if not context.user_data.get("page"):
-            context.user_data["page"] = 1
+        if not context.user_data.get("search_page"):
+            context.user_data["search_page"] = 1
 
         # Create Pagination instance for showing page content and pages
         pagination = Pagination(context.user_data["found_users"],
-                                page=context.user_data["page"])
+                                page=context.user_data["search_page"])
         # Loop over users on given page and send users templates.
         for user in pagination.content:
+            # Update user names and check if the user block the bot
+            update_user_fields(context, user)
             # Send template with keyboard.
             reply_markup = InlineKeyboardMarkup([
                 [InlineKeyboardButton(context.bot.lang_dict["open_btn_str"],
                                       callback_data=f"open_user/{user['_id']}")]
             ])
+
             UserTemplate(user).send(update, context, reply_markup=reply_markup)
         reply_buttons = [[InlineKeyboardButton(context.bot.lang_dict["back_button"],
                                                callback_data="back_to_users_list")]]
@@ -290,7 +273,9 @@ class UsersHandler(object):
         page = context.user_data["page"]
         filter_ = context.user_data["filter"]
         filters_buttons = context.user_data["filters_buttons"]
+        # to_delete = context.user_data["to_delete"]
         context.user_data.clear()
+        # context.user_data["to_delete"] = to_delete
         context.user_data["page"] = page
         context.user_data["filter"] = filter_
         context.user_data["filters_buttons"] = filters_buttons
@@ -455,7 +440,8 @@ class SeeUserMessage(object):
         send_deleted_message_content(
             context,
             chat_id=update.effective_user.id,
-            content=context.user_data["message"]["content"])
+            content=context.user_data["message"]["content"],
+            update=update)
         # If answer exist show it
         if context.user_data["message"]["answer_content"]:
             context.user_data["to_delete"].append(
@@ -465,7 +451,8 @@ class SeeUserMessage(object):
             send_deleted_message_content(
                 context,
                 chat_id=update.effective_user.id,
-                content=context.user_data["message"]["answer_content"])
+                content=context.user_data["message"]["answer_content"],
+                update=update)
         buttons = []
         if not context.user_data["message"]["answer_content"]:
             buttons.append(
@@ -482,19 +469,7 @@ class SeeUserMessage(object):
             [InlineKeyboardButton(
                 text=context.bot.lang_dict["back_button"],
                 callback_data="back_to_users_messages")])
-        """buttons = [
-            [InlineKeyboardButton(
-                text=context.bot.lang_dict["answer_button_str"],
-                callback_data=f"answer_to_user_message/"
-                              + str(context.user_data["message"]['_id'])),
-             InlineKeyboardButton(
-                 text=context.bot.lang_dict["delete_button_str"],
-                 # TODO NEW CALLBACK
-                 callback_data="confirm_delete_user_message")],
-            [InlineKeyboardButton(
-                text=context.bot.lang_dict["back_button"],
-                callback_data="back_to_users_messages")]
-        ]"""
+
         # Send message template.
         MessageTemplate(context.user_data["message"], context).send(
             update.effective_chat.id, temp="short",
@@ -627,31 +602,15 @@ class SendMessageToUser(object):
         ])
         return SenderHelper().help_receive(update, context, reply_markup, MESSAGE_TO_USER)
 
-        # delete_messages(update, context)
-        # if not context.user_data.get("user_input"):
-        #     context.user_data["user_input"] = list()
-        # context.user_data["user_input"].append(update.effective_message)
-        # TODO REFACTOR - use one content_dict structure for the whole project
-        # add_to_content(update, context)
-        # reply_markup = InlineKeyboardMarkup([
-        #     [InlineKeyboardButton(text=context.bot.lang_dict["done_button"],
-        #                           callback_data="send_message_finish")],
-        #     [InlineKeyboardButton(text=context.bot.lang_dict["cancel_button"],
-        #                           callback_data="cancel_creating_message")]
-        # ])
-        # context.user_data["to_delete"].append(
-        #     context.bot.send_message(chat_id=update.message.chat_id,
-        #                              text=context.bot.lang_dict["send_message_4"],
-        #                              reply_markup=reply_markup))
-        # return MESSAGE_TO_USER
-
     def send_message_finish(self, update, context):
         try:
             send_not_deleted_message_content(
                 context,
                 # TODO NO CHAT_ID HERE
                 chat_id=context.user_data["chat_id"],
-                content=context.user_data["content"])
+                content=context.user_data["content"],
+                update=update
+                )
         except Unauthorized:
             update.callback_query.answer(context.bot.lang_dict["user_unauthorized"])
             return self.cancel_creating_message(update, context)
@@ -690,11 +649,11 @@ class UserTemplate(object):
 
     # todo add messages count
     def template(self, context):
-        # self.update_fields(context)
         if self.username:
-            _user_mention = user_mention(self.username, self.full_name)
+            _user_mention = user_mention(self.username, html.escape(self.full_name, quote=False))
         else:
-            _user_mention = f'<a href="tg://user?id={self.user_id}">{self.full_name}</a>'
+            _user_mention = (f'<a href="tg://user?id={self.user_id}">'
+                             f'{html.escape(self.full_name, quote=False)}</a>')
 
         return (context.bot.lang_dict["user_temp"].format(
             _user_mention, lang_timestamp(context, self.timestamp))
@@ -709,63 +668,6 @@ class UserTemplate(object):
             # TODO import fom another module
             DonationStatistic().create_amount(donates))
             if donates.count() else "")
-
-    """def update_fields(self, context):
-        # Update user full_name, username
-        telegram_user = context.bot.get_chat_member(self.chat_id,
-                                                    self.user_id).user
-        new_user_fields = dict()
-        if telegram_user.username != self.username:
-            new_user_fields["username"] = telegram_user.username
-            self.username = telegram_user.username
-
-        if telegram_user.full_name != self.full_name:
-            new_user_fields["full_name"] = telegram_user.full_name
-            self.full_name = telegram_user.full_name
-
-        # if the user has unsubscribed set it as unsubscribed
-        try:
-            context.bot.send_chat_action(self.chat_id, action="typing")
-            if self.unsubscribed:
-                new_user_fields["unsubscribed"] = False
-                self.unsubscribed = False
-        except Unauthorized:
-            if not self.unsubscribed:
-                new_user_fields["unsubscribed"] = True
-                self.unsubscribed = True
-
-        if new_user_fields:
-            users_table.update_one({"_id": self._id},
-                                   {"$set": new_user_fields})"""
-
-
-"""def update_user_fields(context, user):
-    # Update user full_name, username
-    telegram_user = context.bot.get_chat_member(user["chat_id"],
-                                                user["user_id"]).user
-    new_user_fields = dict()
-    if telegram_user.username != user["username"]:
-        new_user_fields["username"] = telegram_user.username
-        user["username"] = telegram_user.username
-
-    if telegram_user.full_name != user["full_name"]:
-        new_user_fields["full_name"] = telegram_user.full_name
-        user["full_name"] = telegram_user.full_name
-
-    # if the user has unsubscribed set it as unsubscribed
-    try:
-        context.bot.send_chat_action(user["chat_id"], action="typing")
-        if user["unsubscribed"]:
-            new_user_fields["unsubscribed"] = False
-            user["unsubscribed"] = False
-    except Unauthorized:
-        if not user["unsubscribed"]:
-            new_user_fields["unsubscribed"] = True
-            user["unsubscribed"] = True
-
-    if new_user_fields:
-        users_table.update_one({"_id": user["_id"]},
-                               {"$set": new_user_fields})"""
 
 
 MESSAGE_TO_USERS, MESSAGE_TO_USER, DOUBLE_CHECK = range(3)

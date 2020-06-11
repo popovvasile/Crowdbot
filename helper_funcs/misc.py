@@ -1,13 +1,18 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from typing import List, Dict
 from uuid import uuid4
+from threading import Thread
 
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
-from telegram.ext import CallbackContext
+from telegram import InlineKeyboardButton, ParseMode
+from telegram.ext import CallbackContext, run_async
 from telegram.error import TelegramError, Unauthorized
 from babel.dates import format_datetime
 from bson.objectid import ObjectId
+from telegram.utils.promise import Promise
 
 from database import chatbots_table, users_table
+from logs import logger
 
 LOAD = []
 NO_LOAD = ['translation', 'rss']
@@ -21,6 +26,48 @@ def dismiss(update, context):
         pass
 
 
+# never run it async
+def delete_messages(update, context, message_from_update=True):
+    try:
+        Thread(target=async_delete,
+               args=(update, context, context.user_data.copy(), message_from_update)).start()
+    except Exception as exc:
+        print("Warning: Some exception in thread start in delete_message func", exc)
+    if context and type(context.user_data) is dict:
+        context.user_data['to_delete'] = list()
+
+
+def async_delete(update, context, user_data, message_from_update=True):
+    if message_from_update:
+        try:
+            context.bot.delete_message(update.effective_chat.id,
+                                       update.effective_message.message_id)
+        except TelegramError:
+            pass
+    # todo use map
+    # https://book.pythontips.com/en/latest/map_filter.html
+    if user_data:
+        if 'to_delete' in user_data:
+            for msg in user_data['to_delete']:
+                msg = get_promise_msg(msg)
+                if type(msg) is list:
+                    for ms in msg:
+                        try:
+                            if ms.message_id != update.effective_message.message_id:
+                                context.bot.delete_message(update.effective_chat.id, ms.message_id)
+                        except TelegramError:
+                            continue
+                else:
+                    if update.effective_message and msg:
+                        try:
+                            if msg.message_id != update.effective_message.message_id:
+                                context.bot.delete_message(update.effective_chat.id,
+                                                           msg.message_id)
+                        except TelegramError:
+                            continue
+
+# Regular old delete
+"""
 def delete_messages(update, context, message_from_update=False):
     if message_from_update:
         try:
@@ -31,6 +78,8 @@ def delete_messages(update, context, message_from_update=False):
     if context.user_data:
         if 'to_delete' in context.user_data:
             for msg in context.user_data['to_delete']:
+                if type(msg) is Promise:
+                    msg = msg.result()
                 if type(msg) is list:
                     for ms in msg:
                         try:
@@ -47,23 +96,13 @@ def delete_messages(update, context, message_from_update=False):
                                     update.effective_chat.id, msg.message_id)
                         except TelegramError:
                             continue
+
             context.user_data['to_delete'] = list()
         else:
             context.user_data['to_delete'] = list()
     else:
         context.user_data['to_delete'] = list()
-
-
-# def html_format(text):
-#     """All <, > and & symbols that are not a part of a tag or an HTML entity
-#     must be replaced with the corresponding HTML entities
-#     (< with &lt;, > with &gt; and & with &amp;)
-#     """
-#     return text.replace("<", "&lt;").replace(">", "&gt;").replace("&", "&amp;")
-#
-#
-# def original_text(text):
-#     return text.replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&")
+"""
 
 
 # todo OVERKILL
@@ -72,7 +111,7 @@ def lang_timestamp(bot_lang: (CallbackContext, str), timestamp,
                    pattern="d, MMM yyyy, hh:mm"):
     if timestamp is None:
         return ""
-    lang_keys = {"ENG": "en", "RUS": "ru"}
+    lang_keys = {"ENG": "en", "RUS": "ru", "DE": "de"}
     if isinstance(bot_lang, CallbackContext):
         bot_lang = chatbots_table.find_one({"bot_id": bot_lang.bot.id})["lang"]
     return format_datetime(timestamp, pattern, locale=lang_keys[bot_lang])
@@ -80,6 +119,8 @@ def lang_timestamp(bot_lang: (CallbackContext, str), timestamp,
 
 # May raise Exception and bson.errors.InvalidId
 def get_obj(table, obj: (ObjectId, dict, str)):
+    # if type(obj) is Promise:
+    #     obj = obj.result()
     if not obj:
         return {}
     if type(obj) is dict:
@@ -90,6 +131,14 @@ def get_obj(table, obj: (ObjectId, dict, str)):
         return table.find_one({"_id": ObjectId(obj)})
     else:
         raise Exception
+
+
+def get_promise_msg(msg):
+    # if isinstance(msg, Promise):
+    if type(msg) is Promise:
+        # todo maybe add timeout arg here
+        msg = msg.result()
+    return msg
 
 
 def user_mention(username, string):
@@ -133,6 +182,15 @@ def update_user_fields(context, user):
                                {"$set": new_user_fields})
 
 
+def update_user_unsubs(context):
+    print(f"Start updating users for bot: {context.bot.first_name}")
+    users_list = users_table.find({"bot_id": context.bot.id})
+    for user in users_list:
+        update_user_fields(context, user)
+    print(f"Finish updating users for bot: {context.bot.first_name}. "
+          f"{users_list.count()} users checked")
+
+
 def create_content_dict(update):
     """Creates content_dict from update.
     # todo use this function for all content_dict (messages, shop products, buttons)
@@ -147,51 +205,51 @@ def create_content_dict(update):
                         "id": str(uuid4())}
 
     if update.message.photo:
-        photo_file = update.message.photo[-1].get_file().file_id
+        photo_file = update.message.photo[-1].file_id
         content_dict = {"file_id": photo_file,
                         "type": "photo_file",
                         "id": str(uuid4())}
 
-    elif update.message.audio:
-        audio_file = update.message.audio.get_file().file_id
+    if update.message.audio:
+        audio_file = update.message.audio.file_id
         content_dict = {"file_id": audio_file,
                         "type": "audio_file",
                         "id": str(uuid4()),
                         "name": update.message.audio.title}
 
-    elif update.message.voice:
-        voice_file = update.message.voice.get_file().file_id
+    if update.message.voice:
+        voice_file = update.message.voice.file_id
         content_dict = {"file_id": voice_file,
                         "type": "voice_file",
                         "id": str(uuid4())}
 
-    elif update.message.document:
-        document_file = update.message.document.get_file().file_id
+    if update.message.document:
+        document_file = update.message.document.file_id
         content_dict = {"file_id": document_file,
                         "type": "document_file",
                         "id": str(uuid4()),
                         "name": update.message.document.file_name}
 
-    elif update.message.video:
-        video_file = update.message.video.get_file().file_id
+    if update.message.video:
+        video_file = update.message.video.file_id
         content_dict = {"file_id": video_file,
                         "type": "video_file",
                         "id": str(uuid4())}
 
-    elif update.message.animation:
-        animation_file = update.message.animation.get_file().file_id
+    if update.message.animation:
+        animation_file = update.message.animation.file_id
         content_dict = {"file_id": animation_file,
                         "type": "animation_file",
                         "id": str(uuid4())}
 
-    elif update.message.video_note:
-        video_note_file = update.message.video_note.get_file().file_id
+    if update.message.video_note:
+        video_note_file = update.message.video_note.file_id
         content_dict = {"file_id": video_note_file,
                         "type": "video_note_file",
                         "id": str(uuid4())}
 
-    elif update.message.sticker:
-        sticker_file = update.message.sticker.get_file().file_id
+    if update.message.sticker:
+        sticker_file = update.message.sticker.file_id
         content_dict = {"file_id": sticker_file,
                         "type": "sticker_file",
                         "id": str(uuid4()),
@@ -201,7 +259,7 @@ def create_content_dict(update):
 
 def send_content_dict(chat_id, context, content_dict,
                       caption=None, parse_mode=ParseMode.HTML, reply_markup=None):
-    # todo use this function for all content_dict (shop products, buttons)
+    # todo use this function for all content_dict (shop products, buttons, messages)
     """Sends one content_dict"""
     if content_dict["type"] == "text":
         context.user_data["to_delete"].append(
