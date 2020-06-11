@@ -1,5 +1,6 @@
 # Byte-compiled / optimized / DLL files
 persistence.bin
+nohup.out
 z/
 __pycache__/
 modules/sql/__pycache__/
@@ -122,7 +123,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-=======
-.pyre/
+
 
 /modules/paid_content/
