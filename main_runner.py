@@ -177,13 +177,8 @@ def catch_unauthorized(func):
 @catch_unauthorized
 def main(token, lang):
     # https://github.com/python-telegram-bot/python-telegram-bot/issues/787
-<<<<<<< HEAD
-    request = Request(con_pool_size=104)
-    q = mq.MessageQueue(all_burst_limit=25, all_time_limit_ms=1200)
-=======
     request = Request(con_pool_size=30)
-    #q = mq.MessageQueue(all_burst_limit=25, all_time_limit_ms=1200)
->>>>>>> 2cba9bc2cc0b17b6a954d07e0933bb37bff4440d
+    # q = mq.MessageQueue(all_burst_limit=25, all_time_limit_ms=1200)
     # bot_obj = MQBot(token, request=request, mqueue=q)
     bot_obj = Bot(token, request=request)
 
@@ -208,11 +203,7 @@ def main(token, lang):
     # my_persistence = PicklePersistence(filename='persistence.bin')
     # https://github.com/python-telegram-bot/python-telegram-bot/issues/1864
     updater = tg.Updater(use_context=True, bot=bot_obj,
-<<<<<<< HEAD
-                         workers=100,
-=======
                          workers=20,
->>>>>>> 2cba9bc2cc0b17b6a954d07e0933bb37bff4440d
                          # persistence=my_persistence
                          )
     # If we stop alive_checker by pressing ctrl+c and there are running job,
