@@ -74,6 +74,7 @@ def get_all_bots():
 
 
 @app.route("/crowdbot/<int:bot_id>", methods=["GET"])
+# TODO take the info about the bot here
 def crowdbot_on_get(bot_id):
     """Get bot by bot_id"""
     chatbot = crowdbot_bots_table.find_one({"bot_id": bot_id})
