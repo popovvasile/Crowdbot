@@ -28,13 +28,13 @@ def dismiss(update, context):
 
 # never run it async
 def delete_messages(update, context, message_from_update=True):
-    try:
-        Thread(target=async_delete,
-               args=(update, context, context.user_data.copy(), message_from_update)).start()
-    except Exception as exc:
-        print("Warning: Some exception in thread start in delete_message func", exc)
     if context and type(context.user_data) is dict:
-        context.user_data['to_delete'] = list()
+        try:
+            Thread(target=async_delete,
+                   args=(update, context, context.user_data.copy(), message_from_update)).start()
+            context.user_data['to_delete'] = list()
+        except Exception as exc:
+            print("Warning: Some exception in delete_message func", exc)
 
 
 def async_delete(update, context, user_data, message_from_update=True):
