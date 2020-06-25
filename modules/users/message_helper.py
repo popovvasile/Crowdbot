@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import html
-import requests
 
-from logs import logger
+import requests
+from requests.exceptions import RequestException
 from telegram.error import Unauthorized
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, TelegramError
 from bson.objectid import ObjectId
 
+from logs import logger
 from helper_funcs.misc import delete_messages
 from helper_funcs.misc import lang_timestamp, get_obj
 from database import users_messages_to_admin_table
@@ -282,7 +283,7 @@ def send_request_content_dict(update, context, chat_id, token, content_dict):
                                         # the poll should not be deleted
                                         from_chat_id=update.effective_chat.id,
                                         message_id=poll.message_id)
-    except:
+    except RequestException:
         pass
 
 

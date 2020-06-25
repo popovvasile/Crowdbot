@@ -152,7 +152,7 @@ class SendMessageToAdmin(SenderHelper):
                                              text=text,
                                              reply_markup=reply_markup,
                                              parse_mode=ParseMode.HTML)
-                except:
+                except TelegramError:
                     continue
 
         # Console log

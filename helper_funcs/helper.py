@@ -1,24 +1,26 @@
+import os
+import sys
 import re
 import html
+import traceback
 from datetime import datetime
 
-import sys
 from pickle import PicklingError
+from telegram.utils.helpers import mention_html
 from urllib3.exceptions import HTTPError
-
 from bson.objectid import ObjectId
-from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, LabeledPrice
+from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, LabeledPrice, Bot
 from telegram.ext import ConversationHandler
 from telegram.error import (BadRequest, TimedOut, NetworkError, TelegramError,
                             ChatMigrated, Unauthorized, Conflict)
 
+from logs import logger
 from helper_funcs.lang_strings.help_strings import help_strings, helpable_dict
-from helper_funcs.misc import paginate_modules, delete_messages, send_content_dict
+from helper_funcs.misc import paginate_modules, delete_messages, send_content_dict, user_mention
 from helper_funcs.auth import (if_admin, initiate_chat_id,
                                register_chat, register_admin)
 from database import (custom_buttons_table, users_table, chatbots_table,
                       user_mode_table, products_table, groups_table)
-from logs import logger
 
 
 HELP_STRINGS = """
@@ -59,10 +61,9 @@ def return_to_menu(update, context):
 
 
 def dismiss_button(context):
-    dismissbutton = InlineKeyboardMarkup(
-        [[InlineKeyboardButton(text=context.bot.lang_dict["notification_close_btn"],
-                               callback_data="dismiss")]])
-    return dismissbutton
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton(text=context.bot.lang_dict["notification_close_btn"],
+                              callback_data="dismiss")]])
 
 
 # do not async
@@ -179,57 +180,93 @@ def check_provider_token(currency, provider_token, update, context):
     return (True, "All good")
 
 
-# for test purposes
 def error_callback(update, context):
     delete_messages(update, context)
-    # print(context)
-    # print(context.user_data)
     try:
         raise context.error
-
-    except Unauthorized:
-        print("Token revoked or bot deleted")
-        chatbots_table.update({"bot_id": context.bot.id},
-                              {"$set": {"active": False,
-                                        # "deactivation_time": datetime.now()
-                                        }})
-        sys.exit()
+    except Unauthorized as err:
+        if err.message == "Unauthorized":
+            print(f"Token revoked or bot deleted. Bot: {context.bot.first_name}: {context.bot.id}")
+            chat_bot = chatbots_table.find_and_modify({"bot_id": context.bot.id},
+                                                      {"$set": {"active": False}}, new=True)
+            # Send notification to superuser
+            bot_father_token = os.environ.get("BOTFATHER_TOKEN")
+            if bot_father_token:
+                try:
+                    bot_instance = Bot(bot_father_token)
+                    bot_instance.send_message(
+                        chat_bot["superuser"],
+                        context.bot.lang_dict["bot_off_notification"].format(
+                            user_mention(context.bot.username, context.bot.first_name)),
+                        parse_mode=ParseMode.HTML,
+                        reply_markup=InlineKeyboardMarkup([
+                            [InlineKeyboardButton(text=context.bot.lang_dict["manage_bots_button"],
+                                                  callback_data="manage_bots")]]))
+                except TelegramError as notification_exc:
+                    print("Can't send bot_off_notification Checker ", traceback.format_exc())
+                    logger.error(str(notification_exc))
+                    logger.error(traceback.format_exc())
+                else:
+                    print("Successfully send bot_off_notification")
+            else:
+                print("Need to set BOTFATHER_TOKEN env var")
+            sys.exit()
+        else:
+            err_string = str(err) + "\nUnauthorized Checker " + traceback.format_exc()
+            print(err_string)
+            logger.error(err_string)
 
     # telegram.error.Conflict: Conflict: terminated by other getUpdatesrequest;
     # make sure that only one bot instance is running
     # What about this Exception? maybe send message to superuser?
-    # except Conflict as err:
-    #     print("Conflict", err)
+    except Conflict as err:
+        err_string = str(err) + "\nConflict Checker "
+        print(err_string)
+        logger.error(err_string)
 
     except ConnectionError as err:
-        print("ConnectionError")
-        print(err)
+        err_string = str(err) + "\nConnectionError Checker " + traceback.format_exc()
+        print(err_string)
+        logger.error(err_string)
 
     except TimedOut as err:
-        print("TimedOut")
-        print(err)
+        err_string = str(err) + "\nTimedOut Checker " + traceback.format_exc()
+        print(err_string)
+        logger.error(err_string)
 
-    except PicklingError:
-        print("PicklingError")
+    except PicklingError as err:
+        err_string = str(err) + "\nPicklingError Checker " + traceback.format_exc()
+        print(err_string)
+        logger.error(err_string)
 
     # handle slow connection problems
-    except (HTTPError, BadRequest):
-        print("HTTPError")
+    except (HTTPError, BadRequest) as err:
+        err_string = str(err) + "\nHTTPError, BadRequest Checker " + traceback.format_exc()
+        print(err_string)
+        logger.error(err_string)
 
-    except NetworkError:
-        print("Neworkerror")
+    except NetworkError as err:
+        err_string = str(err) + "\nNetworkError Checker " + traceback.format_exc()
+        print(err_string)
+        logger.error(err_string)
 
     # handle other connection problems
-    except ChatMigrated as e:
+    except ChatMigrated as err:
         # the chat_id of a group has changed, use e.new_chat_id instead
-        print("ChatMigrated")
+        err_string = str(err) + "\nChatMigrated Checker " + traceback.format_exc()
+        print(err_string)
+        logger.error(err_string)
 
-    except TelegramError:
-        print("TeelgramError")
+    except TelegramError as err:
+        err_string = str(err) + "\nTelegramError Checker " + traceback.format_exc()
+        print(err_string)
+        logger.error(err_string)
 
-    except Exception as e:
-        logger.error(e.__repr__())
-        context.bot.send_message(update.effective_message.chat.id,
+    except Exception as err:
+        err_string = str(err) + "\nException Checker " + traceback.format_exc()
+        print(err_string)
+        logger.error(err_string)
+        context.bot.send_message(update.effective_chat.id,
                                  context.bot.lang_dict["error_occurred"],
                                  reply_markup=InlineKeyboardMarkup(
                                      [[InlineKeyboardButton(

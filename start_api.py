@@ -2,9 +2,9 @@ import logging
 
 from flask import Flask
 from flask_restful import Api
-from rest_api.api.errors import errors
-from .resources import CrowdRobot, UserBots, AllBots, RevokeToken
 
+from rest_api.errors import errors
+from rest_api.resources import CrowdRobot, UserBots, AllBots, RevokeToken
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)

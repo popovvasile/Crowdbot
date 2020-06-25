@@ -8,7 +8,7 @@ def test_conflict():
         context.bot.send_message(update.effective_chat.id, "Hello")
         return ConversationHandler.END
 
-    updater = Updater('1213897606:AAHE_BAU-HYXpdelhL55BuLWNe0lydhJHGg', use_context=True)
+    updater = Updater('1213897606:AAGiCsw20gGle-eLlXSI_YN6GsxGGmxyT_M', use_context=True)
     dp = updater.dispatcher
     dp.add_handler(CommandHandler("start", callback=start))
 
@@ -27,4 +27,5 @@ def test():
 
 
 if __name__ == "__main__":
-    test()
+    # test()
+    test_conflict()

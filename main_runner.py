@@ -3,17 +3,17 @@
 import json
 import logging
 import os
-
 import sys
+from pprint import pprint
 
 import telegram
 import telegram.ext as tg
 from telegram import Bot
 from telegram.error import Unauthorized
 from telegram.ext import messagequeue as mq
+from telegram.utils.request import Request
 from telegram.ext import (CommandHandler, CallbackQueryHandler, MessageHandler, Filters,
                           PicklePersistence)
-from telegram.utils.request import Request
 
 from database import chatbots_table
 from logs import logger
@@ -21,20 +21,6 @@ from helper_funcs.misc import dismiss, update_user_unsubs
 from helper_funcs.helper import (help_button, button_handler, get_help, WelcomeBot,
                                  back_from_button_handler, back_to_modules, error_callback,
                                  return_to_menu)
-
-# CHANNELS
-# from modules.chanells.channels import (MY_CHANNELS_HANDLER, ADD_CHANNEL_HANDLER,
-#                                        REMOVE_CHANNEL_HANDLER, SEND_POST_HANDLER, CHANELLS_MENU)
-# from modules.chanells.channels_polls_surveys_donate import (
-#     SEND_POLL_TO_CHANNEL_HANDLER, SEND_SURVEY_TO_CHANNEL_HANDLER,
-#     SEND_DONATION_TO_CHANNEL_HANDLER)
-#
-# GROUPS
-# from modules.groups.groups import (
-#     MY_GROUPS_HANDLER, REMOVE_GROUP_HANDLER, SEND_POST_TO_GROUP_HANDLER, ADD_GROUP_HANLDER,
-#     GROUPS_MENU)
-# from modules.groups.groups_polls_surveys_donate import (
-#     SEND_POLL_TO_GROUP_HANDLER, SEND_SURVEY_TO_GROUP_HANDLER, SEND_DONATION_TO_GROUP_HANDLER)
 
 # SETTINGS
 from modules.settings.language_switch import LANG_MENU, SET_LANG
@@ -47,8 +33,6 @@ from modules.settings.button_manage import (
 from modules.settings.user_mode import USER_MODE_OFF, USER_MODE_ON
 from modules.settings.admins import ADMINS_LIST_HANDLER
 from modules.settings.notification import NOTIFICATION_MENU, NOTIFICATION_EDIT
-# from modules.donations.donation_payment import (DONATE_HANDLER, HANDLE_SUCCES,
-#                                                 HANDLE_PRECHECKOUT)
 
 # USERS AND MESSAGES
 from modules.users.messages_admin import SEND_MESSAGE_ONLY_TO_ADMINS_HANDLER
@@ -70,31 +54,22 @@ from modules.users.users import (
     OPEN_USER_HANDLER, BACK_TO_OPEN_USER, SEARCH_USER)
 
 # STATISTIC
-# from modules.statistic.statistic_main import (
-#     STATISTIC_MAIN_MENU, BACK_TO_STATISTIC_MAIN)
 from modules.statistic.user_statistic import USERS_STATISTIC_HANDLER
-# from modules.statistic.donation_statistic import DONATION_STATISTIC_HANDLER
 
 # PAYMENTS
-from modules.shop.admin_side.shop_config import (
-    # EDIT_DONATION_HANDLER, PAYMENTS_CONFIG_KEYBOARD, CHANGE_DONATIONS_CONFIG,
-    # CONFIGS_DONATIONS_GENERAL,
-    CONFIGS_SHOP_GENERAL, CHANGE_SHOP_CONFIG, EDIT_SHOP_HANDLER)
-# from modules.donations.donation_enable_disable import (
-#     CREATE_DONATION_HANDLER, DONATIONS_MENU)
+from modules.shop.admin_side.shop_config import (CONFIGS_SHOP_GENERAL, CHANGE_SHOP_CONFIG,
+                                                 EDIT_SHOP_HANDLER)
 
 # SHOP ADMIN SIDE
-from modules.shop.admin_side.welcome import (
-    START_SHOP_HANDLER, BACK_TO_MAIN_MENU_HANDLER, Welcome)
+from modules.shop.admin_side.eshop_enable_disable import CREATE_SHOP_HANDLER
+from modules.shop.admin_side.welcome import START_SHOP_HANDLER, BACK_TO_MAIN_MENU_HANDLER, Welcome
 from modules.shop.admin_side.adding_product import ADD_PRODUCT_HANDLER
 from modules.shop.admin_side.orders import ORDERS_HANDLER
 from modules.shop.admin_side.products import PRODUCTS_HANDLER
-from modules.shop.admin_side.trash import (TRASH_START, ORDERS_TRASH,
-                                           PRODUCTS_TRASH)
+from modules.shop.admin_side.trash import TRASH_START, ORDERS_TRASH, PRODUCTS_TRASH
 from modules.shop.admin_side.categories import (
     ADD_CATEGORY_HANDLER, CATEGORIES_HANDLER, EDIT_CATEGORIES_HANDLER,
     RENAME_CATEGORY_HANDLER, DELETE_CATEGORY_HANDLER, BACK_TO_CATEGORIES_MENU)
-from modules.shop.admin_side.eshop_enable_disable import CREATE_SHOP_HANDLER
 
 # SHOP USER SIDE
 from modules.shop.user_side.order_creator import OFFLINE_PURCHASE_HANDLER
@@ -200,16 +175,20 @@ def main(token, lang):
         bot_obj.lang_dict = lang_dicts["UKR"]
     else:
         bot_obj.lang_dict = lang_dicts["RUS"]
+
     # my_persistence = PicklePersistence(filename='persistence.bin')
     # https://github.com/python-telegram-bot/python-telegram-bot/issues/1864
-    updater = tg.Updater(use_context=True, bot=bot_obj,
+    updater = tg.Updater(use_context=True,
+                         bot=bot_obj,
                          workers=20,
                          # persistence=my_persistence
                          )
+
     # If we stop alive_checker by pressing ctrl+c and there are running job,
     # bot process wouldn't stop. So need to use pkill -9 python
     # job = updater.job_queue
     # job.run_repeating(update_user_unsubs, interval=3600*24, first=0)
+
     # todo try to add async to
     # every function one by one
     # If you’re using @ run_async you cannot  rely on adding custom
@@ -218,26 +197,28 @@ def main(token, lang):
     dispatcher = updater.dispatcher
     start_handler = CommandHandler("start", WelcomeBot().start)
     help_handler = CommandHandler("help", get_help)
-    # product_handler_han = CallbackQueryHandler(
-    #   product_handler, pattern=r"product_")  # TODO think if to use this one
 
-    custom_button_callback_handler = CallbackQueryHandler(
-        callback=button_handler,
-        pattern=r"button_")
+    # TODO think if to use this one
+    # product_handler_han = CallbackQueryHandler(product_handler,
+    #                                            pattern=r"product_")
 
-    custom_button_back_callback_handler = CallbackQueryHandler(
-        callback=back_from_button_handler,
-        pattern=r"back_from_button")
+    custom_button_callback_handler = CallbackQueryHandler(callback=button_handler,
+                                                          pattern=r"button_")
+
+    custom_button_back_callback_handler = CallbackQueryHandler(callback=back_from_button_handler,
+                                                               pattern=r"back_from_button")
 
     help_callback_handler = CallbackQueryHandler(callback=help_button,
                                                  pattern=r"help_")
 
-    back_to_modules_handler = CallbackQueryHandler(pattern=r"back_to_module",
-                                                   callback=back_to_modules)
-    dismiss_handler = CallbackQueryHandler(pattern="dismiss",
-                                           callback=dismiss)
-    dispatcher.add_handler(dismiss_handler)
+    back_to_modules_handler = CallbackQueryHandler(callback=back_to_modules,
+                                                   pattern=r"back_to_module")
+
+    dismiss_handler = CallbackQueryHandler(callback=dismiss,
+                                           pattern="dismiss")
+
     # TODO priority is very important!!!!!!!!!!!!!!!!!!!!
+    dispatcher.add_handler(dismiss_handler)
     dispatcher.add_handler(EDIT_BOT_DESCRIPTION_HANDLER)
     dispatcher.add_handler(EDIT_PICTURE_HANDLER)
 
@@ -300,6 +281,7 @@ def main(token, lang):
     dispatcher.add_handler(BACK_TO_ONE_BUTTON_MENU)
     dispatcher.add_handler(LANG_MENU)
     dispatcher.add_handler(SET_LANG)
+
     # USER MODE
     dispatcher.add_handler(USER_MODE_ON)
     dispatcher.add_handler(USER_MODE_OFF)
@@ -325,33 +307,15 @@ def main(token, lang):
     dispatcher.add_handler(BACK_TO_OPEN_USER)
 
     # STATISTIC
-    # dispatcher.add_handler(STATISTIC_MAIN_MENU)
-    # dispatcher.add_handler(BACK_TO_STATISTIC_MAIN)
-    # dispatcher.add_handler(DONATION_STATISTIC_HANDLER)
     dispatcher.add_handler(USERS_STATISTIC_HANDLER)
 
     # ADMINS
     dispatcher.add_handler(ADMINS_LIST_HANDLER)
-    # dispatcher.add_handler(ADD_ADMIN_HANDLER)
     dispatcher.add_handler(NOTIFICATION_MENU)
     dispatcher.add_handler(NOTIFICATION_EDIT)
 
-    # DONATIONS
-    # dispatcher.add_handler(CREATE_DONATION_HANDLER)
-    # dispatcher.add_handler(DONATE_HANDLER)
-    # dispatcher.add_handler(HANDLE_SUCCES)
-    # dispatcher.add_handler(HANDLE_PRECHECKOUT)
-    # dispatcher.add_handler(EDIT_DONATION_HANDLER)
-    # dispatcher.add_handler(SEND_DONATION_TO_USERS_HANDLER)
-    # dispatcher.add_handler(CHANGE_DONATIONS_CONFIG)
-    # dispatcher.add_handler(PAYMENTS_CONFIG_KEYBOARD)
-    # dispatcher.add_handler(CONFIGS_DONATIONS_GENERAL)
-    # dispatcher.add_handler(DONATIONS_MENU)
-
     # MESSAGES
     dispatcher.add_handler(MESSAGES_MENU)
-    # dispatcher.add_handler(SEE_MESSAGES_FINISH_BACK_HANDLER)
-    # dispatcher.add_handler(SEE_MESSAGES_BACK_HANDLER)
     dispatcher.add_handler(ANSWER_TO_MESSAGE_HANDLER)
     dispatcher.add_handler(DELETE_MESSAGES_HANDLER)
     dispatcher.add_handler(SEND_MESSAGE_TO_ADMIN_HANDLER)
@@ -360,13 +324,7 @@ def main(token, lang):
     dispatcher.add_handler(SEE_MESSAGES_FINISH_HANDLER)
     dispatcher.add_handler(SEND_MESSAGE_ONLY_TO_ADMINS_HANDLER)
     dispatcher.add_handler(SEND_MESSAGE_TO_DONATORS_HANDLER)
-    # dispatcher.add_handler(BLOCK_USER)
-    # dispatcher.add_handler(BLOCKED_USERS_LIST)
-    # dispatcher.add_handler(UNBLOCK_USER)
-    # dispatcher.add_handler(SEE_MESSAGES_PAGINATION_HANDLER)
-    # dispatcher.add_handler(ADD_MESSAGE_CATEGORY_HANDLER)
-    # dispatcher.add_handler(DELETE_MESSAGE_CATEGORY_HANDLER)
-    # dispatcher.add_handler(MESSAGE_CATEGORY_HANDLER)
+
     dispatcher.add_handler(FINISH_BLOCK_ANONIM_MESSAGING)
     dispatcher.add_handler(CONFIRM_BLOCK_ANONIM_MESSAGING)
     dispatcher.add_handler(BACK_TO_INBOX_VIEW_MESSAGE)
@@ -382,30 +340,26 @@ def main(token, lang):
 
     dispatcher.add_handler(custom_button_back_callback_handler)
     dispatcher.add_handler(custom_button_callback_handler)
-    # dispatcher.add_handler(back_from_edit_button_handler)
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(help_handler)
-
     dispatcher.add_handler(back_to_modules_handler)
-
-    dispatcher.add_handler(CallbackQueryHandler(Welcome.back_to_main_menu,
-                                                pattern=r"_back"))
-
+    dispatcher.add_handler(CallbackQueryHandler(Welcome.back_to_main_menu, pattern=r"_back"))
     dispatcher.add_handler(BACK_TO_MAIN_MENU_HANDLER)
-
     dispatcher.add_handler(help_callback_handler)
 
     if os.environ['SHOP_PRODUCTION'] == "1":
         dispatcher.add_error_handler(error_callback)
-    dispatcher.add_handler(CallbackQueryHandler(get_help,
-                                                pattern=r"back"))
-    dispatcher.add_handler(CallbackQueryHandler(get_help,
-                                                pattern=r"cancel"))
+    dispatcher.add_handler(CallbackQueryHandler(get_help, pattern=r"back"))
+    dispatcher.add_handler(CallbackQueryHandler(get_help, pattern=r"cancel"))
     rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), return_to_menu)
     # TODO create another function
     # TODO add "active" to all current bots
     dispatcher.add_handler(rex_help_handler)
-    logger.info("Using long polling.")
-    updater.start_polling(timeout=60, read_latency=60, clean=True, bootstrap_retries=5)
 
+    # Delete webhook if it exist before start polling
+    if bot_obj.getWebhookInfo().url:
+        bot_obj.delete_webhook()
+
+    updater.start_polling(timeout=60, read_latency=60, clean=True, bootstrap_retries=5)
     updater.idle()
+    logger.info("Using long polling.")

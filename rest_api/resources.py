@@ -1,13 +1,12 @@
 from datetime import datetime
-from pprint import pprint
 
 import requests
-from flask_restful import Resource, reqparse, marshal_with
+from flask_restful import Resource, marshal_with
 
-from rest_api.api.common import format_for_response
-from rest_api.api.docs import response_doc, resp_doc, result_response
-from rest_api.api.errors import BotNotFound, InvalidToken
-from rest_api.api.parsers import access_parser
+from rest_api.common import format_for_response
+from rest_api.docs import response_doc, resp_doc, result_response
+from rest_api.errors import BotNotFound, InvalidToken
+from rest_api.parsers import access_parser
 from database import (chatbots_table, orders_table, shop_customers_contacts_table,
                       shop_categories_table, categories_table, carts_table, products_table,
                       users_messages_to_admin_table, user_mode_table, users_table,
@@ -53,6 +52,7 @@ class CrowdRobot(Resource):
                                 result=format_for_response(chat_bot)), 400
             # Bot exist but not active - revoke token and superuser
             else:
+                # https://api.telegram.org/bot938818381:AAHgABp4Rr6qam68ZnL5adQQDwOjUNzxii8/getWebhookInfo
                 chat_bot = chatbots_table.find_and_modify(
                     {"bot_id": telegram_check["result"]["id"]},
                     {"$set": {"token": args["token"],
@@ -63,6 +63,7 @@ class CrowdRobot(Resource):
                                 result=format_for_response(chat_bot)), 200
         # Token valid and bot doesn't exist in db - create and save new bot to database.
         else:
+            # https://api.telegram.org/bot938818381:AAHgABp4Rr6qam68ZnL5adQQDwOjUNzxii8/getWebhookInfo
             chat_bot = {
                 "token": args["token"],
                 "lang": args["lang"],
@@ -111,7 +112,7 @@ class UserBots(Resource):
         parser = access_parser.copy()
         parser.add_argument("user_id", type=int, location="json", required=True)
         args = parser.parse_args(strict=True)
-        chat_bots = chatbots_table.find({"superuser": args["user_id"]})
+        chat_bots = chatbots_table.find({"superuser": args["user_id"]}).sort([["_id", -1]])
         return {"result": list(map(format_for_response, chat_bots))}, 200
 
 
@@ -153,6 +154,7 @@ class RevokeToken(Resource):
                             result={"username": telegram_check["result"]["username"],
                                     "name": telegram_check["result"]["first_name"]}), 403
         else:
+            # https://api.telegram.org/bot938818381:AAHgABp4Rr6qam68ZnL5adQQDwOjUNzxii8/getWebhookInfo
             chat_bot = chatbots_table.find_and_modify(
                 {"bot_id": telegram_check["result"]["id"]},
                 {"$set": {"token": args["token"],

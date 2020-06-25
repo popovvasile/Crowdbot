@@ -17,7 +17,6 @@ from modules.shop.components.order import UserOrder, AdminOrder
 from modules.shop.user_side.cart import Cart
 
 
-
 class OnlinePayment(object):
     def send_invoice(self, update, context, order, shop=None):
         if not shop:
