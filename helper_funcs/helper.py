@@ -5,10 +5,10 @@ import html
 import traceback
 from datetime import datetime
 
-from pickle import PicklingError
-from telegram.utils.helpers import mention_html
 from urllib3.exceptions import HTTPError
 from bson.objectid import ObjectId
+from pickle import PicklingError
+from telegram.utils.helpers import create_deep_linked_url, mention_html
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, LabeledPrice, Bot
 from telegram.ext import ConversationHandler
 from telegram.error import (BadRequest, TimedOut, NetworkError, TelegramError,
@@ -20,7 +20,7 @@ from helper_funcs.misc import paginate_modules, delete_messages, send_content_di
 from helper_funcs.auth import (if_admin, initiate_chat_id,
                                register_chat, register_admin)
 from database import (custom_buttons_table, users_table, chatbots_table,
-                      user_mode_table, products_table, groups_table)
+                      user_mode_table, products_table, groups_table, conflict_notifications_table)
 
 
 HELP_STRINGS = """
@@ -189,28 +189,35 @@ def error_callback(update, context):
             print(f"Token revoked or bot deleted. Bot: {context.bot.first_name}: {context.bot.id}")
             chat_bot = chatbots_table.find_and_modify({"bot_id": context.bot.id},
                                                       {"$set": {"active": False}}, new=True)
-            # Send notification to superuser
-            bot_father_token = os.environ.get("BOTFATHER_TOKEN")
-            if bot_father_token:
-                try:
-                    bot_instance = Bot(bot_father_token)
-                    bot_instance.send_message(
-                        chat_bot["superuser"],
-                        context.bot.lang_dict["bot_off_notification"].format(
-                            user_mention(context.bot.username, context.bot.first_name)),
-                        parse_mode=ParseMode.HTML,
-                        reply_markup=InlineKeyboardMarkup([
-                            [InlineKeyboardButton(text=context.bot.lang_dict["manage_bots_button"],
-                                                  callback_data="manage_bots")]]))
-                except TelegramError as notification_exc:
-                    print("Can't send bot_off_notification Checker ", traceback.format_exc())
-                    logger.error(str(notification_exc))
-                    logger.error(traceback.format_exc())
-                else:
-                    print("Successfully send bot_off_notification")
-            else:
-                print("Need to set BOTFATHER_TOKEN env var")
+            send_superuser_notification(
+                chat_id=chat_bot["superuser"],
+                text=context.bot.lang_dict["bot_off_notification"].format(
+                    user_mention(context.bot.username, context.bot.first_name)),
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton(text=context.bot.lang_dict["manage_bots_button"],
+                                          callback_data="manage_bots")]]))
             sys.exit()
+            # Send notification to superuser
+            # bot_father_token = os.environ.get("BOTFATHER_TOKEN")
+            # if bot_father_token:
+            #     try:
+            #         bot_instance = Bot(bot_father_token)
+            #         bot_instance.send_message(
+            #             chat_bot["superuser"],
+            #             context.bot.lang_dict["bot_off_notification"].format(
+            #                 user_mention(context.bot.username, context.bot.first_name)),
+            #             parse_mode=ParseMode.HTML,
+            #             reply_markup=InlineKeyboardMarkup([
+            #                 [InlineKeyboardButton(text=context.bot.lang_dict["manage_bots_button"],
+            #                                       callback_data="manage_bots")]]))
+            #     except TelegramError as notification_exc:
+                    # print("Can't send bot_off_notification Checker ", traceback.format_exc())
+                    # logger.error(str(notification_exc))
+                    # logger.error(traceback.format_exc())
+                # else:
+                #     print("Successfully send bot_off_notification")
+            # else:
+            #     print("Need to set BOTFATHER_TOKEN env var")
         else:
             err_string = str(err) + "\nUnauthorized Checker " + traceback.format_exc()
             print(err_string)
@@ -220,9 +227,26 @@ def error_callback(update, context):
     # make sure that only one bot instance is running
     # What about this Exception? maybe send message to superuser?
     except Conflict as err:
-        err_string = str(err) + "\nConflict Checker "
-        print(err_string)
-        logger.error(err_string)
+        if "terminated by other getUpdates request" in err.message:
+            print(f"Two bots instances are running. Bot: {context.bot.first_name}: {context.bot.id}")
+            notifications = conflict_notifications_table.find(
+                {"bot_id": context.bot.id}).sort([["_id", -1]])
+            if (not notifications.count() or
+                    (datetime.now() - notifications[0]["timestamp"]).days >= 1):
+                chat_bot = chatbots_table.find_one({"bot_id": context.bot.id})
+                send_superuser_notification(
+                    chat_id=chat_bot["superuser"],
+                    text=context.bot.lang_dict["two_bots_instance_notification"].format(
+                        username="@" + context.bot.username),
+                    reply_markup=InlineKeyboardMarkup([
+                        [InlineKeyboardButton(text=context.bot.lang_dict["notification_close_btn"],
+                                              callback_data="dismiss")]]))
+                conflict_notifications_table.insert_one({"bot_id": context.bot.id,
+                                                         "timestamp": datetime.now()})
+        else:
+            err_string = str(err) + "\nConflict Checker " + traceback.format_exc()
+            print(err_string)
+            logger.error(err_string)
 
     except ConnectionError as err:
         err_string = str(err) + "\nConnectionError Checker " + traceback.format_exc()
@@ -273,6 +297,26 @@ def error_callback(update, context):
                                          text=context.bot.lang_dict["back_button"],
                                          callback_data="help_back")]]))
         return ConversationHandler.END
+
+
+def send_superuser_notification(chat_id, text, reply_markup):
+    # Send notification to superuser using @crowdrobot
+    bot_father_token = os.environ.get("BOTFATHER_TOKEN")
+    if bot_father_token:
+        try:
+            bot_instance = Bot(bot_father_token)
+            bot_instance.send_message(chat_id=chat_id,
+                                      text=text,
+                                      parse_mode=ParseMode.HTML,
+                                      reply_markup=reply_markup)
+        except TelegramError as notification_exc:
+            print("Failed notification to superuser", traceback.format_exc())
+            logger.error(str(notification_exc))
+            logger.error(traceback.format_exc())
+        else:
+            print("Successfully notification to superuser")
+    else:
+        print("Failed notification to superuser. Need to set BOTFATHER_TOKEN env var")
 
 
 def button_handler(update, context):
