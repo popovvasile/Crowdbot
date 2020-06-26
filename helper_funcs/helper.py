@@ -26,38 +26,18 @@ from database import (custom_buttons_table, users_table, chatbots_table,
 HELP_STRINGS = """
 {}
 """
-currency_keyboard = [[InlineKeyboardButton(text="USD",
-                     callback_data="currency_USD"),
-InlineKeyboardButton(text="RUB",
-                     callback_data="currency_RUB"),
-InlineKeyboardButton(text="EUR",
-                     callback_data="currency_EUR")],
-[InlineKeyboardButton(text="GBP",
-                     callback_data="currency_GBP"),
-InlineKeyboardButton(text="KZT",
-                     callback_data="currency_KZT"),
-InlineKeyboardButton(text="UAH",
-                     callback_data="currency_UAH")],
-[InlineKeyboardButton(text="RON",
-                     callback_data="currency_RON"),
-InlineKeyboardButton(text="PLN",
-                     callback_data="currency_PLN")]]
-
-
-# currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["KZT", "UAH", "RON", "PLN"]]
 
 
 def return_to_menu(update, context):
     context.bot.send_message(update.effective_message.chat.id,
                              context.bot.lang_dict["return_to_menu"],
-                             reply_markup=InlineKeyboardMarkup(
-                                 [[InlineKeyboardButton(
+                             reply_markup=InlineKeyboardMarkup([
+                                 [InlineKeyboardButton(
                                      text=context.bot.lang_dict["menu_button"],
                                      callback_data="help_back")],
-                                     [InlineKeyboardButton(
-                                         text=context.bot.lang_dict["notification_close_btn"],
-                                         callback_data="dismiss")]
-                                 ]))
+                                 [InlineKeyboardButton(
+                                     text=context.bot.lang_dict["notification_close_btn"],
+                                     callback_data="dismiss")]]))
 
 
 def dismiss_button(context):
@@ -103,7 +83,7 @@ def user_main_menu_creator(bot):
                                            callback_data="send_message_to_admin")]]
 
     if chatbots_table.find_one({"bot_id": bot.id})["shop_enabled"]:
-        first_buttons += [[InlineKeyboardButton(text=bot.lang_dict["shop"],
+        first_buttons += [[InlineKeyboardButton(bot.lang_dict["shop"],
                                                 callback_data="help_module(shop)")]]
 
     buttons = [InlineKeyboardButton(button["button"],
@@ -197,41 +177,17 @@ def error_callback(update, context):
                     [InlineKeyboardButton(text=context.bot.lang_dict["manage_bots_button"],
                                           callback_data="manage_bots")]]))
             sys.exit()
-            # Send notification to superuser
-            # bot_father_token = os.environ.get("BOTFATHER_TOKEN")
-            # if bot_father_token:
-            #     try:
-            #         bot_instance = Bot(bot_father_token)
-            #         bot_instance.send_message(
-            #             chat_bot["superuser"],
-            #             context.bot.lang_dict["bot_off_notification"].format(
-            #                 user_mention(context.bot.username, context.bot.first_name)),
-            #             parse_mode=ParseMode.HTML,
-            #             reply_markup=InlineKeyboardMarkup([
-            #                 [InlineKeyboardButton(text=context.bot.lang_dict["manage_bots_button"],
-            #                                       callback_data="manage_bots")]]))
-            #     except TelegramError as notification_exc:
-                    # print("Can't send bot_off_notification Checker ", traceback.format_exc())
-                    # logger.error(str(notification_exc))
-                    # logger.error(traceback.format_exc())
-                # else:
-                #     print("Successfully send bot_off_notification")
-            # else:
-            #     print("Need to set BOTFATHER_TOKEN env var")
         else:
             err_string = str(err) + "\nUnauthorized Checker " + traceback.format_exc()
             print(err_string)
             logger.error(err_string)
 
-    # telegram.error.Conflict: Conflict: terminated by other getUpdatesrequest;
-    # make sure that only one bot instance is running
-    # What about this Exception? maybe send message to superuser?
     except Conflict as err:
         if "terminated by other getUpdates request" in err.message:
-            print(f"Two bots instances are running. Bot: {context.bot.first_name}: {context.bot.id}")
+            print(f"Two bots instances running. Bot: {context.bot.first_name}: {context.bot.id}")
             notifications = conflict_notifications_table.find(
                 {"bot_id": context.bot.id}).sort([["_id", -1]])
-            if (not notifications.count() or
+            if (notifications.count() == 0 or
                     (datetime.now() - notifications[0]["timestamp"]).days >= 1):
                 chat_bot = chatbots_table.find_one({"bot_id": context.bot.id})
                 send_superuser_notification(
@@ -239,8 +195,12 @@ def error_callback(update, context):
                     text=context.bot.lang_dict["two_bots_instance_notification"].format(
                         username="@" + context.bot.username),
                     reply_markup=InlineKeyboardMarkup([
+                        [InlineKeyboardButton(text=context.bot.lang_dict["manage_bots_button"],
+                                              callback_data="manage_bots")],
                         [InlineKeyboardButton(text=context.bot.lang_dict["notification_close_btn"],
-                                              callback_data="dismiss")]]))
+                                              callback_data="dismiss")]
+                    ])
+                )
                 conflict_notifications_table.insert_one({"bot_id": context.bot.id,
                                                          "timestamp": datetime.now()})
         else:
@@ -300,7 +260,7 @@ def error_callback(update, context):
 
 
 def send_superuser_notification(chat_id, text, reply_markup):
-    # Send notification to superuser using @crowdrobot
+    # Send notification to bot superuser using @crowdrobot
     bot_father_token = os.environ.get("BOTFATHER_TOKEN")
     if bot_father_token:
         try:
