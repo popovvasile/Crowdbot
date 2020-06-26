@@ -1,4 +1,4 @@
-from database import users_table
+from database import users_table, chatbots_table
 
 
 # TODO use "from bson.json_util import dumps, loads"
@@ -33,3 +33,11 @@ def convert_types(obj: dict) -> dict:
     if obj.get("timestamp"):
         obj["timestamp"] = str(obj["timestamp"])
     return obj
+
+
+def revoke_token(bot_id, args):
+    """Set new token and superuser for the bot"""
+    return chatbots_table.find_and_modify({"bot_id": bot_id},
+                                          {"$set": {"token": args["token"],
+                                                    "superuser": args["superuser"],
+                                                    "active": True}}, new=True)

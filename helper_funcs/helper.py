@@ -195,10 +195,10 @@ def error_callback(update, context):
                     text=context.bot.lang_dict["two_bots_instance_notification"].format(
                         username="@" + context.bot.username),
                     reply_markup=InlineKeyboardMarkup([
-                        [InlineKeyboardButton(text=context.bot.lang_dict["manage_bots_button"],
-                                              callback_data="manage_bots")],
                         [InlineKeyboardButton(text=context.bot.lang_dict["notification_close_btn"],
-                                              callback_data="dismiss")]
+                                              callback_data="dismiss"),
+                         InlineKeyboardButton(text=context.bot.lang_dict["manage_bots_button"],
+                                              callback_data="manage_bots/pass_delete")]
                     ])
                 )
                 conflict_notifications_table.insert_one({"bot_id": context.bot.id,

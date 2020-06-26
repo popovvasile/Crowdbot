@@ -16,7 +16,7 @@ errors = {
 
 
 class BotNotFound(HTTPException):
-    code = 403
+    code = 404
     description = "Given bot_id not found"
 
 

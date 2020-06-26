@@ -3,7 +3,7 @@ from datetime import datetime
 import requests
 from flask_restful import Resource, marshal_with
 
-from rest_api.common import format_for_response
+from rest_api.common import format_for_response, revoke_token
 from rest_api.docs import response_doc, resp_doc, result_response
 from rest_api.errors import BotNotFound, InvalidToken
 from rest_api.parsers import access_parser
@@ -50,20 +50,17 @@ class CrowdRobot(Resource):
                 return resp_doc(ok=False,
                                 message="Bot exist and active",
                                 result=format_for_response(chat_bot)), 400
-            # Bot exist but not active - revoke token and superuser
             else:
-                # https://api.telegram.org/bot938818381:AAHgABp4Rr6qam68ZnL5adQQDwOjUNzxii8/getWebhookInfo
-                chat_bot = chatbots_table.find_and_modify(
-                    {"bot_id": telegram_check["result"]["id"]},
-                    {"$set": {"token": args["token"],
-                              "superuser": args["superuser"],
-                              "active": True}}, new=True)
-                return resp_doc(ok=True,
-                                message="Token revoked successfully",
-                                result=format_for_response(chat_bot)), 200
+                # Bot exist but not active - revoke token and superuser
+                chat_bot = revoke_token(telegram_check["result"]["id"], args)
+                if chat_bot:
+                    return resp_doc(ok=True,
+                                    message="Token revoked successfully",
+                                    result=format_for_response(chat_bot)), 200
+                else:
+                    raise BotNotFound
         # Token valid and bot doesn't exist in db - create and save new bot to database.
         else:
-            # https://api.telegram.org/bot938818381:AAHgABp4Rr6qam68ZnL5adQQDwOjUNzxii8/getWebhookInfo
             chat_bot = {
                 "token": args["token"],
                 "lang": args["lang"],
@@ -154,12 +151,11 @@ class RevokeToken(Resource):
                             result={"username": telegram_check["result"]["username"],
                                     "name": telegram_check["result"]["first_name"]}), 403
         else:
-            # https://api.telegram.org/bot938818381:AAHgABp4Rr6qam68ZnL5adQQDwOjUNzxii8/getWebhookInfo
-            chat_bot = chatbots_table.find_and_modify(
-                {"bot_id": telegram_check["result"]["id"]},
-                {"$set": {"token": args["token"],
-                          "superuser": args["superuser"],
-                          "active": True}}, new=True)
-            return resp_doc(ok=True,
-                            message="Token revoked successfully",
-                            result=format_for_response(chat_bot)), 200
+            # Revoke token and superuser
+            chat_bot = revoke_token(telegram_check["result"]["id"], args)
+            if chat_bot:
+                return resp_doc(ok=True,
+                                message="Token revoked successfully",
+                                result=format_for_response(chat_bot)), 200
+            else:
+                raise BotNotFound
