@@ -15,7 +15,7 @@ class Order(object):
         order = get_obj(orders_table, obj)
         self.context = context
         self._id = order.get("_id")
-        self.article = str(self._id)
+        self.article = order.get("article")
         self.status = order.get("status")  # True or False
         self.bot_id = order.get("bot_id") or context.bot.id
         self.user_id = order.get("user_id")
@@ -41,7 +41,7 @@ class Order(object):
             order = get_obj(orders_table, self._id)
         self.context = context or self.context
         self._id = order.get("_id")
-        self.article = str(self._id) if self._id else None
+        self.article = order.get("article")
         self.status = order.get("status")  # True or False
         self.bot_id = order.get("bot_id") or context.bot.id
         self.user_id = order.get("user_id")

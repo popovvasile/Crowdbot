@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 import html
+import uuid
 
 import phonenumbers as phonenumbers
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ParseMode
@@ -252,6 +253,7 @@ class PurchaseBot(object):
         inserted_id = orders_table.insert_one(
             {**context.user_data["order"],
              **{"status": False,
+                "article": str(uuid.uuid4()).upper()[:6],
                 "bot_id": context.bot.id,
                 "user_id": update.effective_user.id,
                 "creation_timestamp": datetime.datetime.now(),
