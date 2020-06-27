@@ -283,7 +283,7 @@ def send_request_content_dict(update, context, chat_id, token, content_dict):
                                         # the poll should not be deleted
                                         from_chat_id=update.effective_chat.id,
                                         message_id=poll.message_id)
-    except RequestException:
+    except (RequestException, TelegramError):
         pass
 
 
@@ -333,7 +333,10 @@ def add_to_content(update, context):
     elif update.message.poll:  # todo idea --- double forward- first to our crowdbot account and
         # from there to the users
         poll_file = update.message
-        content_dict = {"poll_file": poll_file}
+        content_dict = {"poll_file": poll_file.id,
+                        # "mes""poll.message_id",
+                        # "poll.id"
+        }
 
     if content_dict:
         context.user_data["content"].append(content_dict)
