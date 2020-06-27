@@ -655,35 +655,40 @@ class SubscriberOpenMessage(object):
         if "open_delete" not in context.user_data:
             context.user_data["open_delete"] = list()
         # Send user message content
-        context.user_data["open_delete"].append(
-            context.bot.send_message(chat_id=update.effective_chat.id,
-                                     text=context.bot.lang_dict["your_message_title"],
-                                     parse_mode=ParseMode.HTML))
         send_deleted_message_content(context,
                                      chat_id=update.effective_user.id,
                                      content=message["content"],
                                      delete_key_name="open_delete",
                                      update=update)
-        # Send admin answer content.
-        # User can open message only if the answer exist
         context.user_data["open_delete"].append(
             context.bot.send_message(chat_id=update.effective_chat.id,
-                                     text=context.bot.lang_dict["answer_title"],
+                                     text=context.bot.lang_dict["your_message_title"],
                                      parse_mode=ParseMode.HTML))
+        # Send admin answer content. User can open message only if the answer exist
         send_deleted_message_content(context,
                                      chat_id=update.effective_user.id,
                                      content=message["answer_content"],
                                      delete_key_name="open_delete",
                                      update=update)
-        # Back button
-        reply_markup = InlineKeyboardMarkup([
-            [InlineKeyboardButton(
-                text=context.bot.lang_dict["hide_btn"],
-                callback_data="hide_answer")]])
         context.user_data["open_delete"].append(
             context.bot.send_message(chat_id=update.effective_chat.id,
-                                     text=context.bot.lang_dict["back_text"],
-                                     reply_markup=reply_markup))
+                                     text=context.bot.lang_dict["answer_title"],
+                                     parse_mode=ParseMode.HTML,
+                                     reply_markup=InlineKeyboardMarkup([
+                                         [InlineKeyboardButton(
+                                             text=context.bot.lang_dict["notification_close_btn"],
+                                             callback_data="hide_answer")]])
+                                     ))
+        # Back button
+        # reply_markup = InlineKeyboardMarkup([
+        #     [InlineKeyboardButton(
+        #         text=context.bot.lang_dict["notification_close_btn"],
+        #         callback_data="hide_answer")]])
+        # context.user_data["open_delete"].append(
+        #     context.bot.send_message(chat_id=update.effective_chat.id,
+        #                              text=context.bot.lang_dict["cancel_text"],
+        #                              reply_markup=reply_markup))
+        update.callback_query.answer()
         return ConversationHandler.END
 
     def hide_answer(self, update, context):

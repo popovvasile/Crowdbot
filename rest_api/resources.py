@@ -10,7 +10,7 @@ from rest_api.parsers import access_parser
 from database import (chatbots_table, orders_table, shop_customers_contacts_table,
                       shop_categories_table, categories_table, carts_table, products_table,
                       users_messages_to_admin_table, user_mode_table, users_table,
-                      admin_passwords_table, custom_buttons_table)
+                      admin_passwords_table, custom_buttons_table, conflict_notifications_table)
 
 
 class CrowdRobot(Resource):
@@ -92,6 +92,7 @@ class CrowdRobot(Resource):
         users_table.delete_many({"bot_id": args["bot_id"]})
         user_mode_table.delete_many({"bot_id": args["bot_id"]})
         users_messages_to_admin_table.delete_many({"bot_id": args["bot_id"]})
+        conflict_notifications_table.delete_many({"bot_id": args["bot_id"]})
         # Remove Shop
         products_table.delete_many({"bot_id": args["bot_id"]})
         carts_table.delete_many({"bot_id": args["bot_id"]})

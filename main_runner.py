@@ -24,7 +24,7 @@ from helper_funcs.helper import (help_button, button_handler, get_help, WelcomeB
 
 # SETTINGS
 from modules.settings.language_switch import LANG_MENU, SET_LANG
-from modules.settings.menu_description import EDIT_BOT_DESCRIPTION_HANDLER, EDIT_PICTURE_HANDLER
+from modules.settings.menu_description import EDIT_BOT_DESCRIPTION_HANDLER
 from modules.settings.button_manage import (
     BUTTON_ADD_HANDLER, DELETE_BUTTON_HANDLER, LINK_BUTTON_ADD_HANDLER,
     CREATE_BUTTON_CHOOSE, BUTTONS_MENU, ONE_BUTTON_MENU, BACK_TO_BUTTONS_MENU,
@@ -220,7 +220,6 @@ def main(token, lang):
     # TODO priority is very important!!!!!!!!!!!!!!!!!!!!
     dispatcher.add_handler(dismiss_handler)
     dispatcher.add_handler(EDIT_BOT_DESCRIPTION_HANDLER)
-    dispatcher.add_handler(EDIT_PICTURE_HANDLER)
 
     #  SHOP USER SIDE
     dispatcher.add_handler(EDIT_SHOP_HANDLER)

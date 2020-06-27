@@ -18,8 +18,7 @@ from modules.shop.user_side.online_payment import OnlinePayment
 from modules.shop.components.order import UserOrder, Product, AdminOrder
 
 
-ORDER_DESCRIPTION, ORDER_CONTACTS, ORDER_ADDRESS, CONFIRM_ORDER, \
-    ORDER_FINISH = range(5)
+ORDER_DESCRIPTION, ORDER_CONTACTS, ORDER_ADDRESS, CONFIRM_ORDER, ORDER_FINISH = range(5)
 
 
 class PurchaseBot(object):

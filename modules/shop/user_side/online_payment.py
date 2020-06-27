@@ -22,7 +22,7 @@ class OnlinePayment(object):
         if not shop:
             shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
         context.user_data["paid_order"] = order
-        title = context.bot.lang_dict["order_id"].format(str(order.id_))
+        title = context.bot.lang_dict["order_id"].format(str(order.article))
         description = "\n".join([
             "{}\nx{} {} {}\n".format(
                 item["product"]["name"],
