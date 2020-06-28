@@ -16,6 +16,7 @@ admin_passwords_table = db["admin_passwords"]
 users_table = db["users"]
 user_mode_table = db["user_mode"]
 users_messages_to_admin_table = db["users_messages_to_admin_bot"]
+conflict_notifications_table = db["conflict_notifications"]
 # Shop
 products_table = db["products"]
 carts_table = db["carts"]

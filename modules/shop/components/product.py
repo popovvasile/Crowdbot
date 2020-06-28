@@ -21,7 +21,7 @@ class Product(object):
         # Change _id attribute to id_
         self._id = product.get("_id")
         self.bot_id = context.bot.id
-        self.article = str(self._id) if self._id else uuid4()
+        self.article = product.get("article")
         self.price = product.get("price")
         self.description = product.get("description", "")
         self.name = product.get("name")
@@ -456,6 +456,7 @@ class Product(object):
     def create(self):
         products_table.insert_one({
             "bot_id": self.context.bot.id,
+            "article": str(uuid4()).upper()[:6],
             "price": self.price,
             "discount_price": self.discount_price,
             "description": self.description,

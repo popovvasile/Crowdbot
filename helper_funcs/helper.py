@@ -1,68 +1,49 @@
+import os
+import sys
 import re
 import html
+import traceback
 from datetime import datetime
 
-import sys
-from pickle import PicklingError
 from urllib3.exceptions import HTTPError
-
 from bson.objectid import ObjectId
-from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, LabeledPrice
+from pickle import PicklingError
+from telegram.utils.helpers import create_deep_linked_url, mention_html
+from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, LabeledPrice, Bot
 from telegram.ext import ConversationHandler
 from telegram.error import (BadRequest, TimedOut, NetworkError, TelegramError,
                             ChatMigrated, Unauthorized, Conflict)
 
+from logs import logger
 from helper_funcs.lang_strings.help_strings import help_strings, helpable_dict
-from helper_funcs.misc import paginate_modules, delete_messages, send_content_dict
+from helper_funcs.misc import paginate_modules, delete_messages, send_content_dict, user_mention
 from helper_funcs.auth import (if_admin, initiate_chat_id,
                                register_chat, register_admin)
 from database import (custom_buttons_table, users_table, chatbots_table,
-                      user_mode_table, products_table, groups_table)
-from logs import logger
+                      user_mode_table, products_table, groups_table, conflict_notifications_table)
 
 
 HELP_STRINGS = """
 {}
 """
-currency_keyboard = [[InlineKeyboardButton(text="USD",
-                     callback_data="currency_USD"),
-InlineKeyboardButton(text="RUB",
-                     callback_data="currency_RUB"),
-InlineKeyboardButton(text="EUR",
-                     callback_data="currency_EUR")],
-[InlineKeyboardButton(text="GBP",
-                     callback_data="currency_GBP"),
-InlineKeyboardButton(text="KZT",
-                     callback_data="currency_KZT"),
-InlineKeyboardButton(text="UAH",
-                     callback_data="currency_UAH")],
-[InlineKeyboardButton(text="RON",
-                     callback_data="currency_RON"),
-InlineKeyboardButton(text="PLN",
-                     callback_data="currency_PLN")]]
-
-
-# currency_keyboard = [["RUB", "USD", "EUR", "GBP"], ["KZT", "UAH", "RON", "PLN"]]
 
 
 def return_to_menu(update, context):
     context.bot.send_message(update.effective_message.chat.id,
                              context.bot.lang_dict["return_to_menu"],
-                             reply_markup=InlineKeyboardMarkup(
-                                 [[InlineKeyboardButton(
+                             reply_markup=InlineKeyboardMarkup([
+                                 [InlineKeyboardButton(
                                      text=context.bot.lang_dict["menu_button"],
                                      callback_data="help_back")],
-                                     [InlineKeyboardButton(
-                                         text=context.bot.lang_dict["notification_close_btn"],
-                                         callback_data="dismiss")]
-                                 ]))
+                                 [InlineKeyboardButton(
+                                     text=context.bot.lang_dict["notification_close_btn"],
+                                     callback_data="dismiss")]]))
 
 
 def dismiss_button(context):
-    dismissbutton = InlineKeyboardMarkup(
-        [[InlineKeyboardButton(text=context.bot.lang_dict["notification_close_btn"],
-                               callback_data="dismiss")]])
-    return dismissbutton
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton(text=context.bot.lang_dict["notification_close_btn"],
+                              callback_data="dismiss")]])
 
 
 # do not async
@@ -102,7 +83,7 @@ def user_main_menu_creator(bot):
                                            callback_data="send_message_to_admin")]]
 
     if chatbots_table.find_one({"bot_id": bot.id})["shop_enabled"]:
-        first_buttons += [[InlineKeyboardButton(text=bot.lang_dict["shop"],
+        first_buttons += [[InlineKeyboardButton(bot.lang_dict["shop"],
                                                 callback_data="help_module(shop)")]]
 
     buttons = [InlineKeyboardButton(button["button"],
@@ -179,63 +160,123 @@ def check_provider_token(currency, provider_token, update, context):
     return (True, "All good")
 
 
-# for test purposes
 def error_callback(update, context):
     delete_messages(update, context)
-    # print(context)
-    # print(context.user_data)
     try:
         raise context.error
+    except Unauthorized as err:
+        if err.message == "Unauthorized":
+            print(f"Token revoked or bot deleted. Bot: {context.bot.first_name}: {context.bot.id}")
+            chat_bot = chatbots_table.find_and_modify({"bot_id": context.bot.id},
+                                                      {"$set": {"active": False}}, new=True)
+            send_superuser_notification(
+                chat_id=chat_bot["superuser"],
+                text=context.bot.lang_dict["bot_off_notification"].format(
+                    user_mention(context.bot.username, context.bot.first_name)),
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton(text=context.bot.lang_dict["manage_bots_button"],
+                                          callback_data="manage_bots")]]))
+            sys.exit()
+        else:
+            err_string = str(err) + "\nUnauthorized Checker " + traceback.format_exc()
+            print(err_string)
+            logger.error(err_string)
 
-    except Unauthorized:
-        print("Token revoked or bot deleted")
-        chatbots_table.update({"bot_id": context.bot.id},
-                              {"$set": {"active": False,
-                                        # "deactivation_time": datetime.now()
-                                        }})
-        sys.exit()
-
-    # telegram.error.Conflict: Conflict: terminated by other getUpdatesrequest;
-    # make sure that only one bot instance is running
-    # What about this Exception? maybe send message to superuser?
-    # except Conflict as err:
-    #     print("Conflict", err)
+    except Conflict as err:
+        if "terminated by other getUpdates request" in err.message:
+            print(f"Two bots instances running. Bot: {context.bot.first_name}: {context.bot.id}")
+            notifications = conflict_notifications_table.find(
+                {"bot_id": context.bot.id}).sort([["_id", -1]])
+            if (notifications.count() == 0 or
+                    (datetime.now() - notifications[0]["timestamp"]).days >= 1):
+                chat_bot = chatbots_table.find_one({"bot_id": context.bot.id})
+                send_superuser_notification(
+                    chat_id=chat_bot["superuser"],
+                    text=context.bot.lang_dict["two_bots_instance_notification"].format(
+                        username="@" + context.bot.username),
+                    reply_markup=InlineKeyboardMarkup([
+                        [InlineKeyboardButton(text=context.bot.lang_dict["notification_close_btn"],
+                                              callback_data="dismiss"),
+                         InlineKeyboardButton(text=context.bot.lang_dict["manage_bots_button"],
+                                              callback_data="manage_bots/pass_delete")]
+                    ])
+                )
+                conflict_notifications_table.insert_one({"bot_id": context.bot.id,
+                                                         "timestamp": datetime.now()})
+        else:
+            err_string = str(err) + "\nConflict Checker " + traceback.format_exc()
+            print(err_string)
+            logger.error(err_string)
 
     except ConnectionError as err:
-        print("ConnectionError")
-        print(err)
+        err_string = str(err) + "\nConnectionError Checker " + traceback.format_exc()
+        print(err_string)
+        logger.error(err_string)
 
     except TimedOut as err:
-        print("TimedOut")
-        print(err)
+        err_string = str(err) + "\nTimedOut Checker " + traceback.format_exc()
+        print(err_string)
+        logger.error(err_string)
 
-    except PicklingError:
-        print("PicklingError")
+    except PicklingError as err:
+        err_string = str(err) + "\nPicklingError Checker " + traceback.format_exc()
+        print(err_string)
+        logger.error(err_string)
 
     # handle slow connection problems
-    except (HTTPError, BadRequest):
-        print("HTTPError")
+    except (HTTPError, BadRequest) as err:
+        err_string = str(err) + "\nHTTPError, BadRequest Checker " + traceback.format_exc()
+        print(err_string)
+        logger.error(err_string)
 
-    except NetworkError:
-        print("Neworkerror")
+    except NetworkError as err:
+        err_string = str(err) + "\nNetworkError Checker " + traceback.format_exc()
+        print(err_string)
+        logger.error(err_string)
 
     # handle other connection problems
-    except ChatMigrated as e:
+    except ChatMigrated as err:
         # the chat_id of a group has changed, use e.new_chat_id instead
-        print("ChatMigrated")
+        err_string = str(err) + "\nChatMigrated Checker " + traceback.format_exc()
+        print(err_string)
+        logger.error(err_string)
 
-    except TelegramError:
-        print("TeelgramError")
+    except TelegramError as err:
+        err_string = str(err) + "\nTelegramError Checker " + traceback.format_exc()
+        print(err_string)
+        logger.error(err_string)
 
-    except Exception as e:
-        logger.error(e.__repr__())
-        context.bot.send_message(update.effective_message.chat.id,
+    except Exception as err:
+        err_string = str(err) + "\nException Checker " + traceback.format_exc()
+        print(err_string)
+        logger.error(err_string)
+        context.bot.send_message(update.effective_chat.id,
                                  context.bot.lang_dict["error_occurred"],
                                  reply_markup=InlineKeyboardMarkup(
                                      [[InlineKeyboardButton(
                                          text=context.bot.lang_dict["back_button"],
                                          callback_data="help_back")]]))
         return ConversationHandler.END
+
+
+def send_superuser_notification(chat_id, text, reply_markup):
+    # Send notification to bot superuser using @crowdrobot
+    bot_father_token = os.environ.get("BOTFATHER_TOKEN")
+    if bot_father_token:
+        try:
+            bot_instance = Bot(bot_father_token)
+            bot_instance.send_message(chat_id=chat_id,
+                                      text=text,
+                                      parse_mode=ParseMode.HTML,
+                                      reply_markup=reply_markup)
+        except TelegramError as notification_exc:
+            print("Failed notification to superuser", traceback.format_exc())
+            logger.error(str(notification_exc))
+            logger.error(traceback.format_exc())
+        else:
+            print("Successfully notification to superuser")
+    else:
+        print("Failed notification to superuser. Need to set BOTFATHER_TOKEN env var")
 
 
 def button_handler(update, context):
