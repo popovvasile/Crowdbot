@@ -1,7 +1,7 @@
 import datetime
 # Bot
 from mongoengine import Document, StringField, DateTimeField, IntField, EmbeddedDocument, \
-    BooleanField
+    BooleanField, ReferenceField
 
 
 class Shop(EmbeddedDocument):
@@ -23,6 +23,7 @@ class Chatbots(Document):
     username = StringField(required=True, max_length=200)
     shop_enabled = BooleanField(default=False)
     creation_timestamp = DateTimeField(default=datetime.datetime.now)
+    shop = ReferenceField(Shop)
 
 
 class AdminPasswords(Document):
