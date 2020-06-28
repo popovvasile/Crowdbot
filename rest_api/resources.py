@@ -8,7 +8,7 @@ from rest_api.docs import response_doc, resp_doc, result_response
 from rest_api.errors import BotNotFound, InvalidToken
 from rest_api.parsers import access_parser
 from database import (chatbots_table, orders_table, shop_customers_contacts_table,
-                      shop_categories_table, categories_table, carts_table, products_table,
+                      categories_table, carts_table, products_table,
                       users_messages_to_admin_table, user_mode_table, users_table,
                       admin_passwords_table, custom_buttons_table, conflict_notifications_table)
 
@@ -97,7 +97,6 @@ class CrowdRobot(Resource):
         products_table.delete_many({"bot_id": args["bot_id"]})
         carts_table.delete_many({"bot_id": args["bot_id"]})
         categories_table.delete_many({"bot_id": args["bot_id"]})
-        shop_categories_table.delete_many({"bot_id": args["bot_id"]})
         shop_customers_contacts_table.delete_many({"bot_id": args["bot_id"]})
         orders_table.delete_many({"bot_id": args["bot_id"]})
         return resp_doc(ok=True, message="Bot deleted successfully"), 200
