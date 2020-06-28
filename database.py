@@ -20,7 +20,6 @@ users_messages_to_admin_table = db["users_messages_to_admin_bot"]
 products_table = db["products"]
 carts_table = db["carts"]
 categories_table = db["categories"]
-shop_categories_table = db["shop_categories"]
 shop_customers_contacts_table = db["customers_contacts"]
 orders_table = db["orders"]
 # Not used for now
