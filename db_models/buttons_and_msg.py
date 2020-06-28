@@ -13,7 +13,6 @@ class CustomButtons(Document):
     lower_button = StringField(required=True, max_length=200)
     content = ListField(ReferenceField(Content))
     link_button = BooleanField(default=False)
-    published = DateTimeField(default=datetime.datetime.now)
 
 
 class UsersMessagesToAdmin(Document):

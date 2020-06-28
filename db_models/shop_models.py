@@ -62,8 +62,6 @@ class CartProduct(EmbeddedDocument):
 class Carts(Document):
     bot_id = IntField(required=True)
     user_id = IntField(required=True)
-    title = StringField(required=True, max_length=200)
-    published = DateTimeField(default=datetime.datetime.now)
     products = ListField(ReferenceField(CartProduct))
 
 
@@ -76,7 +74,5 @@ class PhoneNumber(EmbeddedDocument):
 
 
 class CustomersContacts(Document):
-    title = StringField(required=True, max_length=200)
-    published = DateTimeField(default=datetime.datetime.now)
     addresses = ListField(ReferenceField(Address))
     phone_numbers = ListField(ReferenceField(PhoneNumber))
