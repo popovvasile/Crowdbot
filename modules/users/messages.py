@@ -18,7 +18,8 @@ from helper_funcs.misc import delete_messages, update_user_fields, get_promise_m
 from helper_funcs.pagination import Pagination
 from logs import logger
 from modules.users.users import UserTemplate
-from modules.users.message_helper import (MessageTemplate,send_deleted_message_content, AnswerToMessage, SenderHelper, send_request_content_dict)
+from modules.users.message_helper import (MessageTemplate,send_deleted_message_content,
+                                          AnswerToMessage, SenderHelper, send_request_content_dict)
 from database import users_messages_to_admin_table, users_table, chatbots_table
 
 
