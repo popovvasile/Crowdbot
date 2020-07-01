@@ -169,13 +169,17 @@ def error_callback(update, context):
             print(f"Token revoked or bot deleted. Bot: {context.bot.first_name}: {context.bot.id}")
             chat_bot = chatbots_table.find_and_modify({"bot_id": context.bot.id},
                                                       {"$set": {"active": False}}, new=True)
+            # Send notification to superuser
+            reply_markup = InlineKeyboardMarkup([
+                [InlineKeyboardButton(
+                    text=context.bot.lang_dict["more_info"],
+                    callback_data="notification_bot_menu/" + str(context.bot.id))]])
+
             send_superuser_notification(
                 chat_id=chat_bot["superuser"],
                 text=context.bot.lang_dict["bot_off_notification"].format(
                     user_mention(context.bot.username, context.bot.first_name)),
-                reply_markup=InlineKeyboardMarkup([
-                    [InlineKeyboardButton(text=context.bot.lang_dict["manage_bots_button"],
-                                          callback_data="manage_bots")]]))
+                reply_markup=reply_markup)
             sys.exit()
         else:
             err_string = str(err) + "\nUnauthorized Checker " + traceback.format_exc()
@@ -190,17 +194,15 @@ def error_callback(update, context):
             if (notifications.count() == 0 or
                     (datetime.now() - notifications[0]["timestamp"]).days >= 1):
                 chat_bot = chatbots_table.find_one({"bot_id": context.bot.id})
+                # Send notification to superuser
+                reply_markup = InlineKeyboardMarkup([
+                    [InlineKeyboardButton(text=context.bot.lang_dict["notification_close_btn"],
+                                          callback_data="dismiss")]])
                 send_superuser_notification(
                     chat_id=chat_bot["superuser"],
                     text=context.bot.lang_dict["two_bots_instance_notification"].format(
                         username="@" + context.bot.username),
-                    reply_markup=InlineKeyboardMarkup([
-                        [InlineKeyboardButton(text=context.bot.lang_dict["notification_close_btn"],
-                                              callback_data="dismiss"),
-                         InlineKeyboardButton(text=context.bot.lang_dict["manage_bots_button"],
-                                              callback_data="manage_bots/pass_delete")]
-                    ])
-                )
+                    reply_markup=reply_markup)
                 conflict_notifications_table.insert_one({"bot_id": context.bot.id,
                                                          "timestamp": datetime.now()})
         else:
@@ -270,9 +272,8 @@ def send_superuser_notification(chat_id, text, reply_markup):
                                       parse_mode=ParseMode.HTML,
                                       reply_markup=reply_markup)
         except TelegramError as notification_exc:
-            print("Failed notification to superuser", traceback.format_exc())
+            print("Failed notification to superuser")
             logger.error(str(notification_exc))
-            logger.error(traceback.format_exc())
         else:
             print("Successfully notification to superuser")
     else:
@@ -382,7 +383,9 @@ def help_button(update, context):
                                       callback_data="help_back")]
             )
             query.message.reply_text(text=text,
-                                     reply_markup=InlineKeyboardMarkup(pairs))
+                                     reply_markup=InlineKeyboardMarkup(pairs),
+                                     parse_mode=ParseMode.HTML,
+                                     disable_web_page_preview=True)
 
         elif prev_match:
             query.message.reply_text(HELP_STRINGS.format(welcome_message),

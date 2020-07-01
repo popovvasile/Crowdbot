@@ -21,10 +21,17 @@
         "continue_btn": "➡ Сontinue️",
         "users_help_admin": "Here is the list of your users and messages.",
         "return_to_menu": "You can enter the bot menu by clicking the button.",
-        "bot_off_notification": "\uD83D\uDD34 {} перестал работать.\nДля большей информации нажмите\n\uD83D\uDCD6 My bots.\n",
-        "manage_bots_button": "\uD83D\uDCD6 My bots",
-        "two_bots_instance_notification": "Похоже что {username} запущен в нескольких местах.\nУдалите чат бота с других мест или же измените токен бота.\nЧто бы изменить токен бота:\n1️⃣ Зайдите на @BotFather.\n2️⃣ Отправь команду /revoke.\n3️⃣ Выбери {username} из списка ботов, в полученном сообщении находится новый токен для бота.\n4️⃣ В @crowdrobot Нажми \uD83D\uDCD6 My bots и выбери {username}\n5️⃣ Нажми ♻️ Обновить токен и перешли сообщение из пункта 3️⃣",
+        "bot_off_notification": "\uD83D\uDD34 {} приостановил работу.",
+        "more_info": "\uD83D\uDCD6 Узнать подробнее",
+        "two_bots_instance_notification": "<strong>{username} запущен на нескольких платформах.</strong>\n\nИзмени токен, чтобы продолжить корректную работу магазина:\n1️⃣ Зайди в @BotFather.\n2️⃣ Отправь команду /revoke.\n3️⃣ Выбери {username}\n\nЕсли ты запускал магазин только на @crowdrobot и видишь это сообщение, значит твой токен украли.",
 
+
+        "----------------------------------------------------------------GUIDES": "----------------------------------------------------------------",
+        "guide_store_design": "<a href='https://telegra.ph/Store-design-06-28'>\uD83D\uDC49 Store design</a>",
+        "guide_user_mode": "<a href='https://telegra.ph/User-mode-06-28'>\uD83D\uDC49 User mode</a>",
+        "guide_users_and_feedback": "<a href='https://telegra.ph/Users-and-Feedback-06-28'>\uD83D\uDC49 Users and Feedback</a>",
+        "guide_store_management": "<a href='https://telegra.ph/Store-management-06-28'>\uD83D\uDC49 Store management</a>",
+        "guide_post_title": "\n\nКонтакт для вопросов и предложений:\n@crowdrobot_support",
 
         "----------------------------------------------------------------SHOP_ADMIN_SIDE": "----------------------------------------------------------------",
         "shop": "\uD83D\uDECD Shop",
@@ -183,9 +190,11 @@
         "short_address": "Address is so short.\n",
         "add_order_comment": "Add a small comment or info to your order, or press Continue ➡.",
         "order_success_online": "\nYou can pay the order ⬆️",
-        "paid_status_true": "\n                 \uD83D\uDCB0 Paid",
+        "paid_status_true": "\n                \uD83D\uDCB0 Paid",
         "paid_status_false": "\n                 ⭕️ Not paid",
         "status_field": "<code>Status:</code> {}",
+        "delivery_status": "В пути",
+        "self_delivery_status": "Ожидает",
         "order_id": "Order ID: {}",
         "pay_button": "\uD83D\uDCB0 Pay",
         "user_orders_title": "<code>Total orders:</code> {}",
@@ -335,7 +344,7 @@
         "message_temp": "{}\n{}\n\n<b>Content:</b>\n{}",
         "no_messages_blink": "There are no messages from users",
         "polls_str_9": "My messages.",
-        "send_message_1": "✍️ Send Message ",
+        "send_message_1": "✍️ Message ",
         "send_message_3": "Write a message to users\nYou can send as well files of all kinds, video or audio messages",
         "send_message_4": "Write a new message or press ✅ Done.",
         "send_message_6": "\uD83D\uDE09 You didn't receive any messages yet.",
@@ -541,9 +550,17 @@
         "continue_btn": "➡️ Продолжить",
         "users_help_admin": "Тут сообщения и список пользователей.",
         "return_to_menu": "Ты можешь вернуться к меню нажав на кнопку.",
-        "bot_off_notification": "\uD83D\uDD34 {} перестал работать.\nДля большей информации нажмите\n\uD83D\uDCD6 Мои боты.\n",
-        "manage_bots_button": "\uD83D\uDCD6 Мои боты",
-        "two_bots_instance_notification": "Похоже что {username} запущен в нескольких местах.\nУдалите чат бота с других мест или же измените токен бота.\nЧто бы изменить токен бота:\n1️⃣ Зайдите на @BotFather.\n2️⃣ Отправь команду /revoke.\n3️⃣ Выбери {username} из списка ботов, в полученном сообщении находится новый токен для бота.\n4️⃣ В @crowdrobot Нажми \uD83D\uDCD6 My bots и выбери {username}\n5️⃣ Нажми ♻️ Обновить токен и перешли сообщение из пункта 3️⃣",
+        "bot_off_notification": "\uD83D\uDD34 {} приостановил работу.",
+        "more_info": "\uD83D\uDCD6 Узнать подробнее",
+        "two_bots_instance_notification": "<strong>{username} запущен на нескольких платформах.</strong>\n\nИзмени токен, чтобы продолжить корректную работу:\n1️⃣ Зайди в @BotFather.\n2️⃣ Отправь команду /revoke.\n3️⃣ Выбери {username}\n\nЕсли ты запускал магазин только на @crowdrobot и видишь это сообщение, значит твой токен украли.",
+
+
+        "----------------------------------------------------------------GUIDES": "----------------------------------------------------------------",
+        "guide_store_design": "<a href='https://tgraph.io/Oformlenie-magazina-06-14'>\uD83D\uDC49 Оформление магазина</a>",
+        "guide_user_mode": "<a href='https://tgraph.io/Rezhim-polzovatelya-06-14'>\uD83D\uDC49 Режим пользователя</a>",
+        "guide_users_and_feedback": "<a href='https://tgraph.io/Polzovateli-i-obratnaya-svyaz-06-14'>\uD83D\uDC49 Пользователи и обратная связь</a>",
+        "guide_store_management": "<a href='https://tgraph.io/Upravlenie-magazinom-06-14'>\uD83D\uDC49 Управление магазином</a>",
+        "guide_post_title": "\n\nКонтакт для вопросов и предложений:\n@crowdrobot_support",
 
 
         "----------------------------------------------------------------SHOP_ADMIN_SIDE": "----------------------------------------------------------------",
@@ -703,9 +720,11 @@
         "short_address": "Aдрес слишком короткий.\n",
         "add_order_comment": "Добавь комментарий к заказу или продолжай.",
         "order_success_online": "\nВы можете оплатить заказ ⬆️",
-        "paid_status_true": "\n                 \uD83D\uDCB0 Оплачен",
+        "paid_status_true": "\n                \uD83D\uDCB0 Оплачен",
         "paid_status_false": "\n                 ⭕️ Не оплачен",
         "status_field": "<code>Status:</code> {}",
+        "delivery_status": "В пути",
+        "self_delivery_status": "Ожидает",
         "order_id": "ID заказа: {}",
         "pay_button": "\uD83D\uDCB0 Оплатить",
         "user_orders_title": "<code>Всего заказов:</code> {}",
@@ -1058,9 +1077,17 @@
         "continue_btn": "➡ Weiter",
         "users_help_admin": "Hier ist die Liste von deinen Users und Nachrichten.",
         "return_to_menu": "Druecken Sie die Taste, um das Botmenue zu oeffnen.",
-        "bot_off_notification": "\uD83D\uDD34 {} перестал работать.\nДля большей информации нажмите\n\uD83D\uDCD6 Мои боты.\n",
-        "manage_bots_button": "🗑 Bot loeschen",
-        "two_bots_instance_notification": "Похоже что {username} запущен в нескольких местах.\nУдалите чат бота с других мест или же измените токен бота.\nЧто бы изменить токен бота:\n1️⃣ Зайдите на @BotFather.\n2️⃣ Отправь команду /revoke.\n3️⃣ Выбери {username} из списка ботов, в полученном сообщении находится новый токен для бота.\n4️⃣ В @crowdrobot Нажми \uD83D\uDCD6 My bots и выбери {username}\n5️⃣ Нажми ♻️ Обновить токен и перешли сообщение из пункта 3️⃣",
+        "bot_off_notification": "\uD83D\uDD34 {} приостановил работу.",
+        "more_info": "\uD83D\uDCD6 Узнать подробнее",
+        "two_bots_instance_notification": "<strong>{username} запущен на нескольких платформах.</strong>\n\nИзмени токен, чтобы продолжить корректную работу:\n1️⃣ Зайди в @BotFather.\n2️⃣ Отправь команду /revoke.\n3️⃣ Выбери {username}\n\nЕсли ты запускал магазин только на @crowdrobot и видишь это сообщение, значит твой токен украли.",
+
+
+        "----------------------------------------------------------------GUIDES": "----------------------------------------------------------------",
+        "guide_store_design": "<a href='https://telegra.ph/Design-Ihres-Shops-06-22'>\uD83D\uDC49 Design Ihres Shops</a>",
+        "guide_user_mode": "<a href='https://telegra.ph/Benutzermodus-06-22'>\uD83D\uDC49 Benutzermodus</a>",
+        "guide_users_and_feedback": "<a href='https://telegra.ph/Benutzer-und-Feedback-06-22'>\uD83D\uDC49 Benutzer und Feedback</a>",
+        "guide_store_management": "<a href='https://telegra.ph/Gesch%C3%A4ftsleitung-06-22#Inhalt'>\uD83D\uDC49 Geschäftsleitung</a>",
+        "guide_post_title": "\n\nКонтакт для вопросов и предложений:\n@crowdrobot_support",
 
 
         "----------------------------------------------------------------SHOP_ADMIN_SIDE": "----------------------------------------------------------------",
@@ -1218,9 +1245,11 @@
         "short_address": "Addresse ist zu kurz.\n",
         "add_order_comment": "Fuegen Sie Ihrer Bestellung einen kleinen Kommentar oder eine Info hinzu oder klicken Sie auf Weiter ➡.",
         "order_success_online": "\nSie koennen die Bestellung bezahlen ⬆️",
-        "paid_status_true": "\n                 \uD83D\uDCB0 Bezahlt",
+        "paid_status_true": "\n                \uD83D\uDCB0 Bezahlt",
         "paid_status_false": "\n                 ⭕️ Nicht bezahlt",
         "status_field": "<code>Status:</code> {}",
+        "delivery_status": "В пути",
+        "self_delivery_status": "Ожидает",
         "order_id": "Bestellung ID: {}",
         "pay_button": "\uD83D\uDCB0 Bezahlen",
         "user_orders_title": "<code>Gesamtbestellung:</code> {}",
@@ -1365,7 +1394,7 @@
         "message_temp": "{}\n{}\n\n<b>Inhalt:</b>\n{}",
         "no_messages_blink": "Es gibt keine Nachrichten von Benutzern",
         "polls_str_9": "Meine Nachrichten.",
-        "send_message_1": "✍️️ Nachricht senden ",
+        "send_message_1": "✍️️ Nachricht",
         "send_message_3": "Schreiben Sie eine Nachricht an Benutzer\nSie koennen auch Dateien aller Art, Video- oder Audio-Nachrichten senden",
         "send_message_4": "Schreiben Sie eine neue Nachricht oder druecken Sie ✅ Fertig.",
         "send_message_6": "\uD83D\uDE09 Sie haben noch keine Nachrichten erhalten.",
@@ -1571,8 +1600,9 @@
         "return_to_menu": "Ти можеш повернутися до меню натиснувши на кнопку.",
 
 
-        "bot_off_notification": "\uD83D\uDD34 {} перестал работать.\nДля большей информации нажмите\n\uD83D\uDCD6 Мои боты.\n",
-        "manage_bots_button": "\uD83D\uDCD6 Мои боты",
-        "two_bots_instance_notification": "Похоже что {username} запущен в нескольких местах.\nУдалите чат бота с других мест или же измените токен бота.\nЧто бы изменить токен бота:\n1️⃣ Зайдите на @BotFather.\n2️⃣ Отправь команду /revoke.\n3️⃣ Выбери {username} из списка ботов, в полученном сообщении находится новый токен для бота.\n4️⃣ В @crowdrobot Нажми \uD83D\uDCD6 My bots и выбери {username}\n5️⃣ Нажми ♻️ Обновить токен и перешли сообщение из пункта 3️⃣"
+        "bot_off_notification": "\uD83D\uDD34 {} приостановил работу.",
+        "more_info": "\uD83D\uDCD6 Узнать подробнее",
+        "two_bots_instance_notification": "<strong>{username} запущен на нескольких платформах.</strong>\n\nИзмени токен, чтобы продолжить корректную работу:\n1️⃣ Зайди в @BotFather.\n2️⃣ Отправь команду /revoke.\n3️⃣ Выбери {username}\n\nЕсли ты запускал магазин только на @crowdrobot и видишь это сообщение, значит твой токен украли."
+
     }
 }

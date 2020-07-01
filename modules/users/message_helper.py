@@ -333,7 +333,7 @@ def add_to_content(update, context):
     elif update.message.poll:  # todo idea --- double forward- first to our crowdbot account and
         # from there to the users
         poll_file = update.message
-        content_dict = {"poll_file": poll_file.id,
+        content_dict = {"poll_file": poll_file,
                         # "mes""poll.message_id",
                         # "poll.id"
         }

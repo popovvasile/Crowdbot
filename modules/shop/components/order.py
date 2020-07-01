@@ -166,7 +166,7 @@ class AdminOrder(Order):
         if self.in_trash:
             string = self.context.bot.lang_dict["order_status_canceled"]
             if self.paid:
-                string += "\n                 ♻️ " + str(self.total_price) + " " + self.currency
+                string += "\n                ♻️ " + str(self.total_price) + " " + self.currency
         elif self.status:
             string = self.context.bot.lang_dict["shop_admin_order_status_true"]
         else:
@@ -259,11 +259,14 @@ class UserOrder(Order):
         if self.in_trash:
             string = self.context.bot.lang_dict["order_status_canceled"]
             if self.paid:
-                string += "\n                 ♻️ " + str(self.total_price) + " " + self.currency
+                string += "\n                ♻️ " + str(self.total_price) + " " + self.currency
         elif self.status:
             string = self.context.bot.lang_dict["shop_admin_order_status_true"]
         else:
-            string = self.context.bot.lang_dict["shop_admin_order_status_new"]
+            if self.shipping:
+                string = self.context.bot.lang_dict["delivery_status"]
+            else:
+                string = self.context.bot.lang_dict["self_delivery_status"]
             if self.paid:
                 string += self.context.bot.lang_dict["paid_status_true"]
             elif shop["shop_type"] == "online" and not self.paid:

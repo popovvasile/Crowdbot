@@ -8,7 +8,7 @@ def test_conflict():
         context.bot.send_message(update.effective_chat.id, "Hello")
         return ConversationHandler.END
 
-    updater = Updater('1266487119:AAFPWcKV6X97lnbJI0Ha7zghGujqyFAQiVQ', use_context=True)
+    updater = Updater('1266487119:AAG_0q4p6TiW70ykWuikEO8hRGGOXxUMzlc', use_context=True)
     dp = updater.dispatcher
     dp.add_handler(CommandHandler("start", callback=start))
 

@@ -1,4 +1,4 @@
-from database import users_table, chatbots_table
+from database import users_table, chatbots_table, conflict_notifications_table
 
 
 # TODO use "from bson.json_util import dumps, loads"
@@ -36,7 +36,9 @@ def convert_types(obj: dict) -> dict:
 
 
 def revoke_token(bot_id, args):
-    """Set new token and superuser for the bot"""
+    # remove all conflict notifications to send new if error occurred
+    conflict_notifications_table.delete_many({"bot_id": bot_id})
+    # Set new token and superuser for the bot
     return chatbots_table.find_and_modify({"bot_id": bot_id},
                                           {"$set": {"token": args["token"],
                                                     "superuser": args["superuser"],
