@@ -18,31 +18,41 @@ from modules.shop.user_side.cart import Cart
 
 
 class OnlinePayment(object):
-    def send_invoice(self, update, context, order, shop=None):
+    def send_invoice(self, update, context, order, shop=None, reply_markup=None, description=None):
+        context.user_data["paid_order"] = order
         if not shop:
             shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
-        context.user_data["paid_order"] = order
+
+        if not description:
+            description = "\n".join([
+                "{}\nx{} {} {}\n".format(
+                    item["product"]["name"],
+                    item["quantity"],
+                    item["product"]["price"],
+                    order.currency) for item in order.items_json])
+
+        # The first button must be a Pay button
+        if reply_markup:
+            reply_markup = InlineKeyboardMarkup(
+                [[InlineKeyboardButton(text=context.bot.lang_dict["pay_button"],
+                                       pay=True)]]
+                + reply_markup)
+
         title = context.bot.lang_dict["order_id"].format(str(order.article))
-        description = "\n".join([
-            "{}\nx{} {} {}\n".format(
-                item["product"]["name"],
-                item["quantity"],
-                item["product"]["price"],
-                order.currency) for item in order.items_json])
         payload = "Purchase"
         start_parameter = "shop-payment"  # TODO change in production
         prices = [LabeledPrice(title, int(float(order.total_price) * 100))]
-        print(int(float(order.total_price) * 100))
         try:
             context.user_data["to_delete"].append(
-                context.bot.sendInvoice(update.effective_chat.id,
-                                        title,
-                                        description,
-                                        payload,
-                                        shop["payment_token"],
-                                        start_parameter,
-                                        order.currency,
-                                        prices))
+                context.bot.sendInvoice(chat_id=update.effective_chat.id,
+                                        title=title,
+                                        description=description,
+                                        payload=payload,
+                                        provider_token=shop["payment_token"],
+                                        start_parameter=start_parameter,
+                                        currency=order.currency,
+                                        prices=prices,
+                                        reply_markup=reply_markup))
         except BadRequest as exception:
             logger.info(f"Sending invoice excseption -> {exception}. "
                         f"User {update.effective_user.full_name} on bot {context.bot.username}")

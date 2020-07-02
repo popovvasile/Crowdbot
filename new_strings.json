@@ -13,10 +13,14 @@
           "bot_off_notification": "\uD83D\uDD34 {} приостановил работу.",
           "two_bots_instance_notification": "<strong>{username} запущен на нескольких платформах.</strong>\n\nИзмени токен, чтобы продолжить корректную работу:\n1️⃣ Зайди в @BotFather.\n2️⃣ Отправь команду /revoke.\n3️⃣ Выбери {username}\n\nЕсли ты запускал магазин только на @crowdrobot и видишь это сообщение, значит твой токен украли.",
           "more_info": "\uD83D\uDCD6 Узнать подробнее",
+          "finish_revoked": "✅ <strong>Магазин активен</strong>\n\n<code>Название:</code> {}\n<code>Админы:</code> {}\n<code>Создан:</code> {}",
+          "help_command": "Гайды по использованию магазина:\n\n{guides}\n\nКонтакт для вопросов и предложений:  @crowdrobot_support",
 
           "delivery_status": "В пути",
           "self_delivery_status": "Ожидает",
-          "guide_btn": "Гайды"
+          "guide_btn": "Гайды",
+          "guide_post_title": "\n\nКонтакт для вопросов и предложений:\n@crowdrobot_support"
+
     },
 
 
@@ -34,10 +38,13 @@
           "bot_off_notification": "\uD83D\uDD34 {} приостановил работу.",
           "two_bots_instance_notification": "<strong>{username} запущен на нескольких платформах.</strong>\n\nИзмени токен, чтобы продолжить корректную работу:\n1️⃣ Зайди в @BotFather.\n2️⃣ Отправь команду /revoke.\n3️⃣ Выбери {username}\n\nЕсли ты запускал магазин только на @crowdrobot и видишь это сообщение, значит твой токен украли.",
           "more_info": "\uD83D\uDCD6 Узнать подробнее",
+          "finish_revoked": "✅ <strong>Store active</strong>\n\n<code>Name:</code> {}\n<code>Admins:</code> {}\n<code>Creation date:</code> {}",
+          "help_command": "Гайды по использованию магазина:\n\n{guides}\n\nКонтакт для вопросов и предложений:  @crowdrobot_support",
 
           "delivery_status": "В пути",
           "self_delivery_status": "Ожидает",
-          "guide_btn": "Guides"
+          "guide_btn": "Guides",
+          "guide_post_title": "\n\nКонтакт для вопросов и предложений:\n@crowdrobot_support"
     },
 
 
@@ -56,9 +63,11 @@
           "two_bots_instance_notification": "<strong>{username} запущен на нескольких платформах.</strong>\n\nИзмени токен, чтобы продолжить корректную работу:\n1️⃣ Зайди в @BotFather.\n2️⃣ Отправь команду /revoke.\n3️⃣ Выбери {username}\n\nЕсли ты запускал магазин только на @crowdrobot и видишь это сообщение, значит твой токен украли.",
           "more_info": "\uD83D\uDCD6 Узнать подробнее",
           "finish_revoked": "✅ <strong>Магазин активен</strong>\n\n<code>Name:</code> {}\n<code>Admins:</code> {}\n<code>Erstellungsdatum:</code> {}",
+          "help_command": "Гайды по использованию магазина:\n\n{guides}\n\nКонтакт для вопросов и предложений:  @crowdrobot_support",
 
           "delivery_status": "В пути",
           "self_delivery_status": "Ожидает",
-          "guide_btn": "Guides"
+          "guide_btn": "Guides",
+          "guide_post_title": "\n\nКонтакт для вопросов и предложений:\n@crowdrobot_support"
     }
 }
