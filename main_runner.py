@@ -35,8 +35,8 @@ from modules.settings.admins import ADMINS_LIST_HANDLER
 from modules.settings.notification import NOTIFICATION_MENU, NOTIFICATION_EDIT
 
 # USERS AND MESSAGES
-from modules.users.messages_admin import SEND_MESSAGE_ONLY_TO_ADMINS_HANDLER
-from modules.users.messages_donators import SEND_MESSAGE_TO_DONATORS_HANDLER
+# from modules.users.messages_admin import SEND_MESSAGE_ONLY_TO_ADMINS_HANDLER
+# from modules.users.messages_donators import SEND_MESSAGE_TO_DONATORS_HANDLER
 from modules.users.messages import (
     SEND_MESSAGE_TO_ADMIN_HANDLER, SEND_MESSAGE_TO_USERS_HANDLER,
     SEE_MESSAGES_HANDLER, ANSWER_TO_MESSAGE_HANDLER, DELETE_MESSAGES_HANDLER,
@@ -321,8 +321,8 @@ def main(token, lang):
     dispatcher.add_handler(SEND_MESSAGE_TO_USERS_HANDLER)
     dispatcher.add_handler(SEE_MESSAGES_HANDLER)
     dispatcher.add_handler(SEE_MESSAGES_FINISH_HANDLER)
-    dispatcher.add_handler(SEND_MESSAGE_ONLY_TO_ADMINS_HANDLER)
-    dispatcher.add_handler(SEND_MESSAGE_TO_DONATORS_HANDLER)
+    # dispatcher.add_handler(SEND_MESSAGE_ONLY_TO_ADMINS_HANDLER)
+    # dispatcher.add_handler(SEND_MESSAGE_TO_DONATORS_HANDLER)
 
     dispatcher.add_handler(FINISH_BLOCK_ANONIM_MESSAGING)
     dispatcher.add_handler(CONFIRM_BLOCK_ANONIM_MESSAGING)

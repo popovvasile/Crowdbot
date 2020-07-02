@@ -352,18 +352,21 @@ class PurchaseBot(object):
                                              parse_mode=ParseMode.HTML)
                 except TelegramError:
                     continue
-        final_text = context.bot.lang_dict["order_success"]
+
+        reply_markup = [[InlineKeyboardButton(text=context.bot.lang_dict["shop_my_orders"],
+                                              callback_data="back_to_user_orders")],
+                        [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                              callback_data="back_to_module_shop")]]
         if shop["shop_type"] == "online":
-            final_text += context.bot.lang_dict["order_success_online"]
-            OnlinePayment().send_invoice(update, context, order, shop)
-        context.user_data["to_delete"].append(
-            context.bot.send_message(
-                chat_id=update.effective_chat.id,
-                text=final_text,
-                reply_markup=InlineKeyboardMarkup([
-                    [InlineKeyboardButton(
-                        text=context.bot.lang_dict["back_button"],
-                        callback_data="back_to_user_orders")]])))
+            OnlinePayment().send_invoice(update, context, order, shop,
+                                         reply_markup=reply_markup,
+                                         description=context.bot.lang_dict["order_success"])
+        else:
+            context.user_data["to_delete"].append(
+                    context.bot.send_message(
+                        chat_id=update.effective_chat.id,
+                        text=context.bot.lang_dict["order_success"],
+                        reply_markup=InlineKeyboardMarkup(reply_markup)))
         return ConversationHandler.END
 
 

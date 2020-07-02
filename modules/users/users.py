@@ -510,9 +510,7 @@ class SeeUserMessage(object):
             return UsersHandler().back_to_open_user(update, context)
 
     def back_to_users_messages(self, update, context):
-        """
-        All backs to the user messages list must be done through this method
-        """
+        """All backs to the user messages list must be done through this method"""
         delete_messages(update, context, True)
         try:
             # Data for showing users list when - back
@@ -539,9 +537,7 @@ class SeeUserMessage(object):
         return self.see_messages(update, context)
 
     def back_to_view_message(self, update, context):
-        """
-        All backs to the opened user message must be done through this method
-        """
+        """All backs to the opened user message must be done through this method"""
         delete_messages(update, context, True)
         try:
             # Data for showing users list when - back
@@ -614,7 +610,6 @@ class SendMessageToUser(object):
         logger.info("Admin {} on bot {}:{} sent a message to the user".format(
             update.effective_user.first_name,
             context.bot.first_name, context.bot.id))
-        # TODO STRINGS
         update.callback_query.answer(context.bot.lang_dict["message_sent_blink"])
         return UsersHandler().back_to_open_user(update, context)
 
@@ -654,7 +649,6 @@ class UserTemplate(object):
 
         return (context.bot.lang_dict["user_temp"].format(
             _user_mention, lang_timestamp(context, self.timestamp))
-            # TODO STRINGS
             + (context.bot.lang_dict["unsub"] if self.unsubscribed else "")
             + "\n" + self.donates_to_string(context))
 

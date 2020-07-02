@@ -1,5 +1,6 @@
 """June 27 2020"""
 from pprint import pprint
+from uuid import uuid4
 
 from pymongo import MongoClient
 
@@ -10,11 +11,15 @@ def migrate():
     products_table = db["products"]
     orders_table = db["orders"]
 
-    # Add "article" field to all documents in products_table.
-    products_table.update_many({}, {"$set": {"article": str(uuid4())[:6].upper()}})
+    # Add "article" field to each document in products_table.
+    for prod in products_table.find():
+        products_table.update_one({"_id": prod["_id"]},
+                                  {"$set": {"article": str(uuid4())[:6].upper()}})
 
     # Add "article" field to all documents in orders_table.
-    orders_table.update_many({}, {"$set": {"article": str(uuid4())[:6].upper()}})
+    for order in orders_table.find():
+        orders_table.update_one({"_id": order["_id"]},
+                                {"$set": {"article": str(uuid4())[:6].upper()}})
 
     print("Migration Done!")
 
