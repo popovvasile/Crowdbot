@@ -328,6 +328,8 @@ ADD_PRODUCT_HANDLER = ConversationHandler(
                                       AddingProductHandler().ask_price),
                        MessageHandler(Filters.regex(r"^((?!@).)*$"),
                                       AddingProductHandler().ask_price),
+                       # MessageHandler(Filters.text,
+                       #                AddingProductHandler().ask_price)
                        ],
 
         # todo 3 regexes vs just Filters.text(it looks like everything works anyway)

@@ -57,15 +57,17 @@ class UserOrdersHandler(object):
             pagination = Pagination(orders, page=context.user_data["page"])
             shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
             for order in pagination.content:
-                order_buttons = [
-                    [InlineKeyboardButton(
-                        text=context.bot.lang_dict["user_order_items_btn"],
-                        callback_data=f"order_items/{order['_id']}")]]
+                order_buttons = []
                 if not order["in_trash"] and not order["paid"] and shop["shop_type"] == "online":
                     order_buttons.append(
                         [InlineKeyboardButton(
                             text=context.bot.lang_dict["pay_button"],
                             callback_data=f"order_payment_menu/{order['_id']}")])
+                order_buttons.append(
+                    [InlineKeyboardButton(
+                        text=context.bot.lang_dict["user_order_items_btn"],
+                        callback_data=f"order_items/{order['_id']}")])
+
                 context.user_data["to_delete"].append(
                     context.bot.send_message(
                         chat_id=update.effective_chat.id,
@@ -119,16 +121,11 @@ class UserOrdersHandler(object):
         if order.in_trash:
             update.callback_query.answer(context.bot.lang_dict["order_canceled_blink"])
             return self.back_to_orders(update, context)
-        OnlinePayment().send_invoice(update, context, order)
-        context.user_data["to_delete"].append(
-            context.bot.send_message(
-                update.effective_chat.id,
-                context.bot.lang_dict["order_success_online"],
-                parse_mode=ParseMode.HTML,
-                reply_markup=InlineKeyboardMarkup([
-                    [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                          callback_data="back_to_user_orders")]])
-            ))
+
+        reply_markup = [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                              callback_data="back_to_user_orders")]]
+        OnlinePayment().send_invoice(update, context, order,
+                                     reply_markup=reply_markup)
         return ConversationHandler.END
 
     def back_to_orders(self, update, context):

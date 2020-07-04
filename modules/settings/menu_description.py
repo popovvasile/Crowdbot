@@ -42,6 +42,7 @@ class EditBotDescription(object):
         return ConversationHandler.END
 
 
+"""
 class EditBotPicture(object):
     @staticmethod
     def info_menu(update, context):
@@ -59,6 +60,8 @@ class EditBotPicture(object):
 
 EDIT_PICTURE_HANDLER = CallbackQueryHandler(callback=EditBotPicture.info_menu,
                                             pattern="edit_bot_pic")
+"""
+
 
 EDIT_BOT_DESCRIPTION_HANDLER = ConversationHandler(
     allow_reentry=True,

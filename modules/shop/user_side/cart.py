@@ -128,7 +128,7 @@ class CartHelper(object):
             {"_id": cart_item["product"]["category_id"]})["name"]
 
         template = context.bot.lang_dict["cart_item_template"].format(
-                str(cart_item["product"].get("_id")),
+                cart_item["product"].get("article"),
                 html.escape(cart_item["product"]["name"], quote=False),
                 html.escape(category_name, quote=False),
                 cls.price_as_str(cart_item, context, currency))
@@ -157,7 +157,7 @@ class CartHelper(object):
             {"_id": cart_item["product"]["category_id"]})["name"]
 
         template = context.bot.lang_dict["full_cart_item_template"].format(
-                str(cart_item["product"].get("_id")),
+                cart_item["product"].get("article"),
                 html.escape(cart_item["product"]["name"], quote=False),
                 html.escape(category_name, quote=False),
                 cls.price_as_str(cart_item, context, currency))

@@ -39,14 +39,14 @@ def help_strings(context, update):
         visitor_keyboard=user_keyboard_shop)
 
     help_dict["settings"] = dict(
-        mod_name=string_d_str["add_menu_module_button"],
+        mod_name=["add_menu_module_button"],
         admin_keyboard=[
             [InlineKeyboardButton(text=string_d_str["lang_menu_button"],
                                   callback_data="langmenu")],
             [InlineKeyboardButton(text=string_d_str["edit_menu_text"],
                                   callback_data="edit_bot_description")],
-            [InlineKeyboardButton(text=string_d_str["edit_bot_pic_btn"],
-                                  callback_data="edit_bot_pic")],
+            # [InlineKeyboardButton(text=string_d_str["edit_bot_pic_btn"],
+            #                       callback_data="edit_bot_pic")],
             [InlineKeyboardButton(text=string_d_str["menu_buttons_settings"],
                                   callback_data="buttons")],
             [InlineKeyboardButton(text=string_d_str["admins_btn_str"],
@@ -57,6 +57,17 @@ def help_strings(context, update):
                                   callback_data="notification_setting")]
         ],
         admin_help=string_d_str["add_menu_buttons_help"]
+    )
+
+    help_dict["guides"] = dict(
+        mod_name="guides",
+        admin_keyboard=[],
+        admin_help="\n\n".join([
+            string_d_str["guide_store_design"],
+            string_d_str["guide_user_mode"],
+            string_d_str["guide_users_and_feedback"],
+            string_d_str["guide_store_management"]
+        ]) + string_d_str["guide_post_title"]
     )
 
     current_user_mode = user_mode_table.find_one(
@@ -78,7 +89,6 @@ def help_strings(context, update):
         mod_name=messages_mode,
         admin_help=string_d_str["users_help_admin"],
         admin_keyboard=[
-            # TODO Send messages ==> to users, to donators, to customers
             [InlineKeyboardButton(text=messages_button_text,
                                   callback_data="admin_messages")],
             [InlineKeyboardButton(text=string_d_str["users_module"],
@@ -103,21 +113,19 @@ def helpable_dict(bot):
     admin_rus["💰 Магазин"] = "shop"
     admin_rus[f"✉️ Пользователи и Сообщения {new_messages_str}"] = "users"
     admin_rus["⚙ Настройки бота"] = "settings"
+    admin_rus["🧐 Гайды"] = "guides"
 
     admin_eng = OrderedDict()
     admin_eng["💰 Shop"] = "shop"
     admin_eng[f"✉️ Users & Messages {new_messages_str}"] = "users"
     admin_eng["⚙ Settings"] = "settings"
+    admin_eng["🧐 Guides"] = "guides"
 
     admin_de = OrderedDict()
     admin_de["💰 Shop"] = "shop"
     admin_de[f"✉️ Benutzer & Nachrichten {new_messages_str}"] = "users"
     admin_de["⚙️ Einstellungen"] = "settings"
-
-    # admin_ukr = OrderedDict()
-    # admin_ukr["💰 Shop"] = "shop"
-    # admin_ukr[f"✉️ Users & Messages {new_messages_str}"] = "users"
-    # admin_ukr["⚙ Settings"] = "settings"
+    admin_de["🧐 Guides"] = "guides"
 
     lang_dicts = {
         "ENG": dict(
@@ -152,22 +160,10 @@ def helpable_dict(bot):
             VISITOR_HELPABLE={
                 "✉️ Message": "users",
                 "💰 Shop": "shop"},
-        ),
-        # "UKR": dict(
-        #     ALL_MODULES=[],
-        #     ADMIN_HELPABLE=admin_ukr,
-        #     ADMIN_USER_MODE={
-        #         "✉️ Message": "users",
-        #         "Admin view": "user_mode",
-        #         "Shop": "shop"},
-        #     VISITOR_HELPABLE={
-        #         "✉️ Message": "users",
-        #         "💰 Shop": "shop"},
-        # )
+        )
     }
-    # "channels", "donation_enable", "donation_payment", "donations_send_promotion",
-    # "donations_edit_delete_results", "manage_button", "settings", "menu_description",
-    # "messages", "surveys_answer", "surveys_create", "user_mode"
     chatbot = chatbots_table.find_one({"bot_id": bot.id})
 
     return lang_dicts[chatbot["lang"]]
+
+

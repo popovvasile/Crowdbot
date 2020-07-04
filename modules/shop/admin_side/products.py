@@ -83,7 +83,7 @@ class ProductsHelper(object):
 
                 orders_string += (
                     context.bot.lang_dict["product_temp_part_2"].format(
-                        order["_id"], emoji, product_items_count))
+                        order["article"], emoji, product_items_count))
             if new_orders.count() > 3:
                 orders_string = orders_string[:-1] + "..."
             else:
@@ -102,7 +102,7 @@ class ProductsHelper(object):
 
         return context.bot.lang_dict["shop_admin_full_product_template"].format(
             product_obj.status_str,
-            product_obj.id_,
+            product_obj.article,
             html.escape(product_obj.name, quote=False),
             html.escape(product_obj.category["name"], quote=False),
             product_obj.price_as_str(),

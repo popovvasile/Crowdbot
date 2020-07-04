@@ -164,7 +164,6 @@ class UsersHandler(object):
     def search_user(self, update, context):
         delete_messages(update, context, True)
         users = users_table.find({"bot_id": context.bot.id,
-                                  "unsubscribed": False,
                                   "is_admin": False})
         if users.count():
             reply_markup = InlineKeyboardMarkup([
@@ -181,7 +180,6 @@ class UsersHandler(object):
             update.callback_query.answer(context.bot.lang_dict["no_users_str"])
             return self.back_to_users(update, context)
 
-    # TODO !! Other Users can't use but while this method searching for users. WTF?
     def do_search(self, update, context):
         delete_messages(update, context, True)
         reply_buttons = [[InlineKeyboardButton(context.bot.lang_dict["back_button"],
@@ -202,7 +200,6 @@ class UsersHandler(object):
         else:
             # Get all users
             users = users_table.find({"bot_id": context.bot.id,
-                                      "unsubscribed": False,
                                       "is_admin": False})
 
             # If no users just send back button.
@@ -217,6 +214,7 @@ class UsersHandler(object):
                     {"$or": [{"username": {"$regex": pattern, "$options": "i"},
                               "bot_id": context.bot.id,
                               "superuser": False},
+
                              {"full_name": {"$regex": pattern, "$options": "i"},
                               "bot_id": context.bot.id,
                               "superuser": False}]
@@ -512,9 +510,7 @@ class SeeUserMessage(object):
             return UsersHandler().back_to_open_user(update, context)
 
     def back_to_users_messages(self, update, context):
-        """
-        All backs to the user messages list must be done through this method
-        """
+        """All backs to the user messages list must be done through this method"""
         delete_messages(update, context, True)
         try:
             # Data for showing users list when - back
@@ -541,9 +537,7 @@ class SeeUserMessage(object):
         return self.see_messages(update, context)
 
     def back_to_view_message(self, update, context):
-        """
-        All backs to the opened user message must be done through this method
-        """
+        """All backs to the opened user message must be done through this method"""
         delete_messages(update, context, True)
         try:
             # Data for showing users list when - back
@@ -609,15 +603,13 @@ class SendMessageToUser(object):
                 # TODO NO CHAT_ID HERE
                 chat_id=context.user_data["chat_id"],
                 content=context.user_data["content"],
-                update=update
-                )
+                update=update)
         except Unauthorized:
             update.callback_query.answer(context.bot.lang_dict["user_unauthorized"])
             return self.cancel_creating_message(update, context)
         logger.info("Admin {} on bot {}:{} sent a message to the user".format(
             update.effective_user.first_name,
             context.bot.first_name, context.bot.id))
-        # TODO STRINGS
         update.callback_query.answer(context.bot.lang_dict["message_sent_blink"])
         return UsersHandler().back_to_open_user(update, context)
 
@@ -650,14 +642,13 @@ class UserTemplate(object):
     # todo add messages count
     def template(self, context):
         if self.username:
-            _user_mention = user_mention(self.username, html.escape(self.full_name, quote=False))
+            _user_mention = user_mention(self.username, self.full_name)
         else:
             _user_mention = (f'<a href="tg://user?id={self.user_id}">'
                              f'{html.escape(self.full_name, quote=False)}</a>')
 
         return (context.bot.lang_dict["user_temp"].format(
             _user_mention, lang_timestamp(context, self.timestamp))
-            # TODO STRINGS
             + (context.bot.lang_dict["unsub"] if self.unsubscribed else "")
             + "\n" + self.donates_to_string(context))
 

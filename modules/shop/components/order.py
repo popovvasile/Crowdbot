@@ -15,7 +15,7 @@ class Order(object):
         order = get_obj(orders_table, obj)
         self.context = context
         self._id = order.get("_id")
-        self.article = str(self._id)
+        self.article = order.get("article")
         self.status = order.get("status")  # True or False
         self.bot_id = order.get("bot_id") or context.bot.id
         self.user_id = order.get("user_id")
@@ -41,7 +41,7 @@ class Order(object):
             order = get_obj(orders_table, self._id)
         self.context = context or self.context
         self._id = order.get("_id")
-        self.article = str(self._id) if self._id else None
+        self.article = order.get("article")
         self.status = order.get("status")  # True or False
         self.bot_id = order.get("bot_id") or context.bot.id
         self.user_id = order.get("user_id")
@@ -143,22 +143,6 @@ class AdminOrder(Order):
 
         return template
 
-    # @property
-    # def str_product_status(self):
-    #     if self.status is True:
-    #         string = self.context.bot.lang_dict[
-    #             "shop_admin_order_status_true"]
-    #     elif not self.all_items_exists:
-    #         string = self.context.bot.lang_dict[
-    #             "shop_admin_some_product_not_exist"]
-    #     elif not len(self.items):
-    #         string = self.context.bot.lang_dict[
-    #             "shop_admin_empty_order"]
-    #     else:
-    #         string = self.context.bot.lang_dict[
-    #             "shop_admin_all_products_exist"]
-    #     return string
-
     @property
     def str_status(self):
         shop = chatbots_table.find_one({"bot_id": self.context.bot.id})["shop"]
@@ -166,7 +150,8 @@ class AdminOrder(Order):
         if self.in_trash:
             string = self.context.bot.lang_dict["order_status_canceled"]
             if self.paid:
-                string += "\n♻️ " + str(self.total_price) + " " + self.currency
+                string += self.context.bot.lang_dict["paid_status_refund"].format(self.total_price,
+                                                                                  self.currency)
         elif self.status:
             string = self.context.bot.lang_dict["shop_admin_order_status_true"]
         else:
@@ -230,13 +215,13 @@ class UserOrder(Order):
         template += "\n\n" + self.str_order_items()
         return template
 
-    @property
+    """"@property
     def str_status(self):
         shop = chatbots_table.find_one({"bot_id": self.context.bot.id})["shop"]
         if self.in_trash:
             string = self.context.bot.lang_dict["order_status_canceled"]
             if self.paid:
-                string += "\n♻️ " + str(self.total_price) + " " + self.currency
+                string += "\n                 ♻️ " + str(self.total_price) + " " + self.currency
             return string
         if self.status:
             string = self.context.bot.lang_dict["shop_admin_order_status_true"]
@@ -251,6 +236,34 @@ class UserOrder(Order):
             string += self.context.bot.lang_dict["paid_status_true"]
         elif shop["shop_type"] == "online" and not self.paid:
             string += self.context.bot.lang_dict["paid_status_false"]
+        return string"""
+
+    @property
+    def str_status(self):
+        shop = chatbots_table.find_one({"bot_id": self.context.bot.id})["shop"]
+        if self.in_trash:
+            string = self.context.bot.lang_dict["order_status_canceled"]
+            if self.paid:
+                string += self.context.bot.lang_dict["paid_status_refund"].format(self.total_price,
+                                                                                  self.currency)
+        elif self.status:
+            string = self.context.bot.lang_dict["shop_admin_order_status_true"]
+        else:
+            if self.shipping:
+                string = self.context.bot.lang_dict["delivery_status"]
+            else:
+                string = self.context.bot.lang_dict["self_delivery_status"]
+            if self.paid:
+                string += self.context.bot.lang_dict["paid_status_true"]
+            elif shop["shop_type"] == "online" and not self.paid:
+                string += self.context.bot.lang_dict["paid_status_false"]
+
+        if self.shipping:
+            string += self.context.bot.lang_dict["user_delivery_to"].format(
+                html.escape(self.address, quote=False))
+        else:
+            string += self.context.bot.lang_dict["user_pick_up_from"].format(
+                html.escape(shop.get("address", ""), quote=False))
         return string
 
     def send_full_template(self, update, context, text="", reply_markup=None,

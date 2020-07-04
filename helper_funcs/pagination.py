@@ -108,11 +108,11 @@ class Pagination(object):
                     reply_markup=self.keyboard(buttons, page_prefix + "_"),
                     parse_mode=ParseMode.HTML))
         elif buttons or text:
+            if self.total_pages > 1:
+                text += ("\n" + context.bot.lang_dict["current_page_button_str"].format(self.page))
             context.user_data['to_delete'].append(
                 context.bot.send_message(
                     chat_id=update.effective_chat.id,
-                    text=text
-                    + "\n"
-                    + context.bot.lang_dict["current_page_button_str"].format(self.page),
+                    text=text,
                     reply_markup=self.keyboard(buttons, page_prefix + "_"),
                     parse_mode=ParseMode.HTML))

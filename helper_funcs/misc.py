@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import html
+import traceback
 from typing import List, Dict
 from uuid import uuid4
 from threading import Thread
@@ -28,13 +30,15 @@ def dismiss(update, context):
 
 # never run it async
 def delete_messages(update, context, message_from_update=True):
-    try:
-        Thread(target=async_delete,
-               args=(update, context, context.user_data.copy(), message_from_update)).start()
-    except Exception as exc:
-        print("Warning: Some exception in thread start in delete_message func", exc)
     if context and type(context.user_data) is dict:
-        context.user_data['to_delete'] = list()
+        try:
+            Thread(target=async_delete,
+                   args=(update, context, context.user_data.copy(), message_from_update)).start()
+            context.user_data['to_delete'] = list()
+        except Exception as err:
+            err_string = str(err) + "\nException in delete_message func" + traceback.format_exc()
+            print(err_string)
+            logger.error(err_string)
 
 
 def async_delete(update, context, user_data, message_from_update=True):
@@ -148,8 +152,7 @@ def user_mention(username, string):
     But can be showing using "https://t.me/"
     but in this case we use username which must exist and be correct
     """
-    # return f'<a href="tg://user?id={user_id}">{string}</a>'
-    return f'<a href="https://t.me/{username}">{string}</a>'
+    return f'<a href="https://t.me/{username}">{html.escape(string, quote=False)}</a>'
 
 
 def update_user_fields(context, user):
