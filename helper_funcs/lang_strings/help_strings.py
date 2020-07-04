@@ -1,3 +1,4 @@
+import html
 from collections import OrderedDict
 
 from telegram import InlineKeyboardButton
@@ -35,7 +36,7 @@ def help_strings(context, update):
         mod_name=string_d_str["shop_admin_add_product_btn"],
         admin_keyboard=admins_keyboard,
         admin_help=string_d_str["shop_admin_start_message"],
-        visitor_help=shop.get("description", ""),
+        visitor_help=html.escape(shop.get("description", "")),
         visitor_keyboard=user_keyboard_shop)
 
     help_dict["settings"] = dict(
