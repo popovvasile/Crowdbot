@@ -80,6 +80,22 @@ class CrowdRobot(Resource):
                             result=format_for_response(chat_bot)), 201
 
     @marshal_with(response_doc)
+    def put(self):
+        """Update the bot"""
+        parser = access_parser.copy()
+        parser.add_argument("bot_id", type=int, location="json", required=True)
+        args = parser.parse_args()
+        print(args)
+        # Find bot in database
+        chat_bot = chatbots_table.find_one({"bot_id": args["bot_id"]})
+        chat_bot.update(args)
+        chatbots_table.replace_one(dict(bot_id=args["bot_id"]), chat_bot)
+        if chat_bot["active"]:
+            return resp_doc(ok=False,
+                            message="Bot exist and active",
+                            result=format_for_response(chat_bot)), 201
+
+    @marshal_with(response_doc)
     def delete(self):
         """Delete bot"""
         parser = access_parser.copy()
