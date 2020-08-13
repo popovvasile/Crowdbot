@@ -50,7 +50,7 @@ class EnableDisableShopDonations(object):
             admin_keyboard = []
             anti_shipping_text = "self-delivery"
 
-        if chatbot["shop_enabled"] is True and "shop" in chatbot:
+        if chatbot["shop_enabled"] is True and "shop" in chatbot and chatbot["premium"]:
             admin_keyboard.append([InlineKeyboardButton(
                 text=context.bot.lang_dict["disable_shop_button"],
                 callback_data="change_shop_config")]),
@@ -69,10 +69,18 @@ class EnableDisableShopDonations(object):
             admin_keyboard.append([InlineKeyboardButton(
                 text=context.bot.lang_dict["change_donation_currency"],
                 callback_data="edit_change_shop_currency")]),
-        else:
+        elif chatbot["premium"]:
             admin_keyboard.append([InlineKeyboardButton(
                 text=context.bot.lang_dict["allow_shop_button"],
                 callback_data="change_shop_config")]),
+        else:
+            admin_keyboard.append(
+                [InlineKeyboardButton(
+                    text=context.bot.lang_dict["buy_subscription"],
+                    url='tg://crowdrobot?start={}'.format(
+                        "buy_premium_{}".format(
+                            str(context.bot.id))
+                    ))])
 
         admin_keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                                     callback_data="help_module(shop)")])
@@ -136,8 +144,8 @@ class EditPaymentHandler(object):
         elif "currency" in data:
             context.user_data["action"] = "currency"
             text = context.bot.lang_dict["payments_current_payments"].format(chatbot["shop"][
-                                                                                 "currency"])+ \
-                    "\n" + context.bot.lang_dict["donations_edit_str_9"]
+                                                                                 "currency"]) + \
+                   "\n" + context.bot.lang_dict["donations_edit_str_9"]
             context.user_data["to_delete"].append(
                 update.message.reply_text(
                     text,

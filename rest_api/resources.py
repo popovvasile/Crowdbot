@@ -85,9 +85,9 @@ class CrowdRobot(Resource):
         parser = access_parser.copy()
         parser.add_argument("bot_id", type=int, location="json", required=True)
         args = parser.parse_args()
-        print(args)
         # Find bot in database
         chat_bot = chatbots_table.find_one({"bot_id": args["bot_id"]})
+        args.pop("API_KEY", None)
         chat_bot.update(args)
         chatbots_table.replace_one(dict(bot_id=args["bot_id"]), chat_bot)
         if chat_bot["active"]:

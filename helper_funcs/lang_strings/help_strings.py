@@ -20,24 +20,24 @@ def help_strings(context, update):
     cart_items_count = len(cart.get("products", list()))
     if cart_items_count:
         cart_button_text += f" ({cart_items_count})"
-
-    user_keyboard_shop = [
-        [InlineKeyboardButton(text=context.bot.lang_dict["shop_catalog"],
-                              callback_data="open_shop")],
-        [InlineKeyboardButton(text=context.bot.lang_dict["shop_my_orders"],
-                              callback_data="my_orders")],
-        [InlineKeyboardButton(text=cart_button_text,
-                              callback_data="cart")]]
-    if shop.get("shipping") is False:
-        user_keyboard_shop += [
-            [InlineKeyboardButton(text=context.bot.lang_dict["shop_contact_and_address"],
-                                  callback_data="contacts_shop")]]
-    help_dict["shop"] = dict(
-        mod_name=string_d_str["shop_admin_add_product_btn"],
-        admin_keyboard=admins_keyboard,
-        admin_help=string_d_str["shop_admin_start_message"],
-        visitor_help=html.escape(shop.get("description", "")),
-        visitor_keyboard=user_keyboard_shop)
+    if chatbots_table.find_one({"bot_id": context.bot.id}).get("premium", False):
+        user_keyboard_shop = [
+            [InlineKeyboardButton(text=context.bot.lang_dict["shop_catalog"],
+                                  callback_data="open_shop")],
+            [InlineKeyboardButton(text=context.bot.lang_dict["shop_my_orders"],
+                                  callback_data="my_orders")],
+            [InlineKeyboardButton(text=cart_button_text,
+                                  callback_data="cart")]]
+        if shop.get("shipping") is False:
+            user_keyboard_shop += [
+                [InlineKeyboardButton(text=context.bot.lang_dict["shop_contact_and_address"],
+                                      callback_data="contacts_shop")]]
+        help_dict["shop"] = dict(
+            mod_name=string_d_str["shop_admin_add_product_btn"],
+            admin_keyboard=admins_keyboard,
+            admin_help=string_d_str["shop_admin_start_message"],
+            visitor_help=html.escape(shop.get("description", "")),
+            visitor_keyboard=user_keyboard_shop)
 
     help_dict["settings"] = dict(
         mod_name=["add_menu_module_button"],
@@ -111,19 +111,52 @@ def helpable_dict(bot):
                         if new_messages_count else "")
 
     admin_rus = OrderedDict()
-    admin_rus["💰 Магазин"] = "shop"
+    admin_eng = OrderedDict()
+    admin_de = OrderedDict()
+
+    user_mode_eng = OrderedDict()
+    user_mode_eng["✉️ Message"] = "users"
+    user_mode_eng["Admin view"] = "user_mode"
+
+    user_mode_rus = OrderedDict()
+    user_mode_rus["Режим админа"] = "user_mode"
+    user_mode_rus["✉️ Сообщения"] = "users"
+
+    user_mode_de = OrderedDict()
+    user_mode_de["✉️ Message"] = "users"
+    user_mode_de["Admin view"] = "user_mode"
+
+    user_eng = OrderedDict()
+    user_eng["✉️ Message"]="users"
+
+    user_rus = OrderedDict()
+    user_rus["✉️ Сообщения"]="users"
+
+    user_de = OrderedDict()
+    user_de["✉️ Message"] = "users"
+
+    if chatbots_table.find_one({"bot_id": bot.id}).get("premium", False):
+        admin_rus["💰 Магазин"] = "shop"
+        admin_eng["💰 Shop"] = "shop"
+        admin_de["💰 Shop"] = "shop"
+
+        user_mode_rus["💰 Магазин"] = "shop"
+        user_mode_eng["💰 Shop"] = "shop"
+        user_mode_de["💰 Shop"] = "shop"
+
+        user_rus["💰 Магазин"] = "shop"
+        user_eng["💰 Shop"] = "shop"
+        user_de["💰 Shop"] = "shop"
+
     admin_rus[f"✉️ Пользователи и Сообщения {new_messages_str}"] = "users"
     admin_rus["⚙ Настройки бота"] = "settings"
     admin_rus["🧐 Гайды"] = "guides"
 
-    admin_eng = OrderedDict()
-    admin_eng["💰 Shop"] = "shop"
+
     admin_eng[f"✉️ Users & Messages {new_messages_str}"] = "users"
     admin_eng["⚙ Settings"] = "settings"
     admin_eng["🧐 Guides"] = "guides"
 
-    admin_de = OrderedDict()
-    admin_de["💰 Shop"] = "shop"
     admin_de[f"✉️ Benutzer & Nachrichten {new_messages_str}"] = "users"
     admin_de["⚙️ Einstellungen"] = "settings"
     admin_de["🧐 Guides"] = "guides"
@@ -132,35 +165,20 @@ def helpable_dict(bot):
         "ENG": dict(
             ALL_MODULES=[],
             ADMIN_HELPABLE=admin_eng,
-            ADMIN_USER_MODE={
-                "✉️ Message": "users",
-                "Admin view": "user_mode",
-                "Shop": "shop"},
-            VISITOR_HELPABLE={
-                "✉️ Message": "users",
-                "💰 Shop": "shop"},
+            ADMIN_USER_MODE=user_mode_eng,
+            VISITOR_HELPABLE=user_eng,
         ),
         "RUS": dict(
             ALL_MODULES=[],
             ADMIN_HELPABLE=admin_rus,
-            ADMIN_USER_MODE={
-                "Режим админа": "user_mode",
-                "✉️ Сообщения": "users",
-                "Магазин": "shop"},
-            VISITOR_HELPABLE={
-                "✉️ Сообщения": "users",
-                "Магазин": "shop_user_menu"},
+            ADMIN_USER_MODE=user_mode_rus,
+            VISITOR_HELPABLE=user_rus,
         ),
         "DE": dict(
             ALL_MODULES=[],
             ADMIN_HELPABLE=admin_de,
-            ADMIN_USER_MODE={
-                "✉️ Message": "users",
-                "Admin view": "user_mode",
-                "Shop": "shop"},
-            VISITOR_HELPABLE={
-                "✉️ Message": "users",
-                "💰 Shop": "shop"},
+            ADMIN_USER_MODE=user_mode_de,
+            VISITOR_HELPABLE=user_de,
         )
     }
     chatbot = chatbots_table.find_one({"bot_id": bot.id})

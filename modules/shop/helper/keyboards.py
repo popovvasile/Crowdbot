@@ -12,7 +12,7 @@ def start_keyboard(context, back_button=True, as_list=False):
     if new_orders_quantity:
         orders_btn_text += f" ({new_orders_quantity})"
 
-    if chatbot.get("shop_enabled") is True:
+    if chatbot.get("shop_enabled", None) is True and chatbot.get("premium", None) is True:
         keyboard = [
             [InlineKeyboardButton(context.bot.lang_dict["shop_admin_add_product_btn"],
                                   callback_data="add_product")],
@@ -26,12 +26,18 @@ def start_keyboard(context, back_button=True, as_list=False):
                                   callback_data="trash")],
             [InlineKeyboardButton(text=context.bot.lang_dict["configure_button"],
                                   callback_data="shop_config")]]
-    elif "shop" in chatbot:
+    elif "shop" in chatbot and chatbot.get("premium", None) is True :
         keyboard = [[InlineKeyboardButton(text=context.bot.lang_dict["turn_shop_on"],
                                           callback_data="change_shop_config")]]
-    else:
+    elif chatbot.get("premium", None) is True:
         keyboard = [[InlineKeyboardButton(text=context.bot.lang_dict["allow_shop_button"],
                                           callback_data='allow_shop')]]
+    else:
+        keyboard = [[InlineKeyboardButton(text=context.bot.lang_dict["buy_subscription"],
+                                          url='tg://crowdrobot?start={}'.format(
+                                              "buy_premium_{}".format(
+                                                  str(context.bot.id))
+                                          ))]]
     if back_button:
         keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                               callback_data="help_back")])

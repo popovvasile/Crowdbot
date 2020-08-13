@@ -24,7 +24,7 @@
         "bot_off_notification": "\uD83D\uDD34 {} suspended work.",
         "more_info": "\uD83D\uDCD6 Learn more",
         "two_bots_instance_notification": "<strong>{username} launched on several platforms.</strong>\n\nChange the token to continue the correct operation:\n1️⃣ Go to @BotFather.\n2️⃣ Send the command /revoke.\n3️⃣ Select {username}\n\nIf you started the store only on @ crowdrobot and you see this message, it means your token was stolen. ",
-
+        "buy_subscription": "Buy premium subscription",
 
         "----------------------------------------------------------------GUIDES": "----------------------------------------------------------------",
         "guide_store_design": "<a href='https://telegra.ph/Store-design-07-03'>\uD83D\uDC49 Store design</a>",
@@ -555,6 +555,7 @@
         "bot_off_notification": "\uD83D\uDD34 {} приостановил работу.",
         "more_info": "\uD83D\uDCD6 Узнать подробнее",
         "two_bots_instance_notification": "<strong>{username} запущен на нескольких платформах.</strong>\n\nИзмени токен, чтобы продолжить корректную работу:\n1️⃣ Зайди в @BotFather.\n2️⃣ Отправь команду /revoke.\n3️⃣ Выбери {username}\n\nЕсли ты запускал магазин только на @crowdrobot и видишь это сообщение, значит твой токен украли.",
+        "buy_subscription": "Купить премиум подписку",
 
 
         "----------------------------------------------------------------GUIDES": "----------------------------------------------------------------",
@@ -1084,6 +1085,7 @@
         "bot_off_notification": "\uD83D\uDD34 {} stellte die Arbeit ein.",
         "more_info": "\uD83D\uDCD6 Mehr erfahren",
         "two_bots_instance_notification": "<strong>{username} wird auf mehreren Plattformen gestartet. </strong>\n\nÄndern Sie das Token, um den korrekten Vorgang fortzusetzen:\n1️⃣ Gehen Sie zu @BotFather.\n2️⃣ Senden Sie den Befehl /revoke.\n3️⃣ Wählen Sie {username}\n\nWenn Sie den Speicher nur auf @crowdrobot gestartet haben  und Sie sehen diese Nachricht, es bedeutet, dass Ihr Token gestohlen wurde. ",
+        "buy_subscription": "Premium-Abonnement kaufen",
 
 
         "----------------------------------------------------------------GUIDES": "----------------------------------------------------------------",
