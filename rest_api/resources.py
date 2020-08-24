@@ -35,9 +35,11 @@ class CrowdRobot(Resource):
         parser.add_argument("token", type=str, location="json", required=True)
         parser.add_argument("lang", type=str, location="json", required=True)
         parser.add_argument("superuser", type=int, location="json", required=True)
+        parser.add_argument("premium", type=bool, location="json", required=True)
         args = parser.parse_args(strict=True)
-
+        print(args)
         telegram_check = requests.get(f"https://api.telegram.org/bot{args['token']}/getMe").json()
+        print(telegram_check)
         if not telegram_check["ok"]:
             raise InvalidToken
 
