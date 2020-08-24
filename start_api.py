@@ -36,10 +36,10 @@ if __name__ == '__main__':
     app = create_app()
     if os.environ['SHOP_PRODUCTION'] == "1":
         app.run(host="127.0.0.1",
-                port=8000,
+                port=8001,
                 debug=True)
     else:
         app.run(host="127.0.0.1",
-                port=8001,
+                port=8000,
                 debug=True)
 
