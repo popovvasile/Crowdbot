@@ -37,9 +37,7 @@ class CrowdRobot(Resource):
         parser.add_argument("superuser", type=int, location="json", required=True)
         parser.add_argument("premium", type=bool, location="json", required=True)
         args = parser.parse_args(strict=True)
-        print(args)
         telegram_check = requests.get(f"https://api.telegram.org/bot{args['token']}/getMe").json()
-        print(telegram_check)
         if not telegram_check["ok"]:
             raise InvalidToken
 
@@ -66,6 +64,7 @@ class CrowdRobot(Resource):
             chat_bot = {
                 "token": args["token"],
                 "lang": args["lang"],
+                "premium": True,
                 "superuser": args["superuser"],
                 "bot_id": telegram_check["result"]["id"],
                 "username": telegram_check["result"]["username"],
