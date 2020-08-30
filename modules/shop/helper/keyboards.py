@@ -34,10 +34,11 @@ def start_keyboard(context, back_button=True, as_list=False):
                                           callback_data='allow_shop')]]
     else:
         keyboard = [[InlineKeyboardButton(text=context.bot.lang_dict["buy_subscription"],
-                                          url='tg://crowdrobot?start={}'.format(
+                                          url='https://t.me/MakeJournalismBot?start={}'.format(
                                               "buy_premium_{}".format(
                                                   str(context.bot.id))
                                           ))]]
+
     if back_button:
         keyboard.append([InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                               callback_data="help_back")])

@@ -13,7 +13,8 @@ def help_strings(context, update):
     help_dict = OrderedDict()
     string_d_str = context.bot.lang_dict
     admins_keyboard = start_keyboard(context, back_button=False, as_list=True)
-    shop = chatbots_table.find_one({"bot_id": context.bot.id}).get("shop", {})
+    chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
+    shop = chatbot.get("shop", {})
     cart = carts_table.find_one({"bot_id": context.bot.id,
                                  "user_id": update.effective_user.id}) or {}
     cart_button_text = context.bot.lang_dict["shop_cart"]
@@ -38,7 +39,11 @@ def help_strings(context, update):
             admin_help=string_d_str["shop_admin_start_message"],
             visitor_help=html.escape(shop.get("description", "")),
             visitor_keyboard=user_keyboard_shop)
-
+    else:
+        help_dict["shop"] = dict(
+            mod_name=string_d_str["shop_admin_add_product_btn"],
+            admin_keyboard=admins_keyboard,
+            admin_help=string_d_str["shop_admin_start_message"])
     help_dict["settings"] = dict(
         mod_name=["add_menu_module_button"],
         admin_keyboard=[
@@ -135,18 +140,18 @@ def helpable_dict(bot):
     user_de = OrderedDict()
     user_de["✉️ Message"] = "users"
 
-    if chatbots_table.find_one({"bot_id": bot.id}).get("premium", False):
-        admin_rus["💰 Магазин"] = "shop"
-        admin_eng["💰 Shop"] = "shop"
-        admin_de["💰 Shop"] = "shop"
+    # if chatbots_table.find_one({"bot_id": bot.id}).get("premium", False):
+    admin_rus["💰 Магазин"] = "shop"
+    admin_eng["💰 Shop"] = "shop"
+    admin_de["💰 Shop"] = "shop"
 
-        user_mode_rus["💰 Магазин"] = "shop"
-        user_mode_eng["💰 Shop"] = "shop"
-        user_mode_de["💰 Shop"] = "shop"
+    user_mode_rus["💰 Магазин"] = "shop"
+    user_mode_eng["💰 Shop"] = "shop"
+    user_mode_de["💰 Shop"] = "shop"
 
-        user_rus["💰 Магазин"] = "shop"
-        user_eng["💰 Shop"] = "shop"
-        user_de["💰 Shop"] = "shop"
+    user_rus["💰 Магазин"] = "shop"
+    user_eng["💰 Shop"] = "shop"
+    user_de["💰 Shop"] = "shop"
 
     admin_rus[f"✉️ Пользователи и Сообщения {new_messages_str}"] = "users"
     admin_rus["⚙ Настройки бота"] = "settings"
