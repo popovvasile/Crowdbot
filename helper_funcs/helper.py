@@ -374,8 +374,15 @@ def help_button(update, context):
                     commands_keyboard = help_strings(context, update)[module]["admin_keyboard"]
 
             else:
-                text = help_strings(context, update)[module]["visitor_help"]
-                commands_keyboard = help_strings(context, update)[module]["visitor_keyboard"]
+                module_dict = help_strings(context, update)[module] # TODO notification for users
+                if "visitor_help" in module_dict:
+                    text = module_dict["visitor_help"]
+                else:
+                    text = context.bot.username
+                if "visitor_keyboard" in module_dict:
+                    commands_keyboard = module_dict["visitor_keyboard"]
+                else:
+                    commands_keyboard = []
             pairs = commands_keyboard
 
             pairs.append(

@@ -40,10 +40,12 @@ def help_strings(context, update):
             visitor_help=html.escape(shop.get("description", "")),
             visitor_keyboard=user_keyboard_shop)
     else:
-        help_dict["shop"] = dict(
+        help_dict["shop"] = dict(  # TODO notification for users
             mod_name=string_d_str["shop_admin_add_product_btn"],
             admin_keyboard=admins_keyboard,
-            admin_help=string_d_str["shop_admin_start_message"])
+            admin_help=string_d_str["shop_admin_start_message"],
+            visitor_help="Shop is not available",
+        )
     help_dict["settings"] = dict(
         mod_name=["add_menu_module_button"],
         admin_keyboard=[
@@ -132,10 +134,10 @@ def helpable_dict(bot):
     user_mode_de["Admin view"] = "user_mode"
 
     user_eng = OrderedDict()
-    user_eng["✉️ Message"]="users"
+    user_eng["✉️ Message"] = "users"
 
     user_rus = OrderedDict()
-    user_rus["✉️ Сообщения"]="users"
+    user_rus["✉️ Сообщения"] = "users"
 
     user_de = OrderedDict()
     user_de["✉️ Message"] = "users"
@@ -156,7 +158,6 @@ def helpable_dict(bot):
     admin_rus[f"✉️ Пользователи и Сообщения {new_messages_str}"] = "users"
     admin_rus["⚙ Настройки бота"] = "settings"
     admin_rus["🧐 Гайды"] = "guides"
-
 
     admin_eng[f"✉️ Users & Messages {new_messages_str}"] = "users"
     admin_eng["⚙ Settings"] = "settings"
@@ -189,5 +190,3 @@ def helpable_dict(bot):
     chatbot = chatbots_table.find_one({"bot_id": bot.id})
 
     return lang_dicts[chatbot["lang"]]
-
-
