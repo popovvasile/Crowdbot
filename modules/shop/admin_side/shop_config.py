@@ -5,6 +5,7 @@ import telegram
 from telegram import (InlineKeyboardButton, InlineKeyboardMarkup, ParseMode)
 from telegram.ext import MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
 
+from config import conf
 from helper_funcs.constants import MIN_ADDRESS_LENGTH, MAX_ADDRESS_LENGTH
 from logs import logger
 from database import chatbots_table, products_table
@@ -77,7 +78,8 @@ class EnableDisableShopDonations(object):
             admin_keyboard.append(
                 [InlineKeyboardButton(
                     text=context.bot.lang_dict["buy_subscription"],
-                    url='tg://crowdrobot?start={}'.format(
+                    url='tg://{}?start={}'.format(
+                        conf.CROWDBOT_USERNAME,
                         "buy_premium_{}".format(
                             str(context.bot.id))
                     ))])

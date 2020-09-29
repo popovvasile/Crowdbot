@@ -43,7 +43,7 @@ def help_strings(context, update):
         help_dict["shop"] = dict(  # TODO notification for users
             mod_name=string_d_str["shop_admin_add_product_btn"],
             admin_keyboard=admins_keyboard,
-            admin_help=string_d_str["shop_admin_start_message"],
+            admin_help=string_d_str["shop_admin_start_message_not_paid"],
             visitor_help="Shop is not available",
         )
     help_dict["settings"] = dict(
@@ -81,10 +81,21 @@ def help_strings(context, update):
     current_user_mode = user_mode_table.find_one(
         {"bot_id": context.bot.id,
          "user_id": update.effective_user.id})
-    if if_admin(update, context) and not current_user_mode.get("user_mode"):
-        messages_mode = string_d_str["users_module"]
+    if current_user_mode:
+        if if_admin(update, context) and not current_user_mode.get("user_mode"):
+            messages_mode = string_d_str["users_module"]
+        else:
+            messages_mode = string_d_str["send_message_module_str"]
     else:
-        messages_mode = string_d_str["send_message_module_str"]
+
+        user_mode_table.update_one(filter=dict(bot_id=context.bot.id),
+                                   update={
+                                       "$set": dict(
+                                           bot_id=context.bot.id,
+                                           user_id=update.effective_user.id,
+                                           user_mode=False)},
+                                   upsert=True)
+        messages_mode = string_d_str["users_module"]
 
     new_messages_count = users_messages_to_admin_table.find(
         {"bot_id": context.bot.id,

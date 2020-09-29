@@ -1,5 +1,6 @@
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 
+from config import conf
 from database import chatbots_table, orders_table
 
 
@@ -34,7 +35,8 @@ def start_keyboard(context, back_button=True, as_list=False):
                                           callback_data='allow_shop')]]
     else:
         keyboard = [[InlineKeyboardButton(text=context.bot.lang_dict["buy_subscription"],
-                                          url='https://t.me/MakeJournalismBot?start={}'.format(
+                                          url='https://t.me/{}?start={}'.format(
+                                              conf["CROWDBOT_USERNAME"],
                                               "buy_premium_{}".format(
                                                   str(context.bot.id))
                                           ))]]

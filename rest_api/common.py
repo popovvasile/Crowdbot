@@ -15,8 +15,7 @@ def format_for_response(chatbot: dict) -> dict:
          })
 
     admins = users_table.find({"bot_id": chatbot["bot_id"],
-                               "is_admin": True,
-                               "superuser": False})
+                               "is_admin": True})
 
     chatbot["total_active_users"] = active_users.count()
     chatbot["total_not_active_users"] = not_active_users.count()

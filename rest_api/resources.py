@@ -15,16 +15,24 @@ from database import (chatbots_table, orders_table, shop_customers_contacts_tabl
 
 class CrowdRobot(Resource):
     @marshal_with(response_doc)
-    def get(self):
+    def get(self): # todo bug woth admins- superuser is not there somehow
         """Get bot by bot_id"""
         parser = access_parser.copy()
         parser.add_argument("bot_id", type=int, location="json", required=True)
         args = parser.parse_args(strict=True)
         chat_bot = chatbots_table.find_one({"bot_id": args["bot_id"]})
-        if chat_bot:
+        chatbot = format_for_response(chat_bot)
+        # chatbot["admins"] = [{
+        #     "bot_id": chat_bot["bot_id"],
+        #     "user_id": chat_bot["superuser"],
+        #     "full_name": "Vasi",
+        #     "username": "vasile_python"
+        # }]
+
+        if chatbot:
             return resp_doc(ok=True,
                             message="Bot Exist",
-                            result=format_for_response(chat_bot)), 200
+                            result=chatbot), 200
         else:
             raise BotNotFound
 
@@ -64,7 +72,7 @@ class CrowdRobot(Resource):
             chat_bot = {
                 "token": args["token"],
                 "lang": args["lang"],
-                "premium": True,
+                "premium": args["premium"],
                 "superuser": args["superuser"],
                 "bot_id": telegram_check["result"]["id"],
                 "username": telegram_check["result"]["username"],
