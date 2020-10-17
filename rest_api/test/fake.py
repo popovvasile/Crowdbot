@@ -23,15 +23,15 @@ class FakeUsers:
                 "user_id": 321858998,
                 "username": profile["username"],
                 "full_name": profile["name"],
-                # "mention_markdown": f"[{profile['name']}](tg://user?id=321858998)",
-                # "mention_html": f'<a href="tg://user?id=321858998">{profile["name"]}</a>',
+                # "mention_markdown": f"[{profile['name']}](tg://bots?id=321858998)",
+                # "mention_html": f'<a href="tg://bots?id=321858998">{profile["name"]}</a>',
                 "timestamp": datetime.now(),
                 "registered": True,
                 "is_admin": True,
                 "superuser": False,
                 "regular_messages_blocked": False,
                 "anonim_messages_blocked": False,
-                "tags": ["#all", "#user", "#admin"],
+                "tags": ["#all", "#bots", "#admin"],
                 "fake": True})
 
     def not_registered_admins(self):
@@ -52,8 +52,8 @@ class FakeUsers:
                  "user_id": user_id,
                  "username": profile["username"],
                  "full_name": profile["name"],
-                 # "mention_markdown": f"[{profile['name']}](tg://user?id={user_id})",
-                 # "mention_html": f'<a href="tg://user?id={user_id}">{profile["name"]}</a>',
+                 # "mention_markdown": f"[{profile['name']}](tg://bots?id={user_id})",
+                 # "mention_html": f'<a href="tg://bots?id={user_id}">{profile["name"]}</a>',
                  "timestamp": datetime.now(),
                  'registered': False,
                  "is_admin": False,
@@ -61,7 +61,7 @@ class FakeUsers:
                  "regular_messages_blocked": False,
                  "anonim_messages_blocked": False,
                  "blocked": False,
-                 "tags": ["#all", "#user"],
+                 "tags": ["#all", "#bots"],
                  "fake": True})
 
 
@@ -121,8 +121,8 @@ class FakeMessages:
                 "user_id": user_id,
                 'content': [{'text': 'this is my regular message'}],
                 'is_new': True,
-                # 'mention_html': '<a href="tg://user?id={user_id}">Loc Loc</a>',
-                # 'mention_markdown': '[Loc Loc](tg://user?id=321858998)',
+                # 'mention_html': '<a href="tg://bots?id={user_id}">Loc Loc</a>',
+                # 'mention_markdown': '[Loc Loc](tg://bots?id=321858998)',
                 'message_id': 12666,
                 'timestamp': datetime.now(),
                 'user_full_name': 'User Userevich',

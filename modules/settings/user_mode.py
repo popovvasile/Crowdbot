@@ -33,7 +33,7 @@ class UserMode(object):
         context.bot.send_message(update.callback_query.message.chat.id,
                                  context.bot.lang_dict["user_mode_on_finish"],
                                  reply_markup=reply_markup)
-        logger.info("USER MODE ON for user {} on bot {}:{}".format(
+        logger.info("USER MODE ON for bots {} on bot {}:{}".format(
             update.effective_user.first_name, context.bot.first_name, context.bot.id))
         return ConversationHandler.END
 
@@ -61,7 +61,7 @@ class UserMode(object):
         context.bot.send_message(update.callback_query.message.chat.id,
                                  context.bot.lang_dict["user_mode_off_finish"],
                                  reply_markup=reply_markup)
-        logger.info("USER MODE OFF for user {} on bot {}:{}".format(
+        logger.info("USER MODE OFF for bots {} on bot {}:{}".format(
             update.effective_user.first_name, context.bot.first_name, context.bot.id))
         return ConversationHandler.END
 

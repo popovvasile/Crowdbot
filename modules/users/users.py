@@ -78,7 +78,7 @@ class UsersHandler(object):
         # Get users with filters from user_data.
         users = users_table.find(
             context.user_data["filter"]).sort([["_id", -1]])
-        # Send title for user list.
+        # Send title for bots list.
         if context.user_data["filter"].get("blocked") is True:
             title_str = "banned_users_title"
         elif context.user_data["filter"].get("blocked") is False:
@@ -89,7 +89,7 @@ class UsersHandler(object):
         #     context.bot.send_message(update.callback_query.message.chat_id,
         #                              text=context.bot.lang_dict[title_str].format(users.count()),
         #                              parse_mode=ParseMode.HTML))
-        # Keyboard with user list filters buttons
+        # Keyboard with bots list filters buttons
         main_buttons = (context.user_data["filters_buttons"]
                         + [[InlineKeyboardButton(context.bot.lang_dict["search_btn"],
                                                  callback_data="search_user")],
@@ -106,7 +106,7 @@ class UsersHandler(object):
             pagination = Pagination(users, page=context.user_data["page"])
             # Loop over users on given page and send users templates.
             for user in pagination.content:
-                # Update user names and check if the user block the bot
+                # Update bots names and check if the bots block the bot
                 update_user_fields(context, user)
                 # Send template with keyboard.
                 reply_markup = InlineKeyboardMarkup([
@@ -124,18 +124,18 @@ class UsersHandler(object):
         delete_messages(update, context, True)
         if update.callback_query.data.startswith("open_user"):
             user_id = ObjectId(update.callback_query.data.split("/")[1])
-            context.user_data["user"] = users_table.find_one({"_id": user_id})
-        if not context.user_data["user"]:
+            context.user_data["bots"] = users_table.find_one({"_id": user_id})
+        if not context.user_data["bots"]:
             update.callback_query.answer(context.bot.lang_dict["no_user_str"])
             return self.back_to_users(update, context)
         extra_buttons = [[InlineKeyboardButton(context.bot.lang_dict["back_button"],
                                                callback_data="back_to_users_list")]]
-        reply_markup = self.user_markup(context, context.user_data["user"], extra_buttons)
-        UserTemplate(context.user_data["user"]).send(update, context, reply_markup=reply_markup)
+        reply_markup = self.user_markup(context, context.user_data["bots"], extra_buttons)
+        UserTemplate(context.user_data["bots"]).send(update, context, reply_markup=reply_markup)
         return ConversationHandler.END
 
     def user_markup(self, context, user, extra_buttons=None):
-        # Creating keyboard for user.
+        # Creating keyboard for bots.
         user_buttons = []
         # TODO STRINGS
         if not user["unsubscribed"]:
@@ -247,7 +247,7 @@ class UsersHandler(object):
                                 page=context.user_data["search_page"])
         # Loop over users on given page and send users templates.
         for user in pagination.content:
-            # Update user names and check if the user block the bot
+            # Update bots names and check if the bots block the bot
             update_user_fields(context, user)
             # Send template with keyboard.
             reply_markup = InlineKeyboardMarkup([
@@ -279,7 +279,7 @@ class UsersHandler(object):
         context.user_data["filters_buttons"] = filters_buttons
 
     def back_to_users(self, update, context):
-        """All backs to user list must be done through this method"""
+        """All backs to bots list must be done through this method"""
         delete_messages(update, context, True)
         try:
             self.clear_and_reset_user_data(context)
@@ -292,15 +292,15 @@ class UsersHandler(object):
             # return get_help(update, context)
 
     def back_to_open_user(self, update, context):
-        """All backs to open user must be done through this method"""
+        """All backs to open bots must be done through this method"""
         delete_messages(update, context, True)
         try:
-            user_id = context.user_data["user"]["_id"]
+            user_id = context.user_data["bots"]["_id"]
             self.clear_and_reset_user_data(context)
-            context.user_data["user"] = users_table.find_one({"_id": user_id})
+            context.user_data["bots"] = users_table.find_one({"_id": user_id})
             return self.open_user(update, context)
         except KeyError:
-            logger.info("Something gone wrong while back to open user")
+            logger.info("Something gone wrong while back to open bots")
             context.user_data.clear()
             return get_help(update, context)
 
@@ -418,7 +418,7 @@ class SeeUserMessage(object):
 
     def view_message(self, update, context):
         delete_messages(update, context, True)
-        # If "Open" button clicked - set message object in user data
+        # If "Open" button clicked - set message object in bots data
         if update.callback_query.data.startswith("view_user_message_"):
             message_id = ObjectId(
                 update.callback_query.data.replace("view_user_message_", ""))
@@ -430,7 +430,7 @@ class SeeUserMessage(object):
                 users_messages_to_admin_table.update_one(
                     {"_id": message_id}, {"$set": {"is_new": False}})
 
-        # Send user message content
+        # Send bots message content
         context.user_data["to_delete"].append(
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text=context.bot.lang_dict["user_content_title"],
@@ -510,7 +510,7 @@ class SeeUserMessage(object):
             return UsersHandler().back_to_open_user(update, context)
 
     def back_to_users_messages(self, update, context):
-        """All backs to the user messages list must be done through this method"""
+        """All backs to the bots messages list must be done through this method"""
         delete_messages(update, context, True)
         try:
             # Data for showing users list when - back
@@ -521,7 +521,7 @@ class SeeUserMessage(object):
             user_id = context.user_data["user_id"]
             user_messages_page = context.user_data["user_messages_page"]
             # todo do better backs()
-            user = context.user_data["user"]
+            user = context.user_data["bots"]
         except KeyError:
             context.user_data.clear()
             return get_help(update, context)
@@ -533,11 +533,11 @@ class SeeUserMessage(object):
         context.user_data["user_id"] = user_id
         context.user_data["user_messages_page"] = user_messages_page
         # todo do better backs()
-        context.user_data["user"] = users_table.find_one({"_id": user["_id"]})
+        context.user_data["bots"] = users_table.find_one({"_id": user["_id"]})
         return self.see_messages(update, context)
 
     def back_to_view_message(self, update, context):
-        """All backs to the opened user message must be done through this method"""
+        """All backs to the opened bots message must be done through this method"""
         delete_messages(update, context, True)
         try:
             # Data for showing users list when - back
@@ -550,7 +550,7 @@ class SeeUserMessage(object):
             # Data for showing open message when - back
             message = context.user_data["message"]
             # todo do better backs()
-            user = context.user_data["user"]
+            user = context.user_data["bots"]
         except KeyError:
             context.user_data.clear()
             return get_help(update, context)
@@ -564,12 +564,12 @@ class SeeUserMessage(object):
         context.user_data["message"] = users_messages_to_admin_table.find_one(
             {"_id": message["_id"]})
         # todo do better backs()
-        context.user_data["user"] = users_table.find_one({"_id": user["_id"]})
+        context.user_data["bots"] = users_table.find_one({"_id": user["_id"]})
         return self.view_message(update, context)
 
 
 class SendMessageToUser(object):
-    """Sending messages to user"""
+    """Sending messages to bots"""
     def send_message(self, update, context):
         delete_messages(update, context, True)
         context.user_data["chat_id"] = int(
@@ -607,7 +607,7 @@ class SendMessageToUser(object):
         except Unauthorized:
             update.callback_query.answer(context.bot.lang_dict["user_unauthorized"])
             return self.cancel_creating_message(update, context)
-        logger.info("Admin {} on bot {}:{} sent a message to the user".format(
+        logger.info("Admin {} on bot {}:{} sent a message to the bots".format(
             update.effective_user.first_name,
             context.bot.first_name, context.bot.id))
         update.callback_query.answer(context.bot.lang_dict["message_sent_blink"])
@@ -644,7 +644,7 @@ class UserTemplate(object):
         if self.username:
             _user_mention = user_mention(self.username, self.full_name)
         else:
-            _user_mention = (f'<a href="tg://user?id={self.user_id}">'
+            _user_mention = (f'<a href="tg://bots?id={self.user_id}">'
                              f'{html.escape(self.full_name, quote=False)}</a>')
 
         return (context.bot.lang_dict["user_temp"].format(

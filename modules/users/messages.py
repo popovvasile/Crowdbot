@@ -203,14 +203,14 @@ class SendMessageToUsers(object):
         # users = users_table.find({"bot_id": context.bot.id,
         #                           "blocked": False,
         #                           "unsubscribed": False})
-        # for user in users:
-        #     update_user_fields(context, user)
-        #     if (user["chat_id"] != update.callback_query.message.chat_id and
-        #             not user["unsubscribed"]):
+        # for bots in users:
+        #     update_user_fields(context, bots)
+        #     if (bots["chat_id"] != update.callback_query.message.chat_id and
+        #             not bots["unsubscribed"]):
         #             try:
         #                 send_not_deleted_message_content(
         #                     context,
-        #                     chat_id=user["chat_id"],
+        #                     chat_id=bots["chat_id"],
         #                     content=context.user_data["content"],
         #                     update=update)
         #             except:
@@ -478,7 +478,7 @@ class SeeMessageToAdmin(object):
                 users_messages_to_admin_table.update_one(
                     {"_id": message_id}, {"$set": {"is_new": False}})
 
-        # Send user message content
+        # Send bots message content
         context.user_data["to_delete"].append(
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text=context.bot.lang_dict["user_content_title"],
@@ -540,7 +540,7 @@ class SeeMessageToAdmin(object):
             update.effective_chat.id,
             reply_markup=reply_markup,
             text="Are you sure that you want to block anonim messages "
-                 "for this user?\n This User won't be able to send "
+                 "for this bots?\n This User won't be able to send "
                  "anonim messages anymore")
         return ConversationHandler.END
 
@@ -557,7 +557,7 @@ class SeeMessageToAdmin(object):
             "unblock_anonim_messaging_", ""))
         users_table.update_one({"bot_id": context.bot.id, "user_id": user_id},
                                {"$set": {"anonim_messages_blocked": False}})
-        update.callback_query.answer("For now user can send anonim messages")
+        update.callback_query.answer("For now bots can send anonim messages")
         return self.back_to_view_message(update, context)
 
     def block_messaging_confirmation(self, update, context):
@@ -578,7 +578,7 @@ class SeeMessageToAdmin(object):
         # TODO STRINGS
         UserTemplate(user).send(
             update, context,
-            text="Are you sure that you want to block messages for this user?"
+            text="Are you sure that you want to block messages for this bots?"
                  "\nUser won't be able to send any messages anymore",
             reply_markup=markup)
         return ConversationHandler.END
@@ -606,7 +606,7 @@ class SeeMessageToAdmin(object):
 
     def back_to_view_message(self, update, context):
         """
-        All backs to the opened user message must be done through this method
+        All backs to the opened bots message must be done through this method
         """
         delete_messages(update, context, True)
         try:
@@ -653,7 +653,7 @@ class SubscriberOpenMessage(object):
         message = users_messages_to_admin_table.find_one({"_id": message_id})
         if "open_delete" not in context.user_data:
             context.user_data["open_delete"] = list()
-        # Send user message content
+        # Send bots message content
         send_deleted_message_content(context,
                                      chat_id=update.effective_user.id,
                                      content=message["content"],

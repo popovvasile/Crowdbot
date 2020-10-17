@@ -165,16 +165,20 @@ def main(token, lang):
     logger.addHandler(hdlr)
     logger.setLevel(logging.ERROR)
 
+    # with open('languages.json') as f:
+    #     lang_dicts = json.load(f)
+    # if lang == "ENG":
+    #     bot_obj.lang_dict = lang_dicts["ENG"]
+    # elif lang == "DE":
+    #     bot_obj.lang_dict = lang_dicts["DE"]
+    # elif lang == "UKR":
+    #     bot_obj.lang_dict = lang_dicts["UKR"]
+    # else:
+    #     bot_obj.lang_dict = lang_dicts["RUS"]
+
     with open('languages.json') as f:
         lang_dicts = json.load(f)
-    if lang == "ENG":
-        bot_obj.lang_dict = lang_dicts["ENG"]
-    elif lang == "DE":
-        bot_obj.lang_dict = lang_dicts["DE"]
-    elif lang == "UKR":
-        bot_obj.lang_dict = lang_dicts["UKR"]
-    else:
-        bot_obj.lang_dict = lang_dicts["RUS"]
+    bot_obj.lang_dict = lang_dicts[lang]
 
     # my_persistence = PicklePersistence(filename='persistence.bin')
     # https://github.com/python-telegram-bot/python-telegram-bot/issues/1864

@@ -40,12 +40,12 @@ class OrdersHandlerHelper(object):
             #     text=context.bot.lang_dict["shop_admin_to_trash_btn"],
             #     callback_data=f"to_trash/{order.id_}"))
         # todo maybe change "open_user/" callback_data for use user_id instead of _id
-        # user = users_table.find_one({"bot_id": context.bot.id,
+        # bots = users_table.find_one({"bot_id": context.bot.id,
         #                              "user_id": order.user_id})
         # kb[0].append(
         #     InlineKeyboardButton(
         #         text="👤",
-        #         callback_data=f"open_user/{user['_id']}"))
+        #         callback_data=f"open_user/{bots['_id']}"))
         # kb[0].append(
         #     InlineKeyboardButton(
         #         text="🛍",

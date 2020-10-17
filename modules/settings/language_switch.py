@@ -19,15 +19,15 @@ class SwitchLanguage(object):
         lang = update.callback_query.data.split('/')[1]
         with open('languages.json') as f:
             lang_dicts = json.load(f)
-        if lang == "RUS":
-            context.bot.lang_dict = lang_dicts["RUS"]
-        elif lang == "ENG":
-            context.bot.lang_dict = lang_dicts["ENG"]
-        elif lang == "DE":
-            context.bot.lang_dict = lang_dicts["DE"]
+        if lang == "ru":
+            context.bot.lang_dict = lang_dicts["ru"]
+        elif lang == "en":
+            context.bot.lang_dict = lang_dicts["en"]
+        elif lang == "de":
+            context.bot.lang_dict = lang_dicts["de"]
 
         Dispatcher(bot=context.bot, update_queue=update).update_persistence()
-        # change user language
+        # change bots language
         chatbots_table.update_one({'bot_id': context.bot.id},
                                   {'$set': {'lang': lang}})
         # send main menu keyboard
@@ -38,11 +38,11 @@ class SwitchLanguage(object):
         delete_messages(update, context)
         lang_keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton(text=context.bot.lang_dict['en'],
-                                  callback_data='language/ENG')],
+                                  callback_data='language/en')],
             [InlineKeyboardButton(text=context.bot.lang_dict['ru'],
-                                  callback_data='language/RUS')],
+                                  callback_data='language/ru')],
             [InlineKeyboardButton(text=context.bot.lang_dict["de"],
-                                  callback_data='language/DE')]
+                                  callback_data='language/de')]
         ])
         # send language keyboard
         context.user_data['to_delete'].append(

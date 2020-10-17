@@ -115,10 +115,11 @@ def lang_timestamp(bot_lang: (CallbackContext, str), timestamp,
                    pattern="d, MMM yyyy, hh:mm"):
     if timestamp is None:
         return ""
-    lang_keys = {"ENG": "en", "RUS": "ru", "DE": "de"}
+    # lang_keys = {"ENG": "en", "RUS": "ru", "DE": "de"}
     if isinstance(bot_lang, CallbackContext):
         bot_lang = chatbots_table.find_one({"bot_id": bot_lang.bot.id})["lang"]
-    return format_datetime(timestamp, pattern, locale=lang_keys[bot_lang])
+    # return format_datetime(timestamp, pattern, locale=lang_keys[bot_lang])
+    return format_datetime(timestamp, pattern, locale=bot_lang)
 
 
 # May raise Exception and bson.errors.InvalidId
@@ -147,7 +148,7 @@ def get_promise_msg(msg):
 
 def user_mention(username, string):
     """Users that have blocked the bot or never start it
-    can't be shown as the url mention using "tg://user?id=".
+    can't be shown as the url mention using "tg://bots?id=".
 
     But can be showing using "https://t.me/"
     but in this case we use username which must exist and be correct
@@ -156,7 +157,7 @@ def user_mention(username, string):
 
 
 def update_user_fields(context, user):
-    """Update user full_name, username and unsubscribed status.
+    """Update bots full_name, username and unsubscribed status.
     Used for showing users list, admins, users in shop order"""
     telegram_user = context.bot.get_chat_member(user["chat_id"],
                                                 user["user_id"]).user
@@ -169,7 +170,7 @@ def update_user_fields(context, user):
         new_user_fields["full_name"] = telegram_user.full_name
         user["full_name"] = telegram_user.full_name
 
-    # if the user has unsubscribed set it as unsubscribed
+    # if the bots has unsubscribed set it as unsubscribed
     try:
         context.bot.send_chat_action(user["chat_id"], action="typing")
         if user["unsubscribed"]:

@@ -127,7 +127,7 @@ class AnswerToMessage(SenderHelper):
                 {"$set": {"answer_content": context.user_data["content"],
                           # "answer_string": answer_string
                           }})
-            logger.info("Admin {} on bot {}:{} sent an  answer to the user".format(
+            logger.info("Admin {} on bot {}:{} sent an  answer to the bots".format(
                 update.effective_user.first_name,
                 context.bot.first_name, context.bot.id))
             update.callback_query.answer(context.bot.lang_dict["message_sent_blink"])
@@ -388,14 +388,14 @@ class MessageTemplate(object):
         self.content = message_obj["content"]
         self.answer_content = message_obj["answer_content"]
         self.user_full_name = message_obj["user_full_name"]
-        # Get chat member to get user information
+        # Get chat member to get bots information
         # because database data can be incorrect
         user = context.bot.get_chat_member(self.chat_id, self.user_id).user
-        # Create user html mention
+        # Create bots html mention
         if message_obj["anonim"]:
             self.user_mention = f"<code>{self.user_full_name}</code>"
-        # elif user.username:
-        #     self.user_mention = user_mention(user.username, user.full_name)
+        # elif bots.username:
+        #     self.user_mention = user_mention(bots.username, bots.full_name)
         else:
             self.user_mention = user.mention_html()
         # If message is new - add emoji near it

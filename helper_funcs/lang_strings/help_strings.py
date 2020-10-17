@@ -179,19 +179,19 @@ def helpable_dict(bot):
     admin_de["🧐 Guides"] = "guides"
 
     lang_dicts = {
-        "ENG": dict(
+        "en": dict(
             ALL_MODULES=[],
             ADMIN_HELPABLE=admin_eng,
             ADMIN_USER_MODE=user_mode_eng,
             VISITOR_HELPABLE=user_eng,
         ),
-        "RUS": dict(
+        "ru": dict(
             ALL_MODULES=[],
             ADMIN_HELPABLE=admin_rus,
             ADMIN_USER_MODE=user_mode_rus,
             VISITOR_HELPABLE=user_rus,
         ),
-        "DE": dict(
+        "de": dict(
             ALL_MODULES=[],
             ADMIN_HELPABLE=admin_de,
             ADMIN_USER_MODE=user_mode_de,

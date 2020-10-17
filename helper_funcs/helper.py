@@ -187,28 +187,29 @@ def error_callback(update, context):
             logger.error(err_string)
 
     except Conflict as err:
-        if "terminated by other getUpdates request" in err.message:
-            print(f"Two bots instances running. Bot: {context.bot.first_name}: {context.bot.id}")
-            notifications = conflict_notifications_table.find(
-                {"bot_id": context.bot.id}).sort([["_id", -1]])
-            if (notifications.count() == 0 or
-                    (datetime.now() - notifications[0]["timestamp"]).days >= 1):
-                chat_bot = chatbots_table.find_one({"bot_id": context.bot.id})
-                # Send notification to superuser
-                reply_markup = InlineKeyboardMarkup([
-                    [InlineKeyboardButton(text=context.bot.lang_dict["notification_close_btn"],
-                                          callback_data="dismiss")]])
-                send_superuser_notification(
-                    chat_id=chat_bot["superuser"],
-                    text=context.bot.lang_dict["two_bots_instance_notification"].format(
-                        username="@" + context.bot.username),
-                    reply_markup=reply_markup)
-                conflict_notifications_table.insert_one({"bot_id": context.bot.id,
-                                                         "timestamp": datetime.now()})
-        else:
-            err_string = str(err) + "\nConflict Checker " + traceback.format_exc()
-            print(err_string)
-            logger.error(err_string)
+        # todo check wtf is going on here with notification messages.
+        # if "terminated by other getUpdates request" in err.message:
+        #     print(f"Two bots instances running. Bot: {context.bot.first_name}: {context.bot.id}")
+        #     notifications = conflict_notifications_table.find(
+        #         {"bot_id": context.bot.id}).sort([["_id", -1]])
+        #     if (notifications.count() == 0 or
+        #             (datetime.now() - notifications[0]["timestamp"]).days >= 1):
+        #         chat_bot = chatbots_table.find_one({"bot_id": context.bot.id})
+        #         # Send notification to superuser
+        #         reply_markup = InlineKeyboardMarkup([
+        #             [InlineKeyboardButton(text=context.bot.lang_dict["notification_close_btn"],
+        #                                   callback_data="dismiss")]])
+        #         send_superuser_notification(
+        #             chat_id=chat_bot["superuser"],
+        #             text=context.bot.lang_dict["two_bots_instance_notification"].format(
+        #                 username="@" + context.bot.username),
+        #             reply_markup=reply_markup)
+        #         conflict_notifications_table.insert_one({"bot_id": context.bot.id,
+        #                                                  "timestamp": datetime.now()})
+        # else:
+        err_string = str(err) + "\nConflict Checker " + traceback.format_exc()
+        print(err_string)
+        logger.error(err_string)
 
     except ConnectionError as err:
         err_string = str(err) + "\nConnectionError Checker " + traceback.format_exc()

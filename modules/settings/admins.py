@@ -137,7 +137,7 @@ class AdminHandler(object):
         # Created separate collection for the admins passwords
         # because when u click "Add admin" button(create new admin link)
         # u need to keep before created links active.
-        # Save password to db to invalid it after user registration.
+        # Save password to db to invalid it after bots registration.
         admin_passwords_table.insert_one(
             {"bot_id": context.bot.id,
              "password": password,

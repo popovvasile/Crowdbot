@@ -211,7 +211,7 @@ class CartHelper(object):
 
     @classmethod
     def price_as_str(cls, cart_item, context, currency=None):
-        # todo repeating - quick solution, create "components" logic for user side
+        # todo repeating - quick solution, create "components" logic for bots side
         if not currency:
             currency = chatbots_table.find_one(
                 {"bot_id": context.bot.id})["shop"]["currency"]

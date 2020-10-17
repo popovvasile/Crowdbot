@@ -31,7 +31,7 @@ def register_chat(update, context):
                           "messages_notification": True,
                           "blocked": False,
                           "unsubscribed": False,
-                          # "tags": ["#all", "#user", "#admin"]
+                          # "tags": ["#all", "#bots", "#admin"]
                           }}, upsert=True)
         else:
             users_table.insert_one(
@@ -50,7 +50,7 @@ def register_chat(update, context):
                  "messages_notification": True,
                  "blocked": False,
                  "unsubscribed": False,
-                 # "tags": ["#all", "#user"]
+                 # "tags": ["#all", "#bots"]
                  })
     elif user["unsubscribed"]:
         users_table.update_one({"user_id": user_id, "bot_id": context.bot.id},
@@ -73,9 +73,9 @@ def register_chat(update, context):
                       "messages_notification": True,
                       "blocked": False,
                       "unsubscribed": False,
-                      # "tags": ["#all", "#user", "#admin"]
+                      # "tags": ["#all", "#bots", "#admin"]
                       }}, upsert=True)
-    elif not user:
+    elif not bots:
         users_table.insert_one(
             {'bot_id': bot_id,
              "chat_id": chat_id,
@@ -92,20 +92,20 @@ def register_chat(update, context):
              "messages_notification": True,
              "blocked": False,
              "unsubscribed": False,
-             # "tags": ["#all", "#user"]
+             # "tags": ["#all", "#bots"]
              })
-    elif user["unsubscribed"]:
+    elif bots["unsubscribed"]:
         users_table.update_one({"user_id": user_id, "bot_id": context.bot.id},
                                {"$set": {"unsubscribed": False}})"""
 
 
 def register_admin(update, context):
-    """Registers user as an administrator"""
+    """Registers bots as an administrator"""
     # Delete all expired passwords
     for admin_password in admin_passwords_table.find({"bot_id": context.bot.id}):
         if (datetime.today() - admin_password["timestamp"]).total_seconds() > 3600:
             admin_passwords_table.delete_one({"_id": admin_password["_id"]})
-    # Check if the user already admin if so - just back
+    # Check if the bots already admin if so - just back
     if users_table.find_one({"bot_id": context.bot.id,
                              "user_id": update.effective_user.id})["is_admin"]:
         return False
@@ -116,12 +116,12 @@ def register_admin(update, context):
     # and never used before(coz we delete password after registration)
     admin_password = admin_passwords_table.find_one({"bot_id": context.bot.id,
                                                      "password": password})
-    # Register user only if the password is correct
+    # Register bots only if the password is correct
     # and date not expired and password never used before
     if admin_password:
         # Invalidate password(delete it)
         admin_passwords_table.delete_one({"_id": admin_password["_id"]})
-        # Set user as administrator
+        # Set bots as administrator
         users_table.update_one(
             {"user_id": update.effective_user.id, "bot_id": context.bot.id},
             {"$set": {
@@ -140,7 +140,7 @@ def register_admin(update, context):
                 "superuser": False,
                 "blocked": False,
                 "unsubscribed": False,
-                # "tags": ["#all", "#user", "#admin"]
+                # "tags": ["#all", "#bots", "#admin"]
             }}, upsert=True)
 
         context.bot.send_message(

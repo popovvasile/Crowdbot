@@ -151,7 +151,7 @@ class PurchaseBot(object):
 """
 
     def start_purchase(self, update, context):
-        # Ask user phone number
+        # Ask bots phone number
         delete_messages(update, context, True)
         context.user_data["used_contacts"] = (
             shop_customers_contacts_table.find_one(

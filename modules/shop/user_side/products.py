@@ -133,7 +133,7 @@ class UserProductsHelper(object):
 
     @classmethod
     def price_as_str(cls, product, context, currency=None):
-        # todo repeating - create "components" logic for user side
+        # todo repeating - create "components" logic for bots side
         if not currency:
             currency = chatbots_table.find_one(
                 {"bot_id": context.bot.id})["shop"]["currency"]

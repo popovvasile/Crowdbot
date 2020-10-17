@@ -149,7 +149,7 @@ class Product(object):
         """Send short representation of the product.
         Must pass only short templates to this method
 
-        Works for the both user and admin side.
+        Works for the both bots and admin side.
         All templates, strings and keyboard must be passed as arguments"""
         try:
             if len(self.content):
@@ -179,7 +179,7 @@ class Product(object):
         """Send full representation of the product.
         text: full template of the product
 
-        Works for the both user and admin side.
+        Works for the both bots and admin side.
         All templates, strings and keyboard must be passed as arguments
         """
         reply_to_message_id = None

@@ -104,9 +104,9 @@ class AdminOrder(Order):
         if self.user_id:
             user = self.context.bot.get_chat_member(self.user_id,
                                                     self.user_id).user
-            # Create user html mention
-            # if user.username:
-            #     mention = user_mention(user.username, user.full_name)
+            # Create bots html mention
+            # if bots.username:
+            #     mention = user_mention(bots.username, bots.full_name)
             # else:
             mention = user.mention_html()
         return mention
@@ -287,7 +287,7 @@ class UserOrder(Order):
 
 class OrderItem(Product):
     """For showing and check orders items.
-    Works for both user and admin side"""
+    Works for both bots and admin side"""
 
     def __init__(self, context, order_item, currency):
         # change order_item["product_id"] to order_item["product"]
