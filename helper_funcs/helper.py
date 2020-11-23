@@ -27,7 +27,14 @@ HELP_STRINGS = """
 {}
 """
 
-
+def boolmoji(boolean: bool):
+    emoji_yes = "✅"
+    emoji_no = '🔲'
+    # emoji_no = '☑️'
+    return emoji_yes if boolean else emoji_no
+def answer_callback_query(update):
+    if update.callback_query:
+        update.callback_query.answer()
 def return_to_menu(update, context):
     context.bot.send_message(update.effective_message.chat.id,
                              context.bot.lang_dict["return_to_menu"],

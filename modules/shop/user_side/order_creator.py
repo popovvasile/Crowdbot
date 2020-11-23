@@ -169,14 +169,14 @@ class PurchaseBot(object):
         else:
             if self.validate_number(update.message.text):
                 context.user_data["order"]["phone_number"] = update.message.text
-                # set it to check in the next step if there are no shipping
+                # set it to check in the next step if there are no delivery
                 update.message.text = "phone"
             else:
                 self.send_number_markup(update, context, True)
                 return ORDER_CONTACTS
-        # Ask address or ask comment if there are no shipping
+        # Ask address or ask comment if there are no delivery
         shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
-        if shop["shipping"]:
+        if shop["delivery"]:
             self.send_address_markup(update, context)
             return ORDER_ADDRESS
         else:
@@ -243,8 +243,8 @@ class PurchaseBot(object):
         # shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
         context.user_data["order"] = {**context.user_data["order"],
                                       **context.user_data["order_data"]["order"]}
-        context.user_data["order"]["shipping"] = (
-            context.user_data["order_data"]["shop"]["shipping"])
+        context.user_data["order"]["delivery"] = (
+            context.user_data["order_data"]["shop"]["delivery"])
 
         context.user_data["to_delete"].append(
             context.bot.send_message(chat_id=update.effective_chat.id,
@@ -254,7 +254,7 @@ class PurchaseBot(object):
         # Creating confirm order text
         confirm_text = context.bot.lang_dict["confirm_order_text"].format(
             context.user_data['order']['phone_number'])
-        if context.user_data["order"]["shipping"]:
+        if context.user_data["order"]["delivery"]:
             confirm_text += context.bot.lang_dict["delivery_to"].format(
                 html.escape(context.user_data["order"]['address'], quote=False))
         else:

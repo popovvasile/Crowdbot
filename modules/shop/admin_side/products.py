@@ -76,7 +76,7 @@ class ProductsHelper(object):
                     item for item in order["items"]
                     if item["product_id"] == product_obj.id_)["quantity"]
 
-                if order["shipping"]:
+                if order["delivery"]:
                     emoji = "🚚"
                 else:
                     emoji = "🖐"

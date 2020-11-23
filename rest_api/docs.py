@@ -13,7 +13,7 @@ bot_response = {
         "currency": String,
         "description": String,
         "payment_token": String,
-        "shipping": Boolean,
+        "delivery": Boolean,
         "shop_type": String
     },
     "shop_enabled": Boolean,

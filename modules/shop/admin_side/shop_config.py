@@ -42,14 +42,14 @@ class EnableDisableShopDonations(object):
             payment_token_text = "add_payment_token"
             antitype = "online_shop"
 
-        if chatbot["shop"]["shipping"] is False:
+        if chatbot["shop"]["delivery"] is False:
             admin_keyboard = [
                 [InlineKeyboardButton(text=context.bot.lang_dict["change_shop_address_button"],
                                       callback_data="edit_change_shop_address")]]
-            anti_shipping_text = "to customer delivery"
+            anti_delivery_text = "to customer delivery"
         else:
             admin_keyboard = []
-            anti_shipping_text = "self-delivery"
+            anti_delivery_text = "self-delivery"
 
         if chatbot["shop_enabled"] is True and "shop" in chatbot and chatbot["premium"]:
             admin_keyboard.append([InlineKeyboardButton(
@@ -62,8 +62,8 @@ class EnableDisableShopDonations(object):
                 text=context.bot.lang_dict[payment_token_text],
                 callback_data="edit_change_shop_payment_token")]),
             admin_keyboard.append([InlineKeyboardButton(
-                text=context.bot.lang_dict[anti_shipping_text],
-                callback_data="edit_change_shop_shipping")]),
+                text=context.bot.lang_dict[anti_delivery_text],
+                callback_data="edit_change_shop_delivery")]),
             admin_keyboard.append([InlineKeyboardButton(
                 text=context.bot.lang_dict["change_donation_greeting"],
                 callback_data="edit_change_shop_description")]),
@@ -172,11 +172,11 @@ class EditPaymentHandler(object):
                 + context.bot.lang_dict["donations_edit_str_12"],
                 parse_mode=ParseMode.HTML,
                 reply_markup=reply_markup))
-        elif "shipping" in data:
+        elif "delivery" in data:
             chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
-            chatbot["shop"].update({"shipping": not (chatbot["shop"]["shipping"])})
+            chatbot["shop"].update({"delivery": not (chatbot["shop"]["delivery"])})
             if "address" in chatbot["shop"]:
-                if chatbot["shop"]["shipping"]:
+                if chatbot["shop"]["delivery"]:
                     context.user_data["to_delete"].append(update.message.reply_text(
                         context.bot.lang_dict["create_shop_str_12"],
                         reply_markup=reply_markup))

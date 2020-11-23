@@ -37,6 +37,7 @@ from modules.settings.notification import NOTIFICATION_MENU, NOTIFICATION_EDIT
 # USERS AND MESSAGES
 # from modules.users.messages_admin import SEND_MESSAGE_ONLY_TO_ADMINS_HANDLER
 # from modules.users.messages_donators import SEND_MESSAGE_TO_DONATORS_HANDLER
+from modules.shop.admin_side.shop_create import CREATE_SHOP_HANDLER
 from modules.users.messages import (
     SEND_MESSAGE_TO_ADMIN_HANDLER, SEND_MESSAGE_TO_USERS_HANDLER,
     SEE_MESSAGES_HANDLER, ANSWER_TO_MESSAGE_HANDLER, DELETE_MESSAGES_HANDLER,
@@ -61,7 +62,7 @@ from modules.shop.admin_side.shop_config import (CONFIGS_SHOP_GENERAL, CHANGE_SH
                                                  EDIT_SHOP_HANDLER)
 
 # SHOP ADMIN SIDE
-from modules.shop.admin_side.eshop_enable_disable import CREATE_SHOP_HANDLER
+# from modules.shop.admin_side.eshop_enable_disable import CREATE_SHOP_HANDLER
 from modules.shop.admin_side.welcome import START_SHOP_HANDLER, BACK_TO_MAIN_MENU_HANDLER, Welcome
 from modules.shop.admin_side.adding_product import ADD_PRODUCT_HANDLER
 from modules.shop.admin_side.orders import ORDERS_HANDLER

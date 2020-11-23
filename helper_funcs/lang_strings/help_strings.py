@@ -29,7 +29,7 @@ def help_strings(context, update):
                                   callback_data="my_orders")],
             [InlineKeyboardButton(text=cart_button_text,
                                   callback_data="cart")]]
-        if shop.get("shipping") is False:
+        if shop.get("delivery") is False:
             user_keyboard_shop += [
                 [InlineKeyboardButton(text=context.bot.lang_dict["shop_contact_and_address"],
                                       callback_data="contacts_shop")]]

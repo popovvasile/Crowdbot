@@ -25,7 +25,7 @@ class Order(object):
         self.total_price = order.get("total_price")
         self.items_json = order.get("items", list())
         self.currency = order.get("currency")
-        self.shipping = order.get("shipping")
+        self.delivery = order.get("delivery")
         self.user_comment = order.get("user_comment")
         self.phone_number = order.get("phone_number")
         self.address = order.get("address")
@@ -51,7 +51,7 @@ class Order(object):
         self.total_price = order.get("total_price")
         self.items_json = order.get("items", list())
         self.currency = order.get("currency")
-        self.shipping = order.get("shipping")
+        self.delivery = order.get("delivery")
         self.user_comment = order.get("user_comment")
         self.phone_number = order.get("phone_number")
         self.address = order.get("address")
@@ -161,7 +161,7 @@ class AdminOrder(Order):
             elif shop["shop_type"] == "online" and not self.paid:
                 string += self.context.bot.lang_dict["paid_status_false"]
 
-        if self.shipping:
+        if self.delivery:
             string += self.context.bot.lang_dict["delivery_to"].format(
                 html.escape(self.address, quote=False))
         else:
@@ -226,7 +226,7 @@ class UserOrder(Order):
         if self.status:
             string = self.context.bot.lang_dict["shop_admin_order_status_true"]
             return string
-        if self.shipping:
+        if self.delivery:
             # string = self.context.bot.lang_dict["order_on_way_to"].format(self.address)
             string = "🚚 " + f"{html.escape(self.address, quote=False)}"
         else:
@@ -249,7 +249,7 @@ class UserOrder(Order):
         elif self.status:
             string = self.context.bot.lang_dict["shop_admin_order_status_true"]
         else:
-            if self.shipping:
+            if self.delivery:
                 string = self.context.bot.lang_dict["delivery_status"]
             else:
                 string = self.context.bot.lang_dict["self_delivery_status"]
@@ -258,7 +258,7 @@ class UserOrder(Order):
             elif shop["shop_type"] == "online" and not self.paid:
                 string += self.context.bot.lang_dict["paid_status_false"]
 
-        if self.shipping:
+        if self.delivery:
             string += self.context.bot.lang_dict["user_delivery_to"].format(
                 html.escape(self.address, quote=False))
         else:
