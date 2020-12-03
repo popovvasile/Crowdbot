@@ -38,11 +38,9 @@ class UserMode(object):
         return ConversationHandler.END
 
     def turn_user_mode_off(self, update, context):
-        buttons = list()
-        buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["menu_button"],
-                                             callback_data="help_back")])  # must stay so, help_back
         reply_markup = InlineKeyboardMarkup(
-            buttons)
+            [[InlineKeyboardButton(text=context.bot.lang_dict["menu_button"],
+                                   callback_data="help_back")]])
 
         context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
                                    message_id=update.callback_query.message.message_id,)

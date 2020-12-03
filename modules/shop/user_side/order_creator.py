@@ -74,17 +74,6 @@ class PurchaseBot(object):
     @staticmethod
     def validate_number(number):
         """Strong Numbers Validation"""
-        # @staticmethod
-        # def validate_number(number):
-        #     if not number.startswith('+') or not number.startswith('00'):
-        #         number = "+" + number
-        #     if not 5 < len(number) < 25:
-        #         return False
-        #     try:
-        #         z = phonenumbers.parse(number, region=None, _check_region=False)
-        #         return phonenumbers.is_valid_number(z)
-        #     except phonenumbers.phonenumberutil.NumberParseException:
-        #         return False
 
         """Free style numbers Validation."""
         if not 5 < len(number) < 30:
@@ -104,52 +93,6 @@ class PurchaseBot(object):
         else:
             return False
 
-
-    """@staticmethod
-    def start_purchase(update, context):
-        delete_messages(update, context, True)
-        # context.user_data["to_delete"].append(
-        #     context.bot.send_message(
-        #         chat_id=update.callback_query.message.chat.id,
-        #         text=context.bot.lang_dict["to_pay"].format(
-        #             str(context.user_data["order"]["total_price"]),
-        #             str(context.user_data["order"]["currency"]))))
-
-        context.user_data["to_delete"].append(
-            context.bot.send_message(
-                chat_id=update.callback_query.message.chat.id,
-                text=context.bot.lang_dict["add_order_comment"],
-                reply_markup=InlineKeyboardMarkup([
-                    [InlineKeyboardButton(
-                         text=context.bot.lang_dict["continue_btn"],
-                         callback_data="pass_order_comment")],
-                    [InlineKeyboardButton(
-                         text=context.bot.lang_dict["back_button"],
-                         callback_data="back_to_cart")]
-                     ])))
-        return ORDER_CONTACTS"""
-
-
-    """        if update.callback_query:
-            context.user_data["order"]["user_comment"] = ""
-        elif len(update.message.text) > 445:
-            context.user_data["to_delete"].append(
-                context.bot.send_message(
-                    update.effective_chat.id,
-                    context.bot.lang_dict["order_comment_too_long"],
-                    reply_markup=InlineKeyboardMarkup([
-                        [InlineKeyboardButton(
-                             text=context.bot.lang_dict["continue_btn"],
-                             callback_data="pass_order_comment")],
-                        [InlineKeyboardButton(
-                             text=context.bot.lang_dict["back_button"],
-                             callback_data="back_to_cart")]
-                         ])))
-            return ORDER_CONTACTS
-        else:
-            context.user_data["order"]["user_comment"] = update.message.text
-"""
-
     def start_purchase(self, update, context):
         # Ask bots phone number
         delete_messages(update, context, True)
@@ -159,6 +102,20 @@ class PurchaseBot(object):
                  "user_id": update.effective_user.id}) or {})
         self.send_number_markup(update, context)
         return ORDER_CONTACTS
+
+    def send_delivery_or_pick_up(self, update, context):
+        reply_markup = [
+            [InlineKeyboardButton(text=context.bot.lang_dict["shop_creation_delivery"],
+                                  callback_data="order_delivery")],
+            [InlineKeyboardButton(text=context.bot.lang_dict["shop_creation_pick_up"],
+                                  callback_data="order_pick_up")],
+            [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
+                                  callback_data="help_module(shop)")],
+        ]
+        context.user_data["to_delete"].append(context.bot.send_message(
+            update.callback_query.message.chat_id,
+            context.bot.lang_dict["create_shop_str_13"],
+            reply_markup=InlineKeyboardMarkup(reply_markup)))
 
     def ask_address(self, update, context):
         delete_messages(update, context, True)
@@ -173,19 +130,21 @@ class PurchaseBot(object):
                 update.message.text = "phone"
             else:
                 self.send_number_markup(update, context, True)
-                return ORDER_CONTACTS
-        # Ask address or ask comment if there are no delivery
         shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
-        if shop["delivery"]:
-            self.send_address_markup(update, context)
-            return ORDER_ADDRESS
+        if shop["delivery"] and shop["pick_up"]:
+            self.send_delivery_or_pick_up(update, context)
         else:
-            return self.ask_comment(update, context)
+            self.send_address_markup(update, context)
+        return ORDER_ADDRESS
 
     def ask_comment(self, update, context):
-        # Set address
-        if update.callback_query and "address" in update.callback_query.data:
-            context.user_data["order"]["address"] = (update.callback_query.data.split("/")[1])
+        if update.callback_query:
+            data = update.callback_query.data
+            if "delivery" in data or "address" in data:
+                context.user_data["order"]["address"] = (data.split("/")[1])
+            else:
+                self.send_number_markup(update, context, True)
+                return ORDER_ADDRESS
         elif update.message and update.message.text != "phone":
             if len(update.message.text) < MIN_ADDRESS_LENGTH:
                 self.send_address_markup(update, context, context.bot.lang_dict["short_address"])
@@ -382,6 +341,8 @@ OFFLINE_PURCHASE_HANDLER = ConversationHandler(
                            callback=PurchaseBot().ask_address)],
 
         ORDER_ADDRESS: [
+            CallbackQueryHandler(pattern=r"order",
+                                 callback=PurchaseBot().ask_comment),
             CallbackQueryHandler(pattern=r"address",
                                  callback=PurchaseBot().ask_comment),
             MessageHandler(Filters.text,

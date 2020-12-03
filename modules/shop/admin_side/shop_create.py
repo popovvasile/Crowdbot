@@ -35,10 +35,11 @@ class CreateShopHandler(object):
         data = update.callback_query.data
         delete_messages(update, context, True)
         if "delivery" not in context.user_data:
-            context.user_data["delivery"] = False
+            context.user_data["delivery"] = True
         if "pick_up" not in context.user_data:
             context.user_data["pick_up"] = False
-
+        if not context.user_data["pick_up"] and not context.user_data["delivery"]:
+            context.user_data["delivery"] = True
         if "delivery_true" in data and not context.user_data["delivery"]:
             context.user_data["delivery"] = True
         elif "delivery_false" in data:
@@ -48,17 +49,15 @@ class CreateShopHandler(object):
         elif "pick_up_false" in data:
             context.user_data["pick_up"] = False
 
-        delivery_str = "delivery_true" if context.user_data["delivery"] else "delivery_false"
         delivery_callback = "delivery_false" if context.user_data["delivery"] else "delivery_true"
-        pick_up_str = "pick_up_true" if context.user_data["pick_up"] else "pick_up_false"
         pick_up_callback = "pick_up_false" if context.user_data["pick_up"] else "pick_up_true"
 
         keyboard = InlineKeyboardMarkup(
             [[InlineKeyboardButton(
-                text=f'{boolmoji(context.user_data["delivery"])} {text[delivery_str]}',
+                text=f'{boolmoji(context.user_data["delivery"])} {text["delivery"]}',
                 callback_data=delivery_callback)],
                 [InlineKeyboardButton(
-                    text=f'{boolmoji(context.user_data["pick_up"])} {text[pick_up_str]}',
+                    text=f'{boolmoji(context.user_data["pick_up"])} {text["pick_up"]}',
                     callback_data=pick_up_callback)],
                 [InlineKeyboardButton(text=text['continue_button_text'],
                                       callback_data='agree_with_terms')],
@@ -160,6 +159,7 @@ class CreateShopHandler(object):
             return SHOP_FINISH
 
     def handle_shop_finish(self, update, context):
+        context.user_data["shop_type"] = "offline"
         context.user_data["currency"] = update.callback_query.data.split("/")[1]
         chatbot = chatbots_table.find_one({"bot_id": context.bot.id}) or {}
         context.user_data.pop("to_delete", None)
