@@ -20,8 +20,7 @@ from modules.shop.helper.keyboards import back_btn, currency_markup
  TYPING_TITLE, TYPING_DESCRIPTION, TYPING_CURRENCY,
  TYPING_TOKEN, TYPING_TOKEN_FINISH, EDIT_FINISH,
  DOUBLE_CHECK_DELETE, DELETE_FINISH, CURRENCY_FINISH,
- ASK_TOKEN, TYPING_SHOP_ADDRESS, SHOP_FINISH, CHOOSING_PICK_UP_OR_DELIVERY,
- DELIVERY_FEE, ASK_CURRENCY, CHOOSING_SHIPPING) = range(21)
+ TYPING_SHOP_ADDRESS) = range(15)
 
 
 class EnableDisableShopDonations(object):
@@ -36,6 +35,14 @@ class EnableDisableShopDonations(object):
         except (telegram.error.BadRequest, telegram.error.TelegramError):
             pass
         chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
+        context.user_data["delivery"] = chatbot["shop"]["delivery"]
+        context.user_data["pick_up"] = chatbot["shop"]["pick_up"]
+        text = context.bot.lang_dict
+
+        delivery_callback = "edit_change_delivery_false" if context.user_data["delivery"] \
+            else "edit_change_delivery_true"
+        pick_up_callback = "edit_change_pick_up_false" if context.user_data["pick_up"] \
+            else "edit_change_pick_up_true"
 
         if chatbot["shop"]["shop_type"] == "online":
             payment_token_text = "change_payment_token"
@@ -48,10 +55,8 @@ class EnableDisableShopDonations(object):
             admin_keyboard = [
                 [InlineKeyboardButton(text=context.bot.lang_dict["change_shop_address_button"],
                                       callback_data="edit_change_shop_address")]]
-            anti_delivery_text = "to customer delivery"
         else:
             admin_keyboard = []
-            anti_delivery_text = "self-delivery"
 
         if chatbot["shop_enabled"] is True and "shop" in chatbot and chatbot["premium"]:
             admin_keyboard.append([InlineKeyboardButton(
@@ -64,14 +69,17 @@ class EnableDisableShopDonations(object):
                 text=context.bot.lang_dict[payment_token_text],
                 callback_data="edit_change_shop_payment_token")]),
             admin_keyboard.append([InlineKeyboardButton(
-                text=context.bot.lang_dict[anti_delivery_text],
-                callback_data="edit_change_shop_delivery")]),
+                text=f'{boolmoji(context.user_data["delivery"])} {text["delivery"]}',
+                callback_data=delivery_callback)])
+            admin_keyboard.append([InlineKeyboardButton(
+                    text=f'{boolmoji(context.user_data["pick_up"])} {text["pick_up"]}',
+                    callback_data=pick_up_callback)])
             admin_keyboard.append([InlineKeyboardButton(
                 text=context.bot.lang_dict["change_donation_greeting"],
                 callback_data="edit_change_shop_description")]),
             admin_keyboard.append([InlineKeyboardButton(
                 text=context.bot.lang_dict["change_donation_currency"],
-                callback_data="edit_change_shop_currency")]),
+                callback_data="edit_change_shop_currency")])
         elif chatbot["premium"]:
             admin_keyboard.append([InlineKeyboardButton(
                 text=context.bot.lang_dict["allow_shop_button"],
@@ -123,125 +131,6 @@ CHANGE_SHOP_CONFIG = CallbackQueryHandler(
     callback=EnableDisableShopDonations().enable_shop)
 
 
-class EditDeliveryPickUp(object):
-    def start_create_shop(self, update, context):
-        text = context.bot.lang_dict
-
-        if "to_delete" not in context.user_data:
-            context.user_data["to_delete"] = []
-        data = update.callback_query.data
-        delete_messages(update, context, True)
-        if "delivery" not in context.user_data:
-            context.user_data["delivery"] = True
-        if "pick_up" not in context.user_data:
-            context.user_data["pick_up"] = False
-        if not context.user_data["pick_up"] and not context.user_data["delivery"]:
-            context.user_data["delivery"] = True
-        if "delivery_true" in data and not context.user_data["delivery"]:
-            context.user_data["delivery"] = True
-        elif "delivery_false" in data:
-            context.user_data["delivery"] = False
-        if "pick_up_true" in data and not context.user_data["pick_up"]:
-            context.user_data["pick_up"] = True
-        elif "pick_up_false" in data:
-            context.user_data["pick_up"] = False
-
-        delivery_callback = "delivery_false" if context.user_data["delivery"] else "delivery_true"
-        pick_up_callback = "pick_up_false" if context.user_data["pick_up"] else "pick_up_true"
-
-        keyboard = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(
-                text=f'{boolmoji(context.user_data["delivery"])} {text["delivery"]}',
-                callback_data=delivery_callback)],
-                [InlineKeyboardButton(
-                    text=f'{boolmoji(context.user_data["pick_up"])} {text["pick_up"]}',
-                    callback_data=pick_up_callback)],
-                [InlineKeyboardButton(text=text['continue_button_text'],
-                                      callback_data='agree_with_terms')],
-                [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                      callback_data="help_module(shop)")]
-            ]
-        )
-        context.user_data['checkbox_id'] = context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text=text["create_shop_str_13"],
-            reply_markup=keyboard,
-            disable_web_page_preview=True).message_id
-
-        answer_callback_query(update)
-
-        return CHOOSING_PICK_UP_OR_DELIVERY
-
-    def handle_type(self, update, context):
-        delete_messages(update, context, True)
-        reply_markup = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                   callback_data="help_module(shop)")]])
-
-        if context.user_data["delivery"]:
-            context.user_data["to_delete"].append(
-                context.bot.send_message(update.callback_query.message.chat_id,
-                                         context.bot.lang_dict["create_shop_str_6"],
-                                         reply_markup=reply_markup))
-            return TYPING_DESCRIPTION
-        elif context.user_data["pick_up"]:
-            context.user_data["to_delete"].append(
-                context.bot.send_message(update.callback_query.message.chat_id,
-                                         context.bot.lang_dict["create_shop_str_9"],
-                                         reply_markup=reply_markup))
-            return TYPING_SHOP_ADDRESS
-
-    def handle_address(self, update, context):
-        # delete_list = context.user_data["to_delete"]
-        # delete_list.append(update.message)
-        delete_messages(update, context, True)
-
-        chat_id, txt = initiate_chat_id(update)
-        reply_markup = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                   callback_data="help_module(shop)")]])
-        if len(txt) < MIN_ADDRESS_LENGTH:
-            context.user_data["to_delete"].append(
-                context.bot.send_message(update.effective_chat.id,
-                                         context.bot.lang_dict["short_address"]
-                                         + context.bot.lang_dict["create_shop_str_9"],
-                                         reply_markup=reply_markup))
-            return TYPING_SHOP_ADDRESS
-        elif len(txt) > MAX_ADDRESS_LENGTH:
-            context.user_data["to_delete"].append(
-                context.bot.send_message(update.effective_chat.id,
-                                         context.bot.lang_dict["long_address"]
-                                         + context.bot.lang_dict["create_shop_str_9"],
-                                         reply_markup=reply_markup))
-            return TYPING_SHOP_ADDRESS
-
-        context.user_data["address"] = txt
-        context.user_data["to_delete"].append(update.message.reply_text(
-            context.bot.lang_dict["create_shop_str_7"],
-            reply_markup=currency_markup(context)))
-        return SHOP_FINISH
-
-    def handle_delivery_fee(self, update, context):
-        delete_messages(update, context, True)
-        chat_id, txt = initiate_chat_id(update)
-        context.user_data["delivery_fee"] = float(txt)
-        reply_markup = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
-                                   callback_data="help_module(shop)")]])
-
-        if context.user_data["pick_up"]:
-            context.user_data["to_delete"].append(
-                context.bot.send_message(update.message.chat_id,
-                                         context.bot.lang_dict["create_shop_str_9"],
-                                         reply_markup=reply_markup))
-            return TYPING_SHOP_ADDRESS
-        else:
-            context.user_data["to_delete"].append(update.message.reply_text(
-                context.bot.lang_dict["create_shop_str_7"],
-                reply_markup=currency_markup(context)))
-            return SHOP_FINISH
-
-
 class EditPaymentHandler(object):
 
     def handle_edit_action_finish(self, update, context):
@@ -250,6 +139,8 @@ class EditPaymentHandler(object):
         reply_markup = InlineKeyboardMarkup([[back_btn("shop_config", context=context)]])
         update = update.callback_query
         data = update.data
+        print(context.user_data)
+        print(data)
         chat_id = update.message.chat_id
         chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
 
@@ -264,6 +155,21 @@ class EditPaymentHandler(object):
             context.user_data["to_delete"].append(update.message.reply_text(
                 context.bot.lang_dict["donations_edit_str_8"],
                 reply_markup=reply_markup))
+
+        if "delivery_true" in data and not context.user_data["delivery"]:
+            context.user_data["delivery"] = True
+        elif "delivery_false" in data:
+            context.user_data["delivery"] = False
+        if "pick_up_true" in data and not context.user_data["pick_up"]:
+            context.user_data["pick_up"] = True
+        elif "pick_up_false" in data:
+            context.user_data["pick_up"] = False
+        if not context.user_data["pick_up"] and not context.user_data["delivery"]:
+            context.user_data["to_delete"].append(update.message.reply_text(
+                context.bot.lang_dict["create_shop_str_10"],
+                reply_markup=reply_markup))
+            return ConversationHandler.END
+
         elif "currency" in data:
             context.user_data["action"] = "currency"
             text = context.bot.lang_dict["payments_current_payments"].format(chatbot["shop"][
