@@ -139,8 +139,6 @@ class EditPaymentHandler(object):
         reply_markup = InlineKeyboardMarkup([[back_btn("shop_config", context=context)]])
         update = update.callback_query
         data = update.data
-        print(context.user_data)
-        print(data)
         chat_id = update.message.chat_id
         chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
 
@@ -156,19 +154,23 @@ class EditPaymentHandler(object):
                 context.bot.lang_dict["donations_edit_str_8"],
                 reply_markup=reply_markup))
 
-        if "delivery_true" in data and not context.user_data["delivery"]:
-            context.user_data["delivery"] = True
-        elif "delivery_false" in data:
-            context.user_data["delivery"] = False
-        if "pick_up_true" in data and not context.user_data["pick_up"]:
-            context.user_data["pick_up"] = True
-        elif "pick_up_false" in data:
-            context.user_data["pick_up"] = False
-        if not context.user_data["pick_up"] and not context.user_data["delivery"]:
-            context.user_data["to_delete"].append(update.message.reply_text(
-                context.bot.lang_dict["create_shop_str_10"],
-                reply_markup=reply_markup))
-            return ConversationHandler.END
+        # if "delivery_true" in data and not context.user_data["delivery"]:
+        #     context.user_data["delivery"] = True
+        # elif "delivery_false" in data:
+        #     context.user_data["delivery"] = False
+        # if "pick_up_true" in data and not context.user_data["pick_up"]:
+        #     context.user_data["pick_up"] = True
+        # elif "pick_up_false" in data:
+        #     context.user_data["pick_up"] = False
+        #
+        # if context.user_data["pick_up"] and context.user_data["delivery"]:
+        #     "create_shop_str_16"
+        # if not context.user_data["pick_up"] and not context.user_data["delivery"]:
+        #     context.user_data["pick_up"] = True
+        #     context.user_data["to_delete"].append(update.message.reply_text(
+        #         context.bot.lang_dict["create_shop_str_10"],
+        #         reply_markup=reply_markup))
+        #     return ConversationHandler.END
 
         elif "currency" in data:
             context.user_data["action"] = "currency"
@@ -199,9 +201,19 @@ class EditPaymentHandler(object):
                 + context.bot.lang_dict["donations_edit_str_12"],
                 parse_mode=ParseMode.HTML,
                 reply_markup=reply_markup))
-        elif "delivery" in data:
+        elif "delivery" in data or "pick_up" in data:
             chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
-            chatbot["shop"].update({"delivery": not (chatbot["shop"]["delivery"])})
+            if "delivery_true" in data and not context.user_data["delivery"]:
+                chatbot["shop"]["delivery"] = True
+            elif "delivery_false" in data:
+                chatbot["shop"]["delivery"] = False
+            if "pick_up_true" in data:
+                chatbot["shop"]["pick_up"] = True
+            elif "pick_up_false" in data:
+                chatbot["shop"]["pick_up"] = False
+            if not context.user_data["pick_up"] and not context.user_data["delivery"]:
+                chatbot["shop"]["pick_up"] = True
+
             if "address" in chatbot["shop"]:
                 if chatbot["shop"]["delivery"]:
                     context.user_data["to_delete"].append(update.message.reply_text(
@@ -215,6 +227,7 @@ class EditPaymentHandler(object):
                 return ConversationHandler.END
             else:
                 context.user_data["action"] = "address"
+                chatbots_table.update_one({"bot_id": context.bot.id}, {'$set': chatbot})
                 context.user_data["to_delete"].append(update.message.reply_text(
                     context.bot.lang_dict["create_shop_str_9"],
                     reply_markup=reply_markup))
