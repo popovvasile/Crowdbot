@@ -154,24 +154,6 @@ class EditPaymentHandler(object):
                 context.bot.lang_dict["donations_edit_str_8"],
                 reply_markup=reply_markup))
 
-        # if "delivery_true" in data and not context.user_data["delivery"]:
-        #     context.user_data["delivery"] = True
-        # elif "delivery_false" in data:
-        #     context.user_data["delivery"] = False
-        # if "pick_up_true" in data and not context.user_data["pick_up"]:
-        #     context.user_data["pick_up"] = True
-        # elif "pick_up_false" in data:
-        #     context.user_data["pick_up"] = False
-        #
-        # if context.user_data["pick_up"] and context.user_data["delivery"]:
-        #     "create_shop_str_16"
-        # if not context.user_data["pick_up"] and not context.user_data["delivery"]:
-        #     context.user_data["pick_up"] = True
-        #     context.user_data["to_delete"].append(update.message.reply_text(
-        #         context.bot.lang_dict["create_shop_str_10"],
-        #         reply_markup=reply_markup))
-        #     return ConversationHandler.END
-
         elif "currency" in data:
             context.user_data["action"] = "currency"
             text = context.bot.lang_dict["payments_current_payments"].format(chatbot["shop"][
@@ -181,7 +163,6 @@ class EditPaymentHandler(object):
                 update.message.reply_text(
                     text,
                     reply_markup=currency_markup(context)))
-            # if "currency" in chatbot["shop"]:
 
         elif "address" in data:
             context.user_data["action"] = "address"
@@ -211,8 +192,9 @@ class EditPaymentHandler(object):
                 chatbot["shop"]["pick_up"] = True
             elif "pick_up_false" in data:
                 chatbot["shop"]["pick_up"] = False
-            if not context.user_data["pick_up"] and not context.user_data["delivery"]:
-                chatbot["shop"]["pick_up"] = True
+            if not chatbot["shop"]["pick_up"] and not chatbot["shop"]["delivery"]:
+                chatbot["shop"]["pick_up"] = False
+                chatbot["shop"]["delivery"] = True
 
             if "address" in chatbot["shop"]:
                 if chatbot["shop"]["delivery"]:
