@@ -29,11 +29,7 @@ class EnableDisableShopDonations(object):
             update_data = update.callback_query
         else:
             update_data = update
-        try:
-            context.bot.delete_message(chat_id=update_data.message.chat_id,
-                                       message_id=update_data.message.message_id)
-        except (telegram.error.BadRequest, telegram.error.TelegramError):
-            pass
+        delete_messages(update, context)
         chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
         context.user_data["delivery"] = chatbot["shop"]["delivery"]
         context.user_data["pick_up"] = chatbot["shop"]["pick_up"]
@@ -65,6 +61,10 @@ class EnableDisableShopDonations(object):
             admin_keyboard.append([InlineKeyboardButton(
                 text=context.bot.lang_dict["edit_change_shop_type"].format(antitype.split("_")[0]),
                 callback_data="edit_change_shop_type")]),
+            admin_keyboard.append([InlineKeyboardButton(
+                text=context.bot.lang_dict["edit_change_shipping_fee"].format(antitype.split(
+                    "_")[0]),
+                callback_data="edit_change_shipping_fee")]),
             admin_keyboard.append([InlineKeyboardButton(
                 text=context.bot.lang_dict[payment_token_text],
                 callback_data="edit_change_shop_payment_token")]),
@@ -143,6 +143,18 @@ class EditPaymentHandler(object):
         chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
 
         context.user_data["target"] = "shop"
+        if "shipping_fee" in data:
+            context.user_data["action"] = "delivery_fee"
+            if "delivery_fee" in chatbot["shop"]:
+                context.user_data["to_delete"].append(update.message.reply_text(
+                    context.bot.lang_dict["payments_current_delivery_fee"].format(
+                        chatbot["shop"]["delivery_fee"],
+                        chatbot["shop"]["currency"]
+                    )))
+            context.user_data["to_delete"].append(update.message.reply_text(
+                context.bot.lang_dict["donations_edit_str_8"],
+                reply_markup=reply_markup))
+
         if "description" in data:
             context.user_data["action"] = "description"
             if "description" in chatbot["shop"]:
@@ -249,6 +261,9 @@ class EditPaymentHandler(object):
         update_dict = {}
         if context.user_data["action"] == "description":
             update_dict["description"] = txt
+        if context.user_data["action"] == "delivery_fee":
+            update_dict["description"] = float(txt)
+
         if context.user_data["action"] == "address":
             if len(txt) < MIN_ADDRESS_LENGTH:
                 context.user_data["to_delete"].append(
