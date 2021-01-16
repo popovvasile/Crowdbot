@@ -1,4 +1,3 @@
-from pprint import pprint
 import html
 
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
@@ -26,30 +25,27 @@ class CartHelper(object):
             cart_item = cls.validate_cart_item(cart, cart_item["product_id"])
             if cart_item:
                 cart_items.append(cart_item)
-        # print(cart_items)
         shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
         template = context.bot.lang_dict["order_create_title"]
-        order_price = 0
+        if context.user_data.get("shipping", False) is True:
+            order_price = shop["delivery_fee"]
+        else:
+            order_price = 0
         for cart_item in cart_items:
-            pprint(cart_item)
             if cart_item["product"].get("discount_price"):
-                item_price = (round(float(cart_item["product"]["discount_price"])
-                              * cart_item["quantity"], 2))
+                item_price = (round(float(cart_item["product"]["discount_price"]), 2))
             else:
-                item_price = (round(float(cart_item["product"]["price"])
-                              * cart_item["quantity"], 2))
-            # print(item_price)
-            order_price += item_price
+                item_price = (round(float(cart_item["product"]["price"]), 2))
+            order_price += item_price * cart_item["quantity"]
             if len(template) < 3800:
                 template += (
-                    "<b>{}</b>\n<i>x{}</i> - <b>{} {}</b>\n\n").format(
-                    html.escape(cart_item["product"]["name"], quote=False),
-                    cart_item["quantity"],
-                    item_price,
-                    shop["currency"])
+                    context.bot.lang_dict["order_total_price"]).format(
+                    name=html.escape(cart_item["product"]["name"], quote=False),
+                    amount=cart_item["quantity"],
+                    price_per_piece=str(item_price) + shop["currency"],
+                    total_price=str(order_price) + shop["currency"])
             elif not template.endswith("..."):
                 template += "..."
-        template += context.bot.lang_dict["order_create_end"].format(order_price, shop['currency'])
         # Save order data. Need to check order data on each step??
         order = dict()
         order["items"] = cart_items

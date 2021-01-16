@@ -6,3 +6,15 @@ serve -s build
 
 Certificates are in /etc/ssl
 in .crt you must combine 3 files: https://www.reg.ru/support/ssl-sertifikaty/ustanovka-ssl-sertifikata/ustanovka-ssl-sertifikata-na-nginx
+
+
+1) ssh root@64.227.14.144/
+пароль- python#1917
+2)su - crowdbot
+3)cd websitereact
+4)git pull
+5)npm run-script build
+6)sudo pkill -9 node      пароль- python#13
+7)rm nohup.out
+8)nohup serve -s build &
+

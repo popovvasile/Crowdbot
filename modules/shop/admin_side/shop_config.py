@@ -259,10 +259,10 @@ class EditPaymentHandler(object):
         chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
         chat_id, txt = initiate_chat_id(update)
         update_dict = {}
+        if context.user_data["action"] == "delivery_fee":
+            update_dict["delivery_fee"] = float(txt)
         if context.user_data["action"] == "description":
             update_dict["description"] = txt
-        if context.user_data["action"] == "delivery_fee":
-            update_dict["description"] = float(txt)
 
         if context.user_data["action"] == "address":
             if len(txt) < MIN_ADDRESS_LENGTH:

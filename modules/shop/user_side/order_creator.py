@@ -3,8 +3,8 @@
 import datetime
 import html
 import uuid
+from pprint import pprint
 
-import phonenumbers as phonenumbers
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ParseMode, TelegramError
 from telegram.ext import MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
 
@@ -17,8 +17,7 @@ from modules.shop.user_side.cart import Cart
 from modules.shop.user_side.online_payment import OnlinePayment
 from modules.shop.components.order import UserOrder, Product, AdminOrder
 
-
-ORDER_CONTACTS, ORDER_ADDRESS, ORDER_COMMENT, ORDER_FINISH = range(4)
+ASK_DELIVERY_OR_PICK_UP, ORDER_CONTACTS, ORDER_ADDRESS, ORDER_COMMENT, ORDER_FINISH = range(5)
 
 
 class PurchaseBot(object):
@@ -74,6 +73,17 @@ class PurchaseBot(object):
     @staticmethod
     def validate_number(number):
         """Strong Numbers Validation"""
+        # @staticmethod
+        # def validate_number(number):
+        #     if not number.startswith('+') or not number.startswith('00'):
+        #         number = "+" + number
+        #     if not 5 < len(number) < 25:
+        #         return False
+        #     try:
+        #         z = phonenumbers.parse(number, region=None, _check_region=False)
+        #         return phonenumbers.is_valid_number(z)
+        #     except phonenumbers.phonenumberutil.NumberParseException:
+        #         return False
 
         """Free style numbers Validation."""
         if not 5 < len(number) < 30:
@@ -85,7 +95,6 @@ class PurchaseBot(object):
             " ", "").replace(
             "*", "").replace(
             "+", "")
-        # print("number", number)
         if not 5 < len(number) < 30:
             return False
         if number.isdigit():
@@ -93,29 +102,44 @@ class PurchaseBot(object):
         else:
             return False
 
-    def start_purchase(self, update, context):
-        # Ask bots phone number
-        delete_messages(update, context, True)
-        context.user_data["used_contacts"] = (
-            shop_customers_contacts_table.find_one(
-                {"bot_id": context.bot.id,
-                 "user_id": update.effective_user.id}) or {})
-        self.send_number_markup(update, context)
-        return ORDER_CONTACTS
+    @staticmethod
+    def send_delivery_or_pick_up(update, context, shop):
+        pprint(context.user_data["order"])
+        shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
+        order_price = context.user_data["order"]["total_price"]
+        total_price = context.user_data["order"]["total_price"] + shop["delivery_fee"]
 
-    def send_delivery_or_pick_up(self, update, context):
         reply_markup = [
             [InlineKeyboardButton(text=context.bot.lang_dict["shop_creation_delivery"],
-                                  callback_data="order_delivery")],
+                                  callback_data="shipping_delivery")],
             [InlineKeyboardButton(text=context.bot.lang_dict["shop_creation_pick_up"],
-                                  callback_data="order_pick_up")],
+                                  callback_data="shipping_pick_up")],
             [InlineKeyboardButton(text=context.bot.lang_dict["back_button"],
                                   callback_data="help_module(shop)")],
         ]
+        price_template = context.bot.lang_dict["tell_pick_up_or_delivery"].format(
+            address=shop["address"]) + "\n\n" + \
+            context.bot.lang_dict["order_total_price_shipping"].format(
+                delivery_fee=str(shop["delivery_fee"]) + " " + shop["currency"],
+                order_price=str(order_price) + " " + shop["currency"],
+                total_price_with_delivery=str(total_price) + " " + shop["currency"])
+
         context.user_data["to_delete"].append(context.bot.send_message(
             update.callback_query.message.chat_id,
-            context.bot.lang_dict["create_shop_str_13"],
-            reply_markup=InlineKeyboardMarkup(reply_markup)))
+            price_template,
+            reply_markup=InlineKeyboardMarkup(reply_markup),
+            parse_mode=ParseMode.HTML))
+
+    def start_purchase(self, update, context):
+
+        # Ask bots phone number
+        delete_messages(update, context, True)
+        context.user_data["used_contacts"] = (
+                shop_customers_contacts_table.find_one(
+                    {"bot_id": context.bot.id,
+                     "user_id": update.effective_user.id}) or {})
+        self.send_number_markup(update, context)
+        return ORDER_CONTACTS
 
     def ask_address(self, update, context):
         delete_messages(update, context, True)
@@ -126,25 +150,41 @@ class PurchaseBot(object):
         else:
             if self.validate_number(update.message.text):
                 context.user_data["order"]["phone_number"] = update.message.text
-                # set it to check in the next step if there are no delivery
+                # set it to check in the next step if there are no shipping
                 update.message.text = "phone"
             else:
                 self.send_number_markup(update, context, True)
+                return ORDER_CONTACTS
+        # Ask address or ask comment if there are no shipping
         shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
+
         if shop["delivery"] and shop["pick_up"]:
-            self.send_delivery_or_pick_up(update, context)
-        else:
+            self.send_delivery_or_pick_up(update, context, shop)
+            return ASK_DELIVERY_OR_PICK_UP
+        elif shop["delivery"]:
+            context.user_data["shipping"] = True
             self.send_address_markup(update, context)
-        return ORDER_ADDRESS
+            return ORDER_ADDRESS
+        else:
+            context.user_data["shipping"] = False
+            return self.ask_comment(update, context)
+
+    def delivery_or_pick_up(self, update, context):
+        delete_messages(update, context, True)
+        data = update.callback_query.data
+        if "delivery" in data:
+            context.user_data["shipping"] = True
+            self.send_address_markup(update, context)
+            return ORDER_ADDRESS
+        else:
+            context.user_data["shipping"] = False
+            self.ask_comment(update, context)
+            return ORDER_COMMENT
 
     def ask_comment(self, update, context):
-        if update.callback_query:
-            data = update.callback_query.data
-            if "delivery" in data or "address" in data:
-                context.user_data["order"]["address"] = (data.split("/")[1])
-            else:
-                self.send_number_markup(update, context, True)
-                return ORDER_ADDRESS
+        # Set address
+        if update.callback_query and "address" in update.callback_query.data:
+            context.user_data["order"]["address"] = (update.callback_query.data.split("/")[1])
         elif update.message and update.message.text != "phone":
             if len(update.message.text) < MIN_ADDRESS_LENGTH:
                 self.send_address_markup(update, context, context.bot.lang_dict["short_address"])
@@ -165,12 +205,12 @@ class PurchaseBot(object):
                 text=context.bot.lang_dict["add_order_comment"],
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton(
-                         text=context.bot.lang_dict["continue_btn"],
-                         callback_data="pass_order_comment")],
+                        text=context.bot.lang_dict["continue_btn"],
+                        callback_data="pass_order_comment")],
                     [InlineKeyboardButton(
-                         text=context.bot.lang_dict["back_button"],
-                         callback_data="back_to_cart")]
-                     ])))
+                        text=context.bot.lang_dict["back_button"],
+                        callback_data="back_to_cart")]
+                ])))
         return ORDER_COMMENT
 
     def confirm_order(self, update, context):
@@ -202,8 +242,8 @@ class PurchaseBot(object):
         # shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
         context.user_data["order"] = {**context.user_data["order"],
                                       **context.user_data["order_data"]["order"]}
-        context.user_data["order"]["delivery"] = (
-            context.user_data["order_data"]["shop"]["delivery"])
+        context.user_data["order"]["shipping"] = (
+            context.user_data["shipping"])
 
         context.user_data["to_delete"].append(
             context.bot.send_message(chat_id=update.effective_chat.id,
@@ -213,7 +253,7 @@ class PurchaseBot(object):
         # Creating confirm order text
         confirm_text = context.bot.lang_dict["confirm_order_text"].format(
             context.user_data['order']['phone_number'])
-        if context.user_data["order"]["delivery"]:
+        if context.user_data["order"]["shipping"]:
             confirm_text += context.bot.lang_dict["delivery_to"].format(
                 html.escape(context.user_data["order"]['address'], quote=False))
         else:
@@ -322,10 +362,10 @@ class PurchaseBot(object):
                                          description=context.bot.lang_dict["order_success"])
         else:
             context.user_data["to_delete"].append(
-                    context.bot.send_message(
-                        chat_id=update.effective_chat.id,
-                        text=context.bot.lang_dict["order_success"],
-                        reply_markup=InlineKeyboardMarkup(reply_markup)))
+                context.bot.send_message(
+                    chat_id=update.effective_chat.id,
+                    text=context.bot.lang_dict["order_success"],
+                    reply_markup=InlineKeyboardMarkup(reply_markup)))
         return ConversationHandler.END
 
 
@@ -339,10 +379,10 @@ OFFLINE_PURCHASE_HANDLER = ConversationHandler(
                                  callback=PurchaseBot().ask_address),
             MessageHandler(Filters.text,
                            callback=PurchaseBot().ask_address)],
-
+        ASK_DELIVERY_OR_PICK_UP: [CallbackQueryHandler(pattern=r"shipping",
+                                                       callback=PurchaseBot().delivery_or_pick_up),
+                                  ],
         ORDER_ADDRESS: [
-            CallbackQueryHandler(pattern=r"order",
-                                 callback=PurchaseBot().ask_comment),
             CallbackQueryHandler(pattern=r"address",
                                  callback=PurchaseBot().ask_comment),
             MessageHandler(Filters.text,

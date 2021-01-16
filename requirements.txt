@@ -35,3 +35,4 @@ tornado==6.0.4
 ujson==2.0.3
 urllib3==1.25.9
 Werkzeug==1.0.1
+python-decouple==3.3

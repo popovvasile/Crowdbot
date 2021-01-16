@@ -157,9 +157,10 @@ class AddingProductHandler(object):
         elif update.callback_query.data == "unlimited":
             context.user_data["new_product"].quantity = 0
             context.user_data["new_product"].unlimited = True
-
+        chatbot = chatbots_table.find_one({"bot_id": context.bot.id})
         context.user_data["new_product"].send_full_template(
-            update, context, context.bot.lang_dict["shop_admin_write_your_price"],
+            update, context, context.bot.lang_dict["shop_admin_write_your_price"].format(
+                currency=chatbot["shop"]["currency"]),
             keyboards(context)["back_to_main_menu_keyboard"])
         return SET_PRICE
 

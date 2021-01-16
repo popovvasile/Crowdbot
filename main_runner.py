@@ -14,7 +14,7 @@ from telegram.ext import messagequeue as mq
 from telegram.utils.request import Request
 from telegram.ext import (CommandHandler, CallbackQueryHandler, MessageHandler, Filters,
                           PicklePersistence)
-
+from decouple import config
 from database import chatbots_table
 from logs import logger
 from helper_funcs.misc import dismiss, update_user_unsubs
@@ -351,7 +351,7 @@ def main(token, lang):
     dispatcher.add_handler(BACK_TO_MAIN_MENU_HANDLER)
     dispatcher.add_handler(help_callback_handler)
 
-    if os.environ['SHOP_PRODUCTION'] == "1":
+    if config('SHOP_PRODUCTION') == "1":
         dispatcher.add_error_handler(error_callback)
     dispatcher.add_handler(CallbackQueryHandler(get_help, pattern=r"back"))
     dispatcher.add_handler(CallbackQueryHandler(get_help, pattern=r"cancel"))
