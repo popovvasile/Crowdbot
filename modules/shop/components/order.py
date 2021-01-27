@@ -25,7 +25,7 @@ class Order(object):
         self.total_price = order.get("total_price")
         self.items_json = order.get("items", list())
         self.currency = order.get("currency")
-        self.delivery = order.get("delivery")
+        self.delivery = order.get("shipping")
         self.user_comment = order.get("user_comment")
         self.phone_number = order.get("phone_number")
         self.address = order.get("address")
@@ -160,7 +160,7 @@ class AdminOrder(Order):
                 string += self.context.bot.lang_dict["paid_status_true"]
             elif shop["shop_type"] == "online" and not self.paid:
                 string += self.context.bot.lang_dict["paid_status_false"]
-
+        print(self.delivery)
         if self.delivery:
             string += self.context.bot.lang_dict["delivery_to"].format(
                 html.escape(self.address, quote=False))

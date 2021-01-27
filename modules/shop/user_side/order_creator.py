@@ -119,16 +119,22 @@ class PurchaseBot(object):
         ]
         price_template = context.bot.lang_dict["tell_pick_up_or_delivery"].format(
             address=shop["address"]) + "\n\n" + \
-            context.bot.lang_dict["order_total_price_shipping"].format(
+            context.bot.lang_dict["order_price_shipping_small"].format(
                 delivery_fee=str(shop["delivery_fee"]) + " " + shop["currency"],
                 order_price=str(order_price) + " " + shop["currency"],
                 total_price_with_delivery=str(total_price) + " " + shop["currency"])
-
-        context.user_data["to_delete"].append(context.bot.send_message(
-            update.callback_query.message.chat_id,
-            price_template,
-            reply_markup=InlineKeyboardMarkup(reply_markup),
-            parse_mode=ParseMode.HTML))
+        try:
+            context.user_data["to_delete"].append(context.bot.send_message(
+                update.callback_query.message.chat_id,
+                price_template,
+                reply_markup=InlineKeyboardMarkup(reply_markup),
+                parse_mode=ParseMode.HTML))
+        except AttributeError:
+            context.user_data["to_delete"].append(context.bot.send_message(
+                update.message.chat_id,
+                price_template,
+                reply_markup=InlineKeyboardMarkup(reply_markup),
+                parse_mode=ParseMode.HTML))
 
     def start_purchase(self, update, context):
 
@@ -244,15 +250,22 @@ class PurchaseBot(object):
                                       **context.user_data["order_data"]["order"]}
         context.user_data["order"]["shipping"] = (
             context.user_data["shipping"])
-
-        context.user_data["to_delete"].append(
-            context.bot.send_message(chat_id=update.effective_chat.id,
-                                     text=context.user_data["order_data"]["template"],
-                                     parse_mode=ParseMode.HTML))
+        shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
 
         # Creating confirm order text
+        order_price = context.user_data["order"]["total_price"]
+
         confirm_text = context.bot.lang_dict["confirm_order_text"].format(
             context.user_data['order']['phone_number'])
+        if context.user_data["order"]["shipping"]:
+            confirm_text += context.bot.lang_dict["confirm_order_text_shipping"].format(
+                            delivery_fee=str(shop["delivery_fee"]) + " " + shop["currency"],
+                            total_price_with_delivery=str(order_price) + " " + shop["currency"],
+                        )
+        else:
+            confirm_text += context.bot.lang_dict["confirm_order_text_no_shipping"].format(
+                            order_price=str(order_price) + " " + shop["currency"],
+                        )
         if context.user_data["order"]["shipping"]:
             confirm_text += context.bot.lang_dict["delivery_to"].format(
                 html.escape(context.user_data["order"]['address'], quote=False))

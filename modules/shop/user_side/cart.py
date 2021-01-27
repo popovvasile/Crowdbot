@@ -27,7 +27,7 @@ class CartHelper(object):
                 cart_items.append(cart_item)
         shop = chatbots_table.find_one({"bot_id": context.bot.id})["shop"]
         template = context.bot.lang_dict["order_create_title"]
-        if context.user_data.get("shipping", False) is True:
+        if shop["delivery"] is True:
             order_price = shop["delivery_fee"]
         else:
             order_price = 0
@@ -38,12 +38,24 @@ class CartHelper(object):
                 item_price = (round(float(cart_item["product"]["price"]), 2))
             order_price += item_price * cart_item["quantity"]
             if len(template) < 3800:
-                template += (
-                    context.bot.lang_dict["order_total_price"]).format(
-                    name=html.escape(cart_item["product"]["name"], quote=False),
-                    amount=cart_item["quantity"],
-                    price_per_piece=str(item_price) + shop["currency"],
-                    total_price=str(order_price) + shop["currency"])
+                total_price = order_price+shop["delivery_fee"]
+                if shop["delivery"] is True:
+                    template += context.bot.lang_dict["order_total_price_shipping"].format(
+                        name=html.escape(cart_item["product"]["name"], quote=False),
+                        amount=cart_item["quantity"],
+                        delivery_fee=str(shop["delivery_fee"]) + " " + shop["currency"],
+                        order_price=str(order_price) + " " + shop["currency"],
+                        total_price_with_delivery=str(total_price) + " " + shop["currency"],
+                        price_per_piece=str(item_price) + shop["currency"],
+                    )
+                else:
+                    template += context.bot.lang_dict["order_total_price_without_shipping"].format(
+                        name=html.escape(cart_item["product"]["name"], quote=False),
+                        amount=cart_item["quantity"],
+                        price_per_piece=str(item_price) + shop["currency"],
+                        total_price=str(order_price) + shop["currency"]
+                    )
+
             elif not template.endswith("..."):
                 template += "..."
         # Save order data. Need to check order data on each step??

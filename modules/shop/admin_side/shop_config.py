@@ -152,7 +152,7 @@ class EditPaymentHandler(object):
                         chatbot["shop"]["currency"]
                     )))
             context.user_data["to_delete"].append(update.message.reply_text(
-                context.bot.lang_dict["donations_edit_str_8"],
+                context.bot.lang_dict["payments_change_delivery_fee"],
                 reply_markup=reply_markup))
 
         if "description" in data:
