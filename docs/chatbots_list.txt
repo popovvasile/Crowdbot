@@ -35,3 +35,6 @@ occupyguguta@gmail.com
 ssh root@67.211.220.14
 python#1917
 export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+
+
+pythoN#1917#Python ssh root@64.225.23.110  --- testing

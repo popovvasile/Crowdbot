@@ -264,7 +264,7 @@ class PurchaseBot(object):
                         )
         else:
             confirm_text += context.bot.lang_dict["confirm_order_text_no_shipping"].format(
-                            order_price=str(order_price) + " " + shop["currency"],
+                            total_price=str(order_price) + " " + shop["currency"],
                         )
         if context.user_data["order"]["shipping"]:
             confirm_text += context.bot.lang_dict["delivery_to"].format(
