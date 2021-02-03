@@ -266,16 +266,17 @@ class PurchaseBot(object):
             confirm_text += context.bot.lang_dict["confirm_order_text_no_shipping"].format(
                             total_price=str(order_price) + " " + shop["currency"],
                         )
+
+        if context.user_data["order"]["user_comment"]:
+            confirm_text += context.bot.lang_dict["comment_field"].format(
+                html.escape(context.user_data['order']['user_comment'], quote=False))
+
         if context.user_data["order"]["shipping"]:
             confirm_text += context.bot.lang_dict["delivery_to"].format(
                 html.escape(context.user_data["order"]['address'], quote=False))
         else:
             confirm_text += context.bot.lang_dict["pick_up_from"].format(
                 html.escape(context.user_data["order_data"]["shop"]["address"], quote=False))
-        if context.user_data["order"]["user_comment"]:
-            confirm_text += context.bot.lang_dict["comment_field"].format(
-                html.escape(context.user_data['order']['user_comment'], quote=False))
-
         buttons = list()
         buttons.append([InlineKeyboardButton(text=context.bot.lang_dict["finish_order_btn"],
                                              callback_data=f"finish_order")])
@@ -372,12 +373,12 @@ class PurchaseBot(object):
         if shop["shop_type"] == "online":
             OnlinePayment().send_invoice(update, context, order, shop,
                                          reply_markup=reply_markup,
-                                         description=context.bot.lang_dict["order_success"])
+                                         description=context.bot.lang_dict["thank_you"])
         else:
             context.user_data["to_delete"].append(
                 context.bot.send_message(
                     chat_id=update.effective_chat.id,
-                    text=context.bot.lang_dict["order_success"],
+                    text=context.bot.lang_dict["thank_you"],
                     reply_markup=InlineKeyboardMarkup(reply_markup)))
         return ConversationHandler.END
 

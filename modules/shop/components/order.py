@@ -1,13 +1,12 @@
 import html
 
-from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import ParseMode
 from bson.objectid import ObjectId
 
 from .product import Product
 from database import orders_table, chatbots_table
 from helper_funcs.misc import get_obj
 from helper_funcs.pagination import Pagination
-from helper_funcs.misc import user_mention
 
 
 class Order(object):
@@ -72,18 +71,14 @@ class Order(object):
     def id_(self):
         return self._id
 
-    # todo refactor for long order items texts
-    def str_order_items(self, currency=None):
-        # if not currency:
-        #     currency = chatbots_table.find_one(
-        #         {"bot_id": self.context.bot.id})["shop"]["currency"]
+    def str_order_items(self):
+
         text = "\n".join(
             ["{}\nx{} - <u>{} {}</u>".format(
                 html.escape(item.name, quote=False),
                 item.order_quantity,
                 item.item_price,
                 self.currency)
-             # + (item.item_emoji if not self.status else "")
              for item in self.items[:3]])
         if len(self.items) > 3:
             text += "\n..."
@@ -104,10 +99,6 @@ class AdminOrder(Order):
         if self.user_id:
             user = self.context.bot.get_chat_member(self.user_id,
                                                     self.user_id).user
-            # Create bots html mention
-            # if bots.username:
-            #     mention = user_mention(bots.username, bots.full_name)
-            # else:
             mention = user.mention_html()
         return mention
 
@@ -128,18 +119,6 @@ class AdminOrder(Order):
             self.total_price,
             self.currency,
             self.str_order_items())
-        # template = (
-        #     "\n" + self.context.bot.lang_dict["shop_admin_order_temp"].format(
-        #         self.str_status,
-        #         self.article,
-        #         self.creation_timestamp,
-                # self.str_product_status,
-                # self.user_mention,
-                # self.phone_number,
-                # html.escape(self.user_comment, quote=False),
-                # self.total_price,
-                # self.currency,
-                # self.str_order_items()))
 
         return template
 
@@ -209,34 +188,12 @@ class UserOrder(Order):
             self.total_price,
             self.currency,
             self.phone_number)
+
         if self.user_comment:
             template += self.context.bot.lang_dict["comment_field"].format(
                 html.escape(self.user_comment, quote=False))
         template += "\n\n" + self.str_order_items()
         return template
-
-    """"@property
-    def str_status(self):
-        shop = chatbots_table.find_one({"bot_id": self.context.bot.id})["shop"]
-        if self.in_trash:
-            string = self.context.bot.lang_dict["order_status_canceled"]
-            if self.paid:
-                string += "\n                 ♻️ " + str(self.total_price) + " " + self.currency
-            return string
-        if self.status:
-            string = self.context.bot.lang_dict["shop_admin_order_status_true"]
-            return string
-        if self.delivery:
-            # string = self.context.bot.lang_dict["order_on_way_to"].format(self.address)
-            string = "🚚 " + f"{html.escape(self.address, quote=False)}"
-        else:
-            string = self.context.bot.lang_dict["order_wait_on"].format(
-                html.escape(shop['address'], quote=False))
-        if self.paid:
-            string += self.context.bot.lang_dict["paid_status_true"]
-        elif shop["shop_type"] == "online" and not self.paid:
-            string += self.context.bot.lang_dict["paid_status_false"]
-        return string"""
 
     @property
     def str_status(self):
@@ -259,10 +216,10 @@ class UserOrder(Order):
                 string += self.context.bot.lang_dict["paid_status_false"]
 
         if self.delivery:
-            string += self.context.bot.lang_dict["user_delivery_to"].format(
+            string += self.context.bot.lang_dict["delivery_to"].format(
                 html.escape(self.address, quote=False))
         else:
-            string += self.context.bot.lang_dict["user_pick_up_from"].format(
+            string += self.context.bot.lang_dict["pick_up_from"].format(
                 html.escape(shop.get("address", ""), quote=False))
         return string
 
@@ -296,15 +253,6 @@ class OrderItem(Product):
         super(OrderItem, self).__init__(context, order_item["product"])
         # Units of item that customer ordered
         self.order_quantity = order_item.get("quantity")
-        # Check if the product exist, ready for sale, and quantity is right
-        # self.item_exist = (
-        #     self._id  # if _id == None - mean find_one() call returns None
-        #     and self.on_sale
-        #     and (self.unlimited or (self.order_quantity <= self.quantity)))
-        # price of the item
-        # print(self.name)
-        # print(self.discount_price)
-        # print(self.price)
         if self.discount_price:
             self.item_price = self.discount_price * self.order_quantity
         else:
@@ -318,8 +266,6 @@ class OrderItem(Product):
                 and (self.unlimited or (self.order_quantity <= self.quantity)))
 
     def send_template(self, update, context, reply_markup=None):
-        # currency = chatbots_table.find_one(
-        #     {"bot_id": self.context.bot.id})["shop"]["currency"]
 
         text = self.context.bot.lang_dict["order_item_template"].format(
             self.article,
@@ -329,8 +275,3 @@ class OrderItem(Product):
             self.item_price,
             self.currency)
         self.send_short_template(update, context, text, reply_markup)
-
-    # @property
-    # def item_emoji(self):
-    #     """If product can't be sold returns red sticker, else empty string"""
-    #     return " 📛" if not self.item_exist else ""

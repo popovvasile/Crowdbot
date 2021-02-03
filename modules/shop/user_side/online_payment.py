@@ -84,7 +84,7 @@ class OnlinePayment(object):
         context.user_data["to_delete"].append(
             context.bot.send_message(
                 update.effective_chat.id,
-                context.bot.lang_dict["order_success"],
+                context.bot.lang_dict["thank_you"],
                 parse_mode=ParseMode.HTML,
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton(

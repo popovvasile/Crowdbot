@@ -62,10 +62,6 @@ class EnableDisableShopDonations(object):
                 text=context.bot.lang_dict["edit_change_shop_type"].format(antitype.split("_")[0]),
                 callback_data="edit_change_shop_type")]),
             admin_keyboard.append([InlineKeyboardButton(
-                text=context.bot.lang_dict["edit_change_shipping_fee"].format(antitype.split(
-                    "_")[0]),
-                callback_data="edit_change_shipping_fee")]),
-            admin_keyboard.append([InlineKeyboardButton(
                 text=context.bot.lang_dict[payment_token_text],
                 callback_data="edit_change_shop_payment_token")]),
             admin_keyboard.append([InlineKeyboardButton(
@@ -74,6 +70,10 @@ class EnableDisableShopDonations(object):
             admin_keyboard.append([InlineKeyboardButton(
                     text=f'{boolmoji(context.user_data["pick_up"])} {text["pick_up"]}',
                     callback_data=pick_up_callback)])
+            admin_keyboard.append([InlineKeyboardButton(
+                text=context.bot.lang_dict["edit_change_shipping_fee"].format(antitype.split(
+                    "_")[0]),
+                callback_data="edit_change_shipping_fee")]),
             admin_keyboard.append([InlineKeyboardButton(
                 text=context.bot.lang_dict["change_donation_greeting"],
                 callback_data="edit_change_shop_description")]),
