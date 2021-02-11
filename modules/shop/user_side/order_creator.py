@@ -9,7 +9,7 @@ from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ParseMode, Tele
 from telegram.ext import MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
 
 from database import (orders_table, chatbots_table, carts_table, shop_customers_contacts_table,
-                      products_table, users_table)
+                      products_table, users_table, user_mode_table)
 from helper_funcs.helper import dismiss_button
 from helper_funcs.misc import delete_messages
 from helper_funcs.constants import MIN_ADDRESS_LENGTH, MAX_ADDRESS_LENGTH
@@ -354,7 +354,10 @@ class PurchaseBot(object):
         # Send notification about new order to all admins
         order = AdminOrder(context, inserted_id)
         for admin in users_table.find({"bot_id": context.bot.id, "is_admin": True}):
-            if admin["order_notification"]:
+            current_user_mode = user_mode_table.find_one(
+                {"bot_id": context.bot.id,
+                 "user_id": update.effective_user.id}) or {}
+            if admin["order_notification"] and current_user_mode.get("user_mode") is False:
                 # Create notification text and send it.
                 text = context.bot.lang_dict["new_order_notification"].format(
                     order.article, order.user_mention)
@@ -373,12 +376,12 @@ class PurchaseBot(object):
         if shop["shop_type"] == "online":
             OnlinePayment().send_invoice(update, context, order, shop,
                                          reply_markup=reply_markup,
-                                         description=context.bot.lang_dict["thank_you"])
+                                         description=context.bot.lang_dict["order_success"])
         else:
             context.user_data["to_delete"].append(
                 context.bot.send_message(
                     chat_id=update.effective_chat.id,
-                    text=context.bot.lang_dict["thank_you"],
+                    text=context.bot.lang_dict["order_success"],
                     reply_markup=InlineKeyboardMarkup(reply_markup)))
         return ConversationHandler.END
 
