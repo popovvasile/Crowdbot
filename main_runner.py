@@ -350,8 +350,8 @@ def main(token, lang):
     dispatcher.add_handler(BACK_TO_MAIN_MENU_HANDLER)
     dispatcher.add_handler(help_callback_handler)
 
-    if os.environ['SHOP_PRODUCTION'] == "1":
-        dispatcher.add_error_handler(error_callback)
+    # if os.environ['SHOP_PRODUCTION'] == "1":
+    dispatcher.add_error_handler(error_callback)
     dispatcher.add_handler(CallbackQueryHandler(get_help, pattern=r"back"))
     dispatcher.add_handler(CallbackQueryHandler(get_help, pattern=r"cancel"))
     rex_help_handler = MessageHandler(Filters.regex(r"^((?!@).)*$"), return_to_menu)

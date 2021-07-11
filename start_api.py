@@ -5,14 +5,18 @@ from flask import Flask
 from flask_restful import Api
 
 from rest_api.errors import errors
-from rest_api.resources import CrowdRobot, UserBots, AllBots, RevokeToken
+from rest_api.resources import CrowdRobot, UserBots, AllBots, RevokeToken, Subscription
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+
+
+
 def create_app():
+
     api = Api(errors=errors)
     new_app = Flask(__name__)
     new_app.config["BUNDLE_ERRORS"] = True
@@ -26,6 +30,8 @@ def create_app():
     api.add_resource(AllBots, "/crowdbots")  # get
 
     api.add_resource(RevokeToken, "/revoke_token")  # patch
+
+    api.add_resource(Subscription, '/subscription')  # patch
 
     api.init_app(new_app)
 

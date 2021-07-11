@@ -51,6 +51,7 @@ def multiple_bot_daemon():  # todo if token wrong- don't start it and notify
                               if 'token' in d]
             if process_key not in list_of_tokens:
                 my_process[process_key].terminate()
+                my_process[process_key].join()
                 my_process.pop(process_key, None)
 
         time.sleep(10)

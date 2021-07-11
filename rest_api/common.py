@@ -1,5 +1,8 @@
 from database import users_table, chatbots_table, conflict_notifications_table
 
+from flask_restful.fields import Integer, String, Raw
+from flask_restful import reqparse
+
 
 # TODO use "from bson.json_util import dumps, loads"
 def format_for_response(chatbot: dict) -> dict:
@@ -32,6 +35,23 @@ def convert_types(obj: dict) -> dict:
     if obj.get("timestamp"):
         obj["timestamp"] = str(obj["timestamp"])
     return obj
+
+
+# pagination_fields = {"items_total": Integer,
+#                      "total_pages": Integer,
+#                      "current_page": Integer}
+#
+#
+# def pagination_json():
+#     return {"items_total": pagination.total,
+#             "total_pages": pagination.pages,
+#             "current_page": pagination.page}
+#
+#
+# def paginate(query, args):
+#     return query.paginate(args["page"],  # If None -> return 1
+#                           per_page=args["per_page"],  # If None -> return 20
+#                           max_per_page=100, error_out=False)
 
 
 def revoke_token(bot_id, args):

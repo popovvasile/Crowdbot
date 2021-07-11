@@ -1,7 +1,7 @@
 from flask_restful.fields import List, Raw, Integer, String, Boolean
 
 
-bot_response = {
+_bot_response = {
     "_id": String,
     "active": Boolean,
     "bot_id": Integer,
@@ -45,10 +45,10 @@ bot_response = {
 response_doc = {
     "ok": Boolean,
     "message": String,
-    "result": Raw(bot_response)
+    "result": Raw(_bot_response)
 }
 
-result_response = {"result": List(Raw(bot_response))}
+result_response = {"items": List(Raw(_bot_response))}
 
 
 def resp_doc(ok: bool, message: str, result: dict = None) -> dict:
@@ -60,3 +60,15 @@ def resp_doc(ok: bool, message: str, result: dict = None) -> dict:
     if result:
         doc["result"] = result
     return doc
+
+
+_pagination_fields = {'current_page': Integer,
+                      'total_pages': Integer,
+                      'total_items': Integer,
+                      'per_page': Integer}
+
+
+paginated_response = {
+    "items": List(Raw(_bot_response)),
+    **_pagination_fields
+}

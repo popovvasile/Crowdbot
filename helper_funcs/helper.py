@@ -476,6 +476,7 @@ def on_stupid_strings(update, context):
 class WelcomeBot(object):
     @staticmethod
     def start(update, context):
+        print(update.effective_user.username, update.effective_user.id)
         chat_id, txt = initiate_chat_id(update)
         if chat_id < 0:
             print("Group")

@@ -10,3 +10,9 @@ def validate_access(value):
 
 access_parser = reqparse.RequestParser()
 access_parser.add_argument("API_KEY", type=validate_access, location="json", required=True)
+
+
+paginated_parser = access_parser.copy()
+paginated_parser.add_argument("page", type=int, location="json")  # todo min value
+paginated_parser.add_argument("per_page", type=int, location="json")  # todo min and max value
+
